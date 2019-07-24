@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketApp", "FreeMarketApp\FreeMarketApp.csproj", "{461080B6-C326-4B09-A06B-72080F0AB521}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.Tor", "BackEnd.Tor", "{65772184-064A-485E-9402-33A09C9A84FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Org.Mentalis", "Org.Mentalis\Org.Mentalis.csproj", "{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TorSocksWebProxy", "TorSocksWebProxy\TorSocksWebProxy.csproj", "{1A94F985-3069-45AA-841D-7FFA33FD18D4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{461080B6-C326-4B09-A06B-72080F0AB521}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{461080B6-C326-4B09-A06B-72080F0AB521}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{461080B6-C326-4B09-A06B-72080F0AB521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{461080B6-C326-4B09-A06B-72080F0AB521}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6} = {65772184-064A-485E-9402-33A09C9A84FE}
+		{1A94F985-3069-45AA-841D-7FFA33FD18D4} = {65772184-064A-485E-9402-33A09C9A84FE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}
+	EndGlobalSection
+EndGlobal

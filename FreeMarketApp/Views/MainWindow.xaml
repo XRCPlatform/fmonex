@@ -7,11 +7,23 @@
         x:Class="FreeMarketApp.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="FreeMarketApp">
-
-    <Design.DataContext>
+  
+  <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <StackPanel Orientation="Vertical">
+    <StackPanel Orientation="Horizontal">
+      <StackPanel Margin="18" Spacing="4" Width="200">
+        <TextBlock FontSize="16" Text="Simple Bindings"/>
+      </StackPanel>
+      <StackPanel Margin="18" Spacing="4" Width="200">
+        <TextBlock Name="testblock" Text="{Binding Caption}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Name="testblockx" Text="{Binding Caption}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
+        <Button Command="{Binding ShuffleItems}">Shuffle</Button>
+      </StackPanel>
+    </StackPanel>
+    </StackPanel>
+      
 </Window>

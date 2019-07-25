@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using System;
 
 namespace FreeMarketApp.Views
 {
@@ -9,6 +10,10 @@ namespace FreeMarketApp.Views
         public MainWindow()
         {
             InitializeComponent();
+            DataContextChanged += (object sender, EventArgs wat) =>
+            {
+                // here, this.DataContext will be your MainWindowViewModel
+            };
 #if DEBUG
             this.AttachDevTools();
 #endif

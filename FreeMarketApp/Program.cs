@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 using Avalonia;
 using Avalonia.Logging.Serilog;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
+using TorSocksWebProxy;
 
 namespace FreeMarketApp
 {
@@ -24,12 +30,30 @@ namespace FreeMarketApp
         // container, etc.
         private static void AppMain(Application app, string[] args)
         {
-            var window = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            //var window = new MainWindow
+            //{
+            //    Content new MainWindowViewModel(),
+            //    DataContext = new MainWindowViewModel(),
+            //};
+
+            //((MainWindowViewModel)window.DataContext).Greeting = "test";
+            //    RunParallel(2, "https://check.torproject.org/");
+
+            var window = new MainWindow();
+            window.DataContext = new MainWindowViewModel();
+            ((MainWindowViewModel)window.DataContext).Caption = "tesxt";
+            ((MainWindowViewModel)window.DataContext).Greeting = "test";
+
+            ////// wait until the user presses enter
+            ////Console.WriteLine("");
+            ////Console.WriteLine("Press enter to continue...");
+            ////Console.ReadLine();
 
             app.Run(window);
+
+            //((MainWindowViewModel)window.DataContext).Caption = "tesxtXXX";
+            //((MainWindowViewModel)window.DataContext).Greeting = "testCCCC";
         }
     }
 }
+

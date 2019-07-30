@@ -1,0 +1,151 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <AssemblyName>jaindb</AssemblyName>
+    <SignAssembly>false</SignAssembly>
+    <Authors>Roger Zander</Authors>
+    <Company>Zander Rools</Company>
+    <Description>JainDB is a blockchain based database/archive for JSON data.</Description>
+    <Copyright>Copyright (c) 2018 by Roger Zander</Copyright>
+    <PackageProjectUrl>https://github.com/rzander/jaindb</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rzander/jaindb</RepositoryUrl>
+    <PackageTags>blockchain json</PackageTags>
+    <Version>1.4.99</Version>
+    <AssemblyVersion>1.4.99.0</AssemblyVersion>
+    <FileVersion>1.0.99.0</FileVersion>
+    <StartupObject></StartupObject>
+    <UserSecretsId>fcfd6c0a-e53c-46cb-8a9d-b786c0579861</UserSecretsId>
+    <ApplicationIcon>JainDB_Logo.ico</ApplicationIcon>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AuthProvider\CustomAuthExtensions.cs" />
+    <Compile Remove="AuthProvider\CustomAuthHandler.cs" />
+    <Compile Remove="AuthProvider\CustomAuthOptions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\bin\bin.zip" />
+    <Content Remove="wwwroot\redis.sh" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="htmlpage.html" />
+    <None Remove="Properties\PublishProfiles\jaindb - FTP.pubxml" />
+    <None Remove="Properties\PublishProfiles\jaindb2 - FTP.pubxml" />
+    <None Remove="Properties\PublishProfiles\jaindb2 - Web Deploy.pubxml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="AuthProvider\CustomAuthExtensions.cs" />
+    <Content Include="AuthProvider\CustomAuthHandler.cs" />
+    <Content Include="AuthProvider\CustomAuthOptions.cs" />
+    <Content Include="redis.conf">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JsonDiffPatch.Net" Version="2.1.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.7.1" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.HttpSys" Version="2.2.6" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.2.0" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.6.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
+    <PackageReference Include="Moon.AspNetCore.Authentication.Basic" Version="4.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="inventory.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Start.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="AuthProvider\CustomAuthExtensions.cs" />
+    <None Include="AuthProvider\CustomAuthHandler.cs" />
+    <None Include="AuthProvider\CustomAuthOptions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\bin\redis-benchmark">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\bin\redis-check-aof">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\bin\redis-check-rdb">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\bin\redis-cli">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\bin\redis-sentinel">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\bin\redis-server">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\formatters-styles\annotated.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\formatters-styles\html.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\formatters-styles\jsondiffpatch-formatters.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\formatters-styles\jsondiffpatch-full.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\formatters-styles\jsondiffpatch.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\formatters-styles\style.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\jaindb\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\jaindb.base\jaindb.base.csproj" />
+  </ItemGroup>
+
+
+</Project>

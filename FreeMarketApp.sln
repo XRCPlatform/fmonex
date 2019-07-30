@@ -7,9 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketApp", "FreeMarket
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.Tor", "BackEnd.Tor", "{65772184-064A-485E-9402-33A09C9A84FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Org.Mentalis", "Org.Mentalis\Org.Mentalis.csproj", "{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Org.Mentalis", "Org.Mentalis\Org.Mentalis.csproj", "{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TorSocksWebProxy", "TorSocksWebProxy\TorSocksWebProxy.csproj", "{1A94F985-3069-45AA-841D-7FFA33FD18D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorSocksWebProxy", "TorSocksWebProxy\TorSocksWebProxy.csproj", "{1A94F985-3069-45AA-841D-7FFA33FD18D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.BlockChain", "BackEnd.BlockChain", "{A52240B9-9E9E-4768-92E2-35CC7F180F12}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jaindb", "JainDB\jaindb\jaindb.csproj", "{7DAC99C0-FCB8-4B01-A97D-217A2D25807D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jaindb.base", "JainDB\jaindb.base\jaindb.base.csproj", "{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin_FileStore", "JainDB\Plugin_FileStore\Plugin_FileStore.csproj", "{72842BDD-495B-472C-9C45-3C6C6D58240C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +37,18 @@ Global
 		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DAC99C0-FCB8-4B01-A97D-217A2D25807D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DAC99C0-FCB8-4B01-A97D-217A2D25807D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DAC99C0-FCB8-4B01-A97D-217A2D25807D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DAC99C0-FCB8-4B01-A97D-217A2D25807D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72842BDD-495B-472C-9C45-3C6C6D58240C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72842BDD-495B-472C-9C45-3C6C6D58240C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72842BDD-495B-472C-9C45-3C6C6D58240C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72842BDD-495B-472C-9C45-3C6C6D58240C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +56,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6} = {65772184-064A-485E-9402-33A09C9A84FE}
 		{1A94F985-3069-45AA-841D-7FFA33FD18D4} = {65772184-064A-485E-9402-33A09C9A84FE}
+		{7DAC99C0-FCB8-4B01-A97D-217A2D25807D} = {A52240B9-9E9E-4768-92E2-35CC7F180F12}
+		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2} = {A52240B9-9E9E-4768-92E2-35CC7F180F12}
+		{72842BDD-495B-472C-9C45-3C6C6D58240C} = {A52240B9-9E9E-4768-92E2-35CC7F180F12}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

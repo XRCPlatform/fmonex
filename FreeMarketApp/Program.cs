@@ -39,6 +39,32 @@ namespace FreeMarketApp
             //((MainWindowViewModel)window.DataContext).Greeting = "test";
             //    RunParallel(2, "https://check.torproject.org/");
 
+            Console.WriteLine("loading Storage-Providers:");
+            jaindb.jDB.loadPlugins(); //never forget this step !
+            Console.WriteLine("");
+
+            //Genereate a test JSON
+            string sJson = "{ \"prop1\": \"id1\", \"prop2\" : \"bla bla\" }";
+
+            //Store JSON and set Object-Identifier to "OBJ1"
+            string sHash = jaindb.jDB.UploadFull(sJson, "OBJ1");
+
+            //Get OBJ1 back from JainDB
+            var jObj1 = jaindb.jDB.GetFull("OBJ1");
+
+            //Add an additional key Attribute
+            jObj1.Add("#name", "Object1");
+
+            //Upload JSON again
+            string sHash2 = jaindb.jDB.UploadFull(jObj1.ToString(), "OBJ1");
+
+            //Get OBJ1 back from JainDB by using the key #name
+            string sID = jaindb.jDB.LookupID("#name", "Object1");
+            var jObj2 = jaindb.jDB.GetFull(sID);
+            Console.WriteLine(jObj2.ToString(Newtonsoft.Json.Formatting.Indented));
+
+
+
             var window = new MainWindow();
             window.DataContext = new MainWindowViewModel();
             ((MainWindowViewModel)window.DataContext).Caption = "tesxt";

@@ -29,9 +29,9 @@ namespace FreeMarketApp.ViewModels
         {
             Task.Run(() =>
             {
-                RunParallel(2, "https://check.torproject.org/");
-            });
 
+                //  RunParallel(2, "https://check.torproject.org/");
+            });
 
             //Task.Run(() =>
             //{
@@ -153,15 +153,10 @@ namespace FreeMarketApp.ViewModels
                 var result = client.GetAsync(url).Result;
                 var html = result.Content.ReadAsStringAsync().Result;
 
-                //WebClient client = new WebClient();
-                //client.Headers.Add("Cache-Control", "no-cache");
-                //client.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
-                ////client.Proxy = proxy.IsActive() ? proxy : null;
-                //client.Proxy = proxy;
                 var doc = new HtmlAgilityPack.HtmlDocument();
-              //  var html = client.DownloadString(url);
                 doc.LoadHtml(html);
                 var nodes = doc.DocumentNode.SelectNodes("//p/strong");
+
                 foreach (var node in nodes)
                 {
                     try
@@ -171,12 +166,12 @@ namespace FreeMarketApp.ViewModels
                             Caption = Caption + i + ":::::::::::::::::::::" + Environment.NewLine;
                             Caption = Caption + "" + Environment.NewLine;
                             if (html.Contains("Congratulations. This browser is configured to use Tor."))
-                Caption = Caption + "Connected through Tor with IP: " + ip.ToString() + Environment.NewLine;
+                                Caption = Caption + "Connected through Tor with IP: " + ip.ToString() + Environment.NewLine;
                             else
                                 Caption = Caption + "Not connected through Tor with IP: " + ip.ToString() + Environment.NewLine;
 
-            Caption = Caption + "" + Environment.NewLine;
-            Caption = Caption + i + ":::::::::::::::::::::" + Environment.NewLine;
+                            Caption = Caption + "" + Environment.NewLine;
+                            Caption = Caption + i + ":::::::::::::::::::::" + Environment.NewLine;
                         }
                         else
                         {

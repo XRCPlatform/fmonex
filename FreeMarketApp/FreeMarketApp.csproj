@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
+	    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -17,13 +18,16 @@
     <PackageReference Include="Avalonia" Version="0.8.1" />
     <PackageReference Include="Avalonia.Desktop" Version="0.8.1" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.1" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.11" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
     <PackageReference Include="NSubsys" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JainDB\jaindb.base\jaindb.base.csproj" />
+    <ProjectReference Include="..\JainDB\jaindb\jaindb.csproj" />
+    <ProjectReference Include="..\JainDB\Plugin_FileStore\Plugin_FileStore.csproj" />
     <ProjectReference Include="..\Org.Mentalis\Org.Mentalis.csproj" />
     <ProjectReference Include="..\TorSocksWebProxy\TorSocksWebProxy.csproj" />
   </ItemGroup>

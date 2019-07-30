@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <SignAssembly>false</SignAssembly>
+    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+    <ApplicationIcon />
+    <OutputType>Library</OutputType>
+    <StartupObject />
+    <AssemblyName>jaindb.storage.500_FileStore</AssemblyName>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Roger Zander</Authors>
+    <Company>Zander Tools</Company>
+    <PackageId>jaindb.storage.FileStore</PackageId>
+    <Product>jaindb.storage.FileStore</Product>
+    <Description>StorageProvider to use FileSystem as Data-Store.</Description>
+    <Copyright>(c) 2019 by Roger Zander</Copyright>
+    <PackageProjectUrl>https://github.com/rzander/jaindb</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/rzander/jaindb/master/source/jaindb/JainDB_Logo.ico</PackageIconUrl>
+    <RepositoryUrl>https://github.com/rzander/jaindb</RepositoryUrl>
+    <PackageTags>blockchain json database warehouse store</PackageTags>
+    <AssemblyVersion>1.0.6.0</AssemblyVersion>
+    <Title>JainDB File-System Storage Provider</Title>
+    <Version>1.0.6</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\jaindb.base\jaindb.base.csproj" />
+    <ProjectReference Include="..\jaindb\jaindb.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Plugin_500_FileStore.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

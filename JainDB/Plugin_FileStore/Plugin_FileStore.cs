@@ -67,6 +67,28 @@ namespace Plugin_FileStore
                 Directory.CreateDirectory(FilePath);
         }
 
+        public bool Reset()
+        {
+            try
+            {
+                if (File.Exists(Assembly.GetExecutingAssembly().Location.Replace(".dll", ".json")))
+                {
+                    File.Delete(Assembly.GetExecutingAssembly().Location.Replace(".dll", ".json"));
+                }
+
+                FilePath = Path.Combine(Settings["wwwPath"] ?? "", foldername);
+                if (Directory.Exists(FilePath))
+                    Directory.Delete(FilePath, true);
+
+                Init();
+            }
+            catch {
+                return false;
+            }
+
+            return true;
+        }
+
         public bool WriteHash(string Hash, string Data, string Collection)
         {
             Collection = Collection.ToLower();
@@ -355,8 +377,36 @@ namespace Plugin_FileStore
 
             return lResult;
         }
+
+        /// <summary>
+        /// In _asset collection
+        /// </summary>
+        /// <param name="Hash"></param>
+        /// <param name="Collection"></param>
+        /// <returns></returns>
+        public bool RemoveHash(string Hash, string Collection = "_assets")
+        {
+            Collection = Collection.ToLower();
+
+            if (bReadOnly)
+                return false;
+
+            //Remove invalid Characters in Path and Hash
+            foreach (var sChar in Path.GetInvalidPathChars())
+            {
+                Collection = Collection.Replace(sChar.ToString(), "");
+                Hash = Hash.Replace(sChar.ToString(), "");
+            }
+
+            string sCol = Path.Combine(FilePath, Collection);
+            if (Directory.Exists(sCol))
+            {
+                File.Delete(Path.Combine(FilePath, Collection, Hash + ".json"));
+                return true;
+            }
+
+            return false;
+        }
     }
-
-
 }
 

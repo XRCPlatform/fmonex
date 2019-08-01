@@ -26,6 +26,10 @@ namespace JainDBProvider
 
         List<string> GetAllIDs();
 
+        //new functions
+        bool Reset();
+
+        bool RemoveHash(string Hash, string Collection = "_assets");
 
     }
 

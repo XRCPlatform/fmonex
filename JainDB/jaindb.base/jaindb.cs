@@ -23,8 +23,8 @@ namespace jaindb
         public enum hashType { MD5, SHA2_256 } //Implemented Hash types
         private static HttpClient oClient = new HttpClient();
 
-        public static string FilePath = "wwwroot";
-        public static string wwwPath = "wwwroot";
+        public static string FilePath = "fmchain";
+        public static string wwwPath = "fmchain";
 
         public static hashType HashType = hashType.MD5;
 
@@ -1795,6 +1795,113 @@ namespace jaindb
             }
 
             return iCount;
+        }
+
+        public static bool Reset()
+        {
+            if (ReadOnly)
+                return false;
+
+            try
+            {
+                foreach (var item in _Plugins.OrderBy(t => t.Key))
+                {
+                    try
+                    {
+                        if (item.Value.Reset())
+                            return true; //exit if return value is true
+                    }
+                    catch { }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool RemoveHash(string Hash, string Collection = "_assets")
+        {
+            if (ReadOnly)
+                return false;
+
+            try
+            {
+                foreach (var item in _Plugins.OrderBy(t => t.Key))
+                {
+                    try
+                    {
+                        if (item.Value.RemoveHash(Hash, Collection))
+                            return true; //exit if return value is true
+                    }
+                    catch { }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool ClearExpired(string DeviceID, long expireTimeStamp)
+        {
+            if (ReadOnly)
+                return false;
+
+            try
+            {
+                //Load BlockChain
+                Blockchain oChain = GetChain(DeviceID);
+
+                //expired blocks
+                var expiredBlocks = oChain.Chain.Where(a => a.timestamp < expireTimeStamp).ToList();
+
+                if (expiredBlocks.Count() > 0)
+                {
+                    //if all is expired then delete all and reset chain
+                    if (expiredBlocks.Count() == oChain.Chain.Count())
+                    {
+                        Reset();
+                        return true;
+                    }
+                    else
+                    {
+                        foreach (var itemBlock in expiredBlocks)
+                        {
+                            oChain.Chain.Remove(itemBlock);
+                        }
+                    }
+
+                    //set new genesis block
+                    oChain.Chain.First().blocktype = "root";
+                    oChain.Chain.First().previous_hash = null;
+                    oChain.Chain.First().index = 0;
+
+                    var validChain = oChain.ValidateChain(true);
+                    if (validChain)
+                    {
+                        foreach (var itemBlock in expiredBlocks)
+                        {
+                            if (!string.IsNullOrEmpty(itemBlock.data))
+                            {
+                                RemoveHash(itemBlock.data);
+                            }
+                        }
+
+                        WriteHash(DeviceID, JsonConvert.SerializeObject(oChain), "_chain");
+                    }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static class GenericPluginLoader<T>

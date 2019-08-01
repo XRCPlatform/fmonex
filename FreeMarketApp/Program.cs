@@ -43,25 +43,49 @@ namespace FreeMarketApp
             jaindb.jDB.loadPlugins(); //never forget this step !
             Console.WriteLine("");
 
-            //Genereate a test JSON
-            string sJson = "{ \"prop1\": \"id1\", \"prop2\" : \"bla bla\" }";
+            jaindb.jDB.ClearExpired("fmdb", 637002592197784114);
+            //jaindb.jDB.Reset();
 
-            //Store JSON and set Object-Identifier to "OBJ1"
-            string sHash = jaindb.jDB.UploadFull(sJson, "OBJ1");
+            ////Genereate a test JSON
+            //string sJson = "{ \"prop1\": \"id1\", \"prop2\" : \"bla bla1\" }";
 
-            //Get OBJ1 back from JainDB
-            var jObj1 = jaindb.jDB.GetFull("OBJ1");
+            //////Store JSON and set Object-Identifier to "OBJ1"
+            //string sHash = jaindb.jDB.UploadFull(sJson, "fmdb");
 
-            //Add an additional key Attribute
-            jObj1.Add("#name", "Object1");
+            ////Genereate a test JSON
+            //sJson = "{ \"prop1\": \"id2\", \"prop2\" : \"bla bla2\" }";
 
-            //Upload JSON again
-            string sHash2 = jaindb.jDB.UploadFull(jObj1.ToString(), "OBJ1");
+            //////Store JSON and set Object-Identifier to "OBJ1"
+            //sHash = jaindb.jDB.UploadFull(sJson, "fmdb");
 
-            //Get OBJ1 back from JainDB by using the key #name
-            string sID = jaindb.jDB.LookupID("#name", "Object1");
-            var jObj2 = jaindb.jDB.GetFull(sID);
-            Console.WriteLine(jObj2.ToString(Newtonsoft.Json.Formatting.Indented));
+            ////Genereate a test JSON
+            //sJson = "{ \"prop1\": \"id3\", \"prop2\" : \"bla bla3\" }";
+
+            //////Store JSON and set Object-Identifier to "OBJ1"
+            //sHash = jaindb.jDB.UploadFull(sJson, "fmdb");
+
+            ////Genereate a test JSON
+            //sJson = "{ \"prop1\": \"id4\", \"prop2\" : \"bla bla4\" }";
+
+            //////Store JSON and set Object-Identifier to "OBJ1"
+            //sHash = jaindb.jDB.UploadFull(sJson, "fmdb");
+
+            //////Get OBJ1 back from JainDB
+            //var jObj1 = jaindb.jDB.GetFull("fmdb", 0);
+            //var jObj2 = jaindb.jDB.GetFull("fmdb", 1);
+
+            // jaindb.jDB.LookupID("#name", "Object1");
+
+            ////Add an additional key Attribute
+            //jObj1.Add("#name", "Object1");
+
+            ////Upload JSON again
+            //string sHash2 = jaindb.jDB.UploadFull(jObj1.ToString(), "OBJ1");
+
+            ////Get OBJ1 back from JainDB by using the key #name
+            //string sID = jaindb.jDB.LookupID("#name", "Object1");
+            //var jObj2 = jaindb.jDB.GetFull(sID);
+            //Console.WriteLine(jObj2.ToString(Newtonsoft.Json.Formatting.Indented));
 
 
 

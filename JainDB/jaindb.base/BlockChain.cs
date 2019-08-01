@@ -35,7 +35,6 @@ namespace jaindb
                 }
             };
 
-
                 block oGenesis = Chain.First();
                 if (string.IsNullOrEmpty(Data))
                     oGenesis.data = "";

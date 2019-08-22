@@ -15,9 +15,15 @@
     <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.8.1" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.8.1" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.1" />
+    <None Remove="Assets\ico-user.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\ico-user.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.8.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.8.2" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
     <PackageReference Include="NSubsys" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>

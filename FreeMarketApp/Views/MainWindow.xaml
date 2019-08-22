@@ -7,17 +7,36 @@
         x:Class="FreeMarketApp.Views.MainWindow"
         Icon="/Assets/freemarket.ico"
         Title="Free Market One">
-  
+
   <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+    <vm:MainWindowViewModel/>
+  </Design.DataContext>
 
   <StackPanel Orientation="Vertical">
-    <StackPanel Orientation="Horizontal">
-      <StackPanel Margin="18" Spacing="4" Width="200">
-        <TextBlock FontSize="16" Text="Simple Bindings"/>
+    <StackPanel Orientation="Horizontal" Background="#f5f5f5" Margin="10">
+      <StackPanel Margin="12" Spacing="4" Width="40">
+        <Image Source="resm:FreeMarketApp.Assets.ico-user.png"/>
       </StackPanel>
-      <StackPanel Margin="18" Spacing="4" Width="200">
+      <StackPanel Margin="5 15 0 0" Spacing="4" Width="200">
+        <TextBlock FontSize="13" Text="MY LOGINNAME" TextAlignment="Left" FontWeight="Bold" />
+      </StackPanel>
+      <StackPanel Margin="12" Spacing="4" Width="400">
+        <Grid ColumnDefinitions="100,1.5*,4*" RowDefinitions="Auto,Auto,Auto"  Margin="4">
+          <TextBlock Text="Col0Row0:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" ZIndex="1"/>
+          <TextBlock Text="Col0Row1:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" ZIndex="2"/>
+          <TextBlock Text="Col0Row2:" Grid.Row="2" Grid.Column="0"/>
+          <CheckBox Content="Col2Row0" Grid.Row="0" Grid.Column="2"/>
+          <Button Content="SpansCol1-2Row1-2" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+        </Grid>
+        
+        <StackPanel VerticalAlignment="Top" ZIndex="1">
+          <Image Source="resm:FreeMarketApp.Assets.ico-user.png" />
+        </StackPanel>
+        <StackPanel VerticalAlignment="Top" ZIndex="2">
+          <TextBox Watermark="Street address" />
+        </StackPanel>
+      </StackPanel>
+      <StackPanel Margin="10" Spacing="4" Width="200">
         <TextBlock Name="testblock" Text="{Binding Caption}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBlock Name="testblockx" Text="{Binding Caption}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
@@ -25,5 +44,6 @@
       </StackPanel>
     </StackPanel>
     </StackPanel>
-      
+  
+
 </Window>

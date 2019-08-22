@@ -43,14 +43,14 @@ namespace FreeMarketApp
             jaindb.jDB.loadPlugins(); //never forget this step !
             Console.WriteLine("");
 
-            jaindb.jDB.ClearExpired("fmdb", 637002592197784114);
+            // jaindb.jDB.ClearExpired("fmdb", 637002592197784114);
             //jaindb.jDB.Reset();
 
             ////Genereate a test JSON
-            //string sJson = "{ \"prop1\": \"id1\", \"prop2\" : \"bla bla1\" }";
+            string sJson = "{ \"prop1\": \"id1\", \"prop2\" : \"bla bla1\" }";
 
             //////Store JSON and set Object-Identifier to "OBJ1"
-            //string sHash = jaindb.jDB.UploadFull(sJson, "fmdb");
+            // string sHash = jaindb.jDB.UploadFull(sJson, "fmdb2");
 
             ////Genereate a test JSON
             //sJson = "{ \"prop1\": \"id2\", \"prop2\" : \"bla bla2\" }";

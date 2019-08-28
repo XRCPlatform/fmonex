@@ -3,47 +3,87 @@
         xmlns:vm="clr-namespace:FreeMarketApp.ViewModels;assembly=FreeMarketApp"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" MinWidth="700" MinHeight="300"
         x:Class="FreeMarketApp.Views.MainWindow"
         Icon="/Assets/freemarket.ico"
         Title="Free Market One">
 
+  <Window.Styles>
+    <Style Selector="Button.toolbar_dark">
+      <Setter Property="Margin" Value="9,3,9,3"/>
+      <Setter Property="Width" Value="40"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Background" Value="#00002a"/>
+      <Setter Property="Padding" Value="6"/>
+      <Setter Property="Foreground" Value="#ffffff"/>
+      <Setter Property="FontSize" Value="11"/>
+    </Style>
+    <Style Selector="Button.toolbar_dark /template/ ContentPresenter">
+      <Setter Property="CornerRadius" Value="20"/>
+    </Style>
+    <Style Selector="Button:pointerover.toolbar_dark /template/ ContentPresenter">
+      <Setter Property="Background" Value="#00002a"/>
+    </Style>
+    <Style Selector="Button.toolbar">
+      <Setter Property="Margin" Value="9,3,9,3"/>
+      <Setter Property="Width" Value="40"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Background" Value="#ffb506"/>
+      <Setter Property="Padding" Value="6"/>
+      <Setter Property="Foreground" Value="#00002a"/>
+      <Setter Property="FontSize" Value="11"/>
+    </Style>
+    <Style Selector="Button.toolbar /template/ ContentPresenter">
+      <Setter Property="CornerRadius" Value="20"/>
+    </Style>
+    <Style Selector="Button:pointerover.toolbar /template/ ContentPresenter">
+      <Setter Property="Background" Value="#ffb506"/>
+    </Style>
+  </Window.Styles>
+  
   <Design.DataContext>
     <vm:MainWindowViewModel/>
   </Design.DataContext>
 
-  <StackPanel Orientation="Vertical">
-    <StackPanel Orientation="Horizontal" Background="#f5f5f5" Margin="10">
-      <StackPanel Margin="12" Spacing="4" Width="40">
-        <Image Source="resm:FreeMarketApp.Assets.ico-user.png"/>
-      </StackPanel>
-      <StackPanel Margin="5 15 0 0" Spacing="4" Width="200">
-        <TextBlock FontSize="13" Text="MY LOGINNAME" TextAlignment="Left" FontWeight="Bold" />
-      </StackPanel>
-      <StackPanel Margin="12" Spacing="4" Width="400">
-        <Grid ColumnDefinitions="100,1.5*,4*" RowDefinitions="Auto,Auto,Auto"  Margin="4">
-          <TextBlock Text="Col0Row0:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" ZIndex="1"/>
-          <TextBlock Text="Col0Row1:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" ZIndex="2"/>
-          <TextBlock Text="Col0Row2:" Grid.Row="2" Grid.Column="0"/>
-          <CheckBox Content="Col2Row0" Grid.Row="0" Grid.Column="2"/>
-          <Button Content="SpansCol1-2Row1-2" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+  <Grid ColumnDefinitions="*" RowDefinitions="90,*">
+    <Grid ColumnDefinitions="73,150,*,130,130" RowDefinitions="Auto" Margin="6" Background="#f5f5f5" Grid.Row="0" Grid.Column="0">
+      <Image Source="resm:FreeMarketApp.Assets.ico-user.png" Grid.Row="0" Grid.Column="0" Margin="5,15" Stretch="None" />
+      <TextBlock FontSize="13" Text="MY LOGINNAME" TextAlignment="Left" FontWeight="SemiBold" Grid.Row="0" Grid.Column="1" Margin="0,15" />
+      
+      <Border Background="#e6e6e6" BorderThickness="1,1,1,1" CornerRadius="30,30,30,30" Grid.Row="0" Grid.Column="2" Margin="0,15">
+        <Grid ColumnDefinitions="*,35" RowDefinitions="Auto" Margin="14,6" VerticalAlignment="Center">
+          <TextBox Watermark="Enter Your Keyword" BorderThickness="0,0,1,0" Background="#e6e6e6" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+          <Image Source="resm:FreeMarketApp.Assets.ico-search.png" Grid.Row="0" Grid.Column="1" Stretch="None" Cursor="Hand" />
         </Grid>
-        
-        <StackPanel VerticalAlignment="Top" ZIndex="1">
-          <Image Source="resm:FreeMarketApp.Assets.ico-user.png" />
-        </StackPanel>
-        <StackPanel VerticalAlignment="Top" ZIndex="2">
-          <TextBox Watermark="Street address" />
-        </StackPanel>
-      </StackPanel>
-      <StackPanel Margin="10" Spacing="4" Width="200">
-        <TextBlock Name="testblock" Text="{Binding Caption}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBlock Name="testblockx" Text="{Binding Caption}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Border>
 
-        <Button Command="{Binding ShuffleItems}">Shuffle</Button>
-      </StackPanel>
-    </StackPanel>
-    </StackPanel>
-  
+      <Button Width="120" Grid.Row="0" Grid.Column="3" Classes="toolbar" Margin="8,0,2,0" Cursor="Hand">MY PRODUCTS</Button>
+
+      <Button Width="120" Grid.Row="0" Grid.Column="4" Classes="toolbar_dark" Margin="2,0,8,0" Cursor="Hand">PRIVATE CHAT</Button>
+
+    </Grid>
+
+    <Grid ColumnDefinitions="223,*" RowDefinitions="*" Margin="6" Grid.Row="1" Grid.Column="0">
+      <Grid ColumnDefinitions="*" RowDefinitions="25,*" Margin="6" Grid.Row="0" Grid.Column="0">
+        <Border BorderThickness="2,0,0,0" CornerRadius="0" BorderBrush="#ffb506" Grid.Row="0" Grid.Column="0" Background="Transparent">
+          <TextBlock FontSize="13" Text="CATEGORY" TextAlignment="Left" FontWeight="SemiBold" Margin="10,5" />
+        </Border>
+        
+        <TextBlock FontSize="13" Text="..." TextAlignment="Left" FontWeight="SemiBold" Margin="10" Grid.Row="1" Grid.Column="0" />
+      </Grid>
+
+      <Grid ColumnDefinitions="*" RowDefinitions="25,*" Margin="6" Grid.Row="0" Grid.Column="1">
+        <Border BorderThickness="2,0,0,0" BorderBrush="#ffb506" Grid.Row="0" Grid.Column="0" Margin="0">
+          <TextBlock FontSize="13" Text="PRODUCTS" TextAlignment="Left" FontWeight="SemiBold" Margin="10,5" />
+        </Border>
+
+        <TextBlock FontSize="13" Text="..." TextAlignment="Left" FontWeight="SemiBold" Margin="10" Grid.Row="1" Grid.Column="0" />
+      </Grid>
+    </Grid>
+  </Grid>
+
+
 
 </Window>

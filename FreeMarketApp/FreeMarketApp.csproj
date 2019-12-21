@@ -33,8 +33,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Serilog" Version="2.9.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
     <ProjectReference Include="..\JainDB\jaindb.base\jaindb.base.csproj" />
     <ProjectReference Include="..\JainDB\jaindb\jaindb.csproj" />
     <ProjectReference Include="..\JainDB\Plugin_FileStore\Plugin_FileStore.csproj" />

@@ -30,6 +30,7 @@ namespace TorSocksWebProxy
                 if (NewSocket != null)
                 {
                     ProxyClient NewClient = new ProxyClient(Config, NewSocket, new DestroyDelegate(this.RemoveClient));
+                    
                     AddClient(NewClient);
                     NewClient.StartHandshake();
                 }

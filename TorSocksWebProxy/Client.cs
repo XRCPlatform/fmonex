@@ -66,9 +66,21 @@ namespace TorSocksWebProxy
             }
         }
 
-        public Uri GetProxy(Uri destination)
+        public Uri GetProxy(Uri uri)
         {
-            return new Uri("http://127.0.0.1:" + Config.HttpPort);
+            return new Uri("http://" + Config.HttpAddress + ":" + Config.HttpPort);
+        }
+        public IPAddress GetProxyIPAddress()
+        {
+            return Config.HttpAddress;
+        }
+        public int GetProxyPort()
+        {
+            return Config.HttpPort;
+        }
+        public ProxyListener GetListener()
+        {
+            return GetListener(Config);
         }
 
         /// <summary>

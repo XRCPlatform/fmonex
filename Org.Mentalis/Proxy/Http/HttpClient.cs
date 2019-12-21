@@ -280,6 +280,7 @@ public class HttpClient : Client {
 		}
 		return Ret;
 	}
+
 	///<summary>Called when we received some data from the client connection.</summary>
 	///<param name="ar">The result of the asynchronous operation.</param>
     protected void OnReceiveQuery(IAsyncResult ar)
@@ -307,6 +308,7 @@ public class HttpClient : Client {
 			}
 		}
 	}
+
 	///<summary>Called when the Bad Request error has been sent to the client.</summary>
 	///<param name="ar">The result of the asynchronous operation.</param>
     protected void OnErrorSent(IAsyncResult ar)

@@ -10,6 +10,7 @@ using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
 using TorSocksWebProxy;
 using System.Net.Http;
+using System.Security.Authentication;
 
 namespace FreeMarketApp.ViewModels
 {
@@ -29,8 +30,17 @@ namespace FreeMarketApp.ViewModels
         {
             Task.Run(() =>
             {
+            //var handler = new HttpClientHandler()
+            //{
+            //    SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls
+            //};
 
-                //  RunParallel(2, "https://check.torproject.org/");
+            //var client = new HttpClient(handler);
+            //var result = client.GetAsync(url).Result;
+            //var html = result.Content.ReadAsStringAsync().Result;
+
+
+            // RunParallel(1, "https://check.torproject.org/");
             });
 
             //Task.Run(() =>
@@ -137,7 +147,7 @@ namespace FreeMarketApp.ViewModels
                     //This is an internal http->socks proxy that runs in process
                     IPAddress.Parse("127.0.0.1"),
                     //This is the port your in process http->socks proxy will run on
-                    GetNextFreePort(),
+                    27272, // GetNextFreePort(),
                     //This could be an address to a local socks proxy (ex: Tor / Tor Browser, If Tor is running it will be on 127.0.0.1)
                     IPAddress.Parse("127.0.0.1"),
                     //This is the port that the socks proxy lives on (ex: Tor / Tor Browser, Tor is 9150)
@@ -149,6 +159,7 @@ namespace FreeMarketApp.ViewModels
                 HttpClientHandler hch = new HttpClientHandler();
                 hch.Proxy = proxy;
                 hch.UseProxy = true;
+                
                 var client = new HttpClient(hch);
                 var result = client.GetAsync(url).Result;
                 var html = result.Content.ReadAsStringAsync().Result;
@@ -182,7 +193,7 @@ namespace FreeMarketApp.ViewModels
                             Caption = Caption + i + ":::::::::::::::::::::" + Environment.NewLine;
                         }
 
-                        GetNewTorIdentity();
+                      //  GetNewTorIdentity();
                     }
                     catch { }
                 }

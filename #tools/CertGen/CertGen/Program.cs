@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
+using Pluralsight.Crypto;
 
 namespace CertGen
 {
@@ -14,18 +15,29 @@ namespace CertGen
     {
         static void Main(string[] args)
         {
-            var ecdsa = ECDsa.Create(); // generate asymmetric key pair
-            var req = new CertificateRequest("cn=fm.one", ecdsa, HashAlgorithmName.SHA256);
-            var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.MaxValue);
+            using (CryptContext ctx = new CryptContext())
+            {
+                ctx.Open();
 
-            // Create PFX (PKCS #12) with private key
-            File.WriteAllBytes("fm.one.pfx", cert.Export(X509ContentType.Pfx, ConfigurationManager.AppSettings["CertificatePassword"]));
+                X509Certificate2 certNew = ctx.CreateSelfSignedCertificate(
+                    new SelfSignedCertProperties
+                    {
+                        IsPrivateKeyExportable = true,
+                        KeyBitLength = 4096,
+                        Name = new X500DistinguishedName("cn=fm.one"),
+                        ValidFrom = DateTime.Today.AddDays(-1),
+                        ValidTo = DateTime.MaxValue,
+                    });
 
-            // Create Base 64 encoded CER (public key only)
-            File.WriteAllText("fm.one.cer",
-                "-----BEGIN CERTIFICATE-----\r\n"
-                + Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks)
-                + "\r\n-----END CERTIFICATE-----");
+                File.WriteAllBytes("fm.one.pfx", certNew.Export(X509ContentType.Pfx, (string)null));
+
+                var test = X509Certificate2.CreateFromCertFile("fm.one.pfx");
+
+                File.WriteAllText("fm.one.cer",
+                    "-----BEGIN CERTIFICATE-----\r\n"
+                    + Convert.ToBase64String(certNew.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks)
+                    + "\r\n-----END CERTIFICATE-----");
+            }
         }
     }
 }

@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Tor", "FreeMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Extensions", "FreeMarketOne.Extensions\FreeMarketOne.Extensions.csproj", "{718F958C-6ECB-4A97-A972-CBDFD525E33A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.P2P", "FreeMarketOne.P2P\FreeMarketOne.P2P.csproj", "{9B1CC5BB-52B5-4AC0-BED2-079E06BDD0F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{718F958C-6ECB-4A97-A972-CBDFD525E33A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{718F958C-6ECB-4A97-A972-CBDFD525E33A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{718F958C-6ECB-4A97-A972-CBDFD525E33A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B1CC5BB-52B5-4AC0-BED2-079E06BDD0F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B1CC5BB-52B5-4AC0-BED2-079E06BDD0F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B1CC5BB-52B5-4AC0-BED2-079E06BDD0F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B1CC5BB-52B5-4AC0-BED2-079E06BDD0F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,6 +88,7 @@ Global
 		{588A5CBC-CCFC-462B-A7A0-D2B0B9D373A1} = {5EF04D79-24F7-4CD5-845E-0938217976B0}
 		{EF5FBA9E-9514-4D3B-939F-117081004883} = {5EF04D79-24F7-4CD5-845E-0938217976B0}
 		{718F958C-6ECB-4A97-A972-CBDFD525E33A} = {5EF04D79-24F7-4CD5-845E-0938217976B0}
+		{9B1CC5BB-52B5-4AC0-BED2-079E06BDD0F9} = {5EF04D79-24F7-4CD5-845E-0938217976B0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

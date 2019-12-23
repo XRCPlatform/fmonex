@@ -1,3 +1,4 @@
+using FreeMarketOne.Extensions.Models;
 using FreeMarketOne.Tor.Exceptions;
 using Serilog.Core;
 using System;
@@ -27,9 +28,9 @@ namespace FreeMarketOne.Tor
 
 		/// <param name="torSocks5EndPoint">Opt out Tor with null.</param>
 		/// <param name="logFile">Opt out of logging with null.</param>
-		public TorProcessManager(Logger serverLogger, EndPoint torSocks5EndPoint)
+		public TorProcessManager(Logger serverLogger, BaseConfiguration configuration)
 		{
-            TorSocks5EndPoint = torSocks5EndPoint;
+            TorSocks5EndPoint = configuration.TorEndPoint;
             Logger = serverLogger;
             _running = 0;
 			Stop = new CancellationTokenSource();

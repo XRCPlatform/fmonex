@@ -26,8 +26,9 @@ namespace FreeMarketOne.ServerCore
         public static FreeMarketOneServer Current { get; private set; }
 
         public Logger _logger;
+        private ILogger Logger;
         public TorProcessManager _torProcessManager;
-        public List<OnionSeed> _onionSeeds;
+        public OnionSeedsManager _onionSeedsManager;
         public BaseConfiguration _configuration;
 
         public void Initialize()
@@ -35,7 +36,7 @@ namespace FreeMarketOne.ServerCore
             /* Configuration */
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                .AddJsonFile("appsettings.json", true, false);
             var configFile = builder.Build();
             _configuration = new BaseConfiguration();
 
@@ -50,20 +51,28 @@ namespace FreeMarketOne.ServerCore
             /* Initialize Logger */
             _logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(_configuration.LogFilePath)
+                .WriteTo.File(_configuration.LogFilePath,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
+                    rollingInterval: RollingInterval.Day)
                 .CreateLogger();
-            _logger.Information("Prepaire Tor");
+            Logger = _logger.ForContext<FreeMarketOneServer>();
+            Logger.Information("Application Start");
 
             /* Initialize Tor */
             _torProcessManager = new TorProcessManager(_logger, _configuration);
+            var torInitialized = _torProcessManager.Start();
 
-            /* Initialize OnionSeeds */
-            _onionSeeds = OnionSeeds.GetOnions(_configuration);
+            if (torInitialized)
+            {
+                /* Initialize OnionSeeds */
+                _onionSeedsManager = new OnionSeedsManager(_logger, _configuration);
+                _onionSeedsManager.GetOnions();
 
-            //tests
-           // var s = _torProcessManager.IsTorRunningAsync().Result;
+                //tests
+                // var s = _torProcessManager.IsTorRunningAsync().Result;
 
-            var breakIt = true;
+                var breakIt = true;
+            }
         }
 
         private void InitializeLogFilePath(BaseConfiguration configuration, IConfigurationRoot configFile)
@@ -99,6 +108,15 @@ namespace FreeMarketOne.ServerCore
             var settings = configFile.GetSection("FreeMarketOneConfiguration")["TorEndPoint"];
 
             configuration.TorEndPoint = EndPointHelper.ParseIPEndPoint(settings);
+        }
+
+        public void Stop()
+        {
+            Logger.Information("Ending Tor...");
+
+            _torProcessManager.Dispose();
+
+            Logger.Information("Application End");
         }
     }
 }

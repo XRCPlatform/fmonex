@@ -1,5 +1,7 @@
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Extensions.Models;
 using FreeMarketOne.Tor.Exceptions;
+using Serilog;
 using Serilog.Core;
 using System;
 using System.Diagnostics;
@@ -13,194 +15,241 @@ using System.Threading.Tasks;
 
 namespace FreeMarketOne.Tor
 {
-	public class TorProcessManager
+	public class TorProcessManager : IDisposable
 	{
 		/// <summary>
 		/// If null then it's just a mock, clearnet is used.
 		/// </summary>
 		public EndPoint TorSocks5EndPoint { get; }
 
-		public Logger Logger { get; }
+        public string TorOnionEndPoint { get; private set; }
 
-		public static bool RequestFallbackAddressUsage { get; private set; } = false;
+        private ILogger Logger { get; set; }
 
-		public Process TorProcess { get; private set; }
+        public static bool RequestFallbackAddressUsage { get; private set; } = false;
 
-		/// <param name="torSocks5EndPoint">Opt out Tor with null.</param>
-		/// <param name="logFile">Opt out of logging with null.</param>
-		public TorProcessManager(Logger serverLogger, BaseConfiguration configuration)
-		{
+		private Process TorProcess { get; set; }
+
+        /// <summary>
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
+        /// </summary>
+        private long _running;
+
+        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+
+        private CancellationTokenSource Stop { get; set; }
+
+        /// <param name="torSocks5EndPoint">Opt out Tor with null.</param>
+        /// <param name="logFile">Opt out of logging with null.</param>
+        public TorProcessManager(Logger serverLogger, BaseConfiguration configuration)
+        {
+            Logger = serverLogger.ForContext<TorProcessManager>();
+            Logger.Information("Initializing Tor Process Manager");
+
             TorSocks5EndPoint = configuration.TorEndPoint;
-            Logger = serverLogger;
             _running = 0;
 			Stop = new CancellationTokenSource();
 			TorProcess = null;
 		}
 
-        //	public void Start(bool ensureRunning, string dataDir)
-        //	{
-        //		if (TorSocks5EndPoint is null)
-        //		{
-        //			return;
-        //		}
+        public bool Start()
+        {
+            if (TorSocks5EndPoint is null)
+            {
+                return false;
+            }
 
-        //		new Thread(delegate () // Do not ask. This is the only way it worked on Win10/Ubuntu18.04/Manjuro(1 processor VM)/Fedora(1 processor VM)
-        //		{
-        //			try
-        //			{
-        //				// 1. Is it already running?
-        //				// 2. Can I simply run it from output directory?
-        //				// 3. Can I copy and unzip it from assets?
-        //				// 4. Throw exception.
+            //new Thread(delegate () // Do not ask. This is the only way it worked on Win10/Ubuntu18.04/Manjuro(1 processor VM)/Fedora(1 processor VM)
+            //{
+                try
+                {
+                    try
+                    {
+                        var toolsDir = "tools";
+                        var torPath = "";
+                        var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
-        //				try
-        //				{
-        //					if (IsTorRunningAsync(TorSocks5EndPoint).GetAwaiter().GetResult())
-        //					{
-        //						Logger.LogInfo("Tor is already running.");
-        //						return;
-        //					}
+                        if (IsTorRunningAsync(TorSocks5EndPoint).GetAwaiter().GetResult())
+                        {
+                            Logger.Warning("Tor is already running.");
+                            GetOnionEndPoint(fullBaseDirectory, toolsDir);
+                            return true;
+                        }
 
-        //					var torDir = Path.Combine(dataDir, "tor");
-        //					var torPath = "";
-        //					var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
-        //					if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        //					{
-        //						if (!fullBaseDirectory.StartsWith('/'))
-        //						{
-        //							fullBaseDirectory.Insert(0, "/");
-        //						}
+                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            if (!fullBaseDirectory.StartsWith('/'))
+                            {
+                                fullBaseDirectory.Insert(0, "/");
+                            }
 
-        //						torPath = $@"{torDir}/Tor/tor";
-        //					}
-        //					else // If Windows
-        //					{
-        //						torPath = $@"{torDir}\Tor\tor.exe";
-        //					}
+                            torPath = $@"{toolsDir}/Tor/tor";
+                        }
+                        else // If Windows
+                        {
+                            torPath = $@"{toolsDir}\Tor\tor.exe";
+                        }
 
-        //					if (!File.Exists(torPath))
-        //					{
-        //						Logger.LogInfo($"Tor instance NOT found at {torPath}. Attempting to acquire it...");
-        //						InstallTor(fullBaseDirectory, torDir);
-        //					}
-        //					else if (!IoHelpers.CheckExpectedHash(torPath, Path.Combine(fullBaseDirectory, "TorDaemons")))
-        //					{
-        //						Logger.LogInfo($"Updating Tor...");
+                        if (!File.Exists(torPath))
+                        {
+                            Logger.Error($"Tor instance NOT found at {torPath}. Attempting to acquire it...");
+                            InstallTor(fullBaseDirectory, toolsDir);
 
-        //						string backupTorDir = $"{torDir}_backup";
-        //						if (Directory.Exists(backupTorDir))
-        //						{
-        //							Directory.Delete(backupTorDir, true);
-        //						}
-        //						Directory.Move(torDir, backupTorDir);
+                            //copy configuration
+                            CopyDefaultConfig(fullBaseDirectory, toolsDir);
 
-        //						InstallTor(fullBaseDirectory, torDir);
-        //					}
-        //					else
-        //					{
-        //						Logger.LogInfo($"Tor instance found at {torPath}.");
-        //					}
+                            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                            {
+                                // Make sure there's sufficient permission.
+                                string chmodTorDirCmd = $"chmod -R 750 {toolsDir}";
+                                var result = EnvironmentHelpers.ShellExec(chmodTorDirCmd);
+                                if (result > 0)
+                                {
+                                    Logger.Error($"Command: {chmodTorDirCmd} exited with exit code: {result}, instead of 0.");
+                                }
+                                else
+                                {
+                                    Logger.Information($"Shell command executed: {chmodTorDirCmd}.");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Logger.Information($"Tor instance found at {torPath}.");
+                        }
 
-        //					string torArguments = $"--SOCKSPort {TorSocks5EndPoint}";
-        //					if (!string.IsNullOrEmpty(LogFile))
-        //					{
-        //						IoHelpers.EnsureContainingDirectoryExists(LogFile);
-        //						var logFileFullPath = Path.GetFullPath(LogFile);
-        //						torArguments += $" --Log \"notice file {logFileFullPath}\"";
-        //					}
+                        string torArguments = $" -f torrc";
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            TorProcess = Process.Start(new ProcessStartInfo
+                            {
+                                WorkingDirectory = $@"{toolsDir}/Tor/",
+                                FileName = torPath,
+                                Arguments = torArguments,
+                                UseShellExecute = false,
+                                CreateNoWindow = false,
+                                RedirectStandardOutput = false
+                            });
+                            Logger.Information($"Starting Tor process with Process.Start.");
+                        }
+                        else // Linux and OSX
+                        {
+                            string runTorCmd = $"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:={toolsDir}/Tor && export LD_LIBRARY_PATH && cd {toolsDir}/Tor && ./tor {torArguments}";
+                            EnvironmentHelpers.ShellExec(runTorCmd, false);
+                            Logger.Information($"Started Tor process with shell command: {runTorCmd}.");
+                        }
 
-        //					if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        //					{
-        //						TorProcess = Process.Start(new ProcessStartInfo
-        //						{
-        //							FileName = torPath,
-        //							Arguments = torArguments,
-        //							UseShellExecute = false,
-        //							CreateNoWindow = true,
-        //							RedirectStandardOutput = true
-        //						});
-        //						Logger.LogInfo($"Starting Tor process with Process.Start.");
-        //					}
-        //					else // Linux and OSX
-        //					{
-        //						string runTorCmd = $"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:={torDir}/Tor && export LD_LIBRARY_PATH && cd {torDir}/Tor && ./tor {torArguments}";
-        //						EnvironmentHelpers.ShellExec(runTorCmd, false);
-        //						Logger.LogInfo($"Started Tor process with shell command: {runTorCmd}.");
-        //					}
+                        //check if TOR is online
+                        Task.Delay(3000).ConfigureAwait(false).GetAwaiter().GetResult(); // dotnet brainfart, ConfigureAwait(false) IS NEEDED HERE otherwise (only on) Manjuro Linux fails, WTF?!!
+                        if (!IsTorRunningAsync(TorSocks5EndPoint).GetAwaiter().GetResult())
+                        {
+                            throw new TorException("Attempted to start Tor, but it is not running.");
+                        }
+                        else
+                        {
+                            GetOnionEndPoint(fullBaseDirectory, toolsDir);
+                        }
+                        Logger.Information("Tor is running.");
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new TorException("Could not automatically start Tor. Try running Tor manually.", ex);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message + " " + ex.StackTrace);
 
-        //					if (ensureRunning)
-        //					{
-        //						Task.Delay(3000).ConfigureAwait(false).GetAwaiter().GetResult(); // dotnet brainfart, ConfigureAwait(false) IS NEEDED HERE otherwise (only on) Manjuro Linux fails, WTF?!!
-        //						if (!IsTorRunningAsync(TorSocks5EndPoint).GetAwaiter().GetResult())
-        //						{
-        //							throw new TorException("Attempted to start Tor, but it is not running.");
-        //						}
-        //						Logger.LogInfo("Tor is running.");
-        //					}
-        //				}
-        //				catch (Exception ex)
-        //				{
-        //					throw new TorException("Could not automatically start Tor. Try running Tor manually.", ex);
-        //				}
-        //			}
-        //			catch (Exception ex)
-        //			{
-        //				Logger.LogError(ex);
-        //			}
-        //		}).Start();
-        //	}
+                    return false;
+                }
+            //}).Start();
 
-        //	private static void InstallTor(string fullBaseDirectory, string torDir)
-        //	{
-        //		string torDaemonsDir = Path.Combine(fullBaseDirectory, "TorDaemons");
+            return true;
+        }
 
-        //		string dataZip = Path.Combine(torDaemonsDir, "data-folder.zip");
-        //		IoHelpers.BetterExtractZipToDirectoryAsync(dataZip, torDir).GetAwaiter().GetResult();
-        //		Logger.LogInfo($"Extracted {dataZip} to {torDir}.");
+        private void CopyDefaultConfig(string fullBaseDirectory, string torDir)
+        {
+            string torConfigDir = Path.Combine(fullBaseDirectory, torDir);
+            string sourceConfig = Path.Combine(torConfigDir, "torrc-default");
+            string targetConfig = Path.Combine(torConfigDir, "Tor", "torrc");
 
-        //		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        //		{
-        //			string torWinZip = Path.Combine(torDaemonsDir, "tor-win32.zip");
-        //			IoHelpers.BetterExtractZipToDirectoryAsync(torWinZip, torDir).GetAwaiter().GetResult();
-        //			Logger.LogInfo($"Extracted {torWinZip} to {torDir}.");
-        //		}
-        //		else // Linux or OSX
-        //		{
-        //			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        //			{
-        //				string torLinuxZip = Path.Combine(torDaemonsDir, "tor-linux64.zip");
-        //				IoHelpers.BetterExtractZipToDirectoryAsync(torLinuxZip, torDir).GetAwaiter().GetResult();
-        //				Logger.LogInfo($"Extracted {torLinuxZip} to {torDir}.");
-        //			}
-        //			else // OSX
-        //			{
-        //				string torOsxZip = Path.Combine(torDaemonsDir, "tor-osx64.zip");
-        //				IoHelpers.BetterExtractZipToDirectoryAsync(torOsxZip, torDir).GetAwaiter().GetResult();
-        //				Logger.LogInfo($"Extracted {torOsxZip} to {torDir}.");
-        //			}
+            File.Copy(sourceConfig, targetConfig);
+        }
 
-        //			// Make sure there's sufficient permission.
-        //			string chmodTorDirCmd = $"chmod -R 750 {torDir}";
-        //			EnvironmentHelpers.ShellExec(chmodTorDirCmd);
-        //			Logger.LogInfo($"Shell command executed: {chmodTorDirCmd}.");
-        //		}
-        //	}
+        private void GetOnionEndPoint(string fullBaseDirectory, string torDir)
+        {
+            string torHiddenServiceDir = Path.Combine(fullBaseDirectory, torDir, "Tor", "hidden_service");
 
-        //	/// <param name="torSocks5EndPoint">Opt out Tor with null.</param>
-        //	public static async Task<bool> IsTorRunningAsync(EndPoint torSocks5EndPoint)
-        //	{
-        //		using var client = new TorSocks5Client(torSocks5EndPoint);
-        //		try
-        //		{
-        //			await client.ConnectAsync().ConfigureAwait(false);
-        //			await client.HandshakeAsync().ConfigureAwait(false);
-        //		}
-        //		catch (ConnectionException)
-        //		{
-        //			return false;
-        //		}
-        //		return true;
-        //	}
+            if (Directory.Exists(torHiddenServiceDir))
+            {
+                Logger.Information($"Tor instance found at {torHiddenServiceDir}. Attempting to acquire it...");
+
+                var hostNameFile = Path.Combine(torHiddenServiceDir, "hostname");
+
+                try
+                {
+                    var onionEndPoint = File.ReadAllText(hostNameFile);
+                    this.TorOnionEndPoint = onionEndPoint.Replace(Environment.NewLine, string.Empty);
+                }
+                catch (Exception)
+                {
+                    Logger.Error($"Tor onion endpoint cant be loaded from {hostNameFile}.");
+                }
+            }
+            else
+            {
+                Logger.Error($"Tor instance not found at {torHiddenServiceDir}.");
+            }
+        }
+
+        private void InstallTor(string fullBaseDirectory, string torDir)
+        {
+            string torDaemonsDir = Path.Combine(fullBaseDirectory, torDir);
+
+            string dataZip = Path.Combine(torDaemonsDir, "data-folder.zip");
+            IoHelpers.BetterExtractZipToDirectoryAsync(dataZip, torDir).GetAwaiter().GetResult();
+            Logger.Information($"Extracted {dataZip} to {torDir}.");
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                string torWinZip = Path.Combine(torDaemonsDir, "tor-win32.zip");
+                IoHelpers.BetterExtractZipToDirectoryAsync(torWinZip, torDir).GetAwaiter().GetResult();
+                Logger.Information($"Extracted {torWinZip} to {torDir}.");
+            }
+            else // Linux or OSX
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    string torLinuxZip = Path.Combine(torDaemonsDir, "tor-linux64.zip");
+                    IoHelpers.BetterExtractZipToDirectoryAsync(torLinuxZip, torDir).GetAwaiter().GetResult();
+                    Logger.Information($"Extracted {torLinuxZip} to {torDir}.");
+                }
+                else // OSX
+                {
+                    string torOsxZip = Path.Combine(torDaemonsDir, "tor-osx64.zip");
+                    IoHelpers.BetterExtractZipToDirectoryAsync(torOsxZip, torDir).GetAwaiter().GetResult();
+                    Logger.Information($"Extracted {torOsxZip} to {torDir}.");
+                }                
+            }
+        }
+
+        /// <param name="torSocks5EndPoint">Opt out Tor with null.</param>
+        public static async Task<bool> IsTorRunningAsync(EndPoint torSocks5EndPoint)
+        {
+            using (var client = new TorSocks5Client(torSocks5EndPoint))
+            {
+                try
+                {
+                    await client.ConnectAsync().ConfigureAwait(false);
+                    await client.HandshakeAsync().ConfigureAwait(false);
+                }
+                catch (ConnectionException)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
 
         public async Task<bool> IsTorRunningAsync()
         {
@@ -215,17 +264,6 @@ namespace FreeMarketOne.Tor
                 {
                     await client.ConnectAsync().ConfigureAwait(false);
                     await client.HandshakeAsync().ConfigureAwait(false);
-
-                    await client.ConnectToDestinationAsync("uufjjzcy4v3hi5hkyvdh6lkxmafvedm3dsiyko3zefetq53prsinrhyd.onion", 80).ConfigureAwait(false);
-
-                    var bytesX = Encoding.ASCII.GetBytes("xxxx");
-                    var retu = await client.SendAsync(bytesX).ConfigureAwait(false);
-                    
-                    
-                    Stream stream = client.TcpClient.GetStream();
-
-                    var sss = Encoding.ASCII.GetString(retu);
-                    var x = true;
                 }
                 catch (ConnectionException)
                 {
@@ -235,111 +273,104 @@ namespace FreeMarketOne.Tor
             }
         }
 
-        //	#region Monitor
+        //      public void StartMonitor(TimeSpan torMisbehaviorCheckPeriod, TimeSpan checkIfRunningAfterTorMisbehavedFor, string dataDirToStartWith, Uri fallBackTestRequestUri)
+        //      {
+        //          if (TorSocks5EndPoint is null)
+        //          {
+        //              return;
+        //          }
 
-        //	/// <summary>
-        //	/// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
-        //	/// </summary>
-        private long _running;
+        //          Logger.LogInfo("Starting Tor monitor...");
+        //          if (Interlocked.CompareExchange(ref _running, 1, 0) != 0)
+        //          {
+        //              return;
+        //          }
 
-	//	public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        //          Task.Run(async () =>
+        //          {
+        //              try
+        //              {
+        //                  while (IsRunning)
+        //                  {
+        //                      try
+        //                      {
+        //                          await Task.Delay(torMisbehaviorCheckPeriod, Stop.Token).ConfigureAwait(false);
 
-		private CancellationTokenSource Stop { get; set; }
+        //                          if (TorHttpClient.TorDoesntWorkSince != null) // If Tor misbehaves.
+        //                          {
+        //                              TimeSpan torMisbehavedFor = (DateTimeOffset.UtcNow - TorHttpClient.TorDoesntWorkSince) ?? TimeSpan.Zero;
 
-	//	public void StartMonitor(TimeSpan torMisbehaviorCheckPeriod, TimeSpan checkIfRunningAfterTorMisbehavedFor, string dataDirToStartWith, Uri fallBackTestRequestUri)
-	//	{
-	//		if (TorSocks5EndPoint is null)
-	//		{
-	//			return;
-	//		}
+        //                              if (torMisbehavedFor > checkIfRunningAfterTorMisbehavedFor)
+        //                              {
+        //                                  if (TorHttpClient.LatestTorException is TorSocks5FailureResponseException torEx)
+        //                                  {
+        //                                      if (torEx.RepField == RepField.HostUnreachable)
+        //                                      {
+        //                                          Uri baseUri = new Uri($"{fallBackTestRequestUri.Scheme}://{fallBackTestRequestUri.DnsSafeHost}");
+        //                                          using (var client = new TorHttpClient(baseUri, TorSocks5EndPoint))
+        //                                          {
+        //                                              var message = new HttpRequestMessage(HttpMethod.Get, fallBackTestRequestUri);
+        //                                              await client.SendAsync(message, Stop.Token).ConfigureAwait(false);
+        //                                          }
 
-	//		Logger.LogInfo("Starting Tor monitor...");
-	//		if (Interlocked.CompareExchange(ref _running, 1, 0) != 0)
-	//		{
-	//			return;
-	//		}
+        //                                          // Check if it changed in the meantime...
+        //                                          if (TorHttpClient.LatestTorException is TorSocks5FailureResponseException torEx2 && torEx2.RepField == RepField.HostUnreachable)
+        //                                          {
+        //                                              // Fallback here...
+        //                                              RequestFallbackAddressUsage = true;
+        //                                          }
+        //                                      }
+        //                                  }
+        //                                  else
+        //                                  {
+        //                                      Logger.LogInfo($"Tor did not work properly for {(int)torMisbehavedFor.TotalSeconds} seconds. Maybe it crashed. Attempting to start it...");
+        //                                      Start(true, dataDirToStartWith); // Try starting Tor, if it does not work it'll be another issue.
+        //                                      await Task.Delay(14000, Stop.Token).ConfigureAwait(false);
+        //                                  }
+        //                              }
+        //                          }
+        //                      }
+        //                      catch (Exception ex) when (ex is OperationCanceledException || ex is TaskCanceledException || ex is TimeoutException)
+        //                      {
+        //                          Logger.LogTrace(ex);
+        //                      }
+        //                      catch (Exception ex)
+        //                      {
+        //                          Logger.LogDebug(ex);
+        //                      }
+        //                  }
+        //              }
+        //              finally
+        //              {
+        //                  Interlocked.CompareExchange(ref _running, 3, 2); // If IsStopping, make it stopped.
+        //              }
+        //          });
+        //      }
 
-	//		Task.Run(async () =>
-	//		{
-	//			try
-	//			{
-	//				while (IsRunning)
-	//				{
-	//					try
-	//					{
-	//						await Task.Delay(torMisbehaviorCheckPeriod, Stop.Token).ConfigureAwait(false);
+        public async Task StopAsync()
+        {
+            Interlocked.CompareExchange(ref _running, 2, 1); // If running, make it stopping.
 
-	//						if (TorHttpClient.TorDoesntWorkSince != null) // If Tor misbehaves.
-	//						{
-	//							TimeSpan torMisbehavedFor = (DateTimeOffset.UtcNow - TorHttpClient.TorDoesntWorkSince) ?? TimeSpan.Zero;
+            if (TorSocks5EndPoint is null)
+            {
+                Interlocked.Exchange(ref _running, 3);
+            }
 
-	//							if (torMisbehavedFor > checkIfRunningAfterTorMisbehavedFor)
-	//							{
-	//								if (TorHttpClient.LatestTorException is TorSocks5FailureResponseException torEx)
-	//								{
-	//									if (torEx.RepField == RepField.HostUnreachable)
-	//									{
-	//										Uri baseUri = new Uri($"{fallBackTestRequestUri.Scheme}://{fallBackTestRequestUri.DnsSafeHost}");
-	//										using (var client = new TorHttpClient(baseUri, TorSocks5EndPoint))
-	//										{
-	//											var message = new HttpRequestMessage(HttpMethod.Get, fallBackTestRequestUri);
-	//											await client.SendAsync(message, Stop.Token).ConfigureAwait(false);
-	//										}
+            Stop?.Cancel();
+            while (Interlocked.CompareExchange(ref _running, 3, 0) == 2)
+            {
+                await Task.Delay(50).ConfigureAwait(false);
+            }
+            Stop?.Dispose();
+            Stop = null;
+            TorProcess?.Kill();
+            TorProcess?.Dispose();
+            TorProcess = null;
+        }
 
-	//										// Check if it changed in the meantime...
-	//										if (TorHttpClient.LatestTorException is TorSocks5FailureResponseException torEx2 && torEx2.RepField == RepField.HostUnreachable)
-	//										{
-	//											// Fallback here...
-	//											RequestFallbackAddressUsage = true;
-	//										}
-	//									}
-	//								}
-	//								else
-	//								{
-	//									Logger.LogInfo($"Tor did not work properly for {(int)torMisbehavedFor.TotalSeconds} seconds. Maybe it crashed. Attempting to start it...");
-	//									Start(true, dataDirToStartWith); // Try starting Tor, if it does not work it'll be another issue.
-	//									await Task.Delay(14000, Stop.Token).ConfigureAwait(false);
-	//								}
-	//							}
-	//						}
-	//					}
-	//					catch (Exception ex) when (ex is OperationCanceledException || ex is TaskCanceledException || ex is TimeoutException)
-	//					{
-	//						Logger.LogTrace(ex);
-	//					}
-	//					catch (Exception ex)
-	//					{
-	//						Logger.LogDebug(ex);
-	//					}
-	//				}
-	//			}
-	//			finally
-	//			{
-	//				Interlocked.CompareExchange(ref _running, 3, 2); // If IsStopping, make it stopped.
-	//			}
-	//		});
-	//	}
-
-	//	public async Task StopAsync()
-	//	{
-	//		Interlocked.CompareExchange(ref _running, 2, 1); // If running, make it stopping.
-
-	//		if (TorSocks5EndPoint is null)
-	//		{
-	//			Interlocked.Exchange(ref _running, 3);
-	//		}
-
-	//		Stop?.Cancel();
-	//		while (Interlocked.CompareExchange(ref _running, 3, 0) == 2)
-	//		{
-	//			await Task.Delay(50).ConfigureAwait(false);
-	//		}
-	//		Stop?.Dispose();
-	//		Stop = null;
-	//		TorProcess?.Dispose();
-	//		TorProcess = null;
-	//	}
-
-	//	#endregion Monitor
-	}
+        public void Dispose()
+        {
+            StopAsync().GetAwaiter().GetResult();
+        }
+    }
 }

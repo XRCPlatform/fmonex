@@ -31,6 +31,7 @@ namespace FreeMarketApp
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
+                .SetExitMode(ExitMode.OnMainWindowClose)
                 .LogToDebug()
                 .UseReactiveUI();
 
@@ -278,6 +279,7 @@ namespace FreeMarketApp
             }).GetAwaiter();
 
 
+            app.OnExit += OnExit;
             app.Run(window);
 
             //((MainWindowViewModel)window.DataContext).Caption = "tesxtXXX";
@@ -318,6 +320,11 @@ namespace FreeMarketApp
         static void ProcessClient(TcpClient client)
         {
             var s = "true";
+        }
+
+        private static void OnExit(object sender, EventArgs e)
+        {
+            FreeMarketOneServer.Current.Stop();
         }
     }
 }

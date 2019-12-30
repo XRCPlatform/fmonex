@@ -1,6 +1,8 @@
 ﻿using FreeMarketOne.Extensions.Models;
 using FreeMarketOne.P2P.Models;
 using FreeMarketOne.Tor;
+using Serilog;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,37 +11,67 @@ using System.Net.Http;
 
 namespace FreeMarketOne.P2P
 {
-    public static class OnionSeeds
+    public class OnionSeedsManager
     {
-        public static List<OnionSeed> GetOnions(BaseConfiguration configuration)
+        private ILogger Logger { get; set; }
+
+        private EndPoint TorSocks5EndPoint { get; set; }
+
+        private string TorOnionEndPoint { get; set; }
+
+        public List<OnionSeed> OnionSeeds { get; set; }
+
+        public OnionSeedsManager(Logger serverLogger, BaseConfiguration configuration)
         {
-            List<OnionSeed> onionSeeds = new List<OnionSeed>();
+            Logger = serverLogger.ForContext<OnionSeedsManager>();
+            Logger.Information("Initializing Onion Seeds Manager");
 
-            var torHttpClient = new TorHttpClient(new Uri(configuration.OnionSeedsEndPoint), configuration.TorEndPoint);
-            var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
+            TorSocks5EndPoint = configuration.TorEndPoint;
+            TorOnionEndPoint = configuration.OnionSeedsEndPoint;
+        }
 
-            var onionsStreamData = response.Content.ReadAsStreamAsync().Result;
+        public void GetOnions()
+        {
+            OnionSeeds = new List<OnionSeed>();
 
-            using (StreamReader sr = new StreamReader(onionsStreamData))
+            Logger.Information(string.Format("Prepairing loading of: {0} by Tor Gate: {1}", TorOnionEndPoint, TorSocks5EndPoint));
+
+            try
             {
-                while (sr.Peek() >= 0)
+                var torHttpClient = new TorHttpClient(new Uri(TorOnionEndPoint), TorSocks5EndPoint);
+                var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
+
+                var onionsStreamData = response.Content.ReadAsStreamAsync().Result;
+
+                using (StreamReader sr = new StreamReader(onionsStreamData))
                 {
-                    var onion = sr.ReadLine();
-
-                    if (IsOnionAddressValid(onion))
+                    while (sr.Peek() >= 0)
                     {
-                        var parts = onion.Split(":");
-                        var newOnionSeed = new OnionSeed();
+                        var onion = sr.ReadLine();
 
-                        newOnionSeed.Url = parts[0];
-                        newOnionSeed.Port = int.Parse(parts[1]);
+                        Logger.Information(string.Format("Parsing: {0}", onion));
 
-                        onionSeeds.Add(newOnionSeed);
+                        if (IsOnionAddressValid(onion))
+                        {
+                            var parts = onion.Split(":");
+                            var newOnionSeed = new OnionSeed();
+
+                            newOnionSeed.Url = parts[0];
+                            newOnionSeed.Port = int.Parse(parts[1]);
+
+                            OnionSeeds.Add(newOnionSeed);
+
+                            Logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.Url, newOnionSeed.Port));
+                        }
                     }
                 }
             }
+            catch (Exception e)
+            {
+                Logger.Error(string.Format("Unexpected Error: {0}", e.Message));
+            }
 
-            return onionSeeds;
+            Logger.Information(string.Format("Done: {0}", OnionSeeds.Count));
         }
 
         private static bool IsOnionAddressValid(string onionSeed)

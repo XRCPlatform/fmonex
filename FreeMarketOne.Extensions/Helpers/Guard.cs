@@ -18,7 +18,19 @@ namespace FreeMarketOne.Extensions.Helpers
 			return value;
 		}
 
-		private static void AssertCorrectParameterName(string parameterName)
+        public static string NotEmpty(string value, string parameterName)
+        {
+            NotNull(parameterName, value);
+
+            if (value.Trim().Length == 0)
+            {
+                throw new ArgumentException($"The string parameter {parameterName} cannot be empty.");
+            }
+
+            return value;
+        }
+
+        private static void AssertCorrectParameterName(string parameterName)
 		{
 			if (parameterName is null)
 			{

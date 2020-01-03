@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using System.Text;
 
 namespace FreeMarketOne.Extensions.Models
@@ -14,6 +15,7 @@ namespace FreeMarketOne.Extensions.Models
             this.TorEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9050/");
             this.LogFilePath = "log/log.txt";
             this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds_testnet.txt";
+            this.Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         public enum EnvironmentTypes
@@ -29,5 +31,7 @@ namespace FreeMarketOne.Extensions.Models
         public EnvironmentTypes Environment { get; set; }
 
         public string LogFilePath { get; set; }
+
+        public string Version { get; set; }
     }
 }

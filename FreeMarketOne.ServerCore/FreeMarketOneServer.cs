@@ -66,7 +66,7 @@ namespace FreeMarketOne.ServerCore
             if (torInitialized)
             {
                 /* Initialize OnionSeeds */
-                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration);
+                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
                 OnionSeedsManager.GetOnions();
                 OnionSeedsManager.StartPeriodicCheck();
 

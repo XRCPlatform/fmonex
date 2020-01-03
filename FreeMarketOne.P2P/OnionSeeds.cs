@@ -6,9 +6,11 @@ using Serilog;
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,19 +21,25 @@ namespace FreeMarketOne.P2P
         private ILogger logger { get; set; }
         private EndPoint torSocks5EndPoint { get; set; }
         private string torOnionEndPoint { get; set; }
+        private string appVersion { get; set; }
 
         public List<OnionSeed> OnionSeeds { get; set; }
 
         private IAsyncLoopFactory asyncLoopFactory { get; set; }
         private CancellationTokenSource cancellationToken { get; set; }
 
-        public OnionSeedsManager(Logger serverLogger, BaseConfiguration configuration)
+        private TorProcessManager torProcessManager { get; set; }
+
+        public OnionSeedsManager(Logger serverLogger, BaseConfiguration configuration, TorProcessManager torManager)
         {
             logger = serverLogger.ForContext<OnionSeedsManager>();
             logger.Information("Initializing Onion Seeds Manager");
 
             torSocks5EndPoint = configuration.TorEndPoint;
             torOnionEndPoint = configuration.OnionSeedsEndPoint;
+            appVersion = configuration.Version;
+
+            torProcessManager = torManager;
 
             asyncLoopFactory = new AsyncLoopFactory(logger);
         }
@@ -96,31 +104,45 @@ namespace FreeMarketOne.P2P
 
             IAsyncLoop periodicLogLoop = this.asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
-                //StringBuilder benchLogs = new StringBuilder();
+                var dateTimeUtc = DateTime.UtcNow;
 
-                //benchLogs.AppendLine("======Node stats====== " + this.DateTimeProvider.GetUtcNow().ToString(CultureInfo.InvariantCulture) + " agent " +
-                //                     this.ConnectionManager.Parameters.UserAgent);
+                StringBuilder periodicCheckLog = new StringBuilder();
 
-                //// Display node stats grouped together.
-                //foreach (var feature in this.Services.Features.OfType<INodeStats>())
-                //    feature.AddNodeStats(benchLogs);
+                periodicCheckLog.AppendLine("======Onion Seed Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + appVersion);
 
-                //// Now display the other stats.
-                //foreach (var feature in this.Services.Features.OfType<IFeatureStats>())
-                //    feature.AddFeatureStats(benchLogs);
+                var isTorRunning = torProcessManager.IsTorRunningAsync().Result;
+                if (isTorRunning)
+                {
+                    foreach (var itemSeed in OnionSeeds)
+                    {
+                        var resultLog = string.Format("Checking {0} {1}", itemSeed.Url, itemSeed.Port);
 
-                //benchLogs.AppendLine();
-                //benchLogs.AppendLine("======Connection======");
-                //benchLogs.AppendLine(this.ConnectionManager.GetNodeStats());
-                //this.logger.LogInformation(benchLogs.ToString());
+                        var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.Url, itemSeed.Port).Result;
+                        if (isOnionSeedRunning)
+                        {
+                            itemSeed.State = OnionSeed.OnionSeedStates.Online;
+                        }
+                        else
+                        {
+                            itemSeed.State = OnionSeed.OnionSeedStates.Offline;
+                        }
 
-                Console.WriteLine("Start sXXXX");
+                        periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
+                    }
+                }
+                else
+                {
+                    periodicCheckLog.AppendLine("Tor is down!");
+                }
+
+                logger.Information(periodicCheckLog.ToString());
+                Console.WriteLine(periodicCheckLog.ToString());
 
                 return Task.CompletedTask;
             },
                 cancellationToken.Token,
-                repeatEvery: TimeSpans.FiveSeconds,
-                startAfter: TimeSpans.FiveSeconds);
+                repeatEvery: TimeSpans.Minute,
+                startAfter: TimeSpans.TenSeconds);
         }
 
         public void Dispose()

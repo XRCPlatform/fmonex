@@ -255,7 +255,7 @@ namespace FreeMarketOne.Tor
         {
             if (TorSocks5EndPoint is null)
             {
-                return true;
+                return false;
             }
 
             using (var client = new TorSocks5Client(TorSocks5EndPoint))
@@ -264,6 +264,29 @@ namespace FreeMarketOne.Tor
                 {
                     await client.ConnectAsync().ConfigureAwait(false);
                     await client.HandshakeAsync().ConfigureAwait(false);
+                }
+                catch (ConnectionException)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public async Task<bool> IsOnionSeedRunningAsync(string url, int port)
+        {
+            if (TorSocks5EndPoint is null)
+            {
+                return false;
+            }
+
+            using (var client = new TorSocks5Client(TorSocks5EndPoint))
+            {
+                try
+                {
+                    await client.ConnectAsync().ConfigureAwait(false);
+                    await client.HandshakeAsync().ConfigureAwait(false);
+                    await client.ConnectToDestinationAsync(url, port).ConfigureAwait(false);
                 }
                 catch (ConnectionException)
                 {

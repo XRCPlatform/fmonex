@@ -24,6 +24,9 @@ namespace FreeMarketOne.Extensions.Helpers
         /// <summary>Time span of 1 minute.</summary>
         public static TimeSpan Minute => TimeSpan.FromMinutes(1);
 
+        /// <summary>Time span of 10 minute.</summary>
+        public static TimeSpan TenMinutes => TimeSpan.FromMinutes(10);
+
         /// <summary>
         /// Special time span value used for repeat frequency values, for which it means that
         /// the event should be only run once and not repeated.

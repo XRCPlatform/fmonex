@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\jaindb.base\jaindb.base.csproj" />
-    <ProjectReference Include="..\jaindb\jaindb.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -43,7 +43,6 @@
   <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
     <ProjectReference Include="..\JainDB\jaindb.base\jaindb.base.csproj" />
-    <ProjectReference Include="..\JainDB\jaindb\jaindb.csproj" />
     <ProjectReference Include="..\JainDB\Plugin_FileStore\Plugin_FileStore.csproj" />
     <ProjectReference Include="..\Org.Mentalis\Org.Mentalis.csproj" />
     <ProjectReference Include="..\TorSocksWebProxy\TorSocksWebProxy.csproj" />

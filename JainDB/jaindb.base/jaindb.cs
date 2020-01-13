@@ -23,8 +23,8 @@ namespace jaindb
         public enum hashType { MD5, SHA2_256 } //Implemented Hash types
         private static HttpClient oClient = new HttpClient();
 
-        public static string FilePath = "fmchain";
-        public static string wwwPath = "fmchain";
+        public static string FilePath = "blockchain";
+        public static string wwwPath = "blockchain";
 
         public static hashType HashType = hashType.MD5;
 

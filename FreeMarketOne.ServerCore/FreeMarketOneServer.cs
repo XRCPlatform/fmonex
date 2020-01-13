@@ -69,6 +69,7 @@ namespace FreeMarketOne.ServerCore
                 OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
                 OnionSeedsManager.GetOnions();
                 OnionSeedsManager.StartPeriodicCheck();
+                OnionSeedsManager.StartPeriodicPeerBroadcast();
 
                 //tests
                 // var s = _torProcessManager.IsTorRunningAsync().Result;

@@ -116,7 +116,7 @@ namespace FreeMarketApp
                     // Application blocks while waiting for an incoming connection.
                     // Type CNTL-C to terminate the server.
                     Socket client = listener.AcceptSocket();
-
+                  
                     if (client.Connected)
                     {
                         //To read from socket create NetworkStream object associated with socket

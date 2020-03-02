@@ -9,6 +9,7 @@ namespace FreeMarketApp.Views
     {
         public MainWindow()
         {
+          
             InitializeComponent();
             DataContextChanged += (object sender, EventArgs wat) =>
             {

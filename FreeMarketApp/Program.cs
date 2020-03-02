@@ -4,7 +4,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Logging.Serilog;
+using Avalonia.ReactiveUI;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
 using FreeMarketOne.ServerCore;
@@ -17,13 +20,13 @@ namespace FreeMarketApp
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
         // yet and stuff might break.
-        public static void Main(string[] args) => BuildAvaloniaApp().Start(AppMain, args);
+        public static void Main(string[] args) => BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args, Avalonia.Controls.ShutdownMode.OnMainWindowClose);
 
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .SetExitMode(ExitMode.OnMainWindowClose)
                 .LogToDebug()
                 .UseReactiveUI();
 
@@ -270,8 +273,11 @@ namespace FreeMarketApp
                 //SslTcpClient.RunClient(Endpoint, certificate);
             }).GetAwaiter();
 
+            var lifetime = new ClassicDesktopStyleApplicationLifetime();
+            //lifetime.Exit += OnExit;
+            //lifetime.MainWindow = new MainWindow();
 
-            app.OnExit += OnExit;
+            app.ApplicationLifetime = lifetime;
             app.Run(window);
 
             //((MainWindowViewModel)window.DataContext).Caption = "tesxtXXX";
@@ -312,11 +318,6 @@ namespace FreeMarketApp
         static void ProcessClient(TcpClient client)
         {
             var s = "true";
-        }
-
-        private static void OnExit(object sender, EventArgs e)
-        {
-            FreeMarketOneServer.Current.Stop();
         }
     }
 }

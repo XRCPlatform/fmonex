@@ -5,12 +5,6 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketApp", "FreeMarketApp\FreeMarketApp.csproj", "{461080B6-C326-4B09-A06B-72080F0AB521}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.Tor", "BackEnd.Tor", "{65772184-064A-485E-9402-33A09C9A84FE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Org.Mentalis", "Org.Mentalis\Org.Mentalis.csproj", "{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorSocksWebProxy", "TorSocksWebProxy\TorSocksWebProxy.csproj", "{1A94F985-3069-45AA-841D-7FFA33FD18D4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.BlockChain", "BackEnd.BlockChain", "{A52240B9-9E9E-4768-92E2-35CC7F180F12}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jaindb.base", "JainDB\jaindb.base\jaindb.base.csproj", "{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}"
@@ -27,15 +21,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Extensions", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.P2P", "FreeMarketOne.P2P\FreeMarketOne.P2P.csproj", "{9B1CC5BB-52B5-4AC0-BED2-079E06BDD0F9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.BlockMarket", "BackEnd.BlockMarket", "{A2E133F7-EE98-4917-9B73-B246D9B4F574}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.Market", "BackEnd.Market", "{F60B456D-30AB-4150-82C2-36D8955887D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.DataStructure", "FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj", "{06F65A20-9790-4547-AA8A-6E9F71395B13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.DataStructure", "FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj", "{06F65A20-9790-4547-AA8A-6E9F71395B13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Utils", "FreeMarketOne.Utils\FreeMarketOne.Utils.csproj", "{A5B0D135-981F-45E2-B8B3-9B0FA0D0E78F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Utils", "FreeMarketOne.Utils\FreeMarketOne.Utils.csproj", "{A5B0D135-981F-45E2-B8B3-9B0FA0D0E78F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.MarketPool", "FreeMarketOne.MarketPool\FreeMarketOne.MarketPool.csproj", "{6EFBD6E9-F58A-43F5-B06C-8C3210C144DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.MarketPool", "FreeMarketOne.MarketPool\FreeMarketOne.MarketPool.csproj", "{6EFBD6E9-F58A-43F5-B06C-8C3210C144DD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.BasePool", "FreeMarketOne.BasePool\FreeMarketOne.BasePool.csproj", "{2B123CE5-F1A6-4DAC-BAD4-1347267A2738}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,14 +41,6 @@ Global
 		{461080B6-C326-4B09-A06B-72080F0AB521}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{461080B6-C326-4B09-A06B-72080F0AB521}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{461080B6-C326-4B09-A06B-72080F0AB521}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A94F985-3069-45AA-841D-7FFA33FD18D4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -91,13 +77,15 @@ Global
 		{6EFBD6E9-F58A-43F5-B06C-8C3210C144DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EFBD6E9-F58A-43F5-B06C-8C3210C144DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EFBD6E9-F58A-43F5-B06C-8C3210C144DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B123CE5-F1A6-4DAC-BAD4-1347267A2738}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B123CE5-F1A6-4DAC-BAD4-1347267A2738}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B123CE5-F1A6-4DAC-BAD4-1347267A2738}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B123CE5-F1A6-4DAC-BAD4-1347267A2738}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3525C47F-8AC7-4C06-AF5D-9F8981320EA6} = {65772184-064A-485E-9402-33A09C9A84FE}
-		{1A94F985-3069-45AA-841D-7FFA33FD18D4} = {65772184-064A-485E-9402-33A09C9A84FE}
 		{53DB81FA-C23D-4721-9579-1B0B5A46C1D2} = {A52240B9-9E9E-4768-92E2-35CC7F180F12}
 		{72842BDD-495B-472C-9C45-3C6C6D58240C} = {A52240B9-9E9E-4768-92E2-35CC7F180F12}
 		{588A5CBC-CCFC-462B-A7A0-D2B0B9D373A1} = {5EF04D79-24F7-4CD5-845E-0938217976B0}
@@ -107,6 +95,7 @@ Global
 		{06F65A20-9790-4547-AA8A-6E9F71395B13} = {F60B456D-30AB-4150-82C2-36D8955887D3}
 		{A5B0D135-981F-45E2-B8B3-9B0FA0D0E78F} = {5EF04D79-24F7-4CD5-845E-0938217976B0}
 		{6EFBD6E9-F58A-43F5-B06C-8C3210C144DD} = {F60B456D-30AB-4150-82C2-36D8955887D3}
+		{2B123CE5-F1A6-4DAC-BAD4-1347267A2738} = {F60B456D-30AB-4150-82C2-36D8955887D3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

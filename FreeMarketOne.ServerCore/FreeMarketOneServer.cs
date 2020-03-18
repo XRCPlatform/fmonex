@@ -80,7 +80,7 @@ namespace FreeMarketOne.ServerCore
             }
 
             /* Initialize MiningProcessor */
-            MiningProcessor = new MiningProcessor(Logger, Configuration);
+            MiningProcessor = new MiningProcessor(Logger, Configuration, DateTime.UtcNow.AddDays(-10), DateTime.UtcNow);
             var miningProcessorInitialized = MiningProcessor.Start();
 
             if (miningProcessorInitialized)
@@ -133,6 +133,10 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Ending Onion Seeds ...");
 
             OnionSeedsManager.Dispose();
+
+            logger.Information("Ending Mining Processor...");
+
+            MiningProcessor.Dispose();
 
             logger.Information("Application End");
         }

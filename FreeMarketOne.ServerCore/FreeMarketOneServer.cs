@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Extensions.Models;
 using static FreeMarketOne.Extensions.Models.BaseConfiguration;
+using FreeMarketOne.Mining;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -31,6 +32,7 @@ namespace FreeMarketOne.ServerCore
         public TorProcessManager TorProcessManager;
         public OnionSeedsManager OnionSeedsManager;
         public BaseConfiguration Configuration;
+        public MiningProcessor MiningProcessor;
 
         public void Initialize()
         {
@@ -75,6 +77,15 @@ namespace FreeMarketOne.ServerCore
                 // var s = _torProcessManager.IsTorRunningAsync().Result;
 
                 var breakIt = true;
+            }
+
+            /* Initialize MiningProcessor */
+            MiningProcessor = new MiningProcessor(Logger, Configuration);
+            var miningProcessorInitialized = MiningProcessor.Start();
+
+            if (miningProcessorInitialized)
+            {
+
             }
         }
 

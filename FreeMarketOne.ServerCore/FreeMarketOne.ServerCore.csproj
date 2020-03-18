@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.MiningProcessor\FreeMarketOne.Mining.csproj" />
     <ProjectReference Include="..\FreeMarketOne.P2P\FreeMarketOne.P2P.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Tor\FreeMarketOne.Tor.csproj" />
   </ItemGroup>

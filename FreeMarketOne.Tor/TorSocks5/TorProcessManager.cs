@@ -39,8 +39,8 @@ namespace FreeMarketOne.Tor
 
         private CancellationTokenSource stop { get; set; }
 
-        /// <param name="torSocks5EndPoint">Opt out Tor with null.</param>
-        /// <param name="logFile">Opt out of logging with null.</param>
+        /// <param name="serverLogger">Base server logger.</param>
+        /// <param name="configuration">Base configuration.</param>
         public TorProcessManager(Logger serverLogger, BaseConfiguration configuration)
         {
             logger = serverLogger.ForContext<TorProcessManager>();
@@ -141,14 +141,18 @@ namespace FreeMarketOne.Tor
 
                         //check if TOR is online
                         Task.Delay(3000).ConfigureAwait(false).GetAwaiter().GetResult(); // dotnet brainfart, ConfigureAwait(false) IS NEEDED HERE otherwise (only on) Manjuro Linux fails, WTF?!!
+                        
                         if (!IsTorRunningAsync(TorSocks5EndPoint).GetAwaiter().GetResult())
                         {
+                            
                             throw new TorException("Attempted to start Tor, but it is not running.");
                         }
                         else
                         {
+                            
                             GetOnionEndPoint(fullBaseDirectory, toolsDir);
                         }
+
                         logger.Information("Tor is running.");
                     }
                     catch (Exception ex)
@@ -247,6 +251,7 @@ namespace FreeMarketOne.Tor
                 {
                     return false;
                 }
+
                 return true;
             }
         }
@@ -389,6 +394,8 @@ namespace FreeMarketOne.Tor
             torProcess?.Kill();
             torProcess?.Dispose();
             torProcess = null;
+
+            logger.Information("Tor stopped.");
         }
 
         public void Dispose()

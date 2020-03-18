@@ -6,9 +6,9 @@ namespace FreeMarketOne.DataStructure.Objects.Item
 {
     interface IItem
     {
-        public int Version { get; set; }
-        public int Title { get; set; }
-        public string Hash { get; set; }
-        public bool IsValid();
+        int Version { get; set; }
+        int Title { get; set; }
+        string Hash { get; set; }
+        bool IsValid();
     }
 }

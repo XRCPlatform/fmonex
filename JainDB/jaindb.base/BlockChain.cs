@@ -24,16 +24,16 @@ namespace jaindb
                 block._complexity = complexity; 
 
                 this.Chain = new List<block>()
-            {
-                new block
                 {
-                    index = 0,
-                    timestamp = DateTime.Now.ToUniversalTime().Ticks,
-                    previous_hash = new byte[0], //block.GetHash("genesis"),
-                    data = Data, //!! Data is not stored !!
-                    blocktype = Blocktype
-                }
-            };
+                    new block
+                    {
+                        index = 0,
+                        timestamp = DateTime.Now.ToUniversalTime().Ticks,
+                        previous_hash = new byte[0], //block.GetHash("genesis"),
+                        data = Data, //!! Data is not stored !!
+                        blocktype = Blocktype
+                    }
+                };
 
                 block oGenesis = Chain.First();
                 if (string.IsNullOrEmpty(Data))

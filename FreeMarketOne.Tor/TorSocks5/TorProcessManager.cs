@@ -1,6 +1,7 @@
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Extensions.Models;
 using FreeMarketOne.Tor.Exceptions;
+using FreeMarketOne.Tor.TorSocks5;
 using Serilog;
 using Serilog.Core;
 using System;
@@ -16,7 +17,7 @@ using System.Threading.Tasks;
 namespace FreeMarketOne.Tor
 {
 	public class TorProcessManager : IDisposable
-	{
+    {
 		/// <summary>
 		/// If null then it's just a mock, clearnet is used.
 		/// </summary>
@@ -41,7 +42,7 @@ namespace FreeMarketOne.Tor
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
-        public TorProcessManager(Logger serverLogger, BaseConfiguration configuration)
+        public TorProcessManager(ILogger serverLogger, BaseConfiguration configuration)
         {
             logger = serverLogger.ForContext<TorProcessManager>();
             logger.Information("Initializing Tor Process Manager");

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace FreeMarketOne.P2P
 {
-    public class OnionSeedsManager : IDisposable
+    public class OnionSeedsManager : IOnionSeedsManager, IDisposable
     {
         private ILogger logger { get; set; }
         private EndPoint torSocks5EndPoint { get; set; }
@@ -30,7 +30,7 @@ namespace FreeMarketOne.P2P
 
         private TorProcessManager torProcessManager { get; set; }
 
-        public OnionSeedsManager(Logger serverLogger, BaseConfiguration configuration, TorProcessManager torManager)
+        public OnionSeedsManager(ILogger serverLogger, BaseConfiguration configuration, TorProcessManager torManager)
         {
             logger = serverLogger.ForContext<OnionSeedsManager>();
             logger.Information("Initializing Onion Seeds Manager");

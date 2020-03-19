@@ -22,9 +22,7 @@ namespace FreeMarketOne.Mining
 
         private CancellationTokenSource cancellationToken { get; set; }
 
-        public event EventHandler EventNewBlockReached;
-
-        internal ProofOfTimeWorker(Logger serverLogger, DateTime genesisTimeUtc, 
+        internal ProofOfTimeWorker(ILogger serverLogger, DateTime genesisTimeUtc, 
             DateTime networkTimeUtc, TimeSpan blockTime, EventHandler eventNewBlock)
         {
             this.logger = serverLogger.ForContext<ProofOfTimeWorker>();

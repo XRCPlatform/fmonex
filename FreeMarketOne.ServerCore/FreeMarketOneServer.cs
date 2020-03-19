@@ -62,25 +62,25 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Application Start");
 
             /* Initialize Tor */
-            TorProcessManager = new TorProcessManager(Logger, Configuration);
-            var torInitialized = TorProcessManager.Start();
+            //TorProcessManager = new TorProcessManager(Logger, Configuration);
+            //var torInitialized = TorProcessManager.Start();
 
-            if (torInitialized)
-            {
-                /* Initialize OnionSeeds */
-                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-                OnionSeedsManager.GetOnions();
-                OnionSeedsManager.StartPeriodicCheck();
-                OnionSeedsManager.StartPeriodicPeerBroadcast();
+            //if (torInitialized)
+            //{
+            //    /* Initialize OnionSeeds */
+            //    OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
+            //    OnionSeedsManager.GetOnions();
+            //    OnionSeedsManager.StartPeriodicCheck();
+            //    OnionSeedsManager.StartPeriodicPeerBroadcast();
 
-                //tests
-                // var s = _torProcessManager.IsTorRunningAsync().Result;
+            //    //tests
+            //    // var s = _torProcessManager.IsTorRunningAsync().Result;
 
-                var breakIt = true;
-            }
+            //    var breakIt = true;
+            //}
 
             /* Initialize MiningProcessor */
-            MiningProcessor = new MiningProcessor(Logger, Configuration, DateTime.UtcNow.AddDays(-10), DateTime.UtcNow);
+            MiningProcessor = new MiningProcessor(Logger, Configuration, DateTime.UtcNow.AddDays(-10).AddSeconds(-25), DateTime.UtcNow);
             var miningProcessorInitialized = MiningProcessor.Start();
 
             if (miningProcessorInitialized)

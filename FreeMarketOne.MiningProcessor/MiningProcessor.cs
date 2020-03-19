@@ -12,6 +12,9 @@ namespace FreeMarketOne.Mining
     {
         private ILogger logger { get; set; }
 
+        private DateTime genesisTimeUtc;
+        private DateTime networkTimeUtc;
+
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
@@ -27,14 +30,15 @@ namespace FreeMarketOne.Mining
         /// <param name="configuration">Base configuration.</param>
         public MiningProcessor(Logger serverLogger, BaseConfiguration configuration, DateTime genesisDateTimeUtc, DateTime networkDateTimeUtc)
         {
-            logger = serverLogger.ForContext<MiningProcessor>();
+            this.logger = serverLogger.ForContext<MiningProcessor>();
+            this.genesisTimeUtc = genesisDateTimeUtc;
+            this.networkTimeUtc = networkDateTimeUtc;
+
             logger.Information("Initializing Mining Processor");
 
             Interlocked.Exchange(ref running, 0);
             cancellationToken = new CancellationTokenSource();
-
-            potWorker = new ProofOfTimeWorker(serverLogger, genesisDateTimeUtc, networkDateTimeUtc, TimeSpans.FiveMinutes, EventNewBlockReached);
-        }
+         }
 
         internal static void EventNewBlockReached(object sender, EventArgs e)
         {
@@ -44,6 +48,8 @@ namespace FreeMarketOne.Mining
         public bool Start()
         {
             Interlocked.Exchange(ref running, 1);
+
+            potWorker = new ProofOfTimeWorker(this.logger, this.genesisTimeUtc, this.networkTimeUtc, TimeSpans.Minute, EventNewBlockReached);
 
             return true;
         }

@@ -14,6 +14,8 @@ using FreeMarketOne.P2P;
 using FreeMarketOne.Extensions.Models;
 using static FreeMarketOne.Extensions.Models.BaseConfiguration;
 using FreeMarketOne.Mining;
+using FreeMarketOne.BasePool;
+using FreeMarketOne.MarketPool;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -33,6 +35,9 @@ namespace FreeMarketOne.ServerCore
         public OnionSeedsManager OnionSeedsManager;
         public BaseConfiguration Configuration;
         public MiningProcessor MiningProcessor;
+
+        public IBasePoolManager BasePoolManager;
+        public IMarketPoolManager MarketPoolManager;
 
         public void Initialize()
         {
@@ -79,8 +84,17 @@ namespace FreeMarketOne.ServerCore
             //    var breakIt = true;
             //}
 
+            /* Time Manager Loader < ------- Necessary to finish */
+            var genesisTimeUtc = DateTime.UtcNow.AddDays(-10).AddSeconds(-25); //!!!!FROM GENESIS BLOCK OF BASE BLOCKCHAIN
+            var networkTimeUtc = DateTime.UtcNow; //!!!!TIME FROM SOME EXTERNAL SERVICE - To get real time
+
+            /* Initialize Base And Market Pool */
+            BasePoolManager = new BasePoolManager(Logger, Configuration);
+            MarketPoolManager = new MarketPoolManager(Logger, Configuration);
+
             /* Initialize MiningProcessor */
-            MiningProcessor = new MiningProcessor(Logger, Configuration, DateTime.UtcNow.AddDays(-10).AddSeconds(-25), DateTime.UtcNow);
+            MiningProcessor = new MiningProcessor(Logger, Configuration, BasePoolManager, MarketPoolManager, 
+                genesisTimeUtc, networkTimeUtc);
             var miningProcessorInitialized = MiningProcessor.Start();
 
             if (miningProcessorInitialized)
@@ -135,6 +149,14 @@ namespace FreeMarketOne.ServerCore
             OnionSeedsManager.Dispose();
 
             logger.Information("Ending Mining Processor...");
+
+            BasePoolManager.Dispose();
+
+            logger.Information("Ending Base Pool Manager...");
+
+            MarketPoolManager.Dispose();
+
+            logger.Information("Ending Market Pool Manager...");
 
             MiningProcessor.Dispose();
 

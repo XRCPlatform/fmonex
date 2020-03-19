@@ -1,16 +1,11 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using FreeMarketOne.BasePool;
-using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.Extensions.Models;
-using FreeMarketOne.MarketPool;
+﻿using FreeMarketOne.Extensions.Models;
 using Serilog;
-using Serilog.Core;
+using System;
+using System.Threading;
 
-namespace FreeMarketOne.Mining
+namespace FreeMarketOne.MarketPool
 {
-    public class MiningProcessor : IDisposable
+    public class MarketPoolManager : IMarketPoolManager, IDisposable
     {
         private ILogger logger { get; set; }
 
@@ -26,43 +21,26 @@ namespace FreeMarketOne.Mining
 
         private CancellationTokenSource cancellationToken { get; set; }
 
-        private ProofOfTimeWorker potWorker { get; set; }
-
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
-        public MiningProcessor(
-            ILogger serverLogger, 
-            BaseConfiguration configuration,
-            IBasePoolManager basePoolManager,
-            IMarketPoolManager marketPoolManager,
-            DateTime genesisDateTimeUtc, 
-            DateTime networkDateTimeUtc)
+        public MarketPoolManager(ILogger serverLogger, BaseConfiguration configuration)
         {
-            this.logger = serverLogger.ForContext<MiningProcessor>();
-            this.genesisTimeUtc = genesisDateTimeUtc;
-            this.networkTimeUtc = networkDateTimeUtc;
+            this.logger = serverLogger.ForContext<MarketPoolManager>();
 
-            logger.Information("Initializing Mining Processor");
+            logger.Information("Initializing Market Pool Manager");
 
             Interlocked.Exchange(ref running, 0);
             cancellationToken = new CancellationTokenSource();
-         }
-
-        internal static void EventNewBlockReached(object sender, EventArgs e)
-        {
-            Console.WriteLine("XXXX.");
         }
 
         public bool Start()
         {
             Interlocked.Exchange(ref running, 1);
 
-            potWorker = new ProofOfTimeWorker(this.logger, this.genesisTimeUtc, this.networkTimeUtc, TimeSpans.Minute, EventNewBlockReached);
-
             return true;
         }
 
-        public bool IsMiningRunning()
+        public bool IsMarketPoolManagerRunning()
         {
             if (Interlocked.Read(ref running) == 1)
             {
@@ -78,14 +56,11 @@ namespace FreeMarketOne.Mining
         {
             Interlocked.Exchange(ref running, 2);
 
-            potWorker?.Dispose();
-            potWorker = null;
-
             cancellationToken?.Cancel();
             cancellationToken?.Dispose();
             cancellationToken = null;
 
-            logger.Information("Mining Processor stopped.");
+            logger.Information("Market Pool Manager stopped.");
         }
 
         public void Dispose()
@@ -93,5 +68,13 @@ namespace FreeMarketOne.Mining
             Interlocked.Exchange(ref running, 3);
             Stop();
         }
+
+        //accept
+        //isvalid
+        //save
+        //load
+        //getforBlock
+        //processblock
+
     }
 }

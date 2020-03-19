@@ -41,7 +41,7 @@ namespace FreeMarketOne.Tor
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
-        public TorProcessManager(Logger serverLogger, BaseConfiguration configuration)
+        public TorProcessManager(ILogger serverLogger, BaseConfiguration configuration)
         {
             logger = serverLogger.ForContext<TorProcessManager>();
             logger.Information("Initializing Tor Process Manager");

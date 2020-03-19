@@ -10,7 +10,7 @@ using Serilog.Core;
 
 namespace FreeMarketOne.Mining
 {
-    public class MiningProcessor : IDisposable
+    public class MiningProcessor : IMiningProcessor, IDisposable
     {
         private ILogger logger { get; set; }
 

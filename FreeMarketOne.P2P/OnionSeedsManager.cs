@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace FreeMarketOne.P2P
 {
-    public class OnionSeedsManager : IDisposable
+    public class OnionSeedsManager : IOnionSeedsManager, IDisposable
     {
         private ILogger logger { get; set; }
         private EndPoint torSocks5EndPoint { get; set; }

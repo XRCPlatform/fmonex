@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Extensions\FreeMarketOne.Extensions.csproj" />
   </ItemGroup>
 

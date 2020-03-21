@@ -11,11 +11,11 @@ using System.Text;
 using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using FreeMarketOne.P2P;
-using FreeMarketOne.Extensions.Models;
-using static FreeMarketOne.Extensions.Models.BaseConfiguration;
 using FreeMarketOne.Mining;
 using FreeMarketOne.BasePool;
 using FreeMarketOne.MarketPool;
+using FreeMarketOne.DataStructure;
+using static FreeMarketOne.DataStructure.BaseConfiguration;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -31,7 +31,7 @@ namespace FreeMarketOne.ServerCore
         public Logger Logger;
         private ILogger logger;
 
-        public BaseConfiguration Configuration;
+        public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
 
         public IOnionSeedsManager OnionSeedsManager;
@@ -47,10 +47,9 @@ namespace FreeMarketOne.ServerCore
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", true, false);
             var configFile = builder.Build();
-            Configuration = new BaseConfiguration();
 
             /* Environment */
-            InitializeEnvironment(Configuration, configFile);
+            Configuration = InitializeEnvironment(configFile);
 
             /* Config */
             InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
@@ -104,35 +103,41 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        private void InitializeLogFilePath(BaseConfiguration configuration, IConfigurationRoot configFile)
+        private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
             var settings = configFile.GetSection("FreeMarketOneConfiguration")["LogFilePath"];
 
             configuration.LogFilePath = settings;
         }
 
-        public static void InitializeEnvironment(BaseConfiguration configuration, IConfigurationRoot configFile)
+        public static IBaseConfiguration InitializeEnvironment(IConfigurationRoot configFile)
         {
             var settings = configFile.GetSection("FreeMarketOneConfiguration")["ServerEnvironment"];
 
             var environment = EnvironmentTypes.Test;
-
             Enum.TryParse(settings, out environment);
 
-            configuration.Environment = environment;
+            if (environment == EnvironmentTypes.Main)
+            {
+                return new MainConfiguration();
+            } 
+            else
+            {
+                return new TestConfiguration();
+            }
         }
 
-        public static void InitializeBaseOnionSeedsEndPoint(BaseConfiguration configuration, IConfigurationRoot configFile)
+        public static void InitializeBaseOnionSeedsEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
             var prefix = "TestNetOnionSeedsEndPoint";
-            if (configuration.Environment == EnvironmentTypes.Main) prefix = "MainOnionSeedsEndPoint";
+            if (configuration.Environment == (int)EnvironmentTypes.Main) prefix = "MainOnionSeedsEndPoint";
 
             var settings = configFile.GetSection("FreeMarketOneConfiguration")[prefix];
 
             configuration.OnionSeedsEndPoint = settings;
         }
 
-        public static void InitializeBaseTorEndPoint(BaseConfiguration configuration, IConfigurationRoot configFile)
+        public static void InitializeBaseTorEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
             var settings = configFile.GetSection("FreeMarketOneConfiguration")["TorEndPoint"];
 

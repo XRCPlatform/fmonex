@@ -1,5 +1,5 @@
-﻿using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.Extensions.Models;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P.Models;
 using FreeMarketOne.Tor;
 using Serilog;
@@ -30,7 +30,7 @@ namespace FreeMarketOne.P2P
 
         private TorProcessManager torProcessManager { get; set; }
 
-        public OnionSeedsManager(ILogger serverLogger, BaseConfiguration configuration, TorProcessManager torManager)
+        public OnionSeedsManager(ILogger serverLogger, IBaseConfiguration configuration, TorProcessManager torManager)
         {
             logger = serverLogger.ForContext<OnionSeedsManager>();
             logger.Information("Initializing Onion Seeds Manager");

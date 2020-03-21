@@ -1,5 +1,5 @@
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.Extensions.Models;
 using FreeMarketOne.Tor.Exceptions;
 using FreeMarketOne.Tor.TorSocks5;
 using Serilog;
@@ -42,7 +42,7 @@ namespace FreeMarketOne.Tor
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
-        public TorProcessManager(ILogger serverLogger, BaseConfiguration configuration)
+        public TorProcessManager(ILogger serverLogger, IBaseConfiguration configuration)
         {
             logger = serverLogger.ForContext<TorProcessManager>();
             logger.Information("Initializing Tor Process Manager");

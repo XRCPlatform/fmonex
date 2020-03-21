@@ -1,4 +1,4 @@
-﻿using FreeMarketOne.Extensions.Models;
+﻿using FreeMarketOne.DataStructure;
 using Serilog;
 using System;
 using System.Threading;
@@ -23,7 +23,7 @@ namespace FreeMarketOne.MarketPool
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
-        public MarketPoolManager(ILogger serverLogger, BaseConfiguration configuration)
+        public MarketPoolManager(ILogger serverLogger, IBaseConfiguration configuration)
         {
             this.logger = serverLogger.ForContext<MarketPoolManager>();
 

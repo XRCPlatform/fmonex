@@ -5,16 +5,13 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 
-namespace FreeMarketOne.Extensions.Models
+namespace FreeMarketOne.DataStructure
 {
-    public class BaseConfiguration
+    public class BaseConfiguration : IBaseConfiguration
     {
         public BaseConfiguration() {
 
-            this.Environment = EnvironmentTypes.Test;
-            this.TorEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9050/");
-            this.LogFilePath = "log/log.txt";
-            this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds_testnet.txt";
+            this.Environment = (int)EnvironmentTypes.Test;
             this.Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
@@ -28,7 +25,7 @@ namespace FreeMarketOne.Extensions.Models
 
         public string OnionSeedsEndPoint { get; set; }
 
-        public EnvironmentTypes Environment { get; set; }
+        public int Environment { get; set; }
 
         public string LogFilePath { get; set; }
 

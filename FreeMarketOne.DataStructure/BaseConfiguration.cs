@@ -30,5 +30,10 @@ namespace FreeMarketOne.DataStructure
         public string LogFilePath { get; set; }
 
         public string Version { get; set; }
+
+        public string ChangellyApiKey { get; set; }
+
+        public string ChangellySecret { get; set; }
+        public string ChangellyApiBaseUrl { get ; set ; }
     }
 }

@@ -31,7 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.MarketPool", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.BasePool", "FreeMarketOne.BasePool\FreeMarketOne.BasePool.csproj", "{2B123CE5-F1A6-4DAC-BAD4-1347267A2738}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Mining", "FreeMarketOne.MiningProcessor\FreeMarketOne.Mining.csproj", "{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Mining", "FreeMarketOne.MiningProcessor\FreeMarketOne.Mining.csproj", "{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.DataStructure.Test", "FreeMarketOne.DataStructure.Test\FreeMarketOne.DataStructure.Test.csproj", "{973B54E2-5EE5-4C83-BEE5-AF115A0F939D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,10 @@ Global
 		{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}.Release|Any CPU.Build.0 = Release|Any CPU
+		{973B54E2-5EE5-4C83-BEE5-AF115A0F939D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{973B54E2-5EE5-4C83-BEE5-AF115A0F939D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{973B54E2-5EE5-4C83-BEE5-AF115A0F939D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{973B54E2-5EE5-4C83-BEE5-AF115A0F939D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +109,7 @@ Global
 		{6EFBD6E9-F58A-43F5-B06C-8C3210C144DD} = {F60B456D-30AB-4150-82C2-36D8955887D3}
 		{2B123CE5-F1A6-4DAC-BAD4-1347267A2738} = {F60B456D-30AB-4150-82C2-36D8955887D3}
 		{BB8D3FE8-B624-4A36-9F07-7F99D52C7250} = {A52240B9-9E9E-4768-92E2-35CC7F180F12}
+		{973B54E2-5EE5-4C83-BEE5-AF115A0F939D} = {F60B456D-30AB-4150-82C2-36D8955887D3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

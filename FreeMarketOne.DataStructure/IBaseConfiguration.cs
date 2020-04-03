@@ -12,5 +12,8 @@ namespace FreeMarketOne.DataStructure
         string LogFilePath { get; set; }
         string Version { get; set; }
         int Environment { get; set; }
+        string ChangellyApiKey { get; set; }
+        string ChangellySecret { get; set; }
+        string ChangellyApiBaseUrl { get; set; }
     }
 }

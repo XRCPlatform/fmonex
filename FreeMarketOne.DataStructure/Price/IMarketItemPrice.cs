@@ -6,7 +6,7 @@ namespace FreeMarketOne.DataStructure.Price
 {
     public interface IMarketItemPrice
     {
-        double BasePrice { get; set; }
+        double BasePrice { get;}
         IEnumerable<IItemPriceResponse> GetItemPriceInExchangedCurrency(Currency[] currency);
     }
 }

@@ -6,7 +6,13 @@ namespace FreeMarketOne.DataStructure.Price
 {
     public class ChangellyItemPriceManager : IMarketItemPrice
     {
-        public double BasePrice { get; set ; }
+        private double basePrice;
+        public ChangellyItemPriceManager(double basePriceInXrc)
+        {
+            basePrice = basePriceInXrc;
+        }
+
+        public double BasePrice { get { return basePrice; } }
 
         public IEnumerable<IItemPriceResponse> GetItemPriceInExchangedCurrency(Currency[] currency)
         {

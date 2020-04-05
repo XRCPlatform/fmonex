@@ -3,7 +3,9 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Net.Http;
-
+using System.Collections;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace FreeMarketOne.DataStructure.Price.ChangellyApi
 {
@@ -16,7 +18,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
             this.configuration = configuration;
         }
 
-        public ExchangeAmountResponse GetExchangeAmountAsync(Currency baseCurrency, Currency[] currencies, double amount)
+        public ExchangeAmountResponse GetExchangeAmount(Currency baseCurrency, Currency[] currencies, double amount)
         {
             ExchangeAmountRequest request = new ExchangeAmountRequest(baseCurrency, currencies, amount);
             string message = JsonConvert.SerializeObject(request, Formatting.Indented);
@@ -80,6 +82,14 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
                 // to lowercase hexits (slower ?? test)
                 //return String.Concat(Array.ConvertAll(hashmessage, x => x.ToString("x2")));
             }
+        }
+
+        public bool ValidateAddress(Currency currency, string address)
+        {
+            ValidateAddressRequest request = new ValidateAddressRequest(currency.ToString().ToLower(), address);
+            string message = JsonConvert.SerializeObject(request, Formatting.Indented);
+            string response = ProcessRequest(message);
+            return JsonConvert.DeserializeObject<ValidateAddressResponse>(response).ValidationResult.IsValid;
         }
     }
 }

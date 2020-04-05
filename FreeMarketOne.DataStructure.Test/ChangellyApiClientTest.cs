@@ -1,5 +1,6 @@
 using FreeMarketOne.DataStructure.Price.ChangellyApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace FreeMarketOne.DataStructure.Test
 {
@@ -10,7 +11,7 @@ namespace FreeMarketOne.DataStructure.Test
         public void GetExchangeAmount()
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
-            var resp = changelly.GetExchangeAmountAsync(Price.Currency.XRC, 
+            var resp = changelly.GetExchangeAmount(Price.Currency.XRC, 
                 new Price.Currency[] 
                     { 
                         Price.Currency.BTC, 
@@ -59,6 +60,22 @@ namespace FreeMarketOne.DataStructure.Test
             var response = changelly.GetMinAmount(Price.Currency.XRC, Price.Currency.BTC);
             Assert.IsTrue(response.result.Length > 0);
             Assert.IsTrue(response.result[0].MinAmount > 0);
+        }
+
+        [TestMethod]
+        public void ValidateAddress_Invalid()
+        {
+            ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
+            var response = changelly.ValidateAddress(Price.Currency.XRC, "invalid-xrc-adddress");
+            Assert.IsFalse(response);
+        }
+
+        [TestMethod]
+        public void ValidateAddress_Valid()
+        {
+            ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
+            var response = changelly.ValidateAddress(Price.Currency.XRC, "RZx6ZCoizGTamQatK8cSZkhdBU3iHkrXEW");
+            Assert.IsTrue(response);
         }
     }
 }

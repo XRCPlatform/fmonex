@@ -10,17 +10,16 @@ namespace FreeMarketOne.DataStructure.Test
         public void GetExchangeAmount()
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
-            //today xrc is disabled so test need to run against BTC as base
-            var resp = changelly.GetExchangeAmountAsync(Price.Currency.BTC, 
+            var resp = changelly.GetExchangeAmountAsync(Price.Currency.XRC, 
                 new Price.Currency[] 
                     { 
-                        Price.Currency.LTC, 
+                        Price.Currency.BTC, 
                         Price.Currency.USDT 
                     }
             , 10);
 
             Assert.AreEqual(resp.result[0].Amount ,10);
-            Assert.IsTrue(string.Equals(resp.result[0].To, "ltc"));
+            Assert.IsTrue(string.Equals(resp.result[0].To, "btc"));
         }
 
         [TestMethod]
@@ -28,7 +27,20 @@ namespace FreeMarketOne.DataStructure.Test
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
             var response = changelly.GetCurrenciesFull();
+            bool foundXrc = false;
+            bool xrcIsEnabled = false;
+            foreach (var item in response.result)
+            {
+                if (item.Ticker.Equals("xrc",System.StringComparison.InvariantCultureIgnoreCase))
+                {
+                    foundXrc = true;
+                    xrcIsEnabled = item.Enabled;
+                    break;
+                }
+            }
             Assert.IsTrue(response.result.Length > 0);
+            Assert.IsTrue(foundXrc);
+            Assert.IsTrue(xrcIsEnabled);
         }
 
         [TestMethod]
@@ -38,6 +50,15 @@ namespace FreeMarketOne.DataStructure.Test
             var response = changelly.GetMinAmount(Price.Currency.LTC, Price.Currency.BTC);
             Assert.IsTrue(response.result.Length>0);
             Assert.IsTrue(response.result[0].MinAmount>0);
+        }
+
+        [TestMethod]
+        public void GetMinAmountXRC2BTC()
+        {
+            ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
+            var response = changelly.GetMinAmount(Price.Currency.XRC, Price.Currency.BTC);
+            Assert.IsTrue(response.result.Length > 0);
+            Assert.IsTrue(response.result[0].MinAmount > 0);
         }
     }
 }

@@ -91,5 +91,31 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
             string response = ProcessRequest(message);
             return JsonConvert.DeserializeObject<ValidateAddressResponse>(response).ValidationResult.IsValid;
         }
+
+        public ChangellyTransaction CreateTransaction(Currency from, Currency to, string address, string refundAddress, double amount)
+        {
+            CreateTransactionRequest request = new CreateTransactionRequest(from.ToString().ToLower(), to.ToString().ToLower(), address, refundAddress, amount);
+            string message = JsonConvert.SerializeObject(request, Formatting.Indented);
+            string response = ProcessRequest(message);
+            /*
+            error case
+            {
+                "jsonrpc": "2.0",
+                "id": "test",
+                "error": {
+                    "code": -32600,
+                    "message": "invalid amount: minimal amount is 2.84306295"
+                }
+            }
+            */
+            dynamic jToken = JToken.Parse(response);
+            if (jToken.error != null)
+            {
+                throw new Exception(jToken.error.message.ToString());
+            }
+
+            return JsonConvert.DeserializeObject<CreateTransactionResponse>(response).InitiatedTransaction;
+        }
+        
     }
 }

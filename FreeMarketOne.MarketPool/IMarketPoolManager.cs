@@ -9,5 +9,8 @@ namespace FreeMarketOne.MarketPool
         bool Start();
         bool IsMarketPoolManagerRunning();
         void Stop();
+        bool AcceptTx();
+        bool SaveTx();
+        bool LoadTx();
     }
 }

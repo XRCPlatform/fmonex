@@ -7,7 +7,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
 {
     public class ExchangeAmountRequest
     {
-        public ExchangeAmountRequest(Currency baseCurrency, Currency[] exchangeCurrencies, double amount)
+        public ExchangeAmountRequest(Currency baseCurrency, Currency[] exchangeCurrencies, decimal amount)
         {
             ExchangePair[] pairs = new ExchangePair[exchangeCurrencies.Length];
             for (int i = 0; i < exchangeCurrencies.Length; i++)
@@ -45,6 +45,6 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
         public string To { get; set; }
 
         [JsonProperty("amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
             
         }
 
-        public ExchangeAmountResponse GetExchangeAmount(Currency baseCurrency, Currency[] currencies, double amount)
+        public ExchangeAmountResponse GetExchangeAmount(Currency baseCurrency, Currency[] currencies, decimal amount)
         {
             ExchangeAmountRequest request = new ExchangeAmountRequest(baseCurrency, currencies, amount);
             string message = JsonConvert.SerializeObject(request, Formatting.Indented);

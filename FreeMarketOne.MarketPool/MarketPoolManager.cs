@@ -69,6 +69,21 @@ namespace FreeMarketOne.MarketPool
             Stop();
         }
 
+        public bool AcceptTx()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool SaveTx()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool LoadTx()
+        {
+            throw new NotImplementedException();
+        }
+
         //accept
         //isvalid
         //save

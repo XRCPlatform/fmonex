@@ -67,22 +67,22 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Application Start");
 
             /* Initialize Tor */
-            TorProcessManager = new TorProcessManager(Logger, Configuration);
-            var torInitialized = TorProcessManager.Start();
+            //TorProcessManager = new TorProcessManager(Logger, Configuration);
+            //var torInitialized = TorProcessManager.Start();
 
-            if (torInitialized)
-            {
-                /* Initialize OnionSeeds */
-                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-                OnionSeedsManager.GetOnions();
-                OnionSeedsManager.StartPeriodicCheck();
-                OnionSeedsManager.StartPeriodicPeerBroadcast();
+            //if (torInitialized)
+            //{
+            //    /* Initialize OnionSeeds */
+            //    OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
+            //    OnionSeedsManager.GetOnions();
+            //    OnionSeedsManager.StartPeriodicCheck();
+            //    OnionSeedsManager.StartPeriodicPeerBroadcast();
 
-                //tests
-                // var s = _torProcessManager.IsTorRunningAsync().Result;
+            //    //tests
+            //    // var s = _torProcessManager.IsTorRunningAsync().Result;
 
-                var breakIt = true;
-            }
+            //    var breakIt = true;
+            //}
 
             /* Time Manager Loader < ------- Necessary to finish */
             var genesisTimeUtc = DateTime.UtcNow.AddDays(-10).AddSeconds(-25); //!!!!FROM GENESIS BLOCK OF BASE BLOCKCHAIN
@@ -148,11 +148,11 @@ namespace FreeMarketOne.ServerCore
         {
             logger.Information("Ending Tor...");
 
-            TorProcessManager.Dispose();
+            //TorProcessManager.Dispose();
 
             logger.Information("Ending Onion Seeds ...");
 
-            OnionSeedsManager.Dispose();
+            //OnionSeedsManager.Dispose();
 
             logger.Information("Ending Mining Processor...");
 

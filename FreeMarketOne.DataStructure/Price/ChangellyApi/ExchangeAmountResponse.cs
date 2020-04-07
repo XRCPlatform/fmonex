@@ -8,7 +8,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
     {
         public string jsonrpc { get; set; }
         public int id { get; set; }
-        public ExchangeAmountPair[] result { get; set; }
+        public ExchangeAmount[] result { get; set; }
     }    
 
 }

@@ -143,7 +143,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
             return JsonConvert.DeserializeObject<ValidateAddressResponse>(response).ValidationResult.IsValid;
         }
 
-        public ChangellyTransaction CreateTransaction(Currency from, Currency to, string address, string refundAddress, double amount)
+        public ChangellyTransaction CreateTransaction(Currency from, Currency to, string address, string refundAddress, decimal amount)
         {
             CreateTransactionRequest request = new CreateTransactionRequest(from.ToString().ToLower(), to.ToString().ToLower(), address, refundAddress, amount);
             string message = JsonConvert.SerializeObject(request, Formatting.Indented);

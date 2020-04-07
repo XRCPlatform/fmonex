@@ -22,7 +22,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
         public string To { get; set; }
 
         [JsonProperty("minAmount")]
-        public double MinAmount { get; set; }
+        public decimal MinAmount { get; set; }
     }
 
 }

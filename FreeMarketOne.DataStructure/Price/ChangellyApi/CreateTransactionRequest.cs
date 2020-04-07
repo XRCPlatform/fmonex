@@ -7,7 +7,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
 {
     public class CreateTransactionRequest
     {
-        public CreateTransactionRequest(string from, string to, string address, string refundAddress, double amount)
+        public CreateTransactionRequest(string from, string to, string address, string refundAddress, decimal amount)
         {
             Params = new CreateTransactionRequestParams()
             {
@@ -47,7 +47,7 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
         public string RefundAddress { get; set; }
 
         [JsonProperty("amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
     }
 
 }

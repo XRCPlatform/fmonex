@@ -34,7 +34,7 @@ namespace FreeMarketOne.DataStructure.Price
             var response = changellyApiClient.GetExchangeAmount(Currency.XRC, currencies, basePrice);
             foreach (var item in response.result)
             {
-                double minAmount = 0;
+                decimal minAmount = 0;
                 foreach (var min in mins)
                 {
                     if(min.To.Equals(item.To, StringComparison.InvariantCultureIgnoreCase))
@@ -48,7 +48,7 @@ namespace FreeMarketOne.DataStructure.Price
                 {
                     itemPrices.Add(new ItemPriceResponse()
                     {
-                        Amount = item.Amount,
+                        Amount = item.Result,
                         Currency = (Currency) exCurrency,
                         Fee = item.Fee,
                         Rate = item.Rate,

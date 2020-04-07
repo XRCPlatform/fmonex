@@ -48,6 +48,7 @@ namespace FreeMarketOne.DataStructure.Test
             {
                 Assert.IsTrue(item.MinAmount > 0);
                 Assert.IsTrue(item.Rate > 0);
+                Assert.IsTrue(item.Amount > 0);
             }
 
         }

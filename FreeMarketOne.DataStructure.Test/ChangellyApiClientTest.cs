@@ -85,7 +85,7 @@ namespace FreeMarketOne.DataStructure.Test
         public void CreateTransaction_throws_invalid_amount_exception()
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
-            var response = changelly.CreateTransaction(Price.Currency.XRC, Price.Currency.BTC, "31h8jnstG777RfqFugM1vLLT7pPrFQsr3x", "Rp2mdiL2AUvDzRnt8qPY2ePUbjmcFxdt9d",0.0001);
+            var response = changelly.CreateTransaction(Price.Currency.XRC, Price.Currency.BTC, "31h8jnstG777RfqFugM1vLLT7pPrFQsr3x", "Rp2mdiL2AUvDzRnt8qPY2ePUbjmcFxdt9d",0.0001m);
         }
 
         [TestMethod]
@@ -93,14 +93,14 @@ namespace FreeMarketOne.DataStructure.Test
         public void CreateTransaction_throws_invalid_currency_pair_exception()
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
-            var response = changelly.CreateTransaction(Price.Currency.XRC, Price.Currency.XRC, "31h8jnstG777RfqFugM1vLLT7pPrFQsr3x", "Rp2mdiL2AUvDzRnt8qPY2ePUbjmcFxdt9d", 2.9);
+            var response = changelly.CreateTransaction(Price.Currency.XRC, Price.Currency.XRC, "31h8jnstG777RfqFugM1vLLT7pPrFQsr3x", "Rp2mdiL2AUvDzRnt8qPY2ePUbjmcFxdt9d", 2.9m);
         }
 
         [TestMethod]
         public void CreateTransaction()
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
-            var response = changelly.CreateTransaction(Price.Currency.XRC, Price.Currency.BTC, "31h8jnstG777RfqFugM1vLLT7pPrFQsr3x", "Rp2mdiL2AUvDzRnt8qPY2ePUbjmcFxdt9d", 2.9);
+            var response = changelly.CreateTransaction(Price.Currency.XRC, Price.Currency.BTC, "31h8jnstG777RfqFugM1vLLT7pPrFQsr3x", "Rp2mdiL2AUvDzRnt8qPY2ePUbjmcFxdt9d", 2.9m);
             Assert.IsTrue(response.id.Length > 0);
             Assert.IsTrue(response.status.Equals("new", System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(response.payinAddress.Length == 34);

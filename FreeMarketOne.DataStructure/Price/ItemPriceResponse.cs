@@ -2,10 +2,10 @@
 {
     public class ItemPriceResponse : IItemPriceResponse
     {
-        public double MinAmount { get; set; }
+        public decimal MinAmount { get; set; }
         public Currency Currency { get; set; }
-        public double Amount { get; set; }
-        public double Fee { get; set; }
-        public double Rate { get; set; }
+        public decimal Amount { get; set; }
+        public decimal Fee { get; set; }
+        public decimal Rate { get; set; }
     }
 }

@@ -2,10 +2,10 @@
 {
     public interface IItemPriceResponse
     {
-        double MinAmount { get; set; }
+        decimal MinAmount { get; set; }
         Currency Currency { get; set; }
-        double Amount { get; set; }
-        double Fee { get; set; }
-        double Rate { get; set; }
+        decimal Amount { get; set; }
+        decimal Fee { get; set; }
+        decimal Rate { get; set; }
     }
 }

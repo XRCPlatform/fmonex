@@ -23,16 +23,16 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
         public string id { get; set; }
 
         [JsonProperty("apiExtraFee")]
-        public double apiExtraFee { get; set; }
+        public decimal apiExtraFee { get; set; }
 
         [JsonProperty("changellyFee")]
-        public double changellyFee { get; set; }
+        public decimal changellyFee { get; set; }
         
         [JsonProperty("payinExtraId")]
         public string payinExtraId { get; set; }
 
         [JsonProperty("amountExpectedFrom")]
-        public double amountExpectedFrom { get; set; }
+        public decimal amountExpectedFrom { get; set; }
 
         [JsonProperty("status")]
         public string status { get; set; }
@@ -44,10 +44,10 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
         public string currencyTo { get; set; }
 
         [JsonProperty("amountTo")]
-        public double amountTo { get; set; }
+        public decimal amountTo { get; set; }
 
         [JsonProperty("amountExpectedTo")]
-        public double amountExpectedTo { get; set; }
+        public decimal amountExpectedTo { get; set; }
 
         [JsonProperty("payinAddress")]
         public string payinAddress { get; set; }

@@ -6,7 +6,7 @@ using System.Text;
 namespace FreeMarketOne.DataStructure.Price.ChangellyApi
 {
 
-    public class GetMinamountResponse
+    public class GetMinAmountResponse
     {
         public string jsonrpc { get; set; }
         public int id { get; set; }

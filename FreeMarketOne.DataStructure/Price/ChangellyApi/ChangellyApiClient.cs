@@ -6,23 +6,37 @@ using System.Net.Http;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using System.Runtime.Caching;
 
 namespace FreeMarketOne.DataStructure.Price.ChangellyApi
 {
     public class ChangellyApiClient
     {
         IBaseConfiguration configuration;
+        private MemoryCache cache { get;}
+        private readonly object constructorLock = new object();
 
         public ChangellyApiClient(IBaseConfiguration configuration)
         {
             this.configuration = configuration;
+
+            lock (constructorLock)
+            {
+                if (cache == null)
+                {
+                    cache = new MemoryCache("ChangellyApiClient");
+                }
+            }
+            
         }
 
         public ExchangeAmountResponse GetExchangeAmount(Currency baseCurrency, Currency[] currencies, double amount)
         {
             ExchangeAmountRequest request = new ExchangeAmountRequest(baseCurrency, currencies, amount);
             string message = JsonConvert.SerializeObject(request, Formatting.Indented);
-            return JsonConvert.DeserializeObject<ExchangeAmountResponse>(ProcessRequest(message));
+            string response = ProcessRequest(message);
+            //{"jsonrpc":"2.0","id":0,"error":{"code":-32600,"message":"invalid amount: minimal amount is 2.69745195"}}
+            return JsonConvert.DeserializeObject<ExchangeAmountResponse>(response);
         }
 
         private string ProcessRequest(string message)
@@ -41,7 +55,16 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
            
             if (response.IsSuccessStatusCode)
             {
-                return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                string rJson = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                
+                //check for error object in body for logical errors
+                dynamic jToken = JToken.Parse(rJson);
+                if (jToken.error != null)
+                {
+                    throw new Exception(jToken.error.message.ToString());
+                }
+                
+                return rJson;
             }
             else
             {
@@ -56,18 +79,46 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
 
         public CurrencyFullResponse GetCurrenciesFull()
         {
-            CurrenciesFullRequest request = new CurrenciesFullRequest();
-            string message = JsonConvert.SerializeObject(request, Formatting.Indented);
-            return JsonConvert.DeserializeObject<CurrencyFullResponse>(ProcessRequest(message));
+            CurrencyFullResponse response = null;
+            if (cache.Contains("GetCurrenciesFull"))
+            {
+                response = cache.Get("GetCurrenciesFull") as CurrencyFullResponse;
+            }
+            if (response == null)
+            {
+                CurrenciesFullRequest request = new CurrenciesFullRequest();
+                string message = JsonConvert.SerializeObject(request, Formatting.Indented);
+                response = JsonConvert.DeserializeObject<CurrencyFullResponse>(ProcessRequest(message));
+                cache.Set("GetCurrenciesFull", response, new CacheItemPolicy()
+                        {
+                            SlidingExpiration = TimeSpan.FromMinutes(10)
+                        }
+                );
+            }           
+            return response;
         }
 
 
-        public GetMinamountResponse GetMinAmount(Currency from, Currency to)
+        public GetMinAmountResponse GetMinAmount(Currency from, Currency[] to)
         {
-            GetMinAmountRequest request = new GetMinAmountRequest(from, to);
-            string message = JsonConvert.SerializeObject(request, Formatting.Indented);
-            string m = ProcessRequest(message);
-            return JsonConvert.DeserializeObject<GetMinamountResponse>(m);
+            GetMinAmountResponse response = null;            
+            string key = $"GetMinAmount_{string.Join("_", to)}";
+            if (cache.Contains(key))
+            {
+                response = cache.Get(key) as GetMinAmountResponse;
+            }
+            if (response == null)
+            {
+                GetMinAmountRequest request = new GetMinAmountRequest(from, to);
+                string message = JsonConvert.SerializeObject(request, Formatting.Indented);
+                response = JsonConvert.DeserializeObject<GetMinAmountResponse>(ProcessRequest(message));
+                cache.Set(key, response, new CacheItemPolicy()
+                {
+                    SlidingExpiration = TimeSpan.FromMinutes(10)
+                }
+                );
+            }
+            return response;            
         }
 
         public string SignRequest(string key, string payload)

@@ -7,14 +7,17 @@ namespace FreeMarketOne.DataStructure.Price.ChangellyApi
 {
     public class GetMinAmountRequest
     {
-        public GetMinAmountRequest(Currency from, Currency to)
+        public GetMinAmountRequest(Currency from, Currency[] to)
         {
-            SimplePair[] pairs = new SimplePair[1];
-            pairs[0] = new SimplePair()
+            SimplePair[] pairs = new SimplePair[to.Length];
+            for (int i = 0; i < to.Length; i++)
             {
-                From = from.ToString().ToLower(),
-                To = to.ToString().ToLower()
-            };
+                pairs[i] = new SimplePair()
+                {
+                    From = from.ToString().ToLower(),
+                    To = to[i].ToString().ToLower()
+                };
+            }           
             this.Parameters = pairs;
         }
 

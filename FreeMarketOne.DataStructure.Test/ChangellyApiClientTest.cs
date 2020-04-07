@@ -49,7 +49,7 @@ namespace FreeMarketOne.DataStructure.Test
         public void GetMinAmount()
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
-            var response = changelly.GetMinAmount(Price.Currency.LTC, Price.Currency.BTC);
+            var response = changelly.GetMinAmount(Price.Currency.LTC, new Price.Currency[1] { Price.Currency.BTC });
             Assert.IsTrue(response.result.Length>0);
             Assert.IsTrue(response.result[0].MinAmount>0);
         }
@@ -58,7 +58,7 @@ namespace FreeMarketOne.DataStructure.Test
         public void GetMinAmountXRC2BTC()
         {
             ChangellyApiClient changelly = new ChangellyApiClient(new MainConfiguration());
-            var response = changelly.GetMinAmount(Price.Currency.XRC, Price.Currency.BTC);
+            var response = changelly.GetMinAmount(Price.Currency.XRC, new Price.Currency[2] { Price.Currency.BTC, Price.Currency.USDT });;
             Assert.IsTrue(response.result.Length > 0);
             Assert.IsTrue(response.result[0].MinAmount > 0);
         }

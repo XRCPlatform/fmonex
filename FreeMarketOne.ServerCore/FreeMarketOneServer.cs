@@ -67,22 +67,17 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Application Start");
 
             /* Initialize Tor */
-            //TorProcessManager = new TorProcessManager(Logger, Configuration);
-            //var torInitialized = TorProcessManager.Start();
+            TorProcessManager = new TorProcessManager(Logger, Configuration);
+            var torInitialized = TorProcessManager.Start();
 
-            //if (torInitialized)
-            //{
-            //    /* Initialize OnionSeeds */
-            //    OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-            //    OnionSeedsManager.GetOnions();
-            //    OnionSeedsManager.StartPeriodicCheck();
-            //    OnionSeedsManager.StartPeriodicPeerBroadcast();
-
-            //    //tests
-            //    // var s = _torProcessManager.IsTorRunningAsync().Result;
-
-            //    var breakIt = true;
-            //}
+            if (torInitialized)
+            {
+                /* Initialize OnionSeeds */
+                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
+                OnionSeedsManager.GetOnions();
+                OnionSeedsManager.StartPeriodicCheck();
+                OnionSeedsManager.StartPeriodicPeerBroadcast();
+            }
 
             /* Time Manager Loader < ------- Necessary to finish */
             var genesisTimeUtc = DateTime.UtcNow.AddDays(-10).AddSeconds(-25); //!!!!FROM GENESIS BLOCK OF BASE BLOCKCHAIN

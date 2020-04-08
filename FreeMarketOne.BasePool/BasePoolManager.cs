@@ -7,6 +7,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -27,8 +28,7 @@ namespace FreeMarketOne.BasePool
         private List<IBaseItem> baseMemoryTxList { get; set; }
 
         private readonly object basePollLock;
-        private string memoryPoolFilePath { get; set; }
-
+        private string basePoolFilePath { get; set; }
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
@@ -37,14 +37,14 @@ namespace FreeMarketOne.BasePool
             this.logger = serverLogger.ForContext<BasePoolManager>();
             this.baseMemoryTxList = new List<IBaseItem>(); 
             this.basePollLock = new object();
-            this.memoryPoolFilePath = configuration.MemoryBasePoolPath;
+            this.basePoolFilePath = configuration.MemoryBasePoolPath;
 
             logger.Information("Initializing Base Pool Manager");
 
             Interlocked.Exchange(ref running, 0);
             cancellationToken = new CancellationTokenSource();
 
-            LoadTx();
+            LoadTxsFromFile();
         }
 
         public bool Start()
@@ -70,7 +70,7 @@ namespace FreeMarketOne.BasePool
         {
             Interlocked.Exchange(ref running, 2);
 
-            SaveTx();
+            SaveTxsToFile();
 
             cancellationToken?.Cancel();
             cancellationToken?.Dispose();
@@ -89,21 +89,21 @@ namespace FreeMarketOne.BasePool
         {
             if (CheckTxInProcessing(tx))
             {
+                this.baseMemoryTxList.Add(tx);
 
+                return true;
             } 
             else
             {
-
+                return false;
             }
-
-            throw new NotImplementedException();
         }
 
-        public bool SaveTx()
+        public bool SaveTxsToFile()
         {
             lock (basePollLock)
             {
-                logger.Information("Saving base memory tx data.");
+                logger.Information("Saving tx data.");
 
                 var serializedMemory = JsonConvert.SerializeObject(this.baseMemoryTxList);
                 var compressedMemory = ZipHelpers.Compress(serializedMemory);
@@ -117,7 +117,7 @@ namespace FreeMarketOne.BasePool
                     }
                 }
 
-                var targetFilePath = Path.Combine(fullBaseDirectory, this.memoryPoolFilePath);
+                var targetFilePath = Path.Combine(fullBaseDirectory, this.basePoolFilePath);
                 var targetDirectory = Path.GetDirectoryName(targetFilePath);
 
                 if (!Directory.Exists(targetDirectory))
@@ -127,21 +127,21 @@ namespace FreeMarketOne.BasePool
 
                 File.WriteAllBytes(targetFilePath, compressedMemory);
 
-                logger.Information("Base memory tx data saved.");
+                logger.Information("Tx data saved.");
             }
 
             return true;
         }
 
-        public bool LoadTx()
+        public bool LoadTxsFromFile()
         {
             lock (basePollLock)
             {
-                logger.Information("Loading base memory tx data.");
+                logger.Information("Loading tx data.");
                 
                 var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
-                var targetFilePath = Path.Combine(fullBaseDirectory, this.memoryPoolFilePath);
+                var targetFilePath = Path.Combine(fullBaseDirectory, this.basePoolFilePath);
                 var targetDirectory = Path.GetDirectoryName(targetFilePath);
 
                 if (File.Exists(targetFilePath))
@@ -149,10 +149,19 @@ namespace FreeMarketOne.BasePool
                     var compressedMemory = File.ReadAllBytes(targetFilePath);
                     var serializedMemory = ZipHelpers.Decompress(compressedMemory);
                   
-                    this.baseMemoryTxList = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedMemory);
+                    var temporaryMemoryTxList = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedMemory);
+
+                    //check all loaded tx in list
+                    foreach (var itemTx in temporaryMemoryTxList)
+                    {
+                        if (CheckTxInProcessing(itemTx))
+                        {
+                            this.baseMemoryTxList.Add(itemTx);
+                        }
+                    }
                 }
 
-                logger.Information("Base memory tx data loaded.");
+                logger.Information("Tx data loaded.");
             }
 
             return true;
@@ -160,12 +169,25 @@ namespace FreeMarketOne.BasePool
 
         public bool CheckTxInProcessing(IBaseItem tx)
         {
-            throw new NotImplementedException();
+            if (tx.IsValid() && !this.baseMemoryTxList.Exists(mt => mt == tx))
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
         }
 
-        public bool AcceptTx()
+        public bool ClearTxBasedOnHashes(List<string> hashsToRemove)
         {
-            throw new NotImplementedException();
+            foreach (var itemHash in hashsToRemove)
+            {
+                var txToRemove = this.baseMemoryTxList.FirstOrDefault(a => a.Hash == itemHash);
+
+                if (txToRemove != null) this.baseMemoryTxList.Remove(txToRemove);
+            }
+
+            return true;
         }
     }
 }

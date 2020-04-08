@@ -19,13 +19,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         public virtual bool IsValid()
         {
-            var content = new StringBuilder();
-            var sha512processor = new Sha512Processor();
-
-            content.Append(CreatedUtc);
-
-            var hash = sha512processor.GetSHA512(content.ToString());
-            if (hash == Hash)
+            if (GenerateHash() == Hash)
             {
                 return true;
             }
@@ -33,6 +27,16 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             {
                 return false;
             }
+        }
+
+        public virtual string GenerateHash()
+        {
+            var content = new StringBuilder();
+            var sha512processor = new Sha512Processor();
+
+            content.Append(CreatedUtc);
+
+            return sha512processor.GetSHA512(content.ToString());
         }
     }
 }

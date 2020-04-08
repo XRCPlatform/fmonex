@@ -16,5 +16,6 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         string Description { get; set; }
         DateTime CreatedUtc { get; set; }
         bool IsValid();
+        string GenerateHash();
     }
 }

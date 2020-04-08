@@ -12,10 +12,10 @@ namespace FreeMarketOne.BasePool
         bool Start();
         bool IsBasePoolManagerRunning();
         void Stop();
-        bool AcceptTx();
-        bool SaveTx();
-        bool LoadTx();
+        bool AcceptTx(IBaseItem tx);
+        bool SaveTxsToFile();
+        bool LoadTxsFromFile();
         bool CheckTxInProcessing(IBaseItem tx);
-       // List<TxBasePool> GetTxInNewBlock();
+        bool ClearTxBasedOnHashes(List<string> hashs);
     }
 }

@@ -143,11 +143,11 @@ namespace FreeMarketOne.ServerCore
         {
             logger.Information("Ending Tor...");
 
-            //TorProcessManager.Dispose();
+            TorProcessManager.Dispose();
 
             logger.Information("Ending Onion Seeds ...");
 
-            //OnionSeedsManager.Dispose();
+            OnionSeedsManager.Dispose();
 
             logger.Information("Ending Mining Processor...");
 

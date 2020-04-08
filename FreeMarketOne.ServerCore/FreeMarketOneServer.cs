@@ -141,10 +141,6 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
-            logger.Information("Ending Tor...");
-
-            TorProcessManager.Dispose();
-
             logger.Information("Ending Onion Seeds ...");
 
             OnionSeedsManager.Dispose();
@@ -160,6 +156,10 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Ending Market Pool Manager...");
 
             MiningProcessor.Dispose();
+
+            logger.Information("Ending Tor...");
+
+            TorProcessManager.Dispose();
 
             logger.Information("Application End");
         }

@@ -19,7 +19,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             var content = new StringBuilder();
             var sha512processor = new Sha512Processor();
 
-            content.Append(Version);
+            content.Append(nametype);
             content.Append(Message);
             content.Append(CreatedUtc);
             content.Append(ReviewDateTime.Ticks);

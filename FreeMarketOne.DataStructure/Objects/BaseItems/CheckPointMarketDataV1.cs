@@ -8,6 +8,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 {
     public class CheckPointMarketDataV1 : CheckPointMarketData
     {
-
+        public CheckPointMarketDataV1()
+        {
+            this.nametype = "CheckPointMarketDataV1";
+        }
     }
 }

@@ -23,6 +23,7 @@ namespace FreeMarketOne.BasePool
 
         public bool IsRunning => Interlocked.Read(ref running) == 1;
         private CancellationTokenSource cancellationToken { get; set; }
+        
         private List<IBaseItem> baseMemoryTxList { get; set; }
 
         private readonly object basePollLock;
@@ -37,9 +38,6 @@ namespace FreeMarketOne.BasePool
             this.baseMemoryTxList = new List<IBaseItem>(); 
             this.basePollLock = new object();
             this.memoryPoolFilePath = configuration.MemoryBasePoolPath;
-
-            var ss = new CheckPointMarketDataV1();
-            this.baseMemoryTxList.Add(ss);
 
             logger.Information("Initializing Base Pool Manager");
 
@@ -107,12 +105,7 @@ namespace FreeMarketOne.BasePool
             {
                 logger.Information("Saving base memory tx data.");
 
-                var jsonSettings = new JsonSerializerSettings()
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                };
-
-                var serializedMemory = JsonConvert.SerializeObject(this.baseMemoryTxList, Formatting.None, jsonSettings);
+                var serializedMemory = JsonConvert.SerializeObject(this.baseMemoryTxList);
                 var compressedMemory = ZipHelpers.Compress(serializedMemory);
                 var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
@@ -156,7 +149,7 @@ namespace FreeMarketOne.BasePool
                     var compressedMemory = File.ReadAllBytes(targetFilePath);
                     var serializedMemory = ZipHelpers.Decompress(compressedMemory);
                   
-                    var x = JsonBaseConverter.DeserializeObject(serializedMemory);
+                    this.baseMemoryTxList = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedMemory);
                 }
 
                 logger.Information("Base memory tx data loaded.");
@@ -173,41 +166,6 @@ namespace FreeMarketOne.BasePool
         public bool AcceptTx()
         {
             throw new NotImplementedException();
-        }
-    }
-
-    public class JsonBaseConverter : JsonConverter
-    {
-        public override bool CanWrite => false;
-        public override bool CanRead => true;
-        public override bool CanConvert(Type objectType)
-        {
-            return objectType == typeof(IBaseItem);
-        }
-        public override void WriteJson(JsonWriter writer,
-            object value, JsonSerializer serializer)
-        {
-            throw new InvalidOperationException("Use default serialization.");
-        }
-
-        public override object ReadJson(JsonReader reader,
-            Type objectType, object existingValue,
-            JsonSerializer serializer)
-        {
-           
-            var jsonObject = JObject.Load(reader);
-            var profession = default(IBaseItem);
-            //switch (jsonObject["JobTitle"].Value())
-            //{
-            //    case "Software Developer":
-            //        profession = new Programming();
-            //        break;
-            //    case "Copywriter":
-            //        profession = new Writing();
-            //        break;
-            //}
-            serializer.Populate(jsonObject.CreateReader(), profession);
-            return profession;
         }
     }
 }

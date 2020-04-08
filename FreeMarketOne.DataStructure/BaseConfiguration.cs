@@ -30,5 +30,9 @@ namespace FreeMarketOne.DataStructure
         public string LogFilePath { get; set; }
 
         public string Version { get; set; }
+
+        public string MemoryBasePoolPath { get; set; }
+
+        public string MemoryMarketPoolPath { get; set; }
     }
 }

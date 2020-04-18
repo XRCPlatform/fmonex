@@ -16,6 +16,7 @@ using FreeMarketOne.BasePool;
 using FreeMarketOne.MarketPool;
 using FreeMarketOne.DataStructure;
 using static FreeMarketOne.DataStructure.BaseConfiguration;
+using FreeMarketOne.BlockChain;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -39,6 +40,8 @@ namespace FreeMarketOne.ServerCore
 
         public IBasePoolManager BasePoolManager;
         public IMarketPoolManager MarketPoolManager;
+
+        public IBlockChainManager BlockChainManager;
 
         public void Initialize()
         {
@@ -67,17 +70,18 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Application Start");
 
             /* Initialize Tor */
-            TorProcessManager = new TorProcessManager(Logger, Configuration);
-            var torInitialized = TorProcessManager.Start();
+            //UNCOMMENT DISPOSE TOO!!!!
+            //TorProcessManager = new TorProcessManager(Logger, Configuration);
+            //var torInitialized = TorProcessManager.Start();
 
-            if (torInitialized)
-            {
-                /* Initialize OnionSeeds */
-                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-                OnionSeedsManager.GetOnions();
-                OnionSeedsManager.StartPeriodicCheck();
-                OnionSeedsManager.StartPeriodicPeerBroadcast();
-            }
+            //if (torInitialized)
+            //{
+            //    /* Initialize OnionSeeds */
+            //    OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
+            //    OnionSeedsManager.GetOnions();
+            //    OnionSeedsManager.StartPeriodicCheck();
+            //    OnionSeedsManager.StartPeriodicPeerBroadcast();
+            //}
 
             /* Time Manager Loader < ------- Necessary to finish */
             var genesisTimeUtc = DateTime.UtcNow.AddDays(-10).AddSeconds(-25); //!!!!FROM GENESIS BLOCK OF BASE BLOCKCHAIN
@@ -96,6 +100,9 @@ namespace FreeMarketOne.ServerCore
             {
 
             }
+
+            BlockChainManager = new BlockChainManager(Logger, Configuration);
+            BlockChainManager.Start();
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)
@@ -141,9 +148,13 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
+            logger.Information("Ending BlockChain Manager...");
+
+            BlockChainManager.Dispose();
+
             logger.Information("Ending Onion Seeds ...");
 
-            OnionSeedsManager.Dispose();
+            //OnionSeedsManager.Dispose();
 
             logger.Information("Ending Mining Processor...");
 
@@ -159,7 +170,7 @@ namespace FreeMarketOne.ServerCore
 
             logger.Information("Ending Tor...");
 
-            TorProcessManager.Dispose();
+            //TorProcessManager.Dispose();
 
             logger.Information("Application End");
         }

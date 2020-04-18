@@ -14,5 +14,6 @@ namespace FreeMarketOne.DataStructure
         int Environment { get; set; }
         string MemoryBasePoolPath { get; set; }
         string MemoryMarketPoolPath { get; set; }
+        string BlockChainPath { get; set; }
     }
 }

@@ -27,6 +27,10 @@ namespace FreeMarketOne.DataStructure
 
         public string Version { get; set; }
 
+        public string MemoryBasePoolPath { get; set; }
+
+        public string MemoryMarketPoolPath { get; set; }
+
         public string ChangellyApiKey { get; set; }
 
         public string ChangellySecret { get; set; }

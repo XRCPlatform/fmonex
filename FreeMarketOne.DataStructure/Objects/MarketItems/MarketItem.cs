@@ -8,8 +8,8 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
 {
     public class MarketItem : IMarketItem
     {
-        [JsonProperty("v")]
-        public int Version { get; set; }
+        [JsonProperty("_nt")]
+        public string nametype { get; set; }
 
         [JsonProperty("t")]
         public int Title { get; set; }
@@ -23,23 +23,29 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         [JsonProperty("c")]
         public DateTime CreatedUtc { get; set; }
 
-        public virtual bool IsValid ()
+        public virtual bool IsValid()
+        {
+            if (GenerateHash() == Hash)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public virtual string GenerateHash()
         {
             var content = new StringBuilder();
             var sha512processor = new Sha512Processor();
 
-            content.Append(Version);
+            content.Append(nametype);
             content.Append(Title);
             content.Append(Description);
             content.Append(CreatedUtc);
 
-            var hash = sha512processor.GetSHA512(content.ToString());
-            if (hash == Hash)
-            {
-                return true;
-            } else {
-                return false;
-            }
+            return sha512processor.GetSHA512(content.ToString());
         }
     }
 }

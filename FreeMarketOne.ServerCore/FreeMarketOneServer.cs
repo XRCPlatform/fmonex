@@ -77,11 +77,6 @@ namespace FreeMarketOne.ServerCore
                 OnionSeedsManager.GetOnions();
                 OnionSeedsManager.StartPeriodicCheck();
                 OnionSeedsManager.StartPeriodicPeerBroadcast();
-
-                //tests
-                // var s = _torProcessManager.IsTorRunningAsync().Result;
-
-                var breakIt = true;
             }
 
             /* Time Manager Loader < ------- Necessary to finish */
@@ -146,10 +141,6 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
-            logger.Information("Ending Tor...");
-
-            TorProcessManager.Dispose();
-
             logger.Information("Ending Onion Seeds ...");
 
             OnionSeedsManager.Dispose();
@@ -165,6 +156,10 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Ending Market Pool Manager...");
 
             MiningProcessor.Dispose();
+
+            logger.Information("Ending Tor...");
+
+            TorProcessManager.Dispose();
 
             logger.Information("Application End");
         }

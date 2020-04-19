@@ -1,4 +1,6 @@
-﻿namespace FreeMarketOne.DataStructure.Price
+﻿using FreeMarketOne.DataStructure.Price;
+
+namespace FreeMarketOne.Changelly
 {
     public class ItemPriceResponse : IItemPriceResponse
     {

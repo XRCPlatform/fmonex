@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FreeMarketOne.DataStructure.Price
+namespace FreeMarketOne.Changelly
 {
     public static class ExtensionMethods
     {

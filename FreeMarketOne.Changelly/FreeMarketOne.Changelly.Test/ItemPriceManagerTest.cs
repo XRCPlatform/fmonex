@@ -1,10 +1,8 @@
-﻿using FreeMarketOne.DataStructure.Price;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Price;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FreeMarketOne.DataStructure.Test
+namespace FreeMarketOne.Changelly.Test
 {
     [TestClass]
     public class ItemPriceManagerTest

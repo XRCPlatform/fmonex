@@ -1,14 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Price;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Net.Http;
+using System.Runtime.Caching;
 using System.Security.Cryptography;
 using System.Text;
-using System.Net.Http;
-using System.Collections;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using System.Runtime.Caching;
 
-namespace FreeMarketOne.DataStructure.Price.ChangellyApi
+namespace FreeMarketOne.Changelly
 {
     public class ChangellyApiClient
     {

@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FreeMarketOne.DataStructure.Price.ChangellyApi
+namespace FreeMarketOne.Changelly
 {
     public class CurrencyFull
     {

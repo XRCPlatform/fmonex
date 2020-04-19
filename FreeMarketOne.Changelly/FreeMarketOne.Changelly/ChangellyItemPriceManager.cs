@@ -1,14 +1,13 @@
-﻿using FreeMarketOne.DataStructure.Price.ChangellyApi;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Price;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace FreeMarketOne.DataStructure.Price
+namespace FreeMarketOne.Changelly
 {
     public class ChangellyItemPriceManager : IMarketItemPrice
     {
-        private decimal basePrice;
 
         //need singleton for api so that caches and etc are preserved 
         private static ChangellyApiClient changellyApiClient;
@@ -16,7 +15,7 @@ namespace FreeMarketOne.DataStructure.Price
 
         public ChangellyItemPriceManager(decimal basePriceInXrc, IBaseConfiguration config)
         {
-            basePrice = basePriceInXrc;
+            BasePrice = basePriceInXrc;
             lock (constructorLock)
             {
                 if (changellyApiClient == null)
@@ -26,7 +25,7 @@ namespace FreeMarketOne.DataStructure.Price
             }
         }
 
-        public decimal BasePrice { get { return basePrice; } }
+        public decimal BasePrice { get; }
 
         public IEnumerable<IItemPriceResponse> GetItemPriceInExchangedCurrency(Currency[] currencies)
         {
@@ -40,7 +39,7 @@ namespace FreeMarketOne.DataStructure.Price
 
             if (filtered.Length > 0)
             {
-                var response = changellyApiClient.GetExchangeAmount(Currency.XRC, filtered, basePrice);
+                var response = changellyApiClient.GetExchangeAmount(Currency.XRC, filtered, BasePrice);
                 foreach (var item in response.result)
                 {
                     decimal minAmount = 0;
@@ -104,7 +103,7 @@ namespace FreeMarketOne.DataStructure.Price
 
                         if (min.To.Equals(currencies_list[i].ToString(), StringComparison.InvariantCultureIgnoreCase))
                         {
-                            if (min.MinAmount > basePrice)
+                            if (min.MinAmount > BasePrice)
                             {
                                 final.Add(new ItemPriceResponse()
                                 {

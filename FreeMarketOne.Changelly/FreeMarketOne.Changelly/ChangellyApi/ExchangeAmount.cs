@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace FreeMarketOne.DataStructure.Price.ChangellyApi
+namespace FreeMarketOne.Changelly
 {
     public class ExchangeAmount
     {

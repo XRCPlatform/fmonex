@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
-namespace FreeMarketOne.DataStructure.Price.ChangellyApi
+namespace FreeMarketOne.Changelly
 {
     public class JsonContent : StringContent
     {

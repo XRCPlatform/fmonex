@@ -2,7 +2,7 @@
 
 namespace FreeMarketOne.Telemetry
 {
-    interface ITemetryMeasure
+    public interface ITemetryMeasure
     {
         /// <summary>
         /// Date and time of the measurable event.
@@ -33,5 +33,10 @@ namespace FreeMarketOne.Telemetry
         /// Result of the action. Such as succesfuly completed transaction. Arbitration. Win/Lose bid.
         /// </summary>
         string Outcome { get; set; }
+
+        /// <summary>
+        /// Environment that's relevant for this measure. Test, Prod
+        /// </summary>
+        string Environment { get; set; }
     }
 }

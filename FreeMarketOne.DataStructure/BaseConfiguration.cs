@@ -34,5 +34,6 @@ namespace FreeMarketOne.DataStructure
         public string MemoryBasePoolPath { get; set; }
 
         public string MemoryMarketPoolPath { get; set; }
+        public string TelemetryServerUri { get; set; }
     }
 }

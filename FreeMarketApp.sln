@@ -31,10 +31,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.MarketPool", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.BasePool", "FreeMarketOne.BasePool\FreeMarketOne.BasePool.csproj", "{2B123CE5-F1A6-4DAC-BAD4-1347267A2738}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Mining", "FreeMarketOne.MiningProcessor\FreeMarketOne.Mining.csproj", "{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}"
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Crypto", "FreeMarketOne.Crypto\FreeMarketOne.Crypto.csproj", "{6A3517E1-C828-473A-B812-35794020B021}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Mining", "FreeMarketOne.MiningProcessor\FreeMarketOne.Mining.csproj", "{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Crypto.Tests", "FreeMarketOne.Crypto.Tests\FreeMarketOne.Crypto.Tests.csproj", "{4B972920-5A54-474B-B00B-6AF35CA04E42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Crypto", "FreeMarketOne.Crypto\FreeMarketOne.Crypto.csproj", "{6A3517E1-C828-473A-B812-35794020B021}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Crypto.Tests", "FreeMarketOne.Crypto.Tests\FreeMarketOne.Crypto.Tests.csproj", "{4B972920-5A54-474B-B00B-6AF35CA04E42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Telemetry", "FreeMarketOne.Telemetry\FreeMarketOne.Telemetry\FreeMarketOne.Telemetry.csproj", "{D0E33184-A9EF-445F-BCDB-6B8127D95CE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Telemetry.Test", "FreeMarketOne.Telemetry\FreeMarketOne.Telemetry.Test\FreeMarketOne.Telemetry.Test.csproj", "{D547B084-FB19-49BC-98AD-FC110C91C96A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,6 +103,14 @@ Global
 		{4B972920-5A54-474B-B00B-6AF35CA04E42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B972920-5A54-474B-B00B-6AF35CA04E42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B972920-5A54-474B-B00B-6AF35CA04E42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0E33184-A9EF-445F-BCDB-6B8127D95CE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0E33184-A9EF-445F-BCDB-6B8127D95CE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0E33184-A9EF-445F-BCDB-6B8127D95CE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0E33184-A9EF-445F-BCDB-6B8127D95CE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D547B084-FB19-49BC-98AD-FC110C91C96A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D547B084-FB19-49BC-98AD-FC110C91C96A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D547B084-FB19-49BC-98AD-FC110C91C96A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D547B084-FB19-49BC-98AD-FC110C91C96A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

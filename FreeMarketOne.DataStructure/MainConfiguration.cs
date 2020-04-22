@@ -18,6 +18,8 @@ namespace FreeMarketOne.DataStructure
             this.MemoryMarketPoolPath = "data/memory_markettx.data";
             this.BlockChainBasePath = "data/blockchain_base";
             this.BlockChainMarketPath = "data/blockchain_market";
+            this.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9111/");
+            this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9112/");
         }
     }
 }

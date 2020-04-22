@@ -139,9 +139,9 @@ namespace FreeMarketOne.BlockChain
         }
 
         private bool DifferentAppProtocolVersionEncountered(
-    Peer peer,
-    AppProtocolVersion peerVersion,
-    AppProtocolVersion localVersion)
+            Peer peer,
+            AppProtocolVersion peerVersion,
+            AppProtocolVersion localVersion)
         {
             return false;
         }

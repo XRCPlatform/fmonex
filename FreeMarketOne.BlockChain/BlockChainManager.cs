@@ -44,15 +44,17 @@ namespace FreeMarketOne.BlockChain
 
         private readonly object basePollLock;
         private string blockChainFilePath { get; set; }
+        private EndPoint endPoint { get; set; }
 
         private static readonly TimeSpan BlockInterval = TimeSpan.FromSeconds(10);
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
-        public BlockChainManager(ILogger serverLogger, string blockChainPath)
+        public BlockChainManager(ILogger serverLogger, string blockChainPath, EndPoint endPoint)
         {
-            this.logger = serverLogger.ForContext<BlockChainManager<T>>();
+            this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
             this.blockChainFilePath = blockChainPath;
+            this.endPoint = endPoint;
 
             logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
         }
@@ -159,8 +161,8 @@ namespace FreeMarketOne.BlockChain
             var privateSignerKey = new PrivateKey();
             //var peers = options.Peers.Select(LoadPeer).ToImmutableList();
             //var iceServers = options.IceServers.Select(LoadIceServer).ToImmutableList();
-            var host = "127.0.0.1";
-            int? port = 9111;
+            var host = this.endPoint.GetHostOrDefault();
+            int? port = this.endPoint.GetPortOrDefault();
             var storagePath = this.blockChainFilePath;
 
             var appProtocolVersion =

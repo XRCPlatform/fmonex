@@ -105,10 +105,10 @@ namespace FreeMarketOne.ServerCore
 
             }
 
-            BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(Logger, Configuration.BlockChainBasePath);
+            BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(Logger, Configuration.BlockChainBasePath, Configuration.ListenerBaseEndPoint);
             BaseBlockChainManager.Start();
 
-            MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(Logger, Configuration.BlockChainMarketPath);
+            MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(Logger, Configuration.BlockChainMarketPath, Configuration.ListenerMarketEndPoint);
             MarketBlockChainManager.Start();
         }
 

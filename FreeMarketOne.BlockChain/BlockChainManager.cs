@@ -49,57 +49,16 @@ namespace FreeMarketOne.BlockChain
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="configuration">Base configuration.</param>
-        public BlockChainManager(ILogger serverLogger, IBaseConfiguration configuration)
+        public BlockChainManager(ILogger serverLogger, string blockChainPath)
         {
             this.logger = serverLogger.ForContext<BlockChainManager<T>>();
-            this.blockChainFilePath = configuration.BlockChainPath;
+            this.blockChainFilePath = blockChainPath;
 
-            logger.Information("Initializing BlockChain Manager");
-
-            Interlocked.Exchange(ref running, 0);
-            cancellationToken = new CancellationTokenSource();
-
-            var privateKey = new PrivateKey();
-            var privateSignerKey = new PrivateKey();
-            //var peers = options.Peers.Select(LoadPeer).ToImmutableList();
-            //var iceServers = options.IceServers.Select(LoadIceServer).ToImmutableList();
-            var host = "127.0.0.1";
-            int? port = 9111;
-            var storagePath = this.blockChainFilePath;
-
-            var appProtocolVersion =
-    AppProtocolVersion.Sign(privateSignerKey, 123, (Bencodex.Types.Text)"foo");
-            IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null;
-
-            //if (options.Logging)
-            //{
-            //    Log.Logger = new LoggerConfiguration()
-            //        .MinimumLevel.Debug()
-            //        .WriteTo.Console()
-            //        .CreateLogger();
-            //}
-
-            Init(
-                privateKey,
-                storagePath,
-                new List<Peer>(),
-                new List<IceServer>(),
-                host,
-                port,
-                appProtocolVersion,
-                trustedAppProtocolVersionSigners
-                ); ;
-
-            //_miner = options.NoMiner ? null : CoMiner();
-
-            //StartSystemCoroutines();
-            //StartNullableCoroutine(_miner);
-
+            logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
         }
 
         public Block<BaseBlockChainAction> CreateGenesisBlock(IEnumerable<BaseBlockChainAction> actions = null)
         {
-
             List<BaseBlockChainAction> actionsTest = new List<BaseBlockChainAction>();
             var action = new BaseBlockChainAction();
             var test1 = new CheckPointMarketDataV1();
@@ -193,6 +152,45 @@ namespace FreeMarketOne.BlockChain
 
             CreateGenesisBlock();
 
+            Interlocked.Exchange(ref running, 0);
+            cancellationToken = new CancellationTokenSource();
+
+            var privateKey = new PrivateKey();
+            var privateSignerKey = new PrivateKey();
+            //var peers = options.Peers.Select(LoadPeer).ToImmutableList();
+            //var iceServers = options.IceServers.Select(LoadIceServer).ToImmutableList();
+            var host = "127.0.0.1";
+            int? port = 9111;
+            var storagePath = this.blockChainFilePath;
+
+            var appProtocolVersion =
+    AppProtocolVersion.Sign(privateSignerKey, 123, (Bencodex.Types.Text)"foo");
+            IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null;
+
+            //if (options.Logging)
+            //{
+            //    Log.Logger = new LoggerConfiguration()
+            //        .MinimumLevel.Debug()
+            //        .WriteTo.Console()
+            //        .CreateLogger();
+            //}
+
+            Init(
+                privateKey,
+                storagePath,
+                new List<Peer>(),
+                new List<IceServer>(),
+                host,
+                port,
+                appProtocolVersion,
+                trustedAppProtocolVersionSigners
+                );
+
+            //_miner = options.NoMiner ? null : CoMiner();
+
+            //StartSystemCoroutines();
+            //StartNullableCoroutine(_miner);
+
             return true;
         }
 
@@ -216,7 +214,7 @@ namespace FreeMarketOne.BlockChain
             cancellationToken?.Dispose();
             cancellationToken = null;
 
-            logger.Information("BlockChain Manager stopped.");
+            logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
         }
 
         public void Dispose()

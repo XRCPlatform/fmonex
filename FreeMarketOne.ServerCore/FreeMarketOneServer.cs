@@ -41,7 +41,8 @@ namespace FreeMarketOne.ServerCore
         public IBasePoolManager BasePoolManager;
         public IMarketPoolManager MarketPoolManager;
 
-        public IBlockChainManager BlockChainManager;
+        public IBlockChainManager BaseBlockChainManager;
+        public IBlockChainManager MarketBlockChainManager;
 
         public void Initialize()
         {
@@ -103,8 +104,11 @@ namespace FreeMarketOne.ServerCore
 
             }
 
-            BlockChainManager = new BlockChainManager<BaseBlockChainAction>(Logger, Configuration);
-            BlockChainManager.Start();
+            BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(Logger, Configuration.BlockChainBasePath);
+            BaseBlockChainManager.Start();
+
+            MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(Logger, Configuration.BlockChainMarketPath);
+            MarketBlockChainManager.Start();
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)
@@ -168,9 +172,10 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
-            logger.Information("Ending BlockChain Manager...");
+            logger.Information("Ending BlockChain Managers...");
 
-            BlockChainManager.Dispose();
+            BaseBlockChainManager.Dispose();
+            MarketBlockChainManager.Dispose();
 
             logger.Information("Ending Onion Seeds ...");
 

@@ -16,7 +16,8 @@ namespace FreeMarketOne.DataStructure
             this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds_testnet.txt";
             this.MemoryBasePoolPath = "data/testnet_memory_basetx.data";
             this.MemoryMarketPoolPath = "data/testnet_memory_markettx.data";
-            this.BlockChainPath = "data";
+            this.BlockChainBasePath = "data/testnet_blockchain_base";
+            this.BlockChainMarketPath = "data/testnet_blockchain_market";
         }
     }
 }

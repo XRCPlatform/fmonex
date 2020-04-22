@@ -58,6 +58,8 @@ namespace FreeMarketOne.ServerCore
             InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
             InitializeBaseTorEndPoint(Configuration, configFile);
             InitializeLogFilePath(Configuration, configFile);
+            InitializeMemoryPoolPaths(Configuration, configFile);
+            InitializeBlockChainPaths(Configuration, configFile);
 
             /* Initialize Logger */
             Logger = new LoggerConfiguration()
@@ -101,7 +103,7 @@ namespace FreeMarketOne.ServerCore
 
             }
 
-            BlockChainManager = new BlockChainManager(Logger, Configuration);
+            BlockChainManager = new BlockChainManager<BaseBlockChainAction>(Logger, Configuration);
             BlockChainManager.Start();
         }
 
@@ -144,6 +146,24 @@ namespace FreeMarketOne.ServerCore
             var settings = configFile.GetSection("FreeMarketOneConfiguration")["TorEndPoint"];
 
             configuration.TorEndPoint = EndPointHelper.ParseIPEndPoint(settings);
+        }
+
+        public static void InitializeMemoryPoolPaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var memoryBasePoolPath = configFile.GetSection("FreeMarketOneConfiguration")["MemoryBasePoolPath"];
+            var memoryMarketPoolPath = configFile.GetSection("FreeMarketOneConfiguration")["MemoryMarketPoolPath"];
+
+            configuration.MemoryBasePoolPath = memoryBasePoolPath;
+            configuration.MemoryMarketPoolPath = memoryMarketPoolPath;
+        }
+
+        public static void InitializeBlockChainPaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var blockChainBasePath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainBasePath"];
+            var blockChainMarketPath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainMarketPath"];
+
+            configuration.BlockChainBasePath = blockChainBasePath;
+            configuration.BlockChainMarketPath = blockChainMarketPath;
         }
 
         public void Stop()

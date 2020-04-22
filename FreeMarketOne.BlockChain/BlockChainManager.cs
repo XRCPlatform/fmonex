@@ -30,50 +30,7 @@ using System.Text;
 
 namespace FreeMarketOne.BlockChain
 {
-    [Serializable]
-    public class MyActionBase : IAction
-    {
-        public List<IBaseItem> BaseItems { get; set; }
-
-        public IValue PlainValue { 
-            get {
-
-                var serializedMemory = JsonConvert.SerializeObject(this.BaseItems);
-                var compressedMemory = ZipHelpers.Compress(serializedMemory);
-
-                return new Bencodex.Types.Dictionary(new Dictionary<IKey, IValue>
-                {
-                    { (Text)"items", new Binary(compressedMemory) },
-                });  
-            } 
-        }
-
-        public IAccountStateDelta Execute(IActionContext context)
-        {
-            return context.PreviousStates;
-        }
-
-        public void LoadPlainValue(IValue plainValue)
-        {
-            var dictionary = (Bencodex.Types.Dictionary)plainValue;
-            var binaryValue = dictionary.GetValue<Binary>("items");
-            
-            var serializedMemory = ZipHelpers.Decompress(binaryValue.Value);
-            this.BaseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedMemory);
-        }
-
-        public void Render(IActionContext context, IAccountStateDelta nextStates)
-        {
-           // throw new NotImplementedException();
-        }
-
-        public void Unrender(IActionContext context, IAccountStateDelta nextStates)
-        {
-           // throw new NotImplementedException();
-        }
-    }
-
-    public class BlockChainManager : IBlockChainManager, IDisposable
+    public class BlockChainManager<T> : IBlockChainManager, IDisposable where T : IAction
     {
         private ILogger logger { get; set; }
 
@@ -94,7 +51,7 @@ namespace FreeMarketOne.BlockChain
         /// <param name="configuration">Base configuration.</param>
         public BlockChainManager(ILogger serverLogger, IBaseConfiguration configuration)
         {
-            this.logger = serverLogger.ForContext<BlockChainManager>();
+            this.logger = serverLogger.ForContext<BlockChainManager<T>>();
             this.blockChainFilePath = configuration.BlockChainPath;
 
             logger.Information("Initializing BlockChain Manager");
@@ -140,20 +97,20 @@ namespace FreeMarketOne.BlockChain
 
         }
 
-        public Block<MyActionBase> CreateGenesisBlock(IEnumerable<MyActionBase> actions = null)
+        public Block<BaseBlockChainAction> CreateGenesisBlock(IEnumerable<BaseBlockChainAction> actions = null)
         {
 
-            List<MyActionBase> actionsTest = new List<MyActionBase>();
-            var action = new MyActionBase();
+            List<BaseBlockChainAction> actionsTest = new List<BaseBlockChainAction>();
+            var action = new BaseBlockChainAction();
             var test1 = new CheckPointMarketDataV1();
             var test2 = new ReviewUserDataV1();
-            action.BaseItems = new List<IBaseItem>();
-            action.BaseItems.Add(test1);
-            action.BaseItems.Add(test2);
+
+            action.AddBaseItem(test1);
+            action.AddBaseItem(test2);
             actionsTest.Add(action);
 
-            Block<MyActionBase> genesis =
-                BlockChain<MyActionBase>.MakeGenesisBlock(actionsTest);
+            Block<BaseBlockChainAction> genesis =
+                BlockChain<BaseBlockChainAction>.MakeGenesisBlock(actionsTest);
             // File.WriteAllBytes(this.blockChainFilePath + "/genesis.dat", genesis.Serialize());
 
             return genesis;
@@ -162,10 +119,10 @@ namespace FreeMarketOne.BlockChain
         private PrivateKey PrivateKey { get; set; }
         public Address Address { get; private set; }
 
-        private BlockChain<MyActionBase> _blocks;
+        private BlockChain<BaseBlockChainAction> _blocks;
 
         private RocksDBStore _store;
-        private Swarm<MyActionBase> _swarm;
+        private Swarm<BaseBlockChainAction> _swarm;
 
         private ImmutableList<Peer> _seedPeers;
 
@@ -181,7 +138,7 @@ namespace FreeMarketOne.BlockChain
     AppProtocolVersion appProtocolVersion,
     IEnumerable<PublicKey> trustedAppProtocolVersionSigners)
         {
-            var policy = new BlockPolicy<MyActionBase>(
+            var policy = new BlockPolicy<BaseBlockChainAction>(
                 null,
                 BlockInterval,
                 100000,
@@ -190,9 +147,9 @@ namespace FreeMarketOne.BlockChain
             PrivateKey = privateKey;
             Address = privateKey.PublicKey.ToAddress();
             _store = new RocksDBStore(path);
-            Block<MyActionBase> genesis = CreateGenesisBlock();
+            Block<BaseBlockChainAction> genesis = CreateGenesisBlock();
 
-            _blocks = new BlockChain<MyActionBase>(
+            _blocks = new BlockChain<BaseBlockChainAction>(
                 policy,
                 _store,
                 genesis
@@ -200,7 +157,7 @@ namespace FreeMarketOne.BlockChain
 
             if (!(host is null) || iceServers.Any())
             {
-                _swarm = new Swarm<MyActionBase>(
+                _swarm = new Swarm<BaseBlockChainAction>(
                     _blocks,
                     privateKey,
                     appProtocolVersion: appProtocolVersion,
@@ -213,6 +170,13 @@ namespace FreeMarketOne.BlockChain
                 _seedPeers = peers.Where(peer => peer.PublicKey != privateKey.PublicKey).ToImmutableList();
                 _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
             }
+
+            var s = _store.IterateBlockHashes();
+            var s1 = s.FirstOrDefault();
+
+            var readed = _store.GetBlock<BaseBlockChainAction>(s1);
+
+            var xs = true;
         }
 
         private bool DifferentAppProtocolVersionEncountered(

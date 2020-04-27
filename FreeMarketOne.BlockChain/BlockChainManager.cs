@@ -91,7 +91,6 @@ namespace FreeMarketOne.BlockChain
             if (File.Exists(path))
             {
                 var keyBytes = File.ReadAllBytes(path);
-
                 return new PrivateKey(keyBytes);
             } 
             else

@@ -17,11 +17,8 @@ namespace FreeMarketOne.BlockChain
     internal class PeerBootstrapWorker<T> : IDisposable where T : IBaseAction, new()
     {
         private ILogger logger { get; set; }
-
         private IAsyncLoopFactory asyncLoopFactory { get; set; }
-
         private CancellationTokenSource cancellationToken { get; set; }
-
         private const int SwarmDialTimeout = 5000;
 
         internal PeerBootstrapWorker(
@@ -44,7 +41,7 @@ namespace FreeMarketOne.BlockChain
             {
                 if (swarm == null)
                 {
-
+                    logger.Error("Swarm listener is dead.");
                 } 
                 else
                 {
@@ -136,7 +133,7 @@ namespace FreeMarketOne.BlockChain
                 repeatEvery: TimeSpans.RunOnce);
         }
 
-        public void Dispose()
+        internal void Dispose()
         {
             logger.Information("Peer Bootstrap stopping.");
 

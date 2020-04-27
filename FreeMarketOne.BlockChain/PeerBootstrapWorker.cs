@@ -34,11 +34,11 @@ namespace FreeMarketOne.BlockChain
             logger.Information("Initializing Peer Bootstrap Worker");
 
             cancellationToken = new CancellationTokenSource();
-            asyncLoopFactory = new AsyncLoopFactory(serverLogger);
+            //asyncLoopFactory = new AsyncLoopFactory(serverLogger);
 
             //Run one time only
-            var periodicLogLoop = this.asyncLoopFactory.Run("PeerBootstrap" + typeof(T).Name, (cancellation) =>
-            {
+            //var periodicLogLoop = this.asyncLoopFactory.Run("PeerBootstrap" + typeof(T).Name, (cancellation) =>
+            //{
                 if (swarm == null)
                 {
                     logger.Error("Swarm listener is dead.");
@@ -127,10 +127,10 @@ namespace FreeMarketOne.BlockChain
                     swarmStartTask.Wait();
                 }
 
-                return Task.CompletedTask;
-            },
-                cancellationToken.Token,
-                repeatEvery: TimeSpans.RunOnce);
+            //    return Task.CompletedTask;
+            //},
+            //    cancellationToken.Token,
+            //    repeatEvery: TimeSpans.RunOnce);
         }
 
         public void Dispose()

@@ -58,20 +58,23 @@ namespace FreeMarketOne.BlockChain
         private OnionSeedsManager onionSeedManager;
         private PeerBootstrapWorker<T> peerBootstrapWorker { get; set; }
         private ProofOfWorkWorker<T> proofOfWorkWorker { get; set; }
+        private List<CheckPointMarketDataV1> hashCheckPoints { get; set; }
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
         /// </summary>
         /// <param name="serverLogger"></param>
         /// <param name="blockChainPath"></param>
+        /// <param name="blockChainSecretPath"></param>
         /// <param name="endPoint"></param>
+        /// <param name="seedsManager"></param>
         /// <param name="listHashCheckPoints"></param>
         public BlockChainManager(ILogger serverLogger, 
             string blockChainPath,
             string blockChainSecretPath,
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
-            List<CheckPointMarketDataV1> listHashCheckPoints = null)
+            List<IBaseItem> listHashCheckPoints = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
             this.blockChainFilePath = blockChainPath;
@@ -81,6 +84,11 @@ namespace FreeMarketOne.BlockChain
             this.store = new RocksDBStore(this.blockChainFilePath);
 
             this.onionSeedManager = (OnionSeedsManager)seedsManager;
+
+            if (listHashCheckPoints != null)
+            {
+                this.hashCheckPoints = listHashCheckPoints.Select(a => (CheckPointMarketDataV1)a).ToList();
+            }
 
             logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
         }
@@ -111,8 +119,6 @@ namespace FreeMarketOne.BlockChain
 
         public bool Start()
         {
-            Interlocked.Exchange(ref running, 1);
-
             this.cancellationToken = new CancellationTokenSource();
 
             //REMOVE: temporary solution
@@ -157,6 +163,8 @@ namespace FreeMarketOne.BlockChain
                     this.seedPeers,
                     this.trustedPeers,
                     this.privateKey);
+
+                Interlocked.Exchange(ref running, 1);
 
                 this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
                     this.logger,
@@ -230,6 +238,49 @@ namespace FreeMarketOne.BlockChain
             Stop();
 
             Interlocked.Exchange(ref running, 3);
+        }
+
+        public List<IBaseItem> GetActionItemsByType(Type type)
+        {
+            var result = new List<IBaseItem>();
+            var hashs = this.store.IterateBlockHashes();
+
+            if (hashs.Any())
+            {
+                hashs = hashs.Reverse();
+                var i = 1;
+
+                foreach (var itemHash in hashs)
+                {
+                    if (i > 10) break;
+
+                    var block = this.store.GetBlock<T>(itemHash);
+                    if (block.Transactions.Any()) {
+                        foreach (var itemTx in block.Transactions)
+                        {
+                            if (itemTx.Actions.Any())
+                            {
+                                foreach (var itemAction in itemTx.Actions)
+                                {
+                                    if (itemAction.BaseItems.Any())
+                                    {
+                                        foreach (var itemBase in itemAction.BaseItems)
+                                        {
+                                            if (itemBase.GetType() == type)
+                                            {
+                                                i++;
+                                                result.Add(itemBase);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         ///TEMPORARY

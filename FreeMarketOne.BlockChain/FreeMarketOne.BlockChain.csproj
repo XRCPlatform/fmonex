@@ -9,6 +9,7 @@
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet.Tools\Libplanet.Tools.csproj" />
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.P2P\FreeMarketOne.P2P.csproj" />
   </ItemGroup>
 
 </Project>

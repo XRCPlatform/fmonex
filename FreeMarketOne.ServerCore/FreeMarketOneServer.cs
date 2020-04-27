@@ -19,6 +19,7 @@ using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
 using System.Threading.Tasks;
 using System.Threading;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -92,20 +93,25 @@ namespace FreeMarketOne.ServerCore
 
             /* Initialize Base And Market BlockChain Managers */
             BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(
-                Logger, 
-                Configuration.BlockChainBasePath, 
-                Configuration.BlockChainSecretPath,
-                Configuration.ListenerBaseEndPoint,
-                OnionSeedsManager);
-            BaseBlockChainManager.Start();
-
-            MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
                 Logger,
                 Configuration.BlockChainBasePath,
                 Configuration.BlockChainSecretPath,
                 Configuration.ListenerBaseEndPoint,
                 OnionSeedsManager);
-            MarketBlockChainManager.Start();
+            BaseBlockChainManager.Start();
+
+            if (BaseBlockChainManager.IsBlockChainManagerRunning())
+            {
+                var hashCheckPoints = this.BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
+                    Logger,
+                    Configuration.BlockChainBasePath,
+                    Configuration.BlockChainSecretPath,
+                    Configuration.ListenerBaseEndPoint,
+                    OnionSeedsManager,
+                    hashCheckPoints);
+                MarketBlockChainManager.Start();
+            }
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)

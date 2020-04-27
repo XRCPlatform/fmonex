@@ -168,9 +168,11 @@ namespace FreeMarketOne.ServerCore
         {
             var blockChainBasePath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainBasePath"];
             var blockChainMarketPath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainMarketPath"];
+            var blockChainSecretPath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainSecretPath"];
 
             if (!string.IsNullOrEmpty(blockChainBasePath)) configuration.BlockChainBasePath = blockChainBasePath;
             if (!string.IsNullOrEmpty(blockChainMarketPath)) configuration.BlockChainMarketPath = blockChainMarketPath;
+            if (!string.IsNullOrEmpty(blockChainSecretPath)) configuration.BlockChainSecretPath = BlockChainSecretPath;
         }
 
         public static void InitializeListenerEndPoints(IBaseConfiguration configuration, IConfigurationRoot configFile)

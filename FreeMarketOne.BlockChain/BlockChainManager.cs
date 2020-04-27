@@ -56,7 +56,7 @@ namespace FreeMarketOne.BlockChain
         private ImmutableList<Peer> seedPeers;
         private IImmutableSet<Address> trustedPeers;
 
-        private IOnionSeedsManager onionSeedManager;
+        private OnionSeedsManager onionSeedManager;
         private PeerBootstrapWorker<T> peerBootstrapWorker { get; set; }
 
         /// <summary>
@@ -67,22 +67,40 @@ namespace FreeMarketOne.BlockChain
         /// <param name="endPoint"></param>
         /// <param name="listHashCheckPoints"></param>
         public BlockChainManager(ILogger serverLogger, 
-            string blockChainPath, 
+            string blockChainPath,
+            string blockChainSecretPath,
             EndPoint endPoint,
-            IOnionSeedsManager seedsManager,
+            OnionSeedsManager seedsManager,
             List<CheckPointMarketDataV1> listHashCheckPoints = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
             this.blockChainFilePath = blockChainPath;
             this.endPoint = endPoint;
 
-            this.privateKey = new PrivateKey();
+            this.privateKey = GetSecret(blockChainSecretPath);
             this.address = this.privateKey.PublicKey.ToAddress();
             this.store = new RocksDBStore(this.blockChainFilePath);
 
             this.onionSeedManager = seedsManager;
 
             logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
+        }
+
+        private PrivateKey GetSecret(string path)
+        {
+            if (File.Exists(path))
+            {
+                var keyBytes = File.ReadAllBytes(path);
+
+                return new PrivateKey(keyBytes);
+            } 
+            else
+            {
+                var newKey = new PrivateKey();
+                File.WriteAllBytes(path, newKey.ByteArray);
+
+                return newKey;
+            }
         }
 
         private bool DifferentAppProtocolVersionEncountered(
@@ -130,7 +148,7 @@ namespace FreeMarketOne.BlockChain
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
 
-                //var peers = onionSeedManager.GetOnions();
+                var peers = onionSeedManager.OnionSeeds;
 
                // this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
                // this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();

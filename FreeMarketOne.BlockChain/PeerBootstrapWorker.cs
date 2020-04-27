@@ -133,7 +133,7 @@ namespace FreeMarketOne.BlockChain
                 repeatEvery: TimeSpans.RunOnce);
         }
 
-        internal void Dispose()
+        public void Dispose()
         {
             logger.Information("Peer Bootstrap stopping.");
 

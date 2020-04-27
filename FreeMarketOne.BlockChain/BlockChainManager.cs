@@ -49,7 +49,6 @@ namespace FreeMarketOne.BlockChain
 
         private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
         private PrivateKey privateKey { get; set; }
-        private Address address { get; set; }
         private BlockChain<T> blocks;
         private RocksDBStore store;
         private Swarm<T> swarm;
@@ -58,6 +57,7 @@ namespace FreeMarketOne.BlockChain
 
         private OnionSeedsManager onionSeedManager;
         private PeerBootstrapWorker<T> peerBootstrapWorker { get; set; }
+        private ProofOfWorkWorker<T> proofOfWorkWorker { get; set; }
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
@@ -78,7 +78,6 @@ namespace FreeMarketOne.BlockChain
             this.endPoint = endPoint;
 
             this.privateKey = GetSecret(blockChainSecretPath);
-            this.address = this.privateKey.PublicKey.ToAddress();
             this.store = new RocksDBStore(this.blockChainFilePath);
 
             this.onionSeedManager = (OnionSeedsManager)seedsManager;
@@ -158,6 +157,15 @@ namespace FreeMarketOne.BlockChain
                     this.seedPeers,
                     this.trustedPeers,
                     this.privateKey);
+
+                this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
+                    this.logger,
+                    this.swarm,
+                    this.blocks,
+                    this.privateKey.ToAddress(),
+                    this.store,
+                    null
+                    );
             } 
             else
             {

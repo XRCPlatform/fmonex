@@ -1,4 +1,9 @@
 ﻿using FreeMarketOne.Extensions.Helpers;
+using Libplanet;
+using Libplanet.Blockchain;
+using Libplanet.Net;
+using Libplanet.RocksDBStore;
+using Libplanet.Tx;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -17,6 +22,10 @@ namespace FreeMarketOne.BlockChain
 
         internal ProofOfWorkWorker(
             ILogger serverLogger,
+            Swarm<T> swarm,
+            BlockChain<T> blocks,
+            Address address,
+            RocksDBStore store,
             EventHandler eventNewBlock)
         {
             serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
@@ -30,78 +39,79 @@ namespace FreeMarketOne.BlockChain
             {
                 while (true)
                 {
-                    var txs = new HashSet<Transaction<PolymorphicAction<ActionBase>>>();
+                    var txs = new HashSet<Transaction<T>>();
 
-                    var task = Task.Run(async () =>
+                    var taskMiner = Task.Run(async () =>
                     {
-                        var block = await _blocks.MineBlock(Address);
+                        var block = await blocks.MineBlock(address);
 
-                        if (_swarm?.Running ?? false)
+                        if (swarm?.Running ?? false)
                         {
-                            _swarm.BroadcastBlock(block);
+                            swarm.BroadcastBlock(block);
                         }
 
                         return block;
                     });
-                    yield return new WaitUntil(() => task.IsCompleted);
+                    taskMiner.Wait();
 
-                    if (!task.IsCanceled && !task.IsFaulted)
+                    if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
                     {
-                        var block = task.Result;
-                        Debug.Log($"created block index: {block.Index}, difficulty: {block.Difficulty}");
+                        var block = taskMiner.Result;
+                        logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
+                            block.Index,
+                            block.Difficulty));
                     }
                     else
                     {
                         var invalidTxs = txs;
-                        var retryActions = new HashSet<IImmutableList<PolymorphicAction<ActionBase>>>();
+                        var retryActions = new HashSet<IImmutableList<T>>();
 
-                        if (task.IsFaulted)
+                        if (taskMiner.IsFaulted)
                         {
-                            foreach (var ex in task.Exception.InnerExceptions)
+                            foreach (var ex in taskMiner.Exception.InnerExceptions)
                             {
                                 if (ex is InvalidTxNonceException invalidTxNonceException)
                                 {
-                                    var invalidNonceTx = _store.GetTransaction<PolymorphicAction<ActionBase>>(invalidTxNonceException.TxId);
+                                    var invalidNonceTx = store.GetTransaction<T>(invalidTxNonceException.TxId);
 
-                                    if (invalidNonceTx.Signer == Address)
+                                    if (invalidNonceTx.Signer == address)
                                     {
-                                        Debug.Log($"Tx[{invalidTxNonceException.TxId}] nonce is invalid. Retry it.");
+                                        logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
+                                            invalidTxNonceException.TxId));
                                         retryActions.Add(invalidNonceTx.Actions);
                                     }
                                 }
 
                                 if (ex is InvalidTxException invalidTxException)
                                 {
-                                    Debug.Log($"Tx[{invalidTxException.TxId}] is invalid. mark to unstage.");
-                                    invalidTxs.Add(_store.GetTransaction<PolymorphicAction<ActionBase>>(invalidTxException.TxId));
+                                    logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
+                                        invalidTxException.TxId));
+                                    invalidTxs.Add(store.GetTransaction<T>(invalidTxException.TxId));
                                 }
 
-                                Debug.LogException(ex);
+                                logger.Error(ex.Message);
                             }
                         }
 
                         foreach (var invalidTx in invalidTxs)
                         {
-                            _blocks.UnstageTransaction(invalidTx);
+                            blocks.UnstageTransaction(invalidTx);
                         }
 
                         foreach (var retryAction in retryActions)
                         {
-                            MakeTransaction(retryAction, true);
+                            //MakeTransaction(retryAction, true);
                         }
                     }
+
+                    eventNewBlock.Invoke(this, EventArgs.Empty);
                 }
-
-                eventNewBlock.Invoke(this, EventArgs.Empty);
-
-                return Task.CompletedTask;
             },
                 cancellationToken.Token,
-                repeatEvery: blockTime,
-                startAfter: GetDelayTimeSpan());
+                repeatEvery: TimeSpans.RunOnce);
         }
 
-        internal void Dispose()
+        public void Dispose()
         {
             logger.Information("Proof Of Work Worker stopping.");
 

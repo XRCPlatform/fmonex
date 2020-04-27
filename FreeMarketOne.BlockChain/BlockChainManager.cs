@@ -164,6 +164,7 @@ namespace FreeMarketOne.BlockChain
                     this.blocks,
                     this.privateKey.ToAddress(),
                     this.store,
+                    this.privateKey,
                     null
                     );
             } 
@@ -172,10 +173,6 @@ namespace FreeMarketOne.BlockChain
                 logger.Error(string.Format("No host information"));
                 Stop();
             }
-
-            //_miner = options.NoMiner ? null : CoMiner();
-
-            //StartNullableCoroutine(_miner);
 
             return true;
         }

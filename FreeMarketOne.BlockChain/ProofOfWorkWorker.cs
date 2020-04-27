@@ -1,6 +1,7 @@
 ﻿using FreeMarketOne.Extensions.Helpers;
 using Libplanet;
 using Libplanet.Blockchain;
+using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Libplanet.Tx;
@@ -8,6 +9,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +28,7 @@ namespace FreeMarketOne.BlockChain
             BlockChain<T> blocks,
             Address address,
             RocksDBStore store,
+            PrivateKey privateKey,
             EventHandler eventNewBlock)
         {
             serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
@@ -100,7 +103,8 @@ namespace FreeMarketOne.BlockChain
 
                         foreach (var retryAction in retryActions)
                         {
-                            //MakeTransaction(retryAction, true);
+                            var actions = retryAction.ToArray();
+                            blocks.MakeTransaction(privateKey, actions);
                         }
                     }
 

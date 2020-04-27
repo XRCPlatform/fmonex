@@ -9,7 +9,7 @@ using System.Text;
 
 namespace FreeMarketOne.BlockChain
 {
-   public class MarketBlockChainAction : IAction
+   public class MarketBlockChainAction : IBaseAction
     {
         private List<IBaseItem> memoryBaseItems { get; set; }
         private byte[] memorySerialized { get; set; }

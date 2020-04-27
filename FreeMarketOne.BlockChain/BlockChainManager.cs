@@ -27,10 +27,11 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Newtonsoft.Json;
 using FreeMarketOne.Extensions.Helpers;
 using System.Text;
+using FreeMarketOne.P2P;
 
 namespace FreeMarketOne.BlockChain
 {
-    public class BlockChainManager<T> : IBlockChainManager, IDisposable where T : IAction
+    public class BlockChainManager<T> : IBlockChainManager, IDisposable where T : IBaseAction, new()
     {
         private ILogger logger { get; set; }
 
@@ -46,98 +47,42 @@ namespace FreeMarketOne.BlockChain
         private string blockChainFilePath { get; set; }
         private EndPoint endPoint { get; set; }
 
-        private static readonly TimeSpan BlockInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
+        private PrivateKey privateKey { get; set; }
+        private Address address { get; set; }
+        private BlockChain<T> blocks;
+        private RocksDBStore store;
+        private Swarm<T> swarm;
+        private ImmutableList<Peer> seedPeers;
+        private IImmutableSet<Address> trustedPeers;
 
-        /// <param name="serverLogger">Base server logger.</param>
-        /// <param name="configuration">Base configuration.</param>
-        public BlockChainManager(ILogger serverLogger, string blockChainPath, EndPoint endPoint)
+        private IOnionSeedsManager onionSeedManager;
+        private PeerBootstrapWorker<T> peerBootstrapWorker { get; set; }
+
+        /// <summary>
+        /// BlockChain Manager which operate specified blockchain data
+        /// </summary>
+        /// <param name="serverLogger"></param>
+        /// <param name="blockChainPath"></param>
+        /// <param name="endPoint"></param>
+        /// <param name="listHashCheckPoints"></param>
+        public BlockChainManager(ILogger serverLogger, 
+            string blockChainPath, 
+            EndPoint endPoint,
+            IOnionSeedsManager seedsManager,
+            List<CheckPointMarketDataV1> listHashCheckPoints = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
             this.blockChainFilePath = blockChainPath;
             this.endPoint = endPoint;
 
+            this.privateKey = new PrivateKey();
+            this.address = this.privateKey.PublicKey.ToAddress();
+            this.store = new RocksDBStore(this.blockChainFilePath);
+
+            this.onionSeedManager = seedsManager;
+
             logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
-        }
-
-        public Block<BaseBlockChainAction> CreateGenesisBlock(IEnumerable<BaseBlockChainAction> actions = null)
-        {
-            List<BaseBlockChainAction> actionsTest = new List<BaseBlockChainAction>();
-            var action = new BaseBlockChainAction();
-            var test1 = new CheckPointMarketDataV1();
-            var test2 = new ReviewUserDataV1();
-
-            action.AddBaseItem(test1);
-            action.AddBaseItem(test2);
-            actionsTest.Add(action);
-
-            Block<BaseBlockChainAction> genesis =
-                BlockChain<BaseBlockChainAction>.MakeGenesisBlock(actionsTest);
-            // File.WriteAllBytes(this.blockChainFilePath + "/genesis.dat", genesis.Serialize());
-
-            return genesis;
-        }
-
-        private PrivateKey PrivateKey { get; set; }
-        public Address Address { get; private set; }
-
-        private BlockChain<BaseBlockChainAction> _blocks;
-
-        private RocksDBStore _store;
-        private Swarm<BaseBlockChainAction> _swarm;
-
-        private ImmutableList<Peer> _seedPeers;
-
-        private IImmutableSet<Address> _trustedPeers;
-
-        private void Init(
-    PrivateKey privateKey,
-    string path,
-    IEnumerable<Peer> peers,
-    IEnumerable<IceServer> iceServers,
-    string host,
-    int? port,
-    AppProtocolVersion appProtocolVersion,
-    IEnumerable<PublicKey> trustedAppProtocolVersionSigners)
-        {
-            var policy = new BlockPolicy<BaseBlockChainAction>(
-                null,
-                BlockInterval,
-                100000,
-                2048);
-
-            PrivateKey = privateKey;
-            Address = privateKey.PublicKey.ToAddress();
-            _store = new RocksDBStore(path);
-            Block<BaseBlockChainAction> genesis = CreateGenesisBlock();
-
-            _blocks = new BlockChain<BaseBlockChainAction>(
-                policy,
-                _store,
-                genesis
-            );
-
-            if (!(host is null) || iceServers.Any())
-            {
-                _swarm = new Swarm<BaseBlockChainAction>(
-                    _blocks,
-                    privateKey,
-                    appProtocolVersion: appProtocolVersion,
-                    host: host,
-                    listenPort: port,
-                    iceServers: iceServers,
-                    differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
-                    trustedAppProtocolVersionSigners: trustedAppProtocolVersionSigners);
-
-                _seedPeers = peers.Where(peer => peer.PublicKey != privateKey.PublicKey).ToImmutableList();
-                _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
-            }
-
-            var s = _store.IterateBlockHashes();
-            var s1 = s.FirstOrDefault();
-
-            var readed = _store.GetBlock<BaseBlockChainAction>(s1);
-
-            var xs = true;
         }
 
         private bool DifferentAppProtocolVersionEncountered(
@@ -152,45 +97,60 @@ namespace FreeMarketOne.BlockChain
         {
             Interlocked.Exchange(ref running, 1);
 
-            CreateGenesisBlock();
+            this.cancellationToken = new CancellationTokenSource();
 
-            Interlocked.Exchange(ref running, 0);
-            cancellationToken = new CancellationTokenSource();
+            //REMOVE: temporary solution
+            Block<T> genesis = CreateGenesisBlock();
 
-            var privateKey = new PrivateKey();
-            var privateSignerKey = new PrivateKey();
-            //var peers = options.Peers.Select(LoadPeer).ToImmutableList();
-            //var iceServers = options.IceServers.Select(LoadIceServer).ToImmutableList();
             var host = this.endPoint.GetHostOrDefault();
             int? port = this.endPoint.GetPortOrDefault();
-            var storagePath = this.blockChainFilePath;
 
-            var appProtocolVersion =
-    AppProtocolVersion.Sign(privateSignerKey, 123, (Bencodex.Types.Text)"foo");
-            IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null;
+            var appProtocolVersion = default(AppProtocolVersion);
+            var policy = new BlockPolicy<T>(
+                    null,
+                    blockInterval,
+                    100000,
+                    2048);
 
-            //if (options.Logging)
-            //{
-            //    Log.Logger = new LoggerConfiguration()
-            //        .MinimumLevel.Debug()
-            //        .WriteTo.Console()
-            //        .CreateLogger();
-            //}
+            this.blocks = new BlockChain<T>(
+                policy,
+                this.store,
+                genesis
+            );
 
-            Init(
-                privateKey,
-                storagePath,
-                new List<Peer>(),
-                new List<IceServer>(),
-                host,
-                port,
-                appProtocolVersion,
-                trustedAppProtocolVersionSigners
-                );
+            if (host != null)
+            {
+                this.swarm = new Swarm<T>(
+                    this.blocks,
+                    this.privateKey,
+                    appProtocolVersion: appProtocolVersion,
+                    host: host,
+                    listenPort: port,
+                    iceServers: null,
+                    differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
+                    trustedAppProtocolVersionSigners: null);
+
+                //var peers = onionSeedManager.GetOnions();
+
+               // this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
+               // this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
+
+                this.peerBootstrapWorker = new PeerBootstrapWorker<T>(
+                    this.logger,
+                    this.swarm, 
+                    this.blocks,
+                    this.seedPeers,
+                    this.trustedPeers,
+                    this.privateKey);
+            } 
+            else
+            {
+                logger.Error(string.Format("No host information"));
+                Stop();
+            }
 
             //_miner = options.NoMiner ? null : CoMiner();
 
-            //StartSystemCoroutines();
             //StartNullableCoroutine(_miner);
 
             return true;
@@ -212,9 +172,12 @@ namespace FreeMarketOne.BlockChain
         {
             Interlocked.Exchange(ref running, 2);
 
-            cancellationToken?.Cancel();
-            cancellationToken?.Dispose();
-            cancellationToken = null;
+            this.peerBootstrapWorker?.Dispose();
+            this.peerBootstrapWorker = null;
+
+            this.cancellationToken?.Cancel();
+            this.cancellationToken?.Dispose();
+            this.cancellationToken = null;
 
             logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
         }
@@ -223,6 +186,25 @@ namespace FreeMarketOne.BlockChain
         {
             Interlocked.Exchange(ref running, 3);
             Stop();
+        }
+
+        ///TEMPORARY
+        public Block<T> CreateGenesisBlock(IEnumerable<T> actions = null)
+        {
+            List<T> actionsTest = new List<T>();
+            var action = new T();
+            var test1 = new CheckPointMarketDataV1();
+            var test2 = new ReviewUserDataV1();
+
+            action.AddBaseItem(test1);
+            action.AddBaseItem(test2);
+            actionsTest.Add(action);
+
+            Block<T> genesis =
+                BlockChain<T>.MakeGenesisBlock(actionsTest);
+            // File.WriteAllBytes(this.blockChainFilePath + "/genesis.dat", genesis.Serialize());
+
+            return genesis;
         }
     }
 }

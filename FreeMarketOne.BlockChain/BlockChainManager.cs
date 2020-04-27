@@ -70,7 +70,7 @@ namespace FreeMarketOne.BlockChain
             string blockChainPath,
             string blockChainSecretPath,
             EndPoint endPoint,
-            OnionSeedsManager seedsManager,
+            IOnionSeedsManager seedsManager,
             List<CheckPointMarketDataV1> listHashCheckPoints = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
@@ -81,7 +81,7 @@ namespace FreeMarketOne.BlockChain
             this.address = this.privateKey.PublicKey.ToAddress();
             this.store = new RocksDBStore(this.blockChainFilePath);
 
-            this.onionSeedManager = seedsManager;
+            this.onionSeedManager = (OnionSeedsManager)seedsManager;
 
             logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
         }
@@ -148,10 +148,9 @@ namespace FreeMarketOne.BlockChain
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
 
-                var peers = onionSeedManager.OnionSeeds;
-
-               // this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
-               // this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
+                var peers = GetPeers();
+                this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
+                this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
 
                 this.peerBootstrapWorker = new PeerBootstrapWorker<T>(
                     this.logger,
@@ -172,6 +171,28 @@ namespace FreeMarketOne.BlockChain
             //StartNullableCoroutine(_miner);
 
             return true;
+        }
+
+        private List<Peer> GetPeers()
+        {
+            var peers = new List<Peer>();
+
+            while (!this.onionSeedManager.IsOnionSeedsManagerRunning())
+            {
+                Thread.Sleep(100);
+            }
+
+            foreach (var itemPeer in onionSeedManager.OnionSeedPeers)
+            {
+                //TOREMOVEAFTER TEST - HACK
+                itemPeer.SecretKeyHex = new PrivateKey().PublicKey.ToAddress().ToHex();
+
+                var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.Url, itemPeer.Port), default(AppProtocolVersion));
+                peers.Add(boundPeer);
+            }
+
+            return peers;
         }
 
         public bool IsBlockChainManagerRunning()
@@ -202,8 +223,9 @@ namespace FreeMarketOne.BlockChain
 
         public void Dispose()
         {
-            Interlocked.Exchange(ref running, 3);
             Stop();
+
+            Interlocked.Exchange(ref running, 3);
         }
 
         ///TEMPORARY

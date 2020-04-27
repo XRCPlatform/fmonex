@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FreeMarketOne.P2P.Models
 {
-    public class OnionSeed
+    public class OnionSeedPeer
     {
         public enum OnionSeedStates
         {
@@ -15,6 +15,7 @@ namespace FreeMarketOne.P2P.Models
 
         public string Url { get; set; }
         public int Port { get; set; }
+        public string SecretKeyHex { get; set; }
         public OnionSeedStates State { get; set; }
     }
 }

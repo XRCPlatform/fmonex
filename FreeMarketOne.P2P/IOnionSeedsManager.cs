@@ -6,8 +6,8 @@ namespace FreeMarketOne.P2P
 {
     public interface IOnionSeedsManager : IDisposable
     {
-        void GetOnions();
-        void StartPeriodicCheck();
-        void StartPeriodicPeerBroadcast();
+        bool IsOnionSeedsManagerRunning();
+
+        void Start();
     }
 }

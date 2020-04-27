@@ -17,6 +17,8 @@ using FreeMarketOne.MarketPool;
 using FreeMarketOne.DataStructure;
 using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -75,45 +77,35 @@ namespace FreeMarketOne.ServerCore
 
             /* Initialize Tor */
             //UNCOMMENT DISPOSE TOO!!!!
-            //TorProcessManager = new TorProcessManager(Logger, Configuration);
+            TorProcessManager = new TorProcessManager(Logger, Configuration);
             //var torInitialized = TorProcessManager.Start();
 
             //if (torInitialized)
             //{
             //    /* Initialize OnionSeeds */
-            //    OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-            //    OnionSeedsManager.GetOnions();
-            //    OnionSeedsManager.StartPeriodicCheck();
-            //    OnionSeedsManager.StartPeriodicPeerBroadcast();
+                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
+            //    OnionSeedsManager.Start();
             //}
-
-            /* Time Manager Loader < ------- Necessary to finish */
-            var genesisTimeUtc = DateTime.UtcNow.AddDays(-10).AddSeconds(-25); //!!!!FROM GENESIS BLOCK OF BASE BLOCKCHAIN
-            var networkTimeUtc = DateTime.UtcNow; //!!!!TIME FROM SOME EXTERNAL SERVICE - To get real time
 
             /* Initialize Base And Market Pool */
             BasePoolManager = new BasePoolManager(Logger, Configuration);
             MarketPoolManager = new MarketPoolManager(Logger, Configuration);
 
-            /* Initialize MiningProcessor */
-            MiningProcessor = new MiningProcessor(Logger, Configuration, BasePoolManager, MarketPoolManager, 
-                genesisTimeUtc, networkTimeUtc);
-            var miningProcessorInitialized = MiningProcessor.Start();
-
-            if (miningProcessorInitialized)
-            {
-
-            }
-
             /* Initialize Base And Market BlockChain Managers */
-            BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(Logger, 
+            BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(
+                Logger, 
                 Configuration.BlockChainBasePath, 
-                Configuration.ListenerBaseEndPoint);
+                Configuration.BlockChainSecretPath,
+                Configuration.ListenerBaseEndPoint,
+                OnionSeedsManager);
             BaseBlockChainManager.Start();
 
-            MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(Logger, 
-                Configuration.BlockChainMarketPath,
-                Configuration.ListenerMarketEndPoint);
+            MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
+                Logger,
+                Configuration.BlockChainBasePath,
+                Configuration.BlockChainSecretPath,
+                Configuration.ListenerBaseEndPoint,
+                OnionSeedsManager);
             MarketBlockChainManager.Start();
         }
 

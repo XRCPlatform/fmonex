@@ -18,12 +18,18 @@ namespace FreeMarketOne.P2P
 {
     public class OnionSeedsManager : IOnionSeedsManager, IDisposable
     {
+        /// <summary>
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
+        /// </summary>
+        private long running;
+        public bool IsRunning => Interlocked.Read(ref running) == 1;
+
         private ILogger logger { get; set; }
         private EndPoint torSocks5EndPoint { get; set; }
         private string torOnionEndPoint { get; set; }
         private string appVersion { get; set; }
 
-        public List<OnionSeed> OnionSeeds { get; set; }
+        public List<OnionSeedPeer> OnionSeedPeers { get; set; }
 
         private IAsyncLoopFactory asyncLoopFactory { get; set; }
         private CancellationTokenSource cancellationToken { get; set; }
@@ -46,9 +52,23 @@ namespace FreeMarketOne.P2P
             cancellationToken = new CancellationTokenSource();
         }
 
-        public void GetOnions()
+        public bool IsOnionSeedsManagerRunning()
         {
-            OnionSeeds = new List<OnionSeed>();
+            return true;
+
+            if (Interlocked.Read(ref running) == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Start()
+        {
+            OnionSeedPeers = new List<OnionSeedPeer>();
 
             logger.Information(string.Format("Prepairing loading of: {0} by Tor Gate: {1}", torOnionEndPoint, torSocks5EndPoint));
 
@@ -70,12 +90,13 @@ namespace FreeMarketOne.P2P
                         if (IsOnionAddressValid(onion))
                         {
                             var parts = onion.Split(":");
-                            var newOnionSeed = new OnionSeed();
+                            var newOnionSeed = new OnionSeedPeer();
 
                             newOnionSeed.Url = parts[0];
                             newOnionSeed.Port = int.Parse(parts[1]);
+                            newOnionSeed.SecretKeyHex = parts[2];
 
-                            OnionSeeds.Add(newOnionSeed);
+                            OnionSeedPeers.Add(newOnionSeed);
 
                             logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.Url, newOnionSeed.Port));
                         }
@@ -87,20 +108,26 @@ namespace FreeMarketOne.P2P
                 logger.Error(string.Format("Unexpected Error: {0}", e.Message));
             }
 
-            logger.Information(string.Format("Done: {0}", OnionSeeds.Count));
+            logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
+
+            Interlocked.Exchange(ref running, 1);
+            StartPeriodicCheck();
         }
 
-        private static bool IsOnionAddressValid(string onionSeed)
+        private static bool IsOnionAddressValid(string onionSeedPeer)
         {
             var result = true;
 
-            if (!onionSeed.Contains(":")) result = false;
-            if (!onionSeed.Contains("onion")) result = false;
+            if (!onionSeedPeer.Contains(":")) result = false;
+            if (!onionSeedPeer.Contains("onion")) result = false;
+            
+            var parts = onionSeedPeer.Split(":");
+            if (parts.Length < 3) result = false;
 
             return result;
         }
 
-        public void StartPeriodicCheck()
+        private void StartPeriodicCheck()
         {
             IAsyncLoop periodicLogLoop = this.asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
@@ -113,18 +140,18 @@ namespace FreeMarketOne.P2P
                 var isTorRunning = torProcessManager.IsTorRunningAsync().Result;
                 if (isTorRunning)
                 {
-                    foreach (var itemSeed in OnionSeeds)
+                    foreach (var itemSeed in OnionSeedPeers)
                     {
                         var resultLog = string.Format("Checking {0} {1}", itemSeed.Url, itemSeed.Port);
 
                         var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.Url, itemSeed.Port).Result;
                         if (isOnionSeedRunning)
                         {
-                            itemSeed.State = OnionSeed.OnionSeedStates.Online;
+                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
                         }
                         else
                         {
-                            itemSeed.State = OnionSeed.OnionSeedStates.Offline;
+                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
                         }
 
                         periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
@@ -145,57 +172,13 @@ namespace FreeMarketOne.P2P
                 startAfter: TimeSpans.TenSeconds);
         }
 
-        public void StartPeriodicPeerBroadcast()
-        {
-            IAsyncLoop periodicLogLoop = this.asyncLoopFactory.Run("OnionPeriodicPeerSharing", (cancellation) =>
-            {
-                var dateTimeUtc = DateTime.UtcNow;
-
-                StringBuilder periodicExchangeLog = new StringBuilder();
-
-                periodicExchangeLog.AppendLine("======Onion Seed Peer Exchange====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + appVersion);
-
-                var isTorRunning = torProcessManager.IsTorRunningAsync().Result;
-                if (isTorRunning)
-                {
-                    foreach (var itemSeed in OnionSeeds)
-                    {
-                        if (itemSeed.State == OnionSeed.OnionSeedStates.Online)
-                        {
-                            var resultLog = string.Format("Exchange with {0} {1}", itemSeed.Url, itemSeed.Port);
-
-                            //var isOnionSeedRunning = torProcessManager.GetOnionSeedPeersAsync(itemSeed.Url, itemSeed.Port).Result;
-                            //if (isOnionSeedRunning)
-                            //{
-                            //    itemSeed.State = OnionSeed.OnionSeedStates.Online;
-                            //}
-                            //else
-                            //{
-                            //    itemSeed.State = OnionSeed.OnionSeedStates.Offline;
-                            //}
-
-                            periodicExchangeLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
-                        }
-                    }
-                }
-                else
-                {
-                    periodicExchangeLog.AppendLine("Tor is down!");
-                }
-
-                logger.Information(periodicExchangeLog.ToString());
-                Console.WriteLine(periodicExchangeLog.ToString());
-
-                return Task.CompletedTask;
-            },
-                cancellationToken.Token,
-                repeatEvery: TimeSpans.TenMinutes,
-                startAfter: TimeSpans.Minute);
-        }
-
         public void Dispose()
         {
+            Interlocked.Exchange(ref running, 2);
+
             cancellationToken.Cancel();
+
+            Interlocked.Exchange(ref running, 3);
         }
     }
 }

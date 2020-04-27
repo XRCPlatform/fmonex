@@ -76,16 +76,15 @@ namespace FreeMarketOne.ServerCore
             logger.Information("Application Start");
 
             /* Initialize Tor */
-            //UNCOMMENT DISPOSE TOO!!!!
             TorProcessManager = new TorProcessManager(Logger, Configuration);
-            //var torInitialized = TorProcessManager.Start();
+            var torInitialized = TorProcessManager.Start();
 
-            //if (torInitialized)
-            //{
-            //    /* Initialize OnionSeeds */
+            if (torInitialized)
+            {
+                /* Initialize OnionSeeds */
                 OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-            //    OnionSeedsManager.Start();
-            //}
+                OnionSeedsManager.Start();
+            }
 
             /* Initialize Base And Market Pool */
             BasePoolManager = new BasePoolManager(Logger, Configuration);
@@ -164,7 +163,7 @@ namespace FreeMarketOne.ServerCore
 
             if (!string.IsNullOrEmpty(blockChainBasePath)) configuration.BlockChainBasePath = blockChainBasePath;
             if (!string.IsNullOrEmpty(blockChainMarketPath)) configuration.BlockChainMarketPath = blockChainMarketPath;
-            if (!string.IsNullOrEmpty(blockChainSecretPath)) configuration.BlockChainSecretPath = BlockChainSecretPath;
+            if (!string.IsNullOrEmpty(blockChainSecretPath)) configuration.BlockChainSecretPath = blockChainSecretPath;
         }
 
         public static void InitializeListenerEndPoints(IBaseConfiguration configuration, IConfigurationRoot configFile)
@@ -179,29 +178,20 @@ namespace FreeMarketOne.ServerCore
         public void Stop()
         {
             logger.Information("Ending BlockChain Managers...");
-
             BaseBlockChainManager.Dispose();
             MarketBlockChainManager.Dispose();
 
             logger.Information("Ending Onion Seeds ...");
-
-            //OnionSeedsManager.Dispose();
-
-            logger.Information("Ending Mining Processor...");
-
-            BasePoolManager.Dispose();
+            OnionSeedsManager.Dispose();
 
             logger.Information("Ending Base Pool Manager...");
-
-            MarketPoolManager.Dispose();
+            BasePoolManager.Dispose();
 
             logger.Information("Ending Market Pool Manager...");
-
-            MiningProcessor.Dispose();
+            MarketPoolManager.Dispose();
 
             logger.Information("Ending Tor...");
-
-            //TorProcessManager.Dispose();
+            TorProcessManager.Dispose();
 
             logger.Information("Application End");
         }

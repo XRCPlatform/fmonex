@@ -23,17 +23,13 @@ namespace FreeMarketOne.P2P
         /// </summary>
         private long running;
         public bool IsRunning => Interlocked.Read(ref running) == 1;
-
         private ILogger logger { get; set; }
         private EndPoint torSocks5EndPoint { get; set; }
         private string torOnionEndPoint { get; set; }
         private string appVersion { get; set; }
-
         public List<OnionSeedPeer> OnionSeedPeers { get; set; }
-
         private IAsyncLoopFactory asyncLoopFactory { get; set; }
         private CancellationTokenSource cancellationToken { get; set; }
-
         private TorProcessManager torProcessManager { get; set; }
 
         public OnionSeedsManager(ILogger serverLogger, IBaseConfiguration configuration, TorProcessManager torManager)
@@ -54,8 +50,6 @@ namespace FreeMarketOne.P2P
 
         public bool IsOnionSeedsManagerRunning()
         {
-            return true;
-
             if (Interlocked.Read(ref running) == 1)
             {
                 return true;
@@ -111,6 +105,7 @@ namespace FreeMarketOne.P2P
             logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
 
             Interlocked.Exchange(ref running, 1);
+
             StartPeriodicCheck();
         }
 

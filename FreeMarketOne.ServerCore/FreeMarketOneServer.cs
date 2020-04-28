@@ -105,9 +105,9 @@ namespace FreeMarketOne.ServerCore
                 var hashCheckPoints = this.BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
                 MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
                     Logger,
-                    Configuration.BlockChainBasePath,
+                    Configuration.BlockChainMarketPath,
                     Configuration.BlockChainSecretPath,
-                    Configuration.ListenerBaseEndPoint,
+                    Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,
                     hashCheckPoints);
                 MarketBlockChainManager.Start();

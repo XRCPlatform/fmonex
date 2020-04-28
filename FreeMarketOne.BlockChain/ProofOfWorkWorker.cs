@@ -31,7 +31,7 @@ namespace FreeMarketOne.BlockChain
             PrivateKey privateKey,
             EventHandler eventNewBlock)
         {
-            serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
+            this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
             logger.Information("Initializing Proof Of Work Worker");
 
@@ -55,7 +55,7 @@ namespace FreeMarketOne.BlockChain
 
                         return block;
                     });
-                    taskMiner.Wait();
+                    //taskMiner.Wait();
 
                     if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
                     {

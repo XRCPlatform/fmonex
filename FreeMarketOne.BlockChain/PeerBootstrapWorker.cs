@@ -55,6 +55,8 @@ namespace FreeMarketOne.BlockChain
                                 5000,
                                 cancellationToken: this.cancellationToken.Token
                             );
+
+                            var s = true;
                         }
                         catch (Exception e)
                         {
@@ -62,7 +64,7 @@ namespace FreeMarketOne.BlockChain
                         }
                     });
 
-                    bootstrapTask.Wait();
+                  //  bootstrapTask.ConfigureAwait(true);
 
                     logger.Information("PreloadingStarted event was invoked");
 
@@ -79,7 +81,7 @@ namespace FreeMarketOne.BlockChain
                         );
                     });
 
-                    swarmPreloadTask.Wait();
+                //    swarmPreloadTask.Wait();
 
                     DateTimeOffset ended = DateTimeOffset.UtcNow;
 
@@ -124,7 +126,7 @@ namespace FreeMarketOne.BlockChain
                         );
                     });
 
-                    swarmStartTask.Wait();
+                  //  swarmStartTask.Wait();
                 }
 
             //    return Task.CompletedTask;

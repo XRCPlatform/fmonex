@@ -197,7 +197,7 @@ namespace FreeMarketOne.BlockChain
             foreach (var itemPeer in onionSeedManager.OnionSeedPeers)
             {
                 //TOREMOVEAFTER TEST - HACK
-                itemPeer.SecretKeyHex = new PrivateKey().PublicKey.ToAddress().ToHex();
+                itemPeer.SecretKeyHex = ByteUtil.Hex(new PrivateKey().PublicKey.Format(true));
 
                 var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.Url, itemPeer.Port), default(AppProtocolVersion));

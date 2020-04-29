@@ -167,7 +167,8 @@ namespace FreeMarketOne.BlockChain
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
 
-                var peers = new List<Peer>(); // GetPeersFromOnionManager();
+                var peers = GetPeersFromOnionManager();
+                //new List<Peer>(); // 
                 this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
                 this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
 
@@ -223,8 +224,8 @@ namespace FreeMarketOne.BlockChain
 
             foreach (var itemPeer in onionSeedManager.OnionSeedPeers)
             {
-                //TOREMOVEAFTER TEST - HACK
-                itemPeer.SecretKeyHex = ByteUtil.Hex(new PrivateKey().PublicKey.Format(true));
+                //REMOVE: TEST - HACK
+                //itemPeer.SecretKeyHex = ByteUtil.Hex(new PrivateKey().PublicKey.Format(true));
 
                 var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.Url, itemPeer.Port), default(AppProtocolVersion));

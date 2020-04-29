@@ -73,20 +73,20 @@ namespace FreeMarketOne.ServerCore
 
             /* Initialize Tor */
             TorProcessManager = new TorProcessManager(Logger, Configuration);
-            // var torInitialized = TorProcessManager.Start();
+            var torInitialized = TorProcessManager.Start();
 
-            //if (torInitialized)
-            //{
+            if (torInitialized)
+            {
             /* Initialize OnionSeeds */
             OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-            //  OnionSeedsManager.Start();
-            //}
+              OnionSeedsManager.Start();
+            }
 
             /* Initialize Base And Market Pool */
             BasePoolManager = new BasePoolManager(Logger, Configuration);
             MarketPoolManager = new MarketPoolManager(Logger, Configuration);
 
-            /* Initialize Base And Market BlockChain Managers */
+            /* Initialize Base BlockChain Manager */
             BaseBlockChainLoadedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
             BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(
@@ -101,6 +101,7 @@ namespace FreeMarketOne.ServerCore
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
+            /* Initialize Market BlockChain Manager */
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));

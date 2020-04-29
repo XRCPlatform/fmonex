@@ -130,11 +130,7 @@ namespace FreeMarketOne.BlockChain
         public bool Start()
         {
             this.cancellationToken = new CancellationTokenSource();
-
-            //REMOVE: temporary solution
-            Block<T> genesis = CreateGenesisBlock();
-            //
-
+            Block<T> genesis = GetGenesisBlock();
             var host = this.endPoint.GetHostOrDefault();
             int? port = this.endPoint.GetPortOrDefault();
 
@@ -247,32 +243,6 @@ namespace FreeMarketOne.BlockChain
             }
         }
 
-        public void Stop()
-        {
-            Interlocked.Exchange(ref running, 2);
-
-            this.peerBootstrapWorker?.Dispose();
-            this.peerBootstrapWorker = null;
-
-            this.cancellationToken?.Cancel();
-            this.cancellationToken?.Dispose();
-            this.cancellationToken = null;
-
-            Task.Run(async () => await this.swarm.StopAsync()).ContinueWith(_ =>
-            {
-                this.store?.Dispose();
-            }).Wait(2000);
-
-            logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
-        }
-
-        public void Dispose()
-        {
-            Stop();
-
-            Interlocked.Exchange(ref running, 3);
-        }
-
         public List<IBaseItem> GetActionItemsByType(Type type)
         {
             var result = new List<IBaseItem>();
@@ -316,23 +286,46 @@ namespace FreeMarketOne.BlockChain
             return result;
         }
 
-        ///TEMPORARY
-        public Block<T> CreateGenesisBlock(IEnumerable<T> actions = null)
+        public Block<T> GetGenesisBlock()
         {
-            List<T> actionsTest = new List<T>();
-            var action = new T();
-            var test1 = new CheckPointMarketDataV1();
-            var test2 = new ReviewUserDataV1();
+            var genesisPath = Path.Combine(this.blockChainFilePath, "genesis.dat");
 
-            action.AddBaseItem(test1);
-            action.AddBaseItem(test2);
-            actionsTest.Add(action);
+            if (File.Exists(genesisPath))
+            {
+                var genesisBytes = File.ReadAllBytes(genesisPath);
+                return Block<T>.Deserialize(genesisBytes);
+            } 
+            else
+            {
+                this.logger.Error("Genesis block doesn't exist.");
+                return null;
+            }
+        }
 
-            Block<T> genesis =
-                BlockChain<T>.MakeGenesisBlock(actionsTest);
-            // File.WriteAllBytes(this.blockChainFilePath + "/genesis.dat", genesis.Serialize());
+        public void Stop()
+        {
+            Interlocked.Exchange(ref running, 2);
 
-            return genesis;
+            this.peerBootstrapWorker?.Dispose();
+            this.peerBootstrapWorker = null;
+
+            this.cancellationToken?.Cancel();
+            this.cancellationToken?.Dispose();
+            this.cancellationToken = null;
+
+            Task.Run(async () => await this.swarm.StopAsync()).ContinueWith(_ =>
+            {
+                this.store?.Dispose();
+            }).Wait(2000);
+
+            logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
+        }
+
+        public void Dispose()
+        {
+            Stop();
+
+            Interlocked.Exchange(ref running, 3);
         }
     }
 }

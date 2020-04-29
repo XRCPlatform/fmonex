@@ -13,6 +13,7 @@ using FreeMarketOne.DataStructure;
 using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.GenesisBlock;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -78,9 +79,13 @@ namespace FreeMarketOne.ServerCore
             if (torInitialized)
             {
             /* Initialize OnionSeeds */
-            OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-              OnionSeedsManager.Start();
+                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
+                OnionSeedsManager.Start();
             }
+
+            /* Initialize genesis blocks */
+            var generator = new GenesisGenerator();
+            generator.GenerateIt(Configuration.BlockChainBasePath, Configuration.BlockChainMarketPath);
 
             /* Initialize Base And Market Pool */
             BasePoolManager = new BasePoolManager(Logger, Configuration);

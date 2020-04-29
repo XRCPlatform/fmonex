@@ -18,7 +18,7 @@ namespace FreeMarketOne.Telemetry.Test
                 Action = "search",
                 ActionTarget = "Gold bulion",
                 Environment = "dev",
-                Outcome ="no results found"
+                Outcome ="miss"
             };            
             hub.Send(measure);
         }

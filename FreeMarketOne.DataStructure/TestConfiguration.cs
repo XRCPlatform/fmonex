@@ -16,7 +16,7 @@ namespace FreeMarketOne.DataStructure
             this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds_testnet.txt";
             this.MemoryBasePoolPath = "data/testnet_memory_basetx.data";
             this.MemoryMarketPoolPath = "data/testnet_memory_markettx.data";
-            this.TelemetryServerUri = "https://telemetry.freemarket.one/";
+            this.TelemetryServerUri = "http://40.115.21.64:8088/services/collector/event";
         }
     }
 }

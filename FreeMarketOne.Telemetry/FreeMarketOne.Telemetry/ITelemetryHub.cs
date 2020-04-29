@@ -4,12 +4,12 @@ using System.Text;
 
 namespace FreeMarketOne.Telemetry
 {
-    interface ITelemetryServer
+    interface ITelemetryHub
     {
         /// <summary>
         /// Send telemetry data to server for processing. Fire and forget.  
         /// </summary>
         /// <param name="measure"></param>
-        void Send(ITemetryMeasure measure);
+        void Send(ITelemetryMeasure measure);
     }
 }

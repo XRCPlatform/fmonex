@@ -7,6 +7,7 @@ using Libplanet.RocksDBStore;
 using Libplanet.Tx;
 using Serilog;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -29,13 +30,17 @@ namespace FreeMarketOne.BlockChain
             Address address,
             RocksDBStore store,
             PrivateKey privateKey,
-            EventHandler eventNewBlock)
+            EventHandler eventNewBlock = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
-            logger.Information("Initializing Proof Of Work Worker");
+            this.logger.Information("Initializing Proof Of Work Worker");
 
-            cancellationToken = new CancellationTokenSource();
+            this.cancellationToken = new CancellationTokenSource();
+
+        }
+
+        internal IEnumerator GetEnumerator() { 
             asyncLoopFactory = new AsyncLoopFactory(serverLogger);
 
             var periodicLogLoop = this.asyncLoopFactory.Run("ProofOfWork" + typeof(T).Name, (cancellation) =>
@@ -55,7 +60,11 @@ namespace FreeMarketOne.BlockChain
 
                         return block;
                     });
-                    //taskMiner.Wait();
+
+                    //while (!taskMiner.IsCompleted)
+                    //{
+                    //    yield return null;
+                    //}
 
                     if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
                     {
@@ -108,7 +117,10 @@ namespace FreeMarketOne.BlockChain
                         }
                     }
 
-                    eventNewBlock.Invoke(this, EventArgs.Empty);
+                    if (eventNewBlock != null)
+                    {
+                        eventNewBlock.Invoke(this, EventArgs.Empty);
+                    }
                 }
             },
                 cancellationToken.Token,

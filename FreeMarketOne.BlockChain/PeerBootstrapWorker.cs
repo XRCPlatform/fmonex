@@ -1,140 +1,168 @@
-﻿using FreeMarketOne.Extensions.Helpers;
-using Libplanet;
-using Libplanet.Action;
+﻿using Libplanet;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Net;
+using Libplanet.Net.Protocols;
 using Serilog;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Collections.Immutable;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FreeMarketOne.BlockChain.Helpers;
 
 namespace FreeMarketOne.BlockChain
 {
     internal class PeerBootstrapWorker<T> : IDisposable where T : IBaseAction, new()
     {
         private ILogger logger { get; set; }
-        private IAsyncLoopFactory asyncLoopFactory { get; set; }
         private CancellationTokenSource cancellationToken { get; set; }
+
         private const int SwarmDialTimeout = 5000;
+
+        private PrivateKey privateKey { get; set; }
+        private BlockChain<T> blocks;
+        private Swarm<T> swarm;
+        private ImmutableList<Peer> seedPeers;
+        private IImmutableSet<Address> trustedPeers;
+        private EventHandler bootstrapStarted { get; set; }
+        private EventHandler preloadStarted { get; set; }
+        private EventHandler<PreloadState> preloadProcessed { get; set; }
+        private EventHandler preloadEnded { get; set; }
 
         internal PeerBootstrapWorker(
             ILogger serverLogger,
             Swarm<T> swarm,
-            BlockChain<T> blocks, 
+            BlockChain<T> blocks,
             ImmutableList<Peer> seedPeers,
             IImmutableSet<Address> trustedPeers,
-            PrivateKey privateKey)
+            PrivateKey privateKey,
+            EventHandler bootstrapStarted = null,
+            EventHandler preloadStarted = null,
+            EventHandler<PreloadState> preloadProcessed = null,
+            EventHandler preloadEnded = null
+            )
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
-            logger.Information("Initializing Peer Bootstrap Worker");
+            this.blocks = blocks;
+            this.swarm = swarm;
+            this.seedPeers = seedPeers;
+            this.trustedPeers = trustedPeers;
+            this.privateKey = privateKey;
 
-            cancellationToken = new CancellationTokenSource();
-            //asyncLoopFactory = new AsyncLoopFactory(serverLogger);
+            this.bootstrapStarted = bootstrapStarted;
+            this.preloadStarted = preloadStarted;
+            this.preloadProcessed = preloadProcessed;
+            this.preloadEnded = preloadEnded;
 
-            //Run one time only
-            //var periodicLogLoop = this.asyncLoopFactory.Run("PeerBootstrap" + typeof(T).Name, (cancellation) =>
-            //{
-                if (swarm == null)
-                {
-                    logger.Error("Swarm listener is dead.");
-                } 
-                else
-                {
-                    var bootstrapTask = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await swarm.BootstrapAsync(
-                                seedPeers,
-                                5000,
-                                5000,
-                                cancellationToken: this.cancellationToken.Token
-                            );
+            this.cancellationToken = new CancellationTokenSource();
 
-                            var s = true;
-                        }
-                        catch (Exception e)
-                        {
-                            logger.Error(string.Format("Exception occurred during bootstrap {0}", e));
-                        }
-                    });
-
-                  //  bootstrapTask.ConfigureAwait(true);
-
-                    logger.Information("PreloadingStarted event was invoked");
-
-                    DateTimeOffset started = DateTimeOffset.UtcNow;
-                    long existingBlocks = blocks?.Tip?.Index ?? 0;
-
-                    var swarmPreloadTask = Task.Run(async () =>
-                    {
-                        await swarm.PreloadAsync(
-                            TimeSpan.FromMilliseconds(SwarmDialTimeout),
-                            null,
-                            trustedStateValidators: trustedPeers,
-                            cancellationToken: this.cancellationToken.Token
-                        );
-                    });
-
-                //    swarmPreloadTask.Wait();
-
-                    DateTimeOffset ended = DateTimeOffset.UtcNow;
-
-                    if (swarmPreloadTask.Exception is Exception e)
-                    {
-                        logger.Error(string.Format("Preloading terminated with an exception: {0}", e));
-                        throw e;
-                    }
-
-                    var index = blocks?.Tip?.Index ?? 0;
-
-                    logger.Information("Preloading finished; elapsed time: {0}; blocks: {1}",
-                        ended - started,
-                        index - existingBlocks
-                    );
-
-                    var swarmStartTask = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await swarm.StartAsync();
-                        }
-                        catch (TaskCanceledException)
-                        {
-                        }
-                        catch (Exception e)
-                        {
-                            logger.Error(string.Format("Swarm terminated with an exception: {0}", e));
-                            throw e;
-                        }
-                    });
-
-                    Task.Run(async () =>
-                    {
-                        await swarm.WaitForRunningAsync();
-
-                        logger.Information(
-                            "The address of this node: {0},{1},{2}",
-                            ByteUtil.Hex(privateKey.PublicKey.Format(true)),
-                            swarm.EndPoint.Host,
-                            swarm.EndPoint.Port
-                        );
-                    });
-
-                  //  swarmStartTask.Wait();
-                }
-
-            //    return Task.CompletedTask;
-            //},
-            //    cancellationToken.Token,
-            //    repeatEvery: TimeSpans.RunOnce);
+            this.logger.Information("Initializing Peer Bootstrap Worker");
         }
 
+        internal IEnumerator GetEnumerator()
+        {
+            if (this.swarm == null)
+            {
+                this.logger.Error("Swarm listener is dead.");
+            }
+            else
+            {
+                this.bootstrapStarted?.Invoke(this, null);
+
+                var bootstrapTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await this.swarm.BootstrapAsync(
+                            this.seedPeers,
+                            5000,
+                            5000,
+                            cancellationToken: this.cancellationToken.Token
+                        );
+                    }
+                    catch (PeerDiscoveryException e)
+                    {
+                        this.logger.Error(e.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        this.logger.Error(string.Format("Exception occurred during bootstrap {0}", e));
+                    }
+                });
+
+                yield return new WaitUntil(() => bootstrapTask.IsCompleted);
+
+                this.preloadStarted?.Invoke(this, null);
+                this.logger.Information("PreloadingStarted event was invoked");
+
+                DateTimeOffset started = DateTimeOffset.UtcNow;
+                long existingBlocks = this.blocks?.Tip?.Index ?? 0;
+                this.logger.Information("Preloading starts");
+
+                var swarmPreloadTask = Task.Run(async () =>
+                {
+                    await this.swarm.PreloadAsync(
+                        TimeSpan.FromMilliseconds(SwarmDialTimeout),
+                        new Progress<PreloadState>(state =>
+                            this.preloadProcessed?.Invoke(this, state)
+                        ),
+                        trustedStateValidators: this.trustedPeers,
+                        cancellationToken: this.cancellationToken.Token
+                    );
+                });
+
+                yield return new WaitUntil(() => swarmPreloadTask.IsCompleted);
+
+                DateTimeOffset ended = DateTimeOffset.UtcNow;
+                if (swarmPreloadTask.Exception is Exception e)
+                {
+                    this.logger.Error(string.Format("Preloading terminated with an exception: {0}", e));
+                    throw e;
+                }
+
+                var index = blocks?.Tip?.Index ?? 0;
+
+                this.logger.Information("Preloading finished; elapsed time: {0}; blocks: {1}",
+                    ended - started,
+                    index - existingBlocks
+                );
+
+                this.preloadEnded?.Invoke(this, null);
+
+                var swarmStartTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await swarm.StartAsync();
+                    }
+                    catch (TaskCanceledException e)
+                    {
+                        this.logger.Error(e.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        this.logger.Error(string.Format("Swarm terminated with an exception: {0}", e));
+                        throw e;
+                    }
+                });
+
+                Task.Run(async () =>
+                {
+                    await this.swarm.WaitForRunningAsync();
+
+                    this.logger.Information(
+                        "The address of this node: {0},{1},{2}",
+                        ByteUtil.Hex(this.privateKey.PublicKey.Format(true)),
+                        this.swarm.EndPoint.Host,
+                        this.swarm.EndPoint.Port
+                    );
+                });
+
+                yield return new WaitUntil(() => swarmStartTask.IsCompleted);
+            }
+        }
         public void Dispose()
         {
             logger.Information("Peer Bootstrap stopping.");

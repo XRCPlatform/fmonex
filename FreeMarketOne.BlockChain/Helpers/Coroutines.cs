@@ -5,18 +5,18 @@ using System.Text;
 
 namespace FreeMarketOne.BlockChain.Helpers
 {
-    public class CoroutineManager
+    internal class CoroutineManager
     {
-        List<Stack<IEnumerator>> coroutines = new List<Stack<IEnumerator>>();
+        private List<Stack<IEnumerator>> coroutines = new List<Stack<IEnumerator>>();
 
-        public void RegisterCoroutine(IEnumerator coroutine)
+        internal void RegisterCoroutine(IEnumerator coroutine)
         {
             var coroutineChain = new Stack<IEnumerator>();
             coroutineChain.Push(coroutine);
             coroutines.Add(coroutineChain);
         }
 
-        public void Start()
+        internal void Start()
         {
             int i = -1;
             while (true)
@@ -40,23 +40,23 @@ namespace FreeMarketOne.BlockChain.Helpers
             }
         }
     }
-    public interface ICoroutineCommand
+    internal interface ICoroutineCommand
     {
         IEnumerator<object> Execute();
     }
 
-    public sealed class WaitUntil : IEnumerator
+    internal sealed class WaitUntil : IEnumerator
     {
-        Func<bool> m_Predicate;
+        private Func<bool> predicate;
 
         public bool keepWaiting { 
             get { 
-                return !m_Predicate(); 
+                return !this.predicate(); 
             } 
         }
 
-        public WaitUntil(Func<bool> predicate) {
-            m_Predicate = predicate;
+        internal WaitUntil(Func<bool> predicate) {
+            this.predicate = predicate;
         }
 
         public object Current

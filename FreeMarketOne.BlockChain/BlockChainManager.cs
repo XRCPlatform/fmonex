@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,27 +6,17 @@ using System.Net;
 using Libplanet;
 using Libplanet.Crypto;
 using Libplanet.Net;
-using NetMQ;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using Bencodex.Types;
-using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
-using Libplanet.Store;
-using Libplanet.Tx;
 using Libplanet.Blocks;
 using Serilog;
-using FreeMarketOne.DataStructure;
-using Libplanet.Tools;
 using Libplanet.RocksDBStore;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using Newtonsoft.Json;
-using FreeMarketOne.Extensions.Helpers;
-using System.Text;
 using FreeMarketOne.P2P;
+using FreeMarketOne.BlockChain.Helpers;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -43,7 +32,6 @@ namespace FreeMarketOne.BlockChain
         public bool IsRunning => Interlocked.Read(ref running) == 1;
         private CancellationTokenSource cancellationToken { get; set; }
 
-        private readonly object basePollLock;
         private string blockChainFilePath { get; set; }
         private EndPoint endPoint { get; set; }
 
@@ -59,6 +47,10 @@ namespace FreeMarketOne.BlockChain
         private PeerBootstrapWorker<T> peerBootstrapWorker { get; set; }
         private ProofOfWorkWorker<T> proofOfWorkWorker { get; set; }
         private List<CheckPointMarketDataV1> hashCheckPoints { get; set; }
+        private EventHandler bootstrapStarted { get; set; }
+        private EventHandler preloadStarted { get; set; }
+        private EventHandler<PreloadState> preloadProcessed { get; set; }
+        private EventHandler preloadEnded { get; set; }
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
@@ -74,7 +66,11 @@ namespace FreeMarketOne.BlockChain
             string blockChainSecretPath,
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
-            List<IBaseItem> listHashCheckPoints = null)
+            List<IBaseItem> listHashCheckPoints = null,
+            EventHandler bootstrapStarted = null,
+            EventHandler preloadStarted = null,
+            EventHandler<PreloadState> preloadProcessed = null,
+            EventHandler preloadEnded = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
             this.blockChainFilePath = blockChainPath;
@@ -89,6 +85,11 @@ namespace FreeMarketOne.BlockChain
             {
                 this.hashCheckPoints = listHashCheckPoints.Select(a => (CheckPointMarketDataV1)a).ToList();
             }
+
+            this.bootstrapStarted = bootstrapStarted;
+            this.preloadStarted = preloadStarted;
+            this.preloadProcessed = preloadProcessed;
+            this.preloadEnded = preloadEnded;
 
             logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
         }
@@ -123,6 +124,7 @@ namespace FreeMarketOne.BlockChain
 
             //REMOVE: temporary solution
             Block<T> genesis = CreateGenesisBlock();
+            //
 
             var host = this.endPoint.GetHostOrDefault();
             int? port = this.endPoint.GetPortOrDefault();
@@ -152,29 +154,38 @@ namespace FreeMarketOne.BlockChain
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
 
-                var peers = GetPeers();
+                var peers = new List<Peer>(); // GetPeersFromOnionManager();
                 this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
                 this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
 
-                this.peerBootstrapWorker = new PeerBootstrapWorker<T>(
-                    this.logger,
-                    this.swarm, 
-                    this.blocks,
-                    this.seedPeers,
-                    this.trustedPeers,
-                    this.privateKey);
-
-                Interlocked.Exchange(ref running, 1);
-
-                this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
+                //init Peer Bootstrap Worker
+                var peerBootstrapWorker = new PeerBootstrapWorker<T>(
                     this.logger,
                     this.swarm,
                     this.blocks,
-                    this.privateKey.ToAddress(),
-                    this.store,
+                    this.seedPeers,
+                    this.trustedPeers,
                     this.privateKey,
-                    null
-                    );
+                    this.bootstrapStarted,
+                    this.preloadStarted,
+                    this.preloadProcessed,
+                    this.preloadEnded);
+
+                var coBoostrapRunner = new CoroutineManager();
+                coBoostrapRunner.RegisterCoroutine(peerBootstrapWorker.GetEnumerator());
+                coBoostrapRunner.Start();
+
+                Interlocked.Exchange(ref running, 1);
+
+                //this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
+                //    this.logger,
+                //    this.swarm,
+                //    this.blocks,
+                //    this.privateKey.ToAddress(),
+                //    this.store,
+                //    this.privateKey,
+                //    null
+                //    );
             } 
             else
             {
@@ -185,7 +196,7 @@ namespace FreeMarketOne.BlockChain
             return true;
         }
 
-        private List<Peer> GetPeers()
+        private List<Peer> GetPeersFromOnionManager()
         {
             var peers = new List<Peer>();
 
@@ -229,6 +240,11 @@ namespace FreeMarketOne.BlockChain
             this.cancellationToken?.Cancel();
             this.cancellationToken?.Dispose();
             this.cancellationToken = null;
+
+            Task.Run(async () => await this.swarm.StopAsync()).ContinueWith(_ =>
+            {
+                this.store?.Dispose();
+            }).Wait(2000);
 
             logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
         }

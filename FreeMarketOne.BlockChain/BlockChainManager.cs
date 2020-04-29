@@ -158,8 +158,10 @@ namespace FreeMarketOne.BlockChain
                 this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
                 this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
 
+                Interlocked.Exchange(ref running, 1);
+
                 //init Peer Bootstrap Worker
-                var peerBootstrapWorker = new PeerBootstrapWorker<T>(
+                this.peerBootstrapWorker = new PeerBootstrapWorker<T>(
                     this.logger,
                     this.swarm,
                     this.blocks,
@@ -175,17 +177,18 @@ namespace FreeMarketOne.BlockChain
                 coBoostrapRunner.RegisterCoroutine(peerBootstrapWorker.GetEnumerator());
                 coBoostrapRunner.Start();
 
-                Interlocked.Exchange(ref running, 1);
-
                 //this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
                 //    this.logger,
                 //    this.swarm,
                 //    this.blocks,
                 //    this.privateKey.ToAddress(),
                 //    this.store,
-                //    this.privateKey,
-                //    null
+                //    this.privateKey
                 //    );
+
+                //var coProofOfWorkRunner = new CoroutineManager();
+                //coProofOfWorkRunner.RegisterCoroutine(proofOfWorkWorker.GetEnumerator());
+                //coProofOfWorkRunner.Start();
             } 
             else
             {

@@ -1,4 +1,5 @@
-﻿using FreeMarketOne.Extensions.Helpers;
+﻿using FreeMarketOne.BlockChain.Helpers;
+using FreeMarketOne.Extensions.Helpers;
 using Libplanet;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
@@ -20,8 +21,14 @@ namespace FreeMarketOne.BlockChain
     internal class ProofOfWorkWorker<T> : IDisposable where T : IBaseAction, new()
     {
         private ILogger logger { get; set; }
-        private IAsyncLoopFactory asyncLoopFactory { get; set; }
         private CancellationTokenSource cancellationToken { get; set; }
+
+        private PrivateKey privateKey { get; set; }
+        private RocksDBStore store;
+        private BlockChain<T> blocks;
+        private Swarm<T> swarm;
+        private Address address;
+        private EventHandler eventNewBlock { get; set; }
 
         internal ProofOfWorkWorker(
             ILogger serverLogger,
@@ -34,104 +41,99 @@ namespace FreeMarketOne.BlockChain
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
-            this.logger.Information("Initializing Proof Of Work Worker");
+            this.blocks = blocks;
+            this.swarm = swarm;
+            this.privateKey = privateKey;
+
+            this.store = store;
+            this.eventNewBlock = eventNewBlock;
+            this.address = address;
 
             this.cancellationToken = new CancellationTokenSource();
 
+            this.logger.Information("Initializing Proof Of Work Worker");
         }
 
-        internal IEnumerator GetEnumerator() { 
-            asyncLoopFactory = new AsyncLoopFactory(serverLogger);
-
-            var periodicLogLoop = this.asyncLoopFactory.Run("ProofOfWork" + typeof(T).Name, (cancellation) =>
+        internal IEnumerator GetEnumerator()
+        {
+            while (true)
             {
-                while (true)
+                var txs = new HashSet<Transaction<T>>();
+
+                var taskMiner = Task.Run(async () =>
                 {
-                    var txs = new HashSet<Transaction<T>>();
+                    var block = await this.blocks.MineBlock(address);
 
-                    var taskMiner = Task.Run(async () =>
+                    if (this.swarm?.Running ?? false)
                     {
-                        var block = await blocks.MineBlock(address);
-
-                        if (swarm?.Running ?? false)
-                        {
-                            swarm.BroadcastBlock(block);
-                        }
-
-                        return block;
-                    });
-
-                    //while (!taskMiner.IsCompleted)
-                    //{
-                    //    yield return null;
-                    //}
-
-                    if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
-                    {
-                        var block = taskMiner.Result;
-                        logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
-                            block.Index,
-                            block.Difficulty));
+                        this.swarm.BroadcastBlock(block);
                     }
-                    else
-                    {
-                        var invalidTxs = txs;
-                        var retryActions = new HashSet<IImmutableList<T>>();
 
-                        if (taskMiner.IsFaulted)
+                    return block;
+                });
+
+                yield return new WaitUntil(() => taskMiner.IsCompleted);
+
+                if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
+                {
+                    var block = taskMiner.Result;
+                    this.logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
+                        block.Index,
+                        block.Difficulty));
+                }
+                else
+                {
+                    var invalidTxs = txs;
+                    var retryActions = new HashSet<IImmutableList<T>>();
+
+                    if (taskMiner.IsFaulted)
+                    {
+                        foreach (var ex in taskMiner.Exception.InnerExceptions)
                         {
-                            foreach (var ex in taskMiner.Exception.InnerExceptions)
+                            if (ex is InvalidTxNonceException invalidTxNonceException)
                             {
-                                if (ex is InvalidTxNonceException invalidTxNonceException)
+                                var invalidNonceTx = this.store.GetTransaction<T>(invalidTxNonceException.TxId);
+
+                                if (invalidNonceTx.Signer == address)
                                 {
-                                    var invalidNonceTx = store.GetTransaction<T>(invalidTxNonceException.TxId);
-
-                                    if (invalidNonceTx.Signer == address)
-                                    {
-                                        logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
-                                            invalidTxNonceException.TxId));
-                                        retryActions.Add(invalidNonceTx.Actions);
-                                    }
+                                    this.logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
+                                        invalidTxNonceException.TxId));
+                                    retryActions.Add(invalidNonceTx.Actions);
                                 }
-
-                                if (ex is InvalidTxException invalidTxException)
-                                {
-                                    logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
-                                        invalidTxException.TxId));
-                                    invalidTxs.Add(store.GetTransaction<T>(invalidTxException.TxId));
-                                }
-
-                                logger.Error(ex.Message);
                             }
-                        }
 
-                        foreach (var invalidTx in invalidTxs)
-                        {
-                            blocks.UnstageTransaction(invalidTx);
-                        }
+                            if (ex is InvalidTxException invalidTxException)
+                            {
+                                this.logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
+                                    invalidTxException.TxId));
+                                invalidTxs.Add(store.GetTransaction<T>(invalidTxException.TxId));
+                            }
 
-                        foreach (var retryAction in retryActions)
-                        {
-                            var actions = retryAction.ToArray();
-                            blocks.MakeTransaction(privateKey, actions);
+                            this.logger.Error(ex.Message);
                         }
                     }
 
-                    if (eventNewBlock != null)
+                    foreach (var invalidTx in invalidTxs)
                     {
-                        eventNewBlock.Invoke(this, EventArgs.Empty);
+                        this.blocks.UnstageTransaction(invalidTx);
+                    }
+
+                    foreach (var retryAction in retryActions)
+                    {
+                        var actions = retryAction.ToArray();
+                        this.blocks.MakeTransaction(this.privateKey, actions);
                     }
                 }
-            },
-                cancellationToken.Token,
-                repeatEvery: TimeSpans.RunOnce);
+
+                this.eventNewBlock?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public void Dispose()
         {
             logger.Information("Proof Of Work Worker stopping.");
 
-            cancellationToken.Cancel();
+            this.cancellationToken.Cancel();
 
             logger.Information("Proof Of Work Worker stopped.");
         }

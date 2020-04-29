@@ -51,6 +51,7 @@ namespace FreeMarketOne.BlockChain
         private EventHandler preloadStarted { get; set; }
         private EventHandler<PreloadState> preloadProcessed { get; set; }
         private EventHandler preloadEnded { get; set; }
+        private EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged { get; set; }
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
@@ -61,7 +62,12 @@ namespace FreeMarketOne.BlockChain
         /// <param name="endPoint"></param>
         /// <param name="seedsManager"></param>
         /// <param name="listHashCheckPoints"></param>
-        public BlockChainManager(ILogger serverLogger, 
+        /// <param name="bootstrapStarted"></param>
+        /// <param name="preloadStarted"></param>
+        /// <param name="preloadProcessed"></param>
+        /// <param name="preloadEnded"></param>
+        /// <param name="blockChainChanged"></param>
+        public BlockChainManager(ILogger serverLogger,
             string blockChainPath,
             string blockChainSecretPath,
             EndPoint endPoint,
@@ -70,13 +76,15 @@ namespace FreeMarketOne.BlockChain
             EventHandler bootstrapStarted = null,
             EventHandler preloadStarted = null,
             EventHandler<PreloadState> preloadProcessed = null,
-            EventHandler preloadEnded = null)
+            EventHandler preloadEnded = null,
+            EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
             this.blockChainFilePath = blockChainPath;
             this.endPoint = endPoint;
 
             this.privateKey = GetSecret(blockChainSecretPath);
+
             this.store = new RocksDBStore(this.blockChainFilePath);
 
             this.onionSeedManager = (OnionSeedsManager)seedsManager;
@@ -90,6 +98,7 @@ namespace FreeMarketOne.BlockChain
             this.preloadStarted = preloadStarted;
             this.preloadProcessed = preloadProcessed;
             this.preloadEnded = preloadEnded;
+            this.blockChainChanged = blockChainChanged;
 
             logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
         }
@@ -142,6 +151,10 @@ namespace FreeMarketOne.BlockChain
                 genesis
             );
 
+            //event for new block accepted
+            if (blockChainChanged != null)
+                this.blocks.TipChanged += blockChainChanged;
+
             if (host != null)
             {
                 this.swarm = new Swarm<T>(
@@ -177,14 +190,14 @@ namespace FreeMarketOne.BlockChain
                 coBoostrapRunner.RegisterCoroutine(peerBootstrapWorker.GetEnumerator());
                 coBoostrapRunner.Start();
 
-                //this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
-                //    this.logger,
-                //    this.swarm,
-                //    this.blocks,
-                //    this.privateKey.ToAddress(),
-                //    this.store,
-                //    this.privateKey
-                //    );
+                this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
+                    this.logger,
+                    this.swarm,
+                    this.blocks,
+                    this.privateKey.ToAddress(),
+                    this.store,
+                    this.privateKey
+                    );
 
                 //var coProofOfWorkRunner = new CoroutineManager();
                 //coProofOfWorkRunner.RegisterCoroutine(proofOfWorkWorker.GetEnumerator());

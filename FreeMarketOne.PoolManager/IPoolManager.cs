@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace FreeMarketOne.PoolManager
 {
-    public interface IPoolManager : IDisposable
+    public interface IPoolManager : IDisposable 
     {
         bool Start();
         bool IsPoolManagerRunning();

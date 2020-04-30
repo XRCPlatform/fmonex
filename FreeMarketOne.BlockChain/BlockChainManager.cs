@@ -84,7 +84,9 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadEnded = null,
             EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null)
         {
-            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
+            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
+
             _blockChainFilePath = blockChainPath;
             _endPoint = endPoint;
 

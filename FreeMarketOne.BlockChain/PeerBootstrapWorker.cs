@@ -44,7 +44,8 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadEnded = null
             )
         {
-            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
+            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                string.Format("{0}.{1}.{2}", typeof(PeerBootstrapWorker<T>).Namespace, typeof(PeerBootstrapWorker<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
 
             _blockChain = blockChain;
             _swarmServer = swarmServer;

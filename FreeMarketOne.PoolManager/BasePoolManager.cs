@@ -9,7 +9,7 @@ using System.Text;
 
 namespace FreeMarketOne.PoolManager
 {
-    public class BasePoolManager : PoolManager
+    public class BasePoolManager : PoolManager<BaseBlockChainAction>
     {
         public BasePoolManager(
             Logger serverLogger,

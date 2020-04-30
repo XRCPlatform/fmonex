@@ -1,5 +1,6 @@
 ﻿using FreeMarketOne.BlockChain.Actions;
 using FreeMarketOne.DataStructure;
+using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Serilog.Core;
@@ -15,8 +16,9 @@ namespace FreeMarketOne.PoolManager
             Logger serverLogger,
             string memoryPoolFilePath,
             RocksDBStore storage,
-            Swarm<MarketBlockChainAction> swarmServer)
-            : base(serverLogger, memoryPoolFilePath, storage, swarmServer)
+            Swarm<MarketBlockChainAction> swarmServer,
+            PrivateKey privateKey)
+            : base(serverLogger, memoryPoolFilePath, storage, swarmServer, privateKey)
         {
         }
     }

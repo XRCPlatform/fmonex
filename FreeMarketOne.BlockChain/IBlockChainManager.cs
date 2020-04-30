@@ -1,6 +1,7 @@
 ﻿using FreeMarketOne.BlockChain.Actions;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Libplanet.Blockchain;
+using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using System;
@@ -13,6 +14,7 @@ namespace FreeMarketOne.BlockChain
         BlockChain<T> BlockChain { get; }
         RocksDBStore Storage { get; }
         Swarm<T> SwarmServer { get; }
+        PrivateKey PrivateKey { get; }
 
         bool Start();
         bool IsBlockChainManagerRunning();

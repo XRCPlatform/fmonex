@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace FreeMarketOne.PoolManager
 {
-    public interface IPoolManager : IDisposable
+    public interface IPoolManager : IDisposable 
     {
         bool Start();
         bool IsPoolManagerRunning();
@@ -22,8 +22,8 @@ namespace FreeMarketOne.PoolManager
         bool PropagateAllActionItemLocal(List<IBaseAction> extraActions);
 
         List<IBaseItem> GetAllActionItemStaged();
-        IBaseItem GetActionItemStaged();
+        IBaseItem GetActionItemStaged(string hash);
 
-        List<IBaseAction> GetAllActionsStaged();
+        List<IBaseAction> GetAllActionStaged();
     }
 }

@@ -57,6 +57,7 @@ namespace FreeMarketOne.BlockChain
         public BlockChain<T> BlockChain { get => _blockChain; }
         public RocksDBStore Storage { get => _storage; }
         public Swarm<T> SwarmServer { get => _swarmServer; }
+        public PrivateKey PrivateKey { get => _privateKey; }
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data

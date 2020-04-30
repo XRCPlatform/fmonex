@@ -2,8 +2,10 @@
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
+using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
+using Libplanet.Tx;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
@@ -34,9 +36,9 @@ namespace FreeMarketOne.PoolManager
         private readonly object _pollLock;
         private string _memoryPoolFilePath { get; set; }
 
-        //private BlockChain<T> _blockChain;
         private RocksDBStore _storage;
         private Swarm<T> _swarmServer;
+        private PrivateKey _privateKey;
 
         /// <summary>
         /// Base pool manager
@@ -45,11 +47,13 @@ namespace FreeMarketOne.PoolManager
         /// <param name="memoryPoolFilePath"></param>
         /// <param name="storage"></param>
         /// <param name="swarmServer"></param>
+        /// <param name="privateKey"></param>
         public PoolManager(
             Logger serverLogger,
             string memoryPoolFilePath,
             RocksDBStore storage,
-            Swarm<T> swarmServer)
+            Swarm<T> swarmServer,
+            PrivateKey privateKey)
         {
             _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(PoolManager<T>).Namespace, typeof(PoolManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
@@ -58,6 +62,7 @@ namespace FreeMarketOne.PoolManager
             _pollLock = new object();
             _memoryPoolFilePath = memoryPoolFilePath;
             _storage = storage;
+            _privateKey = privateKey;
 
             _logger.Information("Initializing Base Pool Manager");
 
@@ -238,31 +243,115 @@ namespace FreeMarketOne.PoolManager
 
         public bool PropagateAllActionItemLocal(List<IBaseAction> extraActions)
         {
-            throw new NotImplementedException();
+            var actions = new List<T>();
+            var action = new T();
+
+            try
+            {
+                action.BaseItems.AddRange(_actionItemsList);
+                actions.Add(action);
+
+                if (extraActions.Any())
+                {
+                    foreach (var extraAction in extraActions)
+                    {
+                        actions.Add((T)extraAction);
+                    }
+                }
+
+                var tx = Transaction<T>.Create(
+                    0,
+                    _privateKey,
+                    actions);
+
+                _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
+
+                _storage.PutTransaction(tx);
+                _swarmServer.BroadcastTxs(new [] { tx });
+
+                _logger.Information("Clearing all item actions from local pool.");
+                _actionItemsList.Clear();
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Unexpected error suring propagation of transaction.", e);
+                return false;
+            } 
         }
 
         public List<IBaseItem> GetAllActionItemStaged()
         {
+            var result = new List<IBaseItem>();
+
             foreach (var itemTxId in _storage.IterateStagedTransactionIds())
             {
-               // _storage.GetTransaction<T>
+                var transaction = _storage.GetTransaction<T>(itemTxId);
 
-
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                result.Add(itemAction);
+                            }
+                        }
+                    }
+                }
             }
-            
 
-
-            throw new NotImplementedException();
+            return result;
         }
 
-        public IBaseItem GetActionItemStaged()
+        public IBaseItem GetActionItemStaged(string hash)
         {
-            throw new NotImplementedException();
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                if (itemAction.Hash == hash)
+                                {
+                                    return itemAction;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
-        public List<IBaseAction> GetAllActionsStaged()
+        public List<IBaseAction> GetAllActionStaged()
         {
-            throw new NotImplementedException();
+            var result = new List<IBaseAction>();
+
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        result.Add(action);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

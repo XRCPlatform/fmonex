@@ -133,13 +133,15 @@ namespace FreeMarketOne.ServerCore
                 Logger, 
                 Configuration.MemoryBasePoolPath, 
                 BaseBlockChainManager.Storage, 
-                BaseBlockChainManager.SwarmServer);
+                BaseBlockChainManager.SwarmServer,
+                BaseBlockChainManager.PrivateKey);
 
             MarketPoolManager = new MarketPoolManager(
                 Logger,
                 Configuration.MemoryMarketPoolPath,
                 MarketBlockChainManager.Storage,
-                MarketBlockChainManager.SwarmServer);
+                MarketBlockChainManager.SwarmServer,
+                MarketBlockChainManager.PrivateKey);
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)

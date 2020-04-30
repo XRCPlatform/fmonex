@@ -241,7 +241,7 @@ namespace FreeMarketOne.PoolManager
             }
         }
 
-        public bool PropagateAllActionItemLocal(List<IBaseAction> extraActions)
+        public bool PropagateAllActionItemLocal(List<IBaseAction> extraActions = null)
         {
             var actions = new List<T>();
             var action = new T();
@@ -251,7 +251,7 @@ namespace FreeMarketOne.PoolManager
                 action.BaseItems.AddRange(_actionItemsList);
                 actions.Add(action);
 
-                if (extraActions.Any())
+                if ((extraActions != null) && extraActions.Any())
                 {
                     foreach (var extraAction in extraActions)
                     {

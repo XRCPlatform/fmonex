@@ -14,6 +14,7 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.BlockChain.Actions;
 using FreeMarketOne.PoolManager;
+using Libplanet.Blockchain;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -43,6 +44,11 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler BaseBlockChainLoadedEvent;
         public event EventHandler MarketBlockChainLoadedEvent;
+
+        public event EventHandler<BlockChain<BaseBlockChainAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
+        public event EventHandler<BlockChain<MarketBlockChainAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
+
+        public event EventHandler FreeMarketOneServerLoadedEvent;
 
         public void Initialize()
         {
@@ -97,7 +103,8 @@ namespace FreeMarketOne.ServerCore
                 Configuration.BlockChainSecretPath,
                 Configuration.ListenerBaseEndPoint,
                 OnionSeedsManager, 
-                preloadEnded: BaseBlockChainLoadedEvent);
+                preloadEnded: BaseBlockChainLoadedEvent,
+                blockChainChanged: BaseBlockChainChangedEvent);
             BaseBlockChainManager.Start();
         }
 
@@ -116,7 +123,8 @@ namespace FreeMarketOne.ServerCore
                     Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,
                     hashCheckPoints,
-                    preloadEnded: MarketBlockChainLoadedEvent);
+                    preloadEnded: MarketBlockChainLoadedEvent,
+                    blockChainChanged: MarketBlockChainChangedEvent);
                 MarketBlockChainManager.Start();
             } 
             else
@@ -142,6 +150,8 @@ namespace FreeMarketOne.ServerCore
                 MarketBlockChainManager.Storage,
                 MarketBlockChainManager.SwarmServer,
                 MarketBlockChainManager.PrivateKey);
+
+            FreeMarketOneServerLoadedEvent?.Invoke(this, null);
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)

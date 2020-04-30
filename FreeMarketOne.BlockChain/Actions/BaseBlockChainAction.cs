@@ -3,11 +3,9 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Action;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace FreeMarketOne.BlockChain
+namespace FreeMarketOne.BlockChain.Actions
 {
     public class BaseBlockChainAction : IBaseAction
     {

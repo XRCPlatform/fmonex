@@ -14,6 +14,7 @@ using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.GenesisBlock;
+using FreeMarketOne.BlockChain.Actions;
 
 namespace FreeMarketOne.ServerCore
 {

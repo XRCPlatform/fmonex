@@ -10,6 +10,7 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using FreeMarketOne.BlockChain.Helpers;
+using FreeMarketOne.BlockChain.Actions;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -21,8 +22,8 @@ namespace FreeMarketOne.BlockChain
         private const int SwarmDialTimeout = 5000;
 
         private PrivateKey privateKey { get; set; }
-        private BlockChain<T> blocks;
-        private Swarm<T> swarm;
+        private BlockChain<T> blockChain;
+        private Swarm<T> swarmServer;
         private ImmutableList<Peer> seedPeers;
         private IImmutableSet<Address> trustedPeers;
         private EventHandler bootstrapStarted { get; set; }
@@ -32,8 +33,8 @@ namespace FreeMarketOne.BlockChain
 
         internal PeerBootstrapWorker(
             ILogger serverLogger,
-            Swarm<T> swarm,
-            BlockChain<T> blocks,
+            Swarm<T> swarmServer,
+            BlockChain<T> blockChain,
             ImmutableList<Peer> seedPeers,
             IImmutableSet<Address> trustedPeers,
             PrivateKey privateKey,
@@ -45,8 +46,8 @@ namespace FreeMarketOne.BlockChain
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
-            this.blocks = blocks;
-            this.swarm = swarm;
+            this.blockChain = blockChain;
+            this.swarmServer = swarmServer;
             this.seedPeers = seedPeers;
             this.trustedPeers = trustedPeers;
             this.privateKey = privateKey;
@@ -63,7 +64,7 @@ namespace FreeMarketOne.BlockChain
 
         internal IEnumerator GetEnumerator()
         {
-            if (this.swarm == null)
+            if (this.swarmServer == null)
             {
                 this.logger.Error("Swarm listener is dead.");
             }
@@ -75,7 +76,7 @@ namespace FreeMarketOne.BlockChain
                 {
                     try
                     {
-                        await this.swarm.BootstrapAsync(
+                        await this.swarmServer.BootstrapAsync(
                             this.seedPeers,
                             5000,
                             5000,
@@ -98,12 +99,12 @@ namespace FreeMarketOne.BlockChain
                 this.logger.Information("PreloadingStarted event was invoked");
 
                 DateTimeOffset started = DateTimeOffset.UtcNow;
-                long existingBlocks = this.blocks?.Tip?.Index ?? 0;
+                long existingBlocks = this.blockChain?.Tip?.Index ?? 0;
                 this.logger.Information("Preloading starts");
 
                 var swarmPreloadTask = Task.Run(async () =>
                 {
-                    await this.swarm.PreloadAsync(
+                    await this.swarmServer.PreloadAsync(
                         TimeSpan.FromMilliseconds(SwarmDialTimeout),
                         new Progress<PreloadState>(state =>
                             this.preloadProcessed?.Invoke(this, state)
@@ -122,7 +123,7 @@ namespace FreeMarketOne.BlockChain
                     throw e;
                 }
 
-                var index = blocks?.Tip?.Index ?? 0;
+                var index = blockChain?.Tip?.Index ?? 0;
 
                 this.logger.Information("Preloading finished; elapsed time: {0}; blocks: {1}",
                     ended - started,
@@ -135,7 +136,7 @@ namespace FreeMarketOne.BlockChain
                 {
                     try
                     {
-                        await swarm.StartAsync();
+                        await swarmServer.StartAsync();
                     }
                     catch (TaskCanceledException e)
                     {
@@ -150,13 +151,13 @@ namespace FreeMarketOne.BlockChain
 
                 Task.Run(async () =>
                 {
-                    await this.swarm.WaitForRunningAsync();
+                    await this.swarmServer.WaitForRunningAsync();
 
                     this.logger.Information(
                         "The address of this node: {0},{1},{2}",
                         ByteUtil.Hex(this.privateKey.PublicKey.Format(true)),
-                        this.swarm.EndPoint.Host,
-                        this.swarm.EndPoint.Port
+                        this.swarmServer.EndPoint.Host,
+                        this.swarmServer.EndPoint.Port
                     );
                 });
 

@@ -3,13 +3,11 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Action;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace FreeMarketOne.BlockChain
+namespace FreeMarketOne.BlockChain.Actions
 {
-   public class MarketBlockChainAction : IBaseAction
+    public class MarketBlockChainAction : IBaseAction
     {
         private List<IBaseItem> memoryBaseItems { get; set; }
         private byte[] memorySerialized { get; set; }

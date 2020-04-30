@@ -17,6 +17,7 @@ using Libplanet.RocksDBStore;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.P2P;
 using FreeMarketOne.BlockChain.Helpers;
+using FreeMarketOne.BlockChain.Actions;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -37,9 +38,9 @@ namespace FreeMarketOne.BlockChain
 
         private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
         private PrivateKey privateKey { get; set; }
-        private BlockChain<T> blocks;
-        private RocksDBStore store;
-        private Swarm<T> swarm;
+        private BlockChain<T> blockChain;
+        private RocksDBStore storage;
+        private Swarm<T> swarmServer;
         private ImmutableList<Peer> seedPeers;
         private IImmutableSet<Address> trustedPeers;
 
@@ -85,7 +86,7 @@ namespace FreeMarketOne.BlockChain
 
             this.privateKey = GetSecret(blockChainSecretPath);
 
-            this.store = new RocksDBStore(this.blockChainFilePath);
+            this.storage = new RocksDBStore(this.blockChainFilePath);
 
             this.onionSeedManager = (OnionSeedsManager)seedsManager;
 
@@ -141,20 +142,20 @@ namespace FreeMarketOne.BlockChain
                     100000,
                     2048);
 
-            this.blocks = new BlockChain<T>(
+            this.blockChain = new BlockChain<T>(
                 policy,
-                this.store,
+                this.storage,
                 genesis
             );
 
             //event for new block accepted
             if (blockChainChanged != null)
-                this.blocks.TipChanged += blockChainChanged;
+                this.blockChain.TipChanged += blockChainChanged;
 
             if (host != null)
             {
-                this.swarm = new Swarm<T>(
-                    this.blocks,
+                this.swarmServer = new Swarm<T>(
+                    this.blockChain,
                     this.privateKey,
                     appProtocolVersion: appProtocolVersion,
                     host: host,
@@ -173,8 +174,8 @@ namespace FreeMarketOne.BlockChain
                 //init Peer Bootstrap Worker
                 this.peerBootstrapWorker = new PeerBootstrapWorker<T>(
                     this.logger,
-                    this.swarm,
-                    this.blocks,
+                    this.swarmServer,
+                    this.blockChain,
                     this.seedPeers,
                     this.trustedPeers,
                     this.privateKey,
@@ -189,10 +190,10 @@ namespace FreeMarketOne.BlockChain
 
                 this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
                     this.logger,
-                    this.swarm,
-                    this.blocks,
+                    this.swarmServer,
+                    this.blockChain,
                     this.privateKey.ToAddress(),
-                    this.store,
+                    this.storage,
                     this.privateKey
                     );
 
@@ -246,7 +247,7 @@ namespace FreeMarketOne.BlockChain
         public List<IBaseItem> GetActionItemsByType(Type type)
         {
             var result = new List<IBaseItem>();
-            var hashs = this.store.IterateBlockHashes();
+            var hashs = this.storage.IterateBlockHashes();
 
             if (hashs.Any())
             {
@@ -257,7 +258,7 @@ namespace FreeMarketOne.BlockChain
                 {
                     if (i > 10) break;
 
-                    var block = this.store.GetBlock<T>(itemHash);
+                    var block = this.storage.GetBlock<T>(itemHash);
                     if (block.Transactions.Any()) {
                         foreach (var itemTx in block.Transactions)
                         {
@@ -313,9 +314,9 @@ namespace FreeMarketOne.BlockChain
             this.cancellationToken?.Dispose();
             this.cancellationToken = null;
 
-            Task.Run(async () => await this.swarm.StopAsync()).ContinueWith(_ =>
+            Task.Run(async () => await this.swarmServer.StopAsync()).ContinueWith(_ =>
             {
-                this.store?.Dispose();
+                this.storage?.Dispose();
             }).Wait(2000);
 
             logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));

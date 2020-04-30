@@ -1,5 +1,4 @@
 ﻿using FreeMarketOne.BlockChain.Helpers;
-using FreeMarketOne.Extensions.Helpers;
 using Libplanet;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
@@ -15,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FreeMarketOne.BlockChain.Actions;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -24,28 +24,28 @@ namespace FreeMarketOne.BlockChain
         private CancellationTokenSource cancellationToken { get; set; }
 
         private PrivateKey privateKey { get; set; }
-        private RocksDBStore store;
-        private BlockChain<T> blocks;
-        private Swarm<T> swarm;
+        private RocksDBStore storage;
+        private BlockChain<T> blockChain;
+        private Swarm<T> swarmServer;
         private Address address;
         private EventHandler eventNewBlock { get; set; }
 
         internal ProofOfWorkWorker(
             ILogger serverLogger,
-            Swarm<T> swarm,
-            BlockChain<T> blocks,
+            Swarm<T> swarmServer,
+            BlockChain<T> blockChain,
             Address address,
-            RocksDBStore store,
+            RocksDBStore storage,
             PrivateKey privateKey,
             EventHandler eventNewBlock = null)
         {
             this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
-            this.blocks = blocks;
-            this.swarm = swarm;
+            this.blockChain = blockChain;
+            this.swarmServer = swarmServer;
             this.privateKey = privateKey;
 
-            this.store = store;
+            this.storage = storage;
             this.eventNewBlock = eventNewBlock;
             this.address = address;
 
@@ -62,11 +62,11 @@ namespace FreeMarketOne.BlockChain
 
                 var taskMiner = Task.Run(async () =>
                 {
-                    var block = await this.blocks.MineBlock(address);
+                    var block = await this.blockChain.MineBlock(address);
 
-                    if (this.swarm?.Running ?? false)
+                    if (this.swarmServer?.Running ?? false)
                     {
-                        this.swarm.BroadcastBlock(block);
+                        this.swarmServer.BroadcastBlock(block);
                     }
 
                     return block;
@@ -92,7 +92,7 @@ namespace FreeMarketOne.BlockChain
                         {
                             if (ex is InvalidTxNonceException invalidTxNonceException)
                             {
-                                var invalidNonceTx = this.store.GetTransaction<T>(invalidTxNonceException.TxId);
+                                var invalidNonceTx = this.storage.GetTransaction<T>(invalidTxNonceException.TxId);
 
                                 if (invalidNonceTx.Signer == address)
                                 {
@@ -106,7 +106,7 @@ namespace FreeMarketOne.BlockChain
                             {
                                 this.logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
                                     invalidTxException.TxId));
-                                invalidTxs.Add(store.GetTransaction<T>(invalidTxException.TxId));
+                                invalidTxs.Add(storage.GetTransaction<T>(invalidTxException.TxId));
                             }
 
                             this.logger.Error(ex.Message);
@@ -115,13 +115,13 @@ namespace FreeMarketOne.BlockChain
 
                     foreach (var invalidTx in invalidTxs)
                     {
-                        this.blocks.UnstageTransaction(invalidTx);
+                        this.blockChain.UnstageTransaction(invalidTx);
                     }
 
                     foreach (var retryAction in retryActions)
                     {
                         var actions = retryAction.ToArray();
-                        this.blocks.MakeTransaction(this.privateKey, actions);
+                        this.blockChain.MakeTransaction(this.privateKey, actions);
                     }
                 }
 

@@ -1,4 +1,4 @@
-﻿using FreeMarketOne.BlockChain;
+﻿using FreeMarketOne.BlockChain.Actions;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Libplanet;
 using Libplanet.Blockchain;

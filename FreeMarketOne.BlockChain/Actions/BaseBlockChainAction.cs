@@ -9,29 +9,29 @@ namespace FreeMarketOne.BlockChain.Actions
 {
     public class BaseBlockChainAction : IBaseAction
     {
-        private List<IBaseItem> memoryBaseItems { get; set; }
-        private byte[] memorySerialized { get; set; }
+        private List<IBaseItem> _baseItems { get; set; }
+        private byte[] _serialized { get; set; }
 
         public BaseBlockChainAction()
         {
-            memoryBaseItems = new List<IBaseItem>();
+            _baseItems = new List<IBaseItem>();
         }
 
         public List<IBaseItem> BaseItems
         {
             get
             {
-                return memoryBaseItems;
+                return _baseItems;
             }
         }
         public void AddBaseItem(IBaseItem value)
         {
-            memoryBaseItems.Add(value);
+            _baseItems.Add(value);
 
             var serializedItems = JsonConvert.SerializeObject(this.BaseItems);
             var compressedItems = ZipHelpers.Compress(serializedItems);
 
-            memorySerialized = compressedItems;
+            _serialized = compressedItems;
         }
 
         public IValue PlainValue
@@ -40,7 +40,7 @@ namespace FreeMarketOne.BlockChain.Actions
             {
                 return new Bencodex.Types.Dictionary(new Dictionary<IKey, IValue>
                 {
-                    { (Text)"items", new Binary(memorySerialized) },
+                    { (Text)"items", new Binary(_serialized) },
                 });
             }
         }
@@ -56,8 +56,8 @@ namespace FreeMarketOne.BlockChain.Actions
             var binaryValue = dictionary.GetValue<Binary>("items");
 
             var serializedItems = ZipHelpers.Decompress(binaryValue.Value);
-            memoryBaseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
-            memorySerialized = binaryValue.Value;
+            _baseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
+            _serialized = binaryValue.Value;
         }
 
         public void Render(IActionContext context, IAccountStateDelta nextStates)

@@ -28,7 +28,7 @@ namespace FreeMarketOne.ServerCore
         public static FreeMarketOneServer Current { get; private set; }
 
         public Logger Logger;
-        private ILogger logger;
+        private ILogger _logger;
 
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
@@ -39,10 +39,11 @@ namespace FreeMarketOne.ServerCore
         public IBasePoolManager BasePoolManager;
         public IMarketPoolManager MarketPoolManager;
 
-        public IBlockChainManager BaseBlockChainManager;
-        public IBlockChainManager MarketBlockChainManager;
+        public IBlockChainManager<BaseBlockChainAction> BaseBlockChainManager;
+        public IBlockChainManager<MarketBlockChainAction> MarketBlockChainManager;
 
         public event EventHandler BaseBlockChainLoadedEvent;
+        public event EventHandler MarketBlockChainLoadedEvent;
 
         public void Initialize()
         {
@@ -70,8 +71,8 @@ namespace FreeMarketOne.ServerCore
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
                     rollingInterval: RollingInterval.Day)
                 .CreateLogger();
-            logger = Logger.ForContext<FreeMarketOneServer>();
-            logger.Information("Application Start");
+            _logger = Logger.ForContext<FreeMarketOneServer>();
+            _logger.Information("Application Start");
 
             /* Initialize Tor */
             TorProcessManager = new TorProcessManager(Logger, Configuration);
@@ -87,10 +88,6 @@ namespace FreeMarketOne.ServerCore
             /* Initialize genesis blocks */
             var generator = new GenesisGenerator();
             generator.GenerateIt(Configuration.BlockChainBasePath, Configuration.BlockChainMarketPath);
-
-            /* Initialize Base And Market Pool */
-            BasePoolManager = new BasePoolManager(Logger, Configuration);
-            MarketPoolManager = new MarketPoolManager(Logger, Configuration);
 
             /* Initialize Base BlockChain Manager */
             BaseBlockChainLoadedEvent += new EventHandler(Current.BaseBlockChainLoaded);
@@ -110,6 +107,8 @@ namespace FreeMarketOne.ServerCore
             /* Initialize Market BlockChain Manager */
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
+                MarketBlockChainLoadedEvent += new EventHandler(Current.MarketBlockChainLoaded);
+
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
                 MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
                     Logger,
@@ -117,9 +116,22 @@ namespace FreeMarketOne.ServerCore
                     Configuration.BlockChainSecretPath,
                     Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,
-                    hashCheckPoints);
+                    hashCheckPoints,
+                    preloadEnded: MarketBlockChainLoadedEvent);
                 MarketBlockChainManager.Start();
+            } 
+            else
+            {
+                _logger.Error("Base Chain isnt loaded!");
+                Stop();
             }
+        }
+
+        private void MarketBlockChainLoaded(object sender, EventArgs e)
+        {
+            /* Initialize Base And Market Pool */
+            BasePoolManager = new BasePoolManager(Logger, Configuration);
+            MarketPoolManager = new MarketPoolManager(Logger, Configuration);
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)
@@ -191,23 +203,23 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
-            logger.Information("Ending BlockChain Managers...");
+            _logger.Information("Ending BlockChain Managers...");
             BaseBlockChainManager?.Dispose();
             MarketBlockChainManager?.Dispose();
 
-            logger.Information("Ending Onion Seeds ...");
+            _logger.Information("Ending Onion Seeds ...");
             OnionSeedsManager?.Dispose();
 
-            logger.Information("Ending Base Pool Manager...");
+            _logger.Information("Ending Base Pool Manager...");
             BasePoolManager?.Dispose();
 
-            logger.Information("Ending Market Pool Manager...");
+            _logger.Information("Ending Market Pool Manager...");
             MarketPoolManager?.Dispose();
 
-            logger.Information("Ending Tor...");
+            _logger.Information("Ending Tor...");
             TorProcessManager?.Dispose();
 
-            logger.Information("Application End");
+            _logger.Information("Application End");
         }
     }
 }

@@ -21,38 +21,42 @@ using FreeMarketOne.BlockChain.Actions;
 
 namespace FreeMarketOne.BlockChain
 {
-    public class BlockChainManager<T> : IBlockChainManager, IDisposable where T : IBaseAction, new()
+    public class BlockChainManager<T> : IBlockChainManager<T>, IDisposable where T : IBaseAction, new()
     {
-        private ILogger logger { get; set; }
+        private ILogger _logger { get; set; }
 
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
-        private long running;
+        private long _running;
 
-        public bool IsRunning => Interlocked.Read(ref running) == 1;
-        private CancellationTokenSource cancellationToken { get; set; }
+        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        private CancellationTokenSource _cancellationToken { get; set; }
 
-        private string blockChainFilePath { get; set; }
-        private EndPoint endPoint { get; set; }
+        private string _blockChainFilePath { get; set; }
+        private EndPoint _endPoint { get; set; }
 
         private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
-        private PrivateKey privateKey { get; set; }
-        private BlockChain<T> blockChain;
-        private RocksDBStore storage;
-        private Swarm<T> swarmServer;
-        private ImmutableList<Peer> seedPeers;
-        private IImmutableSet<Address> trustedPeers;
+        private PrivateKey _privateKey { get; set; }
+        private BlockChain<T> _blockChain;
+        private RocksDBStore _storage;
+        private Swarm<T> _swarmServer;
+        private ImmutableList<Peer> _seedPeers;
+        private IImmutableSet<Address> _trustedPeers;
 
-        private OnionSeedsManager onionSeedManager;
-        private PeerBootstrapWorker<T> peerBootstrapWorker { get; set; }
-        private ProofOfWorkWorker<T> proofOfWorkWorker { get; set; }
-        private List<CheckPointMarketDataV1> hashCheckPoints { get; set; }
-        private EventHandler bootstrapStarted { get; set; }
-        private EventHandler preloadStarted { get; set; }
-        private EventHandler<PreloadState> preloadProcessed { get; set; }
-        private EventHandler preloadEnded { get; set; }
-        private EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged { get; set; }
+        private OnionSeedsManager _onionSeedManager;
+        private PeerBootstrapWorker<T> _peerBootstrapWorker { get; set; }
+        private ProofOfWorkWorker<T> _proofOfWorkWorker { get; set; }
+        private List<CheckPointMarketDataV1> _hashCheckPoints { get; set; }
+        private EventHandler _bootstrapStarted { get; set; }
+        private EventHandler _preloadStarted { get; set; }
+        private EventHandler<PreloadState> _preloadProcessed { get; set; }
+        private EventHandler _preloadEnded { get; set; }
+        private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockChainChanged { get; set; }
+        
+        public BlockChain<T> BlockChain { get => _blockChain; }
+        public RocksDBStore Storage { get => _storage; }
+        public Swarm<T> SwarmServer { get => _swarmServer; }
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
@@ -80,28 +84,26 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadEnded = null,
             EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null)
         {
-            this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
-            this.blockChainFilePath = blockChainPath;
-            this.endPoint = endPoint;
+            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
+            _blockChainFilePath = blockChainPath;
+            _endPoint = endPoint;
 
-            this.privateKey = GetSecret(blockChainSecretPath);
-
-            this.storage = new RocksDBStore(this.blockChainFilePath);
-
-            this.onionSeedManager = (OnionSeedsManager)seedsManager;
+            _privateKey = GetSecret(blockChainSecretPath);
+            _storage = new RocksDBStore(_blockChainFilePath);
+            _onionSeedManager = (OnionSeedsManager)seedsManager;
 
             if (listHashCheckPoints != null)
             {
-                this.hashCheckPoints = listHashCheckPoints.Select(a => (CheckPointMarketDataV1)a).ToList();
+                _hashCheckPoints = listHashCheckPoints.Select(a => (CheckPointMarketDataV1)a).ToList();
             }
 
-            this.bootstrapStarted = bootstrapStarted;
-            this.preloadStarted = preloadStarted;
-            this.preloadProcessed = preloadProcessed;
-            this.preloadEnded = preloadEnded;
-            this.blockChainChanged = blockChainChanged;
+            _bootstrapStarted = bootstrapStarted;
+            _preloadStarted = preloadStarted;
+            _preloadProcessed = preloadProcessed;
+            _preloadEnded = preloadEnded;
+            _blockChainChanged = blockChainChanged;
 
-            logger.Information(string.Format("Initializing BlockChain Manager for : {0}",  typeof(T).Name));
+            _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
         }
 
         private PrivateKey GetSecret(string path)
@@ -130,10 +132,10 @@ namespace FreeMarketOne.BlockChain
 
         public bool Start()
         {
-            this.cancellationToken = new CancellationTokenSource();
+            _cancellationToken = new CancellationTokenSource();
             Block<T> genesis = GetGenesisBlock();
-            var host = this.endPoint.GetHostOrDefault();
-            int? port = this.endPoint.GetPortOrDefault();
+            var host = _endPoint.GetHostOrDefault();
+            int? port = _endPoint.GetPortOrDefault();
 
             var appProtocolVersion = default(AppProtocolVersion);
             var policy = new BlockPolicy<T>(
@@ -142,21 +144,21 @@ namespace FreeMarketOne.BlockChain
                     100000,
                     2048);
 
-            this.blockChain = new BlockChain<T>(
+            _blockChain = new BlockChain<T>(
                 policy,
-                this.storage,
+                _storage,
                 genesis
             );
 
             //event for new block accepted
-            if (blockChainChanged != null)
-                this.blockChain.TipChanged += blockChainChanged;
+            if (_blockChainChanged != null)
+                _blockChain.TipChanged += _blockChainChanged;
 
             if (host != null)
             {
-                this.swarmServer = new Swarm<T>(
-                    this.blockChain,
-                    this.privateKey,
+                _swarmServer = new Swarm<T>(
+                    _blockChain,
+                    _privateKey,
                     appProtocolVersion: appProtocolVersion,
                     host: host,
                     listenPort: port,
@@ -166,35 +168,35 @@ namespace FreeMarketOne.BlockChain
 
                 var peers = GetPeersFromOnionManager();
                 //new List<Peer>(); // 
-                this.seedPeers = peers.Where(peer => peer.PublicKey != this.privateKey.PublicKey).ToImmutableList();
-                this.trustedPeers = seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
+                _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
+                _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
 
-                Interlocked.Exchange(ref running, 1);
+                Interlocked.Exchange(ref _running, 1);
 
                 //init Peer Bootstrap Worker
-                this.peerBootstrapWorker = new PeerBootstrapWorker<T>(
-                    this.logger,
-                    this.swarmServer,
-                    this.blockChain,
-                    this.seedPeers,
-                    this.trustedPeers,
-                    this.privateKey,
-                    this.bootstrapStarted,
-                    this.preloadStarted,
-                    this.preloadProcessed,
-                    this.preloadEnded);
+                _peerBootstrapWorker = new PeerBootstrapWorker<T>(
+                    _logger,
+                    _swarmServer,
+                    _blockChain,
+                    _seedPeers,
+                    _trustedPeers,
+                    _privateKey,
+                    _bootstrapStarted,
+                    _preloadStarted,
+                    _preloadProcessed,
+                    _preloadEnded);
 
                 var coBoostrapRunner = new CoroutineManager();
-                coBoostrapRunner.RegisterCoroutine(peerBootstrapWorker.GetEnumerator());
+                coBoostrapRunner.RegisterCoroutine(_peerBootstrapWorker.GetEnumerator());
                 coBoostrapRunner.Start();
 
-                this.proofOfWorkWorker = new ProofOfWorkWorker<T>(
-                    this.logger,
-                    this.swarmServer,
-                    this.blockChain,
-                    this.privateKey.ToAddress(),
-                    this.storage,
-                    this.privateKey
+                _proofOfWorkWorker = new ProofOfWorkWorker<T>(
+                    _logger,
+                    _swarmServer,
+                    _blockChain,
+                    _privateKey.ToAddress(),
+                    _storage,
+                    _privateKey
                     );
 
                 //var coProofOfWorkRunner = new CoroutineManager();
@@ -203,7 +205,7 @@ namespace FreeMarketOne.BlockChain
             } 
             else
             {
-                logger.Error(string.Format("No host information"));
+                _logger.Error(string.Format("No host information"));
                 Stop();
             }
 
@@ -214,12 +216,12 @@ namespace FreeMarketOne.BlockChain
         {
             var peers = new List<Peer>();
 
-            while (!this.onionSeedManager.IsOnionSeedsManagerRunning())
+            while (!_onionSeedManager.IsOnionSeedsManagerRunning())
             {
                 Thread.Sleep(100);
             }
 
-            foreach (var itemPeer in onionSeedManager.OnionSeedPeers)
+            foreach (var itemPeer in _onionSeedManager.OnionSeedPeers)
             {
                 //REMOVE: TEST - HACK
                 //itemPeer.SecretKeyHex = ByteUtil.Hex(new PrivateKey().PublicKey.Format(true));
@@ -234,7 +236,7 @@ namespace FreeMarketOne.BlockChain
 
         public bool IsBlockChainManagerRunning()
         {
-            if (Interlocked.Read(ref running) == 1)
+            if (Interlocked.Read(ref _running) == 1)
             {
                 return true;
             }
@@ -247,7 +249,7 @@ namespace FreeMarketOne.BlockChain
         public List<IBaseItem> GetActionItemsByType(Type type)
         {
             var result = new List<IBaseItem>();
-            var hashs = this.storage.IterateBlockHashes();
+            var hashs = _storage.IterateBlockHashes();
 
             if (hashs.Any())
             {
@@ -258,7 +260,7 @@ namespace FreeMarketOne.BlockChain
                 {
                     if (i > 10) break;
 
-                    var block = this.storage.GetBlock<T>(itemHash);
+                    var block = _storage.GetBlock<T>(itemHash);
                     if (block.Transactions.Any()) {
                         foreach (var itemTx in block.Transactions)
                         {
@@ -289,7 +291,7 @@ namespace FreeMarketOne.BlockChain
 
         public Block<T> GetGenesisBlock()
         {
-            var genesisPath = Path.Combine(this.blockChainFilePath, "genesis.dat");
+            var genesisPath = Path.Combine(_blockChainFilePath, "genesis.dat");
 
             if (File.Exists(genesisPath))
             {
@@ -298,35 +300,35 @@ namespace FreeMarketOne.BlockChain
             } 
             else
             {
-                this.logger.Error("Genesis block doesn't exist.");
+                _logger.Error("Genesis block doesn't exist.");
                 return null;
             }
         }
 
         public void Stop()
         {
-            Interlocked.Exchange(ref running, 2);
+            Interlocked.Exchange(ref _running, 2);
 
-            this.peerBootstrapWorker?.Dispose();
-            this.peerBootstrapWorker = null;
+            _peerBootstrapWorker?.Dispose();
+            _peerBootstrapWorker = null;
 
-            this.cancellationToken?.Cancel();
-            this.cancellationToken?.Dispose();
-            this.cancellationToken = null;
+            _cancellationToken?.Cancel();
+            _cancellationToken?.Dispose();
+            _cancellationToken = null;
 
-            Task.Run(async () => await this.swarmServer.StopAsync()).ContinueWith(_ =>
+            Task.Run(async () => await _swarmServer.StopAsync()).ContinueWith(_ =>
             {
-                this.storage?.Dispose();
+                _storage?.Dispose();
             }).Wait(2000);
 
-            logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
+            _logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
         }
 
         public void Dispose()
         {
             Stop();
 
-            Interlocked.Exchange(ref running, 3);
+            Interlocked.Exchange(ref _running, 3);
         }
     }
 }

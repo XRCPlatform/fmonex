@@ -20,15 +20,15 @@ namespace FreeMarketOne.BlockChain
 {
     internal class ProofOfWorkWorker<T> : IDisposable where T : IBaseAction, new()
     {
-        private ILogger logger { get; set; }
-        private CancellationTokenSource cancellationToken { get; set; }
+        private ILogger _logger { get; set; }
+        private CancellationTokenSource _cancellationToken { get; set; }
 
-        private PrivateKey privateKey { get; set; }
-        private RocksDBStore storage;
-        private BlockChain<T> blockChain;
-        private Swarm<T> swarmServer;
-        private Address address;
-        private EventHandler eventNewBlock { get; set; }
+        private PrivateKey _privateKey { get; set; }
+        private RocksDBStore _storage;
+        private BlockChain<T> _blockChain;
+        private Swarm<T> _swarmServer;
+        private Address _address;
+        private EventHandler _eventNewBlock { get; set; }
 
         internal ProofOfWorkWorker(
             ILogger serverLogger,
@@ -39,19 +39,19 @@ namespace FreeMarketOne.BlockChain
             PrivateKey privateKey,
             EventHandler eventNewBlock = null)
         {
-            this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
+            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
-            this.blockChain = blockChain;
-            this.swarmServer = swarmServer;
-            this.privateKey = privateKey;
+            _blockChain = blockChain;
+            _swarmServer = swarmServer;
+            _privateKey = privateKey;
 
-            this.storage = storage;
-            this.eventNewBlock = eventNewBlock;
-            this.address = address;
+            _storage = storage;
+            _eventNewBlock = eventNewBlock;
+            _address = address;
 
-            this.cancellationToken = new CancellationTokenSource();
+            _cancellationToken = new CancellationTokenSource();
 
-            this.logger.Information("Initializing Proof Of Work Worker");
+            _logger.Information("Initializing Proof Of Work Worker");
         }
 
         internal IEnumerator GetEnumerator()
@@ -62,11 +62,11 @@ namespace FreeMarketOne.BlockChain
 
                 var taskMiner = Task.Run(async () =>
                 {
-                    var block = await this.blockChain.MineBlock(address);
+                    var block = await _blockChain.MineBlock(_address);
 
-                    if (this.swarmServer?.Running ?? false)
+                    if (_swarmServer?.Running ?? false)
                     {
-                        this.swarmServer.BroadcastBlock(block);
+                        _swarmServer.BroadcastBlock(block);
                     }
 
                     return block;
@@ -77,7 +77,7 @@ namespace FreeMarketOne.BlockChain
                 if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
                 {
                     var block = taskMiner.Result;
-                    this.logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
+                    _logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
                         block.Index,
                         block.Difficulty));
                 }
@@ -92,11 +92,11 @@ namespace FreeMarketOne.BlockChain
                         {
                             if (ex is InvalidTxNonceException invalidTxNonceException)
                             {
-                                var invalidNonceTx = this.storage.GetTransaction<T>(invalidTxNonceException.TxId);
+                                var invalidNonceTx = _storage.GetTransaction<T>(invalidTxNonceException.TxId);
 
-                                if (invalidNonceTx.Signer == address)
+                                if (invalidNonceTx.Signer == _address)
                                 {
-                                    this.logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
+                                    _logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
                                         invalidTxNonceException.TxId));
                                     retryActions.Add(invalidNonceTx.Actions);
                                 }
@@ -104,38 +104,38 @@ namespace FreeMarketOne.BlockChain
 
                             if (ex is InvalidTxException invalidTxException)
                             {
-                                this.logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
+                                _logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
                                     invalidTxException.TxId));
-                                invalidTxs.Add(storage.GetTransaction<T>(invalidTxException.TxId));
+                                invalidTxs.Add(_storage.GetTransaction<T>(invalidTxException.TxId));
                             }
 
-                            this.logger.Error(ex.Message);
+                            _logger.Error(ex.Message);
                         }
                     }
 
                     foreach (var invalidTx in invalidTxs)
                     {
-                        this.blockChain.UnstageTransaction(invalidTx);
+                        _blockChain.UnstageTransaction(invalidTx);
                     }
 
                     foreach (var retryAction in retryActions)
                     {
                         var actions = retryAction.ToArray();
-                        this.blockChain.MakeTransaction(this.privateKey, actions);
+                        _blockChain.MakeTransaction(_privateKey, actions);
                     }
                 }
 
-                this.eventNewBlock?.Invoke(this, EventArgs.Empty);
+                _eventNewBlock?.Invoke(this, EventArgs.Empty);
             }
         }
 
         public void Dispose()
         {
-            logger.Information("Proof Of Work Worker stopping.");
+            _logger.Information("Proof Of Work Worker stopping.");
 
-            this.cancellationToken.Cancel();
+            _cancellationToken.Cancel();
 
-            logger.Information("Proof Of Work Worker stopped.");
+            _logger.Information("Proof Of Work Worker stopped.");
         }
     }
 }

@@ -16,20 +16,20 @@ namespace FreeMarketOne.BlockChain
 {
     internal class PeerBootstrapWorker<T> : IDisposable where T : IBaseAction, new()
     {
-        private ILogger logger { get; set; }
-        private CancellationTokenSource cancellationToken { get; set; }
+        private ILogger _logger { get; set; }
+        private CancellationTokenSource _cancellationToken { get; set; }
 
         private const int SwarmDialTimeout = 5000;
 
-        private PrivateKey privateKey { get; set; }
-        private BlockChain<T> blockChain;
-        private Swarm<T> swarmServer;
-        private ImmutableList<Peer> seedPeers;
-        private IImmutableSet<Address> trustedPeers;
-        private EventHandler bootstrapStarted { get; set; }
-        private EventHandler preloadStarted { get; set; }
-        private EventHandler<PreloadState> preloadProcessed { get; set; }
-        private EventHandler preloadEnded { get; set; }
+        private PrivateKey _privateKey { get; set; }
+        private BlockChain<T> _blockChain;
+        private Swarm<T> _swarmServer;
+        private ImmutableList<Peer> _seedPeers;
+        private IImmutableSet<Address> _trustedPeers;
+        private EventHandler _bootstrapStarted { get; set; }
+        private EventHandler _preloadStarted { get; set; }
+        private EventHandler<PreloadState> _preloadProcessed { get; set; }
+        private EventHandler _preloadEnded { get; set; }
 
         internal PeerBootstrapWorker(
             ILogger serverLogger,
@@ -44,73 +44,73 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadEnded = null
             )
         {
-            this.logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
+            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName, typeof(T).FullName);
 
-            this.blockChain = blockChain;
-            this.swarmServer = swarmServer;
-            this.seedPeers = seedPeers;
-            this.trustedPeers = trustedPeers;
-            this.privateKey = privateKey;
+            _blockChain = blockChain;
+            _swarmServer = swarmServer;
+            _seedPeers = seedPeers;
+            _trustedPeers = trustedPeers;
+            _privateKey = privateKey;
 
-            this.bootstrapStarted = bootstrapStarted;
-            this.preloadStarted = preloadStarted;
-            this.preloadProcessed = preloadProcessed;
-            this.preloadEnded = preloadEnded;
+            _bootstrapStarted = bootstrapStarted;
+            _preloadStarted = preloadStarted;
+            _preloadProcessed = preloadProcessed;
+            _preloadEnded = preloadEnded;
 
-            this.cancellationToken = new CancellationTokenSource();
+            _cancellationToken = new CancellationTokenSource();
 
-            this.logger.Information("Initializing Peer Bootstrap Worker");
+            _logger.Information("Initializing Peer Bootstrap Worker");
         }
 
         internal IEnumerator GetEnumerator()
         {
-            if (this.swarmServer == null)
+            if (_swarmServer == null)
             {
-                this.logger.Error("Swarm listener is dead.");
+                _logger.Error("Swarm listener is dead.");
             }
             else
             {
-                this.bootstrapStarted?.Invoke(this, null);
+                _bootstrapStarted?.Invoke(this, null);
 
                 var bootstrapTask = Task.Run(async () =>
                 {
                     try
                     {
-                        await this.swarmServer.BootstrapAsync(
-                            this.seedPeers,
+                        await _swarmServer.BootstrapAsync(
+                            _seedPeers,
                             5000,
                             5000,
-                            cancellationToken: this.cancellationToken.Token
+                            cancellationToken: _cancellationToken.Token
                         );
                     }
                     catch (PeerDiscoveryException e)
                     {
-                        this.logger.Error(e.Message);
+                        _logger.Error(e.Message);
                     }
                     catch (Exception e)
                     {
-                        this.logger.Error(string.Format("Exception occurred during bootstrap {0}", e));
+                        _logger.Error(string.Format("Exception occurred during bootstrap {0}", e));
                     }
                 });
 
                 yield return new WaitUntil(() => bootstrapTask.IsCompleted);
 
-                this.preloadStarted?.Invoke(this, null);
-                this.logger.Information("PreloadingStarted event was invoked");
+                _preloadStarted?.Invoke(this, null);
+                _logger.Information("PreloadingStarted event was invoked");
 
                 DateTimeOffset started = DateTimeOffset.UtcNow;
-                long existingBlocks = this.blockChain?.Tip?.Index ?? 0;
-                this.logger.Information("Preloading starts");
+                long existingBlocks = _blockChain?.Tip?.Index ?? 0;
+                _logger.Information("Preloading starts");
 
                 var swarmPreloadTask = Task.Run(async () =>
                 {
-                    await this.swarmServer.PreloadAsync(
+                    await _swarmServer.PreloadAsync(
                         TimeSpan.FromMilliseconds(SwarmDialTimeout),
                         new Progress<PreloadState>(state =>
-                            this.preloadProcessed?.Invoke(this, state)
+                            _preloadProcessed?.Invoke(this, state)
                         ),
-                        trustedStateValidators: this.trustedPeers,
-                        cancellationToken: this.cancellationToken.Token
+                        trustedStateValidators: _trustedPeers,
+                        cancellationToken: _cancellationToken.Token
                     );
                 });
 
@@ -119,45 +119,45 @@ namespace FreeMarketOne.BlockChain
                 DateTimeOffset ended = DateTimeOffset.UtcNow;
                 if (swarmPreloadTask.Exception is Exception e)
                 {
-                    this.logger.Error(string.Format("Preloading terminated with an exception: {0}", e));
+                    _logger.Error(string.Format("Preloading terminated with an exception: {0}", e));
                     throw e;
                 }
 
-                var index = blockChain?.Tip?.Index ?? 0;
+                var index = _blockChain?.Tip?.Index ?? 0;
 
-                this.logger.Information("Preloading finished; elapsed time: {0}; blocks: {1}",
+                _logger.Information("Preloading finished; elapsed time: {0}; blocks: {1}",
                     ended - started,
                     index - existingBlocks
                 );
 
-                this.preloadEnded?.Invoke(this, null);
+                _preloadEnded?.Invoke(this, null);
 
                 var swarmStartTask = Task.Run(async () =>
                 {
                     try
                     {
-                        await swarmServer.StartAsync();
+                        await _swarmServer.StartAsync();
                     }
                     catch (TaskCanceledException e)
                     {
-                        this.logger.Error(e.Message);
+                        _logger.Error(e.Message);
                     }
                     catch (Exception e)
                     {
-                        this.logger.Error(string.Format("Swarm terminated with an exception: {0}", e));
+                        _logger.Error(string.Format("Swarm terminated with an exception: {0}", e));
                         throw e;
                     }
                 });
 
                 Task.Run(async () =>
                 {
-                    await this.swarmServer.WaitForRunningAsync();
+                    await _swarmServer.WaitForRunningAsync();
 
-                    this.logger.Information(
+                    _logger.Information(
                         "The address of this node: {0},{1},{2}",
-                        ByteUtil.Hex(this.privateKey.PublicKey.Format(true)),
-                        this.swarmServer.EndPoint.Host,
-                        this.swarmServer.EndPoint.Port
+                        ByteUtil.Hex(_privateKey.PublicKey.Format(true)),
+                        _swarmServer.EndPoint.Host,
+                        _swarmServer.EndPoint.Port
                     );
                 });
 
@@ -166,11 +166,11 @@ namespace FreeMarketOne.BlockChain
         }
         public void Dispose()
         {
-            logger.Information("Peer Bootstrap stopping.");
+            _logger.Information("Peer Bootstrap stopping.");
 
-            cancellationToken.Cancel();
+            _cancellationToken.Cancel();
 
-            logger.Information("Peer Bootstrap stopped.");
+            _logger.Information("Peer Bootstrap stopped.");
         }
     }
 }

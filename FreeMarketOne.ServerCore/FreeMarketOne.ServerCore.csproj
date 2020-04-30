@@ -15,10 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FreeMarketOne.BasePool\FreeMarketOne.BasePool.csproj" />
-    <ProjectReference Include="..\FreeMarketOne.MarketPool\FreeMarketOne.MarketPool.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.BlockChain\FreeMarketOne.BlockChain.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.GenesisGenerator\FreeMarketOne.GenesisBlock.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\FreeMarketOne.MiningProcessor\FreeMarketOne.Mining.csproj" />
     <ProjectReference Include="..\FreeMarketOne.P2P\FreeMarketOne.P2P.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.PoolManager\FreeMarketOne.PoolManager.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Tor\FreeMarketOne.Tor.csproj" />
   </ItemGroup>
 

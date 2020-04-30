@@ -11,6 +11,11 @@ namespace FreeMarketOne.DataStructure
         int Environment { get; set; }
         string MemoryBasePoolPath { get; set; }
         string MemoryMarketPoolPath { get; set; }
+        string BlockChainBasePath { get; set; }
+        string BlockChainMarketPath { get; set; }
+        string BlockChainSecretPath { get; set; }
+        EndPoint ListenerBaseEndPoint { get; set; }
+        EndPoint ListenerMarketEndPoint { get; set; }
         string ChangellyApiKey { get; set; }
         string ChangellySecret { get; set; }
         string ChangellyApiBaseUrl { get; set; }

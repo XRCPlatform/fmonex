@@ -12,15 +12,13 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         public string BlockHash { get; set; }
 
         [JsonProperty("d")]
-        public DateTime BlockDateTime { get; set; }
+        public DateTimeOffset BlockDateTime { get; set; }
 
         public override string GenerateHash()
         {
             var content = new StringBuilder();
             var sha512processor = new Sha512Processor();
 
-            content.Append(nametype);
-            content.Append(BlockHash);
             content.Append(CreatedUtc);
             content.Append(BlockHash);
             content.Append(BlockDateTime.Ticks);

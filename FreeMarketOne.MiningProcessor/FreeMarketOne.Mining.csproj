@@ -9,9 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FreeMarketOne.BasePool\FreeMarketOne.BasePool.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Extensions\FreeMarketOne.Extensions.csproj" />
-    <ProjectReference Include="..\FreeMarketOne.MarketPool\FreeMarketOne.MarketPool.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.PoolManager\FreeMarketOne.PoolManager.csproj" />
   </ItemGroup>
 
 </Project>

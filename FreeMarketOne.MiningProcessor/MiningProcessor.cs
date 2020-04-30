@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
-using FreeMarketOne.BasePool;
-using FreeMarketOne.DataStructure;
 using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.MarketPool;
+using FreeMarketOne.PoolManager;
 using Serilog;
-using Serilog.Core;
 
 namespace FreeMarketOne.Mining
 {
@@ -32,9 +28,8 @@ namespace FreeMarketOne.Mining
         /// <param name="configuration">Base configuration.</param>
         public MiningProcessor(
             ILogger serverLogger, 
-            IBaseConfiguration configuration,
-            IBasePoolManager basePoolManager,
-            IMarketPoolManager marketPoolManager,
+            IPoolManager basePoolManager,
+            IPoolManager marketPoolManager,
             DateTime genesisDateTimeUtc, 
             DateTime networkDateTimeUtc)
         {

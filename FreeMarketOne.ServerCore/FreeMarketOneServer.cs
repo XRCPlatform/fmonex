@@ -7,14 +7,13 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Mining;
-using FreeMarketOne.BasePool;
-using FreeMarketOne.MarketPool;
 using FreeMarketOne.DataStructure;
 using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.BlockChain.Actions;
+using FreeMarketOne.PoolManager;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -36,8 +35,8 @@ namespace FreeMarketOne.ServerCore
         public IOnionSeedsManager OnionSeedsManager;
         public IMiningProcessor MiningProcessor;
 
-        public IBasePoolManager BasePoolManager;
-        public IMarketPoolManager MarketPoolManager;
+        public IPoolManager BasePoolManager;
+        public IPoolManager MarketPoolManager;
 
         public IBlockChainManager<BaseBlockChainAction> BaseBlockChainManager;
         public IBlockChainManager<MarketBlockChainAction> MarketBlockChainManager;
@@ -130,8 +129,17 @@ namespace FreeMarketOne.ServerCore
         private void MarketBlockChainLoaded(object sender, EventArgs e)
         {
             /* Initialize Base And Market Pool */
-            BasePoolManager = new BasePoolManager(Logger, Configuration);
-            MarketPoolManager = new MarketPoolManager(Logger, Configuration);
+            BasePoolManager = new BasePoolManager(
+                Logger, 
+                Configuration.MemoryBasePoolPath, 
+                BaseBlockChainManager.Storage, 
+                BaseBlockChainManager.SwarmServer);
+
+            MarketPoolManager = new MarketPoolManager(
+                Logger,
+                Configuration.MemoryMarketPoolPath,
+                BaseBlockChainManager.Storage,
+                BaseBlockChainManager.SwarmServer);
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)

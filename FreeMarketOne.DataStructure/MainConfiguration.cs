@@ -16,6 +16,11 @@ namespace FreeMarketOne.DataStructure
             this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds.txt";
             this.MemoryBasePoolPath = "data/memory_basetx.data";
             this.MemoryMarketPoolPath = "data/memory_markettx.data";
+            this.BlockChainBasePath = "data/blockchain_base";
+            this.BlockChainMarketPath = "data/blockchain_market";
+            this.BlockChainSecretPath = "data/key.data";
+            this.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9111/");
+            this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9112/");
         }
     }
 }

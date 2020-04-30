@@ -1,21 +1,19 @@
 ﻿using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.P2P.Models;
 using FreeMarketOne.Tor;
 using Serilog;
 using Serilog.Core;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text;
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Mining;
-using FreeMarketOne.BasePool;
-using FreeMarketOne.MarketPool;
 using FreeMarketOne.DataStructure;
 using static FreeMarketOne.DataStructure.BaseConfiguration;
+using FreeMarketOne.BlockChain;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.GenesisBlock;
+using FreeMarketOne.BlockChain.Actions;
+using FreeMarketOne.PoolManager;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -29,7 +27,7 @@ namespace FreeMarketOne.ServerCore
         public static FreeMarketOneServer Current { get; private set; }
 
         public Logger Logger;
-        private ILogger logger;
+        private ILogger _logger;
 
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
@@ -37,8 +35,14 @@ namespace FreeMarketOne.ServerCore
         public IOnionSeedsManager OnionSeedsManager;
         public IMiningProcessor MiningProcessor;
 
-        public IBasePoolManager BasePoolManager;
-        public IMarketPoolManager MarketPoolManager;
+        public BasePoolManager BasePoolManager;
+        public MarketPoolManager MarketPoolManager;
+
+        public IBlockChainManager<BaseBlockChainAction> BaseBlockChainManager;
+        public IBlockChainManager<MarketBlockChainAction> MarketBlockChainManager;
+
+        public event EventHandler BaseBlockChainLoadedEvent;
+        public event EventHandler MarketBlockChainLoadedEvent;
 
         public void Initialize()
         {
@@ -55,6 +59,9 @@ namespace FreeMarketOne.ServerCore
             InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
             InitializeBaseTorEndPoint(Configuration, configFile);
             InitializeLogFilePath(Configuration, configFile);
+            InitializeMemoryPoolPaths(Configuration, configFile);
+            InitializeBlockChainPaths(Configuration, configFile);
+            InitializeListenerEndPoints(Configuration, configFile);
 
             /* Initialize Logger */
             Logger = new LoggerConfiguration()
@@ -63,8 +70,8 @@ namespace FreeMarketOne.ServerCore
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
                     rollingInterval: RollingInterval.Day)
                 .CreateLogger();
-            logger = Logger.ForContext<FreeMarketOneServer>();
-            logger.Information("Application Start");
+            _logger = Logger.ForContext<FreeMarketOneServer>();
+            _logger.Information("Application Start");
 
             /* Initialize Tor */
             TorProcessManager = new TorProcessManager(Logger, Configuration);
@@ -74,38 +81,77 @@ namespace FreeMarketOne.ServerCore
             {
                 /* Initialize OnionSeeds */
                 OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
-                OnionSeedsManager.GetOnions();
-                OnionSeedsManager.StartPeriodicCheck();
-                OnionSeedsManager.StartPeriodicPeerBroadcast();
+                OnionSeedsManager.Start();
             }
 
-            /* Time Manager Loader < ------- Necessary to finish */
-            var genesisTimeUtc = DateTime.UtcNow.AddDays(-10).AddSeconds(-25); //!!!!FROM GENESIS BLOCK OF BASE BLOCKCHAIN
-            var networkTimeUtc = DateTime.UtcNow; //!!!!TIME FROM SOME EXTERNAL SERVICE - To get real time
+            /* Initialize genesis blocks */
+            var generator = new GenesisGenerator();
+            generator.GenerateIt(Configuration.BlockChainBasePath, Configuration.BlockChainMarketPath);
 
-            /* Initialize Base And Market Pool */
-            BasePoolManager = new BasePoolManager(Logger, Configuration);
-            MarketPoolManager = new MarketPoolManager(Logger, Configuration);
+            /* Initialize Base BlockChain Manager */
+            BaseBlockChainLoadedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
-            /* Initialize MiningProcessor */
-            MiningProcessor = new MiningProcessor(Logger, Configuration, BasePoolManager, MarketPoolManager, 
-                genesisTimeUtc, networkTimeUtc);
-            var miningProcessorInitialized = MiningProcessor.Start();
+            BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(
+                Logger,
+                Configuration.BlockChainBasePath,
+                Configuration.BlockChainSecretPath,
+                Configuration.ListenerBaseEndPoint,
+                OnionSeedsManager, 
+                preloadEnded: BaseBlockChainLoadedEvent);
+            BaseBlockChainManager.Start();
+        }
 
-            if (miningProcessorInitialized)
+        private void BaseBlockChainLoaded(object sender, EventArgs e)
+        {
+            /* Initialize Market BlockChain Manager */
+            if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
+                MarketBlockChainLoadedEvent += new EventHandler(Current.MarketBlockChainLoaded);
 
+                var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
+                    Logger,
+                    Configuration.BlockChainMarketPath,
+                    Configuration.BlockChainSecretPath,
+                    Configuration.ListenerMarketEndPoint,
+                    OnionSeedsManager,
+                    hashCheckPoints,
+                    preloadEnded: MarketBlockChainLoadedEvent);
+                MarketBlockChainManager.Start();
+            } 
+            else
+            {
+                _logger.Error("Base Chain isnt loaded!");
+                Stop();
             }
+        }
+
+        private void MarketBlockChainLoaded(object sender, EventArgs e)
+        {
+            /* Initialize Base And Market Pool */
+            BasePoolManager = new BasePoolManager(
+                Logger, 
+                Configuration.MemoryBasePoolPath, 
+                BaseBlockChainManager.Storage, 
+                BaseBlockChainManager.SwarmServer,
+                BaseBlockChainManager.PrivateKey);
+
+            MarketPoolManager = new MarketPoolManager(
+                Logger,
+                Configuration.MemoryMarketPoolPath,
+                MarketBlockChainManager.Storage,
+                MarketBlockChainManager.SwarmServer,
+                MarketBlockChainManager.PrivateKey);
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
-            var settings = configFile.GetSection("FreeMarketOneConfiguration")["LogFilePath"];
+            var logFilePath = configFile.GetSection("FreeMarketOneConfiguration")["LogFilePath"];
 
-            configuration.LogFilePath = settings;
+            if (!string.IsNullOrEmpty(logFilePath)) configuration.LogFilePath = logFilePath;
         }
 
-        public static IBaseConfiguration InitializeEnvironment(IConfigurationRoot configFile)
+        private static IBaseConfiguration InitializeEnvironment(IConfigurationRoot configFile)
         {
             var settings = configFile.GetSection("FreeMarketOneConfiguration")["ServerEnvironment"];
 
@@ -122,46 +168,68 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        public static void InitializeBaseOnionSeedsEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        private static void InitializeBaseOnionSeedsEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
-            var prefix = "TestNetOnionSeedsEndPoint";
-            if (configuration.Environment == (int)EnvironmentTypes.Main) prefix = "MainOnionSeedsEndPoint";
+            var seedsEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["OnionSeedsEndPoint"];
 
-            var settings = configFile.GetSection("FreeMarketOneConfiguration")[prefix];
-
-            configuration.OnionSeedsEndPoint = settings;
+            if (!string.IsNullOrEmpty(seedsEndPoint)) configuration.OnionSeedsEndPoint = seedsEndPoint;
         }
 
-        public static void InitializeBaseTorEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        private static void InitializeBaseTorEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
-            var settings = configFile.GetSection("FreeMarketOneConfiguration")["TorEndPoint"];
+            var torEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["TorEndPoint"];
 
-            configuration.TorEndPoint = EndPointHelper.ParseIPEndPoint(settings);
+            if (!string.IsNullOrEmpty(torEndPoint)) configuration.TorEndPoint = EndPointHelper.ParseIPEndPoint(torEndPoint);
+        }
+
+        private static void InitializeMemoryPoolPaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var memoryBasePoolPath = configFile.GetSection("FreeMarketOneConfiguration")["MemoryBasePoolPath"];
+            var memoryMarketPoolPath = configFile.GetSection("FreeMarketOneConfiguration")["MemoryMarketPoolPath"];
+
+            if (!string.IsNullOrEmpty(memoryBasePoolPath)) configuration.MemoryBasePoolPath = memoryBasePoolPath;
+            if (!string.IsNullOrEmpty(memoryMarketPoolPath)) configuration.MemoryMarketPoolPath = memoryMarketPoolPath;
+        }
+
+        private static void InitializeBlockChainPaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var blockChainBasePath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainBasePath"];
+            var blockChainMarketPath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainMarketPath"];
+            var blockChainSecretPath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainSecretPath"];
+
+            if (!string.IsNullOrEmpty(blockChainBasePath)) configuration.BlockChainBasePath = blockChainBasePath;
+            if (!string.IsNullOrEmpty(blockChainMarketPath)) configuration.BlockChainMarketPath = blockChainMarketPath;
+            if (!string.IsNullOrEmpty(blockChainSecretPath)) configuration.BlockChainSecretPath = blockChainSecretPath;
+        }
+
+        private static void InitializeListenerEndPoints(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var baseEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerBaseEndPoint"];
+            var marketEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerMarketEndPoint"];
+
+            if (!string.IsNullOrEmpty(baseEndPoint)) EndPointHelper.ParseIPEndPoint(baseEndPoint);
+            if (!string.IsNullOrEmpty(marketEndPoint)) EndPointHelper.ParseIPEndPoint(marketEndPoint);
         }
 
         public void Stop()
         {
-            logger.Information("Ending Onion Seeds ...");
+            _logger.Information("Ending BlockChain Managers...");
+            BaseBlockChainManager?.Dispose();
+            MarketBlockChainManager?.Dispose();
 
-            OnionSeedsManager.Dispose();
+            _logger.Information("Ending Onion Seeds ...");
+            OnionSeedsManager?.Dispose();
 
-            logger.Information("Ending Mining Processor...");
+            _logger.Information("Ending Base Pool Manager...");
+            BasePoolManager?.Dispose();
 
-            BasePoolManager.Dispose();
+            _logger.Information("Ending Market Pool Manager...");
+            MarketPoolManager?.Dispose();
 
-            logger.Information("Ending Base Pool Manager...");
+            _logger.Information("Ending Tor...");
+            TorProcessManager?.Dispose();
 
-            MarketPoolManager.Dispose();
-
-            logger.Information("Ending Market Pool Manager...");
-
-            MiningProcessor.Dispose();
-
-            logger.Information("Ending Tor...");
-
-            TorProcessManager.Dispose();
-
-            logger.Information("Application End");
+            _logger.Information("Application End");
         }
     }
 }

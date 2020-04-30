@@ -19,7 +19,7 @@ namespace FreeMarketOne.PoolManager
         IBaseItem GetActionItemLocal(string hash);
         List<IBaseItem> GetAllActionItemLocal();
         bool DeleteActionItemLocal(string hash);
-        bool PropagateAllActionItemLocal(List<IBaseAction> extraActions);
+        bool PropagateAllActionItemLocal(List<IBaseAction> extraActions = null);
 
         List<IBaseItem> GetAllActionItemStaged();
         IBaseItem GetActionItemStaged(string hash);

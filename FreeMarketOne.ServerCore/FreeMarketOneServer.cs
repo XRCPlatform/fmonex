@@ -44,6 +44,8 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler BaseBlockChainLoadedEvent;
         public event EventHandler MarketBlockChainLoadedEvent;
 
+        public event EventHandler FreeMarketOneServerLoadedEvent;
+
         public void Initialize()
         {
             /* Configuration */
@@ -142,6 +144,8 @@ namespace FreeMarketOne.ServerCore
                 MarketBlockChainManager.Storage,
                 MarketBlockChainManager.SwarmServer,
                 MarketBlockChainManager.PrivateKey);
+
+            FreeMarketOneServerLoadedEvent?.Invoke(this, null);
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)

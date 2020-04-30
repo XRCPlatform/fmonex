@@ -243,26 +243,75 @@ namespace FreeMarketOne.PoolManager
 
         public List<IBaseItem> GetAllActionItemStaged()
         {
+            var result = new List<IBaseItem>();
+
             foreach (var itemTxId in _storage.IterateStagedTransactionIds())
             {
-               // _storage.GetTransaction<T>
+                var transaction = _storage.GetTransaction<T>(itemTxId);
 
-
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                result.Add(itemAction);
+                            }
+                        }
+                    }
+                }
             }
-            
 
-
-            throw new NotImplementedException();
+            return result;
         }
 
-        public IBaseItem GetActionItemStaged()
+        public IBaseItem GetActionItemStaged(string hash)
         {
-            throw new NotImplementedException();
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                if (itemAction.Hash == hash)
+                                {
+                                    return itemAction;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
-        public List<IBaseAction> GetAllActionsStaged()
+        public List<IBaseAction> GetAllActionStaged()
         {
-            throw new NotImplementedException();
+            var result = new List<IBaseAction>();
+
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        result.Add(action);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

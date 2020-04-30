@@ -22,8 +22,8 @@ namespace FreeMarketOne.PoolManager
         bool PropagateAllActionItemLocal(List<IBaseAction> extraActions);
 
         List<IBaseItem> GetAllActionItemStaged();
-        IBaseItem GetActionItemStaged();
+        IBaseItem GetActionItemStaged(string hash);
 
-        List<IBaseAction> GetAllActionsStaged();
+        List<IBaseAction> GetAllActionStaged();
     }
 }

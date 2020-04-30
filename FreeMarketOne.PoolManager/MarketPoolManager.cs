@@ -9,13 +9,13 @@ using System.Text;
 
 namespace FreeMarketOne.PoolManager
 {
-    public class MarketPoolManager : PoolManager
+    public class MarketPoolManager : PoolManager<MarketBlockChainAction>
     {
         public MarketPoolManager(
             Logger serverLogger,
             string memoryPoolFilePath,
             RocksDBStore storage,
-            Swarm<BaseBlockChainAction> swarmServer)
+            Swarm<MarketBlockChainAction> swarmServer)
             : base(serverLogger, memoryPoolFilePath, storage, swarmServer)
         {
         }

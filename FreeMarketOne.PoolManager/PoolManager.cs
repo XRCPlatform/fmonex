@@ -17,7 +17,7 @@ using System.Threading;
 
 namespace FreeMarketOne.PoolManager
 {
-    public class PoolManager : IPoolManager
+    public class PoolManager<T> : IPoolManager, IDisposable where T : IBaseAction, new()
     {
         private ILogger _logger { get; set; }
 
@@ -34,6 +34,10 @@ namespace FreeMarketOne.PoolManager
         private readonly object _pollLock;
         private string _memoryPoolFilePath { get; set; }
 
+        //private BlockChain<T> _blockChain;
+        private RocksDBStore _storage;
+        private Swarm<T> _swarmServer;
+
         /// <summary>
         /// Base pool manager
         /// </summary>
@@ -45,12 +49,15 @@ namespace FreeMarketOne.PoolManager
             Logger serverLogger,
             string memoryPoolFilePath,
             RocksDBStore storage,
-            Swarm<BaseBlockChainAction> swarmServer)
+            Swarm<T> swarmServer)
         {
-            _logger = serverLogger.ForContext<PoolManager>();
+            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                string.Format("{0}.{1}.{2}", typeof(PoolManager<T>).Namespace, typeof(PoolManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
+
             _actionItemsList = new List<IBaseItem>();
             _pollLock = new object();
             _memoryPoolFilePath = memoryPoolFilePath;
+            _storage = storage;
 
             _logger.Information("Initializing Base Pool Manager");
 
@@ -236,6 +243,15 @@ namespace FreeMarketOne.PoolManager
 
         public List<IBaseItem> GetAllActionItemStaged()
         {
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            {
+               // _storage.GetTransaction<T>
+
+
+            }
+            
+
+
             throw new NotImplementedException();
         }
 

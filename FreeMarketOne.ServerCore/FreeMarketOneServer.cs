@@ -35,8 +35,8 @@ namespace FreeMarketOne.ServerCore
         public IOnionSeedsManager OnionSeedsManager;
         public IMiningProcessor MiningProcessor;
 
-        public IPoolManager BasePoolManager;
-        public IPoolManager MarketPoolManager;
+        public BasePoolManager BasePoolManager;
+        public MarketPoolManager MarketPoolManager;
 
         public IBlockChainManager<BaseBlockChainAction> BaseBlockChainManager;
         public IBlockChainManager<MarketBlockChainAction> MarketBlockChainManager;
@@ -79,7 +79,7 @@ namespace FreeMarketOne.ServerCore
 
             if (torInitialized)
             {
-            /* Initialize OnionSeeds */
+                /* Initialize OnionSeeds */
                 OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
                 OnionSeedsManager.Start();
             }
@@ -138,8 +138,8 @@ namespace FreeMarketOne.ServerCore
             MarketPoolManager = new MarketPoolManager(
                 Logger,
                 Configuration.MemoryMarketPoolPath,
-                BaseBlockChainManager.Storage,
-                BaseBlockChainManager.SwarmServer);
+                MarketBlockChainManager.Storage,
+                MarketBlockChainManager.SwarmServer);
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)

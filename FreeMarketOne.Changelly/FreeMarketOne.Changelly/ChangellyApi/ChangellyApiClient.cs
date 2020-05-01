@@ -13,21 +13,18 @@ namespace FreeMarketOne.Changelly
     public class ChangellyApiClient
     {
         IBaseConfiguration configuration;
-        private MemoryCache cache { get;}
-        private readonly object constructorLock = new object();
+        private static readonly MemoryCache cache { get;}
+
+        private readonly static HttpClient httpClient;
+        public static ChangellyApiClient()
+        {
+            httpClient = new HttpClient();
+            cache = new MemoryCache("ChangellyApiClient");
+        }
 
         public ChangellyApiClient(IBaseConfiguration configuration)
         {
             this.configuration = configuration;
-
-            lock (constructorLock)
-            {
-                if (cache == null)
-                {
-                    cache = new MemoryCache("ChangellyApiClient");
-                }
-            }
-            
         }
 
         public ExchangeAmountResponse GetExchangeAmount(Currency baseCurrency, Currency[] currencies, decimal amount)
@@ -42,8 +39,6 @@ namespace FreeMarketOne.Changelly
         private string ProcessRequest(string message)
         {
             string signature = SignRequest(this.configuration.ChangellySecret, message);
-
-            HttpClient httpClient = new HttpClient();
 
             HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, this.configuration.ChangellyApiBaseUrl);
             httpRequest.Content = new JsonContent(message);

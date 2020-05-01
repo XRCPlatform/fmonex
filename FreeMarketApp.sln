@@ -28,10 +28,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Crypto", "FreeMarketOne.Crypto\FreeMarketOne.Crypto.csproj", "{6A3517E1-C828-473A-B812-35794020B021}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Crypto.Tests", "FreeMarketOne.Crypto.Tests\FreeMarketOne.Crypto.Tests.csproj", "{4B972920-5A54-474B-B00B-6AF35CA04E42}"
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Mining", "FreeMarketOne.MiningProcessor\FreeMarketOne.Mining.csproj", "{BB8D3FE8-B624-4A36-9F07-7F99D52C7250}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.LibPlanet", "BackEnd.LibPlanet", "{C59FF8D9-20E4-40D3-8159-F8ECC2255A47}"
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Crypto", "FreeMarketOne.Crypto\FreeMarketOne.Crypto.csproj", "{6A3517E1-C828-473A-B812-35794020B021}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Stun", "FreeMarketOne.LibPlanet\Libplanet.Stun\Libplanet.Stun.csproj", "{0EFBC4CE-ACAD-4920-9B79-AB82D1EEC91D}"
 EndProject
@@ -53,9 +51,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.BlockChain", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.GenesisBlock", "FreeMarketOne.GenesisGenerator\FreeMarketOne.GenesisBlock.csproj", "{3A53ABCA-12EF-4EB4-BF79-FF9F7B4EC622}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.PoolManager", "FreeMarketOne.PoolManager\FreeMarketOne.PoolManager.csproj", "{F9528652-9FCE-4AE8-8E3C-F1CFCCAD144D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Crypto.Tests", "FreeMarketOne.Crypto.Tests\FreeMarketOne.Crypto.Tests.csproj", "{4B972920-5A54-474B-B00B-6AF35CA04E42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.PoolManager", "FreeMarketOne.PoolManager\FreeMarketOne.PoolManager.csproj", "{F9528652-9FCE-4AE8-8E3C-F1CFCCAD144D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Changelly", "FreeMarketOne.Changelly\FreeMarketOne.Changelly\FreeMarketOne.Changelly.csproj", "{4346529F-4CF6-4B6B-AB6E-4EC5257A9C53}"
 EndProject

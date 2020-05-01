@@ -56,7 +56,7 @@ namespace FreeMarketOne.Changelly.Test
         [TestMethod]
         public void GetExchangeAmountPartialWithMininmums()
         {
-            IMarketItemPrice changellyMgr = new ChangellyItemPriceManager(3m, new MainConfiguration());
+            IMarketItemPrice changellyMgr = new ChangellyItemPriceManager(1.149M, new MainConfiguration());
             var resp = changellyMgr.GetItemPriceInExchangedCurrency
                 (
                     new Currency[]

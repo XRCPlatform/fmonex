@@ -13,10 +13,10 @@ namespace FreeMarketOne.Changelly
     public class ChangellyApiClient
     {
         IBaseConfiguration configuration;
-        private static readonly MemoryCache cache { get;}
+        private static readonly MemoryCache cache;
+        private static readonly HttpClient httpClient;
 
-        private readonly static HttpClient httpClient;
-        public static ChangellyApiClient()
+        static ChangellyApiClient()
         {
             httpClient = new HttpClient();
             cache = new MemoryCache("ChangellyApiClient");

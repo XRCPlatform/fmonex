@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
+﻿using System.Net;
 
 namespace FreeMarketOne.DataStructure
 {
@@ -19,6 +16,9 @@ namespace FreeMarketOne.DataStructure
         string BlockChainSecretPath { get; set; }
         EndPoint ListenerBaseEndPoint { get; set; }
         EndPoint ListenerMarketEndPoint { get; set; }
+        string ChangellyApiKey { get; set; }
+        string ChangellySecret { get; set; }
+        string ChangellyApiBaseUrl { get; set; }
         string TelemetryServerUri { get; set; }
     }
 }

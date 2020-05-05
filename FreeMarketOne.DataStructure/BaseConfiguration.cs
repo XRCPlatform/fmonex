@@ -1,9 +1,5 @@
-﻿using FreeMarketOne.Extensions.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Reflection;
-using System.Text;
 
 namespace FreeMarketOne.DataStructure
 {
@@ -44,6 +40,11 @@ namespace FreeMarketOne.DataStructure
         public EndPoint ListenerBaseEndPoint { get; set; }
 
         public EndPoint ListenerMarketEndPoint { get; set; }
+
+        public string ChangellyApiKey { get; set; }
+
+        public string ChangellySecret { get; set; }
+        public string ChangellyApiBaseUrl { get ; set ; }
         public string TelemetryServerUri { get; set; }
     }
 }

@@ -19,5 +19,6 @@ namespace FreeMarketOne.DataStructure
         string ChangellyApiKey { get; set; }
         string ChangellySecret { get; set; }
         string ChangellyApiBaseUrl { get; set; }
+        string TelemetryServerUri { get; set; }
     }
 }

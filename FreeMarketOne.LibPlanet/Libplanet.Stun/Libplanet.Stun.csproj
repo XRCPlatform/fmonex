@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Libplanet.Stun</RootNamespace>
     <AssemblyName>Libplanet.Stun</AssemblyName>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>

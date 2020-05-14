@@ -167,9 +167,9 @@ namespace FreeMarketOne.ServerCore
             var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (!Configuration.FullBaseDirectory.StartsWith('/'))
+                if (!fullBaseDirectory.StartsWith('/'))
                 {
-                    Configuration.FullBaseDirectory.Insert(0, "/");
+                    fullBaseDirectory.Insert(0, "/");
                 }
             }
 

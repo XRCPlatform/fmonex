@@ -46,5 +46,7 @@ namespace FreeMarketOne.DataStructure
         public string ChangellySecret { get; set; }
         public string ChangellyApiBaseUrl { get ; set ; }
         public string TelemetryServerUri { get; set; }
+
+        public string FullBaseDirectory { get; set; }
     }
 }

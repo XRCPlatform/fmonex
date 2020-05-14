@@ -35,6 +35,7 @@ namespace FreeMarketOne.PoolManager
 
         private readonly object _pollLock;
         private string _memoryPoolFilePath { get; set; }
+        private IBaseConfiguration _configuration { get; }
 
         private RocksDBStore _storage;
         private Swarm<T> _swarmServer;
@@ -50,6 +51,7 @@ namespace FreeMarketOne.PoolManager
         /// <param name="privateKey"></param>
         public PoolManager(
             Logger serverLogger,
+            IBaseConfiguration configuration,
             string memoryPoolFilePath,
             RocksDBStore storage,
             Swarm<T> swarmServer,
@@ -58,11 +60,13 @@ namespace FreeMarketOne.PoolManager
             _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(PoolManager<T>).Namespace, typeof(PoolManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
 
+            _configuration = configuration;
             _actionItemsList = new List<IBaseItem>();
             _pollLock = new object();
             _memoryPoolFilePath = memoryPoolFilePath;
             _storage = storage;
             _privateKey = privateKey;
+            _swarmServer = swarmServer;
 
             _logger.Information("Initializing Base Pool Manager");
 
@@ -132,17 +136,8 @@ namespace FreeMarketOne.PoolManager
 
                 var serializedMemory = JsonConvert.SerializeObject(_actionItemsList);
                 var compressedMemory = ZipHelpers.Compress(serializedMemory);
-                var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    if (!fullBaseDirectory.StartsWith('/'))
-                    {
-                        fullBaseDirectory.Insert(0, "/");
-                    }
-                }
-
-                var targetFilePath = Path.Combine(fullBaseDirectory, _memoryPoolFilePath);
+                var targetFilePath = Path.Combine(_configuration.FullBaseDirectory, _memoryPoolFilePath);
                 var targetDirectory = Path.GetDirectoryName(targetFilePath);
 
                 if (!Directory.Exists(targetDirectory))
@@ -164,9 +159,7 @@ namespace FreeMarketOne.PoolManager
             {
                 _logger.Information("Loading action items data.");
 
-                var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
-
-                var targetFilePath = Path.Combine(fullBaseDirectory, _memoryPoolFilePath);
+                var targetFilePath = Path.Combine(_configuration.FullBaseDirectory, _memoryPoolFilePath);
                 var targetDirectory = Path.GetDirectoryName(targetFilePath);
 
                 if (File.Exists(targetFilePath))

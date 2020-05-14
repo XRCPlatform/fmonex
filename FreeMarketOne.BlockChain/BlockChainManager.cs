@@ -18,6 +18,7 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.P2P;
 using FreeMarketOne.BlockChain.Helpers;
 using FreeMarketOne.BlockChain.Actions;
+using FreeMarketOne.DataStructure;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -53,11 +54,13 @@ namespace FreeMarketOne.BlockChain
         private EventHandler<PreloadState> _preloadProcessed { get; set; }
         private EventHandler _preloadEnded { get; set; }
         private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockChainChanged { get; set; }
-        
+        private IBaseConfiguration _configuration { get; }
+
         public BlockChain<T> BlockChain { get => _blockChain; }
         public RocksDBStore Storage { get => _storage; }
         public Swarm<T> SwarmServer { get => _swarmServer; }
         public PrivateKey PrivateKey { get => _privateKey; }
+
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
@@ -74,6 +77,7 @@ namespace FreeMarketOne.BlockChain
         /// <param name="preloadEnded"></param>
         /// <param name="blockChainChanged"></param>
         public BlockChainManager(ILogger serverLogger,
+            IBaseConfiguration configuration,
             string blockChainPath,
             string blockChainSecretPath,
             EndPoint endPoint,
@@ -88,11 +92,12 @@ namespace FreeMarketOne.BlockChain
             _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
 
+            _configuration = configuration;
             _blockChainFilePath = blockChainPath;
             _endPoint = endPoint;
 
-            _privateKey = GetSecret(blockChainSecretPath);
-            _storage = new RocksDBStore(_blockChainFilePath);
+            _privateKey = GetSecret(Path.Combine(_configuration.FullBaseDirectory, blockChainSecretPath));
+            _storage = new RocksDBStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
             _onionSeedManager = (OnionSeedsManager)seedsManager;
 
             if (listHashCheckPoints != null)
@@ -294,7 +299,7 @@ namespace FreeMarketOne.BlockChain
 
         public Block<T> GetGenesisBlock()
         {
-            var genesisPath = Path.Combine(_blockChainFilePath, "genesis.dat");
+            var genesisPath = Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath, "genesis.dat");
 
             if (File.Exists(genesisPath))
             {

@@ -15,6 +15,7 @@ using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.BlockChain.Actions;
 using FreeMarketOne.PoolManager;
 using Libplanet.Blockchain;
+using System.Runtime.InteropServices;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -52,9 +53,11 @@ namespace FreeMarketOne.ServerCore
 
         public void Initialize()
         {
+            var fullBaseDirectory = InitializeFullBaseDirectory();
+
             /* Configuration */
             var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(fullBaseDirectory)
                 .AddJsonFile("appsettings.json", true, false);
             var configFile = builder.Build();
 
@@ -62,6 +65,7 @@ namespace FreeMarketOne.ServerCore
             Configuration = InitializeEnvironment(configFile);
 
             /* Config */
+            Configuration.FullBaseDirectory = fullBaseDirectory;
             InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
             InitializeBaseTorEndPoint(Configuration, configFile);
             InitializeLogFilePath(Configuration, configFile);
@@ -72,7 +76,7 @@ namespace FreeMarketOne.ServerCore
             /* Initialize Logger */
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(Configuration.LogFilePath,
+                .WriteTo.File(Path.Combine(Configuration.FullBaseDirectory, Configuration.LogFilePath),
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
                     rollingInterval: RollingInterval.Day)
                 .CreateLogger();
@@ -92,13 +96,14 @@ namespace FreeMarketOne.ServerCore
 
             /* Initialize genesis blocks */
             var generator = new GenesisGenerator();
-            generator.GenerateIt(Configuration.BlockChainBasePath, Configuration.BlockChainMarketPath);
+            generator.GenerateIt(Configuration);
 
             /* Initialize Base BlockChain Manager */
             BaseBlockChainLoadedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
             BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(
                 Logger,
+                Configuration,
                 Configuration.BlockChainBasePath,
                 Configuration.BlockChainSecretPath,
                 Configuration.ListenerBaseEndPoint,
@@ -118,6 +123,7 @@ namespace FreeMarketOne.ServerCore
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
                 MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
                     Logger,
+                    Configuration,
                     Configuration.BlockChainMarketPath,
                     Configuration.BlockChainSecretPath,
                     Configuration.ListenerMarketEndPoint,
@@ -138,7 +144,8 @@ namespace FreeMarketOne.ServerCore
         {
             /* Initialize Base And Market Pool */
             BasePoolManager = new BasePoolManager(
-                Logger, 
+                Logger,
+                Configuration,
                 Configuration.MemoryBasePoolPath, 
                 BaseBlockChainManager.Storage, 
                 BaseBlockChainManager.SwarmServer,
@@ -146,12 +153,27 @@ namespace FreeMarketOne.ServerCore
 
             MarketPoolManager = new MarketPoolManager(
                 Logger,
+                Configuration,
                 Configuration.MemoryMarketPoolPath,
                 MarketBlockChainManager.Storage,
                 MarketBlockChainManager.SwarmServer,
                 MarketBlockChainManager.PrivateKey);
 
             FreeMarketOneServerLoadedEvent?.Invoke(this, null);
+        }
+
+        private string InitializeFullBaseDirectory()
+        {
+            var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!Configuration.FullBaseDirectory.StartsWith('/'))
+                {
+                    Configuration.FullBaseDirectory.Insert(0, "/");
+                }
+            }
+
+            return fullBaseDirectory;
         }
 
         private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)

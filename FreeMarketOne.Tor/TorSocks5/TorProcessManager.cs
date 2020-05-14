@@ -21,15 +21,15 @@ namespace FreeMarketOne.Tor
 		/// <summary>
 		/// If null then it's just a mock, clearnet is used.
 		/// </summary>
-		public EndPoint TorSocks5EndPoint { get; }
+		private IBaseConfiguration _configuration { get; }
 
         public string TorOnionEndPoint { get; private set; }
 
-        private ILogger logger { get; set; }
+        private ILogger _logger { get; set; }
 
         public static bool RequestFallbackAddressUsage { get; private set; } = false;
 
-		private Process torProcess { get; set; }
+		private Process _torProcess { get; set; }
 
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
@@ -38,24 +38,24 @@ namespace FreeMarketOne.Tor
 
         public bool IsRunning => Interlocked.Read(ref running) == 1;
 
-        private CancellationTokenSource stop { get; set; }
+        private CancellationTokenSource _stop { get; set; }
 
         /// <param name="serverLogger">Base server logger.</param>
-        /// <param name="configuration">Base configuration.</param>
+        /// <param name="_configuration">Base _configuration.</param>
         public TorProcessManager(ILogger serverLogger, IBaseConfiguration configuration)
         {
-            logger = serverLogger.ForContext<TorProcessManager>();
-            logger.Information("Initializing Tor Process Manager");
+            _logger = serverLogger.ForContext<TorProcessManager>();
+            _logger.Information("Initializing Tor Process Manager");
 
-            TorSocks5EndPoint = configuration.TorEndPoint;
+            _configuration = configuration;
             running = 0;
-			stop = new CancellationTokenSource();
-			torProcess = null;
+			_stop = new CancellationTokenSource();
+			_torProcess = null;
 		}
 
         public bool Start()
         {
-            if (TorSocks5EndPoint is null)
+            if (_configuration.TorEndPoint is null)
             {
                 return false;
             }
@@ -68,22 +68,16 @@ namespace FreeMarketOne.Tor
                     {
                         var toolsDir = "tools";
                         var torPath = "";
-                        var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
-                        if (IsTorRunningAsync(TorSocks5EndPoint).GetAwaiter().GetResult())
+                        if (IsTorRunningAsync(_configuration.TorEndPoint).GetAwaiter().GetResult())
                         {
-                            logger.Warning("Tor is already running.");
-                            GetOnionEndPoint(fullBaseDirectory, toolsDir);
+                            _logger.Warning("Tor is already running.");
+                            GetOnionEndPoint(toolsDir);
                             return true;
                         }
 
                         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            if (!fullBaseDirectory.StartsWith('/'))
-                            {
-                                fullBaseDirectory.Insert(0, "/");
-                            }
-
                             torPath = $@"{toolsDir}/Tor/tor";
                         }
                         else // If Windows
@@ -91,38 +85,40 @@ namespace FreeMarketOne.Tor
                             torPath = $@"{toolsDir}\Tor\tor.exe";
                         }
 
-                        if (!File.Exists(torPath))
+                    if (!File.Exists(torPath))
                         {
-                            logger.Error($"Tor instance NOT found at {torPath}. Attempting to acquire it...");
-                            InstallTor(fullBaseDirectory, toolsDir);
+                            _logger.Error($"Tor instance NOT found at {torPath}. Attempting to acquire it...");
+                            InstallTor(toolsDir);
 
-                            //copy configuration
-                            CopyDefaultConfig(fullBaseDirectory, toolsDir);
+                            //copy _configuration
+                            CopyDefaultConfig(toolsDir);
 
                             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             {
+                                var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, toolsDir);
+
                                 // Make sure there's sufficient permission.
-                                string chmodTorDirCmd = $"chmod -R 750 {toolsDir}";
+                                string chmodTorDirCmd = $"chmod -R 750 {fulToolsDir}";
                                 var result = EnvironmentHelpers.ShellExec(chmodTorDirCmd);
                                 if (result > 0)
                                 {
-                                    logger.Error($"Command: {chmodTorDirCmd} exited with exit code: {result}, instead of 0.");
+                                    _logger.Error($"Command: {chmodTorDirCmd} exited with exit code: {result}, instead of 0.");
                                 }
                                 else
                                 {
-                                    logger.Information($"Shell command executed: {chmodTorDirCmd}.");
+                                    _logger.Information($"Shell command executed: {chmodTorDirCmd}.");
                                 }
                             }
                         }
                         else
                         {
-                            logger.Information($"Tor instance found at {torPath}.");
+                            _logger.Information($"Tor instance found at {torPath}.");
                         }
 
                         string torArguments = $" -f torrc";
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            torProcess = Process.Start(new ProcessStartInfo
+                            _torProcess = Process.Start(new ProcessStartInfo
                             {
                                 WorkingDirectory = $@"{toolsDir}/Tor/",
                                 FileName = torPath,
@@ -131,19 +127,21 @@ namespace FreeMarketOne.Tor
                                 CreateNoWindow = false,
                                 RedirectStandardOutput = false
                             });
-                            logger.Information($"Starting Tor process with Process.Start.");
+                            _logger.Information($"Starting Tor process with Process.Start.");
                         }
                         else // Linux and OSX
                         {
-                            string runTorCmd = $"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:={toolsDir}/Tor && export LD_LIBRARY_PATH && cd {toolsDir}/Tor && ./tor {torArguments}";
+                            var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, toolsDir);
+
+                            string runTorCmd = $"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:={fulToolsDir}/Tor && export LD_LIBRARY_PATH && cd {fulToolsDir}/Tor && ./tor {torArguments}";
                             EnvironmentHelpers.ShellExec(runTorCmd, false);
-                            logger.Information($"Started Tor process with shell command: {runTorCmd}.");
+                            _logger.Information($"Started Tor process with shell command: {runTorCmd}.");
                         }
 
                         //check if TOR is online
                         Task.Delay(3000).ConfigureAwait(false).GetAwaiter().GetResult(); // dotnet brainfart, ConfigureAwait(false) IS NEEDED HERE otherwise (only on) Manjuro Linux fails, WTF?!!
                         
-                        if (!IsTorRunningAsync(TorSocks5EndPoint).GetAwaiter().GetResult())
+                        if (!IsTorRunningAsync(_configuration.TorEndPoint).GetAwaiter().GetResult())
                         {
                             
                             throw new TorException("Attempted to start Tor, but it is not running.");
@@ -151,10 +149,10 @@ namespace FreeMarketOne.Tor
                         else
                         {
                             
-                            GetOnionEndPoint(fullBaseDirectory, toolsDir);
+                            GetOnionEndPoint(toolsDir);
                         }
 
-                        logger.Information("Tor is running.");
+                        _logger.Information("Tor is running.");
                     }
                     catch (Exception ex)
                     {
@@ -163,7 +161,7 @@ namespace FreeMarketOne.Tor
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex.Message + " " + ex.StackTrace);
+                    _logger.Error(ex.Message + " " + ex.StackTrace);
 
                     return false;
                 }
@@ -172,22 +170,22 @@ namespace FreeMarketOne.Tor
             return true;
         }
 
-        private void CopyDefaultConfig(string fullBaseDirectory, string torDir)
+        private void CopyDefaultConfig(string torDir)
         {
-            string torConfigDir = Path.Combine(fullBaseDirectory, torDir);
+            string torConfigDir = Path.Combine(_configuration.FullBaseDirectory, torDir);
             string sourceConfig = Path.Combine(torConfigDir, "torrc-default");
             string targetConfig = Path.Combine(torConfigDir, "Tor", "torrc");
 
             File.Copy(sourceConfig, targetConfig);
         }
 
-        private void GetOnionEndPoint(string fullBaseDirectory, string torDir)
+        private void GetOnionEndPoint(string torDir)
         {
-            string torHiddenServiceDir = Path.Combine(fullBaseDirectory, torDir, "Tor", "hidden_service");
+            string torHiddenServiceDir = Path.Combine(_configuration.FullBaseDirectory, torDir, "Tor", "hidden_service");
 
             if (Directory.Exists(torHiddenServiceDir))
             {
-                logger.Information($"Tor instance found at {torHiddenServiceDir}. Attempting to acquire it...");
+                _logger.Information($"Tor instance found at {torHiddenServiceDir}. Attempting to acquire it...");
 
                 var hostNameFile = Path.Combine(torHiddenServiceDir, "hostname");
 
@@ -198,42 +196,42 @@ namespace FreeMarketOne.Tor
                 }
                 catch (Exception)
                 {
-                    logger.Error($"Tor onion endpoint cant be loaded from {hostNameFile}.");
+                    _logger.Error($"Tor onion endpoint cant be loaded from {hostNameFile}.");
                 }
             }
             else
             {
-                logger.Error($"Tor instance not found at {torHiddenServiceDir}.");
+                _logger.Error($"Tor instance not found at {torHiddenServiceDir}.");
             }
         }
 
-        private void InstallTor(string fullBaseDirectory, string torDir)
+        private void InstallTor(string torDir)
         {
-            string torDaemonsDir = Path.Combine(fullBaseDirectory, torDir);
+            string torDaemonsDir = Path.Combine(_configuration.FullBaseDirectory, torDir);
 
             string dataZip = Path.Combine(torDaemonsDir, "data-folder.zip");
-            IoHelpers.BetterExtractZipToDirectoryAsync(dataZip, torDir).GetAwaiter().GetResult();
-            logger.Information($"Extracted {dataZip} to {torDir}.");
+            IoHelpers.BetterExtractZipToDirectoryAsync(dataZip, torDaemonsDir).GetAwaiter().GetResult();
+            _logger.Information($"Extracted {dataZip} to {torDaemonsDir}.");
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 string torWinZip = Path.Combine(torDaemonsDir, "tor-win32.zip");
-                IoHelpers.BetterExtractZipToDirectoryAsync(torWinZip, torDir).GetAwaiter().GetResult();
-                logger.Information($"Extracted {torWinZip} to {torDir}.");
+                IoHelpers.BetterExtractZipToDirectoryAsync(torWinZip, torDaemonsDir).GetAwaiter().GetResult();
+                _logger.Information($"Extracted {torWinZip} to {torDaemonsDir}.");
             }
             else // Linux or OSX
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     string torLinuxZip = Path.Combine(torDaemonsDir, "tor-linux64.zip");
-                    IoHelpers.BetterExtractZipToDirectoryAsync(torLinuxZip, torDir).GetAwaiter().GetResult();
-                    logger.Information($"Extracted {torLinuxZip} to {torDir}.");
+                    IoHelpers.BetterExtractZipToDirectoryAsync(torLinuxZip, torDaemonsDir).GetAwaiter().GetResult();
+                    _logger.Information($"Extracted {torLinuxZip} to {torDaemonsDir}.");
                 }
                 else // OSX
                 {
                     string torOsxZip = Path.Combine(torDaemonsDir, "tor-osx64.zip");
-                    IoHelpers.BetterExtractZipToDirectoryAsync(torOsxZip, torDir).GetAwaiter().GetResult();
-                    logger.Information($"Extracted {torOsxZip} to {torDir}.");
+                    IoHelpers.BetterExtractZipToDirectoryAsync(torOsxZip, torDaemonsDir).GetAwaiter().GetResult();
+                    _logger.Information($"Extracted {torOsxZip} to {torDaemonsDir}.");
                 }                
             }
         }
@@ -259,12 +257,12 @@ namespace FreeMarketOne.Tor
 
         public async Task<bool> IsTorRunningAsync()
         {
-            if (TorSocks5EndPoint is null)
+            if (_configuration.TorEndPoint is null)
             {
                 return false;
             }
 
-            using (var client = new TorSocks5Client(TorSocks5EndPoint))
+            using (var client = new TorSocks5Client(_configuration.TorEndPoint))
             {
                 try
                 {
@@ -281,12 +279,12 @@ namespace FreeMarketOne.Tor
 
         public async Task<bool> IsOnionSeedRunningAsync(string url, int port)
         {
-            if (TorSocks5EndPoint is null)
+            if (_configuration.TorEndPoint is null)
             {
                 return false;
             }
 
-            using (var client = new TorSocks5Client(TorSocks5EndPoint))
+            using (var client = new TorSocks5Client(_configuration.TorEndPoint))
             {
                 try
                 {
@@ -380,23 +378,23 @@ namespace FreeMarketOne.Tor
         {
             Interlocked.CompareExchange(ref running, 2, 1); // If running, make it stopping.
 
-            if (TorSocks5EndPoint is null)
+            if (_configuration.TorEndPoint is null)
             {
                 Interlocked.Exchange(ref running, 3);
             }
 
-            stop?.Cancel();
+            _stop?.Cancel();
             while (Interlocked.CompareExchange(ref running, 3, 0) == 2)
             {
                 await Task.Delay(50).ConfigureAwait(false);
             }
-            stop?.Dispose();
-            stop = null;
-            torProcess?.Kill();
-            torProcess?.Dispose();
-            torProcess = null;
+            _stop?.Dispose();
+            _stop = null;
+            _torProcess?.Kill();
+            _torProcess?.Dispose();
+            _torProcess = null;
 
-            logger.Information("Tor stopped.");
+            _logger.Information("Tor stopped.");
         }
 
         public void Dispose()

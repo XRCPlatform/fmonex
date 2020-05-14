@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.BlockChain.Actions;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Libplanet;
 using Libplanet.Blockchain;
@@ -11,16 +12,16 @@ namespace FreeMarketOne.GenesisBlock
 {
     public class GenesisGenerator
     {
-        public void GenerateIt(string baseBlockChainFilePath, string marketBlockChainFilePath)
+        public void GenerateIt(IBaseConfiguration configuration)
         {
             //make plain market chain block
-            var filePath = Path.Combine(marketBlockChainFilePath, "genesis.dat");
+            var filePath = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath, "genesis.dat");
             if (!File.Exists(filePath))
             {
                 Block<MarketBlockChainAction> genesisMarket =
                     BlockChain<MarketBlockChainAction>.MakeGenesisBlock();
 
-                Directory.CreateDirectory(marketBlockChainFilePath);
+                Directory.CreateDirectory(Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath));
                 File.WriteAllBytes(filePath, genesisMarket.Serialize());
 
                 //generate plain base chain block
@@ -39,8 +40,8 @@ namespace FreeMarketOne.GenesisBlock
                 Block<BaseBlockChainAction> genesis =
                     BlockChain<BaseBlockChainAction>.MakeGenesisBlock(actionsGenesis);
 
-                filePath = Path.Combine(baseBlockChainFilePath, "genesis.dat");
-                Directory.CreateDirectory(baseBlockChainFilePath);
+                filePath = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath, "genesis.dat");
+                Directory.CreateDirectory(Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath));
                 File.WriteAllBytes(filePath, genesis.Serialize());
             }
         }

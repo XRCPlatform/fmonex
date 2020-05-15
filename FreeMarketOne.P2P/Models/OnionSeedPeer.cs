@@ -13,8 +13,13 @@ namespace FreeMarketOne.P2P.Models
             Offline = 2
         }
 
-        public string Url { get; set; }
-        public int Port { get; set; }
+        public string UrlTor { get; set; }
+        public int PortTor { get; set; }
+
+        public string UrlBlockChain { get; set; }
+        public int PortBlockChainBase { get; set; }
+        public int PortBlockChainMaster { get; set; }
+
         public string SecretKeyHex { get; set; }
         public OnionSeedStates State { get; set; }
     }

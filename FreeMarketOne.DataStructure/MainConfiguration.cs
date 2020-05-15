@@ -9,7 +9,7 @@ namespace FreeMarketOne.DataStructure
             this.Environment = (int)EnvironmentTypes.Main;
             this.TorEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9050/");
             this.LogFilePath = "log/log.txt";
-            this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds.txt";
+            this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds_v2.txt";
             this.MemoryBasePoolPath = "data/memory_basetx.data";
             this.MemoryMarketPoolPath = "data/memory_markettx.data";
             this.BlockChainBasePath = "data/blockchain_base";

@@ -120,18 +120,18 @@ namespace FreeMarketOne.ServerCore
             {
                 MarketBlockChainLoadedEvent += new EventHandler(Current.MarketBlockChainLoaded);
 
-                var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
-                MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
-                    Logger,
-                    Configuration,
-                    Configuration.BlockChainMarketPath,
-                    Configuration.BlockChainSecretPath,
-                    Configuration.ListenerMarketEndPoint,
-                    OnionSeedsManager,
-                    hashCheckPoints,
-                    preloadEnded: MarketBlockChainLoadedEvent,
-                    blockChainChanged: MarketBlockChainChangedEvent);
-                MarketBlockChainManager.Start();
+                //var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                //MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
+                //    Logger,
+                //    Configuration,
+                //    Configuration.BlockChainMarketPath,
+                //    Configuration.BlockChainSecretPath,
+                //    Configuration.ListenerMarketEndPoint,
+                //    OnionSeedsManager,
+                //    hashCheckPoints,
+                //    preloadEnded: MarketBlockChainLoadedEvent,
+                //    blockChainChanged: MarketBlockChainChangedEvent);
+                //MarketBlockChainManager.Start();
             } 
             else
             {

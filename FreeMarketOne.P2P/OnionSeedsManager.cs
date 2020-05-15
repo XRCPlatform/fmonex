@@ -86,13 +86,16 @@ namespace FreeMarketOne.P2P
                             var parts = onion.Split(":");
                             var newOnionSeed = new OnionSeedPeer();
 
-                            newOnionSeed.Url = parts[0];
-                            newOnionSeed.Port = int.Parse(parts[1]);
-                            newOnionSeed.SecretKeyHex = parts[2];
+                            newOnionSeed.UrlTor = parts[0];
+                            newOnionSeed.PortTor = int.Parse(parts[1]);
+                            newOnionSeed.UrlBlockChain = parts[2];
+                            newOnionSeed.PortBlockChainBase = int.Parse(parts[3]);
+                            newOnionSeed.PortBlockChainMaster = int.Parse(parts[4]);
+                            newOnionSeed.SecretKeyHex = parts[5];
 
                             OnionSeedPeers.Add(newOnionSeed);
 
-                            logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.Url, newOnionSeed.Port));
+                            logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
                         }
                     }
                 }
@@ -137,9 +140,9 @@ namespace FreeMarketOne.P2P
                 {
                     foreach (var itemSeed in OnionSeedPeers)
                     {
-                        var resultLog = string.Format("Checking {0} {1}", itemSeed.Url, itemSeed.Port);
+                        var resultLog = string.Format("Checking {0} {1}", itemSeed.UrlTor, itemSeed.PortTor);
 
-                        var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.Url, itemSeed.Port).Result;
+                        var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
                         if (isOnionSeedRunning)
                         {
                             itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;

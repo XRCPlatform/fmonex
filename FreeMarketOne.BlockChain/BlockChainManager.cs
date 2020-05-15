@@ -119,11 +119,14 @@ namespace FreeMarketOne.BlockChain
             if (File.Exists(path))
             {
                 var keyBytes = File.ReadAllBytes(path);
-                return new PrivateKey(keyBytes);
+                var key = new PrivateKey(keyBytes);
+                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(key.PublicKey.Format(true))));
+                return key;
             } 
             else
             {
                 var newKey = new PrivateKey();
+                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(newKey.PublicKey.Format(true))));
                 File.WriteAllBytes(path, newKey.ByteArray);
 
                 return newKey;
@@ -235,7 +238,7 @@ namespace FreeMarketOne.BlockChain
                 //itemPeer.SecretKeyHex = ByteUtil.Hex(new PrivateKey().PublicKey.Format(true));
 
                 var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.Url, itemPeer.Port), default(AppProtocolVersion));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.UrlBlockChain, itemPeer.PortBlockChainBase), default(AppProtocolVersion));
                 peers.Add(boundPeer);
             }
 

@@ -74,23 +74,23 @@ namespace FreeMarketOne.ServerCore
             InitializeListenerEndPoints(Configuration, configFile);
 
             /* Initialize Logger */
-            Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(Configuration.FullBaseDirectory, Configuration.LogFilePath),
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
                     rollingInterval: RollingInterval.Day)
                 .CreateLogger();
-            _logger = Logger.ForContext<FreeMarketOneServer>();
+            _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
 
             /* Initialize Tor */
-            TorProcessManager = new TorProcessManager(Logger, Configuration);
+            TorProcessManager = new TorProcessManager( Configuration);
             var torInitialized = TorProcessManager.Start();
 
             if (torInitialized)
             {
                 /* Initialize OnionSeeds */
-                OnionSeedsManager = new OnionSeedsManager(Logger, Configuration, TorProcessManager);
+                OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
                 OnionSeedsManager.Start();
             }
 
@@ -102,7 +102,6 @@ namespace FreeMarketOne.ServerCore
             BaseBlockChainLoadedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
             BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(
-                Logger,
                 Configuration,
                 Configuration.BlockChainBasePath,
                 Configuration.BlockChainSecretPath,
@@ -144,7 +143,6 @@ namespace FreeMarketOne.ServerCore
         {
             /* Initialize Base And Market Pool */
             BasePoolManager = new BasePoolManager(
-                Logger,
                 Configuration,
                 Configuration.MemoryBasePoolPath, 
                 BaseBlockChainManager.Storage, 
@@ -152,7 +150,6 @@ namespace FreeMarketOne.ServerCore
                 BaseBlockChainManager.PrivateKey);
 
             MarketPoolManager = new MarketPoolManager(
-                Logger,
                 Configuration,
                 Configuration.MemoryMarketPoolPath,
                 MarketBlockChainManager.Storage,

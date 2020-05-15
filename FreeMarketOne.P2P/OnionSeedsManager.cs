@@ -32,9 +32,9 @@ namespace FreeMarketOne.P2P
         private CancellationTokenSource cancellationToken { get; set; }
         private TorProcessManager torProcessManager { get; set; }
 
-        public OnionSeedsManager(ILogger serverLogger, IBaseConfiguration configuration, TorProcessManager torManager)
+        public OnionSeedsManager(IBaseConfiguration configuration, TorProcessManager torManager)
         {
-            logger = serverLogger.ForContext<OnionSeedsManager>();
+            logger = Log.Logger.ForContext<OnionSeedsManager>();
             logger.Information("Initializing Onion Seeds Manager");
 
             torSocks5EndPoint = configuration.TorEndPoint;
@@ -141,15 +141,21 @@ namespace FreeMarketOne.P2P
                     foreach (var itemSeed in OnionSeedPeers)
                     {
                         var resultLog = string.Format("Checking {0} {1}", itemSeed.UrlTor, itemSeed.PortTor);
+                        logger.Information(resultLog);
 
-                        var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
-                        if (isOnionSeedRunning)
+                        itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
+
+                        try
                         {
-                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+                            var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
+                            if (isOnionSeedRunning)
+                            {
+                                itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
+                            logger.Error(ex.Message);
                         }
 
                         periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
@@ -160,7 +166,6 @@ namespace FreeMarketOne.P2P
                     periodicCheckLog.AppendLine("Tor is down!");
                 }
 
-                logger.Information(periodicCheckLog.ToString());
                 Console.WriteLine(periodicCheckLog.ToString());
 
                 return Task.CompletedTask;

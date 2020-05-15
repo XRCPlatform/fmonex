@@ -13,13 +13,12 @@ namespace FreeMarketOne.PoolManager
     public class BasePoolManager : PoolManager<BaseBlockChainAction>
     {
         public BasePoolManager(
-            Logger serverLogger,
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
             RocksDBStore storage,
             Swarm<BaseBlockChainAction> swarmServer,
             PrivateKey privateKey) 
-            : base(serverLogger, configuration, memoryPoolFilePath, storage, swarmServer, privateKey)
+            : base(configuration, memoryPoolFilePath, storage, swarmServer, privateKey)
         {
         }
     }

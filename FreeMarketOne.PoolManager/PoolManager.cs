@@ -50,14 +50,13 @@ namespace FreeMarketOne.PoolManager
         /// <param name="swarmServer"></param>
         /// <param name="privateKey"></param>
         public PoolManager(
-            Logger serverLogger,
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
             RocksDBStore storage,
             Swarm<T> swarmServer,
             PrivateKey privateKey)
         {
-            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(PoolManager<T>).Namespace, typeof(PoolManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
 
             _configuration = configuration;

@@ -65,7 +65,6 @@ namespace FreeMarketOne.BlockChain
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
         /// </summary>
-        /// <param name="serverLogger"></param>
         /// <param name="blockChainPath"></param>
         /// <param name="blockChainSecretPath"></param>
         /// <param name="endPoint"></param>
@@ -76,7 +75,7 @@ namespace FreeMarketOne.BlockChain
         /// <param name="preloadProcessed"></param>
         /// <param name="preloadEnded"></param>
         /// <param name="blockChainChanged"></param>
-        public BlockChainManager(ILogger serverLogger,
+        public BlockChainManager(
             IBaseConfiguration configuration,
             string blockChainPath,
             string blockChainSecretPath,
@@ -89,7 +88,7 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadEnded = null,
             EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null)
         {
-            _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
 
             _configuration = configuration;

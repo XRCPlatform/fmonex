@@ -232,8 +232,13 @@ namespace FreeMarketOne.BlockChain
                 Thread.Sleep(100);
             }
 
+            //ignore me as peer
+            var pubKey = ByteUtil.Hex(_privateKey.PublicKey.Format(true));
+
             foreach (var itemPeer in _onionSeedManager.OnionSeedPeers)
             {
+                if (itemPeer.SecretKeyHex == pubKey) continue;
+
                 //REMOVE: TEST - HACK
                 //itemPeer.SecretKeyHex = ByteUtil.Hex(new PrivateKey().PublicKey.Format(true));
 

@@ -1,4 +1,4 @@
-﻿using FreeMarketOne.BlockChain.Actions;
+﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using System;
 using System.Collections.Generic;

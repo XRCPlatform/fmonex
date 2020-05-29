@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Telemetry\FreeMarketOne.Telemetry.csproj" />
   </ItemGroup>
 

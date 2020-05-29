@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using FreeMarketOne.BlockChain.Helpers;
-using FreeMarketOne.BlockChain.Actions;
+using FreeMarketOne.DataStructure;
 
 namespace FreeMarketOne.BlockChain
 {

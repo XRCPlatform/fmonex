@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
+    <ProjectReference Include="..\..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Changelly\FreeMarketOne.Changelly.csproj" />
   </ItemGroup>
 

@@ -1,9 +1,13 @@
-﻿using FreeMarketOne.Extensions.Helpers;
+﻿using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.Extensions.Helpers;
+using System;
 
 namespace FreeMarketOne.DataStructure
 {
     public class MainConfiguration : BaseConfiguration
     {
+        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
+
         public MainConfiguration()
         {
             this.Environment = (int)EnvironmentTypes.Main;
@@ -21,6 +25,18 @@ namespace FreeMarketOne.DataStructure
             this.ChangellySecret = "2b8c94c3c7befcc751c932117a63b63e12c2f2c176ebf6553b5e375da2a8b656";
             this.ChangellyApiBaseUrl = "https://api.changelly.com";
             this.TelemetryServerUri = "https://telemetry.freemarket.one/";
+
+            this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
+                    null,
+                    blockInterval,
+                    100000,
+                    2048);
+
+            this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
+                    null,
+                    blockInterval,
+                    100000,
+                    2048);
         }
     }
 }

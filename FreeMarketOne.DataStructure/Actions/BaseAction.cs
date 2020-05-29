@@ -5,14 +5,14 @@ using Libplanet.Action;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace FreeMarketOne.BlockChain.Actions
+namespace FreeMarketOne.DataStructure
 {
-    public class MarketBlockChainAction : IBaseAction
+    public class BaseAction : IBaseAction
     {
         private List<IBaseItem> _baseItems { get; set; }
         private byte[] _serialized { get; set; }
 
-        public MarketBlockChainAction()
+        public BaseAction()
         {
             _baseItems = new List<IBaseItem>();
         }
@@ -71,4 +71,3 @@ namespace FreeMarketOne.BlockChain.Actions
         }
     }
 }
-

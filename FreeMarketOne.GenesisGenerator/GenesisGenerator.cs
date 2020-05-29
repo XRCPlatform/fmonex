@@ -1,5 +1,4 @@
-﻿using FreeMarketOne.BlockChain.Actions;
-using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Libplanet;
 using Libplanet.Blockchain;
@@ -18,15 +17,15 @@ namespace FreeMarketOne.GenesisBlock
             var filePath = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath, "genesis.dat");
             if (!File.Exists(filePath))
             {
-                Block<MarketBlockChainAction> genesisMarket =
-                    BlockChain<MarketBlockChainAction>.MakeGenesisBlock();
+                Block<MarketAction> genesisMarket =
+                    BlockChain<MarketAction>.MakeGenesisBlock();
 
                 Directory.CreateDirectory(Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath));
                 File.WriteAllBytes(filePath, genesisMarket.Serialize());
 
                 //generate plain base chain block
-                List<BaseBlockChainAction> actionsGenesis = new List<BaseBlockChainAction>();
-                var newAction = new BaseBlockChainAction();
+                List<BaseAction> actionsGenesis = new List<BaseAction>();
+                var newAction = new BaseAction();
                 var checkPoint = new CheckPointMarketDataV1();
 
                 checkPoint.BlockHash = ByteUtil.Hex(genesisMarket.Hash.ByteArray);
@@ -37,8 +36,8 @@ namespace FreeMarketOne.GenesisBlock
                 newAction.AddBaseItem(checkPoint);
                 actionsGenesis.Add(newAction);
 
-                Block<BaseBlockChainAction> genesis =
-                    BlockChain<BaseBlockChainAction>.MakeGenesisBlock(actionsGenesis);
+                Block<BaseAction> genesis =
+                    BlockChain<BaseAction>.MakeGenesisBlock(actionsGenesis);
 
                 filePath = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath, "genesis.dat");
                 Directory.CreateDirectory(Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath));

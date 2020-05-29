@@ -12,7 +12,6 @@ using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.GenesisBlock;
-using FreeMarketOne.BlockChain.Actions;
 using FreeMarketOne.PoolManager;
 using Libplanet.Blockchain;
 using System.Runtime.InteropServices;
@@ -40,19 +39,21 @@ namespace FreeMarketOne.ServerCore
         public BasePoolManager BasePoolManager;
         public MarketPoolManager MarketPoolManager;
 
-        public IBlockChainManager<BaseBlockChainAction> BaseBlockChainManager;
-        public IBlockChainManager<MarketBlockChainAction> MarketBlockChainManager;
+        public IBlockChainManager<BaseAction> BaseBlockChainManager;
+        public IBlockChainManager<MarketAction> MarketBlockChainManager;
 
         public event EventHandler BaseBlockChainLoadedEvent;
         public event EventHandler MarketBlockChainLoadedEvent;
 
-        public event EventHandler<BlockChain<BaseBlockChainAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
-        public event EventHandler<BlockChain<MarketBlockChainAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
+        public event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
+        public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
 
         public event EventHandler FreeMarketOneServerLoadedEvent;
 
         public void Initialize()
         {
+
+
             var fullBaseDirectory = InitializeFullBaseDirectory();
 
             /* Configuration */
@@ -84,7 +85,7 @@ namespace FreeMarketOne.ServerCore
             _logger.Information("Application Start");
 
             /* Initialize Tor */
-            TorProcessManager = new TorProcessManager( Configuration);
+            TorProcessManager = new TorProcessManager(Configuration);
             var torInitialized = TorProcessManager.Start();
 
             if (torInitialized)
@@ -101,10 +102,11 @@ namespace FreeMarketOne.ServerCore
             /* Initialize Base BlockChain Manager */
             BaseBlockChainLoadedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
-            BaseBlockChainManager = new BlockChainManager<BaseBlockChainAction>(
+            BaseBlockChainManager = new BlockChainManager<BaseAction>(
                 Configuration,
                 Configuration.BlockChainBasePath,
                 Configuration.BlockChainSecretPath,
+                Configuration.BlockChainBasePolicy,
                 Configuration.ListenerBaseEndPoint,
                 OnionSeedsManager, 
                 preloadEnded: BaseBlockChainLoadedEvent,

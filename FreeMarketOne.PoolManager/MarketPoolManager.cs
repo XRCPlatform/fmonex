@@ -1,5 +1,4 @@
-﻿using FreeMarketOne.BlockChain.Actions;
-using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.DataStructure;
 using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
@@ -10,13 +9,13 @@ using System.Text;
 
 namespace FreeMarketOne.PoolManager
 {
-    public class MarketPoolManager : PoolManager<MarketBlockChainAction>
+    public class MarketPoolManager : PoolManager<MarketAction>
     {
         public MarketPoolManager(
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
             RocksDBStore storage,
-            Swarm<MarketBlockChainAction> swarmServer,
+            Swarm<MarketAction> swarmServer,
             PrivateKey privateKey)
             : base(configuration, memoryPoolFilePath, storage, swarmServer, privateKey)
         {

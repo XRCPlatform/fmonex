@@ -1,9 +1,13 @@
-﻿using FreeMarketOne.Extensions.Helpers;
+﻿using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.Extensions.Helpers;
+using System;
 
 namespace FreeMarketOne.DataStructure
 {
     public class TestConfiguration : BaseConfiguration
     {
+        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
+
         public TestConfiguration()
         {
             this.Environment = (int)EnvironmentTypes.Test;
@@ -18,6 +22,18 @@ namespace FreeMarketOne.DataStructure
             this.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9113/");
             this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9114/");
             this.TelemetryServerUri = "http://40.115.21.64:8088/services/collector/event";
+
+            this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
+                    null,
+                    blockInterval,
+                    100000,
+                    2048);
+
+            this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
+                    null,
+                    blockInterval,
+                    100000,
+                    2048);
         }
     }
 }

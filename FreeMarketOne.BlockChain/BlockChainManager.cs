@@ -17,8 +17,8 @@ using Libplanet.RocksDBStore;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.P2P;
 using FreeMarketOne.BlockChain.Helpers;
-using FreeMarketOne.BlockChain.Actions;
 using FreeMarketOne.DataStructure;
+using FreeMarketOne.BlockChain.Policy;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -37,7 +37,6 @@ namespace FreeMarketOne.BlockChain
         private string _blockChainFilePath { get; set; }
         private EndPoint _endPoint { get; set; }
 
-        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
         private PrivateKey _privateKey { get; set; }
         private BlockChain<T> _blockChain;
         private RocksDBStore _storage;
@@ -55,18 +54,20 @@ namespace FreeMarketOne.BlockChain
         private EventHandler _preloadEnded { get; set; }
         private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockChainChanged { get; set; }
         private IBaseConfiguration _configuration { get; }
+        private IBlockPolicy<T> _blockChainPolicy { get; }
 
         public BlockChain<T> BlockChain { get => _blockChain; }
         public RocksDBStore Storage { get => _storage; }
         public Swarm<T> SwarmServer { get => _swarmServer; }
         public PrivateKey PrivateKey { get => _privateKey; }
 
-
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
         /// </summary>
+        /// <param name="configuration"></param>
         /// <param name="blockChainPath"></param>
         /// <param name="blockChainSecretPath"></param>
+        /// <param name="blockChainPolicy"></param>
         /// <param name="endPoint"></param>
         /// <param name="seedsManager"></param>
         /// <param name="listHashCheckPoints"></param>
@@ -79,6 +80,7 @@ namespace FreeMarketOne.BlockChain
             IBaseConfiguration configuration,
             string blockChainPath,
             string blockChainSecretPath,
+            IBlockPolicy<T> blockChainPolicy,
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
             List<IBaseItem> listHashCheckPoints = null,
@@ -93,6 +95,7 @@ namespace FreeMarketOne.BlockChain
 
             _configuration = configuration;
             _blockChainFilePath = blockChainPath;
+            _blockChainPolicy = blockChainPolicy;
             _endPoint = endPoint;
 
             _privateKey = GetSecret(Path.Combine(_configuration.FullBaseDirectory, blockChainSecretPath));
@@ -148,14 +151,9 @@ namespace FreeMarketOne.BlockChain
             int? port = _endPoint.GetPortOrDefault();
 
             var appProtocolVersion = default(AppProtocolVersion);
-            var policy = new BlockPolicy<T>(
-                    null,
-                    blockInterval,
-                    100000,
-                    2048);
 
             _blockChain = new BlockChain<T>(
-                policy,
+                _blockChainPolicy,
                 _storage,
                 genesis
             );

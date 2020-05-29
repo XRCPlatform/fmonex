@@ -2,7 +2,7 @@
 using Libplanet.Action;
 using System.Collections.Generic;
 
-namespace FreeMarketOne.BlockChain.Actions
+namespace FreeMarketOne.DataStructure
 {
     public interface IBaseAction : IAction
     {

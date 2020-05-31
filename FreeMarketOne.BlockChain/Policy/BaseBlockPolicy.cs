@@ -42,13 +42,13 @@ namespace FreeMarketOne.BlockChain.Policy
             IAction blockAction = null,
             int blockIntervalMilliseconds = 5000,
             long minimumDifficulty = 1024,
-            int difficultyBoundDivisor = 128,
+            //int difficultyBoundDivisor = 128,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
             : this(
                 blockAction,
                 TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
                 minimumDifficulty,
-                difficultyBoundDivisor,
+                //difficultyBoundDivisor,
                 doesTransactionFollowPolicy)
         {
         }
@@ -73,7 +73,7 @@ namespace FreeMarketOne.BlockChain.Policy
             IAction blockAction,
             TimeSpan blockInterval,
             long minimumDifficulty,
-            int difficultyBoundDivisor,
+            //int difficultyBoundDivisor,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
         {
             if (blockInterval < TimeSpan.Zero)
@@ -90,21 +90,21 @@ namespace FreeMarketOne.BlockChain.Policy
                     "Minimum difficulty must be greater than 0.");
             }
 
-            if (minimumDifficulty <= difficultyBoundDivisor)
-            {
-                const string message =
-                    "Difficulty bound divisor must be less than " +
-                    "the minimum difficulty.";
+            //if (minimumDifficulty <= difficultyBoundDivisor)
+            //{
+            //    const string message =
+            //        "Difficulty bound divisor must be less than " +
+            //        "the minimum difficulty.";
 
-                throw new ArgumentOutOfRangeException(
-                    nameof(difficultyBoundDivisor),
-                    message);
-            }
+            //    throw new ArgumentOutOfRangeException(
+            //        nameof(difficultyBoundDivisor),
+            //        message);
+            //}
 
             BlockAction = blockAction;
             BlockInterval = blockInterval;
             MinimumDifficulty = minimumDifficulty;
-            DifficultyBoundDivisor = difficultyBoundDivisor;
+            //DifficultyBoundDivisor = difficultyBoundDivisor;
             _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? (_ => true);
         }
 
@@ -123,7 +123,7 @@ namespace FreeMarketOne.BlockChain.Policy
 
         private long MinimumDifficulty { get; }
 
-        private int DifficultyBoundDivisor { get; }
+        //private int DifficultyBoundDivisor { get; }
 
         public bool DoesTransactionFollowsPolicy(Transaction<T> transaction)
         {
@@ -181,6 +181,14 @@ namespace FreeMarketOne.BlockChain.Policy
                     $" the block #{index - 1}'s ({prevTimestamp})");
             }
 
+            if (prevTimestamp.HasValue && prevTimestamp.Value.Add(BlockInterval) < nextBlock.Timestamp)
+            {
+                return new InvalidBlockTimestampException(
+                    $"the block #{index}'s timestamp " +
+                    $"({nextBlock.Timestamp}) is earlier than" +
+                    $" the block #{index - 1}'s with block interval ({prevTimestamp.Value.Add(BlockInterval)})");
+            }
+
             return null;
         }
 
@@ -198,24 +206,28 @@ namespace FreeMarketOne.BlockChain.Policy
             if (index <= 1)
             {
                 return index == 0 ? 0 : MinimumDifficulty;
+            } 
+            else
+            {
+                return MinimumDifficulty;
             }
 
-            var prevBlock = blocks[index - 1];
+            //var prevBlock = blocks[index - 1];
 
-            DateTimeOffset prevPrevTimestamp = blocks[index - 2].Timestamp;
-            DateTimeOffset prevTimestamp = prevBlock.Timestamp;
-            TimeSpan timeDiff = prevTimestamp - prevPrevTimestamp;
-            long timeDiffMilliseconds = (long)timeDiff.TotalMilliseconds;
-            const long minimumMultiplier = -99;
-            long multiplier = 1 - (timeDiffMilliseconds /
-                                   (long)BlockInterval.TotalMilliseconds);
-            multiplier = Math.Max(multiplier, minimumMultiplier);
+            //DateTimeOffset prevPrevTimestamp = blocks[index - 2].Timestamp;
+            //DateTimeOffset prevTimestamp = prevBlock.Timestamp;
+            //TimeSpan timeDiff = prevTimestamp - prevPrevTimestamp;
+            //long timeDiffMilliseconds = (long)timeDiff.TotalMilliseconds;
+            //const long minimumMultiplier = -99;
+            //long multiplier = 1 - (timeDiffMilliseconds /
+            //                       (long)BlockInterval.TotalMilliseconds);
+            //multiplier = Math.Max(multiplier, minimumMultiplier);
 
-            var prevDifficulty = prevBlock.Difficulty;
-            var offset = prevDifficulty / DifficultyBoundDivisor;
-            long nextDifficulty = prevDifficulty + (offset * multiplier);
+            //var prevDifficulty = prevBlock.Difficulty;
+            //var offset = prevDifficulty / DifficultyBoundDivisor;
+            //long nextDifficulty = prevDifficulty + (offset * multiplier);
 
-            return Math.Max(nextDifficulty, MinimumDifficulty);
+            //return Math.Max(nextDifficulty, MinimumDifficulty);
         }
     }
 }

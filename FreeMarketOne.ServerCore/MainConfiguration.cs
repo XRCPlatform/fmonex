@@ -6,7 +6,8 @@ namespace FreeMarketOne.DataStructure
 {
     public class MainConfiguration : BaseConfiguration
     {
-        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(300);
+        private static readonly long difficulty = 100000;
 
         public MainConfiguration()
         {
@@ -29,14 +30,12 @@ namespace FreeMarketOne.DataStructure
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,
                     blockInterval,
-                    100000,
-                    2048);
+                    difficulty);
 
             this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
                     null,
                     blockInterval,
-                    100000,
-                    2048);
+                    difficulty);
         }
     }
 }

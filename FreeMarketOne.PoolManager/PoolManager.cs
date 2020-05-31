@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.PoolManager
 {
@@ -39,6 +40,8 @@ namespace FreeMarketOne.PoolManager
         private RocksDBStore _storage;
         private Swarm<T> _swarmServer;
         private PrivateKey _privateKey;
+
+        private IAsyncLoopFactory _asyncLoopFactory { get; set; }
 
         /// <summary>
         /// Base pool manager
@@ -66,6 +69,8 @@ namespace FreeMarketOne.PoolManager
             _privateKey = privateKey;
             _swarmServer = swarmServer;
 
+            _asyncLoopFactory = new AsyncLoopFactory(_logger);
+
             _logger.Information("Initializing Base Pool Manager");
 
             Interlocked.Exchange(ref _running, 0);
@@ -77,6 +82,19 @@ namespace FreeMarketOne.PoolManager
         public bool Start()
         {
             Interlocked.Exchange(ref _running, 1);
+
+            var periodicLogLoop = this._asyncLoopFactory.Run("Mining", (cancellation) =>
+            {
+                //check if mem pool have tx if yes then do mining
+
+                var coProofOfWorkRunner = new CoroutineManager();
+                coProofOfWorkRunner.RegisterCoroutine(_proofOfWorkWorker.GetEnumerator());
+                coProofOfWorkRunner.Start();
+
+                return Task.CompletedTask;
+            },
+            _cancellationToken.Token,
+            repeatEvery: blockTime);
 
             return true;
         }

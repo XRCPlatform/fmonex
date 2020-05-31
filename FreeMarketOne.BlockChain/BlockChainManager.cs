@@ -19,6 +19,7 @@ using FreeMarketOne.P2P;
 using FreeMarketOne.BlockChain.Helpers;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.Extensions.Helpers;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -206,11 +207,7 @@ namespace FreeMarketOne.BlockChain
                     _storage,
                     _privateKey
                     );
-
-                //var coProofOfWorkRunner = new CoroutineManager();
-                //coProofOfWorkRunner.RegisterCoroutine(proofOfWorkWorker.GetEnumerator());
-                //coProofOfWorkRunner.Start();
-            } 
+            }
             else
             {
                 _logger.Error(string.Format("No host information"));

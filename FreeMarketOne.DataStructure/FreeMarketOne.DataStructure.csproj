@@ -14,6 +14,7 @@
     <ProjectReference Include="..\FreeMarketOne.Extensions\FreeMarketOne.Extensions.csproj" />
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Utils\FreeMarketOne.Utils.csproj" />
+    <ProjectReference Include="..\Libplanet.Extensions\Libplanet.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

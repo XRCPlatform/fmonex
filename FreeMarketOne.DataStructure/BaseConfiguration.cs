@@ -1,5 +1,6 @@
 ﻿using Libplanet.Action;
 using Libplanet.Blockchain.Policies;
+using Libplanet.Extensions;
 using System.Net;
 using System.Reflection;
 
@@ -51,7 +52,7 @@ namespace FreeMarketOne.DataStructure
 
         public string FullBaseDirectory { get; set; }
 
-        public IBlockPolicy<BaseAction> BlockChainBasePolicy { get; set; }
-        public IBlockPolicy<MarketAction> BlockChainMarketPolicy { get; set; }
+        public IDefaultBlockPolicy<BaseAction> BlockChainBasePolicy { get; set; }
+        public IDefaultBlockPolicy<MarketAction> BlockChainMarketPolicy { get; set; }
     }
 }

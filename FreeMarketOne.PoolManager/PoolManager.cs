@@ -1,7 +1,13 @@
-﻿using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.BlockChain;
+using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
+using Libplanet;
+using Libplanet.Blockchain;
+using Libplanet.Blockchain.Policies;
 using Libplanet.Crypto;
+using Libplanet.Extensions;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Libplanet.Tx;
@@ -40,23 +46,30 @@ namespace FreeMarketOne.PoolManager
         private RocksDBStore _storage;
         private Swarm<T> _swarmServer;
         private PrivateKey _privateKey;
+        private BlockChain<T> _blockChain;
 
+        private ProofOfWorkWorker<T> _proofOfWorkWorker { get; set; }
+        private IDefaultBlockPolicy<T> _blockPolicy { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
 
         /// <summary>
         /// Base pool manager
         /// </summary>
-        /// <param name="serverLogger"></param>
+        /// <param name="configuration"></param>
         /// <param name="memoryPoolFilePath"></param>
         /// <param name="storage"></param>
         /// <param name="swarmServer"></param>
         /// <param name="privateKey"></param>
+        /// <param name="blockChain"></param>
+        /// <param name="blockPolicy"></param>
         public PoolManager(
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
             RocksDBStore storage,
             Swarm<T> swarmServer,
-            PrivateKey privateKey)
+            PrivateKey privateKey,
+            BlockChain<T> blockChain,
+            IDefaultBlockPolicy<T> blockPolicy)
         {
             _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(PoolManager<T>).Namespace, typeof(PoolManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
@@ -68,8 +81,19 @@ namespace FreeMarketOne.PoolManager
             _storage = storage;
             _privateKey = privateKey;
             _swarmServer = swarmServer;
+            _blockChain = blockChain;
+            _blockPolicy = blockPolicy;
 
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
+
+            _proofOfWorkWorker = new ProofOfWorkWorker<T>(
+                    _logger,
+                    _swarmServer,
+                    _blockChain,
+                    _privateKey.ToAddress(),
+                    _storage,
+                    _privateKey
+                    );
 
             _logger.Information("Initializing Base Pool Manager");
 
@@ -83,18 +107,18 @@ namespace FreeMarketOne.PoolManager
         {
             Interlocked.Exchange(ref _running, 1);
 
-            var periodicLogLoop = this._asyncLoopFactory.Run("Mining", (cancellation) =>
+            var periodicLogLoop = this._asyncLoopFactory.Run("Mining_" + typeof(T).Name, (cancellation) =>
             {
                 //check if mem pool have tx if yes then do mining
 
-                var coProofOfWorkRunner = new CoroutineManager();
-                coProofOfWorkRunner.RegisterCoroutine(_proofOfWorkWorker.GetEnumerator());
-                coProofOfWorkRunner.Start();
+                //var coProofOfWorkRunner = new CoroutineManager();
+                //coProofOfWorkRunner.RegisterCoroutine(_proofOfWorkWorker.GetEnumerator());
+                //coProofOfWorkRunner.Start();
 
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
-            repeatEvery: blockTime);
+            repeatEvery: _blockPolicy.PoolCheckInterval);
 
             return true;
         }

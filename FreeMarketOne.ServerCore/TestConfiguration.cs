@@ -7,6 +7,7 @@ namespace FreeMarketOne.DataStructure
     public class TestConfiguration : BaseConfiguration
     {
         private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan poolCheckInterval = TimeSpan.FromSeconds(30);
         private static readonly long difficulty = 100000;
 
         public TestConfiguration()
@@ -27,12 +28,14 @@ namespace FreeMarketOne.DataStructure
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,
                     blockInterval,
-                    difficulty);
+                    difficulty,
+                    poolCheckInterval);
 
             this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
                     null,
                     blockInterval,
-                    difficulty);
+                    difficulty,
+                    poolCheckInterval);
         }
     }
 }

@@ -6,7 +6,6 @@ using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using FreeMarketOne.P2P;
-using FreeMarketOne.Mining;
 using FreeMarketOne.DataStructure;
 using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
@@ -34,7 +33,6 @@ namespace FreeMarketOne.ServerCore
         public TorProcessManager TorProcessManager;
 
         public IOnionSeedsManager OnionSeedsManager;
-        public IMiningProcessor MiningProcessor;
 
         public BasePoolManager BasePoolManager;
         public MarketPoolManager MarketPoolManager;
@@ -125,7 +123,9 @@ namespace FreeMarketOne.ServerCore
                     Configuration.MemoryBasePoolPath,
                     BaseBlockChainManager.Storage,
                     BaseBlockChainManager.SwarmServer,
-                    BaseBlockChainManager.PrivateKey);
+                    BaseBlockChainManager.PrivateKey,
+                    BaseBlockChainManager.BlockChain,
+                    Configuration.BlockChainBasePolicy);
                 BasePoolManager.Start();
 
                 MarketBlockChainLoadedEvent += new EventHandler(Current.MarketBlockChainLoaded);
@@ -158,7 +158,9 @@ namespace FreeMarketOne.ServerCore
                 Configuration.MemoryBasePoolPath, 
                 BaseBlockChainManager.Storage, 
                 BaseBlockChainManager.SwarmServer,
-                BaseBlockChainManager.PrivateKey);
+                BaseBlockChainManager.PrivateKey,
+                BaseBlockChainManager.BlockChain,
+                Configuration.BlockChainBasePolicy);
 
             //MarketPoolManager = new MarketPoolManager(
             //    Configuration,

@@ -1,5 +1,7 @@
 ﻿using FreeMarketOne.DataStructure;
+using Libplanet.Blockchain;
 using Libplanet.Crypto;
+using Libplanet.Extensions;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Serilog.Core;
@@ -16,8 +18,10 @@ namespace FreeMarketOne.PoolManager
             string memoryPoolFilePath,
             RocksDBStore storage,
             Swarm<MarketAction> swarmServer,
-            PrivateKey privateKey)
-            : base(configuration, memoryPoolFilePath, storage, swarmServer, privateKey)
+            PrivateKey privateKey,
+            BlockChain<MarketAction> blockChain,
+            IDefaultBlockPolicy<MarketAction> blockPolicy)
+            : base(configuration, memoryPoolFilePath, storage, swarmServer, privateKey, blockChain, blockPolicy)
         {
         }
     }

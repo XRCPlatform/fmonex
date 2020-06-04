@@ -6,7 +6,6 @@ using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using FreeMarketOne.P2P;
-using FreeMarketOne.Mining;
 using FreeMarketOne.DataStructure;
 using static FreeMarketOne.DataStructure.BaseConfiguration;
 using FreeMarketOne.BlockChain;
@@ -34,7 +33,6 @@ namespace FreeMarketOne.ServerCore
         public TorProcessManager TorProcessManager;
 
         public IOnionSeedsManager OnionSeedsManager;
-        public IMiningProcessor MiningProcessor;
 
         public BasePoolManager BasePoolManager;
         public MarketPoolManager MarketPoolManager;
@@ -119,6 +117,17 @@ namespace FreeMarketOne.ServerCore
             /* Initialize Market BlockChain Manager */
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
+                /* Initialize Base And Market Pool */
+                BasePoolManager = new BasePoolManager(
+                    Configuration,
+                    Configuration.MemoryBasePoolPath,
+                    BaseBlockChainManager.Storage,
+                    BaseBlockChainManager.SwarmServer,
+                    BaseBlockChainManager.PrivateKey,
+                    BaseBlockChainManager.BlockChain,
+                    Configuration.BlockChainBasePolicy);
+                BasePoolManager.Start();
+
                 MarketBlockChainLoadedEvent += new EventHandler(Current.MarketBlockChainLoaded);
 
                 //var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
@@ -143,20 +152,22 @@ namespace FreeMarketOne.ServerCore
 
         private void MarketBlockChainLoaded(object sender, EventArgs e)
         {
-            /* Initialize Base And Market Pool */
+            /* Initialize Market Pool */
             BasePoolManager = new BasePoolManager(
                 Configuration,
                 Configuration.MemoryBasePoolPath, 
                 BaseBlockChainManager.Storage, 
                 BaseBlockChainManager.SwarmServer,
-                BaseBlockChainManager.PrivateKey);
+                BaseBlockChainManager.PrivateKey,
+                BaseBlockChainManager.BlockChain,
+                Configuration.BlockChainBasePolicy);
 
-            MarketPoolManager = new MarketPoolManager(
-                Configuration,
-                Configuration.MemoryMarketPoolPath,
-                MarketBlockChainManager.Storage,
-                MarketBlockChainManager.SwarmServer,
-                MarketBlockChainManager.PrivateKey);
+            //MarketPoolManager = new MarketPoolManager(
+            //    Configuration,
+            //    Configuration.MemoryMarketPoolPath,
+            //    MarketBlockChainManager.Storage,
+            //    MarketBlockChainManager.SwarmServer,
+            //    MarketBlockChainManager.PrivateKey);
 
             FreeMarketOneServerLoadedEvent?.Invoke(this, null);
         }

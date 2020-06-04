@@ -19,6 +19,7 @@ using FreeMarketOne.P2P;
 using FreeMarketOne.BlockChain.Helpers;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.Extensions.Helpers;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -46,7 +47,6 @@ namespace FreeMarketOne.BlockChain
 
         private OnionSeedsManager _onionSeedManager;
         private PeerBootstrapWorker<T> _peerBootstrapWorker { get; set; }
-        private ProofOfWorkWorker<T> _proofOfWorkWorker { get; set; }
         private List<CheckPointMarketDataV1> _hashCheckPoints { get; set; }
         private EventHandler _bootstrapStarted { get; set; }
         private EventHandler _preloadStarted { get; set; }
@@ -197,20 +197,7 @@ namespace FreeMarketOne.BlockChain
                 var coBoostrapRunner = new CoroutineManager();
                 coBoostrapRunner.RegisterCoroutine(_peerBootstrapWorker.GetEnumerator());
                 coBoostrapRunner.Start();
-
-                _proofOfWorkWorker = new ProofOfWorkWorker<T>(
-                    _logger,
-                    _swarmServer,
-                    _blockChain,
-                    _privateKey.ToAddress(),
-                    _storage,
-                    _privateKey
-                    );
-
-                //var coProofOfWorkRunner = new CoroutineManager();
-                //coProofOfWorkRunner.RegisterCoroutine(proofOfWorkWorker.GetEnumerator());
-                //coProofOfWorkRunner.Start();
-            } 
+            }
             else
             {
                 _logger.Error(string.Format("No host information"));

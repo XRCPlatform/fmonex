@@ -18,7 +18,7 @@ using FreeMarketOne.DataStructure;
 
 namespace FreeMarketOne.BlockChain
 {
-    internal class ProofOfWorkWorker<T> : IDisposable where T : IBaseAction, new()
+    public class ProofOfWorkWorker<T> : IDisposable where T : IBaseAction, new()
     {
         private ILogger _logger { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
@@ -30,7 +30,7 @@ namespace FreeMarketOne.BlockChain
         private Address _address;
         private EventHandler _eventNewBlock { get; set; }
 
-        internal ProofOfWorkWorker(
+        public ProofOfWorkWorker(
             ILogger serverLogger,
             Swarm<T> swarmServer,
             BlockChain<T> blockChain,
@@ -55,7 +55,7 @@ namespace FreeMarketOne.BlockChain
             _logger.Information("Initializing Proof Of Work Worker");
         }
 
-        internal IEnumerator GetEnumerator()
+        public IEnumerator GetEnumerator()
         {
             while (true)
             {

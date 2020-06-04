@@ -5,6 +5,7 @@ using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Blocks;
+using Libplanet.Extensions;
 using Libplanet.Tx;
 
 namespace FreeMarketOne.BlockChain.Policy
@@ -14,7 +15,7 @@ namespace FreeMarketOne.BlockChain.Policy
     /// </summary>
     /// <typeparam name="T">An <see cref="IAction"/> type.  It should match
     /// to <see cref="Block{T}"/>'s type parameter.</typeparam>
-    public class BaseBlockPolicy<T> : IBlockPolicy<T>
+    public class BaseBlockPolicy<T> : IDefaultBlockPolicy<T>
         where T : IAction, new()
     {
         private readonly Predicate<Transaction<T>> _doesTransactionFollowPolicy;
@@ -33,6 +34,10 @@ namespace FreeMarketOne.BlockChain.Policy
         /// </param>
         /// <param name="minimumDifficulty">Configures
         /// <see cref="MinimumDifficulty"/>. 1024 by default.</param>
+        /// <param name="poolCheckIntervalMilliseconds">Configures
+        /// <see cref="PoolCheckInterval"/> in milliseconds.
+        /// 5000 milliseconds by default.
+        /// </param>
         /// <param name="difficultyBoundDivisor">Configures
         /// <see cref="DifficultyBoundDivisor"/>. 128 by default.</param>
         /// <param name="doesTransactionFollowPolicy">
@@ -42,13 +47,14 @@ namespace FreeMarketOne.BlockChain.Policy
             IAction blockAction = null,
             int blockIntervalMilliseconds = 5000,
             long minimumDifficulty = 1024,
-            int difficultyBoundDivisor = 128,
+            int poolCheckIntervalMilliseconds = 5000,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
             : this(
                 blockAction,
                 TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
                 minimumDifficulty,
-                difficultyBoundDivisor,
+                TimeSpan.FromMilliseconds(poolCheckIntervalMilliseconds),
+                //difficultyBoundDivisor,
                 doesTransactionFollowPolicy)
         {
         }
@@ -64,6 +70,8 @@ namespace FreeMarketOne.BlockChain.Policy
         /// </param>
         /// <param name="minimumDifficulty">Configures
         /// <see cref="MinimumDifficulty"/>.</param>
+        /// <param name="poolCheckInterval">Configures <see cref="PoolCheckInterval"/>.
+        /// </param>
         /// <param name="difficultyBoundDivisor">Configures
         /// <see cref="DifficultyBoundDivisor"/>.</param>
         /// <param name="doesTransactionFollowPolicy">
@@ -73,7 +81,7 @@ namespace FreeMarketOne.BlockChain.Policy
             IAction blockAction,
             TimeSpan blockInterval,
             long minimumDifficulty,
-            int difficultyBoundDivisor,
+            TimeSpan poolCheckInterval,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
         {
             if (blockInterval < TimeSpan.Zero)
@@ -90,21 +98,10 @@ namespace FreeMarketOne.BlockChain.Policy
                     "Minimum difficulty must be greater than 0.");
             }
 
-            if (minimumDifficulty <= difficultyBoundDivisor)
-            {
-                const string message =
-                    "Difficulty bound divisor must be less than " +
-                    "the minimum difficulty.";
-
-                throw new ArgumentOutOfRangeException(
-                    nameof(difficultyBoundDivisor),
-                    message);
-            }
-
             BlockAction = blockAction;
             BlockInterval = blockInterval;
             MinimumDifficulty = minimumDifficulty;
-            DifficultyBoundDivisor = difficultyBoundDivisor;
+            PoolCheckInterval = poolCheckInterval;
             _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? (_ => true);
         }
 
@@ -121,9 +118,9 @@ namespace FreeMarketOne.BlockChain.Policy
         /// </summary>
         public TimeSpan BlockInterval { get; }
 
-        private long MinimumDifficulty { get; }
+        public TimeSpan PoolCheckInterval { get; }
 
-        private int DifficultyBoundDivisor { get; }
+        private long MinimumDifficulty { get; }
 
         public bool DoesTransactionFollowsPolicy(Transaction<T> transaction)
         {
@@ -181,6 +178,14 @@ namespace FreeMarketOne.BlockChain.Policy
                     $" the block #{index - 1}'s ({prevTimestamp})");
             }
 
+            if (prevTimestamp.HasValue && prevTimestamp.Value.Add(BlockInterval) < nextBlock.Timestamp)
+            {
+                return new InvalidBlockTimestampException(
+                    $"the block #{index}'s timestamp " +
+                    $"({nextBlock.Timestamp}) is earlier than" +
+                    $" the block #{index - 1}'s with block interval ({prevTimestamp.Value.Add(BlockInterval)})");
+            }
+
             return null;
         }
 
@@ -198,24 +203,11 @@ namespace FreeMarketOne.BlockChain.Policy
             if (index <= 1)
             {
                 return index == 0 ? 0 : MinimumDifficulty;
+            } 
+            else
+            {
+                return MinimumDifficulty;
             }
-
-            var prevBlock = blocks[index - 1];
-
-            DateTimeOffset prevPrevTimestamp = blocks[index - 2].Timestamp;
-            DateTimeOffset prevTimestamp = prevBlock.Timestamp;
-            TimeSpan timeDiff = prevTimestamp - prevPrevTimestamp;
-            long timeDiffMilliseconds = (long)timeDiff.TotalMilliseconds;
-            const long minimumMultiplier = -99;
-            long multiplier = 1 - (timeDiffMilliseconds /
-                                   (long)BlockInterval.TotalMilliseconds);
-            multiplier = Math.Max(multiplier, minimumMultiplier);
-
-            var prevDifficulty = prevBlock.Difficulty;
-            var offset = prevDifficulty / DifficultyBoundDivisor;
-            long nextDifficulty = prevDifficulty + (offset * multiplier);
-
-            return Math.Max(nextDifficulty, MinimumDifficulty);
         }
     }
 }

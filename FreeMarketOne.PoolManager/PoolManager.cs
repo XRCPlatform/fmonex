@@ -115,6 +115,8 @@ namespace FreeMarketOne.PoolManager
 
             var periodicLogLoop = this._asyncLoopFactory.Run("Mining_" + typeof(T).Name, (cancellation) =>
             {
+                _logger.Information("Initializing Mining Loop Checker");
+
                 var actionStaged = GetAllActionItemStaged();
                 var actionLocal = GetAllActionItemLocal();
 
@@ -125,20 +127,27 @@ namespace FreeMarketOne.PoolManager
                     {
                         if ((miningDelayStart >= DateTime.UtcNow) && (!coProofOfWorkRunner.IsActive))
                         {
+                            _logger.Information(string.Format("Starting mining after mining delay."));
                             coProofOfWorkRunner.Start();
                         }
                     }
                     else
                     {
+                        _logger.Information(string.Format("Found new actions in pools. Local {0}. Staged {1}.", actionLocal.Count, actionStaged.Count));
+
                         Interlocked.Exchange(ref _running, 4);
                         miningDelayStart = DateTime.UtcNow.Add(_blockPolicy.BlockInterval);
                     }
                 }
                 else
                 {
-                    Interlocked.Exchange(ref _running, 1);
+                    if ((coProofOfWorkRunner.IsActive) || (Interlocked.Read(ref _running) == 4))
+                    {
+                        _logger.Information("Stopping Mining Loop Checker.");
+                        Interlocked.Exchange(ref _running, 1);
 
-                    coProofOfWorkRunner.Stop();
+                        coProofOfWorkRunner.Stop();
+                    }
                 }
 
                 return Task.CompletedTask;

@@ -3,21 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FreeMarketOne.BlockChain.Helpers
+namespace Libplanet.Extensions.Helpers
 {
-    internal class CoroutineManager
+    public class CoroutineManager
     {
         private List<Stack<IEnumerator>> coroutines = new List<Stack<IEnumerator>>();
 
-        internal void RegisterCoroutine(IEnumerator coroutine)
+        public bool IsActive { get; set; }
+
+        public void RegisterCoroutine(IEnumerator coroutine)
         {
             var coroutineChain = new Stack<IEnumerator>();
             coroutineChain.Push(coroutine);
             coroutines.Add(coroutineChain);
         }
 
-        internal void Start()
+        public void Start()
         {
+            IsActive = true;
             int i = -1;
             while (true)
             {
@@ -39,13 +42,19 @@ namespace FreeMarketOne.BlockChain.Helpers
                 }
             }
         }
+
+        public void Stop()
+        {
+            IsActive = false;
+            coroutines.Clear();
+        }
     }
-    internal interface ICoroutineCommand
+    public interface ICoroutineCommand
     {
         IEnumerator<object> Execute();
     }
 
-    internal sealed class WaitUntil : IEnumerator
+    public sealed class WaitUntil : IEnumerator
     {
         private Func<bool> predicate;
 
@@ -55,7 +64,7 @@ namespace FreeMarketOne.BlockChain.Helpers
             } 
         }
 
-        internal WaitUntil(Func<bool> predicate) {
+        public WaitUntil(Func<bool> predicate) {
             this.predicate = predicate;
         }
 

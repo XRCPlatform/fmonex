@@ -8,6 +8,7 @@ using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
+using Libplanet.Extensions.Helpers;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Libplanet.Tx;
@@ -30,7 +31,7 @@ namespace FreeMarketOne.PoolManager
         private ILogger _logger { get; set; }
 
         /// <summary>
-        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped, 4: Mining
         /// </summary>
         private long _running;
 
@@ -107,13 +108,47 @@ namespace FreeMarketOne.PoolManager
         {
             Interlocked.Exchange(ref _running, 1);
 
+            var coProofOfWorkRunner = new CoroutineManager();
+            coProofOfWorkRunner.RegisterCoroutine(_proofOfWorkWorker.GetEnumerator());
+
+            var miningDelayStart = DateTime.MinValue;
+
             var periodicLogLoop = this._asyncLoopFactory.Run("Mining_" + typeof(T).Name, (cancellation) =>
             {
-                //check if mem pool have tx if yes then do mining
+                _logger.Information("Initializing Mining Loop Checker");
 
-                //var coProofOfWorkRunner = new CoroutineManager();
-                //coProofOfWorkRunner.RegisterCoroutine(_proofOfWorkWorker.GetEnumerator());
-                //coProofOfWorkRunner.Start();
+                var actionStaged = GetAllActionItemStaged();
+                var actionLocal = GetAllActionItemLocal();
+
+                //check if mem pool have tx if yes then do mining
+                if ((actionLocal.Count > 0) || (actionStaged.Count > 0))
+                {
+                    if (Interlocked.Read(ref _running) == 4)
+                    {
+                        if ((miningDelayStart >= DateTime.UtcNow) && (!coProofOfWorkRunner.IsActive))
+                        {
+                            _logger.Information(string.Format("Starting mining after mining delay."));
+                            coProofOfWorkRunner.Start();
+                        }
+                    }
+                    else
+                    {
+                        _logger.Information(string.Format("Found new actions in pools. Local {0}. Staged {1}.", actionLocal.Count, actionStaged.Count));
+
+                        Interlocked.Exchange(ref _running, 4);
+                        miningDelayStart = DateTime.UtcNow.Add(_blockPolicy.BlockInterval);
+                    }
+                }
+                else
+                {
+                    if ((coProofOfWorkRunner.IsActive) || (Interlocked.Read(ref _running) == 4))
+                    {
+                        _logger.Information("Stopping Mining Loop Checker.");
+                        Interlocked.Exchange(ref _running, 1);
+
+                        coProofOfWorkRunner.Stop();
+                    }
+                }
 
                 return Task.CompletedTask;
             },
@@ -125,7 +160,7 @@ namespace FreeMarketOne.PoolManager
 
         public bool IsPoolManagerRunning()
         {
-            if (Interlocked.Read(ref _running) == 1)
+            if ((Interlocked.Read(ref _running) == 1) || (Interlocked.Read(ref _running) == 4))
             {
                 return true;
             }

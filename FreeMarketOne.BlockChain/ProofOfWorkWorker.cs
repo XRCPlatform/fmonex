@@ -1,5 +1,4 @@
-﻿using FreeMarketOne.BlockChain.Helpers;
-using Libplanet;
+﻿using Libplanet;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Net;
@@ -15,6 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FreeMarketOne.DataStructure;
+using Libplanet.Extensions.Helpers;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -57,8 +57,8 @@ namespace FreeMarketOne.BlockChain
 
         public IEnumerator GetEnumerator()
         {
-            while (true)
-            {
+            //while (true)
+            //{
                 var txs = new HashSet<Transaction<T>>();
 
                 var taskMiner = Task.Run(async () =>
@@ -127,7 +127,7 @@ namespace FreeMarketOne.BlockChain
                 }
 
                 _eventNewBlock?.Invoke(this, EventArgs.Empty);
-            }
+            //}
         }
 
         public void Dispose()

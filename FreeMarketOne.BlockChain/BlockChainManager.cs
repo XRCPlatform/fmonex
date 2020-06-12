@@ -45,7 +45,7 @@ namespace FreeMarketOne.BlockChain
         private ImmutableList<Peer> _seedPeers;
         private IImmutableSet<Address> _trustedPeers;
 
-        private OnionSeedsManager _onionSeedManager;
+        private IOnionSeedsManager _onionSeedManager;
         private PeerBootstrapWorker<T> _peerBootstrapWorker { get; set; }
         private List<CheckPointMarketDataV1> _hashCheckPoints { get; set; }
         private EventHandler _bootstrapStarted { get; set; }
@@ -100,7 +100,7 @@ namespace FreeMarketOne.BlockChain
 
             _privateKey = GetSecret(Path.Combine(_configuration.FullBaseDirectory, blockChainSecretPath));
             _storage = new RocksDBStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
-            _onionSeedManager = (OnionSeedsManager)seedsManager;
+            _onionSeedManager = seedsManager;
 
             if (listHashCheckPoints != null)
             {

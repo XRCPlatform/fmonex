@@ -107,6 +107,7 @@ namespace FreeMarketOne.PoolManager
         public bool Start()
         {
             Interlocked.Exchange(ref _running, 1);
+            _logger.Information("Initializing Mining Loop Checker");
 
             var coProofOfWorkRunner = new CoroutineManager();
             coProofOfWorkRunner.RegisterCoroutine(_proofOfWorkWorker.GetEnumerator());
@@ -115,7 +116,7 @@ namespace FreeMarketOne.PoolManager
 
             var periodicLogLoop = this._asyncLoopFactory.Run("Mining_" + typeof(T).Name, (cancellation) =>
             {
-                _logger.Information("Initializing Mining Loop Checker");
+                _logger.Information("Mining Loop Check");
 
                 var actionStaged = GetAllActionItemStaged();
                 var actionLocal = GetAllActionItemLocal();

@@ -50,8 +50,6 @@ namespace FreeMarketOne.ServerCore
 
         public void Initialize()
         {
-
-
             var fullBaseDirectory = InitializeFullBaseDirectory();
 
             /* Configuration */

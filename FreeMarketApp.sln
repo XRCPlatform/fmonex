@@ -61,7 +61,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Telemetry.Tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd.External", "BackEnd.External", "{A794BE5D-399B-4C5F-BB57-1F473B76F5C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Extensions", "Libplanet.Extensions\Libplanet.Extensions.csproj", "{010B9D2B-4A93-4AA5-AEB2-2A4D35B45287}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Extensions", "Libplanet.Extensions\Libplanet.Extensions.csproj", "{010B9D2B-4A93-4AA5-AEB2-2A4D35B45287}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.BlockChain.Test", "FreeMarketOne.BlockChain.Test\FreeMarketOne.BlockChain.Test.csproj", "{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -169,6 +171,10 @@ Global
 		{010B9D2B-4A93-4AA5-AEB2-2A4D35B45287}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{010B9D2B-4A93-4AA5-AEB2-2A4D35B45287}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{010B9D2B-4A93-4AA5-AEB2-2A4D35B45287}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -198,6 +204,7 @@ Global
 		{D0E33184-A9EF-445F-BCDB-6B8127D95CE3} = {A794BE5D-399B-4C5F-BB57-1F473B76F5C1}
 		{D547B084-FB19-49BC-98AD-FC110C91C96A} = {A794BE5D-399B-4C5F-BB57-1F473B76F5C1}
 		{010B9D2B-4A93-4AA5-AEB2-2A4D35B45287} = {C59FF8D9-20E4-40D3-8159-F8ECC2255A47}
+		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6} = {A52240B9-9E9E-4768-92E2-35CC7F180F12}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

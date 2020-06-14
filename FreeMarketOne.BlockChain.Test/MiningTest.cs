@@ -135,7 +135,8 @@ namespace FreeMarketOne.BlockChain.Test
         {
             InitializeDefaultEnvironment();
 
-            SpinWait.SpinUntil((() => _basePoolManager != null && _basePoolManager.IsPoolManagerRunning()));
+            SpinWait.SpinUntil(() => _baseBlockChainManager.IsBlockChainManagerRunning());
+            SpinWait.SpinUntil(() => _basePoolManager != null && _basePoolManager.IsPoolManagerRunning());
 
             Assert.IsNotNull(_basePoolManager);
             Assert.IsTrue(_basePoolManager.IsPoolManagerRunning());
@@ -155,6 +156,7 @@ namespace FreeMarketOne.BlockChain.Test
             _basePoolManager.AcceptActionItem(testActionItem2);
 
             //complete tx and send it to network
+            SpinWait.SpinUntil(() => _baseBlockChainManager.SwarmServer.Running);
             _basePoolManager.PropagateAllActionItemLocal();
 
             //now waiting for mining
@@ -162,15 +164,15 @@ namespace FreeMarketOne.BlockChain.Test
             Assert.AreEqual(0, _basePoolManager.GetAllActionItemLocal().Count);
 
             //now wait until mining will start
-            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == false));
+            SpinWait.SpinUntil(() => _basePoolManager.IsMiningWorkerRunning());
             Assert.IsTrue(_basePoolManager.IsMiningWorkerRunning());
 
             //now wait until we havent a new block
-            SpinWait.SpinUntil((() => _newBlock == false));
+            SpinWait.SpinUntil((() => _newBlock == true));
             Assert.IsTrue(_newBlock);
 
             //wait until end of mining
-            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == true));
+            SpinWait.SpinUntil(() => !_basePoolManager.IsMiningWorkerRunning());
             Assert.IsFalse(_basePoolManager.IsMiningWorkerRunning());
         }
     }

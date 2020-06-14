@@ -18,7 +18,7 @@ using Libplanet.Extensions.Helpers;
 
 namespace FreeMarketOne.BlockChain
 {
-    public class ProofOfWorkWorker<T> : IDisposable where T : IBaseAction, new()
+    public class MiningWorker<T> : IDisposable where T : IBaseAction, new()
     {
         private ILogger _logger { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
@@ -30,7 +30,7 @@ namespace FreeMarketOne.BlockChain
         private Address _address;
         private EventHandler _eventNewBlock { get; set; }
 
-        public ProofOfWorkWorker(
+        public MiningWorker(
             ILogger serverLogger,
             Swarm<T> swarmServer,
             BlockChain<T> blockChain,
@@ -40,7 +40,7 @@ namespace FreeMarketOne.BlockChain
             EventHandler eventNewBlock = null)
         {
             _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
-                string.Format("{0}.{1}.{2}", typeof(ProofOfWorkWorker<T>).Namespace, typeof(ProofOfWorkWorker<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
+                string.Format("{0}.{1}.{2}", typeof(MiningWorker<T>).Namespace, typeof(MiningWorker<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
 
             _blockChain = blockChain;
             _swarmServer = swarmServer;
@@ -52,7 +52,7 @@ namespace FreeMarketOne.BlockChain
 
             _cancellationToken = new CancellationTokenSource();
 
-            _logger.Information("Initializing Proof Of Work Worker");
+            _logger.Information("Initializing Mining Worker");
         }
 
         public IEnumerator GetEnumerator()
@@ -132,11 +132,11 @@ namespace FreeMarketOne.BlockChain
 
         public void Dispose()
         {
-            _logger.Information("Proof Of Work Worker stopping.");
+            _logger.Information("Mining Worker stopping.");
 
             _cancellationToken.Cancel();
 
-            _logger.Information("Proof Of Work Worker stopped.");
+            _logger.Information("Mining Worker stopped.");
         }
     }
 }

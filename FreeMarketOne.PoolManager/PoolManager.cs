@@ -49,7 +49,7 @@ namespace FreeMarketOne.PoolManager
         private PrivateKey _privateKey;
         private BlockChain<T> _blockChain;
 
-        private ProofOfWorkWorker<T> _proofOfWorkWorker { get; set; }
+        private MiningWorker<T> _miningWorker { get; set; }
         private IDefaultBlockPolicy<T> _blockPolicy { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
 
@@ -87,7 +87,7 @@ namespace FreeMarketOne.PoolManager
 
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
 
-            _proofOfWorkWorker = new ProofOfWorkWorker<T>(
+            _miningWorker = new MiningWorker<T>(
                     _logger,
                     _swarmServer,
                     _blockChain,
@@ -109,8 +109,8 @@ namespace FreeMarketOne.PoolManager
             Interlocked.Exchange(ref _running, 1);
             _logger.Information("Initializing Mining Loop Checker");
 
-            var coProofOfWorkRunner = new CoroutineManager();
-            coProofOfWorkRunner.RegisterCoroutine(_proofOfWorkWorker.GetEnumerator());
+            var coMiningRunner = new CoroutineManager();
+            coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
 
             var miningDelayStart = DateTime.MinValue;
 
@@ -126,10 +126,10 @@ namespace FreeMarketOne.PoolManager
                 {
                     if (Interlocked.Read(ref _running) == 4)
                     {
-                        if ((miningDelayStart >= DateTime.UtcNow) && (!coProofOfWorkRunner.IsActive))
+                        if ((miningDelayStart >= DateTime.UtcNow) && (!coMiningRunner.IsActive))
                         {
                             _logger.Information(string.Format("Starting mining after mining delay."));
-                            coProofOfWorkRunner.Start();
+                            coMiningRunner.Start();
                         }
                     }
                     else
@@ -142,12 +142,12 @@ namespace FreeMarketOne.PoolManager
                 }
                 else
                 {
-                    if ((coProofOfWorkRunner.IsActive) || (Interlocked.Read(ref _running) == 4))
+                    if ((coMiningRunner.IsActive) || (Interlocked.Read(ref _running) == 4))
                     {
                         _logger.Information("Stopping Mining Loop Checker.");
                         Interlocked.Exchange(ref _running, 1);
 
-                        coProofOfWorkRunner.Stop();
+                        coMiningRunner.Stop();
                     }
                 }
 
@@ -162,6 +162,18 @@ namespace FreeMarketOne.PoolManager
         public bool IsPoolManagerRunning()
         {
             if ((Interlocked.Read(ref _running) == 1) || (Interlocked.Read(ref _running) == 4))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool IsMiningWorkerRunning()
+        {
+            if (Interlocked.Read(ref _running) == 4)
             {
                 return true;
             }

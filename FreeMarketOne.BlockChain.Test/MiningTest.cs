@@ -1,5 +1,6 @@
 using FreeMarketOne.BlockChain.Test.Mocks;
 using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
@@ -9,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using Serilog.Core;
 using System;
+using System.Data;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -34,6 +36,9 @@ namespace FreeMarketOne.BlockChain.Test
         {
             Configuration = new DebugConfiguration();
             Configuration.FullBaseDirectory = InitializeFullBaseDirectory();
+
+            /* Clear all debug old data */
+            ClearDefaultEnvironment(Configuration);
 
             /* Initialize Logger */
             Log.Logger = new LoggerConfiguration()
@@ -104,6 +109,21 @@ namespace FreeMarketOne.BlockChain.Test
             return fullBaseDirectory;
         }
 
+        private void ClearDefaultEnvironment(IBaseConfiguration configuration)
+        {
+            var folderPathBase = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath);
+            var folderPathMarket = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath);
+            var folderLog = Path.Combine(configuration.FullBaseDirectory, configuration.LogFilePath);
+
+            var keyFile = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainSecretPath);
+
+            if (Directory.Exists(folderPathBase)) Directory.Delete(folderPathBase, true);
+            if (Directory.Exists(folderPathMarket)) Directory.Delete(folderPathMarket, true);
+            if (Directory.Exists(folderLog)) Directory.Delete(folderPathMarket, true);
+
+            if (File.Exists(keyFile)) File.Delete(keyFile);
+        }
+
         [TestMethod]
         public void RunMiningTest()
         {
@@ -114,6 +134,32 @@ namespace FreeMarketOne.BlockChain.Test
             Assert.IsNotNull(BasePoolManager);
             Assert.AreEqual(BasePoolManager.IsPoolManagerRunning(), true);
 
+            //generate new test action
+            var testActionItem1 = new CheckPointMarketDataV1();
+            testActionItem1.BlockDateTime = new DateTime();
+            testActionItem1.BlockHash = "asd8sdkoaf086xsc98n2oi92dh9c9ncfihrf2neicoacno";
+            testActionItem1.Hash = testActionItem1.GenerateHash();
+
+            var testActionItem2 = new ReviewUserDataV1();
+            testActionItem2.ReviewDateTime = new DateTime().AddMinutes(-1);
+            testActionItem2.Hash = testActionItem2.GenerateHash();
+
+            BasePoolManager.AcceptActionItem(testActionItem1);
+            BasePoolManager.AcceptActionItem(testActionItem2);
+
+            //complete tx and send it to network
+            BasePoolManager.PropagateAllActionItemLocal();
+
+            //now waiting for mining
+            SpinWait.SpinUntil((() => BasePoolManager.GetAllActionItemLocal().Count == 0), 4000);
+            
+            //check if all is propagated
+            Assert.AreEqual(BasePoolManager.GetAllActionItemLocal(), 0);
+
+            //now wait until mining will start
+            SpinWait.SpinUntil((() => BasePoolManager.GetAllActionItemLocal().Count == 0), 4000);
+
+            
         }
     }
 }

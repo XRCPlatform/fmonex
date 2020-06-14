@@ -20,30 +20,29 @@ namespace FreeMarketOne.BlockChain.Test
     [TestClass]
     public class MiningTest
     {
-        private IBaseConfiguration Configuration;
+        private IBaseConfiguration _configuration;
         private ILogger _logger;
-        private IOnionSeedsManager OnionSeedsManager;
-        private BasePoolManager BasePoolManager;
+        private IOnionSeedsManager _onionSeedsManager;
+        private BasePoolManager _basePoolManager;
+        private bool _newBlock = false;
 
-        private event EventHandler BaseBlockChainLoadedEvent;
-        private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
-        private IBlockChainManager<BaseAction> BaseBlockChainManager;
-
-        public TorProcessManager TorProcessManager { get; private set; }
+        private event EventHandler _baseBlockChainLoadedEvent;
+        private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
+        private IBlockChainManager<BaseAction> _baseBlockChainManager;
 
         [TestMethod]
         private void InitializeDefaultEnvironment()
         {
-            Configuration = new DebugConfiguration();
-            Configuration.FullBaseDirectory = InitializeFullBaseDirectory();
+            _configuration = new DebugConfiguration();
+            _configuration.FullBaseDirectory = InitializeFullBaseDirectory();
 
             /* Clear all debug old data */
-            ClearDefaultEnvironment(Configuration);
+            ClearDefaultEnvironment(_configuration);
 
             /* Initialize Logger */
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
-                .WriteTo.File(Path.Combine(Configuration.FullBaseDirectory, Configuration.LogFilePath),
+                .WriteTo.File(Path.Combine(_configuration.FullBaseDirectory, _configuration.LogFilePath),
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
                     rollingInterval: RollingInterval.Day)
                 .CreateLogger();
@@ -51,48 +50,55 @@ namespace FreeMarketOne.BlockChain.Test
             _logger.Information("Debug Start");
 
             /* Initialize Mock OnionSeeds */
-            OnionSeedsManager = new MockSeedManager();
+            _onionSeedsManager = new MockSeedManager();
 
             /* Initialize genesis blocks */
             var generator = new GenesisGenerator();
-            generator.GenerateIt(Configuration);
+            generator.GenerateIt(_configuration);
 
             /* Initialize Base BlockChain Manager */
-            BaseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
+            _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
+            _baseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
 
-            BaseBlockChainManager = new BlockChainManager<BaseAction>(
-                Configuration,
-                Configuration.BlockChainBasePath,
-                Configuration.BlockChainSecretPath,
-                Configuration.BlockChainBasePolicy,
-                Configuration.ListenerBaseEndPoint,
-                OnionSeedsManager,
-                preloadEnded: BaseBlockChainLoadedEvent,
-                blockChainChanged: BaseBlockChainChangedEvent);
-            BaseBlockChainManager.Start();
+            _baseBlockChainManager = new BlockChainManager<BaseAction>(
+                _configuration,
+                _configuration.BlockChainBasePath,
+                _configuration.BlockChainSecretPath,
+                _configuration.BlockChainBasePolicy,
+                _configuration.ListenerBaseEndPoint,
+                _onionSeedsManager,
+                preloadEnded: _baseBlockChainLoadedEvent,
+                blockChainChanged: _baseBlockChainChangedEvent);
+            _baseBlockChainManager.Start();
         }
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
             /* Initialize Market BlockChain Manager */
-            if (BaseBlockChainManager.IsBlockChainManagerRunning())
+            if (_baseBlockChainManager.IsBlockChainManagerRunning())
             {
                 /* Initialize Base And Market Pool */
-                BasePoolManager = new BasePoolManager(
-                    Configuration,
-                    Configuration.MemoryBasePoolPath,
-                    BaseBlockChainManager.Storage,
-                    BaseBlockChainManager.SwarmServer,
-                    BaseBlockChainManager.PrivateKey,
-                    BaseBlockChainManager.BlockChain,
-                    Configuration.BlockChainBasePolicy);
-                BasePoolManager.Start();
+                _basePoolManager = new BasePoolManager(
+                    _configuration,
+                    _configuration.MemoryBasePoolPath,
+                    _baseBlockChainManager.Storage,
+                    _baseBlockChainManager.SwarmServer,
+                    _baseBlockChainManager.PrivateKey,
+                    _baseBlockChainManager.BlockChain,
+                    _configuration.BlockChainBasePolicy);
+                _basePoolManager.Start();
 
             }
             else
             {
                 _logger.Error("Debug Base Chain isnt loaded!");
             }
+        }
+
+        private void BaseBlockChainChanged(object sender, EventArgs e)
+        {
+            //we have a new block
+            _newBlock = true;
         }
 
         private string InitializeFullBaseDirectory()
@@ -129,10 +135,10 @@ namespace FreeMarketOne.BlockChain.Test
         {
             InitializeDefaultEnvironment();
 
-            SpinWait.SpinUntil((() => BasePoolManager != null && BasePoolManager.IsPoolManagerRunning()), 4000);
+            SpinWait.SpinUntil((() => _basePoolManager != null && _basePoolManager.IsPoolManagerRunning()), 4000);
 
-            Assert.IsNotNull(BasePoolManager);
-            Assert.AreEqual(BasePoolManager.IsPoolManagerRunning(), true);
+            Assert.IsNotNull(_basePoolManager);
+            Assert.IsTrue(_basePoolManager.IsPoolManagerRunning());
 
             //generate new test action
             var testActionItem1 = new CheckPointMarketDataV1();
@@ -144,22 +150,27 @@ namespace FreeMarketOne.BlockChain.Test
             testActionItem2.ReviewDateTime = new DateTime().AddMinutes(-1);
             testActionItem2.Hash = testActionItem2.GenerateHash();
 
-            BasePoolManager.AcceptActionItem(testActionItem1);
-            BasePoolManager.AcceptActionItem(testActionItem2);
+            _basePoolManager.AcceptActionItem(testActionItem1);
+            _basePoolManager.AcceptActionItem(testActionItem2);
 
             //complete tx and send it to network
-            BasePoolManager.PropagateAllActionItemLocal();
+            _basePoolManager.PropagateAllActionItemLocal();
 
             //now waiting for mining
-            SpinWait.SpinUntil((() => BasePoolManager.GetAllActionItemLocal().Count == 0), 4000);
-            
-            //check if all is propagated
-            Assert.AreEqual(BasePoolManager.GetAllActionItemLocal(), 0);
+            SpinWait.SpinUntil((() => _basePoolManager.GetAllActionItemLocal().Count == 0), 4000);
+            Assert.AreEqual(_basePoolManager.GetAllActionItemLocal(), 0);
 
             //now wait until mining will start
-            SpinWait.SpinUntil((() => BasePoolManager.GetAllActionItemLocal().Count == 0), 4000);
+            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == true), 4000);
+            Assert.IsTrue(_basePoolManager.IsMiningWorkerRunning());
 
-            
+            //now wait until we havent a new block
+            SpinWait.SpinUntil((() => _newBlock == true), 4000);
+            Assert.IsTrue(_newBlock);
+
+            //wait until end of mining
+            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == false), 4000);
+            Assert.IsFalse(_basePoolManager.IsMiningWorkerRunning());
         }
     }
 }

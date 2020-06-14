@@ -178,7 +178,7 @@ namespace FreeMarketOne.BlockChain.Policy
                     $" the block #{index - 1}'s ({prevTimestamp})");
             }
 
-            if (prevTimestamp.HasValue && prevTimestamp.Value.Add(BlockInterval) < nextBlock.Timestamp)
+            if (prevTimestamp.HasValue && prevTimestamp.Value.Add(BlockInterval) > nextBlock.Timestamp)
             {
                 return new InvalidBlockTimestampException(
                     $"the block #{index}'s timestamp " +

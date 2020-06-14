@@ -135,19 +135,20 @@ namespace FreeMarketOne.BlockChain.Test
         {
             InitializeDefaultEnvironment();
 
-            SpinWait.SpinUntil((() => _basePoolManager != null && _basePoolManager.IsPoolManagerRunning()), 4000);
+            SpinWait.SpinUntil((() => _basePoolManager != null && _basePoolManager.IsPoolManagerRunning()));
 
             Assert.IsNotNull(_basePoolManager);
             Assert.IsTrue(_basePoolManager.IsPoolManagerRunning());
 
             //generate new test action
             var testActionItem1 = new CheckPointMarketDataV1();
-            testActionItem1.BlockDateTime = new DateTime();
+            testActionItem1.BlockDateTime = DateTime.UtcNow;
             testActionItem1.BlockHash = "asd8sdkoaf086xsc98n2oi92dh9c9ncfihrf2neicoacno";
             testActionItem1.Hash = testActionItem1.GenerateHash();
 
             var testActionItem2 = new ReviewUserDataV1();
-            testActionItem2.ReviewDateTime = new DateTime().AddMinutes(-1);
+            testActionItem2.ReviewDateTime = DateTime.UtcNow.AddMinutes(-1);
+            testActionItem2.Message = "This is a test message";
             testActionItem2.Hash = testActionItem2.GenerateHash();
 
             _basePoolManager.AcceptActionItem(testActionItem1);
@@ -157,19 +158,19 @@ namespace FreeMarketOne.BlockChain.Test
             _basePoolManager.PropagateAllActionItemLocal();
 
             //now waiting for mining
-            SpinWait.SpinUntil((() => _basePoolManager.GetAllActionItemLocal().Count == 0), 4000);
-            Assert.AreEqual(_basePoolManager.GetAllActionItemLocal(), 0);
+            SpinWait.SpinUntil((() => _basePoolManager.GetAllActionItemLocal().Count == 0));
+            Assert.AreEqual(0, _basePoolManager.GetAllActionItemLocal().Count);
 
             //now wait until mining will start
-            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == true), 4000);
+            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == false));
             Assert.IsTrue(_basePoolManager.IsMiningWorkerRunning());
 
             //now wait until we havent a new block
-            SpinWait.SpinUntil((() => _newBlock == true), 4000);
+            SpinWait.SpinUntil((() => _newBlock == false));
             Assert.IsTrue(_newBlock);
 
             //wait until end of mining
-            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == false), 4000);
+            SpinWait.SpinUntil((() => _basePoolManager.IsMiningWorkerRunning() == true));
             Assert.IsFalse(_basePoolManager.IsMiningWorkerRunning());
         }
     }

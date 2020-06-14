@@ -9,8 +9,8 @@ namespace FreeMarketOne.BlockChain.Test
 {
     public class DebugConfiguration : BaseConfiguration
     {
-        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(60);
-        private static readonly TimeSpan poolCheckInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan poolCheckInterval = TimeSpan.FromSeconds(10);
         private static readonly long difficulty = 100000;
 
         public DebugConfiguration()

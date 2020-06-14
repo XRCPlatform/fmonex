@@ -12,6 +12,7 @@ using Serilog.Core;
 using System;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -174,6 +175,31 @@ namespace FreeMarketOne.BlockChain.Test
             //wait until end of mining
             SpinWait.SpinUntil(() => !_basePoolManager.IsMiningWorkerRunning());
             Assert.IsFalse(_basePoolManager.IsMiningWorkerRunning());
+
+            //now we will check if blockchain contain new block with our action
+            Assert.IsNotNull(_baseBlockChainManager.Storage.IterateBlockHashes());
+            Assert.AreEqual(2, _baseBlockChainManager.Storage.IterateBlockHashes().Count());
+
+            var chainId = _baseBlockChainManager.Storage.GetCanonicalChainId();
+            var block0HashId = _baseBlockChainManager.Storage.IndexBlockHash(chainId.Value, 0);
+            var block1HashId = _baseBlockChainManager.Storage.IndexBlockHash(chainId.Value, 1);
+
+            var blockO = _baseBlockChainManager.Storage.GetBlock<BaseAction>(block0HashId.Value);
+            var block1 = _baseBlockChainManager.Storage.GetBlock<BaseAction>(block1HashId.Value);
+
+            Assert.IsNotNull(blockO.Transactions);
+            Assert.AreEqual(1, blockO.Transactions.Count());
+            Assert.IsNotNull(blockO.Transactions.First().Actions);
+            Assert.AreEqual(1, blockO.Transactions.First().Actions.Count());
+            Assert.IsNotNull(blockO.Transactions.First().Actions.First().BaseItems);
+            Assert.AreEqual(1, blockO.Transactions.First().Actions.First().BaseItems.Count());
+
+            Assert.IsNotNull(block1.Transactions);
+            Assert.AreEqual(1, block1.Transactions.Count());
+            Assert.IsNotNull(block1.Transactions.First().Actions);
+            Assert.AreEqual(1, block1.Transactions.First().Actions.Count());
+            Assert.IsNotNull(block1.Transactions.First().Actions.First().BaseItems);
+            Assert.AreEqual(2, block1.Transactions.First().Actions.First().BaseItems.Count());
         }
     }
 }

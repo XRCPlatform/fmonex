@@ -347,8 +347,6 @@ namespace FreeMarketOne.PoolManager
 
                 _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
 
-               // _storage.PutTransaction(tx);
-               // _storage.StageTransactionIds(new[] { tx.Id });
                 _blockChain.StageTransaction(tx);
                 _swarmServer.BroadcastTxs(new [] { tx });
 

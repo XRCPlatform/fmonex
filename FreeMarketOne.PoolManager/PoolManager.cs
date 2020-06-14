@@ -126,7 +126,7 @@ namespace FreeMarketOne.PoolManager
                 {
                     if (Interlocked.Read(ref _running) == 4)
                     {
-                        if ((miningDelayStart >= DateTime.UtcNow) && (!coMiningRunner.IsActive))
+                        if ((miningDelayStart <= DateTime.UtcNow) && (!coMiningRunner.IsActive))
                         {
                             _logger.Information(string.Format("Starting mining after mining delay."));
                             coMiningRunner.Start();
@@ -347,7 +347,9 @@ namespace FreeMarketOne.PoolManager
 
                 _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
 
-                _storage.PutTransaction(tx);
+               // _storage.PutTransaction(tx);
+               // _storage.StageTransactionIds(new[] { tx.Id });
+                _blockChain.StageTransaction(tx);
                 _swarmServer.BroadcastTxs(new [] { tx });
 
                 _logger.Information("Clearing all item actions from local pool.");

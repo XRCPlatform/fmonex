@@ -175,7 +175,6 @@ namespace FreeMarketOne.BlockChain
                     trustedAppProtocolVersionSigners: null);
 
                 var peers = GetPeersFromOnionManager();
-                //new List<Peer>(); // 
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
                 _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
 
@@ -258,7 +257,7 @@ namespace FreeMarketOne.BlockChain
 
                 foreach (var itemHash in hashs)
                 {
-                    if (i > 10) break;
+                    if (i > 100) break;
 
                     var block = _storage.GetBlock<T>(itemHash);
                     if (block.Transactions.Any()) {

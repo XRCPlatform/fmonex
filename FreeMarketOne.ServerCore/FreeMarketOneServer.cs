@@ -14,6 +14,7 @@ using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.PoolManager;
 using Libplanet.Blockchain;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -40,8 +41,8 @@ namespace FreeMarketOne.ServerCore
         public IBlockChainManager<BaseAction> BaseBlockChainManager;
         public IBlockChainManager<MarketAction> MarketBlockChainManager;
 
-        public event EventHandler BaseBlockChainLoadedEvent;
-        public event EventHandler MarketBlockChainLoadedEvent;
+        public event EventHandler BaseBlockChainLoadEndedEvent;
+        public event EventHandler MarketBlockChainLoadEndedEvent;
 
         public event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
@@ -52,16 +53,16 @@ namespace FreeMarketOne.ServerCore
         {
             var fullBaseDirectory = InitializeFullBaseDirectory();
 
-            /* Configuration */
+            //Configuration
             var builder = new ConfigurationBuilder()
                 .SetBasePath(fullBaseDirectory)
                 .AddJsonFile("appsettings.json", true, false);
             var configFile = builder.Build();
 
-            /* Environment */
+            //Environment
             Configuration = InitializeEnvironment(configFile);
 
-            /* Config */
+            //Config
             Configuration.FullBaseDirectory = fullBaseDirectory;
             InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
             InitializeBaseTorEndPoint(Configuration, configFile);
@@ -70,7 +71,7 @@ namespace FreeMarketOne.ServerCore
             InitializeBlockChainPaths(Configuration, configFile);
             InitializeListenerEndPoints(Configuration, configFile);
 
-            /* Initialize Logger */
+            //Initialize Logger
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(Configuration.FullBaseDirectory, Configuration.LogFilePath),
@@ -80,23 +81,24 @@ namespace FreeMarketOne.ServerCore
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
 
-            /* Initialize Tor */
+            //Initialize Tor
             TorProcessManager = new TorProcessManager(Configuration);
             var torInitialized = TorProcessManager.Start();
 
+            SpinWait.SpinUntil(() => torInitialized, 4000);
             if (torInitialized)
             {
-                /* Initialize OnionSeeds */
+                //Initialize OnionSeeds
                 OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
                 OnionSeedsManager.Start();
             }
 
-            /* Initialize genesis blocks */
+            //Initialize genesis blocks
             var generator = new GenesisGenerator();
             generator.GenerateIt(Configuration);
 
-            /* Initialize Base BlockChain Manager */
-            BaseBlockChainLoadedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+            //Initialize Base BlockChain Manager
+            BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
             BaseBlockChainManager = new BlockChainManager<BaseAction>(
                 Configuration,
@@ -105,17 +107,17 @@ namespace FreeMarketOne.ServerCore
                 Configuration.BlockChainBasePolicy,
                 Configuration.ListenerBaseEndPoint,
                 OnionSeedsManager, 
-                preloadEnded: BaseBlockChainLoadedEvent,
+                preloadEnded: BaseBlockChainLoadEndedEvent,
                 blockChainChanged: BaseBlockChainChangedEvent);
             BaseBlockChainManager.Start();
         }
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
-            /* Initialize Market BlockChain Manager */
+            //Initialize Base Pool Manager
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
-                /* Initialize Base And Market Pool */
+                //Initialize Base Pool
                 BasePoolManager = new BasePoolManager(
                     Configuration,
                     Configuration.MemoryBasePoolPath,
@@ -126,20 +128,21 @@ namespace FreeMarketOne.ServerCore
                     Configuration.BlockChainBasePolicy);
                 BasePoolManager.Start();
 
-                MarketBlockChainLoadedEvent += new EventHandler(Current.MarketBlockChainLoaded);
+                //Initialize Market Blockchain Manager
+                MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
 
-                //var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
-                //MarketBlockChainManager = new BlockChainManager<MarketBlockChainAction>(
-                //    Logger,
-                //    Configuration,
-                //    Configuration.BlockChainMarketPath,
-                //    Configuration.BlockChainSecretPath,
-                //    Configuration.ListenerMarketEndPoint,
-                //    OnionSeedsManager,
-                //    hashCheckPoints,
-                //    preloadEnded: MarketBlockChainLoadedEvent,
-                //    blockChainChanged: MarketBlockChainChangedEvent);
-                //MarketBlockChainManager.Start();
+                var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                MarketBlockChainManager = new BlockChainManager<MarketAction>(
+                    Configuration,
+                    Configuration.BlockChainMarketPath,
+                    Configuration.BlockChainSecretPath,
+                    Configuration.BlockChainMarketPolicy,
+                    Configuration.ListenerMarketEndPoint,
+                    OnionSeedsManager,
+                    hashCheckPoints,
+                    preloadEnded: MarketBlockChainLoadEndedEvent,
+                    blockChainChanged: MarketBlockChainChangedEvent);
+                MarketBlockChainManager.Start();
             } 
             else
             {
@@ -150,24 +153,27 @@ namespace FreeMarketOne.ServerCore
 
         private void MarketBlockChainLoaded(object sender, EventArgs e)
         {
-            /* Initialize Market Pool */
-            BasePoolManager = new BasePoolManager(
-                Configuration,
-                Configuration.MemoryBasePoolPath, 
-                BaseBlockChainManager.Storage, 
-                BaseBlockChainManager.SwarmServer,
-                BaseBlockChainManager.PrivateKey,
-                BaseBlockChainManager.BlockChain,
-                Configuration.BlockChainBasePolicy);
+            //Initialize Market Pool Manager
+            if (MarketBlockChainManager.IsBlockChainManagerRunning())
+            {
+                MarketPoolManager = new MarketPoolManager(
+                    Configuration,
+                    Configuration.MemoryBasePoolPath,
+                    MarketBlockChainManager.Storage,
+                    MarketBlockChainManager.SwarmServer,
+                    MarketBlockChainManager.PrivateKey,
+                    MarketBlockChainManager.BlockChain,
+                    Configuration.BlockChainMarketPolicy);
+                MarketPoolManager.Start();
 
-            //MarketPoolManager = new MarketPoolManager(
-            //    Configuration,
-            //    Configuration.MemoryMarketPoolPath,
-            //    MarketBlockChainManager.Storage,
-            //    MarketBlockChainManager.SwarmServer,
-            //    MarketBlockChainManager.PrivateKey);
-
-            FreeMarketOneServerLoadedEvent?.Invoke(this, null);
+                //Event that server is loaded
+                FreeMarketOneServerLoadedEvent?.Invoke(this, null);
+            }
+            else
+            {
+                _logger.Error("Market Chain isnt loaded!");
+                Stop();
+            }
         }
 
         private string InitializeFullBaseDirectory()

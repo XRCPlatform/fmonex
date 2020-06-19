@@ -106,9 +106,7 @@ namespace FreeMarketOne.BlockChain
 
             if (listHashCheckPoints != null)
             {
-                //DateTimeOffset now = DateTimeOffset.UtcNow.a.AddMilliseconds(_blockChainPolicy.ValidBlockInterval?.);
-
-                //_hashCheckPoints = listHashCheckPoints
+                //_genesisBlock = listHashCheckPoints.First();
                 //    .Where(a => ((CheckPointMarketDataV1)a).BlockDateTime .)
                 //    .Select(a => (CheckPointMarketDataV1)a).ToList();
 

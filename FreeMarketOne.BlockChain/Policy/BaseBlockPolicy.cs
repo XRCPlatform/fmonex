@@ -50,14 +50,14 @@ namespace FreeMarketOne.BlockChain.Policy
             int blockIntervalMilliseconds = 5000,
             long minimumDifficulty = 1024,
             int poolCheckIntervalMilliseconds = 5000,
-            TimeSpan? validBlockInterval = null,
+            int? validBlockInterval = null,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
             : this(
                 blockAction,
                 TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
                 minimumDifficulty,
                 TimeSpan.FromMilliseconds(poolCheckIntervalMilliseconds),
-                validBlockInterval,
+                (validBlockInterval.HasValue ? TimeSpan.FromMilliseconds(validBlockInterval.Value) : default(TimeSpan?)),
                 doesTransactionFollowPolicy)
         {
         }

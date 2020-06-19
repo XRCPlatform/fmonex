@@ -133,7 +133,7 @@ namespace FreeMarketOne.ServerCore
                 MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
 
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
-                var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints);
+                var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
 
                 MarketBlockChainManager = new BlockChainManager<MarketAction>(
                     Configuration,

@@ -28,9 +28,8 @@ namespace FreeMarketOne.GenesisBlock
                 var newAction = new BaseAction();
                 var checkPoint = new CheckPointMarketDataV1();
 
-                checkPoint.BlockHash = ByteUtil.Hex(genesisMarket.Hash.ByteArray);
+                checkPoint.Block = ByteUtil.Hex(genesisMarket.Serialize());
                 checkPoint.CreatedUtc = DateTime.UtcNow;
-                checkPoint.BlockDateTime = genesisMarket.Timestamp;
                 checkPoint.Hash = checkPoint.GenerateHash();
 
                 newAction.AddBaseItem(checkPoint);

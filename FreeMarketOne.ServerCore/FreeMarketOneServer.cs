@@ -15,6 +15,7 @@ using FreeMarketOne.PoolManager;
 using Libplanet.Blockchain;
 using System.Runtime.InteropServices;
 using System.Threading;
+using FreeMarketOne.ServerCore.Helpers;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -132,6 +133,8 @@ namespace FreeMarketOne.ServerCore
                 MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
 
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints);
+
                 MarketBlockChainManager = new BlockChainManager<MarketAction>(
                     Configuration,
                     Configuration.BlockChainMarketPath,
@@ -140,6 +143,7 @@ namespace FreeMarketOne.ServerCore
                     Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,
                     hashCheckPoints,
+                    genesisBlock,
                     preloadEnded: MarketBlockChainLoadEndedEvent,
                     blockChainChanged: MarketBlockChainChangedEvent);
                 MarketBlockChainManager.Start();

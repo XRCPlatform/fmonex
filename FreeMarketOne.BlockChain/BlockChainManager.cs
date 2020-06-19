@@ -86,6 +86,7 @@ namespace FreeMarketOne.BlockChain
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
             List<IBaseItem> listHashCheckPoints = null,
+            Block<T> genesisBlock = null,
             EventHandler bootstrapStarted = null,
             EventHandler preloadStarted = null,
             EventHandler<PreloadState> preloadProcessed = null,
@@ -104,14 +105,7 @@ namespace FreeMarketOne.BlockChain
             _storage = new RocksDBStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
             _onionSeedManager = seedsManager;
 
-            if (listHashCheckPoints != null)
-            {
-                //_genesisBlock = listHashCheckPoints.First();
-                //    .Where(a => ((CheckPointMarketDataV1)a).BlockDateTime .)
-                //    .Select(a => (CheckPointMarketDataV1)a).ToList();
-
-            } 
-            else
+            if (genesisBlock == null)
             {
                 _genesisBlock = GetGenesisBlock();
             }

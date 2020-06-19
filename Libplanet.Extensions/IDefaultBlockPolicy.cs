@@ -18,5 +18,10 @@ namespace Libplanet.Extensions
         /// An appropriate interval for pool check if there is new txs to start/end new mining.
         /// </summary>
         TimeSpan PoolCheckInterval { get; }
+
+        /// <summary>
+        /// If Blockchain has expiration this value cant be null
+        /// </summary>
+        TimeSpan? ValidBlockInterval { get; }
     }
 }

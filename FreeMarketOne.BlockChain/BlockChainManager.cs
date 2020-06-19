@@ -20,6 +20,7 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.BlockChain.Policy;
 using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Extensions.Helpers;
+using Libplanet.Extensions;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -54,7 +55,8 @@ namespace FreeMarketOne.BlockChain
         private EventHandler _preloadEnded { get; set; }
         private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockChainChanged { get; set; }
         private IBaseConfiguration _configuration { get; }
-        private IBlockPolicy<T> _blockChainPolicy { get; }
+        private IDefaultBlockPolicy<T> _blockChainPolicy { get; }
+        private Block<T> _genesisBlock { get; }
 
         public BlockChain<T> BlockChain { get => _blockChain; }
         public RocksDBStore Storage { get => _storage; }
@@ -80,7 +82,7 @@ namespace FreeMarketOne.BlockChain
             IBaseConfiguration configuration,
             string blockChainPath,
             string blockChainSecretPath,
-            IBlockPolicy<T> blockChainPolicy,
+            IDefaultBlockPolicy<T> blockChainPolicy,
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
             List<IBaseItem> listHashCheckPoints = null,
@@ -104,7 +106,16 @@ namespace FreeMarketOne.BlockChain
 
             if (listHashCheckPoints != null)
             {
-                _hashCheckPoints = listHashCheckPoints.Select(a => (CheckPointMarketDataV1)a).ToList();
+                //DateTimeOffset now = DateTimeOffset.UtcNow.a.AddMilliseconds(_blockChainPolicy.ValidBlockInterval?.);
+
+                //_hashCheckPoints = listHashCheckPoints
+                //    .Where(a => ((CheckPointMarketDataV1)a).BlockDateTime .)
+                //    .Select(a => (CheckPointMarketDataV1)a).ToList();
+
+            } 
+            else
+            {
+                _genesisBlock = GetGenesisBlock();
             }
 
             _bootstrapStarted = bootstrapStarted;
@@ -146,7 +157,6 @@ namespace FreeMarketOne.BlockChain
         public bool Start()
         {
             _cancellationToken = new CancellationTokenSource();
-            Block<T> genesis = GetGenesisBlock();
             var host = _endPoint.GetHostOrDefault();
             int? port = _endPoint.GetPortOrDefault();
 
@@ -155,7 +165,7 @@ namespace FreeMarketOne.BlockChain
             _blockChain = new BlockChain<T>(
                 _blockChainPolicy,
                 _storage,
-                genesis
+                _genesisBlock
             );
 
             //event for new block accepted

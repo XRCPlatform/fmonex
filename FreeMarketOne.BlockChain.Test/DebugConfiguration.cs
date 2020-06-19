@@ -9,9 +9,10 @@ namespace FreeMarketOne.BlockChain.Test
 {
     public class DebugConfiguration : BaseConfiguration
     {
-        private static readonly TimeSpan blockInterval = TimeSpan.FromSeconds(30);
-        private static readonly TimeSpan poolCheckInterval = TimeSpan.FromSeconds(10);
-        private static readonly long difficulty = 100000;
+        private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan? _validBlockInterval = null;
+        private static readonly long _difficulty = 100000;
 
         public DebugConfiguration()
         {
@@ -30,15 +31,17 @@ namespace FreeMarketOne.BlockChain.Test
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,
-                    blockInterval,
-                    difficulty,
-                    poolCheckInterval);
+                    _blockInterval,
+                    _difficulty,
+                    _poolCheckInterval,
+                    null);
 
             this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
                     null,
-                    blockInterval,
-                    difficulty,
-                    poolCheckInterval);
+                    _blockInterval,
+                    _difficulty,
+                    _poolCheckInterval,
+                    _validBlockInterval);
         }
     }
 }

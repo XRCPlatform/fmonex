@@ -254,7 +254,7 @@ namespace FreeMarketOne.BlockChain
 
             if (hashs.Any())
             {
-                hashs = hashs.Reverse();
+                hashs = hashs.Reverse().ToHashSet();
                 var i = 1;
 
                 foreach (var itemHash in hashs)

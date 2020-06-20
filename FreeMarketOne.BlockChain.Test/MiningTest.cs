@@ -179,8 +179,8 @@ namespace FreeMarketOne.BlockChain.Test
             Assert.IsFalse(_basePoolManager.IsMiningWorkerRunning());
 
             //now we will check if blockchain contain new block with our action
-            Assert.IsNotNull(_baseBlockChainManager.Storage.IterateBlockHashes());
-            Assert.AreEqual(2, _baseBlockChainManager.Storage.IterateBlockHashes().Count());
+            Assert.IsNotNull(_baseBlockChainManager.Storage.IterateBlockHashes().ToHashSet());
+            Assert.AreEqual(2, _baseBlockChainManager.Storage.IterateBlockHashes().ToHashSet().Count());
 
             var chainId = _baseBlockChainManager.Storage.GetCanonicalChainId();
             var block0HashId = _baseBlockChainManager.Storage.IndexBlockHash(chainId.Value, 0);

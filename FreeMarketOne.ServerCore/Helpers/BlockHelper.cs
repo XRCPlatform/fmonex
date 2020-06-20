@@ -18,6 +18,8 @@ namespace FreeMarketOne.ServerCore.Helpers
         {
             if (blockCheckPoints.Any())
             {
+                //ADDDDDD STORAGE genesis chain!!!! if it is valid!!!
+
                 var now = DateTime.UtcNow;
                 now = now.AddMilliseconds(blockPolicy.ValidBlockInterval.Value.Negate().TotalMilliseconds);
 

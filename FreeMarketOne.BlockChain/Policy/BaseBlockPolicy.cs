@@ -38,8 +38,10 @@ namespace FreeMarketOne.BlockChain.Policy
         /// <see cref="PoolCheckInterval"/> in milliseconds.
         /// 5000 milliseconds by default.
         /// </param>
-        /// <param name="difficultyBoundDivisor">Configures
-        /// <see cref="DifficultyBoundDivisor"/>. 128 by default.</param>
+        /// <param name="validBlockInterval">Configures validity
+        /// <see cref="ValidBlockInterval"/> in milliseconds.
+        /// null by default.
+        /// </param>
         /// <param name="doesTransactionFollowPolicy">
         /// A predicate that determines if the transaction follows the block policy.
         /// </param>
@@ -48,13 +50,14 @@ namespace FreeMarketOne.BlockChain.Policy
             int blockIntervalMilliseconds = 5000,
             long minimumDifficulty = 1024,
             int poolCheckIntervalMilliseconds = 5000,
+            int? validBlockInterval = null,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
             : this(
                 blockAction,
                 TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
                 minimumDifficulty,
                 TimeSpan.FromMilliseconds(poolCheckIntervalMilliseconds),
-                //difficultyBoundDivisor,
+                (validBlockInterval.HasValue ? TimeSpan.FromMilliseconds(validBlockInterval.Value) : default(TimeSpan?)),
                 doesTransactionFollowPolicy)
         {
         }
@@ -71,7 +74,8 @@ namespace FreeMarketOne.BlockChain.Policy
         /// <param name="minimumDifficulty">Configures
         /// <see cref="MinimumDifficulty"/>.</param>
         /// <param name="poolCheckInterval">Configures <see cref="PoolCheckInterval"/>.
-        /// </param>
+        /// </param>        
+        /// <param name="validBlockInterval">Configures <see cref="ValidBlockInterval"/> validity default is null (no expiration)</param>
         /// <param name="difficultyBoundDivisor">Configures
         /// <see cref="DifficultyBoundDivisor"/>.</param>
         /// <param name="doesTransactionFollowPolicy">
@@ -82,6 +86,7 @@ namespace FreeMarketOne.BlockChain.Policy
             TimeSpan blockInterval,
             long minimumDifficulty,
             TimeSpan poolCheckInterval,
+            TimeSpan? validBlockInterval,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
         {
             if (blockInterval < TimeSpan.Zero)
@@ -102,6 +107,7 @@ namespace FreeMarketOne.BlockChain.Policy
             BlockInterval = blockInterval;
             MinimumDifficulty = minimumDifficulty;
             PoolCheckInterval = poolCheckInterval;
+            ValidBlockInterval = validBlockInterval;
             _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? (_ => true);
         }
 
@@ -118,7 +124,11 @@ namespace FreeMarketOne.BlockChain.Policy
         /// </summary>
         public TimeSpan BlockInterval { get; }
 
+        /// <inheritdoc/>
         public TimeSpan PoolCheckInterval { get; }
+
+        /// <inheritdoc/>
+        public TimeSpan? ValidBlockInterval { get; }
 
         private long MinimumDifficulty { get; }
 

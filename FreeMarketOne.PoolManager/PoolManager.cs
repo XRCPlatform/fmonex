@@ -18,6 +18,7 @@ using Serilog;
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -366,7 +367,7 @@ namespace FreeMarketOne.PoolManager
         {
             var result = new List<IBaseItem>();
 
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
             {
                 var transaction = _storage.GetTransaction<T>(itemTxId);
 
@@ -390,7 +391,7 @@ namespace FreeMarketOne.PoolManager
 
         public IBaseItem GetActionItemStaged(string hash)
         {
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
             {
                 var transaction = _storage.GetTransaction<T>(itemTxId);
 
@@ -419,7 +420,7 @@ namespace FreeMarketOne.PoolManager
         {
             var result = new List<IBaseAction>();
 
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds())
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
             {
                 var transaction = _storage.GetTransaction<T>(itemTxId);
 

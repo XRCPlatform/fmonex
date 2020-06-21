@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.Utils.Security;
+using Libplanet.Blocks;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,10 +10,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
     public class CheckPointMarketData : BaseItem
     {
         [JsonProperty("b")]
-        public string BlockHash { get; set; }
-
-        [JsonProperty("d")]
-        public DateTimeOffset BlockDateTime { get; set; }
+        public string Block { get; set; }
 
         public override string GenerateHash()
         {
@@ -20,8 +18,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             var sha512processor = new Sha512Processor();
 
             content.Append(CreatedUtc);
-            content.Append(BlockHash);
-            content.Append(BlockDateTime.Ticks);
+            content.Append(Block);
 
             return sha512processor.GetSHA512(content.ToString());
         }

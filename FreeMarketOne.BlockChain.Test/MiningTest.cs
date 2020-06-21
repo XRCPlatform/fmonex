@@ -5,7 +5,9 @@ using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
 using FreeMarketOne.Tor;
+using Libplanet;
 using Libplanet.Blockchain;
+using Libplanet.Blocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using Serilog.Core;
@@ -144,8 +146,8 @@ namespace FreeMarketOne.BlockChain.Test
 
             //generate new test action
             var testActionItem1 = new CheckPointMarketDataV1();
-            testActionItem1.BlockDateTime = DateTime.UtcNow;
-            testActionItem1.BlockHash = "asd8sdkoaf086xsc98n2oi92dh9c9ncfihrf2neicoacno";
+            var genesisBlock = BlockChain<MarketAction>.MakeGenesisBlock();
+            testActionItem1.Block = ByteUtil.Hex(genesisBlock.Serialize());  
             testActionItem1.Hash = testActionItem1.GenerateHash();
 
             var testActionItem2 = new ReviewUserDataV1();
@@ -177,8 +179,8 @@ namespace FreeMarketOne.BlockChain.Test
             Assert.IsFalse(_basePoolManager.IsMiningWorkerRunning());
 
             //now we will check if blockchain contain new block with our action
-            Assert.IsNotNull(_baseBlockChainManager.Storage.IterateBlockHashes());
-            Assert.AreEqual(2, _baseBlockChainManager.Storage.IterateBlockHashes().Count());
+            Assert.IsNotNull(_baseBlockChainManager.Storage.IterateBlockHashes().ToHashSet());
+            Assert.AreEqual(2, _baseBlockChainManager.Storage.IterateBlockHashes().ToHashSet().Count());
 
             var chainId = _baseBlockChainManager.Storage.GetCanonicalChainId();
             var block0HashId = _baseBlockChainManager.Storage.IndexBlockHash(chainId.Value, 0);

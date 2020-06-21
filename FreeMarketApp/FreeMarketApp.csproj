@@ -25,11 +25,13 @@
     <None Remove="Assets\ico-search.png" />
     <None Remove="Assets\ico-user.png" />
     <None Remove="Assets\search-bar.png" />
+    <None Remove="Assets\splash.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\ico-search.png" />
     <EmbeddedResource Include="Assets\ico-user.png" />
     <EmbeddedResource Include="Assets\search-bar.png" />
+    <EmbeddedResource Include="Assets\splash.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.10" />

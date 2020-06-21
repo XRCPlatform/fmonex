@@ -1,0 +1,12 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="FreeMarketApp.Views.SplashWindow"
+        Title="Loading MyApp" Width="300" Height="300"
+        WindowStartupLocation="CenterScreen" HasSystemDecorations="False" CanResize="False" Topmost="True">
+
+    <Grid ColumnDefinitions="*" RowDefinitions="250,*">
+        <Image Source="resm:FreeMarketApp.Assets.splash.png" Grid.Row="0" Stretch="None" />
+        <TextBlock TextAlignment="Center" Grid.Row="1" Text="{Binding StartupProgressText}"/>
+    </Grid>
+
+</Window>

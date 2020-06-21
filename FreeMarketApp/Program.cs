@@ -8,7 +8,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
-using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
 using FreeMarketOne.ServerCore;
 

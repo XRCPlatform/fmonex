@@ -44,11 +44,12 @@ namespace FreeMarketApp
                 {
                     await Task.Delay(10);
                     var splashViewModel = new SplashWindowViewModel();
-                    splashViewModel.StartupProgressText = "Loading of applciation";
+                    splashViewModel.StartupProgressText = "Loading...";
                     var splash = new SplashWindow { DataContext = splashViewModel };
                     splash.Show();
 
-                    await Task.Delay(1000);
+                    await Task.Delay(10);
+
                     desktop.MainWindow = await GetAppLoadingAsync(splashViewModel);
                     desktop.MainWindow.Show();
                     desktop.MainWindow.Activate();
@@ -56,6 +57,7 @@ namespace FreeMarketApp
                     await Task.Delay(1000);
                     splash.Close();
                 }
+
                 AppAsyncLoadingStart();
             }
         }

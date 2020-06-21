@@ -55,6 +55,7 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler FreeMarketOneServerLoadedEvent;
 
         private SplashWindowViewModel test = null;
+
         public void Initialize(SplashWindowViewModel app)
         {
             test = app;
@@ -130,7 +131,7 @@ namespace FreeMarketOne.ServerCore
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
                 //Initialize Base Pool
-                test.StartupProgressText = "xxxxxxxxx";
+                test.StartupProgressText = "Base Pool Inicialization...";
                 BasePoolManager = new BasePoolManager(
                     Configuration,
                     Configuration.MemoryBasePoolPath,

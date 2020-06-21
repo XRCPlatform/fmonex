@@ -6,7 +6,7 @@
 
     <Grid ColumnDefinitions="*" RowDefinitions="250,*">
         <Image Source="resm:FreeMarketApp.Assets.splash.png" Grid.Row="0" Stretch="None" />
-        <TextBlock TextAlignment="Center" Grid.Row="1" Text="{Binding StartupProgressText}"/>
+        <TextBlock TextAlignment="Center" Grid.Row="1" Text="{Binding StartupProgressText }"/>
     </Grid>
 
 </Window>

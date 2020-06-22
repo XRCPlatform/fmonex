@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -10,16 +11,23 @@ using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
 using FreeMarketApp.Views;
 using FreeMarketOne.ServerCore;
+using FreeMarketOne.ServerCore.ViewModels;
 
 namespace FreeMarketApp
 {
     class Program
     {
-        // Initialization code. Don't use any Avalonia, third-party APIs or any
-        // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-        // yet and stuff might break.
-        public static void Main(string[] args) => BuildAvaloniaApp()
-            .StartWithClassicDesktopLifetime(args, Avalonia.Controls.ShutdownMode.OnMainWindowClose);
+        public static void Main(string[] args)
+        {
+            Console.WriteLine("FREEMARKET.ONE desktop application;");
+            Console.WriteLine("Copyright (c) 2020 www.freemarket.one;");
+            Console.WriteLine("This program comes with ABSOLUTELY NO WARRANTY;");
+            Console.WriteLine("This is free software, and you are welcome to redistribute it under GNU GPL license;");
+            Console.WriteLine("------------------------------------");
+
+            BuildAvaloniaApp()
+               .StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
+        }
 
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()

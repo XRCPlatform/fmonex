@@ -93,36 +93,36 @@ namespace FreeMarketOne.ServerCore
 
             //Initialize Tor
             app.StartupProgressText = "Tor Inicialization...";
-            TorProcessManager = new TorProcessManager(Configuration);
-            var torInitialized = TorProcessManager.Start();
+            //TorProcessManager = new TorProcessManager(Configuration);
+            //var torInitialized = TorProcessManager.Start();
 
-            SpinWait.SpinUntil(() => torInitialized, 4000);
-            if (torInitialized)
-            {
-                //Initialize OnionSeeds
-                app.StartupProgressText = "Tor Seeds Inicialization...";
-                OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
-                OnionSeedsManager.Start();
-            }
+            //SpinWait.SpinUntil(() => torInitialized, 4000);
+            //if (torInitialized)
+            //{
+            //    //Initialize OnionSeeds
+            //    app.StartupProgressText = "Tor Seeds Inicialization...";
+            //    OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
+            //    OnionSeedsManager.Start();
+            //}
 
-            ////Initialize genesis blocks
-            var generator = new GenesisGenerator();
-            generator.GenerateIt(Configuration);
+            //////Initialize genesis blocks
+            //var generator = new GenesisGenerator();
+            //generator.GenerateIt(Configuration);
 
-            //Initialize Base BlockChain Manager
-            app.StartupProgressText = "Base BlockChain Inicialization...";
-            BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+            ////Initialize Base BlockChain Manager
+            //app.StartupProgressText = "Base BlockChain Inicialization...";
+            //BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
-            BaseBlockChainManager = new BlockChainManager<BaseAction>(
-                Configuration,
-                Configuration.BlockChainBasePath,
-                Configuration.BlockChainSecretPath,
-                Configuration.BlockChainBasePolicy,
-                Configuration.ListenerBaseEndPoint,
-                OnionSeedsManager,
-                preloadEnded: BaseBlockChainLoadEndedEvent,
-                blockChainChanged: BaseBlockChainChangedEvent);
-            BaseBlockChainManager.Start();
+            //BaseBlockChainManager = new BlockChainManager<BaseAction>(
+            //    Configuration,
+            //    Configuration.BlockChainBasePath,
+            //    Configuration.BlockChainSecretPath,
+            //    Configuration.BlockChainBasePolicy,
+            //    Configuration.ListenerBaseEndPoint,
+            //    OnionSeedsManager,
+            //    preloadEnded: BaseBlockChainLoadEndedEvent,
+            //    blockChainChanged: BaseBlockChainChangedEvent);
+            //BaseBlockChainManager.Start();
         }
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)

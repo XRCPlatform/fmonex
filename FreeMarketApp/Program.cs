@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
-using FreeMarketApp.Views;
-using FreeMarketOne.ServerCore;
-using FreeMarketOne.ServerCore.ViewModels;
 
 namespace FreeMarketApp
 {

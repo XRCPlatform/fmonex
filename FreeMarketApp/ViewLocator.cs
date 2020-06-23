@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using FreeMarketOne.ServerCore.ViewModels;
+using FreeMarketApp.ViewModels;
 
 namespace FreeMarketApp
 {

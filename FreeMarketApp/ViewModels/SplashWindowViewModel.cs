@@ -1,11 +1,7 @@
 ﻿using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FreeMarketOne.ServerCore.ViewModels
+namespace FreeMarketApp.ViewModels
 {
-
     public class SplashWindowViewModel : ViewModelBase
     {
         private string _startupProgressText;

@@ -14,8 +14,7 @@ namespace FreeMarketApp.Views
             InitializeComponent();
             DataContextChanged += (object sender, EventArgs wat) =>
             {
-                var s = true;
-                // here, this.DataContext will be your MainWindowViewModel
+                //reaction on data context change
             };
 #if DEBUG
             this.AttachDevTools();

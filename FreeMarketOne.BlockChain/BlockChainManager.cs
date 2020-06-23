@@ -108,6 +108,10 @@ namespace FreeMarketOne.BlockChain
             if (genesisBlock == null)
             {
                 _genesisBlock = GetGenesisBlock();
+            } 
+            else
+            {
+                _genesisBlock = genesisBlock;
             }
 
             _bootstrapStarted = bootstrapStarted;

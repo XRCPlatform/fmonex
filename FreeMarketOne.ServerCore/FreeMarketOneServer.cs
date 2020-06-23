@@ -17,7 +17,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using FreeMarketOne.ServerCore.Helpers;
 using Avalonia.Controls.ApplicationLifetimes;
-using FreeMarketOne.ServerCore.ViewModels;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 
@@ -54,12 +53,9 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler FreeMarketOneServerLoadedEvent;
 
-        private SplashWindowViewModel test = null;
-
-        public void Initialize(SplashWindowViewModel app)
+        public void Initialize(EventHandler splashMessageEvent)
         {
-            test = app;
-            app.StartupProgressText = "Loading Application...";
+            splashMessageEvent?.Invoke("Kernel Inicialization...", EventArgs.Empty);
 
             var fullBaseDirectory = InitializeFullBaseDirectory();
 
@@ -92,7 +88,7 @@ namespace FreeMarketOne.ServerCore
             _logger.Information("Application Start");
 
             //Initialize Tor
-            app.StartupProgressText = "Tor Inicialization...";
+            splashMessageEvent?.Invoke("Tor Inicialization...", EventArgs.Empty);
             TorProcessManager = new TorProcessManager(Configuration);
             var torInitialized = TorProcessManager.Start();
 
@@ -100,7 +96,7 @@ namespace FreeMarketOne.ServerCore
             if (torInitialized)
             {
                 //Initialize OnionSeeds
-                app.StartupProgressText = "Tor Seeds Inicialization...";
+                splashMessageEvent?.Invoke("OnionSeed Inicialization...", EventArgs.Empty);
                 OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
                 OnionSeedsManager.Start();
             }
@@ -110,7 +106,7 @@ namespace FreeMarketOne.ServerCore
             generator.GenerateIt(Configuration);
 
             //Initialize Base BlockChain Manager
-            app.StartupProgressText = "Base BlockChain Inicialization...";
+            splashMessageEvent?.Invoke("Base BlockChain Inicialization...", EventArgs.Empty);
             BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
             BaseBlockChainManager = new BlockChainManager<BaseAction>(
@@ -131,7 +127,6 @@ namespace FreeMarketOne.ServerCore
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
                 //Initialize Base Pool
-                test.StartupProgressText = "Base Pool Inicialization...";
                 BasePoolManager = new BasePoolManager(
                     Configuration,
                     Configuration.MemoryBasePoolPath,
@@ -143,23 +138,23 @@ namespace FreeMarketOne.ServerCore
                 BasePoolManager.Start();
 
                 //Initialize Market Blockchain Manager
-                //MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
+                MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
 
-                //var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
-                //var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
+                var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
 
-                //MarketBlockChainManager = new BlockChainManager<MarketAction>(
-                //    Configuration,
-                //    Configuration.BlockChainMarketPath,
-                //    Configuration.BlockChainSecretPath,
-                //    Configuration.BlockChainMarketPolicy,
-                //    Configuration.ListenerMarketEndPoint,
-                //    OnionSeedsManager,
-                //    hashCheckPoints,
-                //    genesisBlock,
-                //    preloadEnded: MarketBlockChainLoadEndedEvent,
-                //    blockChainChanged: MarketBlockChainChangedEvent);
-                //MarketBlockChainManager.Start();
+                MarketBlockChainManager = new BlockChainManager<MarketAction>(
+                    Configuration,
+                    Configuration.BlockChainMarketPath,
+                    Configuration.BlockChainSecretPath,
+                    Configuration.BlockChainMarketPolicy,
+                    Configuration.ListenerMarketEndPoint,
+                    OnionSeedsManager,
+                    hashCheckPoints,
+                    genesisBlock,
+                    preloadEnded: MarketBlockChainLoadEndedEvent,
+                    blockChainChanged: MarketBlockChainChangedEvent);
+                MarketBlockChainManager.Start();
             } 
             else
             {

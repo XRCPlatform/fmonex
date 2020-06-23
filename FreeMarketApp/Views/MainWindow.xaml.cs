@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using System;
 
@@ -13,7 +14,7 @@ namespace FreeMarketApp.Views
             InitializeComponent();
             DataContextChanged += (object sender, EventArgs wat) =>
             {
-                // here, this.DataContext will be your MainWindowViewModel
+                //reaction on data context change
             };
 #if DEBUG
             this.AttachDevTools();
@@ -23,6 +24,11 @@ namespace FreeMarketApp.Views
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+        }
+
+        public void MyButton_Click(object sender, RoutedEventArgs args)
+        {
+            ((Button)sender).Content = "New text";
         }
     }
 }

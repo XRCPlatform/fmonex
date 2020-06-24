@@ -129,13 +129,13 @@ namespace FreeMarketOne.BlockChain
             {
                 var keyBytes = File.ReadAllBytes(path);
                 var key = new PrivateKey(keyBytes);
-                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(key.PublicKey.Format(true))));
+                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(key.ByteArray)));
                 return key;
             } 
             else
             {
                 var newKey = new PrivateKey();
-                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(newKey.PublicKey.Format(true))));
+                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(newKey.ByteArray)));
                 File.WriteAllBytes(path, newKey.ByteArray);
 
                 return newKey;

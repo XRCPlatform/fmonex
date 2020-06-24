@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Genesis\testnet_base_genesis.dat" />
+    <None Remove="Genesis\testnet_market_genesis.dat" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Genesis\testnet_base_genesis.dat" />
+    <EmbeddedResource Include="Genesis\testnet_market_genesis.dat" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.BlockChain\FreeMarketOne.BlockChain.csproj" />
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
   </ItemGroup>

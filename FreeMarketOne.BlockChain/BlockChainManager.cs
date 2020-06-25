@@ -21,6 +21,7 @@ using FreeMarketOne.BlockChain.Policy;
 using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Extensions.Helpers;
 using Libplanet.Extensions;
+using FreeMarketOne.GenesisBlock;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -37,6 +38,7 @@ namespace FreeMarketOne.BlockChain
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private string _blockChainFilePath { get; set; }
+        private string _blockChainGenesisName { get; set; }
         private EndPoint _endPoint { get; set; }
 
         private PrivateKey _privateKey { get; set; }
@@ -69,6 +71,7 @@ namespace FreeMarketOne.BlockChain
         /// <param name="configuration"></param>
         /// <param name="blockChainPath"></param>
         /// <param name="blockChainSecretPath"></param>
+        /// <param name="blockChainGenesisName"></param>
         /// <param name="blockChainPolicy"></param>
         /// <param name="endPoint"></param>
         /// <param name="seedsManager"></param>
@@ -80,8 +83,9 @@ namespace FreeMarketOne.BlockChain
         /// <param name="blockChainChanged"></param>
         public BlockChainManager(
             IBaseConfiguration configuration,
-            string blockChainPath,
+            string blockChainBasePath,
             string blockChainSecretPath,
+            string blockChainGenesisName,
             IDefaultBlockPolicy<T> blockChainPolicy,
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
@@ -97,8 +101,9 @@ namespace FreeMarketOne.BlockChain
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
 
             _configuration = configuration;
-            _blockChainFilePath = blockChainPath;
+            _blockChainFilePath = blockChainBasePath;
             _blockChainPolicy = blockChainPolicy;
+            _blockChainGenesisName = blockChainGenesisName;
             _endPoint = endPoint;
 
             _privateKey = GetSecret(Path.Combine(_configuration.FullBaseDirectory, blockChainSecretPath));
@@ -129,13 +134,16 @@ namespace FreeMarketOne.BlockChain
             {
                 var keyBytes = File.ReadAllBytes(path);
                 var key = new PrivateKey(keyBytes);
-                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(key.PublicKey.Format(true))));
+                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(key.ByteArray)));
                 return key;
             } 
             else
             {
                 var newKey = new PrivateKey();
-                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(newKey.PublicKey.Format(true))));
+                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(newKey.ByteArray)));
+
+                var directoryPath = Path.GetDirectoryName(path);
+                Directory.CreateDirectory(directoryPath);
                 File.WriteAllBytes(path, newKey.ByteArray);
 
                 return newKey;
@@ -296,18 +304,9 @@ namespace FreeMarketOne.BlockChain
 
         public Block<T> GetGenesisBlock()
         {
-            var genesisPath = Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath, "genesis.dat");
+            var genesisBytes = GenesisHelper.GetGenesis(_blockChainGenesisName);
 
-            if (File.Exists(genesisPath))
-            {
-                var genesisBytes = File.ReadAllBytes(genesisPath);
-                return Block<T>.Deserialize(genesisBytes);
-            } 
-            else
-            {
-                _logger.Error("Genesis block doesn't exist.");
-                return null;
-            }
+            return Block<T>.Deserialize(genesisBytes);
         }
 
         public void Stop()

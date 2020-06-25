@@ -56,8 +56,7 @@ namespace FreeMarketOne.BlockChain.Test
             _onionSeedsManager = new MockSeedManager();
 
             /* Initialize genesis blocks */
-            var generator = new GenesisGenerator();
-            generator.GenerateIt(_configuration);
+            var genesis = GenesisHelper.GenerateIt(_configuration);
 
             /* Initialize Base BlockChain Manager */
             _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
@@ -67,9 +66,11 @@ namespace FreeMarketOne.BlockChain.Test
                 _configuration,
                 _configuration.BlockChainBasePath,
                 _configuration.BlockChainSecretPath,
+                null,
                 _configuration.BlockChainBasePolicy,
                 _configuration.ListenerBaseEndPoint,
                 _onionSeedsManager,
+                genesisBlock: genesis,
                 preloadEnded: _baseBlockChainLoadedEvent,
                 blockChainChanged: _baseBlockChainChangedEvent);
             _baseBlockChainManager.Start();

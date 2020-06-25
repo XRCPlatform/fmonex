@@ -40,6 +40,8 @@ namespace FreeMarketOne.Tor
 
         private CancellationTokenSource _stop { get; set; }
 
+        private const string _toolsDir = "tools";
+
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="_configuration">Base _configuration.</param>
         public TorProcessManager(IBaseConfiguration configuration)
@@ -66,36 +68,35 @@ namespace FreeMarketOne.Tor
                 {
                     try
                     {
-                        var toolsDir = "tools";
                         var torPath = "";
 
                         if (IsTorRunningAsync(_configuration.TorEndPoint).GetAwaiter().GetResult())
                         {
                             _logger.Warning("Tor is already running.");
-                            GetOnionEndPoint(toolsDir);
+                            GetOnionEndPoint();
                             return true;
                         }
 
                         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            torPath = $@"{toolsDir}/Tor/tor";
+                            torPath = $@"{_toolsDir}/Tor/tor";
                         }
                         else // If Windows
                         {
-                            torPath = $@"{toolsDir}\Tor\tor.exe";
+                            torPath = $@"{_toolsDir}\Tor\tor.exe";
                         }
 
                     if (!File.Exists(torPath))
                         {
                             _logger.Error($"Tor instance NOT found at {torPath}. Attempting to acquire it...");
-                            InstallTor(toolsDir);
+                            InstallTor();
 
                             //copy _configuration
-                            CopyDefaultConfig(toolsDir);
+                            CopyDefaultConfig();
 
                             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             {
-                                var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, toolsDir);
+                                var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
 
                                 // Make sure there's sufficient permission.
                                 string chmodTorDirCmd = $"chmod -R 750 {fulToolsDir}";
@@ -120,7 +121,7 @@ namespace FreeMarketOne.Tor
                         {
                             _torProcess = Process.Start(new ProcessStartInfo
                             {
-                                WorkingDirectory = $@"{toolsDir}/Tor/",
+                                WorkingDirectory = $@"{_toolsDir}/Tor/",
                                 FileName = torPath,
                                 Arguments = torArguments,
                                 UseShellExecute = false,
@@ -131,7 +132,7 @@ namespace FreeMarketOne.Tor
                         }
                         else // Linux and OSX
                         {
-                            var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, toolsDir);
+                            var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
 
                             string runTorCmd = $"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:={fulToolsDir}/Tor && export LD_LIBRARY_PATH && cd {fulToolsDir}/Tor && ./tor {torArguments}";
                             EnvironmentHelpers.ShellExec(runTorCmd, false);
@@ -149,7 +150,7 @@ namespace FreeMarketOne.Tor
                         else
                         {
                             
-                            GetOnionEndPoint(toolsDir);
+                            GetOnionEndPoint();
                         }
 
                         _logger.Information("Tor is running.");
@@ -170,18 +171,18 @@ namespace FreeMarketOne.Tor
             return true;
         }
 
-        private void CopyDefaultConfig(string torDir)
+        private void CopyDefaultConfig()
         {
-            string torConfigDir = Path.Combine(_configuration.FullBaseDirectory, torDir);
+            string torConfigDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
             string sourceConfig = Path.Combine(torConfigDir, "torrc-default");
             string targetConfig = Path.Combine(torConfigDir, "Tor", "torrc");
 
             File.Copy(sourceConfig, targetConfig);
         }
 
-        private void GetOnionEndPoint(string torDir)
+        private void GetOnionEndPoint()
         {
-            string torHiddenServiceDir = Path.Combine(_configuration.FullBaseDirectory, torDir, "Tor", "hidden_service");
+            string torHiddenServiceDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir, "Tor", "hidden_service");
 
             if (Directory.Exists(torHiddenServiceDir))
             {
@@ -205,9 +206,9 @@ namespace FreeMarketOne.Tor
             }
         }
 
-        private void InstallTor(string torDir)
+        private void InstallTor()
         {
-            string torDaemonsDir = Path.Combine(_configuration.FullBaseDirectory, torDir);
+            string torDaemonsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
 
             string dataZip = Path.Combine(torDaemonsDir, "data-folder.zip");
             IoHelpers.BetterExtractZipToDirectoryAsync(dataZip, torDaemonsDir).GetAwaiter().GetResult();
@@ -292,7 +293,7 @@ namespace FreeMarketOne.Tor
                     await client.HandshakeAsync().ConfigureAwait(false);
                     await client.ConnectToDestinationAsync(url, port).ConfigureAwait(false);
                 }
-                catch (ConnectionException)
+                catch (Exception e)
                 {
                     return false;
                 }

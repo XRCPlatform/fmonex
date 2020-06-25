@@ -134,6 +134,7 @@ namespace FreeMarketOne.P2P
                 StringBuilder periodicCheckLog = new StringBuilder();
 
                 periodicCheckLog.AppendLine("======Onion Seed Status Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + appVersion);
+                periodicCheckLog.AppendLine("My Tor EndPoint " + torProcessManager.TorOnionEndPoint);
 
                 var isTorRunning = torProcessManager.IsTorRunningAsync().Result;
                 if (isTorRunning)
@@ -147,10 +148,13 @@ namespace FreeMarketOne.P2P
 
                         try
                         {
-                            var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
-                            if (isOnionSeedRunning)
+                            if (torProcessManager.TorOnionEndPoint != itemSeed.UrlTor) //ignore me
                             {
-                                itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+                                var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
+                                if (isOnionSeedRunning)
+                                {
+                                    itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+                                }
                             }
                         }
                         catch (Exception ex)

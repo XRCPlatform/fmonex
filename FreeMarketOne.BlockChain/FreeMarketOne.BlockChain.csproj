@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.GenesisGenerator\FreeMarketOne.GenesisBlock.csproj" />
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet.Tools\Libplanet.Tools.csproj" />
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />

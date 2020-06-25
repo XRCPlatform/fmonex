@@ -101,10 +101,6 @@ namespace FreeMarketOne.ServerCore
                 OnionSeedsManager.Start();
             }
 
-            ////Initialize genesis blocks
-            var generator = new GenesisGenerator();
-            generator.GenerateIt(Configuration);
-
             //Initialize Base BlockChain Manager
             splashMessageEvent?.Invoke("Base BlockChain Inicialization...", EventArgs.Empty);
             BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
@@ -113,6 +109,7 @@ namespace FreeMarketOne.ServerCore
                 Configuration,
                 Configuration.BlockChainBasePath,
                 Configuration.BlockChainSecretPath,
+                Configuration.BlockChainBaseGenesis,
                 Configuration.BlockChainBasePolicy,
                 Configuration.ListenerBaseEndPoint,
                 OnionSeedsManager,
@@ -147,6 +144,7 @@ namespace FreeMarketOne.ServerCore
                     Configuration,
                     Configuration.BlockChainMarketPath,
                     Configuration.BlockChainSecretPath,
+                    Configuration.BlockChainMarketGenesis,
                     Configuration.BlockChainMarketPolicy,
                     Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,

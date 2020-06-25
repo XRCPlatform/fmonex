@@ -34,7 +34,11 @@ namespace FreeMarketOne.DataStructure
 
         public string MemoryMarketPoolPath { get; set; }
 
+        public string BlockChainBaseGenesis { get; set; }
+
         public string BlockChainBasePath { get; set; }
+
+        public string BlockChainMarketGenesis { get; set; }
 
         public string BlockChainMarketPath { get; set; }
         

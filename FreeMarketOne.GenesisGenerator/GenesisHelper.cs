@@ -4,6 +4,7 @@ using Libplanet;
 using Libplanet.Blockchain;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
+using Org.BouncyCastle.Crypto.Generators;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,13 +12,13 @@ using System.Reflection;
 
 namespace FreeMarketOne.GenesisBlock
 {
-    public class GenesisGenerator
+    public static class GenesisHelper
     {
         private const string _privateBaseKey = "7dabd5472929a0c388c7d1af6e9e53848d89cb7ad844ed9d8e587aeefd749a5b";
         private const string _privateMarketKey = "24cd3da85fab65992b5d3fc313d5f6fd35879fc13d6bbf36c0d008978fd85c0b";
         private const long _chainUnixTimeMiliseconds = 1356088341000;
 
-        public void GenerateIt(IBaseConfiguration configuration)
+        public static Block<BaseAction> GenerateIt(IBaseConfiguration configuration)
         {
             //get fmone keys
             var privateBaseBytesKey = ByteUtil.ParseHex(_privateBaseKey);
@@ -34,7 +35,6 @@ namespace FreeMarketOne.GenesisBlock
                     BlockChain<MarketAction>.MakeGenesisBlock(null, privateMarketKey, _chainDateTimeOffset);
 
                 Directory.CreateDirectory(Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath));
-                var genesisMarketHexOutput = ByteUtil.Hex(genesisMarket.Serialize());
                 File.WriteAllBytes(filePath, genesisMarket.Serialize());
 
                 //generate plain base chain block
@@ -54,12 +54,34 @@ namespace FreeMarketOne.GenesisBlock
 
                 filePath = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath, "genesis.dat");
                 Directory.CreateDirectory(Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath));
-                var genesisHexOutput = ByteUtil.Hex(genesis.Serialize());
+               
                 File.WriteAllBytes(filePath, genesis.Serialize());
+
+                return genesis;
             }
+
+            return null;
         }
 
-        private byte[] ExtractResource(Assembly assembly, string resourceName)
+        /// <summary>
+        /// Load base genesis blocks for FM.ONE
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static byte[] GetGenesis(string name)
+        {
+            return ExtractResource(Assembly.GetExecutingAssembly()
+                                   , "FreeMarketOne.GenesisBlock.Genesis." + name
+                                   );
+        }
+
+        /// <summary>
+        /// Extract resource from project resources
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <param name="resourceName"></param>
+        /// <returns></returns>
+        private static byte[] ExtractResource(Assembly assembly, string resourceName)
         {
             if (assembly == null)
             {

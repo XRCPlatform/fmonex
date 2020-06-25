@@ -105,7 +105,7 @@ namespace FreeMarketOne.BlockChain
             _blockChainPolicy = blockChainPolicy;
             _blockChainGenesisName = blockChainGenesisName;
             _endPoint = endPoint;
-
+          
             _privateKey = GetSecret(Path.Combine(_configuration.FullBaseDirectory, blockChainSecretPath));
             _storage = new RocksDBStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
             _onionSeedManager = seedsManager;
@@ -235,9 +235,6 @@ namespace FreeMarketOne.BlockChain
             foreach (var itemPeer in _onionSeedManager.OnionSeedPeers)
             {
                 if (itemPeer.SecretKeyHex == pubKey) continue;
-
-                //REMOVE: TEST - HACK
-                //itemPeer.SecretKeyHex = ByteUtil.Hex(new PrivateKey().PublicKey.Format(true));
 
                 var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.UrlBlockChain, itemPeer.PortBlockChainBase), default(AppProtocolVersion));

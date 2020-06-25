@@ -84,6 +84,10 @@ namespace FreeMarketOne.BlockChain
                             cancellationToken: _cancellationToken.Token
                         );
                     }
+                    catch (TimeoutException e)
+                    {
+                        _logger.Error(e.Message);
+                    }
                     catch (PeerDiscoveryException e)
                     {
                         _logger.Error(e.Message);

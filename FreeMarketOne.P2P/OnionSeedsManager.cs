@@ -141,14 +141,14 @@ namespace FreeMarketOne.P2P
                 {
                     foreach (var itemSeed in OnionSeedPeers)
                     {
-                        var resultLog = string.Format("Checking {0} {1}", itemSeed.UrlTor, itemSeed.PortTor);
-                        logger.Information(resultLog);
-
-                        itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
-
-                        try
+                        if (torProcessManager.TorOnionEndPoint != itemSeed.UrlTor) //ignore me
                         {
-                            if (torProcessManager.TorOnionEndPoint != itemSeed.UrlTor) //ignore me
+                            var resultLog = string.Format("Checking {0} {1}", itemSeed.UrlTor, itemSeed.PortTor);
+                            logger.Information(resultLog);
+
+                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
+
+                            try
                             {
                                 var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
                                 if (isOnionSeedRunning)
@@ -156,13 +156,17 @@ namespace FreeMarketOne.P2P
                                     itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.Error(ex.Message);
-                        }
+                            catch (Exception ex)
+                            {
+                                logger.Error(ex.Message);
+                            }
 
-                        periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
+                            periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
+                        } 
+                        else
+                        {
+                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+                        }
                     }
                 }
                 else

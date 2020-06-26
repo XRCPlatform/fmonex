@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -109,6 +110,7 @@ namespace FreeMarketOne.P2P
 
             Interlocked.Exchange(ref running, 1);
 
+            StartListener();
             StartPeriodicCheck();
         }
 
@@ -118,7 +120,7 @@ namespace FreeMarketOne.P2P
 
             if (!onionSeedPeer.Contains(":")) result = false;
             if (!onionSeedPeer.Contains("onion")) result = false;
-            
+
             var parts = onionSeedPeer.Split(":");
             if (parts.Length < 3) result = false;
 
@@ -162,7 +164,7 @@ namespace FreeMarketOne.P2P
                             }
 
                             periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
-                        } 
+                        }
                         else
                         {
                             itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
@@ -181,6 +183,37 @@ namespace FreeMarketOne.P2P
                 cancellationToken.Token,
                 repeatEvery: TimeSpans.Minute,
                 startAfter: TimeSpans.TenSeconds);
+        }
+
+        /// <summary>
+        /// Online listener
+        /// </summary>
+        private void StartListener()
+        {
+            Task.Run(() =>
+            {
+
+                TcpListener listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 27272);
+                listener.Start();
+
+                while (true)
+                {
+                    Socket client = listener.AcceptSocket();
+
+                    if (client.Connected)
+                    {
+                        byte[] b = new byte[65535];
+                        int k = client.Receive(b);
+                        Console.WriteLine("Received:");
+                        for (int i = 0; i < k; i++)
+                            Console.Write(Convert.ToChar(b[i]));
+                        ASCIIEncoding enc = new ASCIIEncoding();
+                        client.Send(enc.GetBytes("Server responded"));
+                        Console.WriteLine("\nSent Response");
+                        client.Close();
+                    }
+                }
+            });
         }
 
         public void Dispose()

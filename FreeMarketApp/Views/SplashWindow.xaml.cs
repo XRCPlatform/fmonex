@@ -4,13 +4,13 @@ using Avalonia.Markup.Xaml;
 
 namespace FreeMarketApp.Views
 {
-    public class SplashWindow : Window
+    public class SplashWindow : WindowBase
     {
         public SplashWindow()
         {
           
             InitializeComponent();
-
+            this.FixWindowCenterPosition();
 #if DEBUG
             this.AttachDevTools();
 #endif

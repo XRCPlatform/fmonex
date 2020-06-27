@@ -186,7 +186,7 @@ namespace FreeMarketOne.P2P
         }
 
         /// <summary>
-        /// Online listener
+        /// Online listener for onion checking
         /// </summary>
         private void StartListener()
         {
@@ -204,12 +204,10 @@ namespace FreeMarketOne.P2P
                     {
                         byte[] b = new byte[65535];
                         int k = client.Receive(b);
-                        Console.WriteLine("Received:");
-                        for (int i = 0; i < k; i++)
-                            Console.Write(Convert.ToChar(b[i]));
+
                         ASCIIEncoding enc = new ASCIIEncoding();
-                        client.Send(enc.GetBytes("Server responded"));
-                        Console.WriteLine("\nSent Response");
+
+                        client.Send(enc.GetBytes("FM.ONE EndPoint - " + DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) + " agent " + appVersion));
                         client.Close();
                     }
                 }

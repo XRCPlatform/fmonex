@@ -69,6 +69,7 @@ namespace FreeMarketOne.Tor
                     try
                     {
                         var torPath = "";
+                        var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
 
                         if (IsTorRunningAsync(_configuration.TorEndPoint).GetAwaiter().GetResult())
                         {
@@ -79,14 +80,14 @@ namespace FreeMarketOne.Tor
 
                         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            torPath = $@"{_toolsDir}/Tor/tor";
+                            torPath = $@"{fulToolsDir}/Tor/tor";
                         }
                         else // If Windows
                         {
                             torPath = $@"{_toolsDir}\Tor\tor.exe";
                         }
 
-                    if (!File.Exists(torPath))
+                        if (!File.Exists(torPath))
                         {
                             _logger.Error($"Tor instance NOT found at {torPath}. Attempting to acquire it...");
                             InstallTor();
@@ -96,8 +97,6 @@ namespace FreeMarketOne.Tor
 
                             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             {
-                                var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
-
                                 // Make sure there's sufficient permission.
                                 string chmodTorDirCmd = $"chmod -R 750 {fulToolsDir}";
                                 var result = EnvironmentHelpers.ShellExec(chmodTorDirCmd);
@@ -132,8 +131,6 @@ namespace FreeMarketOne.Tor
                         }
                         else // Linux and OSX
                         {
-                            var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
-
                             string runTorCmd = $"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:={fulToolsDir}/Tor && export LD_LIBRARY_PATH && cd {fulToolsDir}/Tor && ./tor {torArguments}";
                             EnvironmentHelpers.ShellExec(runTorCmd, false);
                             _logger.Information($"Started Tor process with shell command: {runTorCmd}.");
@@ -149,7 +146,6 @@ namespace FreeMarketOne.Tor
                         }
                         else
                         {
-                            
                             GetOnionEndPoint();
                         }
 
@@ -157,6 +153,7 @@ namespace FreeMarketOne.Tor
                     }
                     catch (Exception ex)
                     {
+                        _logger.Information(ex.Message + " " + ex.StackTrace);
                         throw new TorException("Could not automatically start Tor. Try running Tor manually.", ex);
                     }
                 }

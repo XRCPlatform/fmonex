@@ -1,0 +1,1143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="FreeMarket.One" Language="1033" Version="1.0.0.0" Manufacturer="XRC Team" UpgradeCode="aa27e67c-189c-4941-a71f-62d0e4f113a0">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    
+    <!--Add Icon and ARPPRODUCTICON (the installer icon). 
+  ref.: http://wixtoolset.org/documentation/manual/v3/howtos/ui_and_localization/configure_arp_appearance.html -->
+    <Icon Id="freemarket.ico" SourceFile="freemarket.ico" />
+    <Property Id="ARPPRODUCTICON" Value="freemarket.ico" />
+
+    <!-- Add the WixUI_InstallDir pre-made sequence to allow some additional steps to the setup wizard -->
+    <!-- IMPORTANT: Remember to add a reference to the WixUIExtension.dll reference! -->
+    <!-- Right click the References project folder > Add Reference, 
+       then navigate to C:\Program Files (x86)\WiX Toolset v3.11\bin\ and select WixUIExtension.dll -->
+    <UIRef Id="WixUI_InstallDir" />
+    <!-- This property will allow the end-user to choose a custom install folder -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <Feature Id="MainApplication" Title="FreeMarket.One" Level="1">
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_Repositoriesappsettings.json" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAsyncIO.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Animation.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Base.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Controls.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.DesignerSupport.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Desktop.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.DesktopRuntime.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Diagnostics.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Dialogs.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Direct2D1.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.FreeDesktop.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Input.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Interactivity.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Layout.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Logging.Serilog.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Markup.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Markup.Xaml.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Native.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.OpenGL.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.ReactiveUI.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Remote.Protocol.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Skia.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Styling.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Themes.Default.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Visuals.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Win32.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.X11.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesBencodex.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesBouncyCastle.Crypto.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesCocona.Core.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesCocona.Lite.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesDynamicData.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesEquals.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.deps.json" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.exe" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.runtimeconfig.json" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.BlockChain.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.BlockChain.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.DataStructure.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.DataStructure.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Extensions.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Extensions.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.GenesisBlock.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.GenesisBlock.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.P2P.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.P2P.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.PoolManager.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.PoolManager.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.ServerCore.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.ServerCore.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Tor.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Tor.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Utils.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Utils.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesGetPass.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesHtmlAgilityPack.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesJetBrains.Annotations.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesJsonSubTypes.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Extensions.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Extensions.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.RocksDBStore.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.RocksDBStore.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Stun.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Stun.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.exe" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.pdb" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.xml" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLiteDB.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesLruCacheNet.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.CSharp.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.VisualBasic.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.Abstractions.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.FileExtensions.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.Json.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileProviders.Abstractions.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileProviders.Physical.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileSystemGlobbing.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Primitives.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.VisualBasic.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Win32.SystemEvents.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNetMQ.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNewtonsoft.Json.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Context.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Coordination.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Interop.WaitHandles.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Oop.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Tasks.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Cancellation.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Collections.Deque.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Disposables.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesNorgerman.Cryptography.Scrypt.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesReactiveUI.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesRocksDbSharp.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.Debug.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.File.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.Trace.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.Direct2D1.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.Direct3D11.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.DXGI.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSharpGen.Runtime.COM.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSharpGen.Runtime.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSkiaSharp.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSplat.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Collections.Immutable.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Configuration.ConfigurationManager.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Drawing.Common.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Linq.Async.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Net.Http.WinHttpHandler.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Reactive.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Runtime.Caching.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Security.Cryptography.ProtectedData.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Security.Permissions.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.ServiceModel.Primitives.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Windows.Extensions.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Xml.XPath.XmlDocument.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesTmds.DBus.dll" />
+    <ComponentRef Id="FreeMarketApp_FloatGenesis_RepositoriesZio.dll" />
+    <ComponentRef Id="debian_x64runtimesnative_libuv.so" />
+    <ComponentRef Id="fedora_x64runtimesnative_libuv.so" />
+    <ComponentRef Id="linux_armruntimesnative_libSkiaSharp.so" />
+    <ComponentRef Id="linux_x64runtimesnative_libgflags.so.2.2" />
+    <ComponentRef Id="linux_x64runtimesnative_libjemalloc.so.2" />
+    <ComponentRef Id="linux_x64runtimesnative_liblz4.so.1" />
+    <ComponentRef Id="linux_x64runtimesnative_librocksdb.so" />
+    <ComponentRef Id="linux_x64runtimesnative_libSkiaSharp.so" />
+    <ComponentRef Id="linux_x64runtimesnative_libsnappy.so.1" />
+    <ComponentRef Id="linux_x64runtimesnative_libzstd.so.0" />
+    <ComponentRef Id="opensuse_x64runtimesnative_libuv.so" />
+    <ComponentRef Id="osxruntimesnative_libAvaloniaNative.dylib" />
+    <ComponentRef Id="osxruntimesnative_libSkiaSharp.dylib" />
+    <ComponentRef Id="osxruntimesnative_libuv.dylib" />
+    <ComponentRef Id="osx_x64runtimesnative_libgflags.2.2.dylib" />
+    <ComponentRef Id="osx_x64runtimesnative_liblz4.1.dylib" />
+    <ComponentRef Id="osx_x64runtimesnative_librocksdb.dylib" />
+    <ComponentRef Id="osx_x64runtimesnative_libsnappy.1.dylib" />
+    <ComponentRef Id="osx_x64runtimesnative_libzstd.1.dylib" />
+    <ComponentRef Id="rhel_x64runtimesnative_libuv.so" />
+    <ComponentRef Id="tizen_armelruntimesnative_libSkiaSharp.so" />
+    <ComponentRef Id="tizen_x86runtimesnative_libSkiaSharp.so" />
+    <ComponentRef Id="libunixnetcoreapp3.0_System.Drawing.Common.dll" />
+    <ComponentRef Id="libunixnetstandard2.0_System.Private.ServiceModel.dll" />
+    <ComponentRef Id="libwinnetcoreapp3.0_Microsoft.Win32.SystemEvents.dll" />
+    <ComponentRef Id="libwinnetcoreapp3.0_System.Drawing.Common.dll" />
+    <ComponentRef Id="libwinnetcoreapp3.0_System.Windows.Extensions.dll" />
+    <ComponentRef Id="libwinnetstandard2.0_System.Net.Http.WinHttpHandler.dll" />
+    <ComponentRef Id="libwinnetstandard2.0_System.Runtime.Caching.dll" />
+    <ComponentRef Id="libwinnetstandard2.0_System.Security.Cryptography.ProtectedData.dll" />
+    <ComponentRef Id="win_x64runtimesnative_libSkiaSharp.dll" />
+    <ComponentRef Id="win_x64runtimesnative_rocksdb.dll" />
+    <ComponentRef Id="win_x86runtimesnative_libSkiaSharp.dll" />
+    <ComponentRef Id="libwin7netstandard2.0_System.Private.ServiceModel.dll" />
+    <ComponentRef Id="win7_armruntimesnative_libuv.dll" />
+    <ComponentRef Id="win7_x64runtimesnative_libuv.dll" />
+    <ComponentRef Id="win7_x86runtimesnative_libuv.dll" />
+    <ComponentRef Id="PublishFreeMarketApp_FloatGenesistools_data_folder.zip" />
+    <ComponentRef Id="PublishFreeMarketApp_FloatGenesistools_tor_linux64.zip" />
+    <ComponentRef Id="PublishFreeMarketApp_FloatGenesistools_tor_osx64.zip" />
+    <ComponentRef Id="PublishFreeMarketApp_FloatGenesistools_tor_win32.zip" />
+    <ComponentRef Id="PublishFreeMarketApp_FloatGenesistools_torrc_default" />
+	
+    <ComponentRef Id="ApplicationShortcut" />
+    </Feature>
+
+    
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_Repositoriesappsettings.json">
+      <File Id="FreeMarketApp_FloatGenesis_Repositoriesappsettings.json" Name="appsettings.json" Source="..\Publish\appsettings.json" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAsyncIO.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAsyncIO.dll" Name="AsyncIO.dll" Source="..\Publish\AsyncIO.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Animation.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Animation.dll" Name="Avalonia.Animation.dll" Source="..\Publish\Avalonia.Animation.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Base.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Base.dll" Name="Avalonia.Base.dll" Source="..\Publish\Avalonia.Base.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Controls.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Controls.dll" Name="Avalonia.Controls.dll" Source="..\Publish\Avalonia.Controls.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.DesignerSupport.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.DesignerSupport.dll" Name="Avalonia.DesignerSupport.dll" Source="..\Publish\Avalonia.DesignerSupport.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Desktop.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Desktop.dll" Name="Avalonia.Desktop.dll" Source="..\Publish\Avalonia.Desktop.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.DesktopRuntime.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.DesktopRuntime.dll" Name="Avalonia.DesktopRuntime.dll" Source="..\Publish\Avalonia.DesktopRuntime.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Diagnostics.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Diagnostics.dll" Name="Avalonia.Diagnostics.dll" Source="..\Publish\Avalonia.Diagnostics.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Dialogs.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Dialogs.dll" Name="Avalonia.Dialogs.dll" Source="..\Publish\Avalonia.Dialogs.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Direct2D1.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Direct2D1.dll" Name="Avalonia.Direct2D1.dll" Source="..\Publish\Avalonia.Direct2D1.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.dll" Name="Avalonia.dll" Source="..\Publish\Avalonia.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.FreeDesktop.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.FreeDesktop.dll" Name="Avalonia.FreeDesktop.dll" Source="..\Publish\Avalonia.FreeDesktop.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Input.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Input.dll" Name="Avalonia.Input.dll" Source="..\Publish\Avalonia.Input.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Interactivity.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Interactivity.dll" Name="Avalonia.Interactivity.dll" Source="..\Publish\Avalonia.Interactivity.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Layout.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Layout.dll" Name="Avalonia.Layout.dll" Source="..\Publish\Avalonia.Layout.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Logging.Serilog.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Logging.Serilog.dll" Name="Avalonia.Logging.Serilog.dll" Source="..\Publish\Avalonia.Logging.Serilog.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Markup.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Markup.dll" Name="Avalonia.Markup.dll" Source="..\Publish\Avalonia.Markup.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Markup.Xaml.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Markup.Xaml.dll" Name="Avalonia.Markup.Xaml.dll" Source="..\Publish\Avalonia.Markup.Xaml.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Native.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Native.dll" Name="Avalonia.Native.dll" Source="..\Publish\Avalonia.Native.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.OpenGL.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.OpenGL.dll" Name="Avalonia.OpenGL.dll" Source="..\Publish\Avalonia.OpenGL.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.ReactiveUI.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.ReactiveUI.dll" Name="Avalonia.ReactiveUI.dll" Source="..\Publish\Avalonia.ReactiveUI.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Remote.Protocol.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Remote.Protocol.dll" Name="Avalonia.Remote.Protocol.dll" Source="..\Publish\Avalonia.Remote.Protocol.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Skia.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Skia.dll" Name="Avalonia.Skia.dll" Source="..\Publish\Avalonia.Skia.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Styling.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Styling.dll" Name="Avalonia.Styling.dll" Source="..\Publish\Avalonia.Styling.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Themes.Default.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Themes.Default.dll" Name="Avalonia.Themes.Default.dll" Source="..\Publish\Avalonia.Themes.Default.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Visuals.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Visuals.dll" Name="Avalonia.Visuals.dll" Source="..\Publish\Avalonia.Visuals.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Win32.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.Win32.dll" Name="Avalonia.Win32.dll" Source="..\Publish\Avalonia.Win32.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.X11.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesAvalonia.X11.dll" Name="Avalonia.X11.dll" Source="..\Publish\Avalonia.X11.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesBencodex.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesBencodex.dll" Name="Bencodex.dll" Source="..\Publish\Bencodex.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesBouncyCastle.Crypto.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesBouncyCastle.Crypto.dll" Name="BouncyCastle.Crypto.dll" Source="..\Publish\BouncyCastle.Crypto.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesCocona.Core.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesCocona.Core.dll" Name="Cocona.Core.dll" Source="..\Publish\Cocona.Core.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesCocona.Lite.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesCocona.Lite.dll" Name="Cocona.Lite.dll" Source="..\Publish\Cocona.Lite.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesDynamicData.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesDynamicData.dll" Name="DynamicData.dll" Source="..\Publish\DynamicData.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesEquals.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesEquals.dll" Name="Equals.dll" Source="..\Publish\Equals.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.deps.json">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.deps.json" Name="FreeMarketApp.deps.json" Source="..\Publish\FreeMarketApp.deps.json" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.dll" Name="FreeMarketApp.dll" Source="..\Publish\FreeMarketApp.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.exe">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.exe" Name="FreeMarketApp.exe" Source="..\Publish\FreeMarketApp.exe" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.pdb" Name="FreeMarketApp.pdb" Source="..\Publish\FreeMarketApp.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.runtimeconfig.json">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.runtimeconfig.json" Name="FreeMarketApp.runtimeconfig.json" Source="..\Publish\FreeMarketApp.runtimeconfig.json" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.BlockChain.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.BlockChain.dll" Name="FreeMarketOne.BlockChain.dll" Source="..\Publish\FreeMarketOne.BlockChain.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.BlockChain.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.BlockChain.pdb" Name="FreeMarketOne.BlockChain.pdb" Source="..\Publish\FreeMarketOne.BlockChain.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.DataStructure.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.DataStructure.dll" Name="FreeMarketOne.DataStructure.dll" Source="..\Publish\FreeMarketOne.DataStructure.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.DataStructure.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.DataStructure.pdb" Name="FreeMarketOne.DataStructure.pdb" Source="..\Publish\FreeMarketOne.DataStructure.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Extensions.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Extensions.dll" Name="FreeMarketOne.Extensions.dll" Source="..\Publish\FreeMarketOne.Extensions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Extensions.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Extensions.pdb" Name="FreeMarketOne.Extensions.pdb" Source="..\Publish\FreeMarketOne.Extensions.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.GenesisBlock.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.GenesisBlock.dll" Name="FreeMarketOne.GenesisBlock.dll" Source="..\Publish\FreeMarketOne.GenesisBlock.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.GenesisBlock.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.GenesisBlock.pdb" Name="FreeMarketOne.GenesisBlock.pdb" Source="..\Publish\FreeMarketOne.GenesisBlock.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.P2P.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.P2P.dll" Name="FreeMarketOne.P2P.dll" Source="..\Publish\FreeMarketOne.P2P.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.P2P.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.P2P.pdb" Name="FreeMarketOne.P2P.pdb" Source="..\Publish\FreeMarketOne.P2P.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.PoolManager.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.PoolManager.dll" Name="FreeMarketOne.PoolManager.dll" Source="..\Publish\FreeMarketOne.PoolManager.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.PoolManager.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.PoolManager.pdb" Name="FreeMarketOne.PoolManager.pdb" Source="..\Publish\FreeMarketOne.PoolManager.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.ServerCore.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.ServerCore.dll" Name="FreeMarketOne.ServerCore.dll" Source="..\Publish\FreeMarketOne.ServerCore.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.ServerCore.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.ServerCore.pdb" Name="FreeMarketOne.ServerCore.pdb" Source="..\Publish\FreeMarketOne.ServerCore.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Tor.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Tor.dll" Name="FreeMarketOne.Tor.dll" Source="..\Publish\FreeMarketOne.Tor.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Tor.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Tor.pdb" Name="FreeMarketOne.Tor.pdb" Source="..\Publish\FreeMarketOne.Tor.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Utils.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Utils.dll" Name="FreeMarketOne.Utils.dll" Source="..\Publish\FreeMarketOne.Utils.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Utils.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesFreeMarketOne.Utils.pdb" Name="FreeMarketOne.Utils.pdb" Source="..\Publish\FreeMarketOne.Utils.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesGetPass.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesGetPass.dll" Name="GetPass.dll" Source="..\Publish\GetPass.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesHtmlAgilityPack.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesHtmlAgilityPack.dll" Name="HtmlAgilityPack.dll" Source="..\Publish\HtmlAgilityPack.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesJetBrains.Annotations.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesJetBrains.Annotations.dll" Name="JetBrains.Annotations.dll" Source="..\Publish\JetBrains.Annotations.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesJsonSubTypes.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesJsonSubTypes.dll" Name="JsonSubTypes.dll" Source="..\Publish\JsonSubTypes.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.dll" Name="Libplanet.dll" Source="..\Publish\Libplanet.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Extensions.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Extensions.dll" Name="Libplanet.Extensions.dll" Source="..\Publish\Libplanet.Extensions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Extensions.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Extensions.pdb" Name="Libplanet.Extensions.pdb" Source="..\Publish\Libplanet.Extensions.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.pdb" Name="Libplanet.pdb" Source="..\Publish\Libplanet.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.RocksDBStore.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.RocksDBStore.dll" Name="Libplanet.RocksDBStore.dll" Source="..\Publish\Libplanet.RocksDBStore.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.RocksDBStore.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.RocksDBStore.pdb" Name="Libplanet.RocksDBStore.pdb" Source="..\Publish\Libplanet.RocksDBStore.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Stun.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Stun.dll" Name="Libplanet.Stun.dll" Source="..\Publish\Libplanet.Stun.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Stun.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Stun.pdb" Name="Libplanet.Stun.pdb" Source="..\Publish\Libplanet.Stun.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.dll" Name="Libplanet.Tools.dll" Source="..\Publish\Libplanet.Tools.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.exe">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.exe" Name="Libplanet.Tools.exe" Source="..\Publish\Libplanet.Tools.exe" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.pdb">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.Tools.pdb" Name="Libplanet.Tools.pdb" Source="..\Publish\Libplanet.Tools.pdb" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.xml">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLibplanet.xml" Name="Libplanet.xml" Source="..\Publish\Libplanet.xml" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLiteDB.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLiteDB.dll" Name="LiteDB.dll" Source="..\Publish\LiteDB.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesLruCacheNet.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesLruCacheNet.dll" Name="LruCacheNet.dll" Source="..\Publish\LruCacheNet.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.CSharp.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.CSharp.dll" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="..\Publish\Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.dll" Name="Microsoft.CodeAnalysis.dll" Source="..\Publish\Microsoft.CodeAnalysis.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.VisualBasic.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.CodeAnalysis.VisualBasic.dll" Name="Microsoft.CodeAnalysis.VisualBasic.dll" Source="..\Publish\Microsoft.CodeAnalysis.VisualBasic.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.Abstractions.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.Abstractions.dll" Name="Microsoft.Extensions.Configuration.Abstractions.dll" Source="..\Publish\Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.dll" Name="Microsoft.Extensions.Configuration.dll" Source="..\Publish\Microsoft.Extensions.Configuration.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.FileExtensions.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.FileExtensions.dll" Name="Microsoft.Extensions.Configuration.FileExtensions.dll" Source="..\Publish\Microsoft.Extensions.Configuration.FileExtensions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.Json.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Configuration.Json.dll" Name="Microsoft.Extensions.Configuration.Json.dll" Source="..\Publish\Microsoft.Extensions.Configuration.Json.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileProviders.Abstractions.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileProviders.Abstractions.dll" Name="Microsoft.Extensions.FileProviders.Abstractions.dll" Source="..\Publish\Microsoft.Extensions.FileProviders.Abstractions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileProviders.Physical.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileProviders.Physical.dll" Name="Microsoft.Extensions.FileProviders.Physical.dll" Source="..\Publish\Microsoft.Extensions.FileProviders.Physical.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileSystemGlobbing.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.FileSystemGlobbing.dll" Name="Microsoft.Extensions.FileSystemGlobbing.dll" Source="..\Publish\Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Primitives.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Extensions.Primitives.dll" Name="Microsoft.Extensions.Primitives.dll" Source="..\Publish\Microsoft.Extensions.Primitives.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.VisualBasic.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.VisualBasic.dll" Name="Microsoft.VisualBasic.dll" Source="..\Publish\Microsoft.VisualBasic.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Win32.SystemEvents.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesMicrosoft.Win32.SystemEvents.dll" Name="Microsoft.Win32.SystemEvents.dll" Source="..\Publish\Microsoft.Win32.SystemEvents.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNetMQ.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNetMQ.dll" Name="NetMQ.dll" Source="..\Publish\NetMQ.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNewtonsoft.Json.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNewtonsoft.Json.dll" Name="Newtonsoft.Json.dll" Source="..\Publish\Newtonsoft.Json.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Context.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Context.dll" Name="Nito.AsyncEx.Context.dll" Source="..\Publish\Nito.AsyncEx.Context.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Coordination.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Coordination.dll" Name="Nito.AsyncEx.Coordination.dll" Source="..\Publish\Nito.AsyncEx.Coordination.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Interop.WaitHandles.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Interop.WaitHandles.dll" Name="Nito.AsyncEx.Interop.WaitHandles.dll" Source="..\Publish\Nito.AsyncEx.Interop.WaitHandles.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Oop.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Oop.dll" Name="Nito.AsyncEx.Oop.dll" Source="..\Publish\Nito.AsyncEx.Oop.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Tasks.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.AsyncEx.Tasks.dll" Name="Nito.AsyncEx.Tasks.dll" Source="..\Publish\Nito.AsyncEx.Tasks.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Cancellation.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Cancellation.dll" Name="Nito.Cancellation.dll" Source="..\Publish\Nito.Cancellation.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Collections.Deque.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Collections.Deque.dll" Name="Nito.Collections.Deque.dll" Source="..\Publish\Nito.Collections.Deque.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Disposables.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNito.Disposables.dll" Name="Nito.Disposables.dll" Source="..\Publish\Nito.Disposables.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesNorgerman.Cryptography.Scrypt.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesNorgerman.Cryptography.Scrypt.dll" Name="Norgerman.Cryptography.Scrypt.dll" Source="..\Publish\Norgerman.Cryptography.Scrypt.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesReactiveUI.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesReactiveUI.dll" Name="ReactiveUI.dll" Source="..\Publish\ReactiveUI.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesRocksDbSharp.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesRocksDbSharp.dll" Name="RocksDbSharp.dll" Source="..\Publish\RocksDbSharp.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.dll" Name="Serilog.dll" Source="..\Publish\Serilog.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.Debug.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.Debug.dll" Name="Serilog.Sinks.Debug.dll" Source="..\Publish\Serilog.Sinks.Debug.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.File.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.File.dll" Name="Serilog.Sinks.File.dll" Source="..\Publish\Serilog.Sinks.File.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.Trace.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSerilog.Sinks.Trace.dll" Name="Serilog.Sinks.Trace.dll" Source="..\Publish\Serilog.Sinks.Trace.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.Direct2D1.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.Direct2D1.dll" Name="SharpDX.Direct2D1.dll" Source="..\Publish\SharpDX.Direct2D1.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.Direct3D11.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.Direct3D11.dll" Name="SharpDX.Direct3D11.dll" Source="..\Publish\SharpDX.Direct3D11.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.dll" Name="SharpDX.dll" Source="..\Publish\SharpDX.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.DXGI.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSharpDX.DXGI.dll" Name="SharpDX.DXGI.dll" Source="..\Publish\SharpDX.DXGI.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSharpGen.Runtime.COM.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSharpGen.Runtime.COM.dll" Name="SharpGen.Runtime.COM.dll" Source="..\Publish\SharpGen.Runtime.COM.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSharpGen.Runtime.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSharpGen.Runtime.dll" Name="SharpGen.Runtime.dll" Source="..\Publish\SharpGen.Runtime.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSkiaSharp.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSkiaSharp.dll" Name="SkiaSharp.dll" Source="..\Publish\SkiaSharp.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSplat.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSplat.dll" Name="Splat.dll" Source="..\Publish\Splat.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Collections.Immutable.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Collections.Immutable.dll" Name="System.Collections.Immutable.dll" Source="..\Publish\System.Collections.Immutable.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Configuration.ConfigurationManager.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Configuration.ConfigurationManager.dll" Name="System.Configuration.ConfigurationManager.dll" Source="..\Publish\System.Configuration.ConfigurationManager.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Drawing.Common.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Drawing.Common.dll" Name="System.Drawing.Common.dll" Source="..\Publish\System.Drawing.Common.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Linq.Async.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Linq.Async.dll" Name="System.Linq.Async.dll" Source="..\Publish\System.Linq.Async.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Net.Http.WinHttpHandler.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Net.Http.WinHttpHandler.dll" Name="System.Net.Http.WinHttpHandler.dll" Source="..\Publish\System.Net.Http.WinHttpHandler.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Reactive.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Reactive.dll" Name="System.Reactive.dll" Source="..\Publish\System.Reactive.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Runtime.Caching.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Runtime.Caching.dll" Name="System.Runtime.Caching.dll" Source="..\Publish\System.Runtime.Caching.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Security.Cryptography.ProtectedData.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Security.Cryptography.ProtectedData.dll" Name="System.Security.Cryptography.ProtectedData.dll" Source="..\Publish\System.Security.Cryptography.ProtectedData.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Security.Permissions.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Security.Permissions.dll" Name="System.Security.Permissions.dll" Source="..\Publish\System.Security.Permissions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.ServiceModel.Primitives.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.ServiceModel.Primitives.dll" Name="System.ServiceModel.Primitives.dll" Source="..\Publish\System.ServiceModel.Primitives.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Windows.Extensions.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Windows.Extensions.dll" Name="System.Windows.Extensions.dll" Source="..\Publish\System.Windows.Extensions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Xml.XPath.XmlDocument.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesSystem.Xml.XPath.XmlDocument.dll" Name="System.Xml.XPath.XmlDocument.dll" Source="..\Publish\System.Xml.XPath.XmlDocument.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesTmds.DBus.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesTmds.DBus.dll" Name="Tmds.DBus.dll" Source="..\Publish\Tmds.DBus.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="INSTALLFOLDER">
+    <Component Id="FreeMarketApp_FloatGenesis_RepositoriesZio.dll">
+      <File Id="FreeMarketApp_FloatGenesis_RepositoriesZio.dll" Name="Zio.dll" Source="..\Publish\Zio.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="debian_x64runtimesnativeFolderId">
+    <Component Id="debian_x64runtimesnative_libuv.so">
+      <File Id="debian_x64runtimeslibuv.so" Name="libuv.so" Source="..\Publish\runtimes\debian-x64\native\libuv.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="fedora_x64runtimesnativeFolderId">
+    <Component Id="fedora_x64runtimesnative_libuv.so">
+      <File Id="fedora_x64runtimeslibuv.so" Name="libuv.so" Source="..\Publish\runtimes\fedora-x64\native\libuv.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_armruntimesnativeFolderId">
+    <Component Id="linux_armruntimesnative_libSkiaSharp.so">
+      <File Id="linux_armruntimeslibSkiaSharp.so" Name="libSkiaSharp.so" Source="..\Publish\runtimes\linux-arm\native\libSkiaSharp.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_x64runtimesnativeFolderId">
+    <Component Id="linux_x64runtimesnative_libgflags.so.2.2">
+      <File Id="linux_x64runtimeslibgflags.so.2.2" Name="libgflags.so.2.2" Source="..\Publish\runtimes\linux-x64\native\libgflags.so.2.2" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_x64runtimesnativeFolderId">
+    <Component Id="linux_x64runtimesnative_libjemalloc.so.2">
+      <File Id="linux_x64runtimeslibjemalloc.so.2" Name="libjemalloc.so.2" Source="..\Publish\runtimes\linux-x64\native\libjemalloc.so.2" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_x64runtimesnativeFolderId">
+    <Component Id="linux_x64runtimesnative_liblz4.so.1">
+      <File Id="linux_x64runtimesliblz4.so.1" Name="liblz4.so.1" Source="..\Publish\runtimes\linux-x64\native\liblz4.so.1" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_x64runtimesnativeFolderId">
+    <Component Id="linux_x64runtimesnative_librocksdb.so">
+      <File Id="linux_x64runtimeslibrocksdb.so" Name="librocksdb.so" Source="..\Publish\runtimes\linux-x64\native\librocksdb.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_x64runtimesnativeFolderId">
+    <Component Id="linux_x64runtimesnative_libSkiaSharp.so">
+      <File Id="linux_x64runtimeslibSkiaSharp.so" Name="libSkiaSharp.so" Source="..\Publish\runtimes\linux-x64\native\libSkiaSharp.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_x64runtimesnativeFolderId">
+    <Component Id="linux_x64runtimesnative_libsnappy.so.1">
+      <File Id="linux_x64runtimeslibsnappy.so.1" Name="libsnappy.so.1" Source="..\Publish\runtimes\linux-x64\native\libsnappy.so.1" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="linux_x64runtimesnativeFolderId">
+    <Component Id="linux_x64runtimesnative_libzstd.so.0">
+      <File Id="linux_x64runtimeslibzstd.so.0" Name="libzstd.so.0" Source="..\Publish\runtimes\linux-x64\native\libzstd.so.0" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="opensuse_x64runtimesnativeFolderId">
+    <Component Id="opensuse_x64runtimesnative_libuv.so">
+      <File Id="opensuse_x64runtimeslibuv.so" Name="libuv.so" Source="..\Publish\runtimes\opensuse-x64\native\libuv.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osxruntimesnativeFolderId">
+    <Component Id="osxruntimesnative_libAvaloniaNative.dylib">
+      <File Id="osxruntimeslibAvaloniaNative.dylib" Name="libAvaloniaNative.dylib" Source="..\Publish\runtimes\osx\native\libAvaloniaNative.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osxruntimesnativeFolderId">
+    <Component Id="osxruntimesnative_libSkiaSharp.dylib">
+      <File Id="osxruntimeslibSkiaSharp.dylib" Name="libSkiaSharp.dylib" Source="..\Publish\runtimes\osx\native\libSkiaSharp.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osxruntimesnativeFolderId">
+    <Component Id="osxruntimesnative_libuv.dylib">
+      <File Id="osxruntimeslibuv.dylib" Name="libuv.dylib" Source="..\Publish\runtimes\osx\native\libuv.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osx_x64runtimesnativeFolderId">
+    <Component Id="osx_x64runtimesnative_libgflags.2.2.dylib">
+      <File Id="osx_x64runtimeslibgflags.2.2.dylib" Name="libgflags.2.2.dylib" Source="..\Publish\runtimes\osx-x64\native\libgflags.2.2.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osx_x64runtimesnativeFolderId">
+    <Component Id="osx_x64runtimesnative_liblz4.1.dylib">
+      <File Id="osx_x64runtimesliblz4.1.dylib" Name="liblz4.1.dylib" Source="..\Publish\runtimes\osx-x64\native\liblz4.1.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osx_x64runtimesnativeFolderId">
+    <Component Id="osx_x64runtimesnative_librocksdb.dylib">
+      <File Id="osx_x64runtimeslibrocksdb.dylib" Name="librocksdb.dylib" Source="..\Publish\runtimes\osx-x64\native\librocksdb.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osx_x64runtimesnativeFolderId">
+    <Component Id="osx_x64runtimesnative_libsnappy.1.dylib">
+      <File Id="osx_x64runtimeslibsnappy.1.dylib" Name="libsnappy.1.dylib" Source="..\Publish\runtimes\osx-x64\native\libsnappy.1.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="osx_x64runtimesnativeFolderId">
+    <Component Id="osx_x64runtimesnative_libzstd.1.dylib">
+      <File Id="osx_x64runtimeslibzstd.1.dylib" Name="libzstd.1.dylib" Source="..\Publish\runtimes\osx-x64\native\libzstd.1.dylib" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="rhel_x64runtimesnativeFolderId">
+    <Component Id="rhel_x64runtimesnative_libuv.so">
+      <File Id="rhel_x64runtimeslibuv.so" Name="libuv.so" Source="..\Publish\runtimes\rhel-x64\native\libuv.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="tizen_armelruntimesnativeFolderId">
+    <Component Id="tizen_armelruntimesnative_libSkiaSharp.so">
+      <File Id="tizen_armelruntimeslibSkiaSharp.so" Name="libSkiaSharp.so" Source="..\Publish\runtimes\tizen-armel\native\libSkiaSharp.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="tizen_x86runtimesnativeFolderId">
+    <Component Id="tizen_x86runtimesnative_libSkiaSharp.so">
+      <File Id="tizen_x86runtimeslibSkiaSharp.so" Name="libSkiaSharp.so" Source="..\Publish\runtimes\tizen-x86\native\libSkiaSharp.so" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libunixnetcoreapp3.0FolderId">
+    <Component Id="libunixnetcoreapp3.0_System.Drawing.Common.dll">
+      <File Id="libunixSystem.Drawing.Common.dll" Name="System.Drawing.Common.dll" Source="..\Publish\runtimes\unix\lib\netcoreapp3.0\System.Drawing.Common.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libunixnetstandard2.0FolderId">
+    <Component Id="libunixnetstandard2.0_System.Private.ServiceModel.dll">
+      <File Id="libunixSystem.Private.ServiceModel.dll" Name="System.Private.ServiceModel.dll" Source="..\Publish\runtimes\unix\lib\netstandard2.0\System.Private.ServiceModel.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libwinnetcoreapp3.0FolderId">
+    <Component Id="libwinnetcoreapp3.0_Microsoft.Win32.SystemEvents.dll">
+      <File Id="libwinMicrosoft.Win32.SystemEvents.dll" Name="Microsoft.Win32.SystemEvents.dll" Source="..\Publish\runtimes\win\lib\netcoreapp3.0\Microsoft.Win32.SystemEvents.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libwinnetcoreapp3.0FolderId">
+    <Component Id="libwinnetcoreapp3.0_System.Drawing.Common.dll">
+      <File Id="libwinSystem.Drawing.Common.dll" Name="System.Drawing.Common.dll" Source="..\Publish\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libwinnetcoreapp3.0FolderId">
+    <Component Id="libwinnetcoreapp3.0_System.Windows.Extensions.dll">
+      <File Id="libwinSystem.Windows.Extensions.dll" Name="System.Windows.Extensions.dll" Source="..\Publish\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libwinnetstandard2.0FolderId">
+    <Component Id="libwinnetstandard2.0_System.Net.Http.WinHttpHandler.dll">
+      <File Id="libwinSystem.Net.Http.WinHttpHandler.dll" Name="System.Net.Http.WinHttpHandler.dll" Source="..\Publish\runtimes\win\lib\netstandard2.0\System.Net.Http.WinHttpHandler.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libwinnetstandard2.0FolderId">
+    <Component Id="libwinnetstandard2.0_System.Runtime.Caching.dll">
+      <File Id="libwinSystem.Runtime.Caching.dll" Name="System.Runtime.Caching.dll" Source="..\Publish\runtimes\win\lib\netstandard2.0\System.Runtime.Caching.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libwinnetstandard2.0FolderId">
+    <Component Id="libwinnetstandard2.0_System.Security.Cryptography.ProtectedData.dll">
+      <File Id="libwinSystem.Security.Cryptography.ProtectedData.dll" Name="System.Security.Cryptography.ProtectedData.dll" Source="..\Publish\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="win_x64runtimesnativeFolderId">
+    <Component Id="win_x64runtimesnative_libSkiaSharp.dll">
+      <File Id="win_x64runtimeslibSkiaSharp.dll" Name="libSkiaSharp.dll" Source="..\Publish\runtimes\win-x64\native\libSkiaSharp.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="win_x64runtimesnativeFolderId">
+    <Component Id="win_x64runtimesnative_rocksdb.dll">
+      <File Id="win_x64runtimesrocksdb.dll" Name="rocksdb.dll" Source="..\Publish\runtimes\win-x64\native\rocksdb.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="win_x86runtimesnativeFolderId">
+    <Component Id="win_x86runtimesnative_libSkiaSharp.dll">
+      <File Id="win_x86runtimeslibSkiaSharp.dll" Name="libSkiaSharp.dll" Source="..\Publish\runtimes\win-x86\native\libSkiaSharp.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="libwin7netstandard2.0FolderId">
+    <Component Id="libwin7netstandard2.0_System.Private.ServiceModel.dll">
+      <File Id="libwin7System.Private.ServiceModel.dll" Name="System.Private.ServiceModel.dll" Source="..\Publish\runtimes\win7\lib\netstandard2.0\System.Private.ServiceModel.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="win7_armruntimesnativeFolderId">
+    <Component Id="win7_armruntimesnative_libuv.dll">
+      <File Id="win7_armruntimeslibuv.dll" Name="libuv.dll" Source="..\Publish\runtimes\win7-arm\native\libuv.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="win7_x64runtimesnativeFolderId">
+    <Component Id="win7_x64runtimesnative_libuv.dll">
+      <File Id="win7_x64runtimeslibuv.dll" Name="libuv.dll" Source="..\Publish\runtimes\win7-x64\native\libuv.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="win7_x86runtimesnativeFolderId">
+    <Component Id="win7_x86runtimesnative_libuv.dll">
+      <File Id="win7_x86runtimeslibuv.dll" Name="libuv.dll" Source="..\Publish\runtimes\win7-x86\native\libuv.dll" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="PublishFreeMarketApp_FloatGenesistoolsFolderId">
+    <Component Id="PublishFreeMarketApp_FloatGenesistools_data_folder.zip">
+      <File Id="PublishFreeMarketApp_FloatGenesisdata_folder.zip" Name="data-folder.zip" Source="..\Publish\tools\data-folder.zip" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="PublishFreeMarketApp_FloatGenesistoolsFolderId">
+    <Component Id="PublishFreeMarketApp_FloatGenesistools_tor_linux64.zip">
+      <File Id="PublishFreeMarketApp_FloatGenesistor_linux64.zip" Name="tor-linux64.zip" Source="..\Publish\tools\tor-linux64.zip" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="PublishFreeMarketApp_FloatGenesistoolsFolderId">
+    <Component Id="PublishFreeMarketApp_FloatGenesistools_tor_osx64.zip">
+      <File Id="PublishFreeMarketApp_FloatGenesistor_osx64.zip" Name="tor-osx64.zip" Source="..\Publish\tools\tor-osx64.zip" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="PublishFreeMarketApp_FloatGenesistoolsFolderId">
+    <Component Id="PublishFreeMarketApp_FloatGenesistools_tor_win32.zip">
+      <File Id="PublishFreeMarketApp_FloatGenesistor_win32.zip" Name="tor-win32.zip" Source="..\Publish\tools\tor-win32.zip" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  <DirectoryRef Id="PublishFreeMarketApp_FloatGenesistoolsFolderId">
+    <Component Id="PublishFreeMarketApp_FloatGenesistools_torrc_default">
+      <File Id="PublishFreeMarketApp_FloatGenesistorrc_default" Name="torrc-default" Source="..\Publish\tools\torrc-default" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+  
+      <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="d9fdd7d0-bd64-40cd-9515-7b76d0be1608">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+             Name="FreeMarket.One"
+           Description="FreeMarket.One Application"
+            Target="[#FreeMarketApp_FloatGenesis_RepositoriesFreeMarketApp.exe]"
+                  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\MyCompany\FreeMarketOne" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+	
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="FreeMarketOne">
+
+         <Directory Id="PublishFreeMarketApp_FloatGenesisruntimesFolderId" Name="runtimes">
+          <Directory Id="runtimesPublishdebian_x64FolderId" Name="debian-x64">
+            <Directory Id="debian_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishfedora_x64FolderId" Name="fedora-x64">
+            <Directory Id="fedora_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishlinux_armFolderId" Name="linux-arm">
+            <Directory Id="linux_armruntimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishlinux_x64FolderId" Name="linux-x64">
+            <Directory Id="linux_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishopensuse_x64FolderId" Name="opensuse-x64">
+            <Directory Id="opensuse_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishosxFolderId" Name="osx">
+            <Directory Id="osxruntimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishosx_x64FolderId" Name="osx-x64">
+            <Directory Id="osx_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishrhel_x64FolderId" Name="rhel-x64">
+            <Directory Id="rhel_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishtizen_armelFolderId" Name="tizen-armel">
+            <Directory Id="tizen_armelruntimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishtizen_x86FolderId" Name="tizen-x86">
+            <Directory Id="tizen_x86runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishunixFolderId" Name="unix">
+            <Directory Id="unixruntimeslibFolderId" Name="lib">
+              <Directory Id="libunixnetcoreapp3.0FolderId" Name="netcoreapp3.0" />
+              <Directory Id="libunixnetstandard2.0FolderId" Name="netstandard2.0" />
+            </Directory>
+          </Directory>
+          <Directory Id="runtimesPublishwinFolderId" Name="win">
+            <Directory Id="winruntimeslibFolderId" Name="lib">
+              <Directory Id="libwinnetcoreapp3.0FolderId" Name="netcoreapp3.0" />
+              <Directory Id="libwinnetstandard2.0FolderId" Name="netstandard2.0" />
+            </Directory>
+          </Directory>
+          <Directory Id="runtimesPublishwin_x64FolderId" Name="win-x64">
+            <Directory Id="win_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishwin_x86FolderId" Name="win-x86">
+            <Directory Id="win_x86runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishwin7FolderId" Name="win7">
+            <Directory Id="win7runtimeslibFolderId" Name="lib">
+              <Directory Id="libwin7netstandard2.0FolderId" Name="netstandard2.0" />
+            </Directory>
+          </Directory>
+          <Directory Id="runtimesPublishwin7_armFolderId" Name="win7-arm">
+            <Directory Id="win7_armruntimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishwin7_x64FolderId" Name="win7-x64">
+            <Directory Id="win7_x64runtimesnativeFolderId" Name="native" />
+          </Directory>
+          <Directory Id="runtimesPublishwin7_x86FolderId" Name="win7-x86">
+            <Directory Id="win7_x86runtimesnativeFolderId" Name="native" />
+          </Directory>
+        </Directory>
+        <Directory Id="PublishFreeMarketApp_FloatGenesistoolsFolderId" Name="tools" />
+		
+      </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="FreeMarket.One"/>
+      </Directory>
+    </Directory>
+    
+  </Fragment>
+</Wix>

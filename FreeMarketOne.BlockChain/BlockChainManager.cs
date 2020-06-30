@@ -332,19 +332,22 @@ namespace FreeMarketOne.BlockChain
         public void ClearOlderBlocksAfterNewGenesis()
         {
             var chainId = _storage.GetCanonicalChainId();
-            var hashs = _storage.IterateIndexes(chainId.Value, 0, null);
-            if (hashs.Any())
+            if (chainId.HasValue)
             {
-                foreach (var itemHash in hashs)
+                var hashs = _storage.IterateIndexes(chainId.Value, 0, null);
+                if (hashs.Any())
                 {
-                    var block = _storage.GetBlock<T>(itemHash);
-                    if (block == _genesisBlock)
+                    foreach (var itemHash in hashs)
                     {
-                        break;
-                    }
-                    else
-                    {
-                        _storage.DeleteBlock(itemHash);
+                        var block = _storage.GetBlock<T>(itemHash);
+                        if (block == _genesisBlock)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            _storage.DeleteBlock(itemHash);
+                        }
                     }
                 }
             }

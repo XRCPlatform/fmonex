@@ -113,10 +113,11 @@ namespace FreeMarketOne.BlockChain
             if (genesisBlock == null)
             {
                 _genesisBlock = GetGenesisBlock();
-            } 
+            }
             else
             {
                 _genesisBlock = genesisBlock;
+                ClearOlderBlocksAfterNewGenesis();
             }
 
             _bootstrapStarted = bootstrapStarted;
@@ -323,6 +324,30 @@ namespace FreeMarketOne.BlockChain
             }).Wait(2000);
 
             _logger.Information(string.Format("BlockChain {0} Manager stopped.", typeof(T).Name));
+        }
+
+        /// <summary>
+        /// Clear older blocks until reach actual genesis
+        /// </summary>
+        public void ClearOlderBlocksAfterNewGenesis()
+        {
+            var chainId = _storage.GetCanonicalChainId();
+            var hashs = _storage.IterateIndexes(chainId.Value, 0, null);
+            if (hashs.Any())
+            {
+                foreach (var itemHash in hashs)
+                {
+                    var block = _storage.GetBlock<T>(itemHash);
+                    if (block == _genesisBlock)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        _storage.DeleteBlock(itemHash);
+                    }
+                }
+            }
         }
 
         public void Dispose()

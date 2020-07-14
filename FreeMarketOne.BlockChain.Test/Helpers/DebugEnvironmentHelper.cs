@@ -14,16 +14,16 @@ using System.Text;
 
 namespace FreeMarketOne.BlockChain.Test.Helpers
 {
-    internal static class DebugEnvironmentHelper
+    internal class DebugEnvironmentHelper
     {
-        internal static void Initialize<T>(
-            IBaseConfiguration configuration,
-            ILogger logger, 
-            IOnionSeedsManager onionSeedsManager, 
-            BasePoolManager basePoolManager, 
-            IBlockChainManager<BaseAction> baseBlockChainManager,
-            EventHandler _baseBlockChainLoadedEvent,
-            EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent)
+        internal void Initialize<T>(
+            ref IBaseConfiguration configuration,
+            ref ILogger logger, 
+            ref IOnionSeedsManager onionSeedsManager, 
+            ref BasePoolManager basePoolManager, 
+            ref IBlockChainManager<BaseAction> baseBlockChainManager,
+            ref EventHandler _baseBlockChainLoadedEvent,
+            ref EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent)
         {
             configuration = new DebugConfiguration();
             configuration.FullBaseDirectory = InitializeFullBaseDirectory();
@@ -62,7 +62,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             baseBlockChainManager.Start();
         }
 
-        private static string InitializeFullBaseDirectory()
+        private string InitializeFullBaseDirectory()
         {
             var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -76,19 +76,23 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             return fullBaseDirectory;
         }
 
-        private static void ClearDefaultEnvironment(IBaseConfiguration configuration)
+        private void ClearDefaultEnvironment(IBaseConfiguration configuration)
         {
             var folderPathBase = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath);
             var folderPathMarket = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath);
             var folderLog = Path.Combine(configuration.FullBaseDirectory, configuration.LogFilePath);
 
             var keyFile = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainSecretPath);
+            var memoryBasePoolFile = Path.Combine(configuration.FullBaseDirectory, configuration.MemoryBasePoolPath);
+            var memoryMarketPoolFile = Path.Combine(configuration.FullBaseDirectory, configuration.MemoryMarketPoolPath);
 
             if (Directory.Exists(folderPathBase)) Directory.Delete(folderPathBase, true);
             if (Directory.Exists(folderPathMarket)) Directory.Delete(folderPathMarket, true);
             if (Directory.Exists(folderLog)) Directory.Delete(folderPathMarket, true);
 
             if (File.Exists(keyFile)) File.Delete(keyFile);
+            if (File.Exists(memoryBasePoolFile)) File.Delete(memoryBasePoolFile);
+            if (File.Exists(memoryMarketPoolFile)) File.Delete(memoryMarketPoolFile);
         }
     }
 }

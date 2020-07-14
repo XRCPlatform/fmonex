@@ -22,7 +22,7 @@ using System.Threading;
 namespace FreeMarketOne.BlockChain.Test
 {
     [TestClass]
-    internal class MiningTest
+    public class MiningTest
     {
         private IBaseConfiguration _configuration;
         private ILogger _logger;
@@ -64,19 +64,20 @@ namespace FreeMarketOne.BlockChain.Test
         }
 
         [TestMethod]
-        internal void RunMiningTest()
+        public void RunMiningTest()
         {
+            var debugEnvironment = new DebugEnvironmentHelper();
             _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
             _baseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
 
-            DebugEnvironmentHelper.Initialize<MiningTest>(
-                _configuration,
-                _logger,
-                _onionSeedsManager,
-                _basePoolManager,
-                _baseBlockChainManager,
-                _baseBlockChainLoadedEvent,
-                _baseBlockChainChangedEvent);
+            debugEnvironment.Initialize<MiningTest>(
+                ref _configuration,
+                ref _logger,
+                ref _onionSeedsManager,
+                ref _basePoolManager,
+                ref _baseBlockChainManager,
+                ref _baseBlockChainLoadedEvent,
+                ref _baseBlockChainChangedEvent);
 
             SpinWait.SpinUntil(() => _baseBlockChainManager.IsBlockChainManagerRunning());
             SpinWait.SpinUntil(() => _basePoolManager != null && _basePoolManager.IsPoolManagerRunning());

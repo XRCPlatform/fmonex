@@ -1,3 +1,4 @@
+using FreeMarketOne.BlockChain.Test.Helpers;
 using FreeMarketOne.BlockChain.Test.Mocks;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
@@ -33,49 +34,6 @@ namespace FreeMarketOne.BlockChain.Test
         private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
         private IBlockChainManager<BaseAction> _baseBlockChainManager;
 
-        [TestMethod]
-        private void InitializeDefaultEnvironment()
-        {
-            _configuration = new DebugConfiguration();
-            _configuration.FullBaseDirectory = InitializeFullBaseDirectory();
-
-            /* Clear all debug old data */
-            ClearDefaultEnvironment(_configuration);
-
-            /* Initialize Logger */
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .WriteTo.File(Path.Combine(_configuration.FullBaseDirectory, _configuration.LogFilePath),
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
-                    rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-            _logger = Log.Logger.ForContext<MiningTest>();
-            _logger.Information("Debug Start");
-
-            /* Initialize Mock OnionSeeds */
-            _onionSeedsManager = new MockSeedManager();
-
-            /* Initialize genesis blocks */
-            var genesis = GenesisHelper.GenerateIt(_configuration);
-
-            /* Initialize Base BlockChain Manager */
-            _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
-            _baseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
-
-            _baseBlockChainManager = new BlockChainManager<BaseAction>(
-                _configuration,
-                _configuration.BlockChainBasePath,
-                _configuration.BlockChainSecretPath,
-                null,
-                _configuration.BlockChainBasePolicy,
-                _configuration.ListenerBaseEndPoint,
-                _onionSeedsManager,
-                genesisBlock: genesis,
-                preloadEnded: _baseBlockChainLoadedEvent,
-                blockChainChanged: _baseBlockChainChangedEvent);
-            _baseBlockChainManager.Start();
-        }
-
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
             /* Initialize Market BlockChain Manager */
@@ -105,39 +63,21 @@ namespace FreeMarketOne.BlockChain.Test
             _newBlock = true;
         }
 
-        private string InitializeFullBaseDirectory()
-        {
-            var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (!fullBaseDirectory.StartsWith('/'))
-                {
-                    fullBaseDirectory.Insert(0, "/");
-                }
-            }
-
-            return fullBaseDirectory;
-        }
-
-        private void ClearDefaultEnvironment(IBaseConfiguration configuration)
-        {
-            var folderPathBase = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath);
-            var folderPathMarket = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath);
-            var folderLog = Path.Combine(configuration.FullBaseDirectory, configuration.LogFilePath);
-
-            var keyFile = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainSecretPath);
-
-            if (Directory.Exists(folderPathBase)) Directory.Delete(folderPathBase, true);
-            if (Directory.Exists(folderPathMarket)) Directory.Delete(folderPathMarket, true);
-            if (Directory.Exists(folderLog)) Directory.Delete(folderPathMarket, true);
-
-            if (File.Exists(keyFile)) File.Delete(keyFile);
-        }
-
         [TestMethod]
         public void RunMiningTest()
         {
-            InitializeDefaultEnvironment();
+            var debugEnvironment = new DebugEnvironmentHelper();
+            _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
+            _baseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
+
+            debugEnvironment.Initialize<MiningTest>(
+                ref _configuration,
+                ref _logger,
+                ref _onionSeedsManager,
+                ref _basePoolManager,
+                ref _baseBlockChainManager,
+                ref _baseBlockChainLoadedEvent,
+                ref _baseBlockChainChangedEvent);
 
             SpinWait.SpinUntil(() => _baseBlockChainManager.IsBlockChainManagerRunning());
             SpinWait.SpinUntil(() => _basePoolManager != null && _basePoolManager.IsPoolManagerRunning());

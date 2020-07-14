@@ -314,8 +314,7 @@ namespace FreeMarketOne.PoolManager
           
             if (actionItem != null) {
             
-                _actionItemsList.Remove(actionItem);
-                return true;
+                return _actionItemsList.Remove(actionItem);
             } 
             else
             {

@@ -27,5 +27,7 @@ namespace FreeMarketOne.PoolManager
             : base(configuration, memoryPoolFilePath, storage, swarmServer, privateKey, blockChain, blockPolicy)
         {
         }
+
+        public object SpinWait { get; set; }
     }
 }

@@ -7,14 +7,14 @@ using System.Text;
 
 namespace FreeMarketOne.BlockChain.Test
 {
-    public class DebugConfiguration : BaseConfiguration
+    internal class DebugConfiguration : BaseConfiguration
     {
         private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan? _validBlockInterval = null;
         private static readonly long _difficulty = 100000;
 
-        public DebugConfiguration()
+        internal DebugConfiguration()
         {
             this.Environment = (int)EnvironmentTypes.Test;
             this.TorEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9050/");

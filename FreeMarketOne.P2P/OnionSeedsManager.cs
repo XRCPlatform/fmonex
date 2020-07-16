@@ -24,29 +24,29 @@ namespace FreeMarketOne.P2P
         /// </summary>
         private long running;
         public bool IsRunning => Interlocked.Read(ref running) == 1;
-        private ILogger logger { get; set; }
-        private EndPoint torSocks5EndPoint { get; set; }
-        private string torOnionEndPoint { get; set; }
-        private string appVersion { get; set; }
+        private ILogger _logger { get; set; }
+        private EndPoint _torSocks5EndPoint { get; set; }
+        private string _torOnionEndPoint { get; set; }
+        private string _appVersion { get; set; }
         public List<OnionSeedPeer> OnionSeedPeers { get; set; }
-        private IAsyncLoopFactory asyncLoopFactory { get; set; }
-        private CancellationTokenSource cancellationToken { get; set; }
-        private TorProcessManager torProcessManager { get; set; }
+        private IAsyncLoopFactory _asyncLoopFactory { get; set; }
+        private CancellationTokenSource _cancellationToken { get; set; }
+        private TorProcessManager _torProcessManager { get; set; }
 
         public OnionSeedsManager(IBaseConfiguration configuration, TorProcessManager torManager)
         {
-            logger = Log.Logger.ForContext<OnionSeedsManager>();
-            logger.Information("Initializing Onion Seeds Manager");
+            _logger = Log.Logger.ForContext<OnionSeedsManager>();
+            _logger.Information("Initializing Onion Seeds Manager");
 
-            torSocks5EndPoint = configuration.TorEndPoint;
-            torOnionEndPoint = configuration.OnionSeedsEndPoint;
-            appVersion = configuration.Version;
+            _torSocks5EndPoint = configuration.TorEndPoint;
+            _torOnionEndPoint = configuration.OnionSeedsEndPoint;
+            _appVersion = configuration.Version;
 
-            torProcessManager = torManager;
+            _torProcessManager = torManager;
 
-            asyncLoopFactory = new AsyncLoopFactory(logger);
+            _asyncLoopFactory = new AsyncLoopFactory(_logger);
 
-            cancellationToken = new CancellationTokenSource();
+            _cancellationToken = new CancellationTokenSource();
         }
 
         public bool IsOnionSeedsManagerRunning()
@@ -65,11 +65,11 @@ namespace FreeMarketOne.P2P
         {
             OnionSeedPeers = new List<OnionSeedPeer>();
 
-            logger.Information(string.Format("Prepairing loading of: {0} by Tor Gate: {1}", torOnionEndPoint, torSocks5EndPoint));
+            _logger.Information(string.Format("Prepairing loading of: {0} by Tor Gate: {1}", _torOnionEndPoint, _torSocks5EndPoint));
 
             try
             {
-                var torHttpClient = new TorHttpClient(new Uri(torOnionEndPoint), torSocks5EndPoint);
+                var torHttpClient = new TorHttpClient(new Uri(_torOnionEndPoint), _torSocks5EndPoint);
                 var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
 
                 var onionsStreamData = response.Content.ReadAsStreamAsync().Result;
@@ -80,7 +80,7 @@ namespace FreeMarketOne.P2P
                     {
                         var onion = sr.ReadLine();
 
-                        logger.Information(string.Format("Parsing: {0}", onion));
+                        _logger.Information(string.Format("Parsing: {0}", onion));
 
                         if (IsOnionAddressValid(onion))
                         {
@@ -96,17 +96,17 @@ namespace FreeMarketOne.P2P
 
                             OnionSeedPeers.Add(newOnionSeed);
 
-                            logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
+                            _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                logger.Error(string.Format("Unexpected Error: {0}", e.Message));
+                _logger.Error(string.Format("Unexpected Error: {0}", e.Message));
             }
 
-            logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
+            _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
 
             Interlocked.Exchange(ref running, 1);
 
@@ -129,30 +129,30 @@ namespace FreeMarketOne.P2P
 
         private void StartPeriodicCheck()
         {
-            IAsyncLoop periodicLogLoop = this.asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
+            IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
                 var dateTimeUtc = DateTime.UtcNow;
 
                 StringBuilder periodicCheckLog = new StringBuilder();
 
-                periodicCheckLog.AppendLine("======Onion Seed Status Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + appVersion);
-                periodicCheckLog.AppendLine("My Tor EndPoint " + torProcessManager.TorOnionEndPoint);
+                periodicCheckLog.AppendLine("======Onion Seed Status Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
+                periodicCheckLog.AppendLine("My Tor EndPoint " + _torProcessManager.TorOnionEndPoint);
 
-                var isTorRunning = torProcessManager.IsTorRunningAsync().Result;
+                var isTorRunning = _torProcessManager.IsTorRunningAsync().Result;
                 if (isTorRunning)
                 {
                     foreach (var itemSeed in OnionSeedPeers)
                     {
-                        if (torProcessManager.TorOnionEndPoint != itemSeed.UrlTor) //ignore me
+                        if (_torProcessManager.TorOnionEndPoint != itemSeed.UrlTor) //ignore me
                         {
                             var resultLog = string.Format("Checking {0} {1}", itemSeed.UrlTor, itemSeed.PortTor);
-                            logger.Information(resultLog);
+                            _logger.Information(resultLog);
 
                             itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
 
                             try
                             {
-                                var isOnionSeedRunning = torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
+                                var isOnionSeedRunning = _torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
                                 if (isOnionSeedRunning)
                                 {
                                     itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
@@ -160,7 +160,7 @@ namespace FreeMarketOne.P2P
                             }
                             catch (Exception ex)
                             {
-                                logger.Error(ex.Message);
+                                _logger.Error(ex.Message);
                             }
 
                             periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
@@ -180,7 +180,7 @@ namespace FreeMarketOne.P2P
 
                 return Task.CompletedTask;
             },
-                cancellationToken.Token,
+                _cancellationToken.Token,
                 repeatEvery: TimeSpans.Minute,
                 startAfter: TimeSpans.TenSeconds);
         }
@@ -207,7 +207,7 @@ namespace FreeMarketOne.P2P
 
                         ASCIIEncoding enc = new ASCIIEncoding();
 
-                        client.Send(enc.GetBytes("FM.ONE EndPoint - " + DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) + " agent " + appVersion));
+                        client.Send(enc.GetBytes("FM.ONE EndPoint - " + DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion));
                         client.Close();
                     }
                 }
@@ -218,7 +218,7 @@ namespace FreeMarketOne.P2P
         {
             Interlocked.Exchange(ref running, 2);
 
-            cancellationToken.Cancel();
+            _cancellationToken.Cancel();
 
             Interlocked.Exchange(ref running, 3);
         }

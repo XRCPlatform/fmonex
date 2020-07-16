@@ -34,6 +34,8 @@ namespace FreeMarketOne.ServerCore
         public Logger Logger;
         private ILogger _logger;
 
+        public ServiceManager ServiceManager;
+
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
 
@@ -86,6 +88,10 @@ namespace FreeMarketOne.ServerCore
                 .CreateLogger();
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
+
+            //Service manager
+            ServiceManager = new ServiceManager(Configuration);
+            ServiceManager.Start();
 
             //Initialize Tor
             splashMessageEvent?.Invoke("Tor Inicialization...", EventArgs.Empty);
@@ -288,6 +294,9 @@ namespace FreeMarketOne.ServerCore
 
             _logger.Information("Ending Tor...");
             TorProcessManager?.Dispose();
+
+            _logger.Information("Ending Service Manager...");
+            ServiceManager?.Dispose();
 
             _logger.Information("Application End");
         }

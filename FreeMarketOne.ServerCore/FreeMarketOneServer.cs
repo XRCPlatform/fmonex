@@ -16,9 +16,7 @@ using Libplanet.Blockchain;
 using System.Runtime.InteropServices;
 using System.Threading;
 using FreeMarketOne.ServerCore.Helpers;
-using Avalonia.Controls.ApplicationLifetimes;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -55,10 +53,8 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler FreeMarketOneServerLoadedEvent;
 
-        public void Initialize(EventHandler splashMessageEvent)
+        public void Initialize()
         {
-            splashMessageEvent?.Invoke("Kernel Inicialization...", EventArgs.Empty);
-
             var fullBaseDirectory = InitializeFullBaseDirectory();
 
             //Configuration
@@ -94,7 +90,6 @@ namespace FreeMarketOne.ServerCore
             ServiceManager.Start();
 
             //Initialize Tor
-            splashMessageEvent?.Invoke("Tor Inicialization...", EventArgs.Empty);
             TorProcessManager = new TorProcessManager(Configuration);
             var torInitialized = TorProcessManager.Start();
 
@@ -102,12 +97,10 @@ namespace FreeMarketOne.ServerCore
             if (torInitialized)
             {
                 //Initialize OnionSeeds
-                splashMessageEvent?.Invoke("OnionSeed Inicialization...", EventArgs.Empty);
                 OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
                 OnionSeedsManager.Start();
 
                 //Initialize Base BlockChain Manager
-                splashMessageEvent?.Invoke("Base BlockChain Inicialization...", EventArgs.Empty);
                 BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
                 BaseBlockChainManager = new BlockChainManager<BaseAction>(
@@ -187,13 +180,22 @@ namespace FreeMarketOne.ServerCore
                 MarketPoolManager.Start();
 
                 //Event that server is loaded
-                FreeMarketOneServerLoadedEvent?.Invoke(this, null);
+                RaiseAsyncServerLoadedEvent();
             }
             else
             {
                 _logger.Error("Market Chain isnt loaded!");
                 Stop();
             }
+        }
+
+        async void RaiseAsyncServerLoadedEvent()
+        {
+            await Task.Delay(1000);
+            await Task.Run(() =>
+            {
+                FreeMarketOneServerLoadedEvent?.Invoke(this, null);
+            }).ConfigureAwait(true);
         }
 
         private string InitializeFullBaseDirectory()

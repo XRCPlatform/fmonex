@@ -11,13 +11,9 @@ namespace FreeMarketApp
 {
     public class App : Application
     {
-        private static event EventHandler SplashMessageEventHandler;
-        private static SplashWindow SplashWindow;
-
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
-            SplashMessageEventHandler += new EventHandler(SplashMessageEvent);
         }
 
         public override void OnFrameworkInitializationCompleted()
@@ -37,18 +33,19 @@ namespace FreeMarketApp
             {
                 async void AppAsyncLoadingStart()
                 {
-                    SplashMessageEventHandler?.Invoke("Loading...", EventArgs.Empty);
-                    await Task.Delay(100);
+                    var splashViewModel = new SplashWindowViewModel();
+                    splashViewModel.StartupProgressText = "Loading...";
+                    var splashWindow = new SplashWindow { DataContext = splashViewModel };
+                    splashWindow.Show();
+                    await Task.Delay(10);
 
-                    desktop.MainWindow = await GetAppLoadingAsync(null);
+                    desktop.MainWindow = await GetAppLoadingAsync();
                     desktop.MainWindow.Show();
                     desktop.MainWindow.Activate();
-                    await Task.Delay(1000);
 
-                    if (SplashWindow != null)
+                    if (splashWindow != null)
                     {
-                        await Task.Delay(100);
-                        SplashWindow.Close();
+                        splashWindow.Close();
                     }
                 }
 
@@ -56,26 +53,20 @@ namespace FreeMarketApp
             }
         }
 
-        private static void SplashMessageEvent(object message, EventArgs e)
+        private static async Task<MainWindow> GetAppLoadingAsync()
         {
-            if (SplashWindow == null)
+            await Task.Run(() =>
             {
-                var splashViewModel = new SplashWindowViewModel();
-                splashViewModel.StartupProgressText = (string)message;
-                SplashWindow = new SplashWindow { DataContext = splashViewModel };
-                SplashWindow.Show();
-            }
-            else
-            {
-                ((SplashWindowViewModel)SplashWindow.DataContext).StartupProgressText = (string)message;
-            }
-        }
-
-        private static async Task<MainWindow> GetAppLoadingAsync(SplashWindowViewModel splashViewModel)
-        {
-            FreeMarketOneServer.Current.Initialize(SplashMessageEventHandler);
+                FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
+                FreeMarketOneServer.Current.Initialize();
+            }).ConfigureAwait(true);
 
             return new MainWindow { DataContext = new MainWindowViewModel() };
+        }
+
+        private static void ServerLoadedEvent(object sender, EventArgs e)
+        {
+            //do activities after load;
         }
 
         private static void OnExit(object sender, EventArgs e)

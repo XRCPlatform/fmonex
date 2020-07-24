@@ -92,7 +92,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("OnionSeed Manager : " + (state ? "True" : "False"));
+            periodicCheckLog.AppendLine("OnionSeed Manager : " + (state ? "Active" : "Idle"));
         }
 
         private void CheckTorManager(StringBuilder periodicCheckLog)
@@ -110,7 +110,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Tor Manager : " + (state ? "True" : "False"));
+            periodicCheckLog.AppendLine("Tor Manager : " + (state ? "Active" : "Idle"));
         }
 
         private void CheckBaseBlockChainManager(StringBuilder periodicCheckLog)
@@ -130,7 +130,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Base BlockChain Manager : " + (state ? "True" : "False"));
+            periodicCheckLog.Append("Base Manager / Swarm / Storage / BlockChain : " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -145,7 +145,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Base Swarm Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -159,7 +159,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Base Storage Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -173,7 +173,8 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Base BlockChain Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.AppendLine();
         }
 
         private void CheckMarketBlockChainManager(StringBuilder periodicCheckLog)
@@ -191,7 +192,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Market BlockChain Manager : " + (state ? "True" : "False"));
+            periodicCheckLog.Append("Market Manager / Swarm / Storage / BlockChain : " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -206,7 +207,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Market Swarm Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -220,7 +221,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Market Storage Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -234,7 +235,8 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Market BlockChain Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.AppendLine();
         }
 
         private void CheckBasePoolManager(StringBuilder periodicCheckLog)
@@ -252,7 +254,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Base Pool Manager : " + (state ? "True" : "False"));
+            periodicCheckLog.Append("Base Pool Manager / Mining : " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -267,7 +269,8 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Base Mining Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.AppendLine();
         }
 
         private void CheckMarketPoolManager(StringBuilder periodicCheckLog)
@@ -286,7 +289,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Market Pool Manager : " + (state ? "True" : "False"));
+            periodicCheckLog.Append("Market Pool Manager / Mining : " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -301,7 +304,8 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.AppendLine("Market Mining Service : " + (state ? "True" : "False"));
+            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.AppendLine();
         }
 
         public void Dispose()

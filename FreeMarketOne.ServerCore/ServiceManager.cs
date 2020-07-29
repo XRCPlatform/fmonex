@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -130,7 +131,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append("Base Manager / Swarm / Storage / BlockChain : " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("Base Manager|Swarm|Storage|BlockChain : " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -145,35 +146,50 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active" : "Idle"));
 
             state = false;
+            long height = 0;
             try
             {
                 if (FreeMarketOneServer.Current.BaseBlockChainManager != null)
                 {
-                    if (FreeMarketOneServer.Current.BaseBlockChainManager.Storage != null) state = true;
+                    if (FreeMarketOneServer.Current.BaseBlockChainManager.Storage != null)
+                    {   
+                        var chainId = FreeMarketOneServer.Current.BaseBlockChainManager.Storage.GetCanonicalChainId();
+                        var hashSets = FreeMarketOneServer.Current.BaseBlockChainManager.Storage.IterateBlockHashes().ToHashSet();
+                        height = FreeMarketOneServer.Current.BaseBlockChainManager.Storage.CountIndex(chainId.Value);
+                        state = true;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + height + " height) " : "Idle"));
 
             state = false;
+            height = 0;
             try
             {
                 if (FreeMarketOneServer.Current.BaseBlockChainManager != null)
                 {
-                    if (FreeMarketOneServer.Current.BaseBlockChainManager.BlockChain != null) state = true;
+                    if (FreeMarketOneServer.Current.BaseBlockChainManager.BlockChain != null)
+                    {
+                        state = true;
+                        if (FreeMarketOneServer.Current.BaseBlockChainManager.BlockChain.Tip != null)
+                        {
+                            height = FreeMarketOneServer.Current.BaseBlockChainManager.BlockChain.Tip.Index;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + height + " tip) " : "Idle"));
             periodicCheckLog.AppendLine();
         }
 
@@ -192,7 +208,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append("Market Manager / Swarm / Storage / BlockChain : " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("Market Manager|Swarm|Storage|BlockChain : " + (state ? "Active" : "Idle"));
 
             state = false;
             try
@@ -207,56 +223,76 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active" : "Idle"));
 
             state = false;
+            long height = 0;
             try
             {
                 if (FreeMarketOneServer.Current.MarketBlockChainManager != null)
                 {
-                    if (FreeMarketOneServer.Current.MarketBlockChainManager.Storage != null) state = true;
+                    if (FreeMarketOneServer.Current.MarketBlockChainManager.Storage != null)
+                    {
+                        var chainId = FreeMarketOneServer.Current.MarketBlockChainManager.Storage.GetCanonicalChainId();
+                        height = FreeMarketOneServer.Current.MarketBlockChainManager.Storage.CountIndex(chainId.Value);
+                        state = true;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + height + " height)" : "Idle"));
 
             state = false;
+            height = 0;
             try
             {
                 if (FreeMarketOneServer.Current.MarketBlockChainManager != null)
                 {
-                    if (FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain != null) state = true;
+                    if (FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain != null)
+                    {
+                        state = true;
+                        if (FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain.Tip != null)
+                        {
+                            height = FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain.Tip.Index;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + height + " tip) " : "Idle"));
             periodicCheckLog.AppendLine();
         }
 
         private void CheckBasePoolManager(StringBuilder periodicCheckLog)
         {
             var state = false;
+            var entries = 0;
             try
             {
                 if (FreeMarketOneServer.Current.BasePoolManager != null)
                 {
                     var isPoolManagerRunning = FreeMarketOneServer.Current.BasePoolManager.IsPoolManagerRunning();
-                    if (isPoolManagerRunning) state = true;
+                    if (isPoolManagerRunning)
+                    {
+                        state = true;
+                        entries = FreeMarketOneServer.Current.BasePoolManager.GetAllActionItemLocal().Count;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 state = false;
             }
-            periodicCheckLog.Append("Base Pool Manager / Mining : " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("Base Pool Manager|Mining : " + (state ? "Active (" + entries + " actions)" : "Idle"));
 
             state = false;
+
             try
             {
                 if (FreeMarketOneServer.Current.BasePoolManager != null)
@@ -269,27 +305,31 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active" : "Idle"));
             periodicCheckLog.AppendLine();
         }
 
         private void CheckMarketPoolManager(StringBuilder periodicCheckLog)
         {
             var state = false;
-
+            var entries = 0;
             try
             {
                 if (FreeMarketOneServer.Current.MarketPoolManager != null)
                 {
                     var isPoolManagerRunning = FreeMarketOneServer.Current.MarketPoolManager.IsPoolManagerRunning();
-                    if (isPoolManagerRunning) state = true;
+                    if (isPoolManagerRunning)
+                    {
+                        state = true;
+                        entries = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemLocal().Count;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 state = false;
             }
-            periodicCheckLog.Append("Market Pool Manager / Mining : " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("Market Pool Manager|Mining : " + (state ? "Active (" + entries + " actions) " : "Idle"));
 
             state = false;
             try
@@ -304,7 +344,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append(" / " + (state ? "Active" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active" : "Idle"));
             periodicCheckLog.AppendLine();
         }
 

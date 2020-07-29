@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using FreeMarketOne.ServerCore.Helpers;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -55,7 +56,7 @@ namespace FreeMarketOne.ServerCore
 
         public void Initialize()
         {
-            var fullBaseDirectory = InitializeFullBaseDirectory();
+            var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
 
             //Configuration
             var builder = new ConfigurationBuilder()
@@ -64,16 +65,16 @@ namespace FreeMarketOne.ServerCore
             var configFile = builder.Build();
 
             //Environment
-            Configuration = InitializeEnvironment(configFile);
+            Configuration = InitConfigurationHelper.InitializeEnvironment(configFile);
 
             //Config
             Configuration.FullBaseDirectory = fullBaseDirectory;
-            InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
-            InitializeBaseTorEndPoint(Configuration, configFile);
-            InitializeLogFilePath(Configuration, configFile);
-            InitializeMemoryPoolPaths(Configuration, configFile);
-            InitializeBlockChainPaths(Configuration, configFile);
-            InitializeListenerEndPoints(Configuration, configFile);
+            InitConfigurationHelper.InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
+            InitConfigurationHelper.InitializeBaseTorEndPoint(Configuration, configFile);
+            InitConfigurationHelper.InitializeLogFilePath(Configuration, configFile);
+            InitConfigurationHelper.InitializeMemoryPoolPaths(Configuration, configFile);
+            InitConfigurationHelper.InitializeBlockChainPaths(Configuration, configFile);
+            InitConfigurationHelper.InitializeListenerEndPoints(Configuration, configFile);
 
             //Initialize Logger
             Log.Logger = new LoggerConfiguration()
@@ -101,7 +102,7 @@ namespace FreeMarketOne.ServerCore
                 OnionSeedsManager.Start();
 
                 //Initialize Base BlockChain Manager
-                BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+                //BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
                 BaseBlockChainManager = new BlockChainManager<BaseAction>(
                     Configuration,
@@ -196,87 +197,6 @@ namespace FreeMarketOne.ServerCore
             {
                 FreeMarketOneServerLoadedEvent?.Invoke(this, null);
             }).ConfigureAwait(true);
-        }
-
-        private string InitializeFullBaseDirectory()
-        {
-            var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (!fullBaseDirectory.StartsWith('/'))
-                {
-                    fullBaseDirectory.Insert(0, "/");
-                }
-            }
-
-            return fullBaseDirectory;
-        }
-
-        private void InitializeLogFilePath(IBaseConfiguration configuration, IConfigurationRoot configFile)
-        {
-            var logFilePath = configFile.GetSection("FreeMarketOneConfiguration")["LogFilePath"];
-
-            if (!string.IsNullOrEmpty(logFilePath)) configuration.LogFilePath = logFilePath;
-        }
-
-        private static IBaseConfiguration InitializeEnvironment(IConfigurationRoot configFile)
-        {
-            var settings = configFile.GetSection("FreeMarketOneConfiguration")["ServerEnvironment"];
-
-            var environment = EnvironmentTypes.Test;
-            Enum.TryParse(settings, out environment);
-
-            if (environment == EnvironmentTypes.Main)
-            {
-                return new MainConfiguration();
-            } 
-            else
-            {
-                return new TestConfiguration();
-            }
-        }
-
-        private static void InitializeBaseOnionSeedsEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
-        {
-            var seedsEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["OnionSeedsEndPoint"];
-
-            if (!string.IsNullOrEmpty(seedsEndPoint)) configuration.OnionSeedsEndPoint = seedsEndPoint;
-        }
-
-        private static void InitializeBaseTorEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
-        {
-            var torEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["TorEndPoint"];
-
-            if (!string.IsNullOrEmpty(torEndPoint)) configuration.TorEndPoint = EndPointHelper.ParseIPEndPoint(torEndPoint);
-        }
-
-        private static void InitializeMemoryPoolPaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
-        {
-            var memoryBasePoolPath = configFile.GetSection("FreeMarketOneConfiguration")["MemoryBasePoolPath"];
-            var memoryMarketPoolPath = configFile.GetSection("FreeMarketOneConfiguration")["MemoryMarketPoolPath"];
-
-            if (!string.IsNullOrEmpty(memoryBasePoolPath)) configuration.MemoryBasePoolPath = memoryBasePoolPath;
-            if (!string.IsNullOrEmpty(memoryMarketPoolPath)) configuration.MemoryMarketPoolPath = memoryMarketPoolPath;
-        }
-
-        private static void InitializeBlockChainPaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
-        {
-            var blockChainBasePath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainBasePath"];
-            var blockChainMarketPath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainMarketPath"];
-            var blockChainSecretPath = configFile.GetSection("FreeMarketOneConfiguration")["BlockChainSecretPath"];
-
-            if (!string.IsNullOrEmpty(blockChainBasePath)) configuration.BlockChainBasePath = blockChainBasePath;
-            if (!string.IsNullOrEmpty(blockChainMarketPath)) configuration.BlockChainMarketPath = blockChainMarketPath;
-            if (!string.IsNullOrEmpty(blockChainSecretPath)) configuration.BlockChainSecretPath = blockChainSecretPath;
-        }
-
-        private static void InitializeListenerEndPoints(IBaseConfiguration configuration, IConfigurationRoot configFile)
-        {
-            var baseEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerBaseEndPoint"];
-            var marketEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerMarketEndPoint"];
-
-            if (!string.IsNullOrEmpty(baseEndPoint)) EndPointHelper.ParseIPEndPoint(baseEndPoint);
-            if (!string.IsNullOrEmpty(marketEndPoint)) EndPointHelper.ParseIPEndPoint(marketEndPoint);
         }
 
         public void Stop()

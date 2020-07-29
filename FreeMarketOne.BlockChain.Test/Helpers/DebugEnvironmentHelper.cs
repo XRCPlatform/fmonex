@@ -36,7 +36,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(configuration.FullBaseDirectory, configuration.LogFilePath),
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
-                    rollingInterval: RollingInterval.Day)
+                    rollingInterval: RollingInterval.Day, shared: true)
                 .CreateLogger();
             logger = Log.Logger.ForContext<T>();
             logger.Information("Debug Start");

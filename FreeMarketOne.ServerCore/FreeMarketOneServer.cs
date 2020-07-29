@@ -80,7 +80,7 @@ namespace FreeMarketOne.ServerCore
                 .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(Configuration.FullBaseDirectory, Configuration.LogFilePath),
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
-                    rollingInterval: RollingInterval.Day)
+                    rollingInterval: RollingInterval.Day, shared: true)
                 .CreateLogger();
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
@@ -281,6 +281,9 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
+            _logger.Information("Ending Service Manager...");
+            ServiceManager?.Dispose();
+
             _logger.Information("Ending BlockChain Managers...");
             BaseBlockChainManager?.Dispose();
             MarketBlockChainManager?.Dispose();
@@ -296,9 +299,6 @@ namespace FreeMarketOne.ServerCore
 
             _logger.Information("Ending Tor...");
             TorProcessManager?.Dispose();
-
-            _logger.Information("Ending Service Manager...");
-            ServiceManager?.Dispose();
 
             _logger.Information("Application End");
         }

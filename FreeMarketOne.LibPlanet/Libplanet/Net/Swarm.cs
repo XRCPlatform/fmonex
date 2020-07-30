@@ -856,7 +856,7 @@ namespace Libplanet.Net
             await netMQTransport.CheckAllPeersAsync(cancellationToken, timeout);
         }
 
-        internal async Task AddPeersAsync(
+        public async Task AddPeersAsync(
             IEnumerable<Peer> peers,
             TimeSpan? timeout,
             CancellationToken cancellationToken = default(CancellationToken))

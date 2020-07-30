@@ -149,7 +149,7 @@ namespace FreeMarketOne.ServerCore
             periodicCheckLog.Append("|" + (state ? "Active" : "Idle"));
 
             state = false;
-            long height = 0;
+            long index = 0;
             try
             {
                 if (FreeMarketOneServer.Current.BaseBlockChainManager != null)
@@ -158,7 +158,7 @@ namespace FreeMarketOne.ServerCore
                     {   
                         var chainId = FreeMarketOneServer.Current.BaseBlockChainManager.Storage.GetCanonicalChainId();
                         var hashSets = FreeMarketOneServer.Current.BaseBlockChainManager.Storage.IterateBlockHashes().ToHashSet();
-                        height = FreeMarketOneServer.Current.BaseBlockChainManager.Storage.CountIndex(chainId.Value);
+                        index = FreeMarketOneServer.Current.BaseBlockChainManager.Storage.CountIndex(chainId.Value);
                         state = true;
                     }
                 }
@@ -167,10 +167,10 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append("|" + (state ? "Active (" + height + " height) " : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + index + " index)" : "Idle"));
 
             state = false;
-            height = 0;
+            index = 0;
             try
             {
                 if (FreeMarketOneServer.Current.BaseBlockChainManager != null)
@@ -180,7 +180,7 @@ namespace FreeMarketOne.ServerCore
                         state = true;
                         if (FreeMarketOneServer.Current.BaseBlockChainManager.BlockChain.Tip != null)
                         {
-                            height = FreeMarketOneServer.Current.BaseBlockChainManager.BlockChain.Tip.Index;
+                            index = FreeMarketOneServer.Current.BaseBlockChainManager.BlockChain.Tip.Index;
                         }
                     }
                 }
@@ -189,7 +189,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append("|" + (state ? "Active (" + height + " tip) " : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + index + " tip)" : "Idle"));
             periodicCheckLog.AppendLine();
         }
 
@@ -226,7 +226,7 @@ namespace FreeMarketOne.ServerCore
             periodicCheckLog.Append("|" + (state ? "Active" : "Idle"));
 
             state = false;
-            long height = 0;
+            long index = 0;
             try
             {
                 if (FreeMarketOneServer.Current.MarketBlockChainManager != null)
@@ -234,7 +234,7 @@ namespace FreeMarketOne.ServerCore
                     if (FreeMarketOneServer.Current.MarketBlockChainManager.Storage != null)
                     {
                         var chainId = FreeMarketOneServer.Current.MarketBlockChainManager.Storage.GetCanonicalChainId();
-                        height = FreeMarketOneServer.Current.MarketBlockChainManager.Storage.CountIndex(chainId.Value);
+                        index = FreeMarketOneServer.Current.MarketBlockChainManager.Storage.CountIndex(chainId.Value);
                         state = true;
                     }
                 }
@@ -243,10 +243,10 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append("|" + (state ? "Active (" + height + " height)" : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + index + " index)" : "Idle"));
 
             state = false;
-            height = 0;
+            index = 0;
             try
             {
                 if (FreeMarketOneServer.Current.MarketBlockChainManager != null)
@@ -256,7 +256,7 @@ namespace FreeMarketOne.ServerCore
                         state = true;
                         if (FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain.Tip != null)
                         {
-                            height = FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain.Tip.Index;
+                            index = FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain.Tip.Index;
                         }
                     }
                 }
@@ -265,7 +265,7 @@ namespace FreeMarketOne.ServerCore
             {
                 state = false;
             }
-            periodicCheckLog.Append("|" + (state ? "Active (" + height + " tip) " : "Idle"));
+            periodicCheckLog.Append("|" + (state ? "Active (" + index + " tip) " : "Idle"));
             periodicCheckLog.AppendLine();
         }
 

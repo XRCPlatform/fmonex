@@ -71,7 +71,7 @@ namespace FreeMarketOne.Tor.Models.Messages
 			Passwd.FromBytes(bytes.Skip(3 + ULen.Value).ToArray());
 		}
 
-		public override byte[] ToBytes() => ByteHelpers.Combine(new byte[] { Ver.ToByte(), ULen.ToByte() }, UName.ToBytes(), new byte[] { PLen.ToByte() }, Passwd.ToBytes());
+		public override byte[] ToBytes() => ByteHelper.Combine(new byte[] { Ver.ToByte(), ULen.ToByte() }, UName.ToBytes(), new byte[] { PLen.ToByte() }, Passwd.ToBytes());
 
 		#endregion Serialization
 	}

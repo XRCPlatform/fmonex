@@ -60,5 +60,6 @@ namespace FreeMarketOne.DataStructure
         public IDefaultBlockPolicy<MarketAction> BlockChainMarketPolicy { get; set; }
 
         public bool ListenersUseTor { get; set; }
+        public string ListenersForceThisIp { get; set; }
     }
 }

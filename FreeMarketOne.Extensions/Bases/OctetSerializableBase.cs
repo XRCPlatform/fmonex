@@ -30,16 +30,16 @@ namespace FreeMarketOne.Extensions.Bases
 		{
 			if (xhhSyntax)
 			{
-				return $"X'{ByteHelpers.ToHex(ToByte())}'";
+				return $"X'{ByteHelper.ToHex(ToByte())}'";
 			}
-			return ByteHelpers.ToHex(ToByte());
+			return ByteHelper.ToHex(ToByte());
 		}
 
 		public void FromHex(string hex)
 		{
 			hex = Guard.NotNullOrEmptyOrWhitespace(nameof(hex), hex, true);
 
-			byte[] bytes = ByteHelpers.FromHex(hex);
+			byte[] bytes = ByteHelper.FromHex(hex);
 			if (bytes.Length != 1)
 			{
 				throw new FormatException($"{nameof(hex)} must be exactly one byte. Actual: {bytes.Length} bytes. Value: {hex}.");

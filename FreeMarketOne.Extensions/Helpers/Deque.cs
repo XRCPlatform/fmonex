@@ -53,7 +53,7 @@ namespace FreeMarketOne.Extensions.Helpers
 				throw new ArgumentNullException(nameof(collection));
 			}
 
-			var source = CollectionHelpers.ReifyCollection(collection);
+			var source = CollectionHelper.ReifyCollection(collection);
 			var count = source.Count;
 			if (count > 0)
 			{
@@ -811,7 +811,7 @@ namespace FreeMarketOne.Extensions.Helpers
 		public void InsertRange(int index, IEnumerable<T> collection)
 		{
 			CheckNewIndexArgument(Count, index);
-			var source = CollectionHelpers.ReifyCollection(collection);
+			var source = CollectionHelper.ReifyCollection(collection);
 			int collectionCount = source.Count;
 
 			// Overflow-safe check for "Count + collectionCount > Capacity"

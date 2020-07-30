@@ -70,7 +70,7 @@ namespace FreeMarketOne.Tor.Models.TorSocks5.Fields.ByteArrayFields
 					throw new FormatException($"{nameof(dstAddr)} can be maximum 255 octets. Actual: {numberOfOctets} octets. Value: {dstAddr}.");
 				}
 
-				bytes = ByteHelpers.Combine(new byte[] { (byte)numberOfOctets }, domainBytes);
+				bytes = ByteHelper.Combine(new byte[] { (byte)numberOfOctets }, domainBytes);
 			}
 			else if (atyp == AtypField.IPv4)
 			{

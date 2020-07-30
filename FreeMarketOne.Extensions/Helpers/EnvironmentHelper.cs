@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace FreeMarketOne.Extensions.Helpers
 {
-	public static class EnvironmentHelpers
+	public static class EnvironmentHelper
 	{
 		/// <summary>
 		/// Executes a command with bash.

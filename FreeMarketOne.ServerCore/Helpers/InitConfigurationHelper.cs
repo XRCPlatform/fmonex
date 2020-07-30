@@ -1,6 +1,7 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.Extensions.Helpers;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -102,23 +103,33 @@ namespace FreeMarketOne.ServerCore.Helpers
                 }
             }
 
-            //apply public IP address
+            //apply public IP address or force to use defined
             if (!configuration.ListenersUseTor)
             {
-                SetToPublicIp(configuration.ListenerBaseEndPoint);
-                SetToPublicIp(configuration.ListenerMarketEndPoint);
+                if (string.IsNullOrEmpty(configuration.ListenersForceThisIp))
+                {
+                    var ipHelper = new IpHelper();
+                    if (ipHelper.PublicIp != null)
+                    {
+                        SetToPublicIp(configuration.ListenerBaseEndPoint, ipHelper.PublicIp.MapToIPv4());
+                        SetToPublicIp(configuration.ListenerMarketEndPoint, ipHelper.PublicIp.MapToIPv4());
+                    }
+                } 
+                else
+                {
+                    IPAddress newIp;
+                    if (IPAddress.TryParse(configuration.ListenersForceThisIp, out newIp))
+                    {
+                        SetToPublicIp(configuration.ListenerBaseEndPoint, newIp);
+                        SetToPublicIp(configuration.ListenerMarketEndPoint, newIp);
+                    }
+                }
             }
         }
 
-        private static void SetToPublicIp(EndPoint endPoint)
+        private static void SetToPublicIp(EndPoint endPoint, IPAddress newIp)
         {
-            IPAddress ipAddress = ((IPEndPoint)endPoint).Address;
-            if (Dns.GetHostAddresses(Dns.GetHostName()).Length > 0)
-            {
-                ipAddress = Dns.GetHostAddresses(Dns.GetHostName())[0];
-            }
-
-            ((IPEndPoint)endPoint).Address = ipAddress.MapToIPv4();
+            ((IPEndPoint)endPoint).Address = newIp;
         }
     }
 }

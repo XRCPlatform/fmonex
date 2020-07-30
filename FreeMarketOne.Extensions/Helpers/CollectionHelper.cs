@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace FreeMarketOne.Extensions.Helpers
 {
-	internal static class CollectionHelpers
+	internal static class CollectionHelper
 	{
 		public static IReadOnlyCollection<T> ReifyCollection<T>(IEnumerable<T> source)
 		{

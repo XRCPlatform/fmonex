@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FreeMarketOne.Extensions.Helpers
 {
-    public static class ZipHelpers
+    public static class ZipHelper
     {
         public static byte[] Compress(string s)
         {

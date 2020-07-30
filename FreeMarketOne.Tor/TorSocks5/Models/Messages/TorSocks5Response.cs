@@ -70,7 +70,7 @@ namespace FreeMarketOne.Tor.Models.Messages
 			BndPort.FromBytes(bytes.Skip(bytes.Length - 2).ToArray());
 		}
 
-		public override byte[] ToBytes() => ByteHelpers.Combine(new byte[] { Ver.ToByte(), Rep.ToByte(), Rsv.ToByte(), Atyp.ToByte() }, BndAddr.ToBytes(), BndPort.ToBytes());
+		public override byte[] ToBytes() => ByteHelper.Combine(new byte[] { Ver.ToByte(), Rep.ToByte(), Rsv.ToByte(), Atyp.ToByte() }, BndAddr.ToBytes(), BndPort.ToBytes());
 
 		#endregion Serialization
 	}

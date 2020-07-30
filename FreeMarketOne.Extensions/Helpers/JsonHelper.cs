@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Newtonsoft.Json
 {
-	public static class JsonHelpers
+	public static class JsonHelper
 	{
 		public static bool TryParseJToken(string text, out JToken token)
 		{

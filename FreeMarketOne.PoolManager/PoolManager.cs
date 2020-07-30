@@ -224,7 +224,7 @@ namespace FreeMarketOne.PoolManager
                 _logger.Information("Saving action items data.");
 
                 var serializedMemory = JsonConvert.SerializeObject(_actionItemsList);
-                var compressedMemory = ZipHelpers.Compress(serializedMemory);
+                var compressedMemory = ZipHelper.Compress(serializedMemory);
 
                 var targetFilePath = Path.Combine(_configuration.FullBaseDirectory, _memoryPoolFilePath);
                 var targetDirectory = Path.GetDirectoryName(targetFilePath);
@@ -254,7 +254,7 @@ namespace FreeMarketOne.PoolManager
                 if (File.Exists(targetFilePath))
                 {
                     var compressedMemory = File.ReadAllBytes(targetFilePath);
-                    var serializedMemory = ZipHelpers.Decompress(compressedMemory);
+                    var serializedMemory = ZipHelper.Decompress(compressedMemory);
 
                     var temporaryMemoryActionItemsList = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedMemory);
 

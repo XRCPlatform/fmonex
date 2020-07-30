@@ -17,7 +17,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using FreeMarketOne.ServerCore.Helpers;
 using System.Threading.Tasks;
-using System.Net;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -85,6 +84,8 @@ namespace FreeMarketOne.ServerCore
                 .CreateLogger();
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
+            _logger.Information(Configuration.ListenerBaseEndPoint.ToString());
+            _logger.Information(Configuration.ListenerMarketEndPoint.ToString());
 
             //Service manager
             ServiceManager = new ServiceManager(Configuration);
@@ -102,7 +103,7 @@ namespace FreeMarketOne.ServerCore
                 OnionSeedsManager.Start();
 
                 //Initialize Base BlockChain Manager
-                //BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+                BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
                 BaseBlockChainManager = new BlockChainManager<BaseAction>(
                     Configuration,

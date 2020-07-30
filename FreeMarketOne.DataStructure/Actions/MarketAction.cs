@@ -29,7 +29,7 @@ namespace FreeMarketOne.DataStructure
             _baseItems.Add(value);
 
             var serializedItems = JsonConvert.SerializeObject(this.BaseItems);
-            var compressedItems = ZipHelpers.Compress(serializedItems);
+            var compressedItems = ZipHelper.Compress(serializedItems);
 
             _serialized = compressedItems;
         }
@@ -55,7 +55,7 @@ namespace FreeMarketOne.DataStructure
             var dictionary = (Bencodex.Types.Dictionary)plainValue;
             var binaryValue = dictionary.GetValue<Binary>("items");
 
-            var serializedItems = ZipHelpers.Decompress(binaryValue.Value);
+            var serializedItems = ZipHelper.Decompress(binaryValue.Value);
             _baseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
             _serialized = binaryValue.Value;
         }

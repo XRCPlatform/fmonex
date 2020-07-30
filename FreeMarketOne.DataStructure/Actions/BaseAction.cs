@@ -31,7 +31,7 @@ namespace FreeMarketOne.DataStructure
             _baseItems.Add(value);
 
             var serializedItems = JsonConvert.SerializeObject(this.BaseItems);
-            var compressedItems = ZipHelpers.Compress(serializedItems);
+            var compressedItems = ZipHelper.Compress(serializedItems);
 
             _serialized = compressedItems;
         }
@@ -45,7 +45,7 @@ namespace FreeMarketOne.DataStructure
                     if (BaseItems.Any())
                     {
                         var serializedItems = JsonConvert.SerializeObject(BaseItems);
-                        var compressedItems = ZipHelpers.Compress(serializedItems);
+                        var compressedItems = ZipHelper.Compress(serializedItems);
 
                         _serialized = compressedItems;
                     } 
@@ -74,7 +74,7 @@ namespace FreeMarketOne.DataStructure
 
             if ((binaryValue.Value != null) && (binaryValue.Value.Length > 0))
             {
-                var serializedItems = ZipHelpers.Decompress(binaryValue.Value);
+                var serializedItems = ZipHelper.Decompress(binaryValue.Value);
                 _baseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
             }
 

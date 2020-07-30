@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 
 namespace System
 {
-	public static unsafe class ByteHelpers
+	public static unsafe class ByteHelper
 	{
 		// https://stackoverflow.com/questions/415291/best-way-to-combine-two-or-more-byte-arrays-in-c-sharp
 		/// <summary>

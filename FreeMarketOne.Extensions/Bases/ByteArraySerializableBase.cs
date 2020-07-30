@@ -25,16 +25,16 @@ namespace FreeMarketOne.Extensions.Bases
 		{
 			if (xhhSyntax)
 			{
-				return $"X'{ByteHelpers.ToHex(ToBytes())}'";
+				return $"X'{ByteHelper.ToHex(ToBytes())}'";
 			}
-			return ByteHelpers.ToHex(ToBytes());
+			return ByteHelper.ToHex(ToBytes());
 		}
 
 		public void FromHex(string hex)
 		{
 			hex = Guard.NotNullOrEmptyOrWhitespace(nameof(hex), hex, true);
 
-			var bytes = ByteHelpers.FromHex(hex);
+			var bytes = ByteHelper.FromHex(hex);
 			FromBytes(bytes);
 		}
 
@@ -79,15 +79,15 @@ namespace FreeMarketOne.Extensions.Bases
 			return hash;
 		}
 
-		public static bool operator ==(ByteArraySerializableBase x, ByteArraySerializableBase y) => ByteHelpers.CompareFastUnsafe(x?.ToBytes(), y?.ToBytes());
+		public static bool operator ==(ByteArraySerializableBase x, ByteArraySerializableBase y) => ByteHelper.CompareFastUnsafe(x?.ToBytes(), y?.ToBytes());
 
 		public static bool operator !=(ByteArraySerializableBase x, ByteArraySerializableBase y) => !(x == y);
 
-		public bool Equals(byte[] other) => ByteHelpers.CompareFastUnsafe(ToBytes(), other);
+		public bool Equals(byte[] other) => ByteHelper.CompareFastUnsafe(ToBytes(), other);
 
-		public static bool operator ==(byte[] x, ByteArraySerializableBase y) => ByteHelpers.CompareFastUnsafe(x, y?.ToBytes());
+		public static bool operator ==(byte[] x, ByteArraySerializableBase y) => ByteHelper.CompareFastUnsafe(x, y?.ToBytes());
 
-		public static bool operator ==(ByteArraySerializableBase x, byte[] y) => ByteHelpers.CompareFastUnsafe(x?.ToBytes(), y);
+		public static bool operator ==(ByteArraySerializableBase x, byte[] y) => ByteHelper.CompareFastUnsafe(x?.ToBytes(), y);
 
 		public static bool operator !=(byte[] x, ByteArraySerializableBase y) => !(x == y);
 

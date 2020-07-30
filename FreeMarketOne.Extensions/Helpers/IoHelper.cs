@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace FreeMarketOne.Extensions.Helpers
 {
-	public static class IoHelpers
+	public static class IoHelper
 	{
 		public static async Task BetterExtractZipToDirectoryAsync(string src, string dest)
 		{

@@ -99,7 +99,7 @@ namespace FreeMarketOne.Tor
                             {
                                 // Make sure there's sufficient permission.
                                 string chmodTorDirCmd = $"chmod -R 750 {fulToolsDir}";
-                                var result = EnvironmentHelpers.ShellExec(chmodTorDirCmd);
+                                var result = EnvironmentHelper.ShellExec(chmodTorDirCmd);
                                 if (result > 0)
                                 {
                                     _logger.Error($"Command: {chmodTorDirCmd} exited with exit code: {result}, instead of 0.");
@@ -132,7 +132,7 @@ namespace FreeMarketOne.Tor
                         else // Linux and OSX
                         {
                             string runTorCmd = $"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:={fulToolsDir}/Tor && export LD_LIBRARY_PATH && cd {fulToolsDir}/Tor && ./tor {torArguments}";
-                            EnvironmentHelpers.ShellExec(runTorCmd, false);
+                            EnvironmentHelper.ShellExec(runTorCmd, false);
                             _logger.Information($"Started Tor process with shell command: {runTorCmd}.");
                         }
 
@@ -208,13 +208,13 @@ namespace FreeMarketOne.Tor
             string torDaemonsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
 
             string dataZip = Path.Combine(torDaemonsDir, "data-folder.zip");
-            IoHelpers.BetterExtractZipToDirectoryAsync(dataZip, torDaemonsDir).GetAwaiter().GetResult();
+            IoHelper.BetterExtractZipToDirectoryAsync(dataZip, torDaemonsDir).GetAwaiter().GetResult();
             _logger.Information($"Extracted {dataZip} to {torDaemonsDir}.");
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 string torWinZip = Path.Combine(torDaemonsDir, "tor-win32.zip");
-                IoHelpers.BetterExtractZipToDirectoryAsync(torWinZip, torDaemonsDir).GetAwaiter().GetResult();
+                IoHelper.BetterExtractZipToDirectoryAsync(torWinZip, torDaemonsDir).GetAwaiter().GetResult();
                 _logger.Information($"Extracted {torWinZip} to {torDaemonsDir}.");
             }
             else // Linux or OSX
@@ -222,13 +222,13 @@ namespace FreeMarketOne.Tor
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     string torLinuxZip = Path.Combine(torDaemonsDir, "tor-linux64.zip");
-                    IoHelpers.BetterExtractZipToDirectoryAsync(torLinuxZip, torDaemonsDir).GetAwaiter().GetResult();
+                    IoHelper.BetterExtractZipToDirectoryAsync(torLinuxZip, torDaemonsDir).GetAwaiter().GetResult();
                     _logger.Information($"Extracted {torLinuxZip} to {torDaemonsDir}.");
                 }
                 else // OSX
                 {
                     string torOsxZip = Path.Combine(torDaemonsDir, "tor-osx64.zip");
-                    IoHelpers.BetterExtractZipToDirectoryAsync(torOsxZip, torDaemonsDir).GetAwaiter().GetResult();
+                    IoHelper.BetterExtractZipToDirectoryAsync(torOsxZip, torDaemonsDir).GetAwaiter().GetResult();
                     _logger.Information($"Extracted {torOsxZip} to {torDaemonsDir}.");
                 }                
             }

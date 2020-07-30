@@ -2,12 +2,16 @@
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P.Models;
 using FreeMarketOne.Tor;
+using Libplanet;
+using Libplanet.Crypto;
+using Libplanet.Net;
 using Serilog;
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -33,6 +37,8 @@ namespace FreeMarketOne.P2P
         private CancellationTokenSource _cancellationToken { get; set; }
         private TorProcessManager _torProcessManager { get; set; }
 
+        public List<Swarm<BaseAction>> Swarms { get; set; }
+
         public OnionSeedsManager(IBaseConfiguration configuration, TorProcessManager torManager)
         {
             _logger = Log.Logger.ForContext<OnionSeedsManager>();
@@ -47,6 +53,8 @@ namespace FreeMarketOne.P2P
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
 
             _cancellationToken = new CancellationTokenSource();
+
+            Swarms = new List<Swarm<BaseAction>>();
         }
 
         public bool IsOnionSeedsManagerRunning()
@@ -145,7 +153,7 @@ namespace FreeMarketOne.P2P
                     {
                         if (_torProcessManager.TorOnionEndPoint != itemSeed.UrlTor) //ignore me
                         {
-                            var resultLog = string.Format("Checking {0} {1}", itemSeed.UrlTor, itemSeed.PortTor);
+                            var resultLog = string.Format("Checking peer {0}:{1}", itemSeed.UrlTor, itemSeed.PortTor);
                             _logger.Information(resultLog);
 
                             itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
@@ -156,6 +164,18 @@ namespace FreeMarketOne.P2P
                                 if (isOnionSeedRunning)
                                 {
                                     itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+
+                                    Task.Run(async () =>
+                                    {
+                                        try
+                                        {
+                                            await AddSeedsToSwarmsAsPeer(itemSeed);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            _logger.Error(string.Format("Cant add seed to swarm {0}", e));
+                                        }
+                                    });
                                 }
                             }
                             catch (Exception ex)
@@ -170,6 +190,12 @@ namespace FreeMarketOne.P2P
                             itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
                         }
                     }
+
+                    foreach (var itemSwarm in Swarms)
+                    {
+                        var type = itemSwarm.GetType().GetGenericArguments()[0];
+                        periodicCheckLog.AppendLine(string.Format("Swarm {0} Peers: {1}", type.Name, itemSwarm.Peers.Count()));
+                    }
                 }
                 else
                 {
@@ -183,6 +209,34 @@ namespace FreeMarketOne.P2P
                 _cancellationToken.Token,
                 repeatEvery: TimeSpans.Minute,
                 startAfter: TimeSpans.TenSeconds);
+        }
+
+        /// <summary>
+        /// Adding peers to swarms
+        /// </summary>
+        /// <param name="seed">Seed info</param>
+        /// <returns></returns>
+        private async Task AddSeedsToSwarmsAsPeer(OnionSeedPeer seed)
+        {
+            foreach (var itemSwarm in Swarms)
+            {
+                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
+
+                if (itemSwarm.Peers.Any())
+                {
+                    var exist = itemSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
+                    if (exist != null) continue;
+                }
+
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
+              
+                _logger.Information(string.Format("Adding peer pubkey: {0}", boundPeer.ToString()));
+                
+                await itemSwarm.AddPeersAsync(
+                    new[] { boundPeer }, 
+                    TimeSpan.FromMilliseconds(5000), 
+                    _cancellationToken.Token);
+            }
         }
 
         /// <summary>

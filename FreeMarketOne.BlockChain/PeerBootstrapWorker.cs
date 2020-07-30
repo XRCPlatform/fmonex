@@ -71,77 +71,11 @@ namespace FreeMarketOne.BlockChain
             }
             else
             {
-                _bootstrapStarted?.Invoke(this, null);
-
-                var bootstrapTask = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await _swarmServer.BootstrapAsync(
-                            _seedPeers,
-                            5000,
-                            5000,
-                            cancellationToken: _cancellationToken.Token
-                        );
-                    }
-                    catch (TimeoutException e)
-                    {
-                        _logger.Error(e.Message);
-                    }
-                    catch (PeerDiscoveryException e)
-                    {
-                        _logger.Error(e.Message);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error(string.Format("Exception occurred during bootstrap {0}", e));
-                    }
-                });
-
-                yield return new WaitUntil(() => bootstrapTask.IsCompleted);
-
-                _preloadStarted?.Invoke(this, null);
-                _logger.Information("PreloadingStarted event was invoked");
-
-                DateTimeOffset started = DateTimeOffset.UtcNow;
-                long existingBlocks = _blockChain?.Tip?.Index ?? 0;
-                _logger.Information("Preloading starts");
-
-                var swarmPreloadTask = Task.Run(async () =>
-                {
-                    await _swarmServer.PreloadAsync(
-                        TimeSpan.FromMilliseconds(SwarmDialTimeout),
-                        new Progress<PreloadState>(state =>
-                            _preloadProcessed?.Invoke(this, state)
-                        ),
-                        trustedStateValidators: _trustedPeers,
-                        cancellationToken: _cancellationToken.Token
-                    );
-                });
-
-                yield return new WaitUntil(() => swarmPreloadTask.IsCompleted);
-
-                DateTimeOffset ended = DateTimeOffset.UtcNow;
-                if (swarmPreloadTask.Exception is Exception e)
-                {
-                    _logger.Error(string.Format("Preloading terminated with an exception: {0}", e));
-                    throw e;
-                }
-
-                var index = _blockChain?.Tip?.Index ?? 0;
-
-                _logger.Information("Preloading finished; elapsed time: {0}; blocks: {1}",
-                    ended - started,
-                    index - existingBlocks
-                );
-
-                _preloadEnded?.Invoke(this, null);
-
                 var swarmStartTask = Task.Run(async () =>
                 {
                     try
                     {
-                        await _swarmServer.StartAsync();
+                        await _swarmServer.StartAsync(cancellationToken: _cancellationToken.Token);
                     }
                     catch (TaskCanceledException e)
                     {
@@ -157,6 +91,37 @@ namespace FreeMarketOne.BlockChain
                 Task.Run(async () =>
                 {
                     await _swarmServer.WaitForRunningAsync();
+                    await _swarmServer.AddPeersAsync(
+                        _seedPeers,
+                        null,
+                        _cancellationToken.Token);
+
+                    var bootstrapTask = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _swarmServer.BootstrapAsync(
+                                _seedPeers,
+                                5000,
+                                5000,
+                                cancellationToken: _cancellationToken.Token
+                            );
+                        }
+                        catch (TimeoutException e)
+                        {
+                            _logger.Error(e.Message);
+                        }
+                        catch (PeerDiscoveryException e)
+                        {
+                            _logger.Error(e.Message);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error(string.Format("Exception occurred during bootstrap {0}", e));
+                        }
+                    });
+
+                    await PreloadAsync();
 
                     _logger.Information(
                         "The address of this node: {0},{1},{2}",
@@ -169,6 +134,40 @@ namespace FreeMarketOne.BlockChain
                 yield return new WaitUntil(() => swarmStartTask.IsCompleted);
             }
         }
+
+        private async Task PreloadAsync()
+        {
+            DateTimeOffset started = DateTimeOffset.UtcNow;
+            long existingBlocks = _blockChain?.Tip?.Index ?? 0;
+            _logger.Information("Preloading starts");
+            _preloadStarted?.Invoke(this, null);
+
+            try
+            {
+                await _swarmServer.PreloadAsync(
+                    TimeSpan.FromMilliseconds(SwarmDialTimeout),
+                    new Progress<PreloadState>(state =>
+                        _preloadProcessed?.Invoke(this, state)
+                    ),
+                    trustedStateValidators: _trustedPeers,
+                    cancellationToken: _cancellationToken.Token
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.Error(string.Format("Preloading terminated with an exception: {0}", e));
+                throw e;
+            }
+
+            DateTimeOffset ended = DateTimeOffset.UtcNow;
+            var index = _blockChain?.Tip?.Index ?? 0;
+            _logger.Information("Preloading finished; elapsed time: {0}; blocks: {1}",
+                ended - started,
+                index - existingBlocks
+            );
+            _preloadEnded?.Invoke(this, null);
+        }
+
         public void Dispose()
         {
             _logger.Information("Peer Bootstrap stopping.");

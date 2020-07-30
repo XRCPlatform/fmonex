@@ -84,8 +84,6 @@ namespace FreeMarketOne.ServerCore
                 .CreateLogger();
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
-            _logger.Information(Configuration.ListenerBaseEndPoint.ToString());
-            _logger.Information(Configuration.ListenerMarketEndPoint.ToString());
 
             //Service manager
             ServiceManager = new ServiceManager(Configuration);
@@ -128,6 +126,9 @@ namespace FreeMarketOne.ServerCore
             //Initialize Base Pool Manager
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
+                //Add Swarm server to seed manager
+                OnionSeedsManager.Swarms.Add(BaseBlockChainManager.SwarmServer);
+
                 //Initialize Base Pool
                 BasePoolManager = new BasePoolManager(
                     Configuration,
@@ -171,6 +172,9 @@ namespace FreeMarketOne.ServerCore
             //Initialize Market Pool Manager
             if (MarketBlockChainManager.IsBlockChainManagerRunning())
             {
+                //Add Swarm server to seed manager
+                //OnionSeedsManager.Swarms.Add(MarketBlockChainManager.SwarmServer);
+
                 MarketPoolManager = new MarketPoolManager(
                     Configuration,
                     Configuration.MemoryBasePoolPath,
@@ -205,18 +209,18 @@ namespace FreeMarketOne.ServerCore
             _logger.Information("Ending Service Manager...");
             ServiceManager?.Dispose();
 
+            _logger.Information("Ending Base Pool Manager...");
+            BasePoolManager?.Dispose();
+
+            _logger.Information("Ending Market Pool Manager...");
+            MarketPoolManager?.Dispose();
+
             _logger.Information("Ending BlockChain Managers...");
             BaseBlockChainManager?.Dispose();
             MarketBlockChainManager?.Dispose();
 
             _logger.Information("Ending Onion Seeds ...");
             OnionSeedsManager?.Dispose();
-
-            _logger.Information("Ending Base Pool Manager...");
-            BasePoolManager?.Dispose();
-
-            _logger.Information("Ending Market Pool Manager...");
-            MarketPoolManager?.Dispose();
 
             _logger.Information("Ending Tor...");
             TorProcessManager?.Dispose();

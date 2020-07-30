@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P.Models;
 using FreeMarketOne.Tor;
@@ -37,7 +38,8 @@ namespace FreeMarketOne.P2P
         private CancellationTokenSource _cancellationToken { get; set; }
         private TorProcessManager _torProcessManager { get; set; }
 
-        public List<Swarm<BaseAction>> Swarms { get; set; }
+        public Swarm<BaseAction> BaseSwarm { get; set; }
+        public Swarm<MarketAction> MarketSwarm { get; set; }
 
         public OnionSeedsManager(IBaseConfiguration configuration, TorProcessManager torManager)
         {
@@ -53,8 +55,6 @@ namespace FreeMarketOne.P2P
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
 
             _cancellationToken = new CancellationTokenSource();
-
-            Swarms = new List<Swarm<BaseAction>>();
         }
 
         public bool IsOnionSeedsManagerRunning()
@@ -191,11 +191,11 @@ namespace FreeMarketOne.P2P
                         }
                     }
 
-                    foreach (var itemSwarm in Swarms)
-                    {
-                        var type = itemSwarm.GetType().GetGenericArguments()[0];
-                        periodicCheckLog.AppendLine(string.Format("Swarm {0} Peers: {1}", type.Name, itemSwarm.Peers.Count()));
-                    }
+                    if (BaseSwarm != null) 
+                        periodicCheckLog.AppendLine(string.Format("Swarm Base Peers: {0}", BaseSwarm.Peers.Count()));
+
+                    if (MarketSwarm != null)
+                        periodicCheckLog.AppendLine(string.Format("Swarm Market Peers: {0}", MarketSwarm.Peers.Count()));
                 }
                 else
                 {
@@ -218,24 +218,35 @@ namespace FreeMarketOne.P2P
         /// <returns></returns>
         private async Task AddSeedsToSwarmsAsPeer(OnionSeedPeer seed)
         {
-            foreach (var itemSwarm in Swarms)
+            var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
+            var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
+
+            _logger.Information(string.Format("Adding peer pubkey: {0}", boundPeer.ToString()));
+
+            if (BaseSwarm != null)
             {
-                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
-
-                if (itemSwarm.Peers.Any())
+                if (BaseSwarm.Peers.Any())
                 {
-                    var exist = itemSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
-                    if (exist != null) continue;
+                    var exist = BaseSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
+                    if (exist == null)
+                        await BaseSwarm.AddPeersAsync(
+                            new[] { boundPeer },
+                            TimeSpan.FromMilliseconds(5000),
+                            _cancellationToken.Token);
                 }
+            }
 
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
-              
-                _logger.Information(string.Format("Adding peer pubkey: {0}", boundPeer.ToString()));
-                
-                await itemSwarm.AddPeersAsync(
-                    new[] { boundPeer }, 
-                    TimeSpan.FromMilliseconds(5000), 
-                    _cancellationToken.Token);
+            if (MarketSwarm != null)
+            {
+                if (MarketSwarm.Peers.Any())
+                {
+                    var exist = MarketSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
+                    if (exist == null)
+                        await MarketSwarm.AddPeersAsync(
+                            new[] { boundPeer },
+                            TimeSpan.FromMilliseconds(5000),
+                            _cancellationToken.Token);
+                }
             }
         }
 

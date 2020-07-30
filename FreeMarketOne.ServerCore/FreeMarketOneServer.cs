@@ -127,7 +127,7 @@ namespace FreeMarketOne.ServerCore
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
                 //Add Swarm server to seed manager
-                OnionSeedsManager.Swarms.Add(BaseBlockChainManager.SwarmServer);
+                OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
 
                 //Initialize Base Pool
                 BasePoolManager = new BasePoolManager(
@@ -173,7 +173,7 @@ namespace FreeMarketOne.ServerCore
             if (MarketBlockChainManager.IsBlockChainManagerRunning())
             {
                 //Add Swarm server to seed manager
-                //OnionSeedsManager.Swarms.Add(MarketBlockChainManager.SwarmServer);
+                OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
 
                 MarketPoolManager = new MarketPoolManager(
                     Configuration,

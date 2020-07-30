@@ -11,7 +11,8 @@ namespace FreeMarketOne.P2P
     {
         List<OnionSeedPeer> OnionSeedPeers { get; set; }
 
-        List<Swarm<BaseAction>> Swarms { get; set; }
+        Swarm<BaseAction> BaseSwarm { get; set; }
+        Swarm<MarketAction> MarketSwarm { get; set; }
 
         bool IsOnionSeedsManagerRunning();
 

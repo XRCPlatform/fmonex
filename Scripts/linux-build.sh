@@ -36,4 +36,40 @@ echo "Packaging the application..."
 chmod +x "${download_directory}/${warp}"
 "${download_directory}/./${warp}" --arch $warp_runtime --input_dir $publish_directory --exec FreeMarketApp --output ${publish_directory}/FreeMarketApp-$git_commit
 
+# Create a .deb file
+mkdir -p pkg-debian pkg-debian/DEBIAN pkg-debian/usr/bin pkg-debian/usr/share/applications
+touch pkg-debian/DEBIAN/{conffiles,control,md5sums,postinst,prerm} pkg-debian/debian-binary
+chmod 555 pkg-debian/DEBIAN/postinst
+chmod 555 pkg-debian/DEBIAN/prerm
+
+cp ${publish_directory}/FreeMarketApp-$git_commit pkg-debian/usr/bin/freemarketone
+
+cat <<EOF > pkg-debian/DEBIAN/control
+Package: freemarketone
+Version: 0.0.1
+Architecture: amd64
+Essential: no
+Section: web
+Maintainer: FreeMarketOne Developers
+Installed-Size: 49000
+Description: Decentralized precious metal marketplace.
+EOF
+
+cat <<EOF > pkg-debian/usr/share/applications/freemarketone.desktop
+[Desktop Entry]
+Name=FreeMarketOne
+Comment=Decentralized precious metal marketplace.
+Exec=/usr/bin/freemarketone
+Terminal=false
+Type=Application
+Categories=Unknown
+EOF
+
+cd pkg-debian/
+find . -type f ! -regex '.*.git.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > DEBIAN/md5sums
+cd ..
+dpkg -b pkg-debian freemarketone-0.0.1_amd64.deb
+
+rm -Rf pkg-debian
+
 echo "Done."

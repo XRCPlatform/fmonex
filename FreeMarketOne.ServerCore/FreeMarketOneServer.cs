@@ -27,6 +27,13 @@ namespace FreeMarketOne.ServerCore
             Current = new FreeMarketOneServer();
         }
 
+        public enum FreeMarketOneServerStates
+        {
+            NotReady = 0,
+            Offline = 1,
+            Online = 2
+        }
+
         public static FreeMarketOneServer Current { get; private set; }
 
         public Logger Logger;
@@ -114,7 +121,7 @@ namespace FreeMarketOne.ServerCore
                     preloadEnded: BaseBlockChainLoadEndedEvent,
                     blockChainChanged: BaseBlockChainChangedEvent);
                 BaseBlockChainManager.Start();
-            } 
+            }
             else
             {
                 _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
@@ -159,7 +166,7 @@ namespace FreeMarketOne.ServerCore
                     preloadEnded: MarketBlockChainLoadEndedEvent,
                     blockChainChanged: MarketBlockChainChangedEvent);
                 MarketBlockChainManager.Start();
-            } 
+            }
             else
             {
                 _logger.Error("Base Chain isnt loaded!");
@@ -202,6 +209,18 @@ namespace FreeMarketOne.ServerCore
             {
                 FreeMarketOneServerLoadedEvent?.Invoke(this, null);
             }).ConfigureAwait(true);
+        }
+
+        public FreeMarketOneServerStates GetServerState()
+        {
+            if (ServiceManager == null)
+            {
+                return FreeMarketOneServerStates.NotReady;
+            } 
+            else
+            {
+                return ServiceManager.GetServerState();
+            }
         }
 
         public void Stop()

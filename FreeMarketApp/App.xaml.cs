@@ -79,6 +79,8 @@ namespace FreeMarketApp
 
         private static void ServerLoadedEvent(object sender, EventArgs e)
         {
+            var state = FreeMarketOneServer.Current.GetServerState();
+
             //var testActionItem2 = new ReviewUserDataV1();
             //testActionItem2.ReviewDateTime = DateTime.UtcNow.AddMinutes(-1);
             //testActionItem2.Message = "This is a test message";

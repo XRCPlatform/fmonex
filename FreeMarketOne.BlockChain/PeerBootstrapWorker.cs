@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FreeMarketOne.DataStructure;
 using Libplanet.Extensions.Helpers;
+using Libplanet.Blocks;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -102,8 +103,8 @@ namespace FreeMarketOne.BlockChain
                         {
                             await _swarmServer.BootstrapAsync(
                                 _seedPeers,
-                                5000,
-                                5000,
+                                SwarmDialTimeout,
+                                SwarmDialTimeout,
                                 cancellationToken: _cancellationToken.Token
                             );
                         }
@@ -152,6 +153,18 @@ namespace FreeMarketOne.BlockChain
                     trustedStateValidators: _trustedPeers,
                     cancellationToken: _cancellationToken.Token
                 );
+            }
+            catch (AggregateException e)
+            {
+                if (e.InnerException is InvalidGenesisBlockException)
+                {
+                    _logger.Error(string.Format("Preloading terminated with silence exception: {0}", e));
+                } 
+                else
+                {
+                    _logger.Error(string.Format("Preloading terminated with an exception: {0}", e));
+                    throw e;
+                }
             }
             catch (Exception e)
             {

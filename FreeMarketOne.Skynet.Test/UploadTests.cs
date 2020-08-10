@@ -3,8 +3,12 @@ using Microsoft.Extensions.FileProviders;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 
 namespace FreeMarketOne.Skynet.Test
 {
@@ -123,6 +127,40 @@ namespace FreeMarketOne.Skynet.Test
 
             // Assert
             Assert.That(uploadRequest, Throws.Nothing);
+        }
+
+        [Test]
+        public void UploadFMIcon_SuccessfulResponse_DoesNotThrowException()
+        {
+            var applicationRoot = Path.Combine(GetFullBaseDirectory(), "..\\..\\..\\");
+            IFileProvider provider = new PhysicalFileProvider(applicationRoot);
+
+            var httpClient = new HttpClient()
+            {
+                BaseAddress = new Uri("https://siasky.net")
+            };
+
+            var _skynetWebPortal = new SkynetWebPortal(httpClient);
+           
+            var fileInfo = provider.GetFileInfo("freemarket.ico");
+
+            var uploadInfo =_skynetWebPortal.UploadFiles("20200701", new UploadItem[] { new UploadItem(fileInfo) }).Result;
+
+            var downloadRequest = _skynetWebPortal.DownloadFile(uploadInfo.Skylink).Result;
+        }
+
+        private string GetFullBaseDirectory()
+        {
+            var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!fullBaseDirectory.StartsWith('/'))
+                {
+                    fullBaseDirectory.Insert(0, "/");
+                }
+            }
+
+            return fullBaseDirectory;
         }
     }
 }

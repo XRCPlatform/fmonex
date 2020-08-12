@@ -214,7 +214,7 @@
             <!-- Top Right Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="My Products" FontSize="14" Height="34" Padding="20 0 20 0" Margin="30 0 0 0" Classes="products"/>
-                <Button Content="Private Chat" FontSize="14" Height="34" Padding="20 0 20 0" Margin="15 0 20 0" Classes="chat"/>
+                <Button Content="Private Chat" FontSize="14" Height="34" Padding="20 0 20 0" Margin="15 0 20 0" Classes="chat" Click="MyButton_Click"/>
             </StackPanel>
         </Grid>
         <Separator Height="1" Margin="0 60 0 0" VerticalAlignment="Top" Background="#eff0f1"/>

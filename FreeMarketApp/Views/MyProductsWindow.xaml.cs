@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketOne.ServerCore;
@@ -11,11 +10,11 @@ using System.Runtime.InteropServices;
 
 namespace FreeMarketApp.Views
 {
-    public class MainWindow : WindowBase
+    partial class MyProductsWindow : WindowBase
     {
-        public MainWindow()
+        public MyProductsWindow()
         {
-          
+
             InitializeComponent();
             this.FixWindowCenterPosition();
             DataContextChanged += (object sender, EventArgs wat) =>
@@ -30,12 +29,6 @@ namespace FreeMarketApp.Views
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-        }
-
-        public void MyButton_Click(object sender, RoutedEventArgs args)
-        {
-            var chatWindow = new ChatWindow();
-            chatWindow.Show();
         }
     }
 }

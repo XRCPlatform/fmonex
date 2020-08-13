@@ -9,7 +9,7 @@
       <!-- SIDEBAR -->
       <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
         <StackPanel x:Name="SideBar" Orientation="Vertical">
-          <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb">
+          <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
             <StackPanel Orientation="Horizontal">
               <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
               <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>

@@ -10,125 +10,160 @@
         Icon="/Assets/freemarket.ico"
         Title="Free Market One" WindowStartupLocation="CenterScreen">
 
-    <!-- BUTTON STYLES -->
-    <Window.Styles>
-        <!-- Avatar Button -->
-        <Style Selector="Button.user /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="transparent" />
-            <Setter Property="BorderThickness" Value="3" />
-            <Setter Property="CornerRadius" Value="22" />
-        </Style>
-        <Style Selector="Button:pointerover.user /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#eff0f1" />
-            <Setter Property="Background" Value="transparent" />
-        </Style>
-        <Style Selector="Button:pressed.user /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="transparent" />
-            <Setter Property="Background" Value="transparent" />
-        </Style>
+  <!-- BUTTON STYLES -->
+  <Window.Styles>
 
-        <!-- Sidebar Buttons -->
-        <Style Selector="Button.sidebar">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Width" Value="200"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="15 0 0 0"/>
-            <Setter Property="Margin" Value="-5 3 0 0"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Foreground" Value="#606060" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="White" />
-        </Style>
-        <Style Selector="Button.sidebar /template/ ContentPresenter">
-            <Setter Property="CornerRadius" Value="5"/>
-        </Style>
-        <Style Selector="Button:pointerover.sidebar /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#eff0f1" />
-            <Setter Property="Background" Value="#eff0f1" />
-        </Style>
-        <Style Selector="Button:pressed.sidebar /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#d4d7d9" />
-            <Setter Property="Background" Value="#d4d7d9" />
-        </Style>
-        <Style Selector="Button:disabled.sidebar /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#d4d7d9" />
-            <Setter Property="Background" Value="#d4d7d9" />
-        </Style>
+    <!-- Avatar Button -->
+    <Style Selector="Button.user /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="transparent" />
+      <Setter Property="BorderThickness" Value="3" />
+      <Setter Property="CornerRadius" Value="22" />
+    </Style>
+    <Style Selector="Button:pointerover.user /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#fcfeff" />
+      <Setter Property="Background" Value="transparent" />
+    </Style>
+    <Style Selector="Button:pressed.user /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="transparent" />
+      <Setter Property="Background" Value="transparent" />
+    </Style>
 
-        <!-- Search Button -->
-        <Style Selector="Button.search">
-            <Setter Property="Background" Value="#ececec" />
-        </Style>
-        <Style Selector="Button.search /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#ececec" />
-            <Setter Property="CornerRadius" Value="3"/>
-        </Style>
-        <Style Selector="Button:pointerover.search /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#dce2e3" />
-            <Setter Property="Background" Value="#dce2e3" />
-        </Style>
-        <Style Selector="Button:pressed.search /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#d0d8d9" />
-            <Setter Property="Background" Value="#d0d8d9" />
-        </Style>
+    <!-- Sidebar Button -->
+    <Style Selector="Button.sidebar">
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="Width" Value="220"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Padding" Value="20 0 10 0"/>
+      <Setter Property="Margin" Value="0 0 0 5"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Foreground" Value="#000000" />
+      <Setter Property="Background" Value="#ffffff" />
+      <Setter Property="BorderBrush" Value="#ffffff" />
+    </Style>
+    <Style Selector="Button.sidebar /template/ ContentPresenter">
+      <Setter Property="CornerRadius" Value="5"/>
+    </Style>
+    <Style Selector="Button:pointerover.sidebar /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#eff0f1" />
+      <Setter Property="Background" Value="#eff0f1" />
+    </Style>
+    <Style Selector="Button:pressed.sidebar /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#f4f3f8" />
+      <Setter Property="Background" Value="#f4f3f8" />
+    </Style>
+    <Style Selector="Button:disabled.sidebar /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#f4f3f8" />
+      <Setter Property="Background" Value="#f4f3f8" />
+    </Style>
 
-        <!-- My Products Button -->
-        <Style Selector="Button.products">
-            <Setter Property="Background" Value="#f8b500" />
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-        <Style Selector="Button.products /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#f8b500" />
-            <Setter Property="CornerRadius" Value="3"/>
-        </Style>
-        <Style Selector="Button:pointerover.products /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#f1b104" />
-            <Setter Property="Background" Value="#f1b104" />
-        </Style>
-        <Style Selector="Button:pressed.products /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#e0a400" />
-            <Setter Property="Background" Value="#e0a400" />
-        </Style>
+    <!-- Search Button -->
+    <Style Selector="Button.search">
+      <Setter Property="Background" Value="#e6e5ea" />
+    </Style>
+    <Style Selector="Button.search /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#e6e5ea" />
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="Button:pointerover.search /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#cfced6" />
+      <Setter Property="Background" Value="#cfced6" />
+    </Style>
+    <Style Selector="Button:pressed.search /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#c3c1c9" />
+      <Setter Property="Background" Value="#c3c1c9" />
+    </Style>
 
-        <!-- Chat Button -->
-        <Style Selector="Button.chat">
-            <Setter Property="Background" Value="#848d95" />
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-        <Style Selector="Button.chat /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#848d95" />
-            <Setter Property="CornerRadius" Value="3"/>
-        </Style>
-        <Style Selector="Button:pointerover.chat /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#757d85" />
-            <Setter Property="Background" Value="#757d85" />
-        </Style>
-        <Style Selector="Button:pressed.chat /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#626970" />
-            <Setter Property="Background" Value="#626970" />
-        </Style>
+    <!-- My Products Button -->
+    <Style Selector="Button.products">
+      <Setter Property="Background" Value="#f8b400" />
+      <Setter Property="Foreground" Value="#ffffff"/>
+    </Style>
+    <Style Selector="Button.products /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#f8b400" />
+      <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    <Style Selector="Button:pointerover.products /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#edaf09" />
+      <Setter Property="Background" Value="#edaf09" />
+    </Style>
+    <Style Selector="Button:pressed.products /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#f8b400" />
+      <Setter Property="Background" Value="#f8b400" />
+    </Style>
 
-        <!-- Product Card Button -->
-        <Style Selector="Button.productcard">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="White" />
-        </Style>
-        <Style Selector="Button.productcard /template/ ContentPresenter">
-            <Setter Property="CornerRadius" Value="7"/>
-        </Style>
-        <Style Selector="Button:pointerover.productcard /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#fafafb" />
-            <Setter Property="Background" Value="#fafafb" />
-        </Style>
-        <Style Selector="Button:pressed.productcard /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="#fafafb" />
-            <Setter Property="Background" Value="#fafafb" />
-        </Style>
+    <!-- Chat Button -->
+    <Style Selector="Button.chat">
+      <Setter Property="Background" Value="#5c636e" />
+      <Setter Property="Foreground" Value="#ffffff"/>
+    </Style>
+    <Style Selector="Button.chat /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#5c636e" />
+      <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    <Style Selector="Button:pointerover.chat /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#222831" />
+      <Setter Property="Background" Value="#222831" />
+    </Style>
+    <Style Selector="Button:pressed.chat /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#5c636e" />
+      <Setter Property="Background" Value="#5c636e" />
+    </Style>
 
-    </Window.Styles>
+    <!-- Product Card Button -->
+    <Style Selector="Button.productcard">
+      <Setter Property="Background" Value="#ffffff" />
+      <Setter Property="BorderBrush" Value="#ffffff" />
+    </Style>
+    <Style Selector="Button.productcard /template/ ContentPresenter">
+      <Setter Property="CornerRadius" Value="7"/>
+    </Style>
+    <Style Selector="Button:pointerover.productcard /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#f4f3f8" />
+      <Setter Property="Background" Value="#f4f3f8" />
+    </Style>
+    <Style Selector="Button:pressed.productcard /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#fafafb" />
+      <Setter Property="Background" Value="#fafafb" />
+    </Style>
+
+    <!-- Main action Button -->
+    <Style Selector="Button.action">
+      <Setter Property="Background" Value="#ffffff" />
+      <Setter Property="BorderBrush" Value="#167efb" />
+    </Style>
+    <Style Selector="Button.action /template/ ContentPresenter">
+      <Setter Property="CornerRadius" Value="20"/>
+    </Style>
+    <Style Selector="Button:pointerover.action /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#167efb" />
+      <Setter Property="Background" Value="#ebefff" />
+    </Style>
+    <Style Selector="Button:pressed.action /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#167efb" />
+      <Setter Property="Background" Value="#e1e6f7" />
+    </Style>
+
+    <!-- Send Message Button -->
+    <Style Selector="Button.message">
+      <Setter Property="Background" Value="#167efb" />
+      <Setter Property="BorderBrush" Value="White" />
+    </Style>
+    <Style Selector="Button.message /template/ ContentPresenter">
+      <Setter Property="CornerRadius" Value="25"/>
+    </Style>
+    <Style Selector="Button:pointerover.message /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#1176f1" />
+      <Setter Property="Background" Value="#1176f1" />
+    </Style>
+    <Style Selector="Button:pressed.message /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="#0f70e6" />
+      <Setter Property="Background" Value="#0f70e6" />
+    </Style>
+
+  </Window.Styles>
 
 
-    <Grid Margin="0" Background="White">
+  <Grid Margin="0" Background="White">
         <!-- TOP NAVIGATION -->
         <Grid Height="60" VerticalAlignment="Top" Background="#f9f9f9">
 
@@ -149,7 +184,7 @@
 				s-7.024,1.065-8.867,3.168c-2.119,2.416-1.935,5.346-1.883,5.864v4.667c-0.568,0.661-0.887,1.502-0.887,2.369v3.545
 				c0,1.101,0.494,2.128,1.34,2.821c0.81,3.173,2.477,5.575,3.093,6.389v2.894c0,0.816-0.445,1.566-1.162,1.958l-7.907,4.313
 				c-0.252,0.137-0.502,0.297-0.752,0.476C5.276,41.792,2,35.022,2,27.5z" HorizontalAlignment="Left" VerticalAlignment="Center" Height="38" Stretch="Fill" Width="38" Fill="#848d95" Margin="22,0,0,0"/>
-            <Button Width="46" Height="46" HorizontalAlignment="Left" Background="Transparent" Margin="18 0 0 0" Classes="user" Click="ButtonMyProfile_Click">
+            <Button Width="46" Height="46" HorizontalAlignment="Left" Background="Transparent" Margin="18 0 0 0" Classes="user" Click="ButtonMyProfile_Click" Cursor="Hand">
                 <!-- Avatar Binding -->
                 <Image Source="{Binding Avatar}" Width="40" Height="40" RenderOptions.BitmapInterpolationMode="HighQuality">
                     <Image.Clip>
@@ -204,7 +239,7 @@
                 <Border BorderBrush="#ececec" BorderThickness="3" Background="#ececec" CornerRadius="3">
                     <TextBox x:Name="SearchField" Grid.Column="1" Padding="20 0 50 0" Watermark ="Search in offers" Cursor="IBeam" VerticalAlignment="Center" FontSize="15" BorderThickness="0" Background="#ececec"/>
                 </Border>
-                <Button x:Name="SearchButton" HorizontalAlignment="Right" Height="34" Width="45" Margin="0 0 5 0" Classes="search">
+                <Button x:Name="SearchButton" HorizontalAlignment="Right" Height="34" Width="45" Margin="0 0 5 0" Classes="search" Cursor="Hand" Click="ButtonSearch_Click">
                     <Path Data="M20.194,3.46c-4.613-4.613-12.121-4.613-16.734,0c-4.612,4.614-4.612,12.121,0,16.735   
 						  c4.108,4.107,10.506,4.547,15.116,1.34c0.097,0.459,0.319,0.897,0.676,1.254l6.718,6.718c0.979,0.977,2.561,0.977,3.535,0   
 						  c0.978-0.978,0.978-2.56,0-3.535l-6.718-6.72c-0.355-0.354-0.794-0.577-1.253-0.674C24.743,13.967,24.303,7.57,20.194,3.46z    
@@ -215,8 +250,8 @@
 
             <!-- Top Right Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="My Products" FontSize="14" Height="34" Padding="20 0 20 0" Margin="30 0 0 0" Classes="products" Click="ButtonMyProducts_Click" />
-                <Button Content="Private Chat" FontSize="14" Height="34" Padding="20 0 20 0" Margin="15 0 20 0" Classes="chat" Click="ButtonPrivateChat_Click"/>
+                <Button Content="My Products" FontSize="14" Height="34" Padding="20 0 20 0" Margin="30 0 0 0" Classes="products" Click="ButtonMyProducts_Click" Cursor="Hand" />
+                <Button Content="Private Chat" FontSize="14" Height="34" Padding="20 0 20 0" Margin="15 0 20 0" Classes="chat" Click="ButtonPrivateChat_Click" Cursor="Hand" />
             </StackPanel>
         </Grid>
         <Separator Height="1" Margin="0 60 0 0" VerticalAlignment="Top" Background="#eff0f1"/>

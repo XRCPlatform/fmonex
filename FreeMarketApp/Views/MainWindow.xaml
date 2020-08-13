@@ -4,7 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" MinWidth="700" MinHeight="300"
-        x:Class="FreeMarketApp.Views.MainWindow" 
+        x:Class="FreeMarketApp.Views.MainWindow"
+        xmlns:local="clr-namespace:FreeMarketApp.Views"
+        xmlns:pages="clr-namespace:FreeMarketApp.Views.Pages"
         Icon="/Assets/freemarket.ico"
         Title="Free Market One" WindowStartupLocation="CenterScreen">
 
@@ -147,7 +149,7 @@
 				s-7.024,1.065-8.867,3.168c-2.119,2.416-1.935,5.346-1.883,5.864v4.667c-0.568,0.661-0.887,1.502-0.887,2.369v3.545
 				c0,1.101,0.494,2.128,1.34,2.821c0.81,3.173,2.477,5.575,3.093,6.389v2.894c0,0.816-0.445,1.566-1.162,1.958l-7.907,4.313
 				c-0.252,0.137-0.502,0.297-0.752,0.476C5.276,41.792,2,35.022,2,27.5z" HorizontalAlignment="Left" VerticalAlignment="Center" Height="38" Stretch="Fill" Width="38" Fill="#848d95" Margin="22,0,0,0"/>
-            <Button Width="46" Height="46" HorizontalAlignment="Left" Background="Transparent" Margin="18 0 0 0" Classes="user">
+            <Button Width="46" Height="46" HorizontalAlignment="Left" Background="Transparent" Margin="18 0 0 0" Classes="user" Click="ButtonMyProfile_Click">
                 <!-- Avatar Binding -->
                 <Image Source="{Binding Avatar}" Width="40" Height="40" RenderOptions.BitmapInterpolationMode="HighQuality">
                     <Image.Clip>
@@ -213,55 +215,15 @@
 
             <!-- Top Right Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="My Products" FontSize="14" Height="34" Padding="20 0 20 0" Margin="30 0 0 0" Classes="products"/>
-                <Button Content="Private Chat" FontSize="14" Height="34" Padding="20 0 20 0" Margin="15 0 20 0" Classes="chat" Click="MyButton_Click"/>
+                <Button Content="My Products" FontSize="14" Height="34" Padding="20 0 20 0" Margin="30 0 0 0" Classes="products" Click="ButtonMyProducts_Click" />
+                <Button Content="Private Chat" FontSize="14" Height="34" Padding="20 0 20 0" Margin="15 0 20 0" Classes="chat" Click="ButtonPrivateChat_Click"/>
             </StackPanel>
         </Grid>
         <Separator Height="1" Margin="0 60 0 0" VerticalAlignment="Top" Background="#eff0f1"/>
 
-        <!-- SIDEBAR -->
-        <ScrollViewer HorizontalAlignment="Left" Margin="0,61,0,0" Width="240">
-            <StackPanel x:Name="SideBar" Orientation="Vertical">
-                <TextBlock Text="CATEGORIES" Margin="20 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" Foreground="#606060"/>
-                <Button Content="Gold" Classes="sidebar"/>
-                <Button Content="Silver" Classes="sidebar"/>
-                <Button Content="Platinum" Classes="sidebar"/>
-                <Button Content="Rhodium" Classes="sidebar"/>
-                <Button Content="Palladium" Classes="sidebar"/>
-                <Button Content="Rare Coins" Classes="sidebar"/>
-                <Button Content="Copper" Classes="sidebar"/>
-                <Button Content="Other" Classes="sidebar"/>
-            </StackPanel>
-        </ScrollViewer>
-        <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="240 60 0 0"/>
+      <Panel Name="PanelContent" Margin="0,62,0,0">
 
-        <!-- CONTENT AREA -->
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="240 61 0 0">
-            <StackPanel HorizontalAlignment="Stretch">
-                <TextBlock Text="Offers" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" Foreground="#606060"/>
-
-                <!-- Product card -->
-                <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard">
-                    <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                        <Border BorderBrush="#f2f2f5" Width="120" Height="120" Margin="5 10 10 10" Background="#f2f2f5" BorderThickness="0">
-                            <Image DockPanel.Dock="Left" Source="{Binding ProductImage}" Stretch="UniformToFill" >
-                                <Image.Clip>
-                                    <RectangleGeometry Rect="0,0,120,120" />
-                                </Image.Clip>
-                            </Image>
-                        </Border>
-                        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="2017 1 oz Proof Mississippi Choctaw Water Moccasin Silver Coin"></TextBlock>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                            <TextBlock  FontSize="12" Foreground="Gray" Text="Shipping: "></TextBlock>
-                            <TextBlock  FontSize="12" Foreground="Gray" Text="Worldwide"></TextBlock>
-                        </StackPanel>
-                        <TextBlock DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="$185"></TextBlock>
-                        <TextBlock DockPanel.Dock="Top" FontSize="14" Foreground="Gray" Text="5.3 XRC"></TextBlock>
-                    </DockPanel>
-                </Button>
-                <!-- End of product card -->
-
-            </StackPanel>
-        </ScrollViewer>
+      </Panel>
+      
     </Grid>
 </Window>

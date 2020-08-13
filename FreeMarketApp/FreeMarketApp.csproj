@@ -23,18 +23,24 @@
     <None Remove="Models\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Views\Pages\MainPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\ico-search.png" />
     <None Remove="Assets\ico-user.png" />
     <None Remove="Assets\search-bar.png" />
     <None Remove="Assets\splash.png" />
     <None Remove="Views\AddEditProductWindow.xaml" />
     <None Remove="Views\AddEditProfileWindow.xaml" />
-    <None Remove="Views\ChatWindow.xaml" />
     <None Remove="Views\MyItemWindow.xaml" />
-    <None Remove="Views\MyProductsWindow.xaml" />
-    <None Remove="Views\MyProfileWindow.xaml" />
     <None Remove="Views\MyReviewsWindow.xaml" />
+    <None Remove="Views\Pages\MainPage.xaml" />
     <None Remove="Views\PublicProfileWindow.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaXaml Include="Views\Pages\MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\ico-search.png" />
@@ -66,16 +72,7 @@
     <AvaloniaResource Update="Views\AddEditProfileWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaResource>
-    <AvaloniaResource Update="Views\ChatWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaResource>
     <AvaloniaResource Update="Views\MyItemWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Views\MyProductsWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Views\MyProfileWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaResource>
     <AvaloniaResource Update="Views\MyReviewsWindow.xaml">
@@ -92,20 +89,17 @@
     <Compile Update="Views\AddEditProfileWindow.xaml.cs">
       <DependentUpon>AddEditProfileWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\ChatWindow.xaml.cs">
-      <DependentUpon>ChatWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\MyItemWindow.xaml.cs">
       <DependentUpon>MyItemWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\MyProductsWindow.xaml.cs">
-      <DependentUpon>MyProductsWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\MyProfileWindow.xaml.cs">
-      <DependentUpon>MyProfileWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\MyReviewsWindow.xaml.cs">
       <DependentUpon>MyReviewsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\MyProductsPage.xaml.cs">
+      <DependentUpon>MyProductsPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\PublicProfileWindow.xaml.cs">
       <DependentUpon>PublicProfileWindow.xaml</DependentUpon>

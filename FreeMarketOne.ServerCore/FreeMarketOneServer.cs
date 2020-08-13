@@ -225,26 +225,26 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
-            _logger.Information("Ending Service Manager...");
+            _logger?.Information("Ending Service Manager...");
             ServiceManager?.Dispose();
 
-            _logger.Information("Ending Base Pool Manager...");
+            _logger?.Information("Ending Base Pool Manager...");
             BasePoolManager?.Dispose();
 
-            _logger.Information("Ending Market Pool Manager...");
+            _logger?.Information("Ending Market Pool Manager...");
             MarketPoolManager?.Dispose();
 
-            _logger.Information("Ending BlockChain Managers...");
+            _logger?.Information("Ending BlockChain Managers...");
             BaseBlockChainManager?.Dispose();
             MarketBlockChainManager?.Dispose();
 
-            _logger.Information("Ending Onion Seeds ...");
+            _logger?.Information("Ending Onion Seeds ...");
             OnionSeedsManager?.Dispose();
 
-            _logger.Information("Ending Tor...");
+            _logger?.Information("Ending Tor...");
             TorProcessManager?.Dispose();
 
-            _logger.Information("Application End");
+            _logger?.Information("Application End");
         }
     }
 }

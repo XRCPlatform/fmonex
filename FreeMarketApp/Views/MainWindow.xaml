@@ -1,4 +1,4 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:FreeMarketApp.ViewModels;assembly=FreeMarketApp"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -165,7 +165,7 @@
 
   <Grid Margin="0" Background="White">
         <!-- TOP NAVIGATION -->
-        <Grid Height="60" VerticalAlignment="Top" Background="#f9f9f9">
+        <Grid Height="60" VerticalAlignment="Top" Background="#f4f3f8">
 
             <!-- Avatar Placeholder (Uploaded avatar will cover this icon) -->
             <Path x:Name="AvatarPlaceholder" Data="M55,27.5C55,12.337,42.663,0,27.5,0S0,12.337,0,27.5c0,8.009,3.444,15.228,8.926,20.258l-0.026,0.023l0.892,0.752
@@ -195,8 +195,8 @@
 
             <!-- Name and Reputation -->
             <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70 0 0 0">
-                <TextBlock x:Name="UserName" HorizontalAlignment="Left" Height="24" Text="Gold Trader" Width="170" FontWeight="Bold" FontSize="16" Foreground="#FF212121"/>
-                <StackPanel x:Name="ReputationBar" HorizontalAlignment="Left" VerticalAlignment="Top" Height="12" Width="170" Orientation="Horizontal">
+                <TextBlock x:Name="UserName" HorizontalAlignment="Left" Height="24" Text="Gold Trader" Width="180" FontWeight="Bold" FontSize="16" Foreground="#FF212121"/>
+                <StackPanel x:Name="ReputationBar" HorizontalAlignment="Left" VerticalAlignment="Top" Height="12" Width="180" Orientation="Horizontal">
                     <Path x:Name="Star" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 						  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 						  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
@@ -231,13 +231,13 @@
             </StackPanel>
 
             <!-- Search -->
-            <Grid HorizontalAlignment="Stretch" Height="44" Margin="240 0 300 0">
+            <Grid HorizontalAlignment="Stretch" Height="44" Margin="250 0 310 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
-                <Border BorderBrush="#ececec" BorderThickness="3" Background="#ececec" CornerRadius="3">
-                    <TextBox x:Name="SearchField" Grid.Column="1" Padding="20 0 50 0" Watermark ="Search in offers" Cursor="IBeam" VerticalAlignment="Center" FontSize="15" BorderThickness="0" Background="#ececec"/>
+                <Border BorderBrush="#e6e5ea" BorderThickness="3" Background="#e6e5ea" CornerRadius="3">
+                    <TextBox x:Name="SearchField" Grid.Column="1" Padding="20 0 50 0" Watermark ="Search in offers" Cursor="IBeam" VerticalAlignment="Center" FontSize="15" BorderThickness="0" Background="#e6e5ea"/>
                 </Border>
                 <Button x:Name="SearchButton" HorizontalAlignment="Right" Height="34" Width="45" Margin="0 0 5 0" Classes="search" Cursor="Hand" Click="ButtonSearch_Click">
                     <Path Data="M20.194,3.46c-4.613-4.613-12.121-4.613-16.734,0c-4.612,4.614-4.612,12.121,0,16.735   
@@ -250,13 +250,12 @@
 
             <!-- Top Right Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="My Products" FontSize="14" Height="34" Padding="20 0 20 0" Margin="30 0 0 0" Classes="products" Click="ButtonMyProducts_Click" Cursor="Hand" />
-                <Button Content="Private Chat" FontSize="14" Height="34" Padding="20 0 20 0" Margin="15 0 20 0" Classes="chat" Click="ButtonPrivateChat_Click" Cursor="Hand" />
+                <Button Content="My Products" FontSize="14" Height="34" Width="130" Margin="20 0 0 0" Classes="products" Click="ButtonMyProducts_Click" Cursor="Hand" />
+                <Button Content="Private Chat" FontSize="14" Height="34" Width="130" Margin="10 0 20 0" Classes="chat" Click="ButtonPrivateChat_Click" Cursor="Hand" />
             </StackPanel>
         </Grid>
-        <Separator Height="1" Margin="0 60 0 0" VerticalAlignment="Top" Background="#eff0f1"/>
 
-      <Panel Name="PanelContent" Margin="0,62,0,0">
+      <Panel Name="PanelContent" Margin="0,61,0,0">
 
       </Panel>
       

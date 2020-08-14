@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.ServerCore;
 using Serilog;
@@ -40,34 +41,22 @@ namespace FreeMarketApp.Views
 
         public void ButtonPrivateChat_Click(object sender, RoutedEventArgs args)
         {
-            Panel panel = this.FindControl<Panel>("PanelContent");
-            if (!panel.Children.Contains(ChatPage.Instance)) panel.Children.Add(ChatPage.Instance);
-            if (panel.Children.Contains(MainPage.Instance)) panel.Children.Remove(MainPage.Instance);
-            if (panel.Children.Contains(MyProductsPage.Instance)) panel.Children.Remove(MyProductsPage.Instance);
-            if (panel.Children.Contains(MyProfilePage.Instance)) panel.Children.Remove(MyProfilePage.Instance);
+            PagesHelper.Switch(this, ChatPage.Instance);
         }
 
         public void ButtonMyProducts_Click(object sender, RoutedEventArgs args)
         {
-            Panel panel = this.FindControl<Panel>("PanelContent");
-            if (!panel.Children.Contains(MyProductsPage.Instance)) panel.Children.Add(MyProductsPage.Instance);
-            if (panel.Children.Contains(MainPage.Instance)) panel.Children.Remove(MainPage.Instance);
-            if (panel.Children.Contains(ChatPage.Instance)) panel.Children.Remove(ChatPage.Instance);
-            if (panel.Children.Contains(MyProfilePage.Instance)) panel.Children.Remove(MyProfilePage.Instance);
+            PagesHelper.Switch(this, MyProductsPage.Instance);
         }
 
         public void ButtonSearch_Click(object sender, RoutedEventArgs args)
         {
-
+            PagesHelper.Switch(this, SearchResultsPage.Instance);
         }
 
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
         {
-            Panel panel = this.FindControl<Panel>("PanelContent");
-            if (!panel.Children.Contains(MyProfilePage.Instance)) panel.Children.Add(MyProfilePage.Instance);
-            if (panel.Children.Contains(MainPage.Instance)) panel.Children.Remove(MainPage.Instance);
-            if (panel.Children.Contains(MyProductsPage.Instance)) panel.Children.Remove(MyProductsPage.Instance);
-            if (panel.Children.Contains(ChatPage.Instance)) panel.Children.Remove(ChatPage.Instance);
+            PagesHelper.Switch(this, MyProfilePage.Instance);
         }
     }
 }

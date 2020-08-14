@@ -5,20 +5,20 @@ using FreeMarketApp.Helpers;
 
 namespace FreeMarketApp.Views.Pages
 {
-    public class ChatPage : UserControl
+    public class SearchResultsPage : UserControl
     {
-        private static ChatPage _instance;
-        public static ChatPage Instance
+        private static SearchResultsPage _instance;
+        public static SearchResultsPage Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new ChatPage();
+                    _instance = new SearchResultsPage();
                 return _instance;
             }
         }
 
-        public ChatPage()
+        public SearchResultsPage()
         {
             this.InitializeComponent();
         }

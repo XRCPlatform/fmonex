@@ -101,6 +101,9 @@
     <Compile Update="Views\Pages\MyProductsPage.xaml.cs">
       <DependentUpon>MyProductsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Pages\SearchResultsPage.xaml.cs">
+      <DependentUpon>SearchResultsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\PublicProfileWindow.xaml.cs">
       <DependentUpon>PublicProfileWindow.xaml</DependentUpon>
     </Compile>

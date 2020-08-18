@@ -58,7 +58,7 @@
           <!-- bind an offer (titte of the conversation) -->
           <TextBlock x:Name="OfferTitleBinding" Text="Gold Bar 10 oz PAMP Suisse Fortuna Veriscan (New w/ Assay)" TextWrapping="NoWrap" FontSize="18" FontWeight="Bold" Foreground="#606060"/>
         </Button>
-        <Button Classes="action" VerticalAlignment="Top" Background="#f6f7f8" Foreground="#167efb" BorderThickness="0" HorizontalAlignment="Right" Height="30" FontSize="14" Padding="15 0 15 0" Margin="30 23 20 0">Delete</Button>
+        <Button Classes="action" VerticalAlignment="Top" Background="#f6f7f8" Foreground="#167efb" BorderThickness="0" HorizontalAlignment="Right" Height="30" FontSize="14" Padding="15 0 15 0" Margin="30 23 20 0" Click="ButtonRemove_Click" Cursor="Hand">Delete</Button>
       </Grid>
       <Separator DockPanel.Dock="Bottom" Background="#eff0f1" Height="1" VerticalAlignment="Top" Margin="260 65 20 0"></Separator>
 

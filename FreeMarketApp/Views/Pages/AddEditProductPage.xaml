@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -28,14 +28,17 @@
 
                 <TextBlock Text="Category" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <VirtualizingStackPanel>
-                    <ComboBox MaxDropDownHeight="400" SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
+                    <ComboBox MaxDropDownHeight="450" SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
                         <ComboBoxItem Padding="7" Content="Gold"/>
                         <ComboBoxItem Padding="7" Content="Silver"/>
                         <ComboBoxItem Padding="7" Content="Platinum"/>
                         <ComboBoxItem Padding="7" Content="Rhodium"/>
                         <ComboBoxItem Padding="7" Content="Palladium"/>
-                        <ComboBoxItem Padding="7" Content="Rare Coins"/>
                         <ComboBoxItem Padding="7" Content="Copper"/>
+                        <ComboBoxItem Padding="7" Content="Rare Coins"/>
+                        <ComboBoxItem Padding="7" Content="Jewelry"/>
+                        <ComboBoxItem Padding="7" Content="Cryptocurrency"/>
+                        <ComboBoxItem Padding="7" Content="Barter"/>
                         <ComboBoxItem Padding="7" Content="Other"/>
                     </ComboBox>
                 </VirtualizingStackPanel>

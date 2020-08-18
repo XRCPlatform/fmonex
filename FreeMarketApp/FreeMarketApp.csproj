@@ -23,6 +23,7 @@
     <None Remove="Models\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Views\Controls\MessageBox.xaml" />
     <AvaloniaResource Remove="Views\Pages\MainPage.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -32,12 +33,16 @@
     <None Remove="Assets\splash.png" />
     <None Remove="Views\AddEditProductWindow.xaml" />
     <None Remove="Views\AddEditProfileWindow.xaml" />
+    <None Remove="Views\Controls\MessageBox.xaml" />
     <None Remove="Views\MyItemWindow.xaml" />
     <None Remove="Views\MyReviewsWindow.xaml" />
     <None Remove="Views\Pages\MainPage.xaml" />
     <None Remove="Views\PublicProfileWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaXaml Include="Views\Controls\MessageBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
     <AvaloniaXaml Include="Views\Pages\MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
@@ -88,6 +93,9 @@
     </Compile>
     <Compile Update="Views\AddEditProfileWindow.xaml.cs">
       <DependentUpon>AddEditProfileWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Controls\MessageBox.xaml.cs">
+      <DependentUpon>MessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\MyItemWindow.xaml.cs">
       <DependentUpon>MyItemWindow.xaml</DependentUpon>

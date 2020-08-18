@@ -34,5 +34,12 @@ namespace FreeMarketApp.Views.Pages
 
             PagesHelper.Switch(mainWindow, MainPage.Instance);
         }
+
+        public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, MyProfilePage.Instance);
+        }
     }
 }

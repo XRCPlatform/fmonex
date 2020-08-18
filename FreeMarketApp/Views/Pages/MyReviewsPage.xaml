@@ -15,7 +15,7 @@
                         <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
                     </StackPanel>
                 </Button>
-                <Button Classes="sidebar" Margin="0 30 0 0">
+                <Button Classes="sidebar" Margin="0 30 0 0" Click="ButtonMyProfile_Click" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M511.676,498.752l-12.8-51.2c-6.073-24.838-24.485-44.813-48.747-52.885l-93.867-31.275
 										c-22.891-9.536-33.365-46.4-35.627-60.395c17.442-14.504,28.665-35.14,31.36-57.664c-0.385-3.847,0.523-7.713,2.581-10.987
@@ -30,7 +30,7 @@
                         <TextBlock Margin="7,0,0,0" Text="Profile"/>
                     </StackPanel>
                 </Button>
-                <Button Classes="sidebar" Background="#eff0f1" BorderBrush="#eff0f1" Margin="0 5 0 0">
+                <Button Classes="sidebar" Background="#eff0f1" BorderBrush="#eff0f1" Margin="0 5 0 0" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 										c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    

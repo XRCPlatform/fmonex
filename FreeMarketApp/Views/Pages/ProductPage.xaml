@@ -8,7 +8,7 @@
   <Grid Margin="0" Background="White">
 
     <!-- SIDEBAR -->
-    <ScrollViewer HorizontalAlignment="Left" Margin="0,61,0,0" Width="250">
+    <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
       <StackPanel x:Name="SideBar" Orientation="Vertical">
         <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
           <StackPanel Orientation="Horizontal">
@@ -18,10 +18,10 @@
         </Button>
       </StackPanel>
     </ScrollViewer>
-    <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 60 0 0"/>
+    <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 0 0 0"/>
 
     <!-- PRODUCT AREA -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 60 0 0">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
       <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
         <TextBlock x:Name="Title" Text="10 oz PAMP Suisse Fortuna Veriscan Gold Bar (New w/ Assay)" TextWrapping="Wrap" Margin="20 20 20 20" FontSize="28" FontWeight="Normal" Foreground="#606060"/>
         <Border Margin="18 0 20 10" Padding="2" Background="#f7f7f7" CornerRadius="5">

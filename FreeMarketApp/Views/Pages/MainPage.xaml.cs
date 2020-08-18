@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using FreeMarketApp.Helpers;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -24,6 +26,13 @@ namespace FreeMarketApp.Views.Pages
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+        }
+
+        public void ButtonProduct_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, ProductPage.Instance);
         }
     }
 }

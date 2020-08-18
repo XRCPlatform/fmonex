@@ -31,7 +31,7 @@
                             <TextBlock Margin="7,0,0,0" Text="Edit listing" Foreground="#167efb" FontSize="14"/>
                         </StackPanel>
                     </Button>
-                    <Button Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0" Background="#f6f7f8">
+                    <Button Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0" Background="#f6f7f8" Cursor="Hand" Click="ButtonRemove_Click">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
 								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11" Fill="#167efb"/>

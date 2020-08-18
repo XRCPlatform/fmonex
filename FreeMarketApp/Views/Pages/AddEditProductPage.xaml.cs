@@ -32,7 +32,14 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            PagesHelper.Switch(mainWindow, MainPage.Instance);
+            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+        }
+
+        public void ButtonCancel_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
         }
     }
 }

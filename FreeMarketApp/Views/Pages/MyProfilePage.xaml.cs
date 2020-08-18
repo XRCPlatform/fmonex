@@ -41,5 +41,11 @@ namespace FreeMarketApp.Views.Pages
 
             PagesHelper.Switch(mainWindow, MyReviewsPage.Instance);
         }
+        public void ButtonEdit_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, AddEditProfilePage.Instance);
+        }
     }
 }

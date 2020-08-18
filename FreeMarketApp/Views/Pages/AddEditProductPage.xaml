@@ -140,7 +140,7 @@
 
                 <DockPanel Margin="20 50 50 0">
                     <Button DockPanel.Dock="Right" Classes="message" Foreground="#ffffff" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" >Save</Button>
-                    <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" Foreground="#167efb" FontSize="16" Margin="0 30 10 0">Cancel</Button>
+                    <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" Foreground="#167efb" FontSize="16" Margin="0 30 10 0" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>
                 </DockPanel>
 
             </StackPanel>

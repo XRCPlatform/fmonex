@@ -25,7 +25,7 @@
             <StackPanel HorizontalAlignment="Stretch">
                 <WrapPanel Orientation="Horizontal" Margin="20 20 20 10">
                     <TextBlock Text="My Listings" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" Foreground="#606060"/>
-                    <Button Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="10 0 10 0" Background="#f6f7f8" Foreground="#167efb">
+                    <Button Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="10 0 10 0" Background="#f6f7f8" Foreground="#167efb" Click="ButtonAdd_Click" Cursor="Hand">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="m408 184h-136c-4.417969 0-8-3.582031-8-8v-136c0-22.089844-17.910156-40-40-40s-40 17.910156-40 40v136c0 4.417969-3.582031 8-8 8h-136c-22.089844 0-40 17.910156-40 40s17.910156 40 40 40h136c4.417969 0 8 3.582031 8 8v136c0 22.089844 17.910156 40 40 40s40-17.910156 40-40v-136c0-4.417969 3.582031-8 8-8h136c22.089844 0 40-17.910156 40-40s-17.910156-40-40-40zm0 0"
 								  HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13" Fill="#167efb"/>
@@ -55,7 +55,7 @@
                         </DockPanel>
                     </Button>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 20 10">
-                        <Button Classes="action" BorderThickness="0" Width="36" Height="36" Margin="0 0 0 5">
+                        <Button Classes="action" BorderThickness="0" Width="36" Height="36" Margin="0 0 0 5" Click="ButtonEdit_Click" Cursor="Hand">
                             <Path Data="m114.6875 284.675781-73.800781-73.800781 178.5-178.5 73.800781 73.800781zm-80.699219-60.800781 67.699219 67.699219-101.5 33.800781zm281.898438-140.300781-12.800781 12.800781-73.898438-73.898438 12.800781-12.800781c12.894531-12.902343 33.804688-12.902343 46.699219 0l27.199219 27.199219c12.800781 12.9375 12.800781 33.765625 0 46.699219zm0 0"
 								  HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="15" Fill="#167efb"/>
                         </Button>

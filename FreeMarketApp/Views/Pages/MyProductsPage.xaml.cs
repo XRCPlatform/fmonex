@@ -43,5 +43,19 @@ namespace FreeMarketApp.Views.Pages
 
             MessageBox.Show(mainWindow, "Test", "Test title", MessageBox.MessageBoxButtons.YesNoCancel);
         }
+
+        public void ButtonAdd_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, AddEditProductPage.Instance);
+        }
+
+        public void ButtonEdit_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, AddEditProductPage.Instance);
+        }
     }
 }

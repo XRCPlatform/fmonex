@@ -52,6 +52,13 @@
           <StackPanel Orientation="Vertical">
             <WrapPanel Orientation="Horizontal" Margin="20 19 20 10">
               <TextBlock Text="My Profile" TextWrapping="Wrap" FontSize="28" Margin="0 0 30 0" FontWeight="Bold" Foreground="#606060"/>
+              <Button Classes="action" Height="24" BorderThickness="0" VerticalAlignment="Center" Margin="5 0 15 0" Padding="15 0 15 0" Background="#f6f7f8" Foreground="#167efb" Click="ButtonEdit_Click" Cursor="Hand">
+                <StackPanel Orientation="Horizontal">
+                  <Path Data="m114.6875 284.675781-73.800781-73.800781 178.5-178.5 73.800781 73.800781zm-80.699219-60.800781 67.699219 67.699219-101.5 33.800781zm281.898438-140.300781-12.800781 12.800781-73.898438-73.898438 12.800781-12.800781c12.894531-12.902343 33.804688-12.902343 46.699219 0l27.199219 27.199219c12.800781 12.9375 12.800781 33.765625 0 46.699219zm0 0"
+        HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13" Fill="#167efb"/>
+                  <TextBlock Margin="7,0,0,0" Text="Edit" FontSize="14"/>
+                </StackPanel>
+              </Button>
             </WrapPanel>
             <!-- User binding -->
             <TextBlock Text="Username" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>

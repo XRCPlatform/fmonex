@@ -25,6 +25,7 @@
   <ItemGroup>
     <AvaloniaResource Remove="Views\Controls\MessageBox.xaml" />
     <AvaloniaResource Remove="Views\Pages\MainPage.xaml" />
+    <AvaloniaResource Remove="Views\Pages\ProductPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\ico-search.png" />
@@ -37,6 +38,7 @@
     <None Remove="Views\MyItemWindow.xaml" />
     <None Remove="Views\MyReviewsWindow.xaml" />
     <None Remove="Views\Pages\MainPage.xaml" />
+    <None Remove="Views\Pages\ProductPage.xaml" />
     <None Remove="Views\PublicProfileWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +46,9 @@
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
     <AvaloniaXaml Include="Views\Pages\MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Pages\ProductPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
   </ItemGroup>
@@ -108,6 +113,9 @@
     </Compile>
     <Compile Update="Views\Pages\MyProductsPage.xaml.cs">
       <DependentUpon>MyProductsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\ProductPage.xaml.cs">
+      <DependentUpon>ProductPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pages\SearchResultsPage.xaml.cs">
       <DependentUpon>SearchResultsPage.xaml</DependentUpon>

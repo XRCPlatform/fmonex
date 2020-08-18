@@ -44,6 +44,7 @@ namespace FreeMarketApp.Helpers
             if ((pageAddInstance.GetType() != typeof(MyReviewsPage)) && panel.Children.Contains(MyReviewsPage.Instance)) panel.Children.Remove(MyReviewsPage.Instance);
             if ((pageAddInstance.GetType() != typeof(PublicProfilePage)) && panel.Children.Contains(PublicProfilePage.Instance)) panel.Children.Remove(PublicProfilePage.Instance);
             if ((pageAddInstance.GetType() != typeof(SearchResultsPage)) && panel.Children.Contains(SearchResultsPage.Instance)) panel.Children.Remove(SearchResultsPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(ProductPage)) && panel.Children.Contains(ProductPage.Instance)) panel.Children.Remove(ProductPage.Instance);
         }
     }
 }

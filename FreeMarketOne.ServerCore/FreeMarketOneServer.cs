@@ -17,6 +17,9 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using FreeMarketOne.ServerCore.Helpers;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Libplanet;
+using System.Security.Cryptography;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -57,6 +60,7 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
+        public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
 
         public event EventHandler FreeMarketOneServerLoadedEvent;
 
@@ -164,7 +168,8 @@ namespace FreeMarketOne.ServerCore
                     hashCheckPoints,
                     genesisBlock,
                     preloadEnded: MarketBlockChainLoadEndedEvent,
-                    blockChainChanged: MarketBlockChainChangedEvent);
+                    blockChainChanged: MarketBlockChainChangedEvent,
+                    clearedOlderBlocks: MarketBlockClearedOldersEvent);
                 MarketBlockChainManager.Start();
             }
             else

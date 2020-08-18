@@ -6,9 +6,12 @@ using FreeMarketApp.Views;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using Libplanet;
 using Libplanet.Blockchain;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -65,6 +68,7 @@ namespace FreeMarketApp
             {
                 FreeMarketOneServer.Current.BaseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
                 FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
+                FreeMarketOneServer.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
                 FreeMarketOneServer.Current.Initialize();
             }).ConfigureAwait(true);
 
@@ -75,6 +79,11 @@ namespace FreeMarketApp
         {
             //we have a new block
             _newBlock = true;
+        }
+
+        private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> e)
+        {
+            //process deleted blocks
         }
 
         private static void ServerLoadedEvent(object sender, EventArgs e)

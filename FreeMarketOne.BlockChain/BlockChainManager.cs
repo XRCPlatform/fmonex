@@ -22,6 +22,7 @@ using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Extensions.Helpers;
 using Libplanet.Extensions;
 using FreeMarketOne.GenesisBlock;
+using System.Security.Cryptography;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -56,6 +57,7 @@ namespace FreeMarketOne.BlockChain
         private EventHandler<PreloadState> _preloadProcessed { get; set; }
         private EventHandler _preloadEnded { get; set; }
         private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockChainChanged { get; set; }
+        private EventHandler<List<HashDigest<SHA256>>> _clearedOlderBlocks { get; set; }
         private IBaseConfiguration _configuration { get; }
         private IDefaultBlockPolicy<T> _blockChainPolicy { get; }
         private Block<T> _genesisBlock { get; }
@@ -95,7 +97,8 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadStarted = null,
             EventHandler<PreloadState> preloadProcessed = null,
             EventHandler preloadEnded = null,
-            EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null)
+            EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null,
+            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null)
         {
             _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
@@ -125,6 +128,7 @@ namespace FreeMarketOne.BlockChain
             _preloadProcessed = preloadProcessed;
             _preloadEnded = preloadEnded;
             _blockChainChanged = blockChainChanged;
+            _clearedOlderBlocks = clearedOlderBlocks;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
         }
@@ -329,9 +333,11 @@ namespace FreeMarketOne.BlockChain
         /// <summary>
         /// Clear older blocks until reach actual genesis
         /// </summary>
-        public void ClearOlderBlocksAfterNewGenesis()
+        public List<HashDigest<SHA256>> ClearOlderBlocksAfterNewGenesis()
         {
             var chainId = _storage.GetCanonicalChainId();
+            var clearedBlocks = new List<HashDigest<SHA256>>();
+
             if (chainId.HasValue)
             {
                 var hashs = _storage.IterateIndexes(chainId.Value, 0, null);
@@ -342,15 +348,28 @@ namespace FreeMarketOne.BlockChain
                         var block = _storage.GetBlock<T>(itemHash);
                         if (block == _genesisBlock)
                         {
+                            if (_clearedOlderBlocks != null) RaiseAsyncClearedOlderBlocksEvent(clearedBlocks);
                             break;
                         }
                         else
                         {
                             _storage.DeleteBlock(itemHash);
+                            clearedBlocks.Add(itemHash);
                         }
                     }
                 }
             }
+
+            return clearedBlocks;
+        }
+
+        async void RaiseAsyncClearedOlderBlocksEvent(List<HashDigest<SHA256>> clearedBlocks)
+        {
+            await Task.Delay(1000);
+            await Task.Run(() =>
+            {
+                _clearedOlderBlocks?.Invoke(this, clearedBlocks);
+            }).ConfigureAwait(true);
         }
 
         public void Dispose()

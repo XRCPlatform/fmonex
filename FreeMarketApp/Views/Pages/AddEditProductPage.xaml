@@ -46,8 +46,8 @@
                     <RadioButton Content="Service" FontSize="16"></RadioButton>
                 </StackPanel>
 
-                <TextBlock Text="Title" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
+              <TextBlock Text="Title" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+              <TextBox Name="TBTitle" AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Description" Margin="20 40 0 0" FontSize="16" FontWeight="Bold"/>
                 <TextBox AcceptsReturn="True" Watermark="Describe your listing" Height="200" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
@@ -139,7 +139,7 @@
                 </StackPanel>
 
                 <DockPanel Margin="20 50 50 0">
-                    <Button DockPanel.Dock="Right" Classes="message" Foreground="#ffffff" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" >Save</Button>
+                    <Button DockPanel.Dock="Right" Classes="message" Foreground="#ffffff" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
                     <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" Foreground="#167efb" FontSize="16" Margin="0 30 10 0" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>
                 </DockPanel>
 

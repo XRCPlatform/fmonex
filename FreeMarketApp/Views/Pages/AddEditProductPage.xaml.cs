@@ -2,6 +2,11 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
+using FreeMarketApp.Views.Controls;
+using Libplanet.Extensions.Helpers;
+using System.Threading.Tasks;
+using static FreeMarketApp.Views.Controls.MessageBox;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -35,11 +40,33 @@ namespace FreeMarketApp.Views.Pages
             PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
         }
 
-        public void ButtonCancel_Click(object sender, RoutedEventArgs args)
+        private async void ButtonCancel_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+            var result = await MessageBox.Show(mainWindow,
+                SharedResources.ResourceManager.GetString("Dialog_Confirmation"),
+                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"), 
+                MessageBox.MessageBoxButtons.YesNo);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                ClearForm();
+                PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+            }
+        }
+
+        public void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+        }
+
+
+        private void ClearForm()
+        {
+            var tbTitle = this.FindControl<TextBox>("TBTitle");
+            tbTitle.Text = string.Empty;
         }
     }
 }

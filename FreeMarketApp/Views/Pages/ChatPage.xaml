@@ -18,35 +18,23 @@
         <StackPanel x:Name="SideBar" Orientation="Vertical">
           <TextBlock Text="All Chats" TextWrapping="Wrap" FontSize="28" Margin="25 10 0 10" FontWeight="Bold" Foreground="#606060"/>
 
+          
           <!-- Chat thread-->
-          <Button Classes="sidebar" Height="50" >
-            <DockPanel Width="210">
-              <Border Width="30" Height="30" Background="#D6D7D7" CornerRadius="15">
+          <Button Classes="sidebar" Height="50" HorizontalContentAlignment="Stretch" Cursor="Hand">
+            <DockPanel>
+              <Border DockPanel.Dock="Left" Width="30" Height="30" Margin="-12 0 0 0" Background="#D6D7D7" CornerRadius="15">
                 <Image Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
                   <Image.Clip>
                     <EllipseGeometry Rect="0,0,30,30" />
                   </Image.Clip>
                 </Image>
               </Border>
-              <TextBlock Margin="7,0,0,0" VerticalAlignment="Center" Text="Cryptolover21"/>
-              <Border x:Name="NotificationBadge" HorizontalAlignment="Right" Margin="0 0 10 0" Background="Orange" Width="8" Height="8" CornerRadius="10">
-              </Border>
+              <TextBlock DockPanel.Dock="Left" Margin="7,0,0,0" VerticalAlignment="Center" MaxWidth="145" TextWrapping="NoWrap" Text="Cryptolover21"/>
+				<!-- New Message Notification Badge  -->
+              <Border x:Name="NotificationBadge" HorizontalAlignment="Right" Background="Orange" Width="8" Height="8" CornerRadius="10"></Border>
             </DockPanel>
           </Button>
           <!-- End of chat thread-->
-
-          <Button Classes="sidebar"  Height="50">
-            <DockPanel Width="210">
-              <Border Width="30" Height="30" Background="#D6D7D7" CornerRadius="15">
-                <Image Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
-                  <Image.Clip>
-                    <EllipseGeometry Rect="0,0,30,30" />
-                  </Image.Clip>
-                </Image>
-              </Border>
-              <TextBlock Margin="7,0,0,0" VerticalAlignment="Center" Text="Peter Schif"/>
-            </DockPanel>
-          </Button>
 
         </StackPanel>
       </ScrollViewer>
@@ -80,10 +68,12 @@
               <TextBlock VerticalAlignment="Bottom" Margin="12 7" Foreground="#000000" FontSize="15" TextWrapping="Wrap" Text="Hey. Sure. You pay me 70% in XRC to this address: Rncdhjhgxkjdvsjfghsfkuvhskudvsf and I ship it to you. The rest you pay after you received it.  "/>
             </Border>
 
+            <!-- another incoming message example-->
             <Border HorizontalAlignment="Left" Margin="20 10 80 10" Background="#f9f6f7" CornerRadius="10 10 10 0" MaxWidth="600">
               <TextBlock VerticalAlignment="Bottom" Margin="12 7" Foreground="#000000" FontSize="15" TextWrapping="Wrap" Text="Paid. Waiting for a shipping identificator"/>
             </Border>
 
+            <!-- my reply example -->
             <Border HorizontalAlignment="Right" Margin="80 10 20 10" Background="#dee0d9" CornerRadius="10 10 0 10" MaxWidth="600">
               <TextBlock VerticalAlignment="Bottom" Margin="12 7" Foreground="#000000" FontSize="15" TextWrapping="Wrap" Text="Thanks. It's a pleasure doing business with you. Don't forget to leave me a review."/>
             </Border>

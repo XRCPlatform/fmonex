@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,13 +9,13 @@
       <!-- SIDEBAR -->
       <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
         <StackPanel x:Name="SideBar" Orientation="Vertical">
-          <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
+          <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,30" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
             <StackPanel Orientation="Horizontal">
               <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
               <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
             </StackPanel>
           </Button>
-          <Button Classes="sidebar" Background="#eff0f1" BorderBrush="#eff0f1" Margin="0 30 0 0" Cursor="Hand">
+          <Button Classes="sidebar" Background="#eff0f1" BorderBrush="#eff0f1" Cursor="Hand">
             <StackPanel Orientation="Horizontal">
               <Path Data="M511.676,498.752l-12.8-51.2c-6.073-24.838-24.485-44.813-48.747-52.885l-93.867-31.275
 										c-22.891-9.536-33.365-46.4-35.627-60.395c17.442-14.504,28.665-35.14,31.36-57.664c-0.385-3.847,0.523-7.713,2.581-10.987
@@ -30,7 +30,7 @@
               <TextBlock Margin="7,0,0,0" Text="Profile"/>
             </StackPanel>
           </Button>
-          <Button Classes="sidebar" Margin="0 5 0 0" Click="ButtonMyReviews_Click" Cursor="Hand">
+          <Button Classes="sidebar" Click="ButtonMyReviews_Click" Cursor="Hand">
             <StackPanel Orientation="Horizontal">
               <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 										c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    

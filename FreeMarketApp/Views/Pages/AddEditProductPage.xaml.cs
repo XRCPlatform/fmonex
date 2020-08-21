@@ -21,6 +21,10 @@ namespace FreeMarketApp.Views.Pages
                     _instance = new AddEditProductPage();
                 return _instance;
             }
+            set 
+            {
+                _instance = value;
+            }
         }
 
         public AddEditProductPage()
@@ -44,29 +48,35 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
             var result = await MessageBox.Show(mainWindow,
-                SharedResources.ResourceManager.GetString("Dialog_Confirmation"),
+                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Cancel"),
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"), 
                 MessageBox.MessageBoxButtons.YesNo);
 
             if (result == MessageBoxResult.Yes)
             {
-                ClearForm();
                 PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                ClearForm();
             }
         }
 
-        public void ButtonSave_Click(object sender, RoutedEventArgs args)
+        public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
+            var result = await MessageBox.Show(mainWindow,
+                string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_SaveMyItem"), 300),
+                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                MessageBox.MessageBoxButtons.YesNo);
 
-            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+            if (result == MessageBoxResult.Yes)
+            {
+                PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                ClearForm();
+            }
         }
-
 
         private void ClearForm()
         {
-            var tbTitle = this.FindControl<TextBox>("TBTitle");
-            tbTitle.Text = string.Empty;
+            _instance = null;
         }
     }
 }

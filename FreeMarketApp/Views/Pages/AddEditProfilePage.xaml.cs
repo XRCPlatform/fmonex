@@ -16,6 +16,10 @@ namespace FreeMarketApp.Views.Pages
                     _instance = new AddEditProfilePage();
                 return _instance;
             }
+            set
+            {
+                _instance = value;
+            }
         }
 
         public AddEditProfilePage()

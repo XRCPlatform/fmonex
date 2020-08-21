@@ -63,9 +63,18 @@ namespace FreeMarketApp.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Are you sure that you want to leave this item?.
         /// </summary>
-        internal static string Dialog_Confirmation {
+        internal static string Dialog_Confirmation_Cancel {
             get {
-                return ResourceManager.GetString("Dialog_Confirmation", resourceCulture);
+                return ResourceManager.GetString("Dialog_Confirmation_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure that you want to save this item? Changes will be propagated in next block (&quot;approx {0} sec&quot;)..
+        /// </summary>
+        internal static string Dialog_Confirmation_SaveMyItem {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_SaveMyItem", resourceCulture);
             }
         }
         

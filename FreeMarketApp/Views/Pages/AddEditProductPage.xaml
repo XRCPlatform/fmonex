@@ -50,10 +50,10 @@
                 </StackPanel>
 
               <TextBlock Text="Title" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-              <TextBox Name="TBTitle" AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
+              <TextBox Name="TBTitle" MaxLength="64" AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Description" Margin="20 40 0 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox AcceptsReturn="True" Watermark="Describe your listing" Height="200" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBDescription" MaxLength="512" AcceptsReturn="True" Watermark="Describe your listing" Height="200" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Photos" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
                 <WrapPanel Margin="15 0 0 0">

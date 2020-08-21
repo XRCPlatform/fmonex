@@ -18,6 +18,10 @@ namespace FreeMarketApp.Views.Pages
                     _instance = new MyProductsPage();
                 return _instance;
             }
+            set
+            {
+                _instance = value;
+            }
         }
 
         public MyProductsPage()

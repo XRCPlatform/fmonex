@@ -17,6 +17,10 @@ namespace FreeMarketApp.Views.Pages
                     _instance = new ChatPage();
                 return _instance;
             }
+            set
+            {
+                _instance = value;
+            }
         }
 
         public ChatPage()

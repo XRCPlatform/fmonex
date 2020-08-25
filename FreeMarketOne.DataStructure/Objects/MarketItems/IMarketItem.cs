@@ -11,9 +11,13 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
     public interface IMarketItem
     {
         string nametype { get; set; }
-        int Title { get; set; }
+        string Title { get; set; }
         string Hash { get; set; }
         string Description { get; set; }
+        string Shipping { get; set; }
+        string DealType { get; set; }
+        string Category { get; set; }
+        List<string> Photos { get; set; }
         DateTime CreatedUtc { get; set; }
         bool IsValid();
         string GenerateHash();

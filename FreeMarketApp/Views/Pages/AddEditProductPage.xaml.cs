@@ -1,9 +1,11 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media.Imaging;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure.Objects.MarketItems;
 using Libplanet.Extensions.Helpers;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +15,8 @@ namespace FreeMarketApp.Views.Pages
 {
     public class AddEditProductPage : UserControl
     {
+        private static MarketItemV1 marketItemData;
+
         private static AddEditProductPage _instance;
         public static AddEditProductPage Instance
         {
@@ -30,7 +34,15 @@ namespace FreeMarketApp.Views.Pages
 
         public AddEditProductPage()
         {
+            marketItemData = new MarketItemV1();
+
             this.InitializeComponent();
+
+            if (marketItemData.Photos.Count >= 8)
+            {
+                var btAddPhoto = this.FindControl<Button>("BTAddPhoto");
+                btAddPhoto.IsVisible = false;
+            }
         }
 
         private void InitializeComponent()
@@ -89,11 +101,15 @@ namespace FreeMarketApp.Views.Pages
                 var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
                 if (cbDealTypeValue.Tag.ToString() == "0") errorCount++;
 
-
-
                 if (errorCount == 0)
                 {
                     //save to chain
+                    marketItemData.Title = tbTitle.Text;
+                    marketItemData.Description = tbDescription.Text;
+                    marketItemData.Shipping = tbShipping.Text;
+                    marketItemData.Category = cbCategoryValue.Tag.ToString();
+                    marketItemData.DealType = cbDealTypeValue.Tag.ToString();
+
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                     ClearForm();
 
@@ -124,11 +140,28 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
-        public async void Browse_Clicked(object sender, RoutedEventArgs args)
+        public async void ButtonAddPhoto_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            string path = await GetPhotoPath(mainWindow);
+            string photoPath = await GetPhotoPath(mainWindow);
 
+            if (!string.IsNullOrEmpty(photoPath))
+            {
+                var itemIndex = marketItemData.Photos.Count;
+                var spPhoto = this.FindControl<StackPanel>("SPPhoto_" + itemIndex);
+                var iPhoto = this.FindControl<Image>("IPhoto_" + itemIndex);
+ 
+                spPhoto.IsVisible = true;
+                iPhoto.Source = new Bitmap(photoPath);
+                
+                marketItemData.Photos.Add(photoPath);
+
+                if (marketItemData.Photos.Count >= 8)
+                {
+                    var btAddPhoto = this.FindControl<Button>("BTAddPhoto");
+                    btAddPhoto.IsVisible = false;
+                }
+            }
         }
 
         private void ClearForm()

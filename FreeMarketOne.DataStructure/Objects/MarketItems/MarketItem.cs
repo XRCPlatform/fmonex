@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace FreeMarketOne.DataStructure.Objects.MarketItems
@@ -12,7 +13,7 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         public string nametype { get; set; }
 
         [JsonProperty("t")]
-        public int Title { get; set; }
+        public string Title { get; set; }
 
         [JsonProperty("h")]
         public string Hash { get; set; }
@@ -22,6 +23,23 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
 
         [JsonProperty("c")]
         public DateTime CreatedUtc { get; set; }
+
+        [JsonProperty("s")]
+        public string Shipping { get; set; }
+
+        [JsonProperty("x")]
+        public string DealType { get; set; }
+
+        [JsonProperty("c")]
+        public string Category { get; set; }
+
+        [JsonProperty("p")]
+        public List<string> Photos { get; set; }
+
+        public MarketItem()
+        {
+            this.Photos = new List<string>();
+        }
 
         public virtual bool IsValid()
         {
@@ -43,7 +61,10 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
             content.Append(nametype);
             content.Append(Title);
             content.Append(Description);
-            content.Append(CreatedUtc);
+            content.Append(Shipping);
+            content.Append(DealType);
+            content.Append(Category);
+            content.Append(String.Join(String.Empty, Photos.ToArray()));
 
             return sha512processor.GetSHA512(content.ToString());
         }

@@ -61,6 +61,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have to fill all fields and add at least one photo..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyForm {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyForm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure that you want to leave this item?.
         /// </summary>
         internal static string Dialog_Confirmation_Cancel {
@@ -84,6 +93,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_Confirmation_Title {
             get {
                 return ResourceManager.GetString("Dialog_Confirmation_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Information.
+        /// </summary>
+        internal static string Dialog_Information_Title {
+            get {
+                return ResourceManager.GetString("Dialog_Information_Title", resourceCulture);
             }
         }
     }

@@ -28,29 +28,22 @@
 
                 <TextBlock Text="Category" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <VirtualizingStackPanel>
-                    <ComboBox MaxDropDownHeight="450" SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
-                        <ComboBoxItem Padding="7" Content="Gold"/>
-                        <ComboBoxItem Padding="7" Content="Silver"/>
-                        <ComboBoxItem Padding="7" Content="Platinum"/>
-                        <ComboBoxItem Padding="7" Content="Rhodium"/>
-                        <ComboBoxItem Padding="7" Content="Palladium"/>
-                        <ComboBoxItem Padding="7" Content="Copper"/>
-                        <ComboBoxItem Padding="7" Content="Rare Coins"/>
-                        <ComboBoxItem Padding="7" Content="Jewelry"/>
-                        <ComboBoxItem Padding="7" Content="Cryptocurrency"/>
-                        <ComboBoxItem Padding="7" Content="Barter"/>
-                        <ComboBoxItem Padding="7" Content="Other"/>
+                    <ComboBox Name="CBCategory" MaxDropDownHeight="450" SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
+                        <ComboBoxItem Padding="7" Tag="0" Content=""/>
+                        <ComboBoxItem Padding="7" Tag="1" Content="Gold"/>
+                        <ComboBoxItem Padding="7" Tag="2" Content="Silver"/>
+                        <ComboBoxItem Padding="7" Tag="3" Content="Platinum"/>
+                        <ComboBoxItem Padding="7" Tag="4" Content="Rhodium"/>
+                        <ComboBoxItem Padding="7" Tag="5" Content="Palladium"/>
+                        <ComboBoxItem Padding="7" Tag="6" Content="Copper"/>
+                        <ComboBoxItem Padding="7" Tag="7" Content="Rare Coins"/>
+                        <ComboBoxItem Padding="7" Tag="8" Content="Jewelry"/>
+                        <ComboBoxItem Padding="7" Tag="9" Content="Cryptocurrency"/>
                     </ComboBox>
                 </VirtualizingStackPanel>
 
-                <TextBlock Text="Type" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-                <StackPanel Orientation="Horizontal" Margin="20 10 20 0">
-                    <RadioButton Content="Physical good" IsDefault="True" IsChecked="True" FontSize="16" Margin="0 0 20 0" ></RadioButton>
-                    <RadioButton Content="Service" FontSize="16"></RadioButton>
-                </StackPanel>
-
-              <TextBlock Text="Title" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-              <TextBox Name="TBTitle" MaxLength="64" AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
+                <TextBlock Text="Title" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+                <TextBox Name="TBTitle" MaxLength="64" AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Description" Margin="20 40 0 0" FontSize="16" FontWeight="Bold"/>
                 <TextBox Name="TBDescription" MaxLength="512" AcceptsReturn="True" Watermark="Describe your listing" Height="200" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
@@ -123,24 +116,40 @@
 							  Fill="#167efb" Width="30" Height="30" Stretch="Fill"></Path>
                     </Button>
 
-
-
                 </WrapPanel>
 
                 <TextBlock Text="Shipping" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Watermark="USA shipping, International etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBShipping" AcceptsReturn="True" MaxLength="512" HorizontalAlignment="Left" Padding="10" Watermark="USA shipping, International etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Background="#f9f9f9" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Price" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <StackPanel Orientation="Horizontal" Margin="20 -5 0 0">
-                    <TextBox AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Background="#f9f9f9" Margin="0 10 10 0" FontSize="16"/>
+                    <TextBox MaxLength="16" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Background="#f9f9f9" Margin="0 10 10 0" FontSize="16"/>
                     <VirtualizingStackPanel>
                         <ComboBox SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="0 10 50 0" Padding="10" Width="100" HorizontalAlignment="Left">
-                            <ComboBoxItem Padding="7" Content="XRC"/>
-                            <ComboBoxItem Padding="7" Content="USD"/>
+                            <ComboBoxItem Tag="0" Padding="7" Content="XRC"/>
+                            <ComboBoxItem Tag="1" Padding="7" Content="USD"/>
                         </ComboBox>
                     </VirtualizingStackPanel>
                 </StackPanel>
 
+              <TextBlock Text="Deal Type" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+              <VirtualizingStackPanel>
+                <ComboBox Name="CBDealType" MaxDropDownHeight="450" SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
+                  <ComboBoxItem Padding="7" Tag="0" Content=""/>
+                  <ComboBoxItem Padding="7" Tag="1" Content="Pay 0% before 100% after"/>
+                  <ComboBoxItem Padding="7" Tag="2" Content="Pay 10% before 90% after"/>
+                  <ComboBoxItem Padding="7" Tag="3" Content="Pay 20% before 80% after"/>
+                  <ComboBoxItem Padding="7" Tag="4" Content="Pay 30% before 70% after"/>
+                  <ComboBoxItem Padding="7" Tag="5" Content="Pay 40% before 60% after"/>
+                  <ComboBoxItem Padding="7" Tag="6" Content="Pay 50% before 50% after"/>
+                  <ComboBoxItem Padding="7" Tag="7" Content="Pay 60% before 40% after"/>
+                  <ComboBoxItem Padding="7" Tag="8" Content="Pay 70% before 30% after"/>
+                  <ComboBoxItem Padding="7" Tag="9" Content="Pay 80% before 20% after"/>
+                  <ComboBoxItem Padding="7" Tag="10" Content="Pay 90% before 10% after"/>
+                  <ComboBoxItem Padding="7" Tag="11" Content="Pay 100% before 0% after"/>
+                </ComboBox>
+              </VirtualizingStackPanel>
+              
                 <DockPanel Margin="20 50 50 0">
                     <Button DockPanel.Dock="Right" Classes="message" Foreground="#ffffff" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
                     <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" Foreground="#167efb" FontSize="16" Margin="0 30 10 0" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>

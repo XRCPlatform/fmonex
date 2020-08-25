@@ -69,8 +69,38 @@ namespace FreeMarketApp.Views.Pages
 
             if (result == MessageBoxResult.Yes)
             {
-                PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
-                ClearForm();
+                //check form
+                var tbTitle = this.FindControl<TextBox>("TBTitle");
+                var tbDescription = this.FindControl<TextBox>("TBDescription");
+                var tbShipping = this.FindControl<TextBox>("TBShipping");
+                var cbCategory = this.FindControl<ComboBox>("CBCategory");
+                var cbDealType = this.FindControl<ComboBox>("CBDealType");
+
+                var errorCount = 0;
+
+                if (string.IsNullOrEmpty(tbTitle.Text)) errorCount++;
+                if (string.IsNullOrEmpty(tbDescription.Text)) errorCount++;
+                if (string.IsNullOrEmpty(tbShipping.Text)) errorCount++;
+
+                var cbCategoryValue = cbCategory.SelectedItem as ComboBoxItem;
+                if (cbCategoryValue.Tag.ToString() == "0") errorCount++;
+
+                var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
+                if (cbDealTypeValue.Tag.ToString() == "0") errorCount++;
+
+                if (errorCount == 0)
+                {
+                    //save to chain
+                    PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                    ClearForm();
+
+                } else {
+
+                    await MessageBox.Show(mainWindow,
+                       SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyForm"),
+                        SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                        MessageBox.MessageBoxButtons.Ok);
+                }
             }
         }
 

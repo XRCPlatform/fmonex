@@ -18,6 +18,9 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         [JsonProperty("h")]
         public string Hash { get; set; }
 
+        [JsonProperty("b")]
+        public string BaseHash { get; set; }
+
         [JsonProperty("d")]
         public string Description { get; set; }
 

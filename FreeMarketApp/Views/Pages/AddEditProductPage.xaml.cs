@@ -5,6 +5,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using Libplanet.Extensions.Helpers;
+using System.Linq;
 using System.Threading.Tasks;
 using static FreeMarketApp.Views.Controls.MessageBox;
 
@@ -88,6 +89,8 @@ namespace FreeMarketApp.Views.Pages
                 var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
                 if (cbDealTypeValue.Tag.ToString() == "0") errorCount++;
 
+
+
                 if (errorCount == 0)
                 {
                     //save to chain
@@ -102,6 +105,30 @@ namespace FreeMarketApp.Views.Pages
                         MessageBox.MessageBoxButtons.Ok);
                 }
             }
+        }
+
+        public async Task<string> GetPhotoPath(Window mainWindow)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filters.Add(new FileDialogFilter() { Name = "Photo", Extensions = { "jpg" } });
+
+            string[] result = await dialog.ShowAsync(mainWindow);
+
+            if ((result != null) && result.Any())
+            {
+                return result.First();
+            } 
+            else
+            {
+                return null;
+            }
+        }
+
+        public async void Browse_Clicked(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+            string path = await GetPhotoPath(mainWindow);
+
         }
 
         private void ClearForm()

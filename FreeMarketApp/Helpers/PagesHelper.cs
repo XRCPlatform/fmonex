@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
 using FreeMarketApp.Views.Pages;
+using Serilog;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -45,6 +47,34 @@ namespace FreeMarketApp.Helpers
             if ((pageAddInstance.GetType() != typeof(PublicProfilePage)) && panel.Children.Contains(PublicProfilePage.Instance)) panel.Children.Remove(PublicProfilePage.Instance);
             if ((pageAddInstance.GetType() != typeof(SearchResultsPage)) && panel.Children.Contains(SearchResultsPage.Instance)) panel.Children.Remove(SearchResultsPage.Instance);
             if ((pageAddInstance.GetType() != typeof(ProductPage)) && panel.Children.Contains(ProductPage.Instance)) panel.Children.Remove(ProductPage.Instance);
+        }
+
+        internal static void Log(ILogger _logger, string message, LogEventLevel level = LogEventLevel.Information)
+        {
+            if (_logger != null)
+            {
+                switch (level)
+                {
+                    case LogEventLevel.Debug:
+                        _logger.Debug(message);
+                        break;
+                    case LogEventLevel.Error:
+                        _logger.Error(message);
+                        break;
+                    case LogEventLevel.Fatal:
+                        _logger.Fatal(message);
+                        break;
+                    case LogEventLevel.Verbose:
+                        _logger.Verbose(message);
+                        break;
+                    case LogEventLevel.Warning:
+                        _logger.Warning(message);
+                        break;
+                    default:
+                        _logger.Information(message);
+                        break;
+                }
+            }
         }
     }
 }

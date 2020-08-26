@@ -12,6 +12,9 @@ namespace FreeMarketOne.Skynet
     /// <inheritdoc/>
     public class SkynetWebPortal : ISkynetWebPortal
     {
+        public const string SKYNET_GATEURL = "https://siasky.net";
+        public const string SKYNET_PREFIX = "sia://";
+
         private readonly JsonSerializerOptions _jsonSerializerOptions =
             new JsonSerializerOptions
             {

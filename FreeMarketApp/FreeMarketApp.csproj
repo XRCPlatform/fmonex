@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Skynet\FreeMarketOne.Skynet.csproj" />
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Update="Views\AddEditProductWindow.xaml">

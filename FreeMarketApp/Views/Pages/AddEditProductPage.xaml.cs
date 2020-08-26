@@ -6,8 +6,14 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.MarketItems;
-using Libplanet.Extensions.Helpers;
+using FreeMarketOne.ServerCore;
+using FreeMarketOne.Skynet;
+using Microsoft.Extensions.FileProviders;
+using Serilog;
+using System;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using static FreeMarketApp.Views.Controls.MessageBox;
 
@@ -15,7 +21,8 @@ namespace FreeMarketApp.Views.Pages
 {
     public class AddEditProductPage : UserControl
     {
-        private static MarketItemV1 marketItemData;
+        private MarketItemV1 _marketItemData;
+        private ILogger _logger;
 
         private static AddEditProductPage _instance;
         public static AddEditProductPage Instance
@@ -26,7 +33,7 @@ namespace FreeMarketApp.Views.Pages
                     _instance = new AddEditProductPage();
                 return _instance;
             }
-            set 
+            set
             {
                 _instance = value;
             }
@@ -34,11 +41,15 @@ namespace FreeMarketApp.Views.Pages
 
         public AddEditProductPage()
         {
-            marketItemData = new MarketItemV1();
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(AddEditProductPage).Namespace, typeof(AddEditProductPage).Name));
+
+            _marketItemData = new MarketItemV1();
 
             this.InitializeComponent();
 
-            if (marketItemData.Photos.Count >= 8)
+            if (_marketItemData.Photos.Count >= 8)
             {
                 var btAddPhoto = this.FindControl<Button>("BTAddPhoto");
                 btAddPhoto.IsVisible = false;
@@ -62,7 +73,7 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
             var result = await MessageBox.Show(mainWindow,
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Cancel"),
-                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"), 
+                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                 MessageBox.MessageBoxButtons.YesNo);
 
             if (result == MessageBoxResult.Yes)
@@ -101,19 +112,34 @@ namespace FreeMarketApp.Views.Pages
                 var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
                 if (cbDealTypeValue.Tag.ToString() == "0") errorCount++;
 
-                if (marketItemData.Photos.Count() == 0) errorCount++;
+                if (_marketItemData.Photos.Count() == 0) errorCount++;
 
                 if (errorCount == 0)
                 {
                     //save to chain
-                    marketItemData.Title = tbTitle.Text;
-                    marketItemData.Description = tbDescription.Text;
-                    marketItemData.Shipping = tbShipping.Text;
-                    marketItemData.Category = cbCategoryValue.Tag.ToString();
-                    marketItemData.DealType = cbDealTypeValue.Tag.ToString();
+                    _marketItemData.Title = tbTitle.Text;
+                    _marketItemData.Description = tbDescription.Text;
+                    _marketItemData.Shipping = tbShipping.Text;
+                    _marketItemData.Category = cbCategoryValue.Tag.ToString();
+                    _marketItemData.DealType = cbDealTypeValue.Tag.ToString();
 
                     //get time to next block
                     //upload to sia
+                    for (int i = _marketItemData.Photos.Count(); i > 0; i--)
+                    {
+                        if (!_marketItemData.Photos[i - 1].Contains(SkynetWebPortal.SKYNET_PREFIX))
+                        {
+                            var skynetUrl = UploadToSkynet(_marketItemData.Photos[i - 1]);
+                            if (skynetUrl == null)
+                            {
+                                _marketItemData.Photos.RemoveAt(i - 1);
+                            } 
+                            else
+                            {
+                                _marketItemData.Photos[i - 1] = skynetUrl;
+                            }
+                        }
+                    }
 
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                     ClearForm();
@@ -138,7 +164,7 @@ namespace FreeMarketApp.Views.Pages
             if ((result != null) && result.Any())
             {
                 return result.First();
-            } 
+            }
             else
             {
                 return null;
@@ -152,16 +178,16 @@ namespace FreeMarketApp.Views.Pages
 
             if (!string.IsNullOrEmpty(photoPath))
             {
-                var itemIndex = marketItemData.Photos.Count;
+                var itemIndex = _marketItemData.Photos.Count;
                 var spPhoto = this.FindControl<StackPanel>("SPPhoto_" + itemIndex);
                 var iPhoto = this.FindControl<Image>("IPhoto_" + itemIndex);
- 
+
                 spPhoto.IsVisible = true;
                 iPhoto.Source = new Bitmap(photoPath);
-                
-                marketItemData.Photos.Add(photoPath);
 
-                if (marketItemData.Photos.Count >= 8)
+                _marketItemData.Photos.Add(photoPath);
+
+                if (_marketItemData.Photos.Count >= 8)
                 {
                     var btAddPhoto = this.FindControl<Button>("BTAddPhoto");
                     btAddPhoto.IsVisible = false;
@@ -172,24 +198,63 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonRemove_Click(object sender, RoutedEventArgs args)
         {
             var itemIndex = int.Parse(((Button)sender).Tag.ToString());
-            var lastIndex = marketItemData.Photos.Count - 1;
+            var lastIndex = _marketItemData.Photos.Count - 1;
 
             if (itemIndex != lastIndex)
             {
-                for (int i = itemIndex; i < (marketItemData.Photos.Count - 1); i++)
+                for (int i = itemIndex; i < (_marketItemData.Photos.Count - 1); i++)
                 {
                     var iPhoto = this.FindControl<Image>("IPhoto_" + i);
                     var iPhotoNext = this.FindControl<Image>("IPhoto_" + (i + 1));
 
                     iPhoto.Source = iPhotoNext.Source;
-                    marketItemData.Photos[i] = marketItemData.Photos[i + 1];
+                    _marketItemData.Photos[i] = _marketItemData.Photos[i + 1];
                 }
             }
 
             //hide lastindex
             var spLastPhoto = this.FindControl<StackPanel>("SPPhoto_" + lastIndex);
             spLastPhoto.IsVisible = false;
-            marketItemData.Photos.RemoveAt(lastIndex);
+            _marketItemData.Photos.RemoveAt(lastIndex);
+        }
+
+        private string UploadToSkynet(string localPath)
+        {
+            string skylinkUrl = null;
+
+            try
+            {
+                PagesHelper.Log(_logger, string.Format("Skynet Upload File: {0}", localPath));
+
+                var applicationRoot = Path.GetDirectoryName(localPath);
+                var fileName = Path.GetFileName(localPath);
+                IFileProvider provider = new PhysicalFileProvider(applicationRoot);
+
+                PagesHelper.Log(_logger, string.Format("Skynet Gateway: {0}", SkynetWebPortal.SKYNET_GATEURL));
+
+                var httpClient = new HttpClient()
+                {
+                    BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
+                };
+
+                var skynetWebPortal = new SkynetWebPortal(httpClient);
+                var fileInfo = provider.GetFileInfo(fileName);
+
+                var uniqueIndex = Guid.NewGuid();
+                PagesHelper.Log(_logger, string.Format("Procesing upload with GUID: {0}", uniqueIndex));
+
+                var uploadInfo = skynetWebPortal.UploadFiles(uniqueIndex.ToString(), new UploadItem[] { new UploadItem(fileInfo) }).Result;
+
+                skylinkUrl = string.Format("{0}{1}", SkynetWebPortal.SKYNET_PREFIX, uploadInfo.Skylink);
+
+                PagesHelper.Log(_logger, string.Format("Skynet Link: {0}", skylinkUrl));
+            }
+            catch (Exception e)
+            {
+                PagesHelper.Log(_logger, string.Format("Skynet Link: {0} - {1}", e.Message, e.StackTrace), Serilog.Events.LogEventLevel.Error);
+            }
+
+            return skylinkUrl;
         }
 
         private void ClearForm()

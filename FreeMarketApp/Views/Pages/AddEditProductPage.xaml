@@ -60,7 +60,7 @@
                                 </Image.Clip>
                             </Image>
                         </Border>
-                        <Button Name="BTRemovePhoto_0" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                        <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="0" Name="BTRemovePhoto_0" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                             <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z" 
 								Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                         </Button>
@@ -75,7 +75,7 @@
                         </Image.Clip>
                       </Image>
                     </Border>
-                    <Button Name="BTRemovePhoto_1" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="1" Name="BTRemovePhoto_1" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
           Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -90,7 +90,7 @@
                         </Image.Clip>
                       </Image>
                     </Border>
-                    <Button Name="BTRemovePhoto_2" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="2" Name="BTRemovePhoto_2" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
           Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -105,7 +105,7 @@
                         </Image.Clip>
                       </Image>
                     </Border>
-                    <Button Name="BTRemovePhoto_3" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="3" Name="BTRemovePhoto_3" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
           Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -120,7 +120,7 @@
                         </Image.Clip>
                       </Image>
                     </Border>
-                    <Button Name="BTRemovePhoto_4" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="4" Name="BTRemovePhoto_4" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
           Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -135,7 +135,7 @@
                         </Image.Clip>
                       </Image>
                     </Border>
-                    <Button Name="BTRemovePhoto_5" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="5" Name="BTRemovePhoto_5" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
           Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -150,7 +150,7 @@
                         </Image.Clip>
                       </Image>
                     </Border>
-                    <Button Name="BTRemovePhoto_6" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="6" Name="BTRemovePhoto_6" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
           Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -165,7 +165,7 @@
                         </Image.Clip>
                       </Image>
                     </Border>
-                    <Button Name="BTRemovePhoto_7" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="7" Name="BTRemovePhoto_7" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
           Fill="#167efb" Width="12" Height="12" Stretch="Fill"/>
                     </Button>

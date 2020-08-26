@@ -101,6 +101,8 @@ namespace FreeMarketApp.Views.Pages
                 var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
                 if (cbDealTypeValue.Tag.ToString() == "0") errorCount++;
 
+                if (marketItemData.Photos.Count() == 0) errorCount++;
+
                 if (errorCount == 0)
                 {
                     //save to chain
@@ -109,6 +111,9 @@ namespace FreeMarketApp.Views.Pages
                     marketItemData.Shipping = tbShipping.Text;
                     marketItemData.Category = cbCategoryValue.Tag.ToString();
                     marketItemData.DealType = cbDealTypeValue.Tag.ToString();
+
+                    //get time to next block
+                    //upload to sia
 
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                     ClearForm();
@@ -162,6 +167,29 @@ namespace FreeMarketApp.Views.Pages
                     btAddPhoto.IsVisible = false;
                 }
             }
+        }
+
+        public void ButtonRemove_Click(object sender, RoutedEventArgs args)
+        {
+            var itemIndex = int.Parse(((Button)sender).Tag.ToString());
+            var lastIndex = marketItemData.Photos.Count - 1;
+
+            if (itemIndex != lastIndex)
+            {
+                for (int i = itemIndex; i < (marketItemData.Photos.Count - 1); i++)
+                {
+                    var iPhoto = this.FindControl<Image>("IPhoto_" + i);
+                    var iPhotoNext = this.FindControl<Image>("IPhoto_" + (i + 1));
+
+                    iPhoto.Source = iPhotoNext.Source;
+                    marketItemData.Photos[i] = marketItemData.Photos[i + 1];
+                }
+            }
+
+            //hide lastindex
+            var spLastPhoto = this.FindControl<StackPanel>("SPPhoto_" + lastIndex);
+            spLastPhoto.IsVisible = false;
+            marketItemData.Photos.RemoveAt(lastIndex);
         }
 
         private void ClearForm()

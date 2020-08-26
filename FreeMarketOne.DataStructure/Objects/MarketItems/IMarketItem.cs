@@ -15,14 +15,19 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         string Title { get; set; }
 
         /// <summary>
-        /// Unique Hash of content of market item created by GenerateHash() function manually
+        /// Unique Hash of content of market item created by GenerateHash() function manually for verification of data integrity
         /// </summary>
         string Hash { get; set; }
 
         /// <summary>
-        /// BaseHash is connection to base market item => content update (string Hash)
+        /// Signature is connection to user to check integrity and user ownership
         /// </summary>
-        string BaseHash { get; set; }
+        string Signature { get; set; }
+
+        /// <summary>
+        /// BaseSignature is connection to chain of product update.
+        /// </summary>
+        string BaseSignature { get; set; }
 
         string Description { get; set; }
         string Shipping { get; set; }

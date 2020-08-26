@@ -18,8 +18,11 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         [JsonProperty("h")]
         public string Hash { get; set; }
 
+        [JsonProperty("s")]
+        public string Signature { get; set; }
+
         [JsonProperty("b")]
-        public string BaseHash { get; set; }
+        public string BaseSignature { get; set; }
 
         [JsonProperty("d")]
         public string Description { get; set; }
@@ -33,7 +36,7 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         [JsonProperty("x")]
         public string DealType { get; set; }
 
-        [JsonProperty("c")]
+        [JsonProperty("k")]
         public string Category { get; set; }
 
         [JsonProperty("p")]
@@ -42,6 +45,7 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         public MarketItem()
         {
             this.Photos = new List<string>();
+            this.CreatedUtc = DateTime.UtcNow;
         }
 
         public virtual bool IsValid()
@@ -67,9 +71,24 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
             content.Append(Shipping);
             content.Append(DealType);
             content.Append(Category);
+            content.Append(BaseSignature);
             content.Append(String.Join(String.Empty, Photos.ToArray()));
 
             return sha512processor.GetSHA512(content.ToString());
+        }
+
+        public virtual byte[] ToByteArrayForSign()
+        {
+            var full = new StringBuilder();
+            full.Append(Title);
+            full.Append(Description);
+            full.Append(Shipping);
+            full.Append(DealType);
+            full.Append(Category);
+            full.Append(BaseSignature);
+            full.Append(String.Join(String.Empty, Photos.ToArray()));
+
+            return Encoding.ASCII.GetBytes(full.ToString());
         }
     }
 }

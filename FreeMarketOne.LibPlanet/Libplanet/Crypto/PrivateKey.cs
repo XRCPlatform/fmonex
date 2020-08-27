@@ -40,7 +40,7 @@ namespace Libplanet.Crypto
     [Equals]
     public class PrivateKey
     {
-        private readonly ECPrivateKeyParameters keyParam;
+        public readonly ECPrivateKeyParameters keyParam;
 
         /// <summary>
         /// Generates a new unique <see cref="PrivateKey"/> instance.
@@ -73,7 +73,7 @@ namespace Libplanet.Crypto
         {
         }
 
-        private PrivateKey(ECPrivateKeyParameters keyParam)
+        public PrivateKey(ECPrivateKeyParameters keyParam)
         {
             this.keyParam = keyParam;
         }
@@ -181,6 +181,7 @@ namespace Libplanet.Crypto
             seq.AddObject(new DerInteger(r));
             seq.AddObject(new DerInteger(s));
             seq.Close();
+
             return bos.ToArray();
         }
 
@@ -247,7 +248,7 @@ namespace Libplanet.Crypto
             return new SymmetricKey(result);
         }
 
-        internal static ECDomainParameters GetECParameters()
+        public static ECDomainParameters GetECParameters()
         {
             return GetECParameters("secp256k1");
         }

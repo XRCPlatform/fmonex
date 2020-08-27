@@ -46,12 +46,12 @@ namespace Libplanet.Crypto
         {
         }
 
-        internal PublicKey(ECPublicKeyParameters keyParam)
+        public PublicKey(ECPublicKeyParameters keyParam)
         {
             KeyParam = keyParam;
         }
 
-        internal ECPublicKeyParameters KeyParam { get; }
+        public ECPublicKeyParameters KeyParam { get; }
 
         public static bool operator ==(PublicKey left, PublicKey right) =>
             Operator.Weave(left, right);

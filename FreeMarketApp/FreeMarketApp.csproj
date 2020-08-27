@@ -73,7 +73,6 @@
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FreeMarketOne.Crypto\FreeMarketOne.Crypto.csproj" />
     <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Skynet\FreeMarketOne.Skynet.csproj" />
   </ItemGroup>

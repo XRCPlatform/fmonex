@@ -17,8 +17,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             var content = new StringBuilder();
             var sha512processor = new Sha512Processor();
 
-            content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+            content.Append(nametype);
             content.Append(Block);
+            content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
             return sha512processor.GetSHA512(content.ToString());
         }

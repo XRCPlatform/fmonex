@@ -11,14 +11,17 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("t")]
         public string UserName { get; set; }
 
-        [JsonProperty("s")]
-        public string Signature { get; set; }
+        [JsonProperty("d")]
+        public string Description { get; set; }
+
+        [JsonProperty("p")]
+        public string Photo { get; set; }
 
         [JsonProperty("b")]
         public string BaseSignature { get; set; }
 
-        [JsonProperty("d")]
-        public string Description { get; set; }
+        [JsonProperty("s")]
+        public string Signature { get; set; }
 
         public override string GenerateHash()
         {
@@ -28,6 +31,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(nametype);
             content.Append(UserName);
             content.Append(Description);
+            content.Append(Photo);
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
@@ -40,6 +44,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(nametype);
             content.Append(UserName);
             content.Append(Description);
+            content.Append(Photo);
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 

@@ -15,20 +15,8 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         [JsonProperty("t")]
         public string Title { get; set; }
 
-        [JsonProperty("h")]
-        public string Hash { get; set; }
-
-        [JsonProperty("s")]
-        public string Signature { get; set; }
-
-        [JsonProperty("b")]
-        public string BaseSignature { get; set; }
-
         [JsonProperty("d")]
         public string Description { get; set; }
-
-        [JsonProperty("c")]
-        public DateTime CreatedUtc { get; set; }
 
         [JsonProperty("s")]
         public string Shipping { get; set; }
@@ -41,6 +29,18 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
 
         [JsonProperty("p")]
         public List<string> Photos { get; set; }
+
+        [JsonProperty("b")]
+        public string BaseSignature { get; set; }
+
+        [JsonProperty("c")]
+        public DateTime CreatedUtc { get; set; }
+
+        [JsonProperty("s")]
+        public string Signature { get; set; }
+
+        [JsonProperty("h")]
+        public string Hash { get; set; }
 
         public MarketItem()
         {
@@ -71,9 +71,9 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
             content.Append(Shipping);
             content.Append(DealType);
             content.Append(Category);
+            content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
-            content.Append(string.Join(string.Empty, Photos.ToArray()));
 
             return sha512processor.GetSHA512(content.ToString());
         }
@@ -87,9 +87,9 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
             content.Append(Shipping);
             content.Append(DealType);
             content.Append(Category);
+            content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
-            content.Append(string.Join(string.Empty, Photos.ToArray()));
 
             return Encoding.ASCII.GetBytes(content.ToString());
         }

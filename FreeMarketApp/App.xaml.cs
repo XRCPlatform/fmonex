@@ -4,15 +4,12 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
 using FreeMarketOne.DataStructure;
-using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using Libplanet;
 using Libplanet.Blockchain;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace FreeMarketApp
@@ -70,6 +67,7 @@ namespace FreeMarketApp
                 FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 FreeMarketOneServer.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
                 FreeMarketOneServer.Current.Initialize();
+
             }).ConfigureAwait(true);
 
             return new MainWindow { DataContext = new MainWindowViewModel() };

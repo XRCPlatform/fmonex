@@ -43,6 +43,7 @@ namespace FreeMarketOne.ServerCore
         private ILogger _logger;
 
         public ServiceManager ServiceManager;
+        public UserManager UserManager;
 
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
@@ -96,39 +97,48 @@ namespace FreeMarketOne.ServerCore
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
 
-            //Service manager
-            ServiceManager = new ServiceManager(Configuration);
-            ServiceManager.Start();
-
-            //Initialize Tor
-            TorProcessManager = new TorProcessManager(Configuration);
-            var torInitialized = TorProcessManager.Start();
-
-            SpinWait.SpinUntil(() => torInitialized, 10000);
-            if (torInitialized)
+            //User manager
+            UserManager = new UserManager(Configuration);
+            if (UserManager.Initialize())
             {
-                //Initialize OnionSeeds
-                OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
-                OnionSeedsManager.Start();
+                //Service manager
+                ServiceManager = new ServiceManager(Configuration);
+                ServiceManager.Start();
 
-                //Initialize Base BlockChain Manager
-                BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+                //Initialize Tor
+                TorProcessManager = new TorProcessManager(Configuration);
+                var torInitialized = TorProcessManager.Start();
 
-                BaseBlockChainManager = new BlockChainManager<BaseAction>(
-                    Configuration,
-                    Configuration.BlockChainBasePath,
-                    Configuration.BlockChainSecretPath,
-                    Configuration.BlockChainBaseGenesis,
-                    Configuration.BlockChainBasePolicy,
-                    Configuration.ListenerBaseEndPoint,
-                    OnionSeedsManager,
-                    preloadEnded: BaseBlockChainLoadEndedEvent,
-                    blockChainChanged: BaseBlockChainChangedEvent);
-                BaseBlockChainManager.Start();
-            }
+                SpinWait.SpinUntil(() => torInitialized, 10000);
+                if (torInitialized)
+                {
+                    //Initialize OnionSeeds
+                    OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
+                    OnionSeedsManager.Start();
+
+                    //Initialize Base BlockChain Manager
+                    BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+
+                    BaseBlockChainManager = new BlockChainManager<BaseAction>(
+                        Configuration,
+                        Configuration.BlockChainBasePath,
+                        Configuration.BlockChainSecretPath,
+                        Configuration.BlockChainBaseGenesis,
+                        Configuration.BlockChainBasePolicy,
+                        Configuration.ListenerBaseEndPoint,
+                        OnionSeedsManager,
+                        preloadEnded: BaseBlockChainLoadEndedEvent,
+                        blockChainChanged: BaseBlockChainChangedEvent);
+                    BaseBlockChainManager.Start();
+                }
+                else
+                {
+                    _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
+                }
+            } 
             else
             {
-                _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
+                _logger.Warning("No user account is necessary to create one.");
             }
         }
 
@@ -230,6 +240,9 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
+            _logger?.Information("Ending User Manager...");
+            UserManager = null;
+
             _logger?.Information("Ending Service Manager...");
             ServiceManager?.Dispose();
 

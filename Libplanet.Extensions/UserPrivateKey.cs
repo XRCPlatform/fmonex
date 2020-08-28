@@ -16,6 +16,11 @@ namespace Libplanet.Extensions
             
         }
 
+        public UserPrivateKey(byte[] privateKey) : base(privateKey)
+        {
+
+        }
+
         [Pure]
         [IgnoreDuringEquals]
         public new UserPublicKey PublicKey

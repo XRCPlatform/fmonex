@@ -18,11 +18,26 @@ namespace FreeMarketApp.Views
 
         public MainWindow()
         {
-          
             InitializeComponent();
 
             Panel panel = this.FindControl<Panel>("PanelContent");
-            panel.Children.Add(MainPage.Instance);
+            if (FreeMarketOneServer.Current.UserManager.IsValid)
+            {
+                panel.Children.Add(MainPage.Instance);
+            } 
+            else
+            {
+                panel.Children.Add(FirstRunPage.Instance);
+
+                var btMyProfile = this.FindControl<Button>("BTMyProfile");
+                btMyProfile.IsEnabled = false;
+                var btSearch = this.FindControl<Button>("BTSearch");
+                btSearch.IsEnabled = false;
+                var btMyProducts = this.FindControl<Button>("BTMyProducts");
+                btMyProducts.IsEnabled = false;
+                var btPrivateChat = this.FindControl<Button>("BTPrivateChat");
+                btPrivateChat.IsEnabled = false;
+            }
 
             this.FixWindowCenterPosition();
             DataContextChanged += (object sender, EventArgs wat) =>

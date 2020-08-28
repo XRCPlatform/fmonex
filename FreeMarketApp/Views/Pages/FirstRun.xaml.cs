@@ -2,8 +2,11 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
+using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FreeMarketApp.Views.Pages
@@ -35,91 +38,112 @@ namespace FreeMarketApp.Views.Pages
             AvaloniaXamlLoader.Load(this);
         }
 
-        public void ButtonSave_Click(object sender, RoutedEventArgs args)
+        public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             ////check form
-            //var tbTitle = this.FindControl<TextBox>("TBTitle");
-            //var tbDescription = this.FindControl<TextBox>("TBDescription");
-            //var tbShipping = this.FindControl<TextBox>("TBShipping");
-            //var cbCategory = this.FindControl<ComboBox>("CBCategory");
-            //var cbDealType = this.FindControl<ComboBox>("CBDealType");
+            var tbUserName = this.FindControl<TextBox>("TBUserName");
+            var tbDescription = this.FindControl<TextBox>("TBDescription");
+            var tbPassword = this.FindControl<TextBox>("TBPassword");
+            var tbPasswordVerify = this.FindControl<TextBox>("TBPasswordVerify");
+            var tbSeed = this.FindControl<TextBox>("TBSeed");
 
-            //var errorCount = 0;
+            var errorCount = 0;
+            var errorMessages = new StringBuilder();
 
-            //if (string.IsNullOrEmpty(tbTitle.Text)) errorCount++;
-            //if (string.IsNullOrEmpty(tbDescription.Text)) errorCount++;
-            //if (string.IsNullOrEmpty(tbShipping.Text)) errorCount++;
-
-            //var cbCategoryValue = cbCategory.SelectedItem as ComboBoxItem;
-            //if (cbCategoryValue.Tag.ToString() == "0") errorCount++;
-
-            //var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
-            //if (cbDealTypeValue.Tag.ToString() == "0") errorCount++;
-
-            //if (_marketItemData.Photos.Count() == 0) errorCount++;
-
-            //if (errorCount == 0)
-            //{
-            //    //save to chain
-            //    _marketItemData.Title = tbTitle.Text;
-            //    _marketItemData.Description = tbDescription.Text;
-            //    _marketItemData.Shipping = tbShipping.Text;
-            //    _marketItemData.Category = cbCategoryValue.Tag.ToString();
-            //    _marketItemData.DealType = cbDealTypeValue.Tag.ToString();
-
-            //    //get time to next block
-            //    //upload to sia
-            //    for (int i = _marketItemData.Photos.Count(); i > 0; i--)
-            //    {
-            //        if (!_marketItemData.Photos[i - 1].Contains(SkynetWebPortal.SKYNET_PREFIX))
-            //        {
-            //            var skynetUrl = UploadToSkynet(_marketItemData.Photos[i - 1]);
-            //            if (skynetUrl == null)
-            //            {
-            //                _marketItemData.Photos.RemoveAt(i - 1);
-            //            }
-            //            else
-            //            {
-            //                _marketItemData.Photos[i - 1] = skynetUrl;
-            //            }
-            //        }
-            //    }
-
-            //    PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
-            //    ClearForm();
-
-            //}
-            //else
-            //{
-
-            //    await MessageBox.Show(mainWindow,
-            //       SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyForm"),
-            //        SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
-            //        MessageBox.MessageBoxButtons.Ok);
-            //}
-
-
-            async void AppAsyncLoadingStart()
+            if (string.IsNullOrEmpty(tbUserName.Text) || tbUserName.Text.Length < 10)
             {
-                var splashViewModel = new SplashWindowViewModel();
-                splashViewModel.StartupProgressText = "Reloading...";
-                var splashWindow = new SplashWindow { DataContext = splashViewModel };
-                splashWindow.Show();
-                await Task.Delay(10);
-
-                //reloading server with splash window
-                FreeMarketOneServer.Current.Initialize();
-                PagesHelper.Switch(mainWindow, MainPage.Instance);
-
-                if (splashWindow != null)
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortUserName"));
+                errorCount++;
+            }
+            else
+            {
+                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbUserName.Text))
                 {
-                    splashWindow.Close();
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
+                    errorCount++;
                 }
             }
 
-            AppAsyncLoadingStart();
+            if (string.IsNullOrEmpty(tbDescription.Text) || tbDescription.Text.Length < 50)
+            {
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortDescription"));
+                errorCount++;
+            }
+            else
+            {
+                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbDescription.Text))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                    errorCount++;
+                }
+            }
+
+            if (string.IsNullOrEmpty(tbPassword.Text) || string.IsNullOrEmpty(tbPasswordVerify.Text) || tbPassword.Text.Length < 16)
+            {
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortPassword"));
+                errorCount++;
+            }
+            else
+            {
+                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbPassword.Text))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsPassword"));
+                    errorCount++;
+                }
+            }
+            if (tbPassword.Text != tbPasswordVerify.Text)
+            {
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_PasswordNotIdentical"));
+                errorCount++;
+            }
+
+            if (string.IsNullOrEmpty(tbSeed.Text) || tbSeed.Text.Length < 200)
+            {
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortSeed"));
+                errorCount++;
+            }
+            else
+            {
+                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbSeed.Text))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsSeed"));
+                    errorCount++;
+                }
+            }
+
+            if (errorCount == 0)
+            {
+                //save to chain
+
+                async void AppAsyncLoadingStart()
+                {
+                    var splashViewModel = new SplashWindowViewModel();
+                    splashViewModel.StartupProgressText = "Reloading...";
+                    var splashWindow = new SplashWindow { DataContext = splashViewModel };
+                    splashWindow.Show();
+                    await Task.Delay(10);
+
+                    //reloading server with splash window
+                    FreeMarketOneServer.Current.Initialize();
+                    PagesHelper.Switch(mainWindow, MainPage.Instance);
+
+                    if (splashWindow != null)
+                    {
+                        splashWindow.Close();
+                    }
+                }
+
+                AppAsyncLoadingStart();
+            }
+            else
+            {
+                await MessageBox.Show(mainWindow,
+                   errorMessages.ToString(),
+                    SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                    MessageBox.MessageBoxButtons.Ok);
+            }
         }
 
         public void ButtonRandomSeed_Click(object sender, RoutedEventArgs args)

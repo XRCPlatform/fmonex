@@ -129,6 +129,33 @@
   <data name="Dialog_Confirmation_Title" xml:space="preserve">
     <value>Confirmation</value>
   </data>
+  <data name="Dialog_FirstRun_InvalidCharsDescription" xml:space="preserve">
+    <value>Your description contains invalid chars.</value>
+  </data>
+  <data name="Dialog_FirstRun_InvalidCharsPassword" xml:space="preserve">
+    <value>Your password contains invalid chars.</value>
+  </data>
+  <data name="Dialog_FirstRun_InvalidCharsSeed" xml:space="preserve">
+    <value>Your seed contains invalid chars.</value>
+  </data>
+  <data name="Dialog_FirstRun_InvalidCharsUserName" xml:space="preserve">
+    <value>Your username contains invalid chars.</value>
+  </data>
+  <data name="Dialog_FirstRun_PasswordNotIdentical" xml:space="preserve">
+    <value>Passwords aren't identical.</value>
+  </data>
+  <data name="Dialog_FirstRun_ShortDescription" xml:space="preserve">
+    <value>Your description is too short. Minimum is 50 chars.</value>
+  </data>
+  <data name="Dialog_FirstRun_ShortPassword" xml:space="preserve">
+    <value>Your password is too short. Minimum is 16 chars.</value>
+  </data>
+  <data name="Dialog_FirstRun_ShortSeed" xml:space="preserve">
+    <value>Your seed is too short. Minimum is 200 chars.</value>
+  </data>
+  <data name="Dialog_FirstRun_ShortUserName" xml:space="preserve">
+    <value>Your username is too short. Minimum is 10 chars.</value>
+  </data>
   <data name="Dialog_Information_Title" xml:space="preserve">
     <value>Information</value>
   </data>

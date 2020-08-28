@@ -65,5 +65,25 @@ namespace FreeMarketOne.ServerCore
 
             return new string(chars);
         }
+
+        public bool IsTextValid(string text)
+        {
+            string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+         
+            if (string.IsNullOrEmpty(text))
+            {
+                return false;
+            } 
+            else
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    var charTest = text.Substring(i, 1);
+                    if (!validChars.Contains(charTest)) return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

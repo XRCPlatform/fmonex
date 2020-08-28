@@ -70,7 +70,7 @@
                     <TextBlock Text="Username" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
                     <TextBox HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" AcceptsReturn="True" BorderThickness="0" Padding="10" Background="#f9f9f9"/>
                 </StackPanel>
-                <TextBlock Text="About" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="Description" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
                 <!-- About user text binding -->
                 <TextBox x:Name="DescriptionBinding" Margin="20 5 20 0" FontSize="16" Height="100" AcceptsReturn="True" Watermark="Add public description" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" />
 

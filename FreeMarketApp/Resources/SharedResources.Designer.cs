@@ -97,6 +97,87 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your description contains invalid chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_InvalidCharsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password contains invalid chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_InvalidCharsPassword {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_InvalidCharsPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your seed contains invalid chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_InvalidCharsSeed {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_InvalidCharsSeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your username contains invalid chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_InvalidCharsUserName {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passwords aren&apos;t identical..
+        /// </summary>
+        internal static string Dialog_FirstRun_PasswordNotIdentical {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_PasswordNotIdentical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your description is too short. Minimum is 50 chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_ShortDescription {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_ShortDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password is too short. Minimum is 16 chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_ShortPassword {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_ShortPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your seed is too short. Minimum is 200 chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_ShortSeed {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_ShortSeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your username is too short. Minimum is 10 chars..
+        /// </summary>
+        internal static string Dialog_FirstRun_ShortUserName {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_ShortUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Information.
         /// </summary>
         internal static string Dialog_Information_Title {

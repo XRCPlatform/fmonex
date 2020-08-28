@@ -42,7 +42,7 @@ namespace FreeMarketOne.BlockChain
         private string _blockChainGenesisName { get; set; }
         private EndPoint _endPoint { get; set; }
 
-        private PrivateKey _privateKey { get; set; }
+        private UserPrivateKey _privateKey { get; set; }
         private BlockChain<T> _blockChain;
         private RocksDBStore _storage;
         private Swarm<T> _swarmServer;
@@ -65,7 +65,7 @@ namespace FreeMarketOne.BlockChain
         public BlockChain<T> BlockChain { get => _blockChain; }
         public RocksDBStore Storage { get => _storage; }
         public Swarm<T> SwarmServer { get => _swarmServer; }
-        public PrivateKey PrivateKey { get => _privateKey; }
+        public UserPrivateKey PrivateKey { get => _privateKey; }
 
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
@@ -91,6 +91,7 @@ namespace FreeMarketOne.BlockChain
             IDefaultBlockPolicy<T> blockChainPolicy,
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
+            UserPrivateKey userPrivateKey,
             List<IBaseItem> listHashCheckPoints = null,
             Block<T> genesisBlock = null,
             EventHandler bootstrapStarted = null,
@@ -108,8 +109,8 @@ namespace FreeMarketOne.BlockChain
             _blockChainPolicy = blockChainPolicy;
             _blockChainGenesisName = blockChainGenesisName;
             _endPoint = endPoint;
-          
-            _privateKey = GetSecret(Path.Combine(_configuration.FullBaseDirectory, blockChainSecretPath));
+
+            _privateKey = userPrivateKey;
             _storage = new RocksDBStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
             _onionSeedManager = seedsManager;
 
@@ -131,28 +132,6 @@ namespace FreeMarketOne.BlockChain
             _clearedOlderBlocks = clearedOlderBlocks;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
-        }
-
-        private PrivateKey GetSecret(string path)
-        {
-            if (File.Exists(path))
-            {
-                var keyBytes = File.ReadAllBytes(path);
-                var key = new PrivateKey(keyBytes);
-                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(key.ByteArray)));
-                return key;
-            } 
-            else
-            {
-                var newKey = new PrivateKey();
-                _logger.Information(string.Format("Node Public Key : {0}", ByteUtil.Hex(newKey.ByteArray)));
-
-                var directoryPath = Path.GetDirectoryName(path);
-                Directory.CreateDirectory(directoryPath);
-                File.WriteAllBytes(path, newKey.ByteArray);
-
-                return newKey;
-            }
         }
 
         private bool DifferentAppProtocolVersionEncountered(

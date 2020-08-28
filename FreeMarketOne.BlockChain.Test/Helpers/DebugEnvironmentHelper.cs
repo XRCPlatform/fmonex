@@ -4,6 +4,7 @@ using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
 using Libplanet.Blockchain;
+using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using System;
@@ -28,10 +29,10 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             configuration = new DebugConfiguration();
             configuration.FullBaseDirectory = InitializeFullBaseDirectory();
 
-            /* Clear all debug old data */
+            //Clear all debug old data
             ClearDefaultEnvironment(configuration);
 
-            /* Initialize Logger */
+            //Initialize Logger
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(configuration.FullBaseDirectory, configuration.LogFilePath),
@@ -41,13 +42,16 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             logger = Log.Logger.ForContext<T>();
             logger.Information("Debug Start");
 
-            /* Initialize Mock OnionSeeds */
+            //Mock user private key
+            var newPrivateKey = new UserPrivateKey();
+
+            //Initialize Mock OnionSeeds
             onionSeedsManager = new MockSeedManager();
 
-            /* Initialize genesis blocks */
+            //Initialize genesis blocks
             var genesis = GenesisHelper.GenerateIt(configuration);
 
-            /* Initialize Base BlockChain Manager */
+            //Initialize Base BlockChain Manager
             baseBlockChainManager = new BlockChainManager<BaseAction>(
                 configuration,
                 configuration.BlockChainBasePath,
@@ -56,6 +60,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 configuration.BlockChainBasePolicy,
                 configuration.ListenerBaseEndPoint,
                 onionSeedsManager,
+                newPrivateKey,
                 genesisBlock: genesis,
                 preloadEnded: _baseBlockChainLoadedEvent,
                 blockChainChanged: _baseBlockChainChangedEvent);

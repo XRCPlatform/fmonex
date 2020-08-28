@@ -20,23 +20,27 @@ namespace FreeMarketApp.Views
         {
             InitializeComponent();
 
-            Panel panel = this.FindControl<Panel>("PanelContent");
-            if (FreeMarketOneServer.Current.UserManager.IsValid)
+            var panel = this.FindControl<Panel>("PanelContent");
+
+            if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
             {
                 panel.Children.Add(MainPage.Instance);
-            } 
+
+                PagesHelper.UnlockTools(this, true);
+            }
             else
             {
-                panel.Children.Add(FirstRunPage.Instance);
+                if ((FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
+                    || (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
+                {
+                    panel.Children.Add(LoginPage.Instance);
+                }
+                else
+                {
+                    panel.Children.Add(FirstRunPage.Instance);
+                }
 
-                var btMyProfile = this.FindControl<Button>("BTMyProfile");
-                btMyProfile.IsEnabled = false;
-                var btSearch = this.FindControl<Button>("BTSearch");
-                btSearch.IsEnabled = false;
-                var btMyProducts = this.FindControl<Button>("BTMyProducts");
-                btMyProducts.IsEnabled = false;
-                var btPrivateChat = this.FindControl<Button>("BTPrivateChat");
-                btPrivateChat.IsEnabled = false;
+                PagesHelper.UnlockTools(this, false);
             }
 
             this.FixWindowCenterPosition();

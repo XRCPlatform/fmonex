@@ -10,6 +10,11 @@ namespace Libplanet.Extensions
 {
     public class UserPrivateKey : PrivateKey
     {
+        public UserPrivateKey() : base()
+        {
+
+        }
+
         public UserPrivateKey(string seed) 
             : base(GenerateKeyParam(seed))
         {

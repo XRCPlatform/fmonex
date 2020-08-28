@@ -65,7 +65,7 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler FreeMarketOneServerLoadedEvent;
 
-        public void Initialize()
+        public void Initialize(string password = null)
         {
             var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
 
@@ -99,7 +99,7 @@ namespace FreeMarketOne.ServerCore
 
             //User manager
             UserManager = new UserManager(Configuration);
-            if (UserManager.Initialize())
+            if (UserManager.Initialize(password) == UserManager.PrivateKeyStates.Valid)
             {
                 //Service manager
                 ServiceManager = new ServiceManager(Configuration);
@@ -127,6 +127,7 @@ namespace FreeMarketOne.ServerCore
                         Configuration.BlockChainBasePolicy,
                         Configuration.ListenerBaseEndPoint,
                         OnionSeedsManager,
+                        UserManager.PrivateKey,
                         preloadEnded: BaseBlockChainLoadEndedEvent,
                         blockChainChanged: BaseBlockChainChangedEvent);
                     BaseBlockChainManager.Start();
@@ -175,6 +176,7 @@ namespace FreeMarketOne.ServerCore
                     Configuration.BlockChainMarketPolicy,
                     Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,
+                    UserManager.PrivateKey,
                     hashCheckPoints,
                     genesisBlock,
                     preloadEnded: MarketBlockChainLoadEndedEvent,

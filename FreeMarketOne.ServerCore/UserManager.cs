@@ -1,5 +1,6 @@
 ﻿using FreeMarketOne.DataStructure;
 using Libplanet;
+using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Serilog;
 using System;
@@ -11,11 +12,25 @@ namespace FreeMarketOne.ServerCore
 {
     public class UserManager
     {
+        public enum PrivateKeyStates
+        {
+            NoKey = 0,
+            NoPassword = 1,
+            WrongPassword = 2,
+            Valid = 3
+        }
+
+        private UserPrivateKey _privateKey;
+
         private IBaseConfiguration _configuration;
-        private bool _isValid;
+
+        private PrivateKeyStates _privateKeyState;
+
         private ILogger _logger { get; set; }
 
-        public bool IsValid => _isValid;
+        public PrivateKeyStates PrivateKeyState => _privateKeyState;
+
+        public UserPrivateKey PrivateKey => _privateKey;
 
         public UserManager(IBaseConfiguration configuration)
         {
@@ -23,10 +38,10 @@ namespace FreeMarketOne.ServerCore
             _logger.Information("Initializing User Manager");
 
             _configuration = configuration;
-            _isValid = false;
+            _privateKeyState = PrivateKeyStates.NoKey;
         }
 
-        internal bool Initialize()
+        internal PrivateKeyStates Initialize(string password = null)
         {
             var filePath = Path.Combine(_configuration.FullBaseDirectory, _configuration.BlockChainSecretPath);
 
@@ -35,21 +50,39 @@ namespace FreeMarketOne.ServerCore
                 try
                 {
                     var keyBytes = File.ReadAllBytes(filePath);
-                    var key = new UserPrivateKey(keyBytes);
-                    _logger.Information(string.Format("Node Public Key : {0}", key.PublicKey.KeyParam.Q.GetEncoded()));
-                    _isValid = true;
+
+                    if (password != null)
+                    {
+                        password = password.Substring(0, 16);
+                        var key = password + password; //expecting 32 chars
+                        var aes = new SymmetricKey(Encoding.ASCII.GetBytes(key));
+                        var decryptedPrivKey = aes.Decrypt(keyBytes);
+
+                        _privateKey = new UserPrivateKey(decryptedPrivKey);
+                        _privateKeyState = PrivateKeyStates.Valid;
+
+                        _logger.Information(string.Format("Private Key Decrypted"));
+                    }
+                    else
+                    {
+                        _privateKeyState = PrivateKeyStates.NoPassword;
+                    }
+                }
+                catch (InvalidCiphertextException)
+                {
+                    _privateKeyState = PrivateKeyStates.WrongPassword;
                 }
                 catch (Exception)
                 {
-                    _isValid = false;
+                    _privateKeyState = PrivateKeyStates.NoKey;
                 }
             } 
             else
             {
-                _isValid = false;
+                _privateKeyState = PrivateKeyStates.NoKey;
             }
 
-            return _isValid;
+            return _privateKeyState;
         }
 
         public string CreateRandomSeed(int length = 200)
@@ -84,6 +117,27 @@ namespace FreeMarketOne.ServerCore
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Storing private key dat of user account
+        /// </summary>
+        /// <param name="seed">Expecting at least 200 chars.</param>
+        /// <param name="password">Expecting 16 chars.</param>
+        public void SaveNewPrivKey(string seed, string password, string path)
+        {
+            _logger.Information(string.Format("Saving new private key"));
+
+            password = password.Substring(0, 16);
+            var newUserPrivKey = new UserPrivateKey(seed);
+            var key = password + password; //expecting 32 chars
+
+            var aes = new SymmetricKey(Encoding.ASCII.GetBytes(key));
+            var encryptedPrivKey = aes.Encrypt(newUserPrivKey.ByteArray);
+
+            var directoryPath = Path.GetDirectoryName(path);
+            Directory.CreateDirectory(directoryPath);
+            File.WriteAllBytes(path, encryptedPrivKey);
         }
     }
 }

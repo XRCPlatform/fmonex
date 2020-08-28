@@ -6,6 +6,7 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -115,8 +116,16 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                //save to chain
 
+                var path = Path.Combine(
+                    FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
+                    FreeMarketOneServer.Current.Configuration.BlockChainSecretPath);
+
+                FreeMarketOneServer.Current.UserManager.SaveNewPrivKey(tbSeed.Text, tbPassword.Text, path);
+
+                //TODO: save to chain
+
+                //reloading server with splash window
                 async void AppAsyncLoadingStart()
                 {
                     var splashViewModel = new SplashWindowViewModel();
@@ -125,9 +134,9 @@ namespace FreeMarketApp.Views.Pages
                     splashWindow.Show();
                     await Task.Delay(10);
 
-                    //reloading server with splash window
-                    FreeMarketOneServer.Current.Initialize();
+                    FreeMarketOneServer.Current.Initialize(tbPassword.Text);
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
+                    PagesHelper.UnlockTools(mainWindow, true);
 
                     if (splashWindow != null)
                     {

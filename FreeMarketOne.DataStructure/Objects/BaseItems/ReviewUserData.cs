@@ -14,14 +14,17 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("d")]
         public DateTime ReviewDateTime { get; set; }
 
+        [JsonProperty("s")]
+        public string Signature { get; set; }
+
         public override string GenerateHash()
         {
             var content = new StringBuilder();
             var sha512processor = new Sha512Processor();
 
             content.Append(Message);
-            content.Append(CreatedUtc);
-            content.Append(ReviewDateTime.Ticks);
+            content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+            content.Append(ReviewDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
             return sha512processor.GetSHA512(content.ToString());
         }

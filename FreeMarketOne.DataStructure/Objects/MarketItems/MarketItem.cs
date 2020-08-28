@@ -72,23 +72,26 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
             content.Append(DealType);
             content.Append(Category);
             content.Append(BaseSignature);
-            content.Append(String.Join(String.Empty, Photos.ToArray()));
+            content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+            content.Append(string.Join(string.Empty, Photos.ToArray()));
 
             return sha512processor.GetSHA512(content.ToString());
         }
 
         public virtual byte[] ToByteArrayForSign()
         {
-            var full = new StringBuilder();
-            full.Append(Title);
-            full.Append(Description);
-            full.Append(Shipping);
-            full.Append(DealType);
-            full.Append(Category);
-            full.Append(BaseSignature);
-            full.Append(String.Join(String.Empty, Photos.ToArray()));
+            var content = new StringBuilder();
+            content.Append(nametype);
+            content.Append(Title);
+            content.Append(Description);
+            content.Append(Shipping);
+            content.Append(DealType);
+            content.Append(Category);
+            content.Append(BaseSignature);
+            content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+            content.Append(string.Join(string.Empty, Photos.ToArray()));
 
-            return Encoding.ASCII.GetBytes(full.ToString());
+            return Encoding.ASCII.GetBytes(content.ToString());
         }
     }
 }

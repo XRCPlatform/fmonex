@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,8 +10,8 @@
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
                 <Image Source="resm:FreeMarketApp.Assets.splash.png" Width="250" />
-                <TextBlock Width="200" TextWrapping="Wrap" TextAlignment="Center" Text="Now is necessary to generate your unique account information. Use random generation of new seed or use your stored seed to recover your profile. "/>
-                <TextBlock Width="200" Margin="0,20" TextWrapping="Wrap" TextAlignment="Center" Text="Your seed is important. Please to store it to safe location. If you lost your seed you will not be able to access your data anymore."/>
+                <TextBlock Width="200" TextWrapping="Wrap" TextAlignment="Center" Text="Start by creating your unique account information. Use random generation tool or type previously stored seed phrase to recover your profile."/>
+                <TextBlock Width="200" Margin="0,20" TextWrapping="Wrap" TextAlignment="Center" Text="Your seed is important. To avoid losing access to your account, you have to make a backup. Please write down your recovery phrase and keep it in a safe place."/>
             </StackPanel>
         </ScrollViewer>
         <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 0 0 0"/>

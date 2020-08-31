@@ -20,9 +20,6 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("b")]
         public string BaseSignature { get; set; }
 
-        [JsonProperty("s")]
-        public string Signature { get; set; }
-
         public override string GenerateHash()
         {
             var content = new StringBuilder();
@@ -38,7 +35,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             return sha512processor.GetSHA512(content.ToString());
         }
 
-        public virtual byte[] ToByteArrayForSign()
+        public override byte[] ToByteArrayForSign()
         {
             var content = new StringBuilder();
             content.Append(nametype);

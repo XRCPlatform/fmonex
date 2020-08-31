@@ -185,5 +185,32 @@ namespace FreeMarketApp.Resources {
                 return ResourceManager.GetString("Dialog_Information_Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password contains invalid chars..
+        /// </summary>
+        internal static string Dialog_LoginPage_InvalidCharsPassword {
+            get {
+                return ResourceManager.GetString("Dialog_LoginPage_InvalidCharsPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password is too short. Minimum is 16 chars..
+        /// </summary>
+        internal static string Dialog_LoginPage_ShortPassword {
+            get {
+                return ResourceManager.GetString("Dialog_LoginPage_ShortPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password was wrong. Try it again. Please..
+        /// </summary>
+        internal static string Dialog_LoginPage_WatermarkWrongPassword {
+            get {
+                return ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword", resourceCulture);
+            }
+        }
     }
 }

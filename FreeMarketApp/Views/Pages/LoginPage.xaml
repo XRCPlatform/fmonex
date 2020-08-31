@@ -23,7 +23,7 @@
                         <TextBlock Text="Login" TextWrapping="Wrap" FontSize="28" Margin="0 0 30 0" FontWeight="Bold" Foreground="#606060"/>
                     </WrapPanel>
 
-                  <TextBlock Text="Password" Margin="20 0 0 0" FontSize="16" FontWeight="Bold"/>
+                  <TextBlock Text="Password *" Margin="20 0 0 0" FontSize="16" FontWeight="Bold"/>
                   <TextBox Name="TBPassword" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" BorderThickness="0" Padding="10" Background="#f9f9f9"/>
                 </StackPanel>
 

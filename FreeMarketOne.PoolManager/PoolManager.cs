@@ -433,5 +433,20 @@ namespace FreeMarketOne.PoolManager
 
             return result;
         }
+
+        public List<IBaseItem> GetAllActionItemByType(Type[] type)
+        {
+            var result = new List<IBaseItem>();
+            var localItems = GetAllActionItemLocal();
+            foreach (var itemLocal in localItems)
+            {
+                if (type.Contains(itemLocal.GetType()))
+                {
+                    result.Add(itemLocal);
+                }
+            }
+
+            return result;
+        }
     }
 }

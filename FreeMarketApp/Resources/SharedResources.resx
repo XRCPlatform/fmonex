@@ -159,4 +159,13 @@
   <data name="Dialog_Information_Title" xml:space="preserve">
     <value>Information</value>
   </data>
+  <data name="Dialog_LoginPage_InvalidCharsPassword" xml:space="preserve">
+    <value>Your password contains invalid chars.</value>
+  </data>
+  <data name="Dialog_LoginPage_ShortPassword" xml:space="preserve">
+    <value>Your password is too short. Minimum is 16 chars.</value>
+  </data>
+  <data name="Dialog_LoginPage_WatermarkWrongPassword" xml:space="preserve">
+    <value>Your password was wrong. Try it again. Please.</value>
+  </data>
 </root>

@@ -32,16 +32,16 @@
 
                   <DockPanel Margin="0 0 0 0">
                     <WrapPanel Orientation="Vertical" Margin="0 0 0 0">
-                      <TextBlock Text="Password" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+                      <TextBlock Text="Password *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
                       <TextBox Name="TBPassword" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" BorderThickness="0" Padding="10" Background="#f9f9f9"/>
                     </WrapPanel>
                     <WrapPanel Orientation="Vertical" Margin="0 0 0 0">
-                      <TextBlock Text="Password Verification" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+                      <TextBlock Text="Password Verification *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
                       <TextBox Name="TBPasswordVerify" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" BorderThickness="0" Padding="10" Background="#f9f9f9"/>
                     </WrapPanel>
                   </DockPanel>
                   
-                  <TextBlock Text="Your seed" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+                  <TextBlock Text="Your seed *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
                   <TextBox Name="TBSeed" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="60" Watermark="Add your seed" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" />
 
                 </StackPanel>

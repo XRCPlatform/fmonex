@@ -8,6 +8,11 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 {
     public class BaseItem : IBaseItem
     {
+        public BaseItem()
+        {
+            CreatedUtc = DateTime.UtcNow;
+        }
+
         [JsonProperty("_nt")]
         public string nametype { get; set; }
 
@@ -16,6 +21,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         [JsonProperty("c")]
         public DateTime CreatedUtc { get; set; }
+
+        [JsonProperty("s")]
+        public string Signature { get; set; }
 
         public virtual bool IsValid()
         {
@@ -37,6 +45,15 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(CreatedUtc);
 
             return sha512processor.GetSHA512(content.ToString());
+        }
+
+        public virtual byte[] ToByteArrayForSign()
+        {
+            var content = new StringBuilder();
+            content.Append(nametype);
+            content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+
+            return Encoding.ASCII.GetBytes(content.ToString());
         }
     }
 }

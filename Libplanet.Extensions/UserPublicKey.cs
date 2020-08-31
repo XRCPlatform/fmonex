@@ -1,4 +1,5 @@
 ﻿using Libplanet.Crypto;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -21,7 +22,12 @@ namespace Libplanet.Extensions
 
         }
 
-        public List<byte[]> Recover(byte[] message, byte[] signature)
+        public static List<byte[]> Recover(byte[] message, string signatureBase64)
+        {
+            return Recover(message, Convert.FromBase64String(signatureBase64));
+        }
+
+        public static List<byte[]> Recover(byte[] message, byte[] signature)
         {
             var pubKeysResult = new List<byte[]>();
 
@@ -61,7 +67,7 @@ namespace Libplanet.Extensions
             return pubKeysResult;
         }
 
-        private ECPoint ECDSA_SIG_recover_key_GFp(BigInteger[] sig, byte[] hash, int recid, bool check)
+        private static ECPoint ECDSA_SIG_recover_key_GFp(BigInteger[] sig, byte[] hash, int recid, bool check)
         {
             X9ECParameters ecParams = Org.BouncyCastle.Asn1.Sec.SecNamedCurves.GetByName("secp256k1");
             int i = recid / 2;

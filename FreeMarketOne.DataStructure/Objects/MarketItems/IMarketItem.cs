@@ -43,5 +43,7 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         /// </summary>
         /// <returns></returns>
         string GenerateHash();
+
+        byte[] ToByteArrayForSign();
     }
 }

@@ -31,7 +31,7 @@ namespace LibPlanet.Extensions.Tests
             var isValid = pubkey.Verify(bytes, Convert.FromBase64String(mv1.Signature));
             Assert.IsTrue(isValid);
 
-            var listOfRecoveredKeysM1 = pubkey.Recover(bytes, Convert.FromBase64String(mv1.Signature));
+            var listOfRecoveredKeysM1 = UserPublicKey.Recover(bytes, mv1.Signature);
             var rightPubKey = pubkey.KeyParam.Q.GetEncoded();
             var isIdentical = false;
 
@@ -59,7 +59,7 @@ namespace LibPlanet.Extensions.Tests
             isValid = pubkey.Verify(bytes, Convert.FromBase64String(mv2.Signature));
             Assert.IsTrue(isValid);
 
-            var listOfRecoveredKeysM2 = pubkey.Recover(bytes, Convert.FromBase64String(mv2.Signature));
+            var listOfRecoveredKeysM2 = UserPublicKey.Recover(bytes, mv2.Signature);
             isIdentical = false;
 
             foreach (var item in listOfRecoveredKeysM2)

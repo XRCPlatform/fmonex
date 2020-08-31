@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using FreeMarketApp.Views.Pages;
+using FreeMarketOne.ServerCore;
 using Serilog;
 using Serilog.Events;
 using System;
@@ -33,7 +34,7 @@ namespace FreeMarketApp.Helpers
 
         internal static void Switch(Window mainWindow, UserControl pageAddInstance)
         {
-            Panel panel = mainWindow.FindControl<Panel>("PanelContent");
+            Panel panel = mainWindow.FindControl<Panel>("PCMainContent");
             if (!panel.Children.Contains(pageAddInstance)) panel.Children.Add(pageAddInstance);
 
             if ((pageAddInstance.GetType() != typeof(MainPage)) && panel.Children.Contains(MainPage.Instance)) panel.Children.Remove(MainPage.Instance);
@@ -62,6 +63,16 @@ namespace FreeMarketApp.Helpers
             btSearch.IsEnabled = isUnlocked;
             btMyProducts.IsEnabled = isUnlocked;
             btPrivateChat.IsEnabled = isUnlocked;
+        }
+
+        internal static void SetUserDate(Window mainWindow)
+        {
+            var userManager = FreeMarketOneServer.Current.UserManager;
+            if ((userManager != null) && (userManager.UserData != null))
+            {
+                var tbUserName = mainWindow.FindControl<TextBlock>("TBUserName");
+                tbUserName.Text = userManager.UserData.UserName;
+            }
         }
 
         internal static void Log(ILogger _logger, string message, LogEventLevel level = LogEventLevel.Information)

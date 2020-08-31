@@ -14,8 +14,11 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
     {
         string nametype { get; set; }
         string Hash { get; set; }
+        string Signature { get; set; }
         DateTime CreatedUtc { get; set; }
         bool IsValid();
         string GenerateHash();
+
+        byte[] ToByteArrayForSign();
     }
 }

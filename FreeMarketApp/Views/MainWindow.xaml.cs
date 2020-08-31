@@ -15,29 +15,29 @@ namespace FreeMarketApp.Views
 {
     public class MainWindow : WindowBase
     {
-
         public MainWindow()
         {
             InitializeComponent();
 
-            var panel = this.FindControl<Panel>("PanelContent");
+            var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
             if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
             {
-                panel.Children.Add(MainPage.Instance);
-
+                pcMainContent.Children.Add(MainPage.Instance);
+                
                 PagesHelper.UnlockTools(this, true);
+                PagesHelper.SetUserDate(this);
             }
             else
             {
                 if ((FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
                     || (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
                 {
-                    panel.Children.Add(LoginPage.Instance);
+                    pcMainContent.Children.Add(LoginPage.Instance);
                 }
                 else
                 {
-                    panel.Children.Add(FirstRunPage.Instance);
+                    pcMainContent.Children.Add(FirstRunPage.Instance);
                 }
 
                 PagesHelper.UnlockTools(this, false);

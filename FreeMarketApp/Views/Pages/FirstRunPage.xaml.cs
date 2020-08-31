@@ -5,7 +5,9 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,32 +55,16 @@ namespace FreeMarketApp.Views.Pages
             var errorCount = 0;
             var errorMessages = new StringBuilder();
 
-            if (string.IsNullOrEmpty(tbUserName.Text) || tbUserName.Text.Length < 10)
+            if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbUserName.Text))
             {
-                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortUserName"));
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
                 errorCount++;
-            }
-            else
-            {
-                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbUserName.Text))
-                {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
-                    errorCount++;
-                }
             }
 
-            if (string.IsNullOrEmpty(tbDescription.Text) || tbDescription.Text.Length < 50)
+            if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbDescription.Text))
             {
-                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortDescription"));
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
                 errorCount++;
-            }
-            else
-            {
-                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbDescription.Text))
-                {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
-                    errorCount++;
-                }
             }
 
             if (string.IsNullOrEmpty(tbPassword.Text) || string.IsNullOrEmpty(tbPasswordVerify.Text) || tbPassword.Text.Length < 16)
@@ -116,14 +102,12 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-
                 var path = Path.Combine(
                     FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                     FreeMarketOneServer.Current.Configuration.BlockChainSecretPath);
 
                 FreeMarketOneServer.Current.UserManager.SaveNewPrivKey(tbSeed.Text, tbPassword.Text, path);
-
-                //TODO: save to chain
+                var firstUserData = GenerateUserData(tbUserName.Text, tbDescription.Text);
 
                 //reloading server with splash window
                 async void AppAsyncLoadingStart()
@@ -134,9 +118,10 @@ namespace FreeMarketApp.Views.Pages
                     splashWindow.Show();
                     await Task.Delay(10);
 
-                    FreeMarketOneServer.Current.Initialize(tbPassword.Text);
+                    FreeMarketOneServer.Current.Initialize(tbPassword.Text, firstUserData);
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
                     PagesHelper.UnlockTools(mainWindow, true);
+                    PagesHelper.SetUserDate(mainWindow);
 
                     if (splashWindow != null)
                     {
@@ -159,6 +144,25 @@ namespace FreeMarketApp.Views.Pages
         {
             var tbSeed = this.FindControl<TextBox>("TBSeed");
             tbSeed.Text = FreeMarketOneServer.Current.UserManager.CreateRandomSeed();
+        }
+
+        /// <summary>
+        /// Saving data to blockchain
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="description"></param>
+        private UserDataV1 GenerateUserData(string userName, string description)
+        {
+            var newUser = new UserDataV1();
+            newUser.UserName = userName;
+            newUser.Description = description;
+            var bytesToSign = newUser.ToByteArrayForSign();
+
+            newUser.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+            
+            newUser.Hash = newUser.GenerateHash();
+
+            return newUser;
         }
     }
 }

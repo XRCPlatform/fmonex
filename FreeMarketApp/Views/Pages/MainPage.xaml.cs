@@ -2,7 +2,6 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
-using FreeMarketOne.ServerCore;
 
 namespace FreeMarketApp.Views.Pages
 {

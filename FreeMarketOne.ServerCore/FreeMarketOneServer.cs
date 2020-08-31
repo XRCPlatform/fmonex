@@ -1,25 +1,21 @@
-﻿using FreeMarketOne.Extensions.Helpers;
+﻿using FreeMarketOne.BlockChain;
+using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.P2P;
+using FreeMarketOne.PoolManager;
+using FreeMarketOne.ServerCore.Helpers;
 using FreeMarketOne.Tor;
+using Libplanet;
+using Libplanet.Blockchain;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using System;
-using System.IO;
-using Microsoft.Extensions.Configuration;
-using FreeMarketOne.P2P;
-using FreeMarketOne.DataStructure;
-using static FreeMarketOne.DataStructure.BaseConfiguration;
-using FreeMarketOne.BlockChain;
-using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.GenesisBlock;
-using FreeMarketOne.PoolManager;
-using Libplanet.Blockchain;
-using System.Runtime.InteropServices;
-using System.Threading;
-using FreeMarketOne.ServerCore.Helpers;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-using Libplanet;
+using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -65,7 +61,7 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler FreeMarketOneServerLoadedEvent;
 
-        public void Initialize(string password = null)
+        public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
             var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
 
@@ -99,7 +95,7 @@ namespace FreeMarketOne.ServerCore
 
             //User manager
             UserManager = new UserManager(Configuration);
-            if (UserManager.Initialize(password) == UserManager.PrivateKeyStates.Valid)
+            if (UserManager.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
             {
                 //Service manager
                 ServiceManager = new ServiceManager(Configuration);
@@ -224,6 +220,18 @@ namespace FreeMarketOne.ServerCore
             await Task.Delay(1000);
             await Task.Run(() =>
             {
+                if ((UserManager.UsedDataForceToPropagate) && (UserManager.UserData != null))
+                {
+                    BasePoolManager.AcceptActionItem(UserManager.UserData);
+                    BasePoolManager.PropagateAllActionItemLocal();
+                    Task.Delay(1000);
+                } 
+                else
+                {
+                    //loading actual user data from pool or blockchain
+                    UserManager.GetActualUserData();
+                }
+
                 FreeMarketOneServerLoadedEvent?.Invoke(this, null);
             }).ConfigureAwait(true);
         }

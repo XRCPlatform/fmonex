@@ -6,8 +6,6 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
-using System.Globalization;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,14 +49,14 @@ namespace FreeMarketApp.Views.Pages
 
             if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 16)
             {
-                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortPassword"));
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_ShortPassword"));
                 errorCount++;
             }
             else
             {
                 if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbPassword.Text))
                 {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsPassword"));
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_InvalidCharsPassword"));
                     errorCount++;
                 }
             }
@@ -79,13 +77,14 @@ namespace FreeMarketApp.Views.Pages
                     if (FreeMarketOneServer.Current.UserManager.PrivateKeyState != UserManager.PrivateKeyStates.WrongPassword) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
+                        PagesHelper.SetUserDate(mainWindow);
                     } 
                     else
                     {
                         tbPassword.Text = string.Empty;
-                        tbPassword.Watermark = "Your password was wrong. Try it again. Please.";
+                        tbPassword.Watermark = SharedResources.ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword");
                     }
-
+                    
                     if (splashWindow != null)
                     {
                         splashWindow.Close();

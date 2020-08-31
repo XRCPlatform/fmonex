@@ -102,12 +102,18 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                var path = Path.Combine(
+                FreeMarketOneServer.Current.UserManager.SaveNewPrivKey(
+                    tbSeed.Text, 
+                    tbPassword.Text, 
                     FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                     FreeMarketOneServer.Current.Configuration.BlockChainSecretPath);
-
-                FreeMarketOneServer.Current.UserManager.SaveNewPrivKey(tbSeed.Text, tbPassword.Text, path);
+                
                 var firstUserData = GenerateUserData(tbUserName.Text, tbDescription.Text);
+
+                FreeMarketOneServer.Current.UserManager.SaveUserData(
+                    firstUserData,
+                    FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
+                    FreeMarketOneServer.Current.Configuration.BlockChainUserPath);
 
                 //reloading server with splash window
                 async void AppAsyncLoadingStart()
@@ -121,7 +127,7 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.Initialize(tbPassword.Text, firstUserData);
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
                     PagesHelper.UnlockTools(mainWindow, true);
-                    PagesHelper.SetUserDate(mainWindow);
+                    PagesHelper.SetUserData(mainWindow);
 
                     if (splashWindow != null)
                     {

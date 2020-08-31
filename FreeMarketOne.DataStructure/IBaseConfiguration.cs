@@ -19,6 +19,7 @@ namespace FreeMarketOne.DataStructure
         string BlockChainMarketGenesis { get; set; }
         string BlockChainMarketPath { get; set; }
         string BlockChainSecretPath { get; set; }
+        string BlockChainUserPath { get; set; }
         EndPoint ListenerBaseEndPoint { get; set; }
         EndPoint ListenerMarketEndPoint { get; set; }
         string ChangellyApiKey { get; set; }

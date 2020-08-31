@@ -24,6 +24,7 @@ namespace FreeMarketOne.DataStructure
             this.BlockChainMarketPath = "data/blockchain_market";
             this.BlockChainMarketGenesis = "market_genesis.dat";
             this.BlockChainSecretPath = "data/key.data";
+            this.BlockChainUserPath = "data/user.data";
             this.ListenersUseTor = false;
             this.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9111/");
             this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9112/");

@@ -44,6 +44,8 @@ namespace FreeMarketOne.DataStructure
         
         public string BlockChainSecretPath { get; set; }
 
+        public string BlockChainUserPath { get; set; }
+
         public EndPoint ListenerBaseEndPoint { get; set; }
 
         public EndPoint ListenerMarketEndPoint { get; set; }

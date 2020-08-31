@@ -174,7 +174,7 @@ namespace FreeMarketOne.ServerCore
 
                         foreach (var itemPubKey in itemPubKeys)
                         {
-                            if (itemPubKey == userPubKey)
+                            if (itemPubKey.SequenceEqual(userPubKey))
                             {
                                 _logger.Information(string.Format("Found my UserData in pool."));
                                 _userData = (UserDataV1)itemPool;
@@ -208,7 +208,7 @@ namespace FreeMarketOne.ServerCore
 
                                     foreach (var itemPubKey in itemPubKeys)
                                     {
-                                        if (itemPubKey == userPubKey)
+                                        if (itemPubKey.SequenceEqual(userPubKey))
                                         {
                                             _logger.Information(string.Format("Found my UserData in pool."));
                                             _userData = userData;

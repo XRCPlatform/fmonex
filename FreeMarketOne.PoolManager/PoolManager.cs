@@ -446,6 +446,15 @@ namespace FreeMarketOne.PoolManager
                 }
             }
 
+            var stagedItems = GetAllActionItemStaged();
+            foreach (var itemStaged in stagedItems)
+            {
+                if (type.Contains(itemStaged.GetType()))
+                {
+                    result.Add(itemStaged);
+                }
+            }
+
             return result;
         }
     }

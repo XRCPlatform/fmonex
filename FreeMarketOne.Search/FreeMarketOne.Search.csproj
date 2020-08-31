@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lucene.Net" Version="4.8.0-beta00010" />
+    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00010" />
+    <PackageReference Include="Lucene.Net.Facet" Version="4.8.0-beta00010" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
+  </ItemGroup>
+
+</Project>

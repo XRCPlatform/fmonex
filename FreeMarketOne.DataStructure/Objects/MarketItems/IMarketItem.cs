@@ -25,14 +25,23 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         string Signature { get; set; }
 
         /// <summary>
+        /// Signature of buyer to identify him
+        /// </summary>
+        string BuyerSignature { get; set; }
+
+        /// <summary>
         /// BaseSignature is connection to chain of product update.
         /// </summary>
         string BaseSignature { get; set; }
 
+        float Price { get; set; }
+
+        int PriceType { get; set; }
+
         string Description { get; set; }
         string Shipping { get; set; }
-        string DealType { get; set; }
-        string Category { get; set; }
+        int DealType { get; set; }
+        int Category { get; set; }
         List<string> Photos { get; set; }
         DateTime CreatedUtc { get; set; }
         

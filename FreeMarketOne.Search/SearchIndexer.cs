@@ -39,21 +39,13 @@ namespace FreeMarketOne.Search
         {
             Document doc = new Document
             {
-                // StringField indexes but doesn't tokenize
-                new StringField("Title",
-                    MarketItem.Title,
-                    Field.Store.YES),
-                new TextField("TokenizedTile",
-                    MarketItem.Title,
-                    Field.Store.YES),
-                new TextField("Description",
-                    MarketItem.Description,
-                    Field.Store.YES),
-                 new FacetField("Category",
-                    MarketItem.Category),
-                 new FacetField("Shipping",
-                    MarketItem.Shipping)
-                
+                new StringField("ID", MarketItem.Hash, Field.Store.YES),
+                new StringField("Title",MarketItem.Title,Field.Store.YES),
+                new TextField("TokenizedTile",MarketItem.Title,Field.Store.YES),
+                new TextField("Description",MarketItem.Description,Field.Store.YES),
+                new FacetField("Category",MarketItem.Category),
+                new FacetField("Shipping",MarketItem.Shipping),
+                new FacetField("DealType",MarketItem.DealType)
             };
 
             writer.AddDocument(doc);

@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.ServerCore;
@@ -19,14 +20,16 @@ namespace FreeMarketApp.Views
         {
             InitializeComponent();
 
+            FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
+
             var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
             if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
             {
                 pcMainContent.Children.Add(MainPage.Instance);
-                
+
                 PagesHelper.UnlockTools(this, true);
-                PagesHelper.SetUserDate(this);
+                PagesHelper.SetUserData(this);
             }
             else
             {
@@ -76,6 +79,13 @@ namespace FreeMarketApp.Views
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
         {
             PagesHelper.Switch(this, MyProfilePage.Instance);
+        }
+
+        private void ServerLoadedEvent(object sender, EventArgs e)
+        {
+            Dispatcher.UIThread.InvokeAsync(() => { 
+                PagesHelper.SetUserData(this);
+            });
         }
     }
 }

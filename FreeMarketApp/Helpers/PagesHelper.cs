@@ -65,7 +65,7 @@ namespace FreeMarketApp.Helpers
             btPrivateChat.IsEnabled = isUnlocked;
         }
 
-        internal static void SetUserDate(Window mainWindow)
+        internal static void SetUserData(Window mainWindow)
         {
             var userManager = FreeMarketOneServer.Current.UserManager;
             if ((userManager != null) && (userManager.UserData != null))

@@ -1,7 +1,10 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
+using LiteDB;
+using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.IO;
@@ -47,13 +50,14 @@ namespace FreeMarketOne.ServerCore
 
         internal PrivateKeyStates Initialize(string password = null, UserDataV1 newUserData = null)
         {
-            var filePath = Path.Combine(_configuration.FullBaseDirectory, _configuration.BlockChainSecretPath);
+            var fileKeyPath = Path.Combine(_configuration.FullBaseDirectory, _configuration.BlockChainSecretPath);
+            var fileUserPath = Path.Combine(_configuration.FullBaseDirectory, _configuration.BlockChainUserPath);
 
-            if (File.Exists(filePath))
+            if (File.Exists(fileKeyPath))
             {
                 try
                 {
-                    var keyBytes = File.ReadAllBytes(filePath);
+                    var keyBytes = File.ReadAllBytes(fileKeyPath);
 
                     if (password != null)
                     {
@@ -65,13 +69,22 @@ namespace FreeMarketOne.ServerCore
                         _privateKey = new UserPrivateKey(decryptedPrivKey);
                         _privateKeyState = PrivateKeyStates.Valid;
 
+                        _logger.Information(string.Format("Private Key Decrypted"));
+
                         if (newUserData != null)
                         {
                             _userDataForceToPropagate = true;
                             _userData = newUserData;
+                        } 
+                        else
+                        {
+                            if (File.Exists(fileUserPath))
+                            {
+                                var userBytes = File.ReadAllBytes(fileUserPath);
+                                var serializedItems = ZipHelper.Decompress(userBytes);
+                                _userData = JsonConvert.DeserializeObject<UserDataV1>(serializedItems);
+                            }
                         }
-
-                        _logger.Information(string.Format("Private Key Decrypted"));
                     }
                     else
                     {
@@ -131,7 +144,7 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="seed">Expecting at least 200 chars.</param>
         /// <param name="password">Expecting 16 chars.</param>
-        public void SaveNewPrivKey(string seed, string password, string path) 
+        public void SaveNewPrivKey(string seed, string password, string pathRoot, string pathFileKey) 
         {  
             _logger.Information(string.Format("Saving new private key"));
 
@@ -142,16 +155,40 @@ namespace FreeMarketOne.ServerCore
             var aes = new SymmetricKey(Encoding.ASCII.GetBytes(key));
             var encryptedPrivKey = aes.Encrypt(_privateKey.ByteArray);
 
-            var directoryPath = Path.GetDirectoryName(path);
+            var pathKey = Path.Combine(pathRoot, pathFileKey);
+
+            var directoryPath = Path.GetDirectoryName(pathKey);
             Directory.CreateDirectory(directoryPath);
-            File.WriteAllBytes(path, encryptedPrivKey);
+
+            File.WriteAllBytes(pathKey, encryptedPrivKey);
+        }
+
+        /// <summary>
+        /// Store user data to cache for quick usage
+        /// </summary>
+        /// <param name="userData"></param>
+        /// <param name="pathRoot"></param>
+        /// <param name="pathUserData"></param>
+        public void SaveUserData(UserDataV1 userData, string pathRoot, string pathFileUserData)
+        {
+            _logger.Information(string.Format("Saving new user data"));
+
+            var serializedUserData = JsonConvert.SerializeObject(userData);
+            var compressedUserData = ZipHelper.Compress(serializedUserData);
+
+            var pathUserData = Path.Combine(pathRoot, pathFileUserData);
+
+            var directoryPath = Path.GetDirectoryName(pathUserData);
+            Directory.CreateDirectory(directoryPath);
+
+            File.WriteAllBytes(pathUserData, compressedUserData);
         }
 
         /// <summary>
         /// Get actual user data from blockchain or pool
         /// </summary>
         /// <returns></returns>
-        public UserData GetActualUserData()
+        public UserDataV1 GetActualUserData()
         {
             _logger.Information(string.Format("Loading user data from pool or blockchain."));
 
@@ -174,7 +211,7 @@ namespace FreeMarketOne.ServerCore
 
                         foreach (var itemPubKey in itemPubKeys)
                         {
-                            if (itemPubKey == userPubKey)
+                            if (itemPubKey.SequenceEqual(userPubKey))
                             {
                                 _logger.Information(string.Format("Found my UserData in pool."));
                                 _userData = (UserDataV1)itemPool;
@@ -208,7 +245,7 @@ namespace FreeMarketOne.ServerCore
 
                                     foreach (var itemPubKey in itemPubKeys)
                                     {
-                                        if (itemPubKey == userPubKey)
+                                        if (itemPubKey.SequenceEqual(userPubKey))
                                         {
                                             _logger.Information(string.Format("Found my UserData in pool."));
                                             _userData = userData;

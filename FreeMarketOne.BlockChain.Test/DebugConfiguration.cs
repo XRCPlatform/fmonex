@@ -25,6 +25,7 @@ namespace FreeMarketOne.BlockChain.Test
             this.BlockChainBasePath = "data/debug_blockchain_base";
             this.BlockChainMarketPath = "data/debug_blockchain_market";
             this.BlockChainSecretPath = "data/debug_key.data";
+            this.BlockChainUserPath = "data/debug_user.data";
             this.ListenersUseTor = true;
             this.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9113/");
             this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9114/");

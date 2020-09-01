@@ -22,16 +22,25 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
         public string Shipping { get; set; }
 
         [JsonProperty("x")]
-        public string DealType { get; set; }
+        public int DealType { get; set; }
 
         [JsonProperty("k")]
-        public string Category { get; set; }
+        public int Category { get; set; }
 
         [JsonProperty("p")]
+        public float Price { get; set; }
+
+        [JsonProperty("r")]
+        public int PriceType { get; set; }
+
+        [JsonProperty("i")]
         public List<string> Photos { get; set; }
 
         [JsonProperty("b")]
         public string BaseSignature { get; set; }
+
+        [JsonProperty("u")]
+        public string BuyerSignature { get; set; }
 
         [JsonProperty("c")]
         public DateTime CreatedUtc { get; set; }
@@ -71,6 +80,8 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
             content.Append(Shipping);
             content.Append(DealType);
             content.Append(Category);
+            content.Append(Price);
+            content.Append(PriceType);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
@@ -87,6 +98,8 @@ namespace FreeMarketOne.DataStructure.Objects.MarketItems
             content.Append(Shipping);
             content.Append(DealType);
             content.Append(Category);
+            content.Append(Price);
+            content.Append(PriceType);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));

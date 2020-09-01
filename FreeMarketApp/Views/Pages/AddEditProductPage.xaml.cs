@@ -120,8 +120,8 @@ namespace FreeMarketApp.Views.Pages
                     _marketItemData.Title = tbTitle.Text;
                     _marketItemData.Description = tbDescription.Text;
                     _marketItemData.Shipping = tbShipping.Text;
-                    _marketItemData.Category = cbCategoryValue.Tag.ToString();
-                    _marketItemData.DealType = cbDealTypeValue.Tag.ToString();
+                    _marketItemData.Category = int.Parse(cbCategoryValue.Tag.ToString());
+                    _marketItemData.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
 
                     //get time to next block
                     //upload to sia

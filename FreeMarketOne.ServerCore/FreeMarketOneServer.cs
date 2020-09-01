@@ -220,16 +220,20 @@ namespace FreeMarketOne.ServerCore
             await Task.Delay(1000);
             await Task.Run(() =>
             {
-                if ((UserManager.UsedDataForceToPropagate) && (UserManager.UserData != null))
+                if (UserManager != null)
                 {
-                    BasePoolManager.AcceptActionItem(UserManager.UserData);
-                    BasePoolManager.PropagateAllActionItemLocal();
-                    Task.Delay(1000);
-                } 
-                else
-                {
-                    //loading actual user data from pool or blockchain
-                    UserManager.GetActualUserData();
+                    if ((UserManager.UsedDataForceToPropagate) && (UserManager.UserData != null))
+                    {
+                        BasePoolManager.AcceptActionItem(UserManager.UserData);
+                        BasePoolManager.PropagateAllActionItemLocal();
+                        Task.Delay(1000);
+                    }
+                    else
+                    {
+                        //loading actual user data from pool or blockchain
+                        var userData = UserManager.GetActualUserData();
+                        UserManager.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
+                    }
                 }
 
                 FreeMarketOneServerLoadedEvent?.Invoke(this, null);

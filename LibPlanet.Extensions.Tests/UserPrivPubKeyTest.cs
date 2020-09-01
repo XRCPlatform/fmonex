@@ -15,9 +15,9 @@ namespace LibPlanet.Extensions.Tests
             var pubkey = privKey.PublicKey;
 
             var mv1 = new MarketItemV1();
-            mv1.Category = "1";
+            mv1.Category = int.Parse("1");
             mv1.BaseSignature = null;
-            mv1.DealType = "1";
+            mv1.DealType = int.Parse("1");
             mv1.Description = "1";
             mv1.Photos.Add("sia link");
             mv1.Shipping = "1";
@@ -43,9 +43,9 @@ namespace LibPlanet.Extensions.Tests
             Assert.IsTrue(isIdentical);
 
             var mv2 = new MarketItemV1();
-            mv2.Category = "2";
+            mv2.Category = int.Parse("2");
             mv2.BaseSignature = null;
-            mv2.DealType = "2";
+            mv2.DealType = int.Parse("2");
             mv2.Description = "1";
             mv2.Photos.Add("sia link 2");
             mv2.Shipping = "2";

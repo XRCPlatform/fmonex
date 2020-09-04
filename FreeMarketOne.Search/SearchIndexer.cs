@@ -20,8 +20,8 @@ namespace FreeMarketOne.Search
         {
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
 
-            var dir = new RAMDirectory(); //FSDirectory.Open(indexLocation);
-            var dirTaxonomy = new RAMDirectory(); //FSDirectory.Open(indexLocation + "/taxonomy/");
+            var dir = FSDirectory.Open(indexLocation);
+            var dirTaxonomy = FSDirectory.Open(indexLocation + "/taxonomy/");
 
             //create an analyzer to process the text
             var analyzer = new StandardAnalyzer(AppLuceneVersion);
@@ -45,7 +45,7 @@ namespace FreeMarketOne.Search
         {
             MarketItemCategory cat = (MarketItemCategory)MarketItem.Category;
             new DealType().TryGetValue(MarketItem.DealType, out string dealTypeString);
-            Writer.DeleteDocuments(new Term(MarketItem.Hash));
+            Writer.DeleteDocuments(new Term("ID", MarketItem.Hash));
 
             Document doc = new Document
             {
@@ -58,8 +58,21 @@ namespace FreeMarketOne.Search
                 new FacetField("DealType",dealTypeString)
             };
             Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
-            //writer.AddDocument(doc);
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+
+        }
+
+        public void DeleteAll()
+        {
+            Writer.DeleteAll();
+            Writer.Commit();
+            taxoWriter.Commit();
+        }
+
+        public void Commit()
+        {
+            Writer.Commit();
+            taxoWriter.Commit();
         }
     }
 }

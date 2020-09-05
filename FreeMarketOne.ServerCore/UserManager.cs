@@ -204,6 +204,22 @@ namespace FreeMarketOne.ServerCore
         }
 
         /// <summary>
+        /// Get public key of actual user
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetCurrentUserPublicKey()
+        {
+            _logger.Information(string.Format("Getting current public key for actual user."));
+
+            if (_privateKey != null)
+            {
+                return _privateKey.PublicKey.KeyParam.Q.GetEncoded();
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Get user data by his public key
         /// </summary>
         /// <param name="userPubKeys"></param>

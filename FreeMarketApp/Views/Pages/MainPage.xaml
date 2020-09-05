@@ -7,7 +7,7 @@
 
     <Grid Margin="0" Background="White">
        <!-- SIDEBAR -->
-        <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
+        <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,40" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
 					<TextBlock Text="CATEGORIES" Margin="27 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13" Foreground="#606060"/>
 					

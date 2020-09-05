@@ -1,4 +1,4 @@
-using FreeMarketOne.DataStructure.Objects.MarketItems;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Libplanet.Extensions;
 using NUnit.Framework;
 using System;

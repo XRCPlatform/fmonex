@@ -10,6 +10,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
     [JsonSubtypes.KnownSubTypeWithProperty(typeof(CheckPointMarketDataV1), "CheckPointMarketDataV1")]
     [JsonSubtypes.KnownSubTypeWithProperty(typeof(ReviewUserDataV1), "ReviewUserDataV1")]
     [JsonSubtypes.KnownSubTypeWithProperty(typeof(UserDataV1), "UserDataV1")]
+    [JsonSubtypes.KnownSubTypeWithProperty(typeof(MarketItemV1), "MarketItemV1")]
     public interface IBaseItem
     {
         string nametype { get; set; }

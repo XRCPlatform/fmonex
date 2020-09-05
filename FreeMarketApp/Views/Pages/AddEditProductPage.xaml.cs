@@ -5,7 +5,7 @@ using Avalonia.Media.Imaging;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
-using FreeMarketOne.DataStructure.Objects.MarketItems;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Microsoft.Extensions.FileProviders;

@@ -230,7 +230,6 @@ namespace FreeMarketOne.ServerCore
                     {
                         BasePoolManager.AcceptActionItem(UserManager.UserData);
                         BasePoolManager.PropagateAllActionItemLocal();
-                        Task.Delay(1000);
                     }
                     else
                     {

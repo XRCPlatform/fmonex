@@ -71,7 +71,7 @@ namespace FreeMarketOne.ServerCore
                         _privateKey = new UserPrivateKey(decryptedPrivKey);
                         _privateKeyState = PrivateKeyStates.Valid;
 
-                        _logger.Information(string.Format("Private Key Decrypted"));
+                        _logger.Information(string.Format("Private Key Decrypted."));
 
                         if (newUserData != null)
                         {
@@ -148,7 +148,7 @@ namespace FreeMarketOne.ServerCore
         /// <param name="password">Expecting 16 chars.</param>
         public void SaveNewPrivKey(string seed, string password, string pathRoot, string pathFileKey)
         {
-            _logger.Information(string.Format("Saving new private key"));
+            _logger.Information(string.Format("Saving new private key."));
 
             password = password.Substring(0, 16);
             _privateKey = new UserPrivateKey(seed);
@@ -173,7 +173,7 @@ namespace FreeMarketOne.ServerCore
         /// <param name="pathUserData"></param>
         public void SaveUserData(UserDataV1 userData, string pathRoot, string pathFileUserData)
         {
-            _logger.Information(string.Format("Saving new user data"));
+            _logger.Information(string.Format("Saving new user data."));
 
             var serializedUserData = JsonConvert.SerializeObject(userData);
             var compressedUserData = ZipHelper.Compress(serializedUserData);
@@ -318,7 +318,7 @@ namespace FreeMarketOne.ServerCore
                                                 } 
                                                 else
                                                 {
-                                                    _logger.Information(string.Format("UserData arent valid : {0}", userData.BaseSignature));
+                                                    _logger.Information(string.Format("UserData arent valid : {0}.", userData.BaseSignature));
                                                 }
                                             }
                                             else

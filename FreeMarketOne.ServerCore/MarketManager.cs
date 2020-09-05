@@ -1,5 +1,6 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.ServerCore.Helpers;
 using Libplanet.Extensions;
 using Serilog;
 using System;
@@ -11,6 +12,20 @@ namespace FreeMarketOne.ServerCore
 {
     public class MarketManager
     {
+        public enum MarketCategoryEnum
+        {
+            All = 0,
+            Gold = 1,
+            Silver = 2,
+            Platinum = 3,
+            Rhodium = 4,
+            Palladium = 5,
+            Copper = 6,
+            RareCoins = 7,
+            Jewelry = 8,
+            Cryptocurrency = 9
+        }
+
         private IBaseConfiguration _configuration;
 
         private ILogger _logger { get; set; }
@@ -36,7 +51,7 @@ namespace FreeMarketOne.ServerCore
 
                 var itemMarketBytes = itemMarket.ToByteArrayForSign();
                 return UserPublicKey.Recover(itemMarketBytes, itemMarket.BuyerSignature);
-            } 
+            }
             else
             {
                 return null;
@@ -64,22 +79,24 @@ namespace FreeMarketOne.ServerCore
         }
 
         /// <summary>
-        /// Get all seller market items with all "revisions"
+        /// Get all seller market items with old data filtration
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetSellerMarketItemsByPubKeys(byte[] pubKey)
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(byte[] pubKey)
         {
-            return GetSellerMarketItemsByPubKeys(new List<byte[]> { pubKey });
+            return GetAllSellerMarketItemsByPubKeys(new List<byte[]> { pubKey });
         }
 
         /// <summary>
-        /// Get all seller market items with all "revisions"
+        /// Get all seller market items with old data filtration
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetSellerMarketItemsByPubKeys(List<byte[]> userPubKeys)
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys)
         {
+            _logger.Information(string.Format("GetAllSellerMarketItemsByPubKeys."));
+
             var result = new List<MarketItemV1>();
 
             var types = new Type[] { typeof(MarketItemV1) };
@@ -93,6 +110,8 @@ namespace FreeMarketOne.ServerCore
                 var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
                 var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
 
+                var ignoredSignatures = new List<string>();
+
                 foreach (var itemTx in block.Transactions)
                 {
                     foreach (var itemAction in itemTx.Actions)
@@ -101,18 +120,28 @@ namespace FreeMarketOne.ServerCore
                         {
                             if (types.Contains(itemMarket.GetType()))
                             {
-                                var itemMarketBytes = itemMarket.ToByteArrayForSign();
-                                var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, itemMarket.Signature);
+                                var marketData = (MarketItemV1)itemMarket;
 
-                                foreach (var itemPubKey in itemPubKeys)
+                                if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                                 {
-                                    foreach (var itemUserPubKey in userPubKeys)
-                                    {
-                                        if (itemPubKey.SequenceEqual(itemUserPubKey))
-                                        {
-                                            _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                    var itemMarketBytes = itemMarket.ToByteArrayForSign();
+                                    var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, itemMarket.Signature);
 
-                                            result.Add((MarketItemV1)itemMarket);
+                                    foreach (var itemPubKey in itemPubKeys)
+                                    {
+                                        foreach (var itemUserPubKey in userPubKeys)
+                                        {
+                                            if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                            {
+                                                _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+
+                                                var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
+                                                        marketBlockChain, chainId, countOfIndex, marketData, types);
+
+                                                ignoredSignatures.AddRange(chainSignatures);
+
+                                                result.Add(marketData);
+                                            }
                                         }
                                     }
                                 }
@@ -126,23 +155,74 @@ namespace FreeMarketOne.ServerCore
         }
 
         /// <summary>
-        /// Get all buyer market items with all "revisions"
+        /// Get all active offers in market blockchain with old data filtration
         /// </summary>
-        /// <param name="pubKey"></param>
+        /// <param name="category"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetBuyerMarketItemsByPubKeys(byte[] pubKey)
+        public List<MarketItemV1> GetAllActiveOffers(MarketCategoryEnum category = MarketCategoryEnum.All)
         {
-            return GetBuyerMarketItemsByPubKeys(new List<byte[]> { pubKey });
+            _logger.Information(string.Format("GetAllActiveOffers {0}.", (int)category));
+
+            var result = new List<MarketItemV1>();
+
+            var types = new Type[] { typeof(MarketItemV1) };
+
+            var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
+            var chainId = marketBlockChain.GetCanonicalChainId();
+            var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+
+            for (long i = (countOfIndex - 1); i >= 0; i--)
+            {
+                var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
+                var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+
+                var ignoredSignatures = new List<string>();
+
+                foreach (var itemTx in block.Transactions)
+                {
+                    foreach (var itemAction in itemTx.Actions)
+                    {
+                        foreach (var itemMarket in itemAction.BaseItems)
+                        {
+                            if (types.Contains(itemMarket.GetType()))
+                            {
+                                var marketData = (MarketItemV1)itemMarket;
+
+                                if ((category == MarketCategoryEnum.All) 
+                                    && (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
+                                {
+                                    if (!ignoredSignatures.Exists(a => a == marketData.Signature))
+                                    {
+                                        if (string.IsNullOrEmpty(marketData.BuyerSignature))
+                                        {
+                                            _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
+                                            result.Add(marketData);
+                                        }
+
+                                        var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
+                                            marketBlockChain, chainId, countOfIndex, marketData, types);
+
+                                        ignoredSignatures.AddRange(chainSignatures);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
-        /// Get all buyer market items with all "revisions"
+        /// Return Market Item by hash and signature
         /// </summary>
-        /// <param name="pubKey"></param>
+        /// <param name="hash"></param>
+        /// <param name="signature"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetBuyerMarketItemsByPubKeys(List<byte[]> userPubKeys)
+        public MarketItemV1 GetOfferByHashAndSignature(string hash, string signature)
         {
-            var result = new List<MarketItemV1>();
+            _logger.Information(string.Format("GetOfferByHashAndSignature hash {0} signature {1}.", hash, signature));
 
             var types = new Type[] { typeof(MarketItemV1) };
 
@@ -164,24 +244,9 @@ namespace FreeMarketOne.ServerCore
                             if (types.Contains(itemMarket.GetType()))
                             {
                                 var marketData = (MarketItemV1)itemMarket;
-
-                                if (!string.IsNullOrEmpty(marketData.BuyerSignature)) {
-
-                                    var itemMarketBytes = itemMarket.ToByteArrayForSign();
-                                    var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
-
-                                    foreach (var itemPubKey in itemPubKeys)
-                                    {
-                                        foreach (var itemUserPubKey in userPubKeys)
-                                        {
-                                            if (itemPubKey.SequenceEqual(itemUserPubKey))
-                                            {
-                                                _logger.Information(string.Format("Found MarketItem for buyer - item hash {0}.", itemMarket.Hash));
-
-                                                result.Add((MarketItemV1)itemMarket);
-                                            }
-                                        }
-                                    }
+                                if ((marketData.Hash == hash) && (marketData.Signature == signature))
+                                {
+                                    return marketData;
                                 }
                             }
                         }
@@ -189,7 +254,7 @@ namespace FreeMarketOne.ServerCore
                 }
             }
 
-            return result;
+            return null;
         }
     }
 }

@@ -77,7 +77,7 @@ namespace FreeMarketOne.ServerCore
                         {
                             _userDataForceToPropagate = true;
                             _userData = newUserData;
-                        } 
+                        }
                         else
                         {
                             if (File.Exists(fileUserPath))
@@ -146,8 +146,8 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="seed">Expecting at least 200 chars.</param>
         /// <param name="password">Expecting 16 chars.</param>
-        public void SaveNewPrivKey(string seed, string password, string pathRoot, string pathFileKey) 
-        {  
+        public void SaveNewPrivKey(string seed, string password, string pathRoot, string pathFileKey)
+        {
             _logger.Information(string.Format("Saving new private key"));
 
             password = password.Substring(0, 16);
@@ -197,11 +197,10 @@ namespace FreeMarketOne.ServerCore
             if (_privateKey != null)
             {
                 var userPubKey = _privateKey.PublicKey.KeyParam.Q.GetEncoded();
+                _userData = GetUserDataByPublicKey(userPubKey);
+            }
 
-                return GetUserDataByPublicKey(userPubKey);
-            } 
-
-            return null;
+            return UserData;
         }
 
         /// <summary>
@@ -209,9 +208,9 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="userPubKeys"></param>
         /// <returns></returns>
-        public UserDataV1 GetUserDataByPublicKey(byte[] userPubKeys)
+        public UserDataV1 GetUserDataByPublicKey(byte[] userPubKey)
         {
-            return GetUserDataByPublicKey(new List<byte[]> { userPubKeys });
+            return GetUserDataByPublicKey(new List<byte[]> { userPubKey });
         }
 
         /// <summary>
@@ -242,8 +241,23 @@ namespace FreeMarketOne.ServerCore
                             if (itemPubKey.SequenceEqual(itemUserPubKey))
                             {
                                 _logger.Information(string.Format("Found UserData in pool."));
-                                _userData = (UserDataV1)itemPool;
-                                return UserData;
+
+                                var userData = (UserDataV1)itemPool;
+                                if (!string.IsNullOrEmpty(userData.BaseSignature))
+                                {
+                                    if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys))
+                                    {
+                                        return userData;
+                                    }
+                                    else
+                                    {
+                                        _logger.Information(string.Format("UserData arent valid : {0}", userData.BaseSignature));
+                                    }
+                                }
+                                else
+                                {
+                                    return userData;
+                                }
                             }
                         }
                     }
@@ -268,9 +282,8 @@ namespace FreeMarketOne.ServerCore
                         {
                             if (types.Contains(itemBase.GetType()))
                             {
-                                var userData = (UserDataV1)itemBase;
-                                var itemBaseBytes = userData.ToByteArrayForSign();
-                                var itemPubKeys = UserPublicKey.Recover(itemBaseBytes, userData.Signature);
+                                var itemBaseBytes = itemBase.ToByteArrayForSign();
+                                var itemPubKeys = UserPublicKey.Recover(itemBaseBytes, itemBase.Signature);
 
                                 foreach (var itemPubKey in itemPubKeys)
                                 {
@@ -279,8 +292,25 @@ namespace FreeMarketOne.ServerCore
                                         if (itemPubKey.SequenceEqual(itemUserPubKey))
                                         {
                                             _logger.Information(string.Format("Found UserData in chain."));
-                                            _userData = userData;
-                                            return UserData;
+
+                                            var userData = (UserDataV1)itemBase;
+                                            if (!string.IsNullOrEmpty(userData.BaseSignature))
+                                            {
+                                                if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys))
+                                                {
+                                                    return userData;
+                                                } 
+                                                else
+                                                {
+                                                    _logger.Information(string.Format("UserData arent valid : {0}", userData.BaseSignature));
+                                                }
+                                            }
+                                            else
+                                            {
+                                                return userData;
+                                            }
+
+                                            return userData;
                                         }
                                     }
                                 }
@@ -291,6 +321,55 @@ namespace FreeMarketOne.ServerCore
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Verify that updated chain data are equal to base pub key
+        /// </summary>
+        /// <param name="baseSignature"></param>
+        /// <param name="userData"></param>
+        /// <param name="userPubKeys"></param>
+        /// <returns></returns>
+        private bool VerifyUserDataByBaseSignature(string baseSignature, UserDataV1 userData, List<byte[]> userPubKeys)
+        {
+            var types = new Type[] { typeof(UserDataV1) };
+            var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
+            var chainId = baseBlockChain.GetCanonicalChainId();
+            var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+
+            for (long i = (countOfIndex - 1); i >= 0; i--)
+            {
+                var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
+                var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+
+                foreach (var itemTx in block.Transactions)
+                {
+                    foreach (var itemAction in itemTx.Actions)
+                    {
+                        foreach (var itemBase in itemAction.BaseItems)
+                        {
+                            if (types.Contains(itemBase.GetType()) && (itemBase.Signature == baseSignature))
+                            {
+                                var itemBaseBytes = itemBase.ToByteArrayForSign();
+                                var itemPubKeys = UserPublicKey.Recover(itemBaseBytes, itemBase.Signature);
+
+                                foreach (var itemPubKey in itemPubKeys)
+                                {
+                                    foreach (var itemUserPubKey in userPubKeys)
+                                    {
+                                        if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                        {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

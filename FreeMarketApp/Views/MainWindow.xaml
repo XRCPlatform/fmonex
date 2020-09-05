@@ -258,5 +258,29 @@
 
       </Panel>
       
+    <!-- Status bar -->
+	  <Border CornerRadius="0 7 0 0" BorderBrush="#f4f3f8" Background="#ebefff" VerticalAlignment="Bottom" HorizontalAlignment="Left">
+		  <WrapPanel Orientation="Horizontal">
+			  <!-- Status icon colors
+							- Tor is turned off: #79d70f
+							- Connecting to Tor: #ff9234
+							- Tor is running: #79d70f 
+							- No Peers: #ff2400 -->
+
+			  <!-- Tor --> 
+			  <Path x:Name="TorIcon" Data="M461.143,60.883l-200.83-60.25c-2.812-0.844-5.809-0.844-8.622,0L50.857,60.883c-6.344,1.903-10.689,7.743-10.689,14.367
+						v220.916c0,28.734,11.633,58.148,34.574,87.425c17.521,22.36,41.762,44.813,72.047,66.736
+						c50.877,36.828,100.976,59.42,103.084,60.363c1.949,0.873,4.039,1.31,6.129,1.31s4.18-0.436,6.129-1.31
+						c2.107-0.943,52.205-23.535,103.082-60.363c30.285-21.923,54.525-44.376,72.047-66.736c22.941-29.276,34.572-58.69,34.572-87.425
+						V75.25C471.832,68.626,467.489,62.786,461.143,60.883z" VerticalAlignment="Center" HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="11" Fill="#79d70f" Margin="10 0 0 0"/>
+			  <TextBlock x:Name="TorStatus" Text="Tor is running" FontSize="12" Margin="5 5 15 5" Foreground="#606060" VerticalAlignment="Center"/>
+
+			  <!-- Peers -->
+			  <Ellipse x:Name="PeersStatus" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9" Fill="#ff2400"/>
+			  <TextBlock Text="Peers: " FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0" Foreground="#606060"/>
+			  <TextBlock x:Name="PeersNumber" Text="0 " FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center" Foreground="#606060"/>
+		  </WrapPanel>
+	  </Border>
+
     </Grid>
 </Window>

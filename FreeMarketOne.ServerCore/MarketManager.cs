@@ -98,9 +98,11 @@ namespace FreeMarketOne.ServerCore
             _logger.Information(string.Format("GetAllSellerMarketItemsByPubKeys."));
 
             var result = new List<MarketItemV1>();
-
             var types = new Type[] { typeof(MarketItemV1) };
 
+            var ignoredSignatures = new List<string>();
+
+            //checking blockchain
             var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
             var chainId = marketBlockChain.GetCanonicalChainId();
             var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
@@ -109,8 +111,6 @@ namespace FreeMarketOne.ServerCore
             {
                 var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
                 var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
-
-                var ignoredSignatures = new List<string>();
 
                 foreach (var itemTx in block.Transactions)
                 {
@@ -164,9 +164,9 @@ namespace FreeMarketOne.ServerCore
             _logger.Information(string.Format("GetAllActiveOffers {0}.", (int)category));
 
             var result = new List<MarketItemV1>();
-
             var types = new Type[] { typeof(MarketItemV1) };
 
+            //checking blockchain
             var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
             var chainId = marketBlockChain.GetCanonicalChainId();
             var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
@@ -226,6 +226,7 @@ namespace FreeMarketOne.ServerCore
 
             var types = new Type[] { typeof(MarketItemV1) };
 
+            //checking blockchain
             var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
             var chainId = marketBlockChain.GetCanonicalChainId();
             var countOfIndex = marketBlockChain.CountIndex(chainId.Value);

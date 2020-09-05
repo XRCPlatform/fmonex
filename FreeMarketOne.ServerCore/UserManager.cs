@@ -39,7 +39,7 @@ namespace FreeMarketOne.ServerCore
         public bool UsedDataForceToPropagate => _userDataForceToPropagate;
 
 
-        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_- ";
 
         public UserManager(IBaseConfiguration configuration)
         {

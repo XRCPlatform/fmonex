@@ -14,6 +14,12 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("d")]
         public DateTime ReviewDateTime { get; set; }
 
+        /// <summary>
+        /// This value is equal to UserData Signature of revieved user
+        /// </summary>
+        [JsonProperty("u")]
+        public string UserSignature { get; set; }
+
         public override string GenerateHash()
         {
             var content = new StringBuilder();
@@ -21,6 +27,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
             content.Append(nametype);
             content.Append(Message);
+            content.Append(UserSignature);
             content.Append(ReviewDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
@@ -32,6 +39,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             var content = new StringBuilder();
             content.Append(nametype);
             content.Append(Message);
+            content.Append(UserSignature);
             content.Append(ReviewDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 

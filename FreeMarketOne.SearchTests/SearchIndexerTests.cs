@@ -71,7 +71,7 @@ namespace FreeMarketOne.Search.Tests
 
             indexReader.Dispose();
             taxoReader.Dispose();
-            search.DeleteAll();
+           // search.DeleteAll();
 
         }
 
@@ -163,7 +163,7 @@ namespace FreeMarketOne.Search.Tests
             Assert.AreEqual(results.Find(x => x.Dim.Equals("Shipping")).LabelValues[0].Value, 2);
             Assert.AreEqual(results.Find(x => x.Dim.Equals("Shipping")).LabelValues[1].Label, "Europe");
             Assert.AreEqual(results.Find(x => x.Dim.Equals("Shipping")).LabelValues[1].Value, 1);
-            search.DeleteAll();
+           // search.DeleteAll();
         }
     }
 }

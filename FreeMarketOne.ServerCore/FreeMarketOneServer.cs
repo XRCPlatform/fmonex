@@ -40,6 +40,7 @@ namespace FreeMarketOne.ServerCore
 
         public ServiceManager ServiceManager;
         public UserManager UserManager;
+        public MarketManager MarketManager;
 
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
@@ -100,6 +101,9 @@ namespace FreeMarketOne.ServerCore
                 //Service manager
                 ServiceManager = new ServiceManager(Configuration);
                 ServiceManager.Start();
+
+                //Market Manager
+                MarketManager = new MarketManager(Configuration);
 
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);
@@ -226,7 +230,6 @@ namespace FreeMarketOne.ServerCore
                     {
                         BasePoolManager.AcceptActionItem(UserManager.UserData);
                         BasePoolManager.PropagateAllActionItemLocal();
-                        Task.Delay(1000);
                     }
                     else
                     {

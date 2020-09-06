@@ -1,14 +1,17 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
+using FreeMarketOne.ServerCore.Helpers;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using LiteDB;
 using Newtonsoft.Json;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 
 namespace FreeMarketOne.ServerCore
@@ -37,7 +40,7 @@ namespace FreeMarketOne.ServerCore
         public bool UsedDataForceToPropagate => _userDataForceToPropagate;
 
 
-        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_- ";
 
         public UserManager(IBaseConfiguration configuration)
         {
@@ -69,13 +72,13 @@ namespace FreeMarketOne.ServerCore
                         _privateKey = new UserPrivateKey(decryptedPrivKey);
                         _privateKeyState = PrivateKeyStates.Valid;
 
-                        _logger.Information(string.Format("Private Key Decrypted"));
+                        _logger.Information(string.Format("Private Key Decrypted."));
 
                         if (newUserData != null)
                         {
                             _userDataForceToPropagate = true;
                             _userData = newUserData;
-                        } 
+                        }
                         else
                         {
                             if (File.Exists(fileUserPath))
@@ -144,9 +147,9 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="seed">Expecting at least 200 chars.</param>
         /// <param name="password">Expecting 16 chars.</param>
-        public void SaveNewPrivKey(string seed, string password, string pathRoot, string pathFileKey) 
-        {  
-            _logger.Information(string.Format("Saving new private key"));
+        public void SaveNewPrivKey(string seed, string password, string pathRoot, string pathFileKey)
+        {
+            _logger.Information(string.Format("Saving new private key."));
 
             password = password.Substring(0, 16);
             _privateKey = new UserPrivateKey(seed);
@@ -171,7 +174,7 @@ namespace FreeMarketOne.ServerCore
         /// <param name="pathUserData"></param>
         public void SaveUserData(UserDataV1 userData, string pathRoot, string pathFileUserData)
         {
-            _logger.Information(string.Format("Saving new user data"));
+            _logger.Information(string.Format("Saving new user data."));
 
             var serializedUserData = JsonConvert.SerializeObject(userData);
             var compressedUserData = ZipHelper.Compress(serializedUserData);
@@ -194,62 +197,137 @@ namespace FreeMarketOne.ServerCore
 
             if (_privateKey != null)
             {
-                var types = new Type[] { typeof(UserDataV1) };
                 var userPubKey = _privateKey.PublicKey.KeyParam.Q.GetEncoded();
+                _userData = GetUserDataByPublicKey(userPubKey);
+            }
 
-                //checking pool
-                var poolItems = FreeMarketOneServer.Current.BasePoolManager.GetAllActionItemByType(types);
-                if (poolItems.Any())
+            return UserData;
+        }
+
+        /// <summary>
+        /// Get public key of actual user
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetCurrentUserPublicKey()
+        {
+            _logger.Information(string.Format("Getting current public key for actual user."));
+
+            if (_privateKey != null)
+            {
+                return _privateKey.PublicKey.KeyParam.Q.GetEncoded();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get user data by his public key
+        /// </summary>
+        /// <param name="userPubKeys"></param>
+        /// <returns></returns>
+        public UserDataV1 GetUserDataByPublicKey(byte[] userPubKey)
+        {
+            return GetUserDataByPublicKey(new List<byte[]> { userPubKey });
+        }
+
+        /// <summary>
+        /// Get user data by his public keys
+        /// </summary>
+        /// <param name="userPubKeys"></param>
+        /// <returns></returns>
+        public UserDataV1 GetUserDataByPublicKey(List<byte[]> userPubKeys)
+        {
+            var types = new Type[] { typeof(UserDataV1) };
+
+            //checking pool
+            var poolItems = FreeMarketOneServer.Current.BasePoolManager.GetAllActionItemByType(types);
+            if (poolItems.Any())
+            {
+                _logger.Information(string.Format("Some UserData found in pool. Checking if they are mine."));
+                poolItems.Reverse();
+
+                foreach (var itemPool in poolItems)
                 {
-                    _logger.Information(string.Format("Some UserData found in pool. Checking if they are mine."));
-                    poolItems.Reverse();
+                    var itemPoolBytes = itemPool.ToByteArrayForSign();
+                    var itemPubKeys = UserPublicKey.Recover(itemPoolBytes, itemPool.Signature);
 
-                    foreach (var itemPool in poolItems)
+                    foreach (var itemPubKey in itemPubKeys)
                     {
-                        var itemPoolBytes = itemPool.ToByteArrayForSign();
-                        var itemPubKeys = UserPublicKey.Recover(itemPoolBytes, itemPool.Signature);
-
-                        foreach (var itemPubKey in itemPubKeys)
+                        foreach (var itemUserPubKey in userPubKeys)
                         {
-                            if (itemPubKey.SequenceEqual(userPubKey))
+                            if (itemPubKey.SequenceEqual(itemUserPubKey))
                             {
-                                _logger.Information(string.Format("Found my UserData in pool."));
-                                _userData = (UserDataV1)itemPool;
-                                return UserData;
+                                _logger.Information(string.Format("Found UserData in pool."));
+
+                                var userData = (UserDataV1)itemPool;
+                                if (!string.IsNullOrEmpty(userData.BaseSignature))
+                                {
+                                    if (UserManagerHelper.VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys))
+                                    {
+                                        return userData;
+                                    }
+                                    else
+                                    {
+                                        _logger.Information(string.Format("UserData arent valid : {0}", userData.BaseSignature));
+                                    }
+                                }
+                                else
+                                {
+                                    return userData;
+                                }
                             }
                         }
                     }
                 }
+            }
 
-                //checking blockchain
-                var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
-                var chainId = baseBlockChain.GetCanonicalChainId();
-                var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+            //checking blockchain
+            var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
+            var chainId = baseBlockChain.GetCanonicalChainId();
+            var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
 
-                for (long i = (countOfIndex - 1); i >= 0; i--)
+            for (long i = (countOfIndex - 1); i >= 0; i--)
+            {
+                var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
+                var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+
+                foreach (var itemTx in block.Transactions)
                 {
-                    var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
-
-                    foreach (var itemTx in block.Transactions)
+                    foreach (var itemAction in itemTx.Actions)
                     {
-                        foreach (var itemAction in itemTx.Actions)
+                        foreach (var itemBase in itemAction.BaseItems)
                         {
-                            foreach (var itemBase in itemAction.BaseItems)
+                            if (types.Contains(itemBase.GetType()))
                             {
-                                if (types.Contains(itemBase.GetType()))
-                                {
-                                    var userData = (UserDataV1)itemBase;
-                                    var itemBaseBytes = userData.ToByteArrayForSign();
-                                    var itemPubKeys = UserPublicKey.Recover(itemBaseBytes, userData.Signature);
+                                var itemBaseBytes = itemBase.ToByteArrayForSign();
+                                var itemPubKeys = UserPublicKey.Recover(itemBaseBytes, itemBase.Signature);
 
-                                    foreach (var itemPubKey in itemPubKeys)
+                                foreach (var itemPubKey in itemPubKeys)
+                                {
+                                    foreach (var itemUserPubKey in userPubKeys)
                                     {
-                                        if (itemPubKey.SequenceEqual(userPubKey))
+                                        if (itemPubKey.SequenceEqual(itemUserPubKey))
                                         {
-                                            _logger.Information(string.Format("Found my UserData in pool."));
-                                            _userData = userData;
-                                            return UserData;
+                                            _logger.Information(string.Format("Found UserData in chain."));
+
+                                            var userData = (UserDataV1)itemBase;
+                                            if (!string.IsNullOrEmpty(userData.BaseSignature))
+                                            {
+                                                if (UserManagerHelper.VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys))
+                                                {
+                                                    return userData;
+                                                } 
+                                                else
+                                                {
+                                                    _logger.Information(string.Format("UserData arent valid : {0}.", userData.BaseSignature));
+                                                }
+                                            }
+                                            else
+                                            {
+                                                return userData;
+                                            }
+
+                                            return userData;
                                         }
                                     }
                                 }
@@ -257,9 +335,140 @@ namespace FreeMarketOne.ServerCore
                         }
                     }
                 }
-            } 
+            }
 
             return null;
+        }
+
+        /// <summary>
+        /// Get user data by signature and hash - signature is compared by string comparer only
+        /// </summary>
+        /// <param name="signature"></param>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public UserDataV1 GetUserDataBySignatureAndHash(string signature, string hash)
+        {
+            var types = new Type[] { typeof(UserDataV1) };
+
+            _logger.Information(string.Format("GetUserDataBySignatureAndHash signature {0} hash {1}.", signature, hash));
+
+            //checking pool
+            var poolItems = FreeMarketOneServer.Current.BasePoolManager.GetAllActionItemByType(types);
+            if (poolItems.Any())
+            {
+                _logger.Information(string.Format("Some UserData found in pool."));
+                poolItems.Reverse();
+
+                foreach (var itemPool in poolItems)
+                {
+                    if ((itemPool.Hash == hash) && (itemPool.Signature == signature))
+                    {
+                        return (UserDataV1)itemPool;
+                    }
+                }
+            }
+
+            //checking blockchain
+            var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
+            var chainId = baseBlockChain.GetCanonicalChainId();
+            var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+
+            for (long i = (countOfIndex - 1); i >= 0; i--)
+            {
+                var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
+                var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+
+                foreach (var itemTx in block.Transactions)
+                {
+                    foreach (var itemAction in itemTx.Actions)
+                    {
+                        foreach (var itemBase in itemAction.BaseItems)
+                        {
+                            if (types.Contains(itemBase.GetType()))
+                            {
+                                if ((itemBase.Hash == hash) && (itemBase.Signature == signature))
+                                {
+                                    _logger.Information(string.Format("Found UserData signature {0} hash {1}.", signature, hash));
+
+                                    return (UserDataV1)itemBase;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get all review based on user public key
+        /// </summary>
+        /// <param name="pubKey"></param>
+        /// <returns></returns>
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(byte[] pubKey)
+        {
+            return GetAllReviewsForPubKey(new List<byte[]> { pubKey });
+        }
+
+        /// <summary>
+        /// Get all review based on user public keys
+        /// </summary>
+        /// <param name="userPubKeys"></param>
+        /// <returns></returns>
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(List<byte[]> userPubKeys)
+        {
+            _logger.Information(string.Format("GetAllReviewsForPubKey."));
+
+            var typesReview = new Type[] { typeof(ReviewUserDataV1) };
+            var typesUser = new Type[] { typeof(UserDataV1) };
+            var result = new List<ReviewUserDataV1>();
+
+            //checking blockchain
+            var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
+            var chainId = baseBlockChain.GetCanonicalChainId();
+            var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+            
+            var userData = GetUserDataByPublicKey(userPubKeys);
+            var allUserDatas = UserManagerHelper.GetChainUserData(
+                baseBlockChain, chainId, countOfIndex, userData, typesUser);
+
+            for (long i = (countOfIndex - 1); i >= 0; i--)
+            {
+                var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
+                var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+
+                foreach (var itemTx in block.Transactions)
+                {
+                    foreach (var itemAction in itemTx.Actions)
+                    {
+                        foreach (var itemBase in itemAction.BaseItems)
+                        {
+                            if (typesReview.Contains(itemBase.GetType()))
+                            {
+                                var reviewData = (ReviewUserDataV1)itemBase;
+
+                                foreach (var itemUserData in allUserDatas)
+                                {
+                                    if ((reviewData.UserSignature == itemUserData.Signature)
+                                        && (reviewData.Hash == itemUserData.Hash))
+                                    {
+                                        _logger.Information(
+                                            string.Format("Found UserData signature {0} hash {1}.", 
+                                            itemUserData.Signature,
+                                            itemUserData.Hash));
+
+                                        result.Add(reviewData);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

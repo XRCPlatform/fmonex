@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FreeMarketOne.DataStructure.Objects.MarketItems
+namespace FreeMarketOne.DataStructure.Objects.BaseItems
 {
     public class MarketItemV1 : MarketItem
     {

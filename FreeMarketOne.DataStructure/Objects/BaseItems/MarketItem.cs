@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FreeMarketOne.DataStructure.Objects.MarketItems
+namespace FreeMarketOne.DataStructure.Objects.BaseItems
 {
-    public class MarketItem : IMarketItem
+    public class MarketItem : IBaseItem
     {
         [JsonProperty("_nt")]
         public string nametype { get; set; }

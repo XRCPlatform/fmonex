@@ -1,11 +1,12 @@
-﻿using FreeMarketOne.DataStructure.Objects.MarketItems;
-using Lucene.Net.Index;
-using Lucene.Net.Store;
-using Lucene.Net.Util;
+﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Facet;
 using Lucene.Net.Facet.Taxonomy.Directory;
+using Lucene.Net.Index;
+using Lucene.Net.Store;
+using Lucene.Net.Util;
+using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketOne.Search
 {
@@ -41,9 +42,9 @@ namespace FreeMarketOne.Search
             }
         }
 
-        public void Index(IMarketItem MarketItem)
+        public void Index(MarketItem MarketItem)
         {
-            MarketItemCategory cat = (MarketItemCategory)MarketItem.Category;
+            MarketCategoryEnum cat = (MarketCategoryEnum)MarketItem.Category;
             new DealType().TryGetValue(MarketItem.DealType, out string dealTypeString);
             Writer.DeleteDocuments(new Term("ID", MarketItem.Hash));
 

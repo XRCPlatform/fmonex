@@ -1,15 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FreeMarketOne.Search;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using FreeMarketOne.DataStructure.Objects.MarketItems;
+﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+using Lucene.Net.Facet;
+using Lucene.Net.Facet.Taxonomy;
+using Lucene.Net.Facet.Taxonomy.Directory;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
-using Lucene.Net.Facet.Taxonomy;
-using Lucene.Net.Facet;
 using Lucene.Net.Store;
-using Lucene.Net.Facet.Taxonomy.Directory;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 
 namespace FreeMarketOne.Search.Tests
 {

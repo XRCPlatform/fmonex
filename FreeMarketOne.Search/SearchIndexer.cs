@@ -72,7 +72,7 @@ namespace FreeMarketOne.Search
 
         public void DeleteMarketItem(string hash)
         {
-            Writer.DeleteDocuments(new Term("ID", MarketItem.Hash));
+            Writer.DeleteDocuments(new Term("ID", hash));
         }
 
         public void DeleteAll()

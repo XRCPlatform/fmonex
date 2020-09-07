@@ -145,5 +145,21 @@ namespace FreeMarketApp.Helpers
 
             return skylinkUrl;
         }
+
+        internal static Stream DownloadFromSkynet(string skylink, ILogger logger)
+        {
+            PagesHelper.Log(logger, string.Format("Skynet Download File: {0}", skylink));
+
+            var httpClient = new HttpClient()
+            {
+                BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
+            };
+
+            var skynetWebPortal = new SkynetWebPortal(httpClient);
+
+            var content = skynetWebPortal.DownloadFile(skylink).Result;
+
+            return content.ReadAsStreamAsync().Result;
+        }
     }
 }

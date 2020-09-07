@@ -29,7 +29,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         /// <summary>
         /// Connection to Market Item by Market Item hash (probably for nothing but...)
         /// </summary>
-        [JsonProperty("m")]
+        [JsonProperty("i")]
         public string MarketItemHash { get; set; }
 
         public override string GenerateHash()

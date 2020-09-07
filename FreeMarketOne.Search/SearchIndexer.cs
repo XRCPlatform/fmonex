@@ -41,7 +41,10 @@ namespace FreeMarketOne.Search
                 return writer;
             }
         }
-
+        /// <summary>
+        /// Indexes market items posted on blockchain for search. This does not index blocks.  
+        /// </summary>
+        /// <param name="MarketItem"></param>
         public void Index(MarketItem MarketItem)
         {
             MarketCategoryEnum cat = (MarketCategoryEnum)MarketItem.Category;
@@ -51,16 +54,25 @@ namespace FreeMarketOne.Search
             Document doc = new Document
             {
                 new StringField("ID", MarketItem.Hash, Field.Store.YES),
-                new StringField("Title",MarketItem.Title,Field.Store.YES),
-                new TextField("TokenizedTile",MarketItem.Title,Field.Store.YES),
+                new StringField("ExactTitle",MarketItem.Title,Field.Store.YES),
+                new TextField("Title",MarketItem.Title,Field.Store.YES),
                 new TextField("Description",MarketItem.Description,Field.Store.YES),
                 new FacetField("Category",cat.ToString()),
                 new FacetField("Shipping",MarketItem.Shipping),
-                new FacetField("DealType",dealTypeString)
+                new FacetField("DealType",dealTypeString),
+                new FacetField("Fineness",MarketItem.Fineness),
+                new FacetField("Manufacturer",MarketItem.Manufacturer),
+                new FacetField("Size",MarketItem.Size),
+                new FacetField("WeightInGrams",MarketItem.WeightInGrams)
             };
             Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
 
+        }
+
+        public void DeleteMarketItem(string hash)
+        {
+            Writer.DeleteDocuments(new Term("ID", MarketItem.Hash));
         }
 
         public void DeleteAll()

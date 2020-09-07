@@ -88,6 +88,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure that you want to save profile? Changes will be propagated in next block (&quot;approx {0} sec&quot;)..
+        /// </summary>
+        internal static string Dialog_Confirmation_SaveMyProfile {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_SaveMyProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Confirmation.
         /// </summary>
         internal static string Dialog_Confirmation_Title {

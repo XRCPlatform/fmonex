@@ -126,6 +126,9 @@
   <data name="Dialog_Confirmation_SaveMyItem" xml:space="preserve">
     <value>Are you sure that you want to save this item? Changes will be propagated in next block ("approx {0} sec").</value>
   </data>
+  <data name="Dialog_Confirmation_SaveMyProfile" xml:space="preserve">
+    <value>Are you sure that you want to save profile? Changes will be propagated in next block ("approx {0} sec").</value>
+  </data>
   <data name="Dialog_Confirmation_Title" xml:space="preserve">
     <value>Confirmation</value>
   </data>

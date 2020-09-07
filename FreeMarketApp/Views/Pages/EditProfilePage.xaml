@@ -57,13 +57,13 @@
                     <DockPanel Margin="20 7 0 0">
                         <Border Width="70" Height="70" Background="#D6D7D7" CornerRadius="35" HorizontalAlignment="Left">
                             <!-- User avatar binding -->
-                            <Image Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
+                            <Image Name="IPhoto" Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
                                 <Image.Clip>
                                     <EllipseGeometry Rect="0,0,60,60" />
                                 </Image.Clip>
                             </Image>
                         </Border>
-                        <Button Margin="10 0 0 0" Classes="action" Height="35" HorizontalAlignment="Left" Padding="15 0" FontSize="14" Foreground="#167efb" BorderThickness="0" >Upload image</Button>
+                        <Button Margin="10 0 0 0" Classes="action" Height="35" HorizontalAlignment="Left" Padding="15 0" FontSize="14" Foreground="#167efb" BorderThickness="0" Cursor="Hand" Click="ButtonChangePhoto_Click">Upload image</Button>
                     </DockPanel>
 
                     <!-- Username binding -->

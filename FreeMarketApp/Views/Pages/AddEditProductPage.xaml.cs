@@ -8,12 +8,8 @@ using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
-using Microsoft.Extensions.FileProviders;
 using Serilog;
-using System;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using static FreeMarketApp.Views.Controls.MessageBox;
 
@@ -48,6 +44,8 @@ namespace FreeMarketApp.Views.Pages
             _marketItemData = new MarketItemV1();
 
             this.InitializeComponent();
+
+            PagesHelper.Log(_logger, string.Format("Loading product data of {0} to profile page.", "?"));
 
             if (_marketItemData.Photos.Count >= 8)
             {
@@ -116,6 +114,8 @@ namespace FreeMarketApp.Views.Pages
 
                 if (errorCount == 0)
                 {
+                    PagesHelper.Log(_logger, string.Format("Saving new data of product."));
+
                     //save to chain
                     _marketItemData.Title = tbTitle.Text;
                     _marketItemData.Description = tbDescription.Text;
@@ -129,7 +129,9 @@ namespace FreeMarketApp.Views.Pages
                     {
                         if (!_marketItemData.Photos[i - 1].Contains(SkynetWebPortal.SKYNET_PREFIX))
                         {
-                            var skynetUrl = UploadToSkynet(_marketItemData.Photos[i - 1]);
+                            PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _marketItemData.Photos[i - 1]));
+
+                            var skynetUrl = PagesHelper.UploadToSkynet(_marketItemData.Photos[i - 1], _logger);
                             if (skynetUrl == null)
                             {
                                 _marketItemData.Photos.RemoveAt(i - 1);
@@ -216,45 +218,6 @@ namespace FreeMarketApp.Views.Pages
             var spLastPhoto = this.FindControl<StackPanel>("SPPhoto_" + lastIndex);
             spLastPhoto.IsVisible = false;
             _marketItemData.Photos.RemoveAt(lastIndex);
-        }
-
-        private string UploadToSkynet(string localPath)
-        {
-            string skylinkUrl = null;
-
-            try
-            {
-                PagesHelper.Log(_logger, string.Format("Skynet Upload File: {0}", localPath));
-
-                var applicationRoot = Path.GetDirectoryName(localPath);
-                var fileName = Path.GetFileName(localPath);
-                IFileProvider provider = new PhysicalFileProvider(applicationRoot);
-
-                PagesHelper.Log(_logger, string.Format("Skynet Gateway: {0}", SkynetWebPortal.SKYNET_GATEURL));
-
-                var httpClient = new HttpClient()
-                {
-                    BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
-                };
-
-                var skynetWebPortal = new SkynetWebPortal(httpClient);
-                var fileInfo = provider.GetFileInfo(fileName);
-
-                var uniqueIndex = Guid.NewGuid();
-                PagesHelper.Log(_logger, string.Format("Procesing upload with GUID: {0}", uniqueIndex));
-
-                var uploadInfo = skynetWebPortal.UploadFiles(uniqueIndex.ToString(), new UploadItem[] { new UploadItem(fileInfo) }).Result;
-
-                skylinkUrl = string.Format("{0}{1}", SkynetWebPortal.SKYNET_PREFIX, uploadInfo.Skylink);
-
-                PagesHelper.Log(_logger, string.Format("Skynet Link: {0}", skylinkUrl));
-            }
-            catch (Exception e)
-            {
-                PagesHelper.Log(_logger, string.Format("Skynet Link: {0} - {1}", e.Message, e.StackTrace), Serilog.Events.LogEventLevel.Error);
-            }
-
-            return skylinkUrl;
         }
 
         private void ClearForm()

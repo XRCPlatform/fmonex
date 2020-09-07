@@ -10,6 +10,7 @@ using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using static FreeMarketApp.Views.Controls.MessageBox;
 
@@ -95,10 +96,13 @@ namespace FreeMarketApp.Views.Pages
                 var tbTitle = this.FindControl<TextBox>("TBTitle");
                 var tbDescription = this.FindControl<TextBox>("TBDescription");
                 var tbShipping = this.FindControl<TextBox>("TBShipping");
+                var tbPrice = this.FindControl<TextBox>("TBPrice");
                 var cbCategory = this.FindControl<ComboBox>("CBCategory");
                 var cbDealType = this.FindControl<ComboBox>("CBDealType");
+                var cbPriceType = this.FindControl<ComboBox>("CBPriceType");
 
                 var errorCount = 0;
+                var errorMessages = new StringBuilder();
 
                 if (string.IsNullOrEmpty(tbTitle.Text)) errorCount++;
                 if (string.IsNullOrEmpty(tbDescription.Text)) errorCount++;
@@ -122,6 +126,8 @@ namespace FreeMarketApp.Views.Pages
                     _marketItemData.Shipping = tbShipping.Text;
                     _marketItemData.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _marketItemData.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
+                    _marketItemData.Price = int.Parse(tbPrice.Text.Trim());
+                    _marketItemData.PriceType = int.Parse(cbPriceType.Tag.ToString());
 
                     //get time to next block
                     //upload to sia

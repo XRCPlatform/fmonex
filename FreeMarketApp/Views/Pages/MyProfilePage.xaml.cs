@@ -1,9 +1,11 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media.Imaging;
 using FreeMarketApp.Helpers;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using FreeMarketOne.Skynet;
 using Serilog;
 
 namespace FreeMarketApp.Views.Pages
@@ -47,6 +49,14 @@ namespace FreeMarketApp.Views.Pages
 
                 tbUserName.Text = _userData.UserName;
                 tbDescription.Text = _userData.Description;
+
+                if (string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
+                {
+                    var iPhoto = this.FindControl<Image>("IPhoto");
+
+                    var skynetStream = PagesHelper.DownloadFromSkynet(_userData.Photo, _logger);
+                    iPhoto.Source = new Bitmap(skynetStream);
+                }
             }
         }
 

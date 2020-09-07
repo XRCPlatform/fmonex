@@ -15,6 +15,8 @@ namespace FreeMarketApp.Helpers
 {
     internal static class PagesHelper
     {
+        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+
         internal static Window GetParentWindow(UserControl userControl)
         {
             IControl parent = userControl.Parent;
@@ -160,6 +162,34 @@ namespace FreeMarketApp.Helpers
             var content = skynetWebPortal.DownloadFile(skylink).Result;
 
             return content.ReadAsStreamAsync().Result;
+        }
+
+        public static bool IsTextValid(string text, bool allowSpace = false)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return true;
+            }
+            else
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    var charTest = text.Substring(i, 1);
+                    if (!VALIDCHARS.Contains(charTest))
+                    {
+                        if ((charTest == " ") && (allowSpace == true))
+                        {
+                            //silence
+                        } 
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

@@ -62,13 +62,13 @@ namespace FreeMarketApp.Views.Pages
             var errorCount = 0;
             var errorMessages = new StringBuilder();
 
-            if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbUserName.Text))
+            if (!PagesHelper.IsTextValid(tbUserName.Text))
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
                 errorCount++;
             }
 
-            if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbDescription.Text))
+            if (!PagesHelper.IsTextValid(tbDescription.Text, true))
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
                 errorCount++;
@@ -81,7 +81,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbPassword.Text))
+                if (!PagesHelper.IsTextValid(tbPassword.Text, true))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsPassword"));
                     errorCount++;
@@ -100,7 +100,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbSeed.Text))
+                if (!PagesHelper.IsTextValid(tbSeed.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsSeed"));
                     errorCount++;

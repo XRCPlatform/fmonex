@@ -39,9 +39,6 @@ namespace FreeMarketOne.ServerCore
         public UserDataV1 UserData => _userData;
         public bool UsedDataForceToPropagate => _userDataForceToPropagate;
 
-
-        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_- ";
-
         public UserManager(IBaseConfiguration configuration)
         {
             _logger = Log.Logger.ForContext<ServiceManager>();
@@ -115,31 +112,15 @@ namespace FreeMarketOne.ServerCore
         {
             Random random = new Random();
 
+            var validchars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+
             char[] chars = new char[length];
             for (int i = 0; i < length; i++)
             {
-                chars[i] = VALIDCHARS[random.Next(0, VALIDCHARS.Length)];
+                chars[i] = validchars[random.Next(0, validchars.Length)];
             }
 
             return new string(chars);
-        }
-
-        public bool IsTextValid(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                return true;
-            }
-            else
-            {
-                for (int i = 0; i < text.Length; i++)
-                {
-                    var charTest = text.Substring(i, 1);
-                    if (!VALIDCHARS.Contains(charTest)) return false;
-                }
-            }
-
-            return true;
         }
 
         /// <summary>

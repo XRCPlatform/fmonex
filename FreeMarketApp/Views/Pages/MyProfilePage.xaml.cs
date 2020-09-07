@@ -36,15 +36,18 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            PagesHelper.Log(_logger, string.Format("Loading user data of current user to profile page."));
+            if (FreeMarketOneServer.Current.UserManager != null)
+            {
+                PagesHelper.Log(_logger, string.Format("Loading user data of current user to profile page."));
 
-            _userData = FreeMarketOneServer.Current.UserManager.UserData;
+                _userData = FreeMarketOneServer.Current.UserManager.UserData;
 
-            var tbUserName = this.FindControl<TextBox>("TBUserName");
-            var tbDescription = this.FindControl<TextBox>("TBDescription");
+                var tbUserName = this.FindControl<TextBlock>("TBUserName");
+                var tbDescription = this.FindControl<TextBlock>("TBDescription");
 
-            tbUserName.Text = _userData.UserName;
-            tbDescription.Text = _userData.Description;
+                tbUserName.Text = _userData.UserName;
+                tbDescription.Text = _userData.Description;
+            }
         }
 
         private void InitializeComponent()

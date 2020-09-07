@@ -45,22 +45,25 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            PagesHelper.Log(_logger, string.Format("Loading user data of current user to edit profile page."));
-
-            _userData = FreeMarketOneServer.Current.UserManager.UserData;
-
-            var tbUserName = this.FindControl<TextBox>("TBUserName");
-            var tbDescription = this.FindControl<TextBox>("TBDescription");
-
-            tbUserName.Text = _userData.UserName;
-            tbDescription.Text = _userData.Description;
-
-            if (string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
+            if (FreeMarketOneServer.Current.UserManager != null)
             {
-                var iPhoto = this.FindControl<Image>("IPhoto");
+                PagesHelper.Log(_logger, string.Format("Loading user data of current user to edit profile page."));
 
-                var skynetStream = PagesHelper.DownloadFromSkynet(_userData.Photo, _logger);
-                iPhoto.Source = new Bitmap(skynetStream);
+                _userData = FreeMarketOneServer.Current.UserManager.UserData;
+
+                var tbUserName = this.FindControl<TextBox>("TBUserName");
+                var tbDescription = this.FindControl<TextBox>("TBDescription");
+
+                tbUserName.Text = _userData.UserName;
+                tbDescription.Text = _userData.Description;
+
+                if (string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
+                {
+                    var iPhoto = this.FindControl<Image>("IPhoto");
+
+                    var skynetStream = PagesHelper.DownloadFromSkynet(_userData.Photo, _logger);
+                    iPhoto.Source = new Bitmap(skynetStream);
+                }
             }
         }
 

@@ -66,7 +66,7 @@ namespace FreeMarketApp.Views.Pages
             PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
         }
 
-        private async void ButtonCancel_Click(object sender, RoutedEventArgs e)
+        public async void ButtonCancel_Click(object sender, RoutedEventArgs e)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
             var result = await MessageBox.Show(mainWindow,

@@ -3,12 +3,16 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.ServerCore;
+using Serilog;
 
 namespace FreeMarketApp.Views.Pages
 {
     public class ChatPage : UserControl
     {
         private static ChatPage _instance;
+        private ILogger _logger;
+
         public static ChatPage Instance
         {
             get
@@ -25,6 +29,10 @@ namespace FreeMarketApp.Views.Pages
 
         public ChatPage()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(ChatPage).Namespace, typeof(ChatPage).Name));
+
             this.InitializeComponent();
         }
 

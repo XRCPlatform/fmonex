@@ -2,12 +2,16 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketOne.ServerCore;
+using Serilog;
 
 namespace FreeMarketApp.Views.Pages
 {
     public class MyProfilePage : UserControl
     {
         private static MyProfilePage _instance;
+        private ILogger _logger;
+
         public static MyProfilePage Instance
         {
             get
@@ -24,6 +28,10 @@ namespace FreeMarketApp.Views.Pages
 
         public MyProfilePage()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(MyProfilePage).Namespace, typeof(MyProfilePage).Name));
+
             this.InitializeComponent();
         }
 
@@ -49,7 +57,7 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            PagesHelper.Switch(mainWindow, AddEditProfilePage.Instance);
+            PagesHelper.Switch(mainWindow, EditProfilePage.Instance);
         }
     }
 }

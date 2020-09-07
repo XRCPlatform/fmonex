@@ -7,6 +7,7 @@ using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using Serilog;
 using System;
 using System.IO;
 using System.Text;
@@ -17,6 +18,8 @@ namespace FreeMarketApp.Views.Pages
     public class FirstRunPage : UserControl
     {
         private static FirstRunPage _instance;
+        private ILogger _logger;
+
         public static FirstRunPage Instance
         {
             get
@@ -33,6 +36,10 @@ namespace FreeMarketApp.Views.Pages
 
         public FirstRunPage()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(FirstRunPage).Namespace, typeof(FirstRunPage).Name));
+
             this.InitializeComponent();
         }
 

@@ -104,17 +104,82 @@ namespace FreeMarketApp.Views.Pages
                 var errorCount = 0;
                 var errorMessages = new StringBuilder();
 
-                if (string.IsNullOrEmpty(tbTitle.Text)) errorCount++;
-                if (string.IsNullOrEmpty(tbDescription.Text)) errorCount++;
-                if (string.IsNullOrEmpty(tbShipping.Text)) errorCount++;
+                if (string.IsNullOrEmpty(tbTitle.Text) || (tbTitle.Text.Length < 10))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortTitle"));
+                    errorCount++;
+                }
+                else
+                {
+                    if (!PagesHelper.IsTextValid(tbTitle.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
+                        errorCount++;
+                    }
+                }
+                if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortDescription"));
+                    errorCount++;
+                }
+                else
+                {
+                    if (!PagesHelper.IsTextValid(tbDescription.Text, true))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
+                        errorCount++;
+                    }
+                }
+                if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 10))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortShipping"));
+                    errorCount++;
+                }
+                else
+                {
+                    if (!PagesHelper.IsTextValid(tbShipping.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
+                        errorCount++;
+                    }
+                }
+                if (string.IsNullOrEmpty(tbPrice.Text) || (tbPrice.Text.Length < 1))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortPrice"));
+                    errorCount++;
+                }
+                else
+                {
+                    if (!PagesHelper.IsNumberValid(tbPrice.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsPrice"));
+                        errorCount++;
+                    }
+                }
 
                 var cbCategoryValue = cbCategory.SelectedItem as ComboBoxItem;
-                if (cbCategoryValue.Tag.ToString() == "0") errorCount++;
-
+                if (cbCategoryValue.Tag.ToString() == "0")
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyCategory"));
+                    errorCount++;
+                }
                 var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
-                if (cbDealTypeValue.Tag.ToString() == "0") errorCount++;
-
-                if (_marketItemData.Photos.Count() == 0) errorCount++;
+                if (cbDealTypeValue.Tag.ToString() == "0")
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyDealValue"));
+                    errorCount++;
+                }
+                var cbPriceTypeValue = cbPriceType.SelectedItem as ComboBoxItem;
+                if (cbPriceTypeValue.Tag.ToString() == "0")
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPriceType"));
+                    errorCount++;
+                }
+                if (_marketItemData.Photos.Count() == 0)
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPhoto"));
+                    errorCount++;
+                }
 
                 if (errorCount == 0)
                 {
@@ -126,7 +191,7 @@ namespace FreeMarketApp.Views.Pages
                     _marketItemData.Shipping = tbShipping.Text;
                     _marketItemData.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _marketItemData.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
-                    _marketItemData.Price = int.Parse(tbPrice.Text.Trim());
+                    _marketItemData.Price = float.Parse(tbPrice.Text.Trim());
                     _marketItemData.PriceType = int.Parse(cbPriceType.Tag.ToString());
 
                     //get time to next block

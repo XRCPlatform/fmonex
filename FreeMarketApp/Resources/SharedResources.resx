@@ -117,8 +117,44 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Dialog_AddEditProduct_EmptyCategory" xml:space="preserve">
+    <value>You have to choose right category.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_EmptyDealValue" xml:space="preserve">
+    <value>You have to choose right deal type.</value>
+  </data>
   <data name="Dialog_AddEditProduct_EmptyForm" xml:space="preserve">
     <value>You have to fill all fields and add at least one photo.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_EmptyPhoto" xml:space="preserve">
+    <value>You have to add at least one photo.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_EmptyPriceType" xml:space="preserve">
+    <value>You have to choose right price type.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsDescription" xml:space="preserve">
+    <value>Your description contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsPrice" xml:space="preserve">
+    <value>Your price can contains number only.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsShipping" xml:space="preserve">
+    <value>Your shipping contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsTitle" xml:space="preserve">
+    <value>Your title contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_ShortDescription" xml:space="preserve">
+    <value>Your title is too short. Minimum is 50 chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_ShortPrice" xml:space="preserve">
+    <value>Your price is too short. Minimum is 1 number and it can't be a zero.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_ShortShipping" xml:space="preserve">
+    <value>Your shipping is too short. Minimum is 10 chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_ShortTitle" xml:space="preserve">
+    <value>Your title is too short. Minimum is 10 chars.</value>
   </data>
   <data name="Dialog_Confirmation_Cancel" xml:space="preserve">
     <value>Are you sure that you want to leave this item?</value>

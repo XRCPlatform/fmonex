@@ -148,6 +148,20 @@ namespace FreeMarketApp.Helpers
             return skylinkUrl;
         }
 
+        internal static bool IsNumberValid(string text)
+        {
+            float number;
+
+            if (float.TryParse(text, out number))
+            {
+                return true;
+            } 
+            else
+            {
+                return false;
+            }
+        }
+
         internal static Stream DownloadFromSkynet(string skylink, ILogger logger)
         {
             PagesHelper.Log(logger, string.Format("Skynet Download File: {0}", skylink));

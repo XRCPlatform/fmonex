@@ -126,16 +126,32 @@ namespace FreeMarketApp.Views.Pages
                 var errorCount = 0;
                 var errorMessages = new StringBuilder();
 
-                if (!PagesHelper.IsTextValid(tbUserName.Text))
+                if (string.IsNullOrEmpty(tbUserName.Text) || (tbUserName.Text.Length < 16))
                 {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortUserName"));
                     errorCount++;
+                } 
+                else
+                {
+                    if (!PagesHelper.IsTextValid(tbUserName.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
+                        errorCount++;
+                    }
                 }
 
-                if (!PagesHelper.IsTextValid(tbDescription.Text, true))
+                if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
                 {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortDescription"));
                     errorCount++;
+                } 
+                else
+                {
+                    if (!PagesHelper.IsTextValid(tbDescription.Text, true))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                        errorCount++;
+                    }
                 }
 
                 if (errorCount == 0)

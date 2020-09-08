@@ -172,6 +172,7 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void FindsRhodiumBarBySearchPhrase()
         {
+            
             MarketItem marketItem = new MarketItem
             {
                 Hash = "F",
@@ -182,7 +183,11 @@ namespace FreeMarketOne.Search.Tests
                 BuyerSignature = "a",
                 Description = "These one ounce minted rhodium bars are produced by Baird & Co in London, England.Each bar is individually numbered, supplied as new in mint packaging and contains 31.1035 grams of 999.0 fine rhodium.",
                 Title = "1oz Baird & Co Minted Rhodium Bar",
-                Shipping = "International"
+                Shipping = "International",
+                Fineness = "999 fine rhodium",
+                Size = "1oz",
+                WeightInGrams = 28,
+                Manufacturer = "Baird & Co",
             };
 
             MarketItem marketItem2 = new MarketItem

@@ -58,7 +58,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         /// To standardise the price per gram and etc, conversion into common metric unit.
         /// </summary>
         [JsonProperty("w")]
-        public string WeightInGrams { get; set; }
+        public long WeightInGrams { get; set; }
 
         /// <summary>
         /// Bar size in commercial terms for example 1 oz, 1 troy ounce (ozt), 1 tola, 1 kg. Should be standardised so that could be used as filter.

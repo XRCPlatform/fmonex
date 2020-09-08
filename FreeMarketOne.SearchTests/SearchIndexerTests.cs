@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.ServerCore;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Facet;
@@ -10,6 +11,7 @@ using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using System;
 using System.Collections.Generic;
 
@@ -38,7 +40,9 @@ namespace FreeMarketOne.Search.Tests
             string indexDir = "./search";
             string taxoDir = indexDir + "/taxonomy/";
 
-            SearchIndexer search = new SearchIndexer(indexDir);
+            var marketManager = Substitute.For<IMarketManager>();
+            SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+
             search.Index(marketItem);
             search.Commit();
 
@@ -123,7 +127,8 @@ namespace FreeMarketOne.Search.Tests
             string indexDir = "./search";
             string taxoDir = indexDir + "/taxonomy/";
 
-            SearchIndexer search = new SearchIndexer(indexDir);
+            var marketManager = Substitute.For<IMarketManager>();
+            SearchIndexer search = new SearchIndexer(indexDir, marketManager);
             search.Index(marketItem);
             search.Index(marketItem2);
             search.Index(marketItem3);
@@ -218,7 +223,9 @@ namespace FreeMarketOne.Search.Tests
 
             string indexDir = "./search";
 
-            SearchIndexer search = new SearchIndexer(indexDir);
+            var marketManager = Substitute.For<IMarketManager>();
+
+            SearchIndexer search = new SearchIndexer(indexDir, marketManager);
             search.Index(marketItem);
             search.Index(marketItem2);
             search.Index(marketItem3);

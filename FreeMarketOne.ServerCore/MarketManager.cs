@@ -10,7 +10,7 @@ using System.Text;
 
 namespace FreeMarketOne.ServerCore
 {
-    public class MarketManager
+    public class MarketManager : IMarketManager
     {
         public enum MarketCategoryEnum
         {
@@ -188,7 +188,7 @@ namespace FreeMarketOne.ServerCore
                             {
                                 var marketData = (MarketItemV1)itemMarket;
 
-                                if ((category == MarketCategoryEnum.All) 
+                                if ((category == MarketCategoryEnum.All)
                                     && (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
                                 {
                                     if (!ignoredSignatures.Exists(a => a == marketData.Signature))

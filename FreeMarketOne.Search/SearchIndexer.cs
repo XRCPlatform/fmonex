@@ -1,13 +1,16 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.ServerCore;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Facet;
-using Lucene.Net.Facet.Range;
 using Lucene.Net.Facet.Taxonomy.Directory;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
-using static FreeMarketOne.ServerCore.MarketManager;
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace FreeMarketOne.Search
 {
@@ -17,8 +20,9 @@ namespace FreeMarketOne.Search
         private readonly DirectoryTaxonomyWriter taxoWriter;
         private readonly IndexWriterConfig indexConfig;
         private readonly FacetsConfig facetConfig = new FacetsConfig();
+        private IMarketManager _marketManager;
 
-        public SearchIndexer(string indexLocation)
+        public SearchIndexer(string indexLocation, IMarketManager marketManager)
         {
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
 
@@ -32,7 +36,7 @@ namespace FreeMarketOne.Search
             indexConfig = new IndexWriterConfig(AppLuceneVersion, analyzer);
             writer = new IndexWriter(dir, indexConfig);
             taxoWriter = new DirectoryTaxonomyWriter(dirTaxonomy);
-
+            _marketManager = marketManager;
         }
 
         public IndexWriter Writer
@@ -49,7 +53,7 @@ namespace FreeMarketOne.Search
         public void Index(MarketItem MarketItem)
         {
             double pricePerGram = 0F;
-            MarketCategoryEnum cat = (MarketCategoryEnum)MarketItem.Category;
+            MarketManager.MarketCategoryEnum cat = (MarketManager.MarketCategoryEnum)MarketItem.Category;
             new DealType().TryGetValue(MarketItem.DealType, out string dealTypeString);
             
             //if we are re-running the block and same hash comes again, delete and add it again
@@ -68,6 +72,10 @@ namespace FreeMarketOne.Search
                 pricePerGram = MarketItem.Price / MarketItem.WeightInGrams;
             }
 
+            //transform seller pubkeys to sha hashes for simplified search use
+            var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(MarketItem);
+            List<string> sellerPubKeyHashes = GenerateSellerPubKeyHashes(sellerPubKeys);
+
             Document doc = new Document
             {
                 new StringField("ID", MarketItem.Hash, Field.Store.YES),
@@ -85,9 +93,44 @@ namespace FreeMarketOne.Search
                 new DoubleDocValuesField("Price", MarketItem.Price)
             };
 
+            //append all seller sha-hashes to a single multivalue field so that we can find by any.
+            //this should support find all seller items usecase, provided we hash seller's keys for query
+            foreach (var sellerPubKeyHash in sellerPubKeyHashes)
+            {
+                doc.Add(new StringField("SellerPubKeyHash", sellerPubKeyHash, Field.Store.NO));
+            }
+
             Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
 
+        }
+
+        private List<string> GenerateSellerPubKeyHashes(List<byte[]> pubKeys)
+        {
+            List<string> list = new List<string>();
+            if (pubKeys == null)
+            {
+                return list;
+            }
+            foreach (var pubKey in pubKeys)
+            {
+                list.Add(Sha256Hash(pubKey));
+            }
+            return list;
+        }
+
+        private static string Sha256Hash(byte[] rawData)
+        {
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(rawData);
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
         }
 
         public void DeleteMarketItem(MarketItem MarketItem)

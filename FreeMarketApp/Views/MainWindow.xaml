@@ -10,7 +10,7 @@
         Icon="/Assets/freemarket.ico"
         Title="Free Market One" WindowStartupLocation="CenterScreen">
 
-  <!-- BUTTON STYLES -->
+  <!-- BUTTONS -->
   <Window.Styles>
 
     <!-- Avatar Button -->
@@ -159,15 +159,73 @@
       <Setter Property="Background" Value="#0f70e6" />
     </Style>
 
+<!-- ELEMENTS -->
+  <Style Selector="MainGrid">
+      <Setter Property="Background" Value="#ffffff" />
+  </Style>
+
+<!-- Main Toolbar -->
+  <Style Selector="ToolBar">
+      <Setter Property="Background" Value="#f4f3f8" />
+  </Style>
+
+  <Style Selector="SideBarIcon">
+      <Setter Property="Background" Value="#848d95" />
+  </Style>
+
+  <Style Selector="TextBlock.H1">
+      <Setter Property="Foreground" Value="#000000" />
+  </Style>
+
+  <Style Selector="InactiveStar">
+      <Setter Property="Background" Value="#FFECECEC" />
+  </Style>
+
+  <Style Selector="SearchBar">
+      <Setter Property="BorderBrush" Value="#e6e5ea" />
+	    <Setter Property="Background" Value="#e6e5ea" />
+  </Style>
+
+  <Style Selector="TextBox.SearchBar">
+      <Setter Property="Foreground" Value="#e6e5ea" />
+  </Style>
+
+  <Style Selector="StatushBar">
+      <Setter Property="BorderBrush" Value="#ebefff" />
+	    <Setter Property="Background" Value="#ebefff" />
+  </Style>
+
+<!-- Status Bar -->
+  <Style Selector="StatushBarIconGreen">
+        <Setter Property="Background" Value="#79d70f" />
+    </Style>
+
+  <Style Selector="StatushBarIconInactive">
+        <Setter Property="Background" Value="#79d70f" />
+    </Style>
+
+  <Style Selector="StatushBarIconRed">
+        <Setter Property="Background" Value="#ff2400" />
+    </Style>
+
+  <Style Selector="StatushBarIconOrange">
+        <Setter Property="Background" Value="#ff9234" />
+    </Style>
+
+  <Style Selector="TextBlock.StatushBarText">
+        <Setter Property="Foreground" Value="#606060" />
+    </Style>
+
+
   </Window.Styles>
 
 
-  <Grid Margin="0" Background="White">
+  <Grid Classes="MainGrid" Margin="0">
         <!-- TOP NAVIGATION -->
-        <Grid Height="60" VerticalAlignment="Top" Background="#f4f3f8">
+        <Grid Classes="ToolBar" Height="60" VerticalAlignment="Top">
 
             <!-- Avatar Placeholder (Uploaded avatar will cover this icon) -->
-            <Path x:Name="AvatarPlaceholder" Data="M55,27.5C55,12.337,42.663,0,27.5,0S0,12.337,0,27.5c0,8.009,3.444,15.228,8.926,20.258l-0.026,0.023l0.892,0.752
+            <Path x:Name="AvatarPlaceholder" Classes="SideBarIcon" Data="M55,27.5C55,12.337,42.663,0,27.5,0S0,12.337,0,27.5c0,8.009,3.444,15.228,8.926,20.258l-0.026,0.023l0.892,0.752
 				c0.058,0.049,0.121,0.089,0.179,0.137c0.474,0.393,0.965,0.766,1.465,1.127c0.162,0.117,0.324,0.234,0.489,0.348
 				c0.534,0.368,1.082,0.717,1.642,1.048c0.122,0.072,0.245,0.142,0.368,0.212c0.613,0.349,1.239,0.678,1.88,0.98
 				c0.047,0.022,0.095,0.042,0.142,0.064c2.089,0.971,4.319,1.684,6.651,2.105c0.061,0.011,0.122,0.022,0.184,0.033
@@ -182,7 +240,7 @@
 				c0-0.867-0.318-1.708-0.887-2.369v-4.667c0.052-0.52,0.236-3.448-1.883-5.864C34.524,9.065,31.541,8,27.5,8
 				s-7.024,1.065-8.867,3.168c-2.119,2.416-1.935,5.346-1.883,5.864v4.667c-0.568,0.661-0.887,1.502-0.887,2.369v3.545
 				c0,1.101,0.494,2.128,1.34,2.821c0.81,3.173,2.477,5.575,3.093,6.389v2.894c0,0.816-0.445,1.566-1.162,1.958l-7.907,4.313
-				c-0.252,0.137-0.502,0.297-0.752,0.476C5.276,41.792,2,35.022,2,27.5z" HorizontalAlignment="Left" VerticalAlignment="Center" Height="38" Stretch="Fill" Width="38" Fill="#848d95" Margin="22,0,0,0"/>
+				c-0.252,0.137-0.502,0.297-0.752,0.476C5.276,41.792,2,35.022,2,27.5z" HorizontalAlignment="Left" VerticalAlignment="Center" Height="38" Stretch="Fill" Width="38" Margin="22,0,0,0"/>
             <Button Name="BTMyProfile" Width="46" Height="46" HorizontalAlignment="Left" Background="Transparent" Margin="18 0 0 0" Classes="user" Click="ButtonMyProfile_Click" Cursor="Hand">
                 <!-- Avatar Binding -->
                 <Image Source="{Binding Avatar}" Width="40" Height="40" RenderOptions.BitmapInterpolationMode="HighQuality">
@@ -194,38 +252,38 @@
 
             <!-- Name and Reputation -->
             <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70 0 0 0">
-                <TextBlock Name="TBUserName" HorizontalAlignment="Left" Height="24" Text="New User" Width="180" FontWeight="Bold" FontSize="16" Foreground="#FF212121"/>
+                <TextBlock Name="TBUserName" Classes="H1" HorizontalAlignment="Left" Height="24" Text="New User" Width="180" FontWeight="Bold" FontSize="16"/>
                 <StackPanel x:Name="ReputationBar" HorizontalAlignment="Left" VerticalAlignment="Top" Height="12" Width="180" Orientation="Horizontal">
-                    <Path x:Name="Star" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                    <Path x:Name="Star" Classes="InactiveStar" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 						  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 						  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 						  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 						  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
-						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Fill="#FFECECEC" Margin="0,0,3,0"/>
-                    <Path x:Name="Star1" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Margin="0,0,3,0"/>
+                    <Path x:Name="Star1" Classes="InactiveStar" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 						  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 						  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 						  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 						  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
-						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Fill="#FFECECEC" Margin="0,0,3,0"/>
-                    <Path x:Name="Star2" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Margin="0,0,3,0"/>
+                    <Path x:Name="Star2" Classes="InactiveStar" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 						  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 						  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 						  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 						  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
-						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Fill="#FFECECEC" Margin="0,0,3,0"/>
-                    <Path x:Name="GreyStar" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Margin="0,0,3,0"/>
+                    <Path x:Name="GreyStar" Classes="InactiveStar" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 						  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 						  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 						  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 						  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
-						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Fill="#FFECECEC" Margin="0,0,3,0"/>
-                    <Path x:Name="GreyStar1" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Margin="0,0,3,0"/>
+                    <Path x:Name="GreyStar1" Classes="InactiveStar" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 						  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 						  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 						  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 						  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
-						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Fill="#FFECECEC" Margin="0,0,3,0"/>
+						  C511.56,208.649,513.033,202.688,511.267,197.258z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="11" Stretch="Fill" Width="12" Margin="0,0,3,0"/>
                 </StackPanel>
             </StackPanel>
 
@@ -235,15 +293,15 @@
                     <ColumnDefinition />
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
-                <Border BorderBrush="#e6e5ea" BorderThickness="3" Background="#e6e5ea" CornerRadius="3">
-                    <TextBox x:Name="SearchField" Grid.Column="1" Padding="20 0 50 0" Watermark ="Search in offers" Cursor="IBeam" VerticalAlignment="Center" FontSize="15" BorderThickness="0" Background="#e6e5ea"/>
+                <Border Classes="SearchBar" BorderThickness="3" CornerRadius="3">
+                    <TextBox x:Name="SearchField" Classes="SearchBar" Grid.Column="1" Padding="20 0 50 0" Watermark ="Search in offers" Cursor="IBeam" VerticalAlignment="Center" FontSize="15" BorderThickness="0"/>
                 </Border>
                 <Button Name="BTSearch" HorizontalAlignment="Right" Height="34" Width="45" Margin="0 0 5 0" Classes="search" Cursor="Hand" Click="ButtonSearch_Click">
-                    <Path Data="M20.194,3.46c-4.613-4.613-12.121-4.613-16.734,0c-4.612,4.614-4.612,12.121,0,16.735   
+                    <Path Classes="SideBarIcon" Data="M20.194,3.46c-4.613-4.613-12.121-4.613-16.734,0c-4.612,4.614-4.612,12.121,0,16.735   
 						  c4.108,4.107,10.506,4.547,15.116,1.34c0.097,0.459,0.319,0.897,0.676,1.254l6.718,6.718c0.979,0.977,2.561,0.977,3.535,0   
 						  c0.978-0.978,0.978-2.56,0-3.535l-6.718-6.72c-0.355-0.354-0.794-0.577-1.253-0.674C24.743,13.967,24.303,7.57,20.194,3.46z    
 						  M18.073,18.074c-3.444,3.444-9.049,3.444-12.492,0c-3.442-3.444-3.442-9.048,0-12.492c3.443-3.443,9.048-3.443,12.492,0   
-						  C21.517,9.026,21.517,14.63,18.073,18.074z" Fill="#848d95" Width="18" Height="18" Stretch="Fill"/>
+						  C21.517,9.026,21.517,14.63,18.073,18.074z" Width="18" Height="18" Stretch="Fill"/>
                 </Button>
             </Grid>
 
@@ -259,26 +317,21 @@
       </Panel>
       
     <!-- Status bar -->
-	  <Border CornerRadius="0 7 0 0" BorderBrush="#f4f3f8" Background="#ebefff" VerticalAlignment="Bottom" HorizontalAlignment="Left">
+	  <Border CornerRadius="0 7 0 0" Classes="StatusBar" VerticalAlignment="Bottom" HorizontalAlignment="Left">
 		  <WrapPanel Orientation="Horizontal">
-			  <!-- Status icon colors
-							- Tor is turned off: #79d70f
-							- Connecting to Tor: #ff9234
-							- Tor is running: #79d70f 
-							- No Peers: #ff2400 -->
 
 			  <!-- Tor --> 
-			  <Path x:Name="TorIcon" Data="M461.143,60.883l-200.83-60.25c-2.812-0.844-5.809-0.844-8.622,0L50.857,60.883c-6.344,1.903-10.689,7.743-10.689,14.367
+			  <Path x:Name="TorIcon" Classes="StatusBarIconGreen" Data="M461.143,60.883l-200.83-60.25c-2.812-0.844-5.809-0.844-8.622,0L50.857,60.883c-6.344,1.903-10.689,7.743-10.689,14.367
 						v220.916c0,28.734,11.633,58.148,34.574,87.425c17.521,22.36,41.762,44.813,72.047,66.736
 						c50.877,36.828,100.976,59.42,103.084,60.363c1.949,0.873,4.039,1.31,6.129,1.31s4.18-0.436,6.129-1.31
 						c2.107-0.943,52.205-23.535,103.082-60.363c30.285-21.923,54.525-44.376,72.047-66.736c22.941-29.276,34.572-58.69,34.572-87.425
-						V75.25C471.832,68.626,467.489,62.786,461.143,60.883z" VerticalAlignment="Center" HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="11" Fill="#79d70f" Margin="10 0 0 0"/>
-			  <TextBlock x:Name="TorStatus" Text="Tor is running" FontSize="12" Margin="5 5 15 5" Foreground="#606060" VerticalAlignment="Center"/>
+						V75.25C471.832,68.626,467.489,62.786,461.143,60.883z" VerticalAlignment="Center" HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="11" Margin="10 0 0 0"/>
+			  <TextBlock x:Name="TorStatus" Classes="StatusBarText" Text="Tor is running" FontSize="12" Margin="5 5 15 5" VerticalAlignment="Center"/>
 
 			  <!-- Peers -->
-			  <Ellipse x:Name="PeersStatus" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9" Fill="#ff2400"/>
-			  <TextBlock Text="Peers: " FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0" Foreground="#606060"/>
-			  <TextBlock x:Name="PeersNumber" Text="0 " FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center" Foreground="#606060"/>
+			  <Ellipse x:Name="PeersStatus" Classes="StatusBarIconRed" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
+			  <TextBlock Text="Peers: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
+			  <TextBlock x:Name="PeersNumber" Text="0 " Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 		  </WrapPanel>
 	  </Border>
 

@@ -160,56 +160,57 @@
     </Style>
 
 <!-- ELEMENTS -->
-  <Style Selector="MainGrid">
+  <Style Selector="Grid.Main">
       <Setter Property="Background" Value="#ffffff" />
   </Style>
 
 <!-- Main Toolbar -->
-  <Style Selector="ToolBar">
+  <Style Selector="Grid.ToolBar">
       <Setter Property="Background" Value="#f4f3f8" />
   </Style>
 
-  <Style Selector="SideBarIcon">
-      <Setter Property="Background" Value="#848d95" />
+  <Style Selector="Path.SideBarIcon">
+      <Setter Property="Fill" Value="#848d95" />
   </Style>
 
   <Style Selector="TextBlock.H1">
       <Setter Property="Foreground" Value="#000000" />
   </Style>
 
-  <Style Selector="InactiveStar">
-      <Setter Property="Background" Value="#FFECECEC" />
+  <Style Selector="Path.InactiveStar">
+      <Setter Property="Fill" Value="#FFECECEC" />
   </Style>
 
-  <Style Selector="SearchBar">
+  <Style Selector="Border.SearchBar">
       <Setter Property="BorderBrush" Value="#e6e5ea" />
 	    <Setter Property="Background" Value="#e6e5ea" />
   </Style>
 
   <Style Selector="TextBox.SearchBar">
-      <Setter Property="Foreground" Value="#e6e5ea" />
+      <Setter Property="Foreground" Value="#606060" />
+      <Setter Property="Background" Value="#e6e5ea" />
   </Style>
 
-  <Style Selector="StatushBar">
+<!-- Status Bar -->
+  <Style Selector="Border.StatusBar">
       <Setter Property="BorderBrush" Value="#ebefff" />
 	    <Setter Property="Background" Value="#ebefff" />
   </Style>
 
-<!-- Status Bar -->
-  <Style Selector="StatushBarIconGreen">
-        <Setter Property="Background" Value="#79d70f" />
+  <Style Selector="Path.StatushBarIconGreen">
+        <Setter Property="Fill" Value="#79d70f" />
     </Style>
 
-  <Style Selector="StatushBarIconInactive">
-        <Setter Property="Background" Value="#79d70f" />
+  <Style Selector="Path.StatushBarIconInactive">
+        <Setter Property="Fill" Value="#e6e5ea" />
     </Style>
 
-  <Style Selector="StatushBarIconRed">
-        <Setter Property="Background" Value="#ff2400" />
+  <Style Selector="Path.StatushBarIconRed">
+        <Setter Property="Fill" Value="#ff2400" />
     </Style>
 
-  <Style Selector="StatushBarIconOrange">
-        <Setter Property="Background" Value="#ff9234" />
+  <Style Selector="Path.StatushBarIconOrange">
+        <Setter Property="Fill" Value="#ff9234" />
     </Style>
 
   <Style Selector="TextBlock.StatushBarText">
@@ -220,7 +221,7 @@
   </Window.Styles>
 
 
-  <Grid Classes="MainGrid" Margin="0">
+  <Grid Classes="Main" Margin="0">
         <!-- TOP NAVIGATION -->
         <Grid Classes="ToolBar" Height="60" VerticalAlignment="Top">
 

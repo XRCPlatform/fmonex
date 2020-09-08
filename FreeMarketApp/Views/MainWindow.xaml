@@ -13,7 +13,7 @@
   <!-- BUTTONS -->
   <Window.Styles>
 
-    <!-- Avatar Button -->
+   	<!-- Avatar Button -->
 		<Style Selector="Button.user /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="transparent" />
 			<Setter Property="BorderThickness" Value="3" />
@@ -239,6 +239,10 @@
 		<Style Selector="Path.BlueIcon">
 			<Setter Property="Fill" Value="#167efb" />
 		</Style>
+		
+		<Style Selector="Path.WhiteIcon">
+			<Setter Property="Fill" Value="#ffffff" />
+		</Style>
 
 		<Style Selector="TextBox.TextBoxBackground">
 			<Setter Property="Background" Value="#f9f9f9" />
@@ -251,6 +255,27 @@
 		<Style Selector="Border.PhotoPlaceholder">
 			<Setter Property="BorderBrush" Value="#f2f2f5" />
 			<Setter Property="Background" Value="#f2f2f5" />
+		</Style>
+		
+		<Style Selector="Border.Notification">
+			<Setter Property="Background" Value="Orange" />
+		</Style>
+		
+		<Style Selector="Border.IncomingChatMessage">
+			<Setter Property="Background" Value="#f9f6f7" />
+		</Style>
+		
+		<Style Selector="Border.OutcomingChatMessage">
+			<Setter Property="Background" Value="#dee0d9" />
+		</Style>
+		
+		<Style Selector="Border.ReplyTextbox">
+			<Setter Property="BorderBrush" Value="#848d95" />
+			<Setter Property="Background" Value="#ffffff" />
+		</Style>
+		
+		<Style Selector="Path.SidebarIcon">
+			<Setter Property="Fill" Value="#4E5C6E" />
 		</Style>
 
 

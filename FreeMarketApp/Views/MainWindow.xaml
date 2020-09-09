@@ -184,10 +184,6 @@
 			<Setter Property="Background" Value="#f4f3f8" />
 		</Style>
 
-		<Style Selector="Path.SideBarIcon">
-			<Setter Property="Fill" Value="#848d95" />
-		</Style>
-
 		<Style Selector="TextBlock.H1">
 			<Setter Property="Foreground" Value="#000000" />
 		</Style>
@@ -212,15 +208,15 @@
 			<Setter Property="Background" Value="#ebefff" />
 		</Style>
 
-		<Style Selector="Path.StatushBarIconGreen">
+		<Style Selector="Path.StatusBarIconGreen">
 			<Setter Property="Fill" Value="#79d70f" />
 		</Style>
 
-		<Style Selector="Path.StatushBarIconInactive">
+		<Style Selector="Path.StatusBarIconInactive">
 			<Setter Property="Fill" Value="#e6e5ea" />
 		</Style>
 
-		<Style Selector="Path.StatushBarIconRed">
+		<Style Selector="Path.StatusBarIconRed">
 			<Setter Property="Fill" Value="#ff2400" />
 		</Style>
 
@@ -228,11 +224,11 @@
         	<Setter Property="Background" Value="#ff2400" />
     	</Style>
 
-		<Style Selector="Path.StatushBarIconOrange">
+		<Style Selector="Path.StatusBarIconOrange">
 			<Setter Property="Fill" Value="#ff9234" />
 		</Style>
 
-		<Style Selector="TextBlock.StatushBarText">
+		<Style Selector="TextBlock.StatusBarText">
 			<Setter Property="Foreground" Value="#606060" />
 		</Style>
 
@@ -278,7 +274,7 @@
 			<Setter Property="Background" Value="#ffffff" />
 		</Style>
 		
-		<Style Selector="Path.SidebarIcon">
+		<Style Selector="Path.SideBarIcon">
 			<Setter Property="Fill" Value="#4E5C6E" />
 		</Style>
 
@@ -382,10 +378,33 @@
 
       </Panel>
       
-    <!-- Status bar -->
+     <!-- Status bar -->
 	  <Border CornerRadius="0 7 0 0" Classes="StatusBar" VerticalAlignment="Bottom" HorizontalAlignment="Left">
 		  <WrapPanel Orientation="Horizontal">
-
+			  
+            <!-- Settings -->
+		<Button Width="30" Height="20" Margin="2 0 0 0" Background="Transparent" HorizontalContentAlignment="Center" BorderThickness="0">	  
+			<Path x:Name="SettingsIcon" Classes="SideBarIcon" Data="M494.699,212.48l-28.245-5.44c-12.651-2.411-22.571-10.688-27.285-22.635c-4.715-12.011-3.051-24.832,4.587-35.221
+				l17.728-24.192c6.229-8.469,5.312-20.245-2.133-27.669l-38.293-38.293c-7.211-7.232-18.603-8.299-27.029-2.581l-23.829,16.107
+				c-10.624,7.232-23.467,8.405-35.307,3.285c-11.797-5.163-19.712-15.403-21.653-28.139l-4.565-29.611
+				C307.072,7.68,298.112,0,287.573,0h-54.144c-10.219,0-19.008,7.253-20.949,17.301l-7.019,36.48
+				c-2.368,12.352-10.389,22.208-22.016,27.008c-11.627,4.843-24.299,3.541-34.709-3.52l-30.763-20.821
+				c-8.427-5.717-19.776-4.651-27.029,2.581L52.651,97.323c-7.445,7.424-8.363,19.2-2.133,27.669l17.728,24.213
+				c7.637,10.368,9.301,23.189,4.587,35.2c-4.715,11.947-14.635,20.224-27.307,22.635l-28.224,5.44
+				C7.253,214.421,0,223.211,0,233.429v54.144c0,10.539,7.68,19.499,18.091,21.099l29.611,4.565
+				c12.736,1.941,22.976,9.856,28.139,21.653c5.141,11.797,3.947,24.661-3.285,35.328l-16.107,23.808
+				c-5.739,8.448-4.651,19.797,2.581,27.029l38.293,38.293c7.445,7.467,19.2,8.32,27.669,2.133l24.213-17.728
+				c10.368-7.616,23.168-9.259,35.2-4.587c11.947,4.715,20.224,14.635,22.635,27.307l5.44,28.224
+				C214.421,504.747,223.211,512,233.429,512h54.144c10.539,0,19.499-7.68,21.099-18.091l3.2-20.821
+				c2.005-13.035,10.133-23.381,22.293-28.395c12.075-5.035,25.195-3.477,35.84,4.331l17.003,12.459
+				c8.427,6.187,20.224,5.333,27.669-2.133l38.293-38.293c7.232-7.232,8.32-18.581,2.581-27.029l-16.107-23.829
+				c-7.232-10.645-8.427-23.509-3.285-35.307c5.163-11.797,15.403-19.712,28.139-21.653l29.611-4.565
+				c10.411-1.6,18.091-10.56,18.091-21.099v-54.144C512,223.211,504.747,214.421,494.699,212.48z M256,362.667
+				c-58.816,0-106.667-47.851-106.667-106.667S197.184,149.333,256,149.333S362.667,197.184,362.667,256
+				S314.816,362.667,256,362.667z" 
+			  VerticalAlignment="Center" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="14" />
+		</Button>  
+			
 			  <!-- Tor --> 
 			  <Path x:Name="TorIcon" Classes="StatusBarIconGreen" Data="M461.143,60.883l-200.83-60.25c-2.812-0.844-5.809-0.844-8.622,0L50.857,60.883c-6.344,1.903-10.689,7.743-10.689,14.367
 						v220.916c0,28.734,11.633,58.148,34.574,87.425c17.521,22.36,41.762,44.813,72.047,66.736
@@ -395,7 +414,7 @@
 			  <TextBlock x:Name="TorStatus" Classes="StatusBarText" Text="Tor is running" FontSize="12" Margin="5 5 15 5" VerticalAlignment="Center"/>
 
 			  <!-- Peers -->
-			  <Ellipse x:Name="PeersStatus" Classes="StatusBarIconRed" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
+			  <Border x:Name="PeersStatus" Classes="StatusBarIconRed" CornerRadius="10" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
 			  <TextBlock Text="Peers: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
 			  <TextBlock x:Name="PeersNumber" Text="0 " Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 		  </WrapPanel>

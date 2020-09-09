@@ -24,28 +24,93 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
       <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
         <TextBlock Name="TBTitle" Text="" TextWrapping="Wrap" Margin="20 20 20 20" FontSize="28" FontWeight="Normal" Foreground="#606060"/>
-        <Border Margin="18 0 20 10" Padding="2" Background="#f7f7f7" CornerRadius="5">
-          <DockPanel>
-            <ListBox x:Name="photos" Classes="myListbox" DockPanel.Dock="Left" VerticalAlignment="Top" HorizontalAlignment="Left" Background="#f7f7f7" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-              <ListBox.ItemTemplate>
-                <DataTemplate >
-                  <Border BorderBrush="#f7f7f7" BorderThickness="1" Margin="1 2">
 
-                    <!-- bind all uploaded photos to this template -->
-                    <Image Source="{Binding UploadedImages}" Width="65" Height="45" Stretch="UniformToFill">
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,65,45" />
-                      </Image.Clip>
-                    </Image>
-                  </Border>
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-            </ListBox>
-            <!-- big image is binded to a selected item from listbox -->
-            <Image Source="{Binding SelectedItem.Image, ElementName=photos}" HorizontalAlignment="Left" MaxHeight="1000" Margin="0 7 7 7" VerticalAlignment="Top"/>
-          </DockPanel>
-        </Border>
+        <TextBlock Text="Photos" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+       
+        <WrapPanel Margin="18 0 20 10">
 
+          <StackPanel Name="SPPhoto_0" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_0" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Name="SPPhoto_1" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_1" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Name="SPPhoto_2" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_2" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Name="SPPhoto_3" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_3" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Name="SPPhoto_4" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_4" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Name="SPPhoto_5" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_5" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Name="SPPhoto_6" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_6" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Name="SPPhoto_7" IsVisible="false">
+            <Border BorderBrush="#f2f2f5" Width="168" Height="100" Margin="5" Background="#f2f2f5" BorderThickness="0">
+              <Image Name="IPhoto_7" Stretch="UniformToFill" >
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,168,100" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </StackPanel>
+          
+        </WrapPanel>
+        
         <TextBlock Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
         <!-- product description binding -->
         <TextBlock Name="TBDescription" Text=""
@@ -70,7 +135,7 @@
         <TextBlock Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Vertical">
           <!-- seller profile binding -->
-          <TextBlock x:Name="UserBinding" Text="CryptoGoldLover" Margin="20 0 0 2" FontSize="20"/>
+          <TextBlock Name="TBSeller" Text="" Margin="20 0 0 2" FontSize="20"/>
           <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
             <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 							  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
@@ -80,7 +145,7 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
               Height="14" Stretch="Fill" Width="14" Fill="#f8b500" Margin="0,1,5,0"/>
             <!-- seller rating binding -->
-            <TextBlock x:Name="ReputationBinding" Text="4.2" FontSize="16"/>
+            <TextBlock Text="4.2" FontSize="16"/>
             <TextBlock Text="Reviews" Margin="20 0 5 0" FontSize="16"/>
             <Button Padding="10 0 10 0" BorderThickness="0" Background="#f6f7f8" Foreground="#167efb" Classes="action">
               <!-- link to a seller's public profile and number of reviews binding -->

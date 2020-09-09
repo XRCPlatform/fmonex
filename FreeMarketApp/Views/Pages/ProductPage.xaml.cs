@@ -5,7 +5,7 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketOne.ServerCore;
 using Serilog;
-using System;
+using System.Linq;
 using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
@@ -58,11 +58,14 @@ namespace FreeMarketApp.Views.Pages
 
             if (offer != null)
             {
+                PagesHelper.Log(Instance._logger, string.Format("Loading detail of product signature {0}", offer.Signature));
+
                 var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
                 var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
                 var tbShipping = Instance.FindControl<TextBlock>("TBShipping");
                 var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
                 var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
+                var tbSeller = Instance.FindControl<TextBlock>("TBSeller");
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
@@ -70,8 +73,25 @@ namespace FreeMarketApp.Views.Pages
                 tbPrice.Text = offer.Price.ToString();
                 tbPriceType.Text = ((ProductPriceTypeEnum)offer.PriceType).ToString();
 
-                //photos
-                //user info
+                //seller userdata loading
+                var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(offer);
+                var userData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(userPubKey);
+                if (userData != null) tbSeller.Text = userData.UserName;
+
+                //photos loading
+                if ((offer.Photos != null) && (offer.Photos.Any()))
+                {
+                    SkynetHelper.PreloadPhotos(offer, Instance._logger);
+
+                    for (int i = 0; i < offer.Photos.Count; i++)
+                    {
+                        var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
+                        var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
+
+                        spPhoto.IsVisible = true;
+                        iPhoto.Source = offer.PrePhotos[i];
+                    }
+                }
             }
         }
 

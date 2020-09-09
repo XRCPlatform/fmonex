@@ -97,6 +97,14 @@ namespace FreeMarketApp.Helpers
             }
         }
 
+        internal static void PreloadPhotos(MarketItemV1 offers, ILogger logger)
+        {
+            if (offers != null)
+            {
+                PreloadPhotos(new List<MarketItemV1>() { offers }, logger);
+            }    
+        }
+
         internal static void PreloadPhotos(List<MarketItemV1> offers, ILogger logger)
         {
             if (offers.Any())

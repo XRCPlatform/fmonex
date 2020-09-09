@@ -1,22 +1,22 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.SearchResultsPage">
 
-    <Grid Margin="0" Background="White">
+    <Grid Margin="0" Classes="Main">
       <!-- SIDEBAR -->
       <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
         <StackPanel x:Name="SideBar" Orientation="Vertical">
-          <Button x:Name="BackButton" Cursor="Hand" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click">
+          <Button x:Name="BackButton" Cursor="Hand" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click">
             <StackPanel Orientation="Horizontal">
-              <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
+              <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
               <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
             </StackPanel>
           </Button>
 
-          <TextBlock Text="Sort by category" Margin="20 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" Foreground="#606060"/>
+          <TextBlock Classes="H1" Text="Sort by category" Margin="20 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
           <Button Classes="sidebar" Cursor="Hand" HorizontalContentAlignment="Stretch">
             <DockPanel HorizontalAlignment="Stretch">
               <TextBlock Text="All results" DockPanel.Dock="Left"></TextBlock>
@@ -44,30 +44,30 @@
 
         </StackPanel>
       </ScrollViewer>
-      <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 0 0 0"/>
+      <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
       <!-- CONTENT AREA -->
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
         <StackPanel HorizontalAlignment="Stretch">
-          <TextBlock Text="Search results" TextWrapping="Wrap" Margin="20 20 20 20" FontSize="28" FontWeight="Bold" Foreground="#606060"/>
+          <TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" Margin="20 20 20 20" FontSize="28" FontWeight="Bold" />
 
           <!-- Product card from a search result -->
           <Button Margin="10 0 10 10" Cursor="Hand" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Click="ButtonProduct_Click">
             <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-              <Border Width="200" Height="120" Margin="5 10 10 10" Background="#e6e5ea" BorderThickness="0">
+              <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="0">
                 <Image DockPanel.Dock="Left" Source="{Binding ProductImage}" Stretch="UniformToFill" >
                   <Image.Clip>
                     <RectangleGeometry Rect="0,0,200,120" />
                   </Image.Clip>
                 </Image>
               </Border>
-              <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="2017 1 oz Proof Mississippi Choctaw Water Moccasin Silver Coin"></TextBlock>
+              <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="2017 1 oz Proof Mississippi Choctaw Water Moccasin Silver Coin"></TextBlock>
               <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                <TextBlock  FontSize="12" Foreground="Gray" Text="Shipping: "></TextBlock>
-                <TextBlock  FontSize="12" Foreground="Gray" Text="Worldwide"></TextBlock>
+                <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
+                <TextBlock Classes="H2" FontSize="12" Text="Worldwide"></TextBlock>
               </StackPanel>
-              <TextBlock DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="$185"></TextBlock>
-              <TextBlock DockPanel.Dock="Top" FontSize="14" Foreground="Gray" Text="5.3 XRC"></TextBlock>
+              <TextBlock Classes="H1" DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="$185"></TextBlock>
+              <TextBlock Classes="H2" DockPanel.Dock="Top" FontSize="14" Text="5.3 XRC"></TextBlock>
             </DockPanel>
           </Button>
           <!-- End of product card -->

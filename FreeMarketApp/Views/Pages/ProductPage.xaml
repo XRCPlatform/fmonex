@@ -9,8 +9,8 @@
 
     <!-- SIDEBAR -->
     <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
-      <StackPanel x:Name="SideBar" Orientation="Vertical">
-        <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
+      <StackPanel Name="SideBar" Orientation="Vertical">
+        <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
           <StackPanel Orientation="Horizontal">
             <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
             <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
@@ -23,7 +23,7 @@
     <!-- PRODUCT AREA -->
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
       <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
-        <TextBlock x:Name="Title" Text="10 oz PAMP Suisse Fortuna Veriscan Gold Bar (New w/ Assay)" TextWrapping="Wrap" Margin="20 20 20 20" FontSize="28" FontWeight="Normal" Foreground="#606060"/>
+        <TextBlock Name="TBTitle" Text="" TextWrapping="Wrap" Margin="20 20 20 20" FontSize="28" FontWeight="Normal" Foreground="#606060"/>
         <Border Margin="18 0 20 10" Padding="2" Background="#f7f7f7" CornerRadius="5">
           <DockPanel>
             <ListBox x:Name="photos" Classes="myListbox" DockPanel.Dock="Left" VerticalAlignment="Top" HorizontalAlignment="Left" Background="#f7f7f7" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -48,25 +48,24 @@
 
         <TextBlock Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
         <!-- product description binding -->
-        <TextBlock x:Name="DescriptionBinding" Text="Veriscan is a unique technology developed by PAMP Suisse to help eliminate counterfeiting. The idea behind the system is simple. The microscopic topography of a gold bars surface makes it possible to assign an individual, unique fingerprint to each bar. When the bars are struck at the refinery, those fingerprints are recorded and cataloged.The Fortuna gold-bar design is one of the most popular on a gold bar today. The Roman goddess of fortune and personification of luck, Fortuna is often depicted with her eyes blindfolded or her face hidden behind a veil. It is not uncommon for a cornucopia to be included in depictions of Fortuna because, as Annonaria, she was considered the protector of grain supplies."
+        <TextBlock Name="TBDescription" Text=""
                TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
         <TextBlock Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <Path Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
             Height="14" Stretch="Fill" Width="11" Fill="#f8b500" Margin="0,1,5,0"/>
           <!-- product shipping binding -->
-          <TextBlock x:Name="ShippingBinding" Text="Wordlwide" FontSize="16"/>
+          <TextBlock Name="TBShipping" Text="" FontSize="16"/>
         </StackPanel>
         <TextBlock Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <TextBlock Text="$" Margin="0 2 0 0" FontSize="16"/>
           <!-- USD price binding -->
-          <TextBlock x:Name="USD_Binding" Text="2,430" FontSize="20"/>
+          <TextBlock Name="TBPrice" Text="" FontSize="20"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Margin="20 0 0 0">
           <!-- XRC price binding -->
-          <TextBlock x:Name="XRC_Binding" Foreground="#848d95" Text="12" FontSize="16"/>
-          <TextBlock Text=" XRC" Foreground="#848d95" FontSize="16"/>
+          <TextBlock Name="TBPriceType" Text="" Foreground="#848d95" FontSize="16"/>
         </StackPanel>
         <TextBlock Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Vertical">
@@ -89,7 +88,7 @@
             </Button>
           </StackPanel>
         </StackPanel>
-        <Button HorizontalAlignment="Left" Width="300" Foreground="White" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message">Reply to the seller</Button>
+        <Button HorizontalAlignment="Left" Width="300" Foreground="White" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message">Buy Product</Button>
       </StackPanel>
     </ScrollViewer>
   </Grid>

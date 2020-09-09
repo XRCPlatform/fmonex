@@ -118,7 +118,7 @@
                   <DataTemplate>
 
                     <!-- Product card -->
-                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Cursor="Hand" Click="ButtonProduct_Click">
+                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
                       <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
                         <Border BorderBrush="#e6e5ea" Width="200" Height="120" Margin="5 10 10 10" Background="#e6e5ea" BorderThickness="0">
                           <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}" Stretch="UniformToFill" >

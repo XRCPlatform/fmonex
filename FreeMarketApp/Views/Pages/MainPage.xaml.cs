@@ -58,8 +58,10 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonProduct_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
+            var signature = ((Button) sender).Tag.ToString();
 
             PagesHelper.Switch(mainWindow, ProductPage.Instance);
+            ProductPage.LoadProduct(signature);
         }
 
         public void ButtonCategory_Click(object sender, RoutedEventArgs args)

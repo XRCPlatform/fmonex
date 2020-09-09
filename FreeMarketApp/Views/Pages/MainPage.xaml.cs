@@ -8,7 +8,6 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -41,46 +40,13 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MainPage).Namespace, typeof(MainPage).Name));
 
-            //if (FreeMarketOneServer.Current.MarketManager != null)
-            //{
-            //    PagesHelper.Log(_logger, string.Format("Loading market offers from chain."));
-
-            //    //var offers = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
-            //}
-
-           // var offers = new List<MarketItemV1>();
-
-           // var item = new MarketItemV1();
-           // item.Title = "Gold";
-           // item.Shipping = "World";
-           // item.Price = 102f;
-
-           // var item2 = new MarketItemV1();
-           // item2.Title = "Silver";
-           // item2.Shipping = "Eu";
-           // item2.Price = 1.2f;
-           // item2.PriceType = 1;
-
-           // offers.Add(item);
-           // offers.Add(item2);
-
-           //// Items = new ObservableCollection<MarketItemV1>(offers);
-
-           // DataContext = new MainPageViewModel(offers);
-
-            this.InitializeComponent();
-
-
-
             if (FreeMarketOneServer.Current.MarketManager != null)
             {
                 PagesHelper.Log(_logger, string.Format("Loading market offers from chain."));
 
                 var offers = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
-
-                DataContext = new MainPageViewModel(offers);
+                SkynetHelper.PreloadTitlePhotos(offers, _logger);
             }
-
             this.InitializeComponent();
         }
 
@@ -106,6 +72,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (offers.Any())
             {
+                SkynetHelper.PreloadTitlePhotos(offers, _logger);
                 ((MainPageViewModel)DataContext).Items.AddRange(offers);
             }
         }

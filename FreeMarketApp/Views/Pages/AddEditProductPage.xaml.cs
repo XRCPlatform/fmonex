@@ -113,7 +113,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!PagesHelper.IsTextValid(tbTitle.Text))
+                    if (!ValidationHelper.IsTextValid(tbTitle.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
                         errorCount++;
@@ -126,7 +126,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!PagesHelper.IsTextValid(tbDescription.Text, true))
+                    if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
                         errorCount++;
@@ -139,7 +139,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!PagesHelper.IsTextValid(tbShipping.Text))
+                    if (!ValidationHelper.IsTextValid(tbShipping.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
                         errorCount++;
@@ -152,7 +152,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!PagesHelper.IsNumberValid(tbPrice.Text))
+                    if (!ValidationHelper.IsNumberValid(tbPrice.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsPrice"));
                         errorCount++;
@@ -204,7 +204,7 @@ namespace FreeMarketApp.Views.Pages
                         {
                             PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _marketItemData.Photos[i - 1]));
 
-                            var skynetUrl = PagesHelper.UploadToSkynet(_marketItemData.Photos[i - 1], _logger);
+                            var skynetUrl = SkynetHelper.UploadToSkynet(_marketItemData.Photos[i - 1], _logger);
                             if (skynetUrl == null)
                             {
                                 _marketItemData.Photos.RemoveAt(i - 1);

@@ -1,22 +1,13 @@
 ﻿using Avalonia.Controls;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.ServerCore;
-using FreeMarketOne.Skynet;
-using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Serilog.Events;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Text;
 
 namespace FreeMarketApp.Helpers
 {
     internal static class PagesHelper
     {
-        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
-
         internal static Window GetParentWindow(UserControl userControl)
         {
             IControl parent = userControl.Parent;
@@ -107,103 +98,6 @@ namespace FreeMarketApp.Helpers
                         break;
                 }
             }
-        }
-
-        internal static string UploadToSkynet(string localPath, ILogger logger)
-        {
-            string skylinkUrl = null;
-
-            try
-            {
-                PagesHelper.Log(logger, string.Format("Skynet Upload File: {0}", localPath));
-
-                var applicationRoot = Path.GetDirectoryName(localPath);
-                var fileName = Path.GetFileName(localPath);
-                IFileProvider provider = new PhysicalFileProvider(applicationRoot);
-
-                PagesHelper.Log(logger, string.Format("Skynet Gateway: {0}", SkynetWebPortal.SKYNET_GATEURL));
-
-                var httpClient = new HttpClient()
-                {
-                    BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
-                };
-
-                var skynetWebPortal = new SkynetWebPortal(httpClient);
-                var fileInfo = provider.GetFileInfo(fileName);
-
-                var uniqueIndex = Guid.NewGuid();
-                PagesHelper.Log(logger, string.Format("Procesing upload with GUID: {0}", uniqueIndex));
-
-                var uploadInfo = skynetWebPortal.UploadFiles(uniqueIndex.ToString(), new UploadItem[] { new UploadItem(fileInfo) }).Result;
-
-                skylinkUrl = string.Format("{0}{1}", SkynetWebPortal.SKYNET_PREFIX, uploadInfo.Skylink);
-
-                PagesHelper.Log(logger, string.Format("Skynet Link: {0}", skylinkUrl));
-            }
-            catch (Exception e)
-            {
-                PagesHelper.Log(logger, string.Format("Skynet Link: {0} - {1}", e.Message, e.StackTrace), Serilog.Events.LogEventLevel.Error);
-            }
-
-            return skylinkUrl;
-        }
-
-        internal static bool IsNumberValid(string text)
-        {
-            float number;
-
-            if (float.TryParse(text, out number))
-            {
-                return true;
-            } 
-            else
-            {
-                return false;
-            }
-        }
-
-        internal static Stream DownloadFromSkynet(string skylink, ILogger logger)
-        {
-            PagesHelper.Log(logger, string.Format("Skynet Download File: {0}", skylink));
-
-            var httpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
-            };
-
-            var skynetWebPortal = new SkynetWebPortal(httpClient);
-
-            var content = skynetWebPortal.DownloadFile(skylink).Result;
-
-            return content.ReadAsStreamAsync().Result;
-        }
-
-        public static bool IsTextValid(string text, bool allowSpace = false)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                return true;
-            }
-            else
-            {
-                for (int i = 0; i < text.Length; i++)
-                {
-                    var charTest = text.Substring(i, 1);
-                    if (!VALIDCHARS.Contains(charTest))
-                    {
-                        if ((charTest == " ") && (allowSpace == true))
-                        {
-                            //silence
-                        } 
-                        else
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            return true;
         }
     }
 }

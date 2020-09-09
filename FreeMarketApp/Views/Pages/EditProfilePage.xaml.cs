@@ -57,11 +57,11 @@ namespace FreeMarketApp.Views.Pages
                 tbUserName.Text = _userData.UserName;
                 tbDescription.Text = _userData.Description;
 
-                if (string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
+                if (!string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
                 {
                     var iPhoto = this.FindControl<Image>("IPhoto");
 
-                    var skynetStream = PagesHelper.DownloadFromSkynet(_userData.Photo, _logger);
+                    var skynetStream = SkynetHelper.DownloadFromSkynet(_userData.Photo, _logger);
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
             }
@@ -133,7 +133,7 @@ namespace FreeMarketApp.Views.Pages
                 } 
                 else
                 {
-                    if (!PagesHelper.IsTextValid(tbUserName.Text))
+                    if (!ValidationHelper.IsTextValid(tbUserName.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
                         errorCount++;
@@ -147,7 +147,7 @@ namespace FreeMarketApp.Views.Pages
                 } 
                 else
                 {
-                    if (!PagesHelper.IsTextValid(tbDescription.Text, true))
+                    if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
                         errorCount++;
@@ -163,7 +163,7 @@ namespace FreeMarketApp.Views.Pages
                     {
                         PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _userData.Photo));
 
-                        var skynetUrl = PagesHelper.UploadToSkynet(_userData.Photo, _logger);
+                        var skynetUrl = SkynetHelper.UploadToSkynet(_userData.Photo, _logger);
                         if (skynetUrl == null)
                         {
                             _userData.Photo = null;;

@@ -61,7 +61,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!PagesHelper.IsTextValid(tbPassword.Text, true))
+                if (!ValidationHelper.IsTextValid(tbPassword.Text, true))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_InvalidCharsPassword"));
                     errorCount++;

@@ -188,6 +188,10 @@
 			<Setter Property="Foreground" Value="#000000" />
 		</Style>
 
+		<Style Selector="RadioButton.H1">
+			<Setter Property="Foreground" Value="#000000" />
+		</Style>
+
 		<Style Selector="Path.InactiveStar">
 			<Setter Property="Fill" Value="#FFECECEC" />
 		</Style>

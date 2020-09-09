@@ -65,6 +65,8 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+
+            ClearForm();
         }
 
         public async void ButtonCancel_Click(object sender, RoutedEventArgs e)
@@ -213,6 +215,11 @@ namespace FreeMarketApp.Views.Pages
                             }
                         }
                     }
+
+                    PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
+
+                    FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_marketItemData);
+                    FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                     ClearForm();

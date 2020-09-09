@@ -224,6 +224,10 @@
 			<Setter Property="Fill" Value="#ff2400" />
 		</Style>
 
+		<Style Selector="Border.StatusBarIconRed">
+        	<Setter Property="Background" Value="#ff2400" />
+    	</Style>
+
 		<Style Selector="Path.StatushBarIconOrange">
 			<Setter Property="Fill" Value="#ff9234" />
 		</Style>

@@ -85,6 +85,28 @@ namespace FreeMarketApp.Helpers
                 {
                     if (offers[i].Photos.Any())
                     {
+                        if (!string.IsNullOrEmpty(offers[i].Photos[0]) && (offers[i].Photos[0].Contains(SkynetWebPortal.SKYNET_PREFIX)))
+                        {
+                            PagesHelper.Log(logger, string.Format("Skynet Preloading Title File: {0}", offers[i].Photos[0]));
+
+                            var skynetStream = SkynetHelper.DownloadFromSkynet(offers[i].Photos[0], logger);
+                            offers[i].PreTitlePhoto = new Bitmap(skynetStream);
+                        }
+                    }
+                }
+            }
+        }
+
+        internal static void PreloadPhotos(List<MarketItemV1> offers, ILogger logger)
+        {
+            if (offers.Any())
+            {
+                for (int i = 0; i < offers.Count; i++)
+                {
+                    if (offers[i].Photos.Any())
+                    {
+                        offers[i].PrePhotos = new List<Bitmap>();
+
                         for (int n = 0; n < offers[i].Photos.Count; n++)
                         {
                             if (!string.IsNullOrEmpty(offers[i].Photos[n]) && (offers[i].Photos[n].Contains(SkynetWebPortal.SKYNET_PREFIX)))
@@ -92,7 +114,7 @@ namespace FreeMarketApp.Helpers
                                 PagesHelper.Log(logger, string.Format("Skynet Preloading Title File: {0}", offers[i].Photos[n]));
 
                                 var skynetStream = SkynetHelper.DownloadFromSkynet(offers[i].Photos[n], logger);
-                                offers[i].PreTitlePhoto = new Bitmap(skynetStream);
+                                offers[i].PrePhotos.Add(new Bitmap(skynetStream));
                             }
                         }
                     }

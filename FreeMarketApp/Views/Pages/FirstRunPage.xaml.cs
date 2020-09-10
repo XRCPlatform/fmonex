@@ -7,6 +7,7 @@ using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using Serilog;
 using System;
 using System.IO;
 using System.Text;
@@ -17,6 +18,8 @@ namespace FreeMarketApp.Views.Pages
     public class FirstRunPage : UserControl
     {
         private static FirstRunPage _instance;
+        private ILogger _logger;
+
         public static FirstRunPage Instance
         {
             get
@@ -33,6 +36,10 @@ namespace FreeMarketApp.Views.Pages
 
         public FirstRunPage()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(FirstRunPage).Namespace, typeof(FirstRunPage).Name));
+
             this.InitializeComponent();
         }
 
@@ -55,13 +62,13 @@ namespace FreeMarketApp.Views.Pages
             var errorCount = 0;
             var errorMessages = new StringBuilder();
 
-            if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbUserName.Text))
+            if (!ValidationHelper.IsTextValid(tbUserName.Text))
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
                 errorCount++;
             }
 
-            if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbDescription.Text))
+            if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
                 errorCount++;
@@ -74,7 +81,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbPassword.Text))
+                if (!ValidationHelper.IsTextValid(tbPassword.Text, true))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsPassword"));
                     errorCount++;
@@ -93,7 +100,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbSeed.Text))
+                if (!ValidationHelper.IsTextValid(tbSeed.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsSeed"));
                     errorCount++;

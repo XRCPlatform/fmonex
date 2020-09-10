@@ -186,9 +186,9 @@
 
                 <TextBlock Text="Price" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <StackPanel Orientation="Horizontal" Margin="20 -5 0 0">
-                    <TextBox MaxLength="16" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Background="#f9f9f9" Margin="0 10 10 0" FontSize="16"/>
+                    <TextBox Name="TBPrice" MaxLength="10" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Background="#f9f9f9" Margin="0 10 10 0" FontSize="16"/>
                     <VirtualizingStackPanel>
-                        <ComboBox SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="0 10 50 0" Padding="10" Width="100" HorizontalAlignment="Left">
+                        <ComboBox Name="CBPriceType" SelectedIndex="0" BorderThickness="0" Background="#f9f9f9" FontSize="16" Margin="0 10 50 0" Padding="10" Width="100" HorizontalAlignment="Left">
                             <ComboBoxItem Tag="0" Padding="7" Content="XRC"/>
                             <ComboBoxItem Tag="1" Padding="7" Content="USD"/>
                         </ComboBox>

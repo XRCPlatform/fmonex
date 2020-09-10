@@ -3,13 +3,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="FreeMarketApp.Views.Pages.AddEditProfilePage">
+             x:Class="FreeMarketApp.Views.Pages.EditProfilePage">
 
   <Grid Margin="0" Background="White">
         <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
-            <StackPanel x:Name="SideBar" Orientation="Vertical">
-                <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
+            <StackPanel Name="SideBar" Orientation="Vertical">
+                <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
                         <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
@@ -57,26 +57,26 @@
                     <DockPanel Margin="20 7 0 0">
                         <Border Width="70" Height="70" Background="#D6D7D7" CornerRadius="35" HorizontalAlignment="Left">
                             <!-- User avatar binding -->
-                            <Image Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
+                            <Image Name="IPhoto" Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
                                 <Image.Clip>
                                     <EllipseGeometry Rect="0,0,60,60" />
                                 </Image.Clip>
                             </Image>
                         </Border>
-                        <Button Margin="10 0 0 0" Classes="action" Height="35" HorizontalAlignment="Left" Padding="15 0" FontSize="14" Foreground="#167efb" BorderThickness="0" >Upload image</Button>
+                        <Button Margin="10 0 0 0" Classes="action" Height="35" HorizontalAlignment="Left" Padding="15 0" FontSize="14" Foreground="#167efb" BorderThickness="0" Cursor="Hand" Click="ButtonChangePhoto_Click">Upload image</Button>
                     </DockPanel>
 
                     <!-- Username binding -->
                     <TextBlock Text="Username" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-                    <TextBox HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" AcceptsReturn="True" BorderThickness="0" Padding="10" Background="#f9f9f9"/>
+                    <TextBox Name="TBUserName" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" AcceptsReturn="True" BorderThickness="0" Padding="10" Background="#f9f9f9"/>
                 </StackPanel>
                 <TextBlock Text="Description" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
                 <!-- About user text binding -->
-                <TextBox x:Name="DescriptionBinding" Margin="20 5 20 0" FontSize="16" Height="100" AcceptsReturn="True" Watermark="Add public description" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" />
+                <TextBox Name="TBDescription" Margin="20 5 20 0" FontSize="16" Height="100" AcceptsReturn="True" Watermark="Add public description" BorderThickness="0" Padding="10" TextWrapping="Wrap" Background="#f9f9f9" />
 
                 <!-- Save/Cancel Buttons -->
                 <DockPanel Margin="20 20 20 0">
-                    <Button DockPanel.Dock="Right" Classes="message" Foreground="#ffffff" FontSize="16" Margin="0 30 0 0" Height="40" Width="110">Save</Button>
+                    <Button DockPanel.Dock="Right" Classes="message" Foreground="#ffffff" FontSize="16" Margin="0 30 0 0" Height="40" Width="110" Click="ButtonSave_Click" Cursor="Hand">Save</Button>
                     <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="110" Foreground="#167efb" FontSize="16" Click="ButtonCancel_Click" Cursor="Hand" Margin="0 30 10 0">Cancel</Button>
                 </DockPanel>
             </StackPanel>

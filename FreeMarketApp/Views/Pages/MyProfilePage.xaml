@@ -8,8 +8,8 @@
     <Grid Margin="0" Background="White">
       <!-- SIDEBAR -->
       <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
-        <StackPanel x:Name="SideBar" Orientation="Vertical">
-          <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,30" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
+        <StackPanel Name="SideBar" Orientation="Vertical">
+          <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,30" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
             <StackPanel Orientation="Horizontal">
               <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
               <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
@@ -61,8 +61,8 @@
               </Button>
             </WrapPanel>
             <!-- User binding -->
-            <TextBlock Text="Username" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-            <TextBlock x:Name="UserBinding" Text="Gold Trader" Margin="20 0 0 0" FontSize="16"/>
+            <TextBlock Text="UserName" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+            <TextBlock Name="TBUserName" Text="Gold Trader" Margin="20 0 0 0" FontSize="16"/>
             <TextBlock Text="Rating" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
             <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
               <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
@@ -73,14 +73,14 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
       Height="16" Stretch="Fill" Width="17" Fill="#f8b500" Margin="0,1,5,0"/>
               <!-- Rating number binding -->
-              <TextBlock x:Name="ReputationBinding" Text="3.4" FontWeight="Bold" FontSize="16"/>
+              <TextBlock Name="ReputationBinding" Text="3.4" FontWeight="Bold" FontSize="16"/>
               <TextBlock Text=" out of 5" Foreground="#979797" FontSize="16"/>
             </StackPanel>
           </StackPanel>
 
-          <TextBlock Text="About" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+          <TextBlock Text="Description" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
           <!-- About user text binding -->
-          <TextBlock x:Name="DescriptionBinding" Text="I sell gold bars, coins and jewelery around the world."
+          <TextBlock Name="TBDescription" Text="I sell gold bars, coins and jewelery around the world."
            TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
 
         </StackPanel>

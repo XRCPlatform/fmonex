@@ -1,4 +1,5 @@
-﻿using FreeMarketOne.Utils.Security;
+﻿using Avalonia.Media.Imaging;
+using FreeMarketOne.Utils.Security;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -74,6 +75,13 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         [JsonProperty("h")]
         public string Hash { get; set; }
+
+        /* Rendering Helpers */
+        [JsonIgnore]
+        public List<Bitmap> PrePhotos { get; set; }
+
+        [JsonIgnore]
+        public Bitmap PreTitlePhoto { get; set; }
 
         public MarketItem()
         {

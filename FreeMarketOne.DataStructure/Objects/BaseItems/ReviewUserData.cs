@@ -29,8 +29,14 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         /// <summary>
         /// Connection to Market Item by Market Item hash (probably for nothing but...)
         /// </summary>
-        [JsonProperty("m")]
+        [JsonProperty("i")]
         public string MarketItemHash { get; set; }
+
+        /// <summary>
+        /// User stars
+        /// </summary>
+        [JsonProperty("t")]
+        public int Stars { get; set; }
 
         public override string GenerateHash()
         {
@@ -42,6 +48,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(UserSignature);
             content.Append(UserHash);
             content.Append(MarketItemHash);
+            content.Append(Stars);
             content.Append(ReviewDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
@@ -56,6 +63,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(UserSignature);
             content.Append(UserHash);
             content.Append(MarketItemHash);
+            content.Append(Stars);
             content.Append(ReviewDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 

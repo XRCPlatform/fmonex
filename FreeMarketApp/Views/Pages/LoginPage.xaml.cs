@@ -6,6 +6,7 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
+using Serilog;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,8 @@ namespace FreeMarketApp.Views.Pages
     public class LoginPage : UserControl
     {
         private static LoginPage _instance;
+        private ILogger _logger;
+
         public static LoginPage Instance
         {
             get
@@ -30,6 +33,10 @@ namespace FreeMarketApp.Views.Pages
 
         public LoginPage()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(LoginPage).Namespace, typeof(LoginPage).Name));
+
             this.InitializeComponent();
         }
 
@@ -54,7 +61,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!FreeMarketOneServer.Current.UserManager.IsTextValid(tbPassword.Text))
+                if (!ValidationHelper.IsTextValid(tbPassword.Text, true))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_InvalidCharsPassword"));
                     errorCount++;

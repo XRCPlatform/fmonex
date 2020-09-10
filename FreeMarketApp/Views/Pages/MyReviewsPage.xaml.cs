@@ -2,12 +2,16 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketOne.ServerCore;
+using Serilog;
 
 namespace FreeMarketApp.Views.Pages
 {
     public class MyReviewsPage : UserControl
     {
         private static MyReviewsPage _instance;
+        private ILogger _logger;
+
         public static MyReviewsPage Instance
         {
             get
@@ -24,6 +28,10 @@ namespace FreeMarketApp.Views.Pages
 
         public MyReviewsPage()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(MyReviewsPage).Namespace, typeof(MyReviewsPage).Name));
+
             this.InitializeComponent();
         }
 

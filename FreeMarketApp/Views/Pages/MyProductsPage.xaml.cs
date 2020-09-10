@@ -3,6 +3,8 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.ServerCore;
+using Serilog;
 using System.Threading.Tasks;
 
 namespace FreeMarketApp.Views.Pages
@@ -10,6 +12,8 @@ namespace FreeMarketApp.Views.Pages
     public class MyProductsPage : UserControl
     {
         private static MyProductsPage _instance;
+        private ILogger _logger;
+
         public static MyProductsPage Instance
         {
             get
@@ -26,6 +30,10 @@ namespace FreeMarketApp.Views.Pages
 
         public MyProductsPage()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(MyProductsPage).Namespace, typeof(MyProductsPage).Name));
+
             this.InitializeComponent();
         }
 

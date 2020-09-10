@@ -26,6 +26,12 @@ namespace FreeMarketOne.ServerCore
             Cryptocurrency = 9
         }
 
+        public enum ProductPriceTypeEnum
+        {
+            XRC = 0,
+            USD = 1
+        }
+
         private IBaseConfiguration _configuration;
 
         private ILogger _logger { get; set; }
@@ -220,9 +226,9 @@ namespace FreeMarketOne.ServerCore
         /// <param name="hash"></param>
         /// <param name="signature"></param>
         /// <returns></returns>
-        public MarketItemV1 GetOfferByHashAndSignature(string hash, string signature)
+        public MarketItemV1 GetOfferBySignature(string signature)
         {
-            _logger.Information(string.Format("GetOfferByHashAndSignature hash {0} signature {1}.", hash, signature));
+            _logger.Information(string.Format("GetOfferBySignature signature {0}.", signature));
 
             var types = new Type[] { typeof(MarketItemV1) };
 
@@ -245,7 +251,7 @@ namespace FreeMarketOne.ServerCore
                             if (types.Contains(itemMarket.GetType()))
                             {
                                 var marketData = (MarketItemV1)itemMarket;
-                                if ((marketData.Hash == hash) && (marketData.Signature == signature))
+                                if (marketData.Signature == signature)
                                 {
                                     return marketData;
                                 }

@@ -1,35 +1,35 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.LoginPage">
 
-  <Grid Margin="0" Background="White">
+  <Grid Margin="0" Classes="Main">
         <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
                 <Image Source="resm:FreeMarketApp.Assets.splash.png" Width="250" />
-                <TextBlock Width="200" TextWrapping="Wrap" TextAlignment="Center" Text="Use your password to open your account."/>
+                <TextBlock Classes="H1" Width="200" TextWrapping="Wrap" TextAlignment="Center" Text="Use your password to open your account."/>
             </StackPanel>
         </ScrollViewer>
-        <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 0 0 0"/>
+        <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 50">
                 <StackPanel Orientation="Vertical">
                     <WrapPanel Orientation="Horizontal" Margin="20 19 20 10">
-                        <TextBlock Text="Login" TextWrapping="Wrap" FontSize="28" Margin="0 0 30 0" FontWeight="Bold" Foreground="#606060"/>
+                        <TextBlock Classes="H1" Text="Login" TextWrapping="Wrap" FontSize="28" Margin="0 0 30 0" FontWeight="Bold"/>
                     </WrapPanel>
 
-                  <TextBlock Text="Password *" Margin="20 0 0 0" FontSize="16" FontWeight="Bold"/>
-                  <TextBox Name="TBPassword" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" BorderThickness="0" Padding="10" Background="#f9f9f9"/>
+                  <TextBlock Classes="H1" Text="Password *" Margin="20 0 0 0" FontSize="16" FontWeight="Bold"/>
+                  <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" BorderThickness="0" Padding="10"/>
                 </StackPanel>
 
               <!-- Save/Cancel Buttons -->
                 <DockPanel Margin="20 20 20 0">
-                  <Button HorizontalAlignment="Right" Classes="message" Foreground="#ffffff" FontSize="16" Margin="0 30 0 0" Height="40" Width="110" Click="ButtonLogin_Click" Cursor="Hand">Login</Button>
+                  <Button HorizontalAlignment="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Width="110" Click="ButtonLogin_Click" Cursor="Hand">Login</Button>
                  
                 </DockPanel>
             </StackPanel>

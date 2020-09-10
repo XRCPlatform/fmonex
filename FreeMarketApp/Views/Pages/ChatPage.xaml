@@ -5,24 +5,24 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.ChatPage">
 
-    <Grid Margin="0" Background="White">
+     <Grid Margin="0" Classes="Main">
       <!-- SIDEBAR -->
-      <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
+      <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
         <StackPanel Orientation="Horizontal">
-          <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
+          <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15"/>
           <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
         </StackPanel>
       </Button>
 
       <ScrollViewer HorizontalAlignment="Left" Margin="0,90,0,0" Width="250">
         <StackPanel x:Name="SideBar" Orientation="Vertical">
-          <TextBlock Text="All Chats" TextWrapping="Wrap" FontSize="28" Margin="25 10 0 10" FontWeight="Bold" Foreground="#606060"/>
+          <TextBlock Text="All Chats" Classes="H1" TextWrapping="Wrap" FontSize="28" Margin="25 10 0 10" FontWeight="Bold"/>
 
           
           <!-- Chat thread-->
           <Button Classes="sidebar" Height="50" HorizontalContentAlignment="Stretch" Cursor="Hand">
             <DockPanel>
-              <Border DockPanel.Dock="Left" Width="30" Height="30" Margin="-12 0 0 0" Background="#D6D7D7" CornerRadius="15">
+              <Border Classes="PhotoPlaceholder" DockPanel.Dock="Left" Width="30" Height="30" Margin="-12 0 0 0" CornerRadius="15">
                 <Image Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
                   <Image.Clip>
                     <EllipseGeometry Rect="0,0,30,30" />
@@ -31,24 +31,24 @@
               </Border>
               <TextBlock DockPanel.Dock="Left" Margin="7,0,0,0" VerticalAlignment="Center" MaxWidth="145" TextWrapping="NoWrap" Text="Cryptolover21"/>
 				<!-- New Message Notification Badge  -->
-              <Border x:Name="NotificationBadge" HorizontalAlignment="Right" Background="Orange" Width="8" Height="8" CornerRadius="10"></Border>
+              <Border x:Name="NotificationBadge" Classes="Notification" HorizontalAlignment="Right" Width="8" Height="8" CornerRadius="10"></Border>
             </DockPanel>
           </Button>
           <!-- End of chat thread-->
 
         </StackPanel>
       </ScrollViewer>
-      <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 0 0 0"/>
+      <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
       <!-- CONTENT AREA -->
       <Grid Margin="250 0 0 0">
         <Button Padding="10 0 10 0" Margin="10 18 100 0" Height="40" VerticalAlignment="Top" HorizontalContentAlignment="Left" Classes="productcard">
           <!-- bind an offer (titte of the conversation) -->
-          <TextBlock x:Name="OfferTitleBinding" Text="Gold Bar 10 oz PAMP Suisse Fortuna Veriscan (New w/ Assay)" TextWrapping="NoWrap" FontSize="18" FontWeight="Bold" Foreground="#606060"/>
+          <TextBlock x:Name="OfferTitleBinding" Classes="H1" Text="Gold Bar 10 oz PAMP Suisse Fortuna Veriscan (New w/ Assay)" TextWrapping="NoWrap" FontSize="18" FontWeight="Bold" />
         </Button>
-        <Button Classes="action" VerticalAlignment="Top" Background="#f6f7f8" Foreground="#167efb" BorderThickness="0" HorizontalAlignment="Right" Height="30" FontSize="14" Padding="15 0 15 0" Margin="30 23 20 0" Click="ButtonRemove_Click" Cursor="Hand">Delete</Button>
+        <Button Classes="action" VerticalAlignment="Top" Foreground="#167efb" BorderThickness="0" HorizontalAlignment="Right" Height="30" FontSize="14" Padding="15 0 15 0" Margin="30 23 20 0" Click="ButtonRemove_Click" Cursor="Hand">Delete</Button>
       </Grid>
-      <Separator DockPanel.Dock="Bottom" Background="#eff0f1" Height="1" VerticalAlignment="Top" Margin="260 65 20 0"></Separator>
+      <Separator Classes="SideBarSeparator" DockPanel.Dock="Bottom" Height="1" VerticalAlignment="Top" Margin="260 65 20 0"></Separator>
 
 
       <!-- Message bubbles panel-->
@@ -59,23 +59,23 @@
           <StackPanel HorizontalAlignment="Stretch">
 
             <!-- incoming message template-->
-            <Border HorizontalAlignment="Left" Margin="20 10 80 10" Background="#f9f6f7" CornerRadius="10 10 10 0" MaxWidth="600">
-              <TextBlock VerticalAlignment="Bottom" Margin="12 7" Foreground="#000000" FontSize="15" TextWrapping="Wrap" Text="Good evening Sir. It's a really nice bar of gold. Would like to purchase it"/>
+            <Border Classes="IncomingChatMessage" HorizontalAlignment="Left" Margin="20 10 80 10" CornerRadius="10 10 10 0" MaxWidth="600">
+              <TextBlock Classes="H1" VerticalAlignment="Bottom" Margin="12 7" FontSize="15" TextWrapping="Wrap" Text="Good evening Sir. It's a really nice bar of gold. Would like to purchase it"/>
             </Border>
 
             <!-- my reply template -->
-            <Border HorizontalAlignment="Right" Margin="80 10 20 10" Background="#dee0d9" CornerRadius="10 10 0 10" MaxWidth="600">
-              <TextBlock VerticalAlignment="Bottom" Margin="12 7" Foreground="#000000" FontSize="15" TextWrapping="Wrap" Text="Hey. Sure. You pay me 70% in XRC to this address: Rncdhjhgxkjdvsjfghsfkuvhskudvsf and I ship it to you. The rest you pay after you received it.  "/>
+            <Border Classes="OutcomingChatMessage" HorizontalAlignment="Right" Margin="80 10 20 10" CornerRadius="10 10 0 10" MaxWidth="600">
+              <TextBlock Classes="H1" VerticalAlignment="Bottom" Margin="12 7" FontSize="15" TextWrapping="Wrap" Text="Hey. Sure. You pay me 70% in XRC to this address: Rncdhjhgxkjdvsjfghsfkuvhskudvsf and I ship it to you. The rest you pay after you received it.  "/>
             </Border>
 
             <!-- another incoming message example-->
-            <Border HorizontalAlignment="Left" Margin="20 10 80 10" Background="#f9f6f7" CornerRadius="10 10 10 0" MaxWidth="600">
-              <TextBlock VerticalAlignment="Bottom" Margin="12 7" Foreground="#000000" FontSize="15" TextWrapping="Wrap" Text="Paid. Waiting for a shipping identificator"/>
+            <Border Classes="IncomingChatMessage"  HorizontalAlignment="Left" Margin="20 10 80 10" CornerRadius="10 10 10 0" MaxWidth="600">
+              <TextBlock Classes="H1" VerticalAlignment="Bottom" Margin="12 7" FontSize="15" TextWrapping="Wrap" Text="Paid. Waiting for a shipping identificator"/>
             </Border>
 
             <!-- my reply example -->
-            <Border HorizontalAlignment="Right" Margin="80 10 20 10" Background="#dee0d9" CornerRadius="10 10 0 10" MaxWidth="600">
-              <TextBlock VerticalAlignment="Bottom" Margin="12 7" Foreground="#000000" FontSize="15" TextWrapping="Wrap" Text="Thanks. It's a pleasure doing business with you. Don't forget to leave me a review."/>
+            <Border Classes="OutcomingChatMessage" HorizontalAlignment="Right" Margin="80 10 20 10" CornerRadius="10 10 0 10" MaxWidth="600">
+              <TextBlock Classes="H1" VerticalAlignment="Bottom" Margin="12 7" FontSize="15" TextWrapping="Wrap" Text="Thanks. It's a pleasure doing business with you. Don't forget to leave me a review."/>
             </Border>
 
           </StackPanel>
@@ -83,14 +83,14 @@
 
         <!-- Typing and sending -->
         <Grid VerticalAlignment="Bottom" Height="80">
-          <Border BorderBrush="#848d95" HorizontalAlignment="Stretch" BorderThickness="1" Margin="20 10 60 10" Padding="10 4" Background="White" VerticalAlignment="Center" CornerRadius="10">
+          <Border Classes="ReplyTextbox" HorizontalAlignment="Stretch" BorderThickness="1" Margin="20 10 60 10" Padding="10 4" VerticalAlignment="Center" CornerRadius="10">
             <TextBox x:Name="TypeMessageField" AcceptsReturn="True" TextWrapping="Wrap" Padding="5" Watermark ="Type a message" Cursor="IBeam" VerticalAlignment="Top" Height="50" FontSize="15" BorderThickness="0" />
           </Border>
-          <Button x:Name="SendMessageButton" Classes="message" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Top" Height="36" Width="36" Margin="0 10 20 0">
-            <Path Data="M437.2,178.7c12.8,12.8,12.8,33.4,0,46.2c-6.4,6.4-14.7,9.6-23.1,9.6s-16.7-3.2-23.1-9.6L277.7,111.5v345.8
+          <Button x:Name="SendMessageButton" Classes="message" HorizontalAlignment="Right" VerticalAlignment="Top" Height="36" Width="36" Margin="0 10 20 0">
+            <Path Classes="WhiteIcon" Data="M437.2,178.7c12.8,12.8,12.8,33.4,0,46.2c-6.4,6.4-14.7,9.6-23.1,9.6s-16.7-3.2-23.1-9.6L277.7,111.5v345.8
 										c0,18-14.6,32.7-32.7,32.7s-32.7-14.6-32.7-32.7V111.5L99,224.9c-12.8,12.8-33.4,12.8-46.2,0s-12.8-33.4,0-46.2L221.9,9.6
 										C228,3.4,236.3,0,245,0c8.7,0,17,3.4,23.1,9.6L437.2,178.7z"
-            Width="13" Height="16" Fill="White" Stretch="Fill"></Path>
+            Width="13" Height="16" Stretch="Fill"></Path>
           </Button>
         </Grid>
 

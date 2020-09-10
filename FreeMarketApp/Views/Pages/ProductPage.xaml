@@ -147,7 +147,7 @@
             <!-- seller rating binding -->
             <TextBlock Classes="H1" Text="4.2" FontSize="16"/>
             <TextBlock Classes="H1" Text="Reviews" Margin="20 0 5 0" FontSize="16"/>
-            <Button Padding="10 0 10 0" BorderThickness="0" BorderThickness="1" Classes="action">
+            <Button Padding="10 0 10 0" BorderThickness="1" Classes="action">
               <!-- link to a seller's public profile and number of reviews binding -->
               <TextBlock x:Name="ReviewsBinding" FontWeight="Bold" Text="13"/>
             </Button>

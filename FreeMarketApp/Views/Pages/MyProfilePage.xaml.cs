@@ -54,7 +54,7 @@ namespace FreeMarketApp.Views.Pages
                 {
                     var iPhoto = this.FindControl<Image>("IPhoto");
 
-                    var skynetStream = PagesHelper.DownloadFromSkynet(_userData.Photo, _logger);
+                    var skynetStream = SkynetHelper.DownloadFromSkynet(_userData.Photo, _logger);
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
             }

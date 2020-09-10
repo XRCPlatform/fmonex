@@ -61,11 +61,119 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have to choose right category..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyCategory {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have to choose right deal type..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyDealValue {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyDealValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have to fill all fields and add at least one photo..
         /// </summary>
         internal static string Dialog_AddEditProduct_EmptyForm {
             get {
                 return ResourceManager.GetString("Dialog_AddEditProduct_EmptyForm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have to add at least one photo..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyPhoto {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyPhoto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have to choose right price type..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyPriceType {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyPriceType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your description contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your price can contains number only..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsPrice {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your shipping contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsShipping {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your title contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsTitle {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your title is too short. Minimum is 50 chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_ShortDescription {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_ShortDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your price is too short. Minimum is 1 number and it can&apos;t be a zero..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_ShortPrice {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_ShortPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your shipping is too short. Minimum is 10 chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_ShortShipping {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_ShortShipping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your title is too short. Minimum is 10 chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_ShortTitle {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_ShortTitle", resourceCulture);
             }
         }
         

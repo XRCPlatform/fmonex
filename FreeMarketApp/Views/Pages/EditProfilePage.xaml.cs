@@ -57,11 +57,11 @@ namespace FreeMarketApp.Views.Pages
                 tbUserName.Text = _userData.UserName;
                 tbDescription.Text = _userData.Description;
 
-                if (string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
+                if (!string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
                 {
                     var iPhoto = this.FindControl<Image>("IPhoto");
 
-                    var skynetStream = PagesHelper.DownloadFromSkynet(_userData.Photo, _logger);
+                    var skynetStream = SkynetHelper.DownloadFromSkynet(_userData.Photo, _logger);
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
             }
@@ -126,16 +126,32 @@ namespace FreeMarketApp.Views.Pages
                 var errorCount = 0;
                 var errorMessages = new StringBuilder();
 
-                if (!PagesHelper.IsTextValid(tbUserName.Text))
+                if (string.IsNullOrEmpty(tbUserName.Text) || (tbUserName.Text.Length < 16))
                 {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortUserName"));
                     errorCount++;
+                } 
+                else
+                {
+                    if (!ValidationHelper.IsTextValid(tbUserName.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
+                        errorCount++;
+                    }
                 }
 
-                if (!PagesHelper.IsTextValid(tbDescription.Text, true))
+                if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
                 {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortDescription"));
                     errorCount++;
+                } 
+                else
+                {
+                    if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                        errorCount++;
+                    }
                 }
 
                 if (errorCount == 0)
@@ -147,7 +163,7 @@ namespace FreeMarketApp.Views.Pages
                     {
                         PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _userData.Photo));
 
-                        var skynetUrl = PagesHelper.UploadToSkynet(_userData.Photo, _logger);
+                        var skynetUrl = SkynetHelper.UploadToSkynet(_userData.Photo, _logger);
                         if (skynetUrl == null)
                         {
                             _userData.Photo = null;;

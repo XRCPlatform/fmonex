@@ -1,24 +1,24 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.PublicProfilePage">
 
-  <Grid Margin="0" Background="White">
+  <Grid Margin="0" Classes="Main">
 
         <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
-                <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Foreground="#167efb" Click="ButtonBack_Click" Cursor="Hand">
+                <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
-                        <Path Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" Fill="#167efb"/>
+                        <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
                         <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
         </ScrollViewer>
-        <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 0 0 0"/>
+        <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
@@ -26,7 +26,7 @@
 
 
                 <DockPanel Margin="20 20 0 0">
-                    <Border Width="60" Height="60" Background="#D6D7D7" CornerRadius="30" HorizontalAlignment="Left">
+                    <Border Classes="PhotoPlaceholder" Width="60" Height="60" CornerRadius="30" HorizontalAlignment="Left">
                         <!-- User avatar binding -->
                         <Image Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
                             <Image.Clip>
@@ -36,31 +36,31 @@
                     </Border>
                     <StackPanel Orientation="Vertical">
                         <!-- User binding -->
-                        <TextBlock x:Name="UserBinding" Text="CryptoLoverOne" Margin="10 0 0 2" FontSize="28"/>
+                        <TextBlock Classes="H1" x:Name="UserBinding" Text="CryptoLoverOne" Margin="10 0 0 2" FontWeight="Bold" FontSize="28"/>
                         <StackPanel Orientation="Horizontal" Margin="10 0 20 0">
-                            <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 							  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 							  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 							  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 							  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
-								Height="15" Stretch="Fill" Width="16" Fill="#f8b500" Margin="0,1,5,0"/>
+								Height="15" Stretch="Fill" Width="16" Margin="0,1,5,0"/>
                             <!-- Rating number binding -->
-                            <TextBlock x:Name="ReputationBinding" Text="5" FontWeight="Bold" FontSize="16"/>
-                            <TextBlock Text=" out of 5" Foreground="#979797" FontSize="16"/>
+                            <TextBlock Classes="H1" x:Name="ReputationBinding" Text="5" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock Classes="H2" Text=" out of 5" FontSize="16"/>
                         </StackPanel>
                     </StackPanel>
                 </DockPanel>
 
-                <TextBlock Text="About" Margin="20 40 0 0" FontSize="18" FontWeight="Bold"/>
+                <TextBlock Classes="H1" Text="About" Margin="20 40 0 0" FontSize="18" FontWeight="Bold"/>
                 <!-- About user text binding -->
-                <TextBlock x:Name="DescriptionBinding" Text="I sell gold bars, coins and jewelery around the world."
+                <TextBlock Classes="H1" x:Name="DescriptionBinding" Text="I sell gold bars, coins and jewelery around the world."
 							   TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
 
-                <TextBlock Text="Reviews" Margin="20 30 0 0" FontSize="18" FontWeight="Bold"/>
+                <TextBlock Classes="H1" Text="Reviews" Margin="20 30 0 0" FontSize="18" FontWeight="Bold"/>
                 <!-- Review card -->
                 <DockPanel Margin="20 10 0 30">
-                    <Border Width="60" Height="36" Margin="0 8 0 0" VerticalAlignment="Top" Background="#e6e5ea" BorderBrush="#e6e5ea" BorderThickness="1">
+                    <Border Classes="PhotoPlaceholder" Width="60" Height="36" Margin="0 8 0 0" VerticalAlignment="Top" BorderThickness="1">
                         <!-- Item Image Binding -->
                         <Image DockPanel.Dock="Left" Source="{Binding ProductImage}" Stretch="UniformToFill" >
                             <Image.Clip>
@@ -71,55 +71,55 @@
                     <DockPanel  LastChildFill="true">
                         <Button Margin="5 0 20 0" DockPanel.Dock="Top" Classes="productcard" VerticalAlignment="Top" HorizontalAlignment="Left">
                             <!-- Review Item Binding -->
-                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Stretch" FontSize="17" FontWeight="Bold" Foreground="#000000"
+                            <TextBlock Classes="H1" TextWrapping="Wrap" HorizontalAlignment="Stretch" FontSize="17" FontWeight="Bold"
 										   Text="Sony WH-1000XM4 Wireless Industry Leading Noise Canceling Overhead Headphones with Mic for Phone-Call and Alexa Voice Control, Black"></TextBlock>
                         </Button>
                         <StackPanel DockPanel.Dock="Top" Margin="10 0 0 0" Orientation="Horizontal">
                             <!-- Stars Binding -->
-                            <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 									  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
-										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Fill="#f8b500" Margin="0,0,3,0"/>
-                            <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0"/>
+                            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 									  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
-										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Fill="#f8b500" Margin="0,0,3,0"/>
-                            <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0"/>
+                            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 									  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
-										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Fill="#f8b500" Margin="0,0,3,0"/>
-                            <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0"/>
+                            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 									  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
-										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Fill="#f8b500" Margin="0,0,3,0"/>
-                            <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0"/>
+                            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 									  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
-										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Fill="#f8b500" Margin="0,0,3,0"/>
+										HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0"/>
 
-                            <TextBlock FontSize="14" Foreground="#979797" VerticalAlignment="Center" Margin="5 0 0 0" Text="From "></TextBlock>
+                            <TextBlock Classes="H2" FontSize="14" VerticalAlignment="Center" Margin="5 0 0 0" Text="From "></TextBlock>
                             <!-- Reviewer Profile Link Binding -->
-                            <Button Classes="productcard" BorderThickness="0">
-                                <TextBlock x:Name="Reviewer Profile Binding" FontSize="14" Foreground="#167efb" Text="Parabolic Trav"></TextBlock>
+                            <Button Classes="action" BorderThickness="0">
+                                <TextBlock x:Name="Reviewer Profile Binding" FontSize="14" Text="Parabolic Trav"></TextBlock>
                             </Button>
                         </StackPanel>
                         <!-- Review Binding -->
-                        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" FontSize="16" Margin="10 5 20 0" Foreground="#000000"
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" FontSize="16" Margin="10 5 20 0" 
 									   Text="It's actually pretty good in my opinion, I love the bass. I've had mine for less than 6 months. The great sound quality gives you an immersive feeling when you are watching movies or listening to music with people you love. Can't complain.">
                         </TextBlock>
                     </DockPanel>

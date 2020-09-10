@@ -8,25 +8,25 @@
              x:Class="FreeMarketApp.Views.Pages.MainPage"
              Content="{Binding Items}">
 
-    <Grid Margin="0" Background="White">
+    <Grid Margin="0" Classes="Main">
        <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,40" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
-					<TextBlock Text="CATEGORIES" Margin="27 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13" Foreground="#606060"/>
+
+			<TextBlock Classes="H1" Text="CATEGORIES" Margin="27 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>
 
               <Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="0">
                 <DockPanel HorizontalAlignment="Stretch">
-                  <Path Data="M47,0C21.042,0,0,21.043,0,47s21.042,47,47,47s47-21.043,47-47S72.958,0,47,0z M9.05,29.668l9.032,4.125
+                  <Path Classes="SideBarIcon" Data="M47,0C21.042,0,0,21.043,0,47s21.042,47,47,47s47-21.043,47-47S72.958,0,47,0z M9.05,29.668l9.032,4.125
 										c3.597-7.24,9.607-12.876,17.148-15.998c8.266-3.424,17.37-3.423,25.635,0c8.266,3.424,14.703,9.861,18.126,18.128l-7.886,3.267
 										c-2.551-6.161-7.349-10.957-13.508-13.508c-6.158-2.551-12.943-2.553-19.102,0c-5.529,2.289-9.954,6.391-12.647,11.659
 										l10.019,4.576L16.333,49.2L9.05,29.668z M75.918,60.207c-3.598,7.24-9.607,12.876-17.148,15.998
 										c-8.266,3.424-17.369,3.423-25.635,0c-8.266-3.424-14.703-9.861-18.126-18.128l7.885-3.267c2.552,6.16,7.349,10.957,13.508,13.508
 										c6.159,2.551,12.944,2.553,19.102,0c5.529-2.291,9.954-6.393,12.646-11.659l-10.019-4.576L77.667,44.8l7.283,19.532L75.918,60.207z"
-                        HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="16" Fill="#4E5C6E" Margin="-12 0 0 0"/>
+                        HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="16" Margin="-12 0 0 0"/>
                   <TextBlock Text="All" Margin="6 0 0 0"/>
                 </DockPanel>
               </Button>
-              
              
 					<Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="1">
 						<DockPanel HorizontalAlignment="Stretch">
@@ -72,25 +72,25 @@
 
 					<Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="7">
 						<DockPanel HorizontalAlignment="Stretch">
-							<Ellipse Margin="-10 0 0 0 " Width="13" Height="13" Fill="#4E5C6E" DockPanel.Dock="Left"/>
+							<Border Classes="SideBarIcon" Margin="-10 0 0 0 " CornerRadius="10" Width="13" Height="13" DockPanel.Dock="Left"/>
 							<TextBlock Text="Rare Coins" Margin="7 0 0 0"/>
 						</DockPanel>
 					</Button>
 
 					<Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="8">
 						<DockPanel HorizontalAlignment="Stretch">
-							<Path Data="M98.064,16.396c-1.301-1.2-3-1.9-4.801-1.9h-61.5c-1.8,0-3.5,0.7-4.8,1.9l-24.8,23.6c-2.8,2.7-2.9,7.1-0.2,9.9l55.5,58.5
+							<Path Classes="SideBarIcon" Data="M98.064,16.396c-1.301-1.2-3-1.9-4.801-1.9h-61.5c-1.8,0-3.5,0.7-4.8,1.9l-24.8,23.6c-2.8,2.7-2.9,7.1-0.2,9.9l55.5,58.5
 										c1.3,1.399,3.2,2.199,5.1,2.199c1.899,0,3.8-0.8,5.1-2.199l55.5-58.5c2.7-2.8,2.5-7.2-0.2-9.9L98.064,16.396z M106.064,47.496
 										l-38.4,40.5c-1.9,2-5.2,0.6-5.2-2.1v-54.5c0-1.7,1.3-3,3-3h23.7c0.8,0,1.5,0.3,2.1,0.8l14.7,14
 										C107.164,44.396,107.164,46.296,106.064,47.496z" 
-										HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="16" Fill="#4E5C6E" Margin="-12 0 0 0"/>
+										HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="16" Margin="-12 0 0 0"/>
 							<TextBlock Text="Jewelry" Margin="5 0 0 0"/>
 						</DockPanel>
 					</Button>
 
 					<Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="9">
 						<DockPanel HorizontalAlignment="Stretch">
-							<Path Data="M217.021,167.042c18.631-9.483,30.288-26.184,27.565-54.007c-3.667-38.023-36.526-50.773-78.006-54.404l-0.008-52.741
+							<Path Classes="SideBarIcon" Data="M217.021,167.042c18.631-9.483,30.288-26.184,27.565-54.007c-3.667-38.023-36.526-50.773-78.006-54.404l-0.008-52.741
 										h-32.139l-0.009,51.354c-8.456,0-17.076,0.166-25.657,0.338L108.76,5.897l-32.11-0.003l-0.006,52.728
 										c-6.959,0.142-13.793,0.277-20.466,0.277v-0.156l-44.33-0.018l0.006,34.282c0,0,23.734-0.446,23.343-0.013
 										c13.013,0.009,17.262,7.559,18.484,14.076l0.01,60.083v84.397c-0.573,4.09-2.984,10.625-12.083,10.637
@@ -99,19 +99,19 @@
 										C266.916,192.612,247.692,174.396,217.021,167.042z M109.535,95.321c18.126,0,75.132-5.767,75.14,32.064
 										c-0.008,36.269-56.996,32.032-75.14,32.032V95.321z M109.521,262.447l0.014-70.672c21.778-0.006,90.085-6.261,90.094,35.32
 										C199.638,266.971,131.313,262.431,109.521,262.447z" 
-										HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="13" Fill="#4E5C6E" Margin="-11 0 0 0"/>
+										HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="13" Margin="-11 0 0 0"/>
 							<TextBlock Text="Cryptocurrency" Margin="6 0 0 0"/>
 						</DockPanel>
 					</Button>
 
 				</StackPanel>
         </ScrollViewer>
-        <Separator Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Background="#eff0f1" Margin="250 0 0 0"/>
+        <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch">
-                <TextBlock Text="Offers" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" Foreground="#606060"/>
+                <TextBlock Classes="H1" Text="Offers" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold"/>
 
               <ItemsControl Items="{Binding Items}">
                 <ItemsControl.ItemTemplate>
@@ -120,20 +120,20 @@
                     <!-- Product card -->
                     <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
                       <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                        <Border BorderBrush="#e6e5ea" Width="200" Height="120" Margin="5 10 10 10" Background="#e6e5ea" BorderThickness="0">
+                        <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="0">
                           <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}" Stretch="UniformToFill" >
                             <Image.Clip>
                               <RectangleGeometry Rect="0,0,200,120" />
                             </Image.Clip>
                           </Image>
                         </Border>
-                        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="{Binding Title}"></TextBlock>
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="{Binding Title}"></TextBlock>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                          <TextBlock  FontSize="12" Foreground="Gray" Text="Shipping: "></TextBlock>
-                          <TextBlock  FontSize="12" Foreground="Gray" Text="{Binding Shipping}"></TextBlock>
+                          <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
+                          <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
                         </StackPanel>
-                        <TextBlock DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                        <TextBlock Name="TBPriceType" DockPanel.Dock="Top" FontSize="14" Foreground="Gray">
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
+                        <TextBlock Classes="H2" Name="TBPriceType" DockPanel.Dock="Top" FontSize="14" >
                           <i:Interaction.Behaviors>
                             <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
                               <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
@@ -150,7 +150,6 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-             
 
             </StackPanel>
         </ScrollViewer>

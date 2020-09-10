@@ -10,6 +10,7 @@ using Serilog;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -42,10 +43,14 @@ namespace FreeMarketApp.Views.Pages
 
             if (FreeMarketOneServer.Current.MarketManager != null)
             {
+                SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
+
                 PagesHelper.Log(_logger, string.Format("Loading market offers from chain."));
 
                 var offers = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
+
                 SkynetHelper.PreloadTitlePhotos(offers, _logger);
+                DataContext = new MainPageViewModel(offers);
             }
             this.InitializeComponent();
         }

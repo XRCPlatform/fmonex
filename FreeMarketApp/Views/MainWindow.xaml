@@ -387,7 +387,7 @@
 		  <WrapPanel Orientation="Horizontal">
 			  
             <!-- Settings -->
-		<Button Width="30" Height="20" Margin="2 0 0 0" Background="Transparent" HorizontalContentAlignment="Center" BorderThickness="0">	  
+		<Button Click="ButtonSettings_Click" Cursor="Hand" Width="30" Height="20" Margin="2 0 0 0" Background="Transparent" HorizontalContentAlignment="Center" BorderThickness="0">	  
 			<Path x:Name="SettingsIcon" Classes="SideBarIcon" Data="M494.699,212.48l-28.245-5.44c-12.651-2.411-22.571-10.688-27.285-22.635c-4.715-12.011-3.051-24.832,4.587-35.221
 				l17.728-24.192c6.229-8.469,5.312-20.245-2.133-27.669l-38.293-38.293c-7.211-7.232-18.603-8.299-27.029-2.581l-23.829,16.107
 				c-10.624,7.232-23.467,8.405-35.307,3.285c-11.797-5.163-19.712-15.403-21.653-28.139l-4.565-29.611

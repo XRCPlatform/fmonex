@@ -87,5 +87,10 @@ namespace FreeMarketApp.Views
                 PagesHelper.SetUserData(this);
             });
         }
+
+        public void ButtonSettings_Click(object sender, RoutedEventArgs args)
+        {
+            PagesHelper.Switch(this, SettingsPage.Instance);
+        }
     }
 }

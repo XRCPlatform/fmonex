@@ -47,6 +47,7 @@ namespace FreeMarketApp.Helpers
             if ((pageAddInstance.GetType() != typeof(ProductPage)) && panel.Children.Contains(ProductPage.Instance)) panel.Children.Remove(ProductPage.Instance);
             if ((pageAddInstance.GetType() != typeof(FirstRunPage)) && panel.Children.Contains(FirstRunPage.Instance)) panel.Children.Remove(FirstRunPage.Instance);
             if ((pageAddInstance.GetType() != typeof(LoginPage)) && panel.Children.Contains(LoginPage.Instance)) panel.Children.Remove(LoginPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(SettingsPage)) && panel.Children.Contains(SettingsPage.Instance)) panel.Children.Remove(SettingsPage.Instance);
         }
 
         internal static void UnlockTools(Window mainWindow, bool isUnlocked)

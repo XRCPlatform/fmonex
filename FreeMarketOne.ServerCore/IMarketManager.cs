@@ -9,7 +9,7 @@ namespace FreeMarketOne.ServerCore
         List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(byte[] pubKey);
         List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys);
         List<byte[]> GetBuyerPubKeyFromMarketItem(MarketItem itemMarket);
-        MarketItemV1 GetOfferByHashAndSignature(string hash, string signature);
+        MarketItemV1 GetOfferBySignature(string signature);
         List<byte[]> GetSellerPubKeyFromMarketItem(MarketItem itemMarket);
     }
 }

@@ -50,7 +50,7 @@ namespace FreeMarketApp.Views.Pages
                 tbUserName.Text = _userData.UserName;
                 tbDescription.Text = _userData.Description;
 
-                if (string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
+                if (!string.IsNullOrEmpty(_userData.Photo) && (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
                 {
                     var iPhoto = this.FindControl<Image>("IPhoto");
 

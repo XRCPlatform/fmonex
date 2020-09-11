@@ -423,6 +423,5 @@
 			  <TextBlock x:Name="PeersNumber" Text="0 " Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 		  </WrapPanel>
 	  </Border>
-
     </Grid>
 </Window>

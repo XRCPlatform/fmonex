@@ -62,6 +62,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonIgnore]
         public Bitmap PreTitlePhoto { get; set; }
 
+        [JsonIgnore]
+        public bool IsInPool { get; set; }
+
         public MarketItem()
         {
             this.Photos = new List<string>();

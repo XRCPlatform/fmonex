@@ -4,9 +4,11 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,10 +93,15 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             var signature = ((Button)sender).Tag.ToString();
-            var myProductItemPage = MyProductItemPage.Instance;
-            myProductItemPage.LoadProduct(signature);
 
-            PagesHelper.Switch(mainWindow, myProductItemPage);
+            var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
+            if ((marketItem != null) && (!marketItem.IsInPool))
+            {
+                var myProductItemPage = MyProductItemPage.Instance;
+                myProductItemPage.LoadProduct(signature);
+
+                PagesHelper.Switch(mainWindow, myProductItemPage);
+            }
         }
 
         private void ClearForm()

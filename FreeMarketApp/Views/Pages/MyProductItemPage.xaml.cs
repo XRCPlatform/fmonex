@@ -4,8 +4,10 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using Serilog;
+using System;
 using System.Linq;
 using static FreeMarketApp.Views.Controls.MessageBox;
 using static FreeMarketOne.ServerCore.MarketManager;
@@ -74,6 +76,9 @@ namespace FreeMarketApp.Views.Pages
                 {
                     offer.State = (int)MarketManager.ProductStateEnum.Removed;
 
+                    //sign market data and generating chain connection
+                    offer = SignMarketData(offer);
+
                     PagesHelper.Log(_logger, string.Format("Saving remove of product to chain {0}.", signature));
 
                     FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(offer);
@@ -138,6 +143,18 @@ namespace FreeMarketApp.Views.Pages
                     }
                 }
             }
+        }
+
+        private MarketItemV1 SignMarketData(MarketItemV1 marketData)
+        {
+            var bytesToSign = marketData.ToByteArrayForSign();
+
+            marketData.BaseSignature = marketData.Signature;
+            marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+
+            marketData.Hash = marketData.GenerateHash();
+
+            return marketData;
         }
 
         private void ClearForm()

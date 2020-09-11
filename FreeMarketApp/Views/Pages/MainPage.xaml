@@ -5,8 +5,7 @@
              xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="FreeMarketApp.Views.Pages.MainPage"
-             Content="{Binding Items}">
+             x:Class="FreeMarketApp.Views.Pages.MainPage">
 
     <Grid Margin="0" Classes="Main">
        <!-- SIDEBAR -->

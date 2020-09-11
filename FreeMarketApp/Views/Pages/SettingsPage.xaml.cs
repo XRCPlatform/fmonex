@@ -11,6 +11,7 @@ namespace FreeMarketApp.Views.Pages
     {
         private static SettingsPage _instance;
         private ILogger _logger;
+        private UserControl _returnToInstanceOfPage;
 
         public static SettingsPage Instance
         {
@@ -31,6 +32,11 @@ namespace FreeMarketApp.Views.Pages
             return _instance;
         }
 
+        public void SetReturnTo(UserControl page)
+        {
+            Instance._returnToInstanceOfPage = page;
+        }
+
         public SettingsPage()
         {
             if (FreeMarketOneServer.Current.Logger != null)
@@ -49,7 +55,7 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            PagesHelper.Switch(mainWindow, MainPage.Instance);
+            PagesHelper.Switch(mainWindow, _returnToInstanceOfPage);
         }
     }
 }

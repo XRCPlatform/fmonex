@@ -10,6 +10,7 @@ using Serilog;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace FreeMarketApp.Views
@@ -90,7 +91,14 @@ namespace FreeMarketApp.Views
 
         public void ButtonSettings_Click(object sender, RoutedEventArgs args)
         {
-            PagesHelper.Switch(this, SettingsPage.Instance);
+            var settingsPage = SettingsPage.Instance;
+            
+            Panel panel = this.FindControl<Panel>("PCMainContent");
+            if (panel.Children.Any()) {
+                settingsPage.SetReturnTo((UserControl)panel.Children.First());
+            }
+
+            PagesHelper.Switch(this, settingsPage);
         }
     }
 }

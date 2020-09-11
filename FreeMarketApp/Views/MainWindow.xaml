@@ -196,6 +196,10 @@
 			<Setter Property="Foreground" Value="#9e9ea5" />
 		</Style>
 
+		<Style Selector="Path.H2">
+			<Setter Property="Fill" Value="#9e9ea5" />
+		</Style>
+
 		<Style Selector="Path.InactiveStar">
 			<Setter Property="Fill" Value="#FFECECEC" />
 		</Style>

@@ -24,7 +24,7 @@
         <!-- PRODUCT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
-                <TextBlock Text="Add New Listing" Classes="H1" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
+                <TextBlock Name="TBPageName" Text="Add New Listing" Classes="H1" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
 
                 <TextBlock Text="Category" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <VirtualizingStackPanel>

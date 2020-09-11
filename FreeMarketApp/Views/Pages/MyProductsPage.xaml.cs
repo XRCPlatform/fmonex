@@ -7,6 +7,7 @@ using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,7 +53,13 @@ namespace FreeMarketApp.Views.Pages
                 var myOffers = FreeMarketOneServer.Current.MarketManager.GetAllSellerMarketItemsByPubKeys(userPubKey);
 
                 SkynetHelper.PreloadTitlePhotos(myOffers, _logger);
-                DataContext = new MyProductsPageViewModel(myOffers);
+
+                var myOffersActive = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Default);
+                var myOffersSold = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);
+
+                if (myOffersSold.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
+
+                DataContext = new MyProductsPageViewModel(myOffersActive, myOffersSold);
             }
 
             this.InitializeComponent();

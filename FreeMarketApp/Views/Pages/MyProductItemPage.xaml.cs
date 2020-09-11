@@ -2,10 +2,12 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System.Linq;
+using static FreeMarketApp.Views.Controls.MessageBox;
 using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
@@ -56,15 +58,32 @@ namespace FreeMarketApp.Views.Pages
             ClearForm();
         }
 
-        public void ButtonRemove_Click(object sender, RoutedEventArgs args)
+        public async void ButtonRemove_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
+            var result = await MessageBox.Show(mainWindow,
+                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_RemoveProduct"), 300),
+                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                 MessageBox.MessageBoxButtons.YesNo);
 
-            MessageBox.Show(mainWindow, "Test", "Test title", MessageBox.MessageBoxButtons.YesNoCancel);
-            //TODO: Write to chain -> state = deleted
+            var signature = ((Button)sender).Tag.ToString();
+            if (result == MessageBoxResult.Yes)
+            {
+                var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
+                if (offer != null)
+                {
+                    offer.State = (int)MarketManager.ProductStateEnum.Removed;
 
+                    PagesHelper.Log(_logger, string.Format("Saving remove of product to chain {0}.", signature));
 
-            ClearForm();
+                    FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(offer);
+                    FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
+
+                    MyProductsPage.Instance = null;
+                    PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                    ClearForm();
+                }
+            }
         }
 
         public void ButtonEdit_Click(object sender, RoutedEventArgs args)

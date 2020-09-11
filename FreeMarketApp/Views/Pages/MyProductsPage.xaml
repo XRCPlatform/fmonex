@@ -27,7 +27,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch">
                 <WrapPanel Orientation="Horizontal" Margin="20 20 20 10">
-                    <TextBlock Classes="H1" Text="My Listings" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
+                    <TextBlock Classes="H1" Text="My Products" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
                     <Button Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="10 0 10 0" Click="ButtonAdd_Click" Cursor="Hand">
                         <StackPanel Orientation="Horizontal">
                             <Path Classes="BlueIcon" Data="m408 184h-136c-4.417969 0-8-3.582031-8-8v-136c0-22.089844-17.910156-40-40-40s-40 17.910156-40 40v136c0 4.417969-3.582031 8-8 8h-136c-22.089844 0-40 17.910156-40 40s17.910156 40 40 40h136c4.417969 0 8 3.582031 8 8v136c0 22.089844 17.910156 40 40 40s40-17.910156 40-40v-136c0-4.417969 3.582031-8 8-8h136c22.089844 0 40-17.910156 40-40s-17.910156-40-40-40zm0 0"
@@ -74,7 +74,47 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-             
+
+              <TextBlock Name="TBSoldProducts" IsVisible="False" Text="Sold Products" Classes="H1" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
+              
+              <ItemsControl Items="{Binding SoldItems}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+
+                    <!-- Product card -->
+                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}">
+                      <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
+                        <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="0">
+                          <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}" Stretch="UniformToFill" >
+                            <Image.Clip>
+                              <RectangleGeometry Rect="0,0,200,120" />
+                            </Image.Clip>
+                          </Image>
+                        </Border>
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="{Binding Title}"></TextBlock>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                          <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
+                          <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
+                        </StackPanel>
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
+                        <TextBlock Classes="H2" Name="TBPriceType" DockPanel.Dock="Top" FontSize="14" >
+                          <i:Interaction.Behaviors>
+                            <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
+                              <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
+                            </ia:DataTriggerBehavior>
+                            <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
+                              <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
+                            </ia:DataTriggerBehavior>
+                          </i:Interaction.Behaviors>
+                        </TextBlock>
+                      </DockPanel>
+                    </Button>
+                    <!-- End of product card -->
+
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              
             </StackPanel>
         </ScrollViewer>
 </Grid>

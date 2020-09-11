@@ -32,6 +32,14 @@ namespace FreeMarketOne.ServerCore
             USD = 1
         }
 
+        public enum ProductStateEnum
+        {
+            New = 0,
+            Updated = 1,
+            Sold = 2,
+            Deleted = 3
+        }
+
         private IBaseConfiguration _configuration;
 
         private ILogger _logger { get; set; }

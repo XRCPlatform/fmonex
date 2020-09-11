@@ -19,7 +19,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("d")]
         public string Description { get; set; }
 
-        [JsonProperty("s")]
+        [JsonProperty("g")]
         public string Shipping { get; set; }
 
         [JsonProperty("x")]
@@ -33,6 +33,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         [JsonProperty("r")]
         public int PriceType { get; set; }
+
+        [JsonProperty("a")]
+        public int State { get; set; }
 
         [JsonProperty("i")]
         public List<string> Photos { get; set; }
@@ -90,6 +93,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Category);
             content.Append(Price);
             content.Append(PriceType);
+            content.Append(State);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
@@ -108,6 +112,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Category);
             content.Append(Price);
             content.Append(PriceType);
+            content.Append(State);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));

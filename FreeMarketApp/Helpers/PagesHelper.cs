@@ -40,7 +40,7 @@ namespace FreeMarketApp.Helpers
             if ((pageAddInstance.GetType() != typeof(ChatPage)) && (ChatPage.GetInstance() != null) && panel.Children.Contains(ChatPage.Instance)) panel.Children.Remove(ChatPage.Instance);
             if ((pageAddInstance.GetType() != typeof(AddEditProductPage)) && (AddEditProductPage.GetInstance() != null) && panel.Children.Contains(AddEditProductPage.Instance)) panel.Children.Remove(AddEditProductPage.Instance);
             if ((pageAddInstance.GetType() != typeof(EditProfilePage)) && (EditProfilePage.GetInstance() != null) && panel.Children.Contains(EditProfilePage.Instance)) panel.Children.Remove(EditProfilePage.Instance);
-            if ((pageAddInstance.GetType() != typeof(MyItemPage)) && (MyItemPage.GetInstance() != null) && panel.Children.Contains(MyItemPage.Instance)) panel.Children.Remove(MyItemPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(MyProductItemPage)) && (MyProductItemPage.GetInstance() != null) && panel.Children.Contains(MyProductItemPage.Instance)) panel.Children.Remove(MyProductItemPage.Instance);
             if ((pageAddInstance.GetType() != typeof(MyReviewsPage)) && (MyReviewsPage.GetInstance() != null) && panel.Children.Contains(MyReviewsPage.Instance)) panel.Children.Remove(MyReviewsPage.Instance);
             if ((pageAddInstance.GetType() != typeof(PublicProfilePage)) && (PublicProfilePage.GetInstance() != null) && panel.Children.Contains(PublicProfilePage.Instance)) panel.Children.Remove(PublicProfilePage.Instance);
             if ((pageAddInstance.GetType() != typeof(SearchResultsPage)) && (SearchResultsPage.GetInstance() != null) && panel.Children.Contains(SearchResultsPage.Instance)) panel.Children.Remove(SearchResultsPage.Instance);

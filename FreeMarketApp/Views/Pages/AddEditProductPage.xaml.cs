@@ -87,6 +87,11 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+        public void LoadProduct(string signature)
+        {
+          
+        }
+
         public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);

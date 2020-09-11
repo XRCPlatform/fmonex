@@ -1,0 +1,150 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="FreeMarketApp.Views.Pages.MyProductItemPage">
+
+  <Grid Margin="0" Classes="Main">
+
+        <!-- SIDEBAR -->
+        <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
+            <StackPanel Name="SideBar" Orientation="Vertical">
+                <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15"/>
+                        <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+        <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Margin="250 0 0 0"/>
+
+        <!-- PRODUCT AREA -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
+            <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
+                <StackPanel Name="EditBar" Height="40" Margin="20 18 20 10" Orientation="Horizontal">
+                    <Button Name="BTEdit" Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0" Cursor="Hand" Click="ButtonEdit_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Classes="BlueIcon" Data="m114.6875 284.675781-73.800781-73.800781 178.5-178.5 73.800781 73.800781zm-80.699219-60.800781 67.699219 67.699219-101.5 33.800781zm281.898438-140.300781-12.800781 12.800781-73.898438-73.898438 12.800781-12.800781c12.894531-12.902343 33.804688-12.902343 46.699219 0l27.199219 27.199219c12.800781 12.9375 12.800781 33.765625 0 46.699219zm0 0"
+								  HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13"/>
+                            <TextBlock Margin="7,0,0,0" Text="Edit listing" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Name="BTRemove" Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0"  Cursor="Hand" Click="ButtonRemove_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Classes="BlueIcon" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+                            <TextBlock Margin="7,0,0,0" Text="Remove" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <TextBlock Classes="H1" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="20 0 20 10" FontSize="28" FontWeight="Normal"/>
+
+
+              <TextBlock Classes="H1" Text="Photos" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+
+              <WrapPanel Margin="18 0 20 10">
+
+                <StackPanel Name="SPPhoto_0" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_0" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Name="SPPhoto_1" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_1" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Name="SPPhoto_2" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_2" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Name="SPPhoto_3" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_3" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Name="SPPhoto_4" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_4" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Name="SPPhoto_5" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_5" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Name="SPPhoto_6" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_6" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Name="SPPhoto_7" IsVisible="false">
+                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_7" Stretch="UniformToFill" >
+                      <Image.Clip>
+                        <RectangleGeometry Rect="0,0,168,100" />
+                      </Image.Clip>
+                    </Image>
+                  </Border>
+                </StackPanel>
+
+              </WrapPanel>
+
+
+                <TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Classes="H1" Name="TBDescription" Text="" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
+                <TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                    <Path Classes="StatushBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
+						Height="14" Stretch="Fill" Width="11" Fill="#f8b500" Margin="0,1,5,0"/>
+                    <TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
+                </StackPanel>
+                <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                    <TextBlock Classes="H1" Name="TBPrice" Text="" FontSize="20"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="20 0 0 0">
+                    <TextBlock Classes="H2" Name="TBPriceType" Text="" FontSize="16"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

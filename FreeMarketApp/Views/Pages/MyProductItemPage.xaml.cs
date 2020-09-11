@@ -1,8 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System.Linq;
@@ -10,17 +10,17 @@ using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
 {
-    public class ProductPage : UserControl
+    public class MyProductItemPage : UserControl
     {
-        private static ProductPage _instance;
+        private static MyProductItemPage _instance;
         private ILogger _logger;
 
-        public static ProductPage Instance
+        public static MyProductItemPage Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new ProductPage();
+                    _instance = new MyProductItemPage();
                 return _instance;
             }
             set
@@ -28,17 +28,16 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
-
-        public static ProductPage GetInstance()
+        public static MyProductItemPage GetInstance()
         {
             return _instance;
         }
 
-        public ProductPage()
+        public MyProductItemPage()
         {
             if (FreeMarketOneServer.Current.Logger != null)
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
-                            string.Format("{0}.{1}", typeof(ProductPage).Namespace, typeof(ProductPage).Name));
+                            string.Format("{0}.{1}", typeof(MyProductItemPage).Namespace, typeof(MyProductItemPage).Name));
 
             this.InitializeComponent();
         }
@@ -52,9 +51,31 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            PagesHelper.Switch(mainWindow, MainPage.Instance);
+            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
 
             ClearForm();
+        }
+
+        public void ButtonRemove_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            MessageBox.Show(mainWindow, "Test", "Test title", MessageBox.MessageBoxButtons.YesNoCancel);
+            //TODO: Write to chain -> state = deleted
+
+
+            ClearForm();
+        }
+
+        public void ButtonEdit_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            var signature = ((Button)sender).Tag.ToString();
+            var addEditProductPage = AddEditProductPage.Instance;
+            addEditProductPage.LoadProduct(signature);
+
+            PagesHelper.Switch(mainWindow, addEditProductPage);
         }
 
         public void LoadProduct(string signature)
@@ -63,25 +84,23 @@ namespace FreeMarketApp.Views.Pages
 
             if (offer != null)
             {
-                PagesHelper.Log(Instance._logger, string.Format("Loading detail of product signature {0}", offer.Signature));
+                PagesHelper.Log(Instance._logger, string.Format("Loading detail of my product signature {0}", offer.Signature));
 
                 var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
                 var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
                 var tbShipping = Instance.FindControl<TextBlock>("TBShipping");
                 var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
                 var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
-                var tbSeller = Instance.FindControl<TextBlock>("TBSeller");
+                var btEdit = Instance.FindControl<Button>("BTEdit");
+                var btRemove = Instance.FindControl<Button>("BTRemove");
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
                 tbShipping.Text = offer.Shipping;
                 tbPrice.Text = offer.Price.ToString();
                 tbPriceType.Text = ((ProductPriceTypeEnum)offer.PriceType).ToString();
-
-                //seller userdata loading
-                var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(offer);
-                var userData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(userPubKey);
-                if (userData != null) tbSeller.Text = userData.UserName;
+                btEdit.Tag = signature;
+                btRemove.Tag = signature;
 
                 //photos loading
                 if ((offer.Photos != null) && (offer.Photos.Any()))

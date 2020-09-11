@@ -76,6 +76,8 @@ namespace FreeMarketApp.Views.Pages
             addEditProductPage.LoadProduct(signature);
 
             PagesHelper.Switch(mainWindow, addEditProductPage);
+
+            ClearForm();
         }
 
         public void LoadProduct(string signature)

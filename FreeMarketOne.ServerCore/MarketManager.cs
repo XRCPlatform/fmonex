@@ -34,10 +34,9 @@ namespace FreeMarketOne.ServerCore
 
         public enum ProductStateEnum
         {
-            New = 0,
-            Updated = 1,
-            Sold = 2,
-            Deleted = 3
+            Default = 0,
+            Sold = 1,
+            Removed = 2
         }
 
         private IBaseConfiguration _configuration;
@@ -147,14 +146,20 @@ namespace FreeMarketOne.ServerCore
                                         {
                                             if (itemPubKey.SequenceEqual(itemUserPubKey))
                                             {
-                                                _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                if (marketData.State != (int)ProductStateEnum.Removed)
+                                                {
+                                                    _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                    result.Add(marketData);
+                                                } 
+                                                else
+                                                {
+                                                    _logger.Information(string.Format("Found deleted MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                }
 
                                                 var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
                                                         marketBlockChain, chainId, countOfIndex, marketData, types);
 
                                                 ignoredSignatures.AddRange(chainSignatures);
-
-                                                result.Add(marketData);
                                             }
                                         }
                                     }
@@ -207,7 +212,8 @@ namespace FreeMarketOne.ServerCore
                                 {
                                     if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                                     {
-                                        if (string.IsNullOrEmpty(marketData.BuyerSignature))
+                                        if (string.IsNullOrEmpty(marketData.BuyerSignature) 
+                                            && (marketData.State == (int)ProductStateEnum.Default))
                                         {
                                             _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
                                             result.Add(marketData);

@@ -2,10 +2,12 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FreeMarketApp.Views.Pages
@@ -40,6 +42,19 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MyProductsPage).Namespace, typeof(MyProductsPage).Name));
 
+            if ((FreeMarketOneServer.Current.MarketManager != null) && (FreeMarketOneServer.Current.UserManager != null))
+            {
+                SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
+
+                PagesHelper.Log(_logger, string.Format("Loading my market offers from chain."));
+
+                var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+                var myOffers = FreeMarketOneServer.Current.MarketManager.GetAllSellerMarketItemsByPubKeys(userPubKey);
+
+                SkynetHelper.PreloadTitlePhotos(myOffers, _logger);
+                DataContext = new MyProductsPageViewModel(myOffers);
+            }
+
             this.InitializeComponent();
         }
 
@@ -53,6 +68,8 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, MainPage.Instance);
+
+            ClearForm();
         }
 
         public void ButtonAdd_Click(object sender, RoutedEventArgs args)
@@ -71,6 +88,11 @@ namespace FreeMarketApp.Views.Pages
             myProductItemPage.LoadProduct(signature);
 
             PagesHelper.Switch(mainWindow, myProductItemPage);
+        }
+
+        private void ClearForm()
+        {
+            _instance = null;
         }
     }
 }

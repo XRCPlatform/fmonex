@@ -34,20 +34,20 @@ namespace FreeMarketApp.Helpers
             Panel panel = mainWindow.FindControl<Panel>("PCMainContent");
             if (!panel.Children.Contains(pageAddInstance)) panel.Children.Add(pageAddInstance);
 
-            if ((pageAddInstance.GetType() != typeof(MainPage)) && panel.Children.Contains(MainPage.Instance)) panel.Children.Remove(MainPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(MyProfilePage)) && panel.Children.Contains(MyProfilePage.Instance)) panel.Children.Remove(MyProfilePage.Instance);
-            if ((pageAddInstance.GetType() != typeof(MyProductsPage)) && panel.Children.Contains(MyProductsPage.Instance)) panel.Children.Remove(MyProductsPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(ChatPage)) && panel.Children.Contains(ChatPage.Instance)) panel.Children.Remove(ChatPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(AddEditProductPage)) && panel.Children.Contains(AddEditProductPage.Instance)) panel.Children.Remove(AddEditProductPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(EditProfilePage)) && panel.Children.Contains(EditProfilePage.Instance)) panel.Children.Remove(EditProfilePage.Instance);
-            if ((pageAddInstance.GetType() != typeof(MyItemPage)) && panel.Children.Contains(MyItemPage.Instance)) panel.Children.Remove(MyItemPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(MyReviewsPage)) && panel.Children.Contains(MyReviewsPage.Instance)) panel.Children.Remove(MyReviewsPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(PublicProfilePage)) && panel.Children.Contains(PublicProfilePage.Instance)) panel.Children.Remove(PublicProfilePage.Instance);
-            if ((pageAddInstance.GetType() != typeof(SearchResultsPage)) && panel.Children.Contains(SearchResultsPage.Instance)) panel.Children.Remove(SearchResultsPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(ProductPage)) && panel.Children.Contains(ProductPage.Instance)) panel.Children.Remove(ProductPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(FirstRunPage)) && panel.Children.Contains(FirstRunPage.Instance)) panel.Children.Remove(FirstRunPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(LoginPage)) && panel.Children.Contains(LoginPage.Instance)) panel.Children.Remove(LoginPage.Instance);
-            if ((pageAddInstance.GetType() != typeof(SettingsPage)) && panel.Children.Contains(SettingsPage.Instance)) panel.Children.Remove(SettingsPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(MainPage)) && (MainPage.GetInstance() != null) && panel.Children.Contains(MainPage.Instance)) panel.Children.Remove(MainPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(MyProfilePage)) && (MyProfilePage.GetInstance() != null) && panel.Children.Contains(MyProfilePage.Instance)) panel.Children.Remove(MyProfilePage.Instance);
+            if ((pageAddInstance.GetType() != typeof(MyProductsPage)) && (MyProductsPage.GetInstance() != null) && panel.Children.Contains(MyProductsPage.Instance)) panel.Children.Remove(MyProductsPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(ChatPage)) && (ChatPage.GetInstance() != null) && panel.Children.Contains(ChatPage.Instance)) panel.Children.Remove(ChatPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(AddEditProductPage)) && (AddEditProductPage.GetInstance() != null) && panel.Children.Contains(AddEditProductPage.Instance)) panel.Children.Remove(AddEditProductPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(EditProfilePage)) && (EditProfilePage.GetInstance() != null) && panel.Children.Contains(EditProfilePage.Instance)) panel.Children.Remove(EditProfilePage.Instance);
+            if ((pageAddInstance.GetType() != typeof(MyItemPage)) && (MyItemPage.GetInstance() != null) && panel.Children.Contains(MyItemPage.Instance)) panel.Children.Remove(MyItemPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(MyReviewsPage)) && (MyReviewsPage.GetInstance() != null) && panel.Children.Contains(MyReviewsPage.Instance)) panel.Children.Remove(MyReviewsPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(PublicProfilePage)) && (PublicProfilePage.GetInstance() != null) && panel.Children.Contains(PublicProfilePage.Instance)) panel.Children.Remove(PublicProfilePage.Instance);
+            if ((pageAddInstance.GetType() != typeof(SearchResultsPage)) && (SearchResultsPage.GetInstance() != null) && panel.Children.Contains(SearchResultsPage.Instance)) panel.Children.Remove(SearchResultsPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(ProductPage)) && (ProductPage.GetInstance() != null) && panel.Children.Contains(ProductPage.Instance)) panel.Children.Remove(ProductPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(FirstRunPage)) && (FirstRunPage.GetInstance() != null) && panel.Children.Contains(FirstRunPage.Instance)) panel.Children.Remove(FirstRunPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(LoginPage)) && (LoginPage.GetInstance() != null) && panel.Children.Contains(LoginPage.Instance)) panel.Children.Remove(LoginPage.Instance);
+            if ((pageAddInstance.GetType() != typeof(SettingsPage)) && (SettingsPage.GetInstance() != null) && panel.Children.Contains(SettingsPage.Instance)) panel.Children.Remove(SettingsPage.Instance);
         }
 
         internal static void UnlockTools(Window mainWindow, bool isUnlocked)

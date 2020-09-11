@@ -33,6 +33,10 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
+        public static FirstRunPage GetInstance()
+        {
+            return _instance;
+        }
 
         public FirstRunPage()
         {

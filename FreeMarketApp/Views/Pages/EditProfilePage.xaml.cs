@@ -36,7 +36,10 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
-
+        public static EditProfilePage GetInstance()
+        {
+            return _instance;
+        }
         public EditProfilePage()
         {
             if (FreeMarketOneServer.Current.Logger != null)

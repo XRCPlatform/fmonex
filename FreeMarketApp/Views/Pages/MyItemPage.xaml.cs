@@ -26,6 +26,10 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
+        public static MyItemPage GetInstance()
+        {
+            return _instance;
+        }
 
         public MyItemPage()
         {

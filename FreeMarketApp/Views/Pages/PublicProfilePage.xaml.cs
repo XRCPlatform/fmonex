@@ -26,6 +26,11 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+        public static PublicProfilePage GetInstance()
+        {
+            return _instance;
+        }
+
         public PublicProfilePage()
         {
             if (FreeMarketOneServer.Current.Logger != null)

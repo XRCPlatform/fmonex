@@ -26,6 +26,11 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+        public static MyReviewsPage GetInstance()
+        {
+            return _instance;
+        }
+
         public MyReviewsPage()
         {
             if (FreeMarketOneServer.Current.Logger != null)

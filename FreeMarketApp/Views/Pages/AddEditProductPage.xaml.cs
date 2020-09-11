@@ -35,7 +35,10 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
-
+        public static AddEditProductPage GetInstance()
+        {
+            return _instance;
+        }
         public AddEditProductPage()
         {
             if (FreeMarketOneServer.Current.Logger != null)

@@ -192,6 +192,10 @@
 			<Setter Property="Foreground" Value="#000000" />
 		</Style>
 
+		<Style Selector="TextBlock.H2">
+			<Setter Property="Foreground" Value="#9e9ea5" />
+		</Style>
+
 		<Style Selector="Path.InactiveStar">
 			<Setter Property="Fill" Value="#FFECECEC" />
 		</Style>
@@ -257,8 +261,8 @@
 		</Style>
 		
 		<Style Selector="Border.PhotoPlaceholder">
-			<Setter Property="BorderBrush" Value="#f2f2f5" />
-			<Setter Property="Background" Value="#f2f2f5" />
+			<Setter Property="BorderBrush" Value="#e6e5ea" />
+			<Setter Property="Background" Value="#e6e5ea" />
 		</Style>
 		
 		<Style Selector="Border.Notification">

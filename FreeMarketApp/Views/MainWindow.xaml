@@ -291,7 +291,7 @@
 		</Style>
 
 		<Style Selector="Border.SideBarIcon">
-			<Setter Property="Fill" Value="#4E5C6E" />
+			<Setter Property="Background" Value="#4E5C6E" />
 		</Style>
 
 

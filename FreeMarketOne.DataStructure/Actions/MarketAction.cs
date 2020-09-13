@@ -4,6 +4,7 @@ using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Action;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FreeMarketOne.DataStructure
 {
@@ -38,6 +39,21 @@ namespace FreeMarketOne.DataStructure
         {
             get
             {
+                if ((_serialized == null) || (_serialized.Length == 0))
+                {
+                    if (BaseItems.Any())
+                    {
+                        var serializedItems = JsonConvert.SerializeObject(BaseItems);
+                        var compressedItems = ZipHelper.Compress(serializedItems);
+
+                        _serialized = compressedItems;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+
                 return new Bencodex.Types.Dictionary(new Dictionary<IKey, IValue>
                 {
                     { (Text)"items", new Binary(_serialized) },

@@ -3,6 +3,7 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
+using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore.Helpers;
 using FreeMarketOne.Tor;
 using Libplanet;
@@ -41,6 +42,7 @@ namespace FreeMarketOne.ServerCore
         public ServiceManager ServiceManager;
         public UserManager UserManager;
         public MarketManager MarketManager;
+        public SearchIndexer SearchIndexer;
 
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
@@ -94,6 +96,7 @@ namespace FreeMarketOne.ServerCore
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
 
+            
             //User manager
             UserManager = new UserManager(Configuration);
             if (UserManager.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
@@ -104,6 +107,8 @@ namespace FreeMarketOne.ServerCore
 
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
+
+                SearchIndexer = new SearchIndexer(Configuration.FullBaseDirectory, MarketManager);
 
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);

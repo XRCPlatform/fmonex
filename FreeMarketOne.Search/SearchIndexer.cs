@@ -1,5 +1,7 @@
-﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using Libplanet.Blocks;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Facet;
@@ -11,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Linq;
 
 namespace FreeMarketOne.Search
 {
@@ -39,7 +42,7 @@ namespace FreeMarketOne.Search
             _marketManager = marketManager;
         }
 
-        public IndexWriter Writer
+        private IndexWriter Writer
         {
             get
             {
@@ -53,7 +56,7 @@ namespace FreeMarketOne.Search
         public void Index(MarketItem MarketItem)
         {
             double pricePerGram = 0F;
-            MarketManager.MarketCategoryEnum cat = (MarketManager.MarketCategoryEnum)MarketItem.Category;
+            MarketItemCategory cat = (MarketItemCategory)MarketItem.Category;
             new DealType().TryGetValue(MarketItem.DealType, out string dealTypeString);
             
             //if we are re-running the block and same hash comes again, delete and add it again
@@ -105,6 +108,24 @@ namespace FreeMarketOne.Search
 
         }
 
+        public void IndexBlock(Block<MarketAction> block)
+        {
+            Type[] types = new Type[] { typeof(MarketItemV1) };
+            foreach (var itemTx in block.Transactions)
+            {
+                foreach (var itemAction in itemTx.Actions)
+                {
+                    foreach (var item in itemAction.BaseItems)
+                    {
+                        if (types.Contains(item.GetType()))
+                        {
+                            Index((MarketItemV1)item);
+                        }
+                    }
+                }
+            }
+        }
+
         private List<string> GenerateSellerPubKeyHashes(List<byte[]> pubKeys)
         {
             List<string> list = new List<string>();
@@ -119,6 +140,7 @@ namespace FreeMarketOne.Search
             return list;
         }
 
+       //TODO: consider migrating to lower grade hash for speed and disk space efficiency as colisions are irrelevant in this context
         private static string Sha256Hash(byte[] rawData)
         {
             using (SHA256 sha256Hash = SHA256.Create())

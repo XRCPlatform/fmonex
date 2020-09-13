@@ -36,7 +36,10 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
-
+        public static EditProfilePage GetInstance()
+        {
+            return _instance;
+        }
         public EditProfilePage()
         {
             if (FreeMarketOneServer.Current.Logger != null)
@@ -174,7 +177,7 @@ namespace FreeMarketApp.Views.Pages
                         }
                     }
 
-                    var updatedUserData = GenerateUserData(tbUserName.Text, tbDescription.Text, _userData);
+                    var updatedUserData = SignUserData(tbUserName.Text, tbDescription.Text, _userData);
 
                     FreeMarketOneServer.Current.UserManager.SaveUserData(
                         updatedUserData,
@@ -232,7 +235,7 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
-        private UserDataV1 GenerateUserData(string userName, string description, UserDataV1 userData)
+        private UserDataV1 SignUserData(string userName, string description, UserDataV1 userData)
         {
             userData.UserName = userName;
             userData.Description = description;

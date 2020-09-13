@@ -33,6 +33,10 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
+        public static FirstRunPage GetInstance()
+        {
+            return _instance;
+        }
 
         public FirstRunPage()
         {
@@ -115,7 +119,7 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                     FreeMarketOneServer.Current.Configuration.BlockChainSecretPath);
                 
-                var firstUserData = GenerateUserData(tbUserName.Text, tbDescription.Text);
+                var firstUserData = SignUserData(tbUserName.Text, tbDescription.Text);
 
                 FreeMarketOneServer.Current.UserManager.SaveUserData(
                     firstUserData,
@@ -164,7 +168,7 @@ namespace FreeMarketApp.Views.Pages
         /// </summary>
         /// <param name="userName"></param>
         /// <param name="description"></param>
-        private UserDataV1 GenerateUserData(string userName, string description)
+        private UserDataV1 SignUserData(string userName, string description)
         {
             var newUser = new UserDataV1();
             newUser.UserName = userName;

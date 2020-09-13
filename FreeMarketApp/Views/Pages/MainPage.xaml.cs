@@ -11,6 +11,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
+using System.Xml;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -21,7 +22,7 @@ namespace FreeMarketApp.Views.Pages
 
         public ObservableCollection<MarketItemV1> Items { get; }
 
-        public static MainPage Instance
+        public static MainPage Instance 
         {
             get
             {
@@ -33,6 +34,11 @@ namespace FreeMarketApp.Views.Pages
             {
                 _instance = value;
             }
+        }
+
+        public static MainPage GetInstance()
+        {
+            return _instance;
         }
 
         public MainPage()
@@ -65,8 +71,9 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
             var signature = ((Button) sender).Tag.ToString();
 
-            PagesHelper.Switch(mainWindow, ProductPage.Instance);
-            ProductPage.LoadProduct(signature);
+            var productPage = ProductPage.Instance;
+            productPage.LoadProduct(signature);
+            PagesHelper.Switch(mainWindow, productPage);
         }
 
         public void ButtonCategory_Click(object sender, RoutedEventArgs args)

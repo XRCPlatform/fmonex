@@ -32,6 +32,13 @@ namespace FreeMarketOne.ServerCore
             USD = 1
         }
 
+        public enum ProductStateEnum
+        {
+            Default = 0,
+            Sold = 1,
+            Removed = 2
+        }
+
         private IBaseConfiguration _configuration;
 
         private ILogger _logger { get; set; }
@@ -108,11 +115,54 @@ namespace FreeMarketOne.ServerCore
 
             var ignoredSignatures = new List<string>();
 
-            //checking blockchain
             var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
             var chainId = marketBlockChain.GetCanonicalChainId();
             var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
 
+            //checking pool
+            var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+            if (poolItems.Any())
+            {
+                _logger.Information(string.Format("Some offer found in pool. Loading them too."));
+                poolItems.Reverse();
+
+                foreach (var itemPool in poolItems)
+                {
+                    var marketData = (MarketItemV1)itemPool;
+
+                    if (!ignoredSignatures.Exists(a => a == marketData.Signature))
+                    {
+                        var itemMarketBytes = marketData.ToByteArrayForSign();
+                        var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
+
+                        foreach (var itemPubKey in itemPubKeys)
+                        {
+                            foreach (var itemUserPubKey in userPubKeys)
+                            {
+                                if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                {
+                                    if (marketData.State != (int)ProductStateEnum.Removed)
+                                    {
+                                        _logger.Information(string.Format("Found Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                        result.Add(marketData);
+                                    }
+                                    else
+                                    {
+                                        _logger.Information(string.Format("Found deleted Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                    }
+
+                                    var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
+                                            marketBlockChain, chainId, countOfIndex, marketData, types);
+
+                                    ignoredSignatures.AddRange(chainSignatures);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //checking blockchain
             for (long i = (countOfIndex - 1); i >= 0; i--)
             {
                 var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
@@ -139,14 +189,21 @@ namespace FreeMarketOne.ServerCore
                                         {
                                             if (itemPubKey.SequenceEqual(itemUserPubKey))
                                             {
-                                                _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                if (marketData.State != (int)ProductStateEnum.Removed)
+                                                {
+                                                    _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                    marketData.IsInPool = true;
+                                                    result.Add(marketData);
+                                                } 
+                                                else
+                                                {
+                                                    _logger.Information(string.Format("Found deleted MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                }
 
                                                 var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
                                                         marketBlockChain, chainId, countOfIndex, marketData, types);
 
                                                 ignoredSignatures.AddRange(chainSignatures);
-
-                                                result.Add(marketData);
                                             }
                                         }
                                     }
@@ -171,18 +228,50 @@ namespace FreeMarketOne.ServerCore
 
             var result = new List<MarketItemV1>();
             var types = new Type[] { typeof(MarketItemV1) };
+            var ignoredSignatures = new List<string>();
 
-            //checking blockchain
             var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
             var chainId = marketBlockChain.GetCanonicalChainId();
             var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
 
+            //checking pool
+            var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+            if (poolItems.Any())
+            {
+                _logger.Information(string.Format("Some offer found in pool. Loading them too."));
+                poolItems.Reverse();
+
+                foreach (var itemPool in poolItems)
+                {
+                    var marketData = (MarketItemV1)itemPool;
+
+                    if ((category == MarketCategoryEnum.All)
+                        && (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
+                    {
+                        if (!ignoredSignatures.Exists(a => a == marketData.Signature))
+                        {
+                            if (string.IsNullOrEmpty(marketData.BuyerSignature)
+                                && (marketData.State == (int)ProductStateEnum.Default))
+                            {
+                                _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
+                                marketData.IsInPool = true;
+                                result.Add(marketData);
+                            }
+
+                            var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
+                                marketBlockChain, chainId, countOfIndex, marketData, types);
+
+                            ignoredSignatures.AddRange(chainSignatures);
+                        }
+                    }
+                }
+            }
+
+            //checking blockchain
             for (long i = (countOfIndex - 1); i >= 0; i--)
             {
                 var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
                 var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
-
-                var ignoredSignatures = new List<string>();
 
                 foreach (var itemTx in block.Transactions)
                 {
@@ -199,7 +288,8 @@ namespace FreeMarketOne.ServerCore
                                 {
                                     if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                                     {
-                                        if (string.IsNullOrEmpty(marketData.BuyerSignature))
+                                        if (string.IsNullOrEmpty(marketData.BuyerSignature) 
+                                            && (marketData.State == (int)ProductStateEnum.Default))
                                         {
                                             _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
                                             result.Add(marketData);
@@ -231,6 +321,24 @@ namespace FreeMarketOne.ServerCore
             _logger.Information(string.Format("GetOfferBySignature signature {0}.", signature));
 
             var types = new Type[] { typeof(MarketItemV1) };
+
+            //checking pool
+            var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+            if (poolItems.Any())
+            {
+                _logger.Information(string.Format("Some offer found in pool. Checking them by signature."));
+                poolItems.Reverse();
+
+                foreach (var itemPool in poolItems)
+                {
+                    var marketData = (MarketItemV1)itemPool;
+                    if (marketData.Signature == signature)
+                    {
+                        marketData.IsInPool = true;
+                        return marketData;
+                    }
+                }
+            }
 
             //checking blockchain
             var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;

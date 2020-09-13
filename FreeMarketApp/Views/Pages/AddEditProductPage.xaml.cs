@@ -9,16 +9,18 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static FreeMarketApp.Views.Controls.MessageBox;
+using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
 {
     public class AddEditProductPage : UserControl
     {
-        private MarketItemV1 _marketItemData;
+        private MarketItemV1 _offer;
         private ILogger _logger;
 
         private static AddEditProductPage _instance;
@@ -35,20 +37,23 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
-
+        public static AddEditProductPage GetInstance()
+        {
+            return _instance;
+        }
         public AddEditProductPage()
         {
             if (FreeMarketOneServer.Current.Logger != null)
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(AddEditProductPage).Namespace, typeof(AddEditProductPage).Name));
 
-            _marketItemData = new MarketItemV1();
+            _offer = new MarketItemV1();
 
             this.InitializeComponent();
 
             PagesHelper.Log(_logger, string.Format("Loading product data of {0} to profile page.", "?"));
 
-            if (_marketItemData.Photos.Count >= 8)
+            if (_offer.Photos.Count >= 8)
             {
                 var btAddPhoto = this.FindControl<Button>("BTAddPhoto");
                 btAddPhoto.IsVisible = false;
@@ -81,6 +86,53 @@ namespace FreeMarketApp.Views.Pages
             {
                 PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                 ClearForm();
+            }
+        }
+
+        public void LoadProduct(string signature)
+        {
+            var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
+
+            if (offer != null)
+            {
+                _offer = offer;
+
+                PagesHelper.Log(Instance._logger, string.Format("Loading editation of my product signature {0}", offer.Signature));
+
+                var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
+                var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
+                var tbShipping = Instance.FindControl<TextBlock>("TBShipping");
+                var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
+                var tbPageName = Instance.FindControl<TextBlock>("TBPageName");
+
+                var cbCategory = this.FindControl<ComboBox>("CBCategory");
+                var cbDealType = this.FindControl<ComboBox>("CBDealType");
+                var cbPriceType = this.FindControl<ComboBox>("CBPriceType");
+
+                tbTitle.Text = _offer.Title;
+                tbDescription.Text = _offer.Description;
+                tbShipping.Text = _offer.Shipping;
+                tbPrice.Text = _offer.Price.ToString();
+                tbPageName.Text = SharedResources.ResourceManager.GetString("AddEditProduct_EditPageName");
+
+                cbCategory.SelectedItem = cbCategory.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.Category));
+                cbDealType.SelectedItem = cbDealType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.DealType));
+                cbPriceType.SelectedItem = cbPriceType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.PriceType));
+
+                //photos loading
+                if ((_offer.Photos != null) && (_offer.Photos.Any()))
+                {
+                    SkynetHelper.PreloadPhotos(_offer, Instance._logger);
+
+                    for (int i = 0; i < _offer.Photos.Count; i++)
+                    {
+                        var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
+                        var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
+
+                        spPhoto.IsVisible = true;
+                        iPhoto.Source = _offer.PrePhotos[i];
+                    }
+                }
             }
         }
 
@@ -177,7 +229,7 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPriceType"));
                     errorCount++;
                 }
-                if (_marketItemData.Photos.Count() == 0)
+                if (_offer.Photos.Count() == 0)
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPhoto"));
                     errorCount++;
@@ -188,39 +240,44 @@ namespace FreeMarketApp.Views.Pages
                     PagesHelper.Log(_logger, string.Format("Saving new data of product."));
 
                     //save to chain
-                    _marketItemData.Title = tbTitle.Text;
-                    _marketItemData.Description = tbDescription.Text;
-                    _marketItemData.Shipping = tbShipping.Text;
-                    _marketItemData.Category = int.Parse(cbCategoryValue.Tag.ToString());
-                    _marketItemData.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
-                    _marketItemData.Price = float.Parse(tbPrice.Text.Trim());
-                    _marketItemData.PriceType = int.Parse(cbPriceType.Tag.ToString());
+                    _offer.Title = tbTitle.Text;
+                    _offer.Description = tbDescription.Text;
+                    _offer.Shipping = tbShipping.Text;
+                    _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
+                    _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
+                    _offer.Price = float.Parse(tbPrice.Text.Trim());
+                    _offer.PriceType = int.Parse(cbPriceType.Tag.ToString());
+                    _offer.State = (int)ProductStateEnum.Default;
 
                     //get time to next block
                     //upload to sia
-                    for (int i = _marketItemData.Photos.Count(); i > 0; i--)
+                    for (int i = _offer.Photos.Count(); i > 0; i--)
                     {
-                        if (!_marketItemData.Photos[i - 1].Contains(SkynetWebPortal.SKYNET_PREFIX))
+                        if (!_offer.Photos[i - 1].Contains(SkynetWebPortal.SKYNET_PREFIX))
                         {
-                            PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _marketItemData.Photos[i - 1]));
+                            PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _offer.Photos[i - 1]));
 
-                            var skynetUrl = SkynetHelper.UploadToSkynet(_marketItemData.Photos[i - 1], _logger);
+                            var skynetUrl = SkynetHelper.UploadToSkynet(_offer.Photos[i - 1], _logger);
                             if (skynetUrl == null)
                             {
-                                _marketItemData.Photos.RemoveAt(i - 1);
+                                _offer.Photos.RemoveAt(i - 1);
                             } 
                             else
                             {
-                                _marketItemData.Photos[i - 1] = skynetUrl;
+                                _offer.Photos[i - 1] = skynetUrl;
                             }
                         }
                     }
 
+                    //sign market data and generating chain connection
+                    _offer = SignMarketData(_offer);
+
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 
-                    FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_marketItemData);
+                    FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
                     FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
+                    MyProductsPage.Instance = null;
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                     ClearForm();
 
@@ -258,16 +315,16 @@ namespace FreeMarketApp.Views.Pages
 
             if (!string.IsNullOrEmpty(photoPath))
             {
-                var itemIndex = _marketItemData.Photos.Count;
+                var itemIndex = _offer.Photos.Count;
                 var spPhoto = this.FindControl<StackPanel>("SPPhoto_" + itemIndex);
                 var iPhoto = this.FindControl<Image>("IPhoto_" + itemIndex);
 
                 spPhoto.IsVisible = true;
                 iPhoto.Source = new Bitmap(photoPath);
 
-                _marketItemData.Photos.Add(photoPath);
+                _offer.Photos.Add(photoPath);
 
-                if (_marketItemData.Photos.Count >= 8)
+                if (_offer.Photos.Count >= 8)
                 {
                     var btAddPhoto = this.FindControl<Button>("BTAddPhoto");
                     btAddPhoto.IsVisible = false;
@@ -278,24 +335,36 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonRemove_Click(object sender, RoutedEventArgs args)
         {
             var itemIndex = int.Parse(((Button)sender).Tag.ToString());
-            var lastIndex = _marketItemData.Photos.Count - 1;
+            var lastIndex = _offer.Photos.Count - 1;
 
             if (itemIndex != lastIndex)
             {
-                for (int i = itemIndex; i < (_marketItemData.Photos.Count - 1); i++)
+                for (int i = itemIndex; i < (_offer.Photos.Count - 1); i++)
                 {
                     var iPhoto = this.FindControl<Image>("IPhoto_" + i);
                     var iPhotoNext = this.FindControl<Image>("IPhoto_" + (i + 1));
 
                     iPhoto.Source = iPhotoNext.Source;
-                    _marketItemData.Photos[i] = _marketItemData.Photos[i + 1];
+                    _offer.Photos[i] = _offer.Photos[i + 1];
                 }
             }
 
             //hide lastindex
             var spLastPhoto = this.FindControl<StackPanel>("SPPhoto_" + lastIndex);
             spLastPhoto.IsVisible = false;
-            _marketItemData.Photos.RemoveAt(lastIndex);
+            _offer.Photos.RemoveAt(lastIndex);
+        }
+
+        private MarketItemV1 SignMarketData(MarketItemV1 marketData)
+        {
+            var bytesToSign = marketData.ToByteArrayForSign();
+
+            marketData.BaseSignature = marketData.Signature;
+            marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+
+            marketData.Hash = marketData.GenerateHash();
+
+            return marketData;
         }
 
         private void ClearForm()

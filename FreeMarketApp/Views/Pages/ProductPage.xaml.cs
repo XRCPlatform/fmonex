@@ -29,6 +29,11 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+        public static ProductPage GetInstance()
+        {
+            return _instance;
+        }
+
         public ProductPage()
         {
             if (FreeMarketOneServer.Current.Logger != null)
@@ -52,7 +57,7 @@ namespace FreeMarketApp.Views.Pages
             ClearForm();
         }
 
-        public static void LoadProduct(string signature)
+        public void LoadProduct(string signature)
         {
             var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
 

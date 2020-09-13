@@ -13,13 +13,13 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("_nt")]
         public string nametype { get; set; }
 
-        [JsonProperty("t")]
+        [JsonProperty("n")]
         public string Title { get; set; }
 
         [JsonProperty("d")]
         public string Description { get; set; }
 
-        [JsonProperty("s")]
+        [JsonProperty("g")]
         public string Shipping { get; set; }
 
         [JsonProperty("x")]
@@ -33,6 +33,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         [JsonProperty("r")]
         public int PriceType { get; set; }
+
+        [JsonProperty("a")]
+        public int State { get; set; }
 
         [JsonProperty("i")]
         public List<string> Photos { get; set; }
@@ -83,6 +86,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonIgnore]
         public Bitmap PreTitlePhoto { get; set; }
 
+        [JsonIgnore]
+        public bool IsInPool { get; set; }
+
         public MarketItem()
         {
             this.Photos = new List<string>();
@@ -125,6 +131,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Category);
             content.Append(Price);
             content.Append(PriceType);
+            content.Append(State);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));

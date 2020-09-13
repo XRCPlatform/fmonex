@@ -10,6 +10,7 @@ using Serilog;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace FreeMarketApp.Views
@@ -20,30 +21,33 @@ namespace FreeMarketApp.Views
         {
             InitializeComponent();
 
-            FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
-
-            var pcMainContent = this.FindControl<Panel>("PCMainContent");
-
-            if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
+            if (FreeMarketOneServer.Current.UserManager != null)
             {
-                pcMainContent.Children.Add(MainPage.Instance);
+                FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
 
-                PagesHelper.UnlockTools(this, true);
-                PagesHelper.SetUserData(this);
-            }
-            else
-            {
-                if ((FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
-                    || (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
+                var pcMainContent = this.FindControl<Panel>("PCMainContent");
+
+                if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
                 {
-                    pcMainContent.Children.Add(LoginPage.Instance);
+                    pcMainContent.Children.Add(MainPage.Instance);
+
+                    PagesHelper.UnlockTools(this, true);
+                    PagesHelper.SetUserData(this);
                 }
                 else
                 {
-                    pcMainContent.Children.Add(FirstRunPage.Instance);
-                }
+                    if ((FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
+                        || (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
+                    {
+                        pcMainContent.Children.Add(LoginPage.Instance);
+                    }
+                    else
+                    {
+                        pcMainContent.Children.Add(FirstRunPage.Instance);
+                    }
 
-                PagesHelper.UnlockTools(this, false);
+                    PagesHelper.UnlockTools(this, false);
+                }
             }
 
             this.FixWindowCenterPosition();
@@ -86,6 +90,18 @@ namespace FreeMarketApp.Views
             Dispatcher.UIThread.InvokeAsync(() => { 
                 PagesHelper.SetUserData(this);
             });
+        }
+
+        public void ButtonSettings_Click(object sender, RoutedEventArgs args)
+        {
+            var settingsPage = SettingsPage.Instance;
+            
+            Panel panel = this.FindControl<Panel>("PCMainContent");
+            if (panel.Children.Any()) {
+                settingsPage.SetReturnTo((UserControl)panel.Children.First());
+            }
+
+            PagesHelper.Switch(this, settingsPage);
         }
     }
 }

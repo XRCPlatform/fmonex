@@ -30,6 +30,10 @@ namespace FreeMarketApp.Views.Pages
                 _instance = value;
             }
         }
+        public static LoginPage GetInstance()
+        {
+            return _instance;
+        }
 
         public LoginPage()
         {

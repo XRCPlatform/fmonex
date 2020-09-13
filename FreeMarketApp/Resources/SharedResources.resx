@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddEditProduct_EditPageName" xml:space="preserve">
+    <value>Edit Listing</value>
+  </data>
   <data name="Dialog_AddEditProduct_EmptyCategory" xml:space="preserve">
     <value>You have to choose right category.</value>
   </data>
@@ -158,6 +161,9 @@
   </data>
   <data name="Dialog_Confirmation_Cancel" xml:space="preserve">
     <value>Are you sure that you want to leave this item?</value>
+  </data>
+  <data name="Dialog_Confirmation_RemoveProduct" xml:space="preserve">
+    <value>Are you sure that you want to remove this product? Changes will be propagated in next block ("approx {0} sec").</value>
   </data>
   <data name="Dialog_Confirmation_SaveMyItem" xml:space="preserve">
     <value>Are you sure that you want to save this item? Changes will be propagated in next block ("approx {0} sec").</value>

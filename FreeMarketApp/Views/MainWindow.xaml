@@ -192,6 +192,14 @@
 			<Setter Property="Foreground" Value="#000000" />
 		</Style>
 
+		<Style Selector="TextBlock.H2">
+			<Setter Property="Foreground" Value="#9e9ea5" />
+		</Style>
+
+		<Style Selector="Path.H2">
+			<Setter Property="Fill" Value="#9e9ea5" />
+		</Style>
+
 		<Style Selector="Path.InactiveStar">
 			<Setter Property="Fill" Value="#FFECECEC" />
 		</Style>
@@ -257,8 +265,8 @@
 		</Style>
 		
 		<Style Selector="Border.PhotoPlaceholder">
-			<Setter Property="BorderBrush" Value="#f2f2f5" />
-			<Setter Property="Background" Value="#f2f2f5" />
+			<Setter Property="BorderBrush" Value="#e6e5ea" />
+			<Setter Property="Background" Value="#e6e5ea" />
 		</Style>
 		
 		<Style Selector="Border.Notification">
@@ -280,6 +288,10 @@
 		
 		<Style Selector="Path.SideBarIcon">
 			<Setter Property="Fill" Value="#4E5C6E" />
+		</Style>
+
+		<Style Selector="Border.SideBarIcon">
+			<Setter Property="Background" Value="#4E5C6E" />
 		</Style>
 
 
@@ -387,7 +399,7 @@
 		  <WrapPanel Orientation="Horizontal">
 			  
             <!-- Settings -->
-		<Button Width="30" Height="20" Margin="2 0 0 0" Background="Transparent" HorizontalContentAlignment="Center" BorderThickness="0">	  
+		<Button Click="ButtonSettings_Click" Cursor="Hand" Width="30" Height="20" Margin="2 0 0 0" Background="Transparent" HorizontalContentAlignment="Center" BorderThickness="0">	  
 			<Path x:Name="SettingsIcon" Classes="SideBarIcon" Data="M494.699,212.48l-28.245-5.44c-12.651-2.411-22.571-10.688-27.285-22.635c-4.715-12.011-3.051-24.832,4.587-35.221
 				l17.728-24.192c6.229-8.469,5.312-20.245-2.133-27.669l-38.293-38.293c-7.211-7.232-18.603-8.299-27.029-2.581l-23.829,16.107
 				c-10.624,7.232-23.467,8.405-35.307,3.285c-11.797-5.163-19.712-15.403-21.653-28.139l-4.565-29.611
@@ -423,6 +435,5 @@
 			  <TextBlock x:Name="PeersNumber" Text="0 " Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 		  </WrapPanel>
 	  </Border>
-
     </Grid>
 </Window>

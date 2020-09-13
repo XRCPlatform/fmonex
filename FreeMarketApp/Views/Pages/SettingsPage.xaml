@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="FreeMarketApp.Views.Pages.SettingsPage">
+
+  <Grid Margin="0" Classes="Main">
+
+        <!-- SIDEBAR -->
+        <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
+            <StackPanel x:Name="SideBar" Orientation="Vertical">
+                <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15"/>
+                        <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+        <Separator Width="1" Classes="SideBarSeparator" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
+
+        <!-- PRODUCT AREA -->
+		<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
+			<StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
+				<TextBlock Classes="H1" Text="Settings" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
+
+				<TextBlock Classes="H1" Text="Appearance" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Vertical" Margin="30 10 20 0">
+					<RadioButton Classes="H1" Content="Automatic" IsDefault="True" IsChecked="True" FontSize="16" Margin="0 0 0 10" ></RadioButton>
+					<RadioButton Classes="H1" Content="Light" FontSize="16" Margin="0 0 0 10"></RadioButton>
+					<RadioButton Classes="H1" Content="Dark" FontSize="16" Margin="0 0 0 10"></RadioButton>
+				</StackPanel>
+			
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</UserControl>
+
+

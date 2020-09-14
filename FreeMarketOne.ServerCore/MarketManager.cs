@@ -1,17 +1,15 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore.Helpers;
 using Libplanet.Extensions;
 using Libplanet.RocksDBStore;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FreeMarketOne.ServerCore
 {
-    public class MarketManager
+    public class MarketManager : IMarketManager
     {
         public enum MarketCategoryEnum
         {

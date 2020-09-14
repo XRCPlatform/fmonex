@@ -177,7 +177,7 @@ namespace FreeMarketApp.Views.Pages
                         }
                     }
 
-                    var updatedUserData = SignUserData(tbUserName.Text, tbDescription.Text, _userData);
+                    var updatedUserData = FreeMarketOneServer.Current.UserManager.SignUserData(tbUserName.Text, tbDescription.Text, _userData);
 
                     FreeMarketOneServer.Current.UserManager.SaveUserData(
                         updatedUserData,
@@ -233,20 +233,6 @@ namespace FreeMarketApp.Views.Pages
                 iPhoto.Source = new Bitmap(photoPath);
                 _userData.Photo = photoPath;
             }
-        }
-
-        private UserDataV1 SignUserData(string userName, string description, UserDataV1 userData)
-        {
-            userData.UserName = userName;
-            userData.Description = description;
-            var bytesToSign = userData.ToByteArrayForSign();
-            
-            userData.BaseSignature = userData.Signature;
-            userData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
-
-            userData.Hash = userData.GenerateHash();
-
-            return userData;
         }
 
         private void ClearForm()

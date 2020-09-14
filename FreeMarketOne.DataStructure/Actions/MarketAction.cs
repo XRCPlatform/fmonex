@@ -25,6 +25,7 @@ namespace FreeMarketOne.DataStructure
                 return _baseItems;
             }
         }
+
         public void AddBaseItem(IBaseItem value)
         {
             _baseItems.Add(value);
@@ -54,10 +55,10 @@ namespace FreeMarketOne.DataStructure
                     }
                 }
 
-                return new Bencodex.Types.Dictionary(new Dictionary<IKey, IValue>
-                {
-                    { (Text)"items", new Binary(_serialized) },
-                });
+                return new Dictionary(new Dictionary<IKey, IValue>
+                    {
+                        { (Text)"items", new Binary(_serialized) },
+                    });
             }
         }
 
@@ -71,14 +72,18 @@ namespace FreeMarketOne.DataStructure
             var dictionary = (Bencodex.Types.Dictionary)plainValue;
             var binaryValue = dictionary.GetValue<Binary>("items");
 
-            var serializedItems = ZipHelper.Decompress(binaryValue.Value);
-            _baseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
+            if ((binaryValue.Value != null) && (binaryValue.Value.Length > 0))
+            {
+                var serializedItems = ZipHelper.Decompress(binaryValue.Value);
+                _baseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
+            }
+
             _serialized = binaryValue.Value;
         }
 
         public void Render(IActionContext context, IAccountStateDelta nextStates)
         {
-            // throw new NotImplementedException();
+            //not used
         }
 
         public void Unrender(IActionContext context, IAccountStateDelta nextStates)

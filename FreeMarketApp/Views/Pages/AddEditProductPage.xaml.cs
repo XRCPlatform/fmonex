@@ -99,10 +99,10 @@ namespace FreeMarketApp.Views.Pages
 
                 PagesHelper.Log(Instance._logger, string.Format("Loading editation of my product signature {0}", offer.Signature));
 
-                var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
-                var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
-                var tbShipping = Instance.FindControl<TextBlock>("TBShipping");
-                var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
+                var tbTitle = Instance.FindControl<TextBox>("TBTitle");
+                var tbDescription = Instance.FindControl<TextBox>("TBDescription");
+                var tbShipping = Instance.FindControl<TextBox>("TBShipping");
+                var tbPrice = Instance.FindControl<TextBox>("TBPrice");
                 var tbPageName = Instance.FindControl<TextBlock>("TBPageName");
 
                 var cbCategory = this.FindControl<ComboBox>("CBCategory");
@@ -115,9 +115,9 @@ namespace FreeMarketApp.Views.Pages
                 tbPrice.Text = _offer.Price.ToString();
                 tbPageName.Text = SharedResources.ResourceManager.GetString("AddEditProduct_EditPageName");
 
-                cbCategory.SelectedItem = cbCategory.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.Category));
-                cbDealType.SelectedItem = cbDealType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.DealType));
-                cbPriceType.SelectedItem = cbPriceType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.PriceType));
+                cbCategory.SelectedItem = cbCategory.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.Category.ToString()));
+                cbDealType.SelectedItem = cbDealType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.DealType.ToString()));
+                cbPriceType.SelectedItem = cbPriceType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.PriceType.ToString()));
 
                 //photos loading
                 if ((_offer.Photos != null) && (_offer.Photos.Any()))
@@ -165,7 +165,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbTitle.Text))
+                    if (!ValidationHelper.IsTextValid(tbTitle.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
                         errorCount++;
@@ -184,7 +184,7 @@ namespace FreeMarketApp.Views.Pages
                         errorCount++;
                     }
                 }
-                if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 10))
+                if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 2))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortShipping"));
                     errorCount++;
@@ -223,12 +223,6 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyDealValue"));
                     errorCount++;
                 }
-                var cbPriceTypeValue = cbPriceType.SelectedItem as ComboBoxItem;
-                if (cbPriceTypeValue.Tag.ToString() == "0")
-                {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPriceType"));
-                    errorCount++;
-                }
                 if (_offer.Photos.Count() == 0)
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPhoto"));
@@ -246,7 +240,7 @@ namespace FreeMarketApp.Views.Pages
                     _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
                     _offer.Price = float.Parse(tbPrice.Text.Trim());
-                    _offer.PriceType = int.Parse(cbPriceType.Tag.ToString());
+                    _offer.PriceType = (cbPriceType.Tag != null && cbPriceType.Tag.ToString() == "1" ? 1 : 0);
                     _offer.State = (int)ProductStateEnum.Default;
 
                     //get time to next block
@@ -270,7 +264,7 @@ namespace FreeMarketApp.Views.Pages
                     }
 
                     //sign market data and generating chain connection
-                    _offer = SignMarketData(_offer);
+                    _offer = FreeMarketOneServer.Current.MarketManager.SignMarketData(_offer);
 
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 
@@ -353,18 +347,6 @@ namespace FreeMarketApp.Views.Pages
             var spLastPhoto = this.FindControl<StackPanel>("SPPhoto_" + lastIndex);
             spLastPhoto.IsVisible = false;
             _offer.Photos.RemoveAt(lastIndex);
-        }
-
-        private MarketItemV1 SignMarketData(MarketItemV1 marketData)
-        {
-            var bytesToSign = marketData.ToByteArrayForSign();
-
-            marketData.BaseSignature = marketData.Signature;
-            marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
-
-            marketData.Hash = marketData.GenerateHash();
-
-            return marketData;
         }
 
         private void ClearForm()

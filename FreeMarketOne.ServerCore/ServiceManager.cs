@@ -274,7 +274,7 @@ namespace FreeMarketOne.ServerCore
                 if (isPoolManagerRunning.GetValueOrDefault(false))
                 {
                     state = true;
-                    entries = FreeMarketOneServer.Current.BasePoolManager.GetAllActionItemLocal().Count;
+                    entries = FreeMarketOneServer.Current.BasePoolManager.GetTotalCount();
                 }
             }
             catch
@@ -311,7 +311,7 @@ namespace FreeMarketOne.ServerCore
                 if (isPoolManagerRunning.GetValueOrDefault(false))
                 {
                     state = true;
-                    entries = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemLocal().Count;
+                    entries = FreeMarketOneServer.Current.MarketPoolManager.GetTotalCount();
                 }
             }
             catch

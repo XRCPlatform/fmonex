@@ -83,7 +83,7 @@ namespace FreeMarketOne.DataStructure
 
         public void Render(IActionContext context, IAccountStateDelta nextStates)
         {
-            // throw new NotImplementedException();
+            //not used
         }
 
         public void Unrender(IActionContext context, IAccountStateDelta nextStates)

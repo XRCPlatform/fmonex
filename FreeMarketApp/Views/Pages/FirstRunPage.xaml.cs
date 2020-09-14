@@ -119,7 +119,7 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                     FreeMarketOneServer.Current.Configuration.BlockChainSecretPath);
                 
-                var firstUserData = SignUserData(tbUserName.Text, tbDescription.Text);
+                var firstUserData = FreeMarketOneServer.Current.UserManager.SignUserData(tbUserName.Text, tbDescription.Text);
 
                 FreeMarketOneServer.Current.UserManager.SaveUserData(
                     firstUserData,
@@ -161,25 +161,6 @@ namespace FreeMarketApp.Views.Pages
         {
             var tbSeed = this.FindControl<TextBox>("TBSeed");
             tbSeed.Text = FreeMarketOneServer.Current.UserManager.CreateRandomSeed();
-        }
-
-        /// <summary>
-        /// Saving data to blockchain
-        /// </summary>
-        /// <param name="userName"></param>
-        /// <param name="description"></param>
-        private UserDataV1 SignUserData(string userName, string description)
-        {
-            var newUser = new UserDataV1();
-            newUser.UserName = userName;
-            newUser.Description = description;
-            var bytesToSign = newUser.ToByteArrayForSign();
-
-            newUser.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
-            
-            newUser.Hash = newUser.GenerateHash();
-
-            return newUser;
         }
     }
 }

@@ -2,6 +2,7 @@
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore.Helpers;
 using Libplanet.Extensions;
+using Libplanet.RocksDBStore;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,8 @@ namespace FreeMarketOne.ServerCore
         private IBaseConfiguration _configuration;
 
         private ILogger _logger { get; set; }
+
+        private readonly object _locked = new object();
 
         public MarketManager(IBaseConfiguration configuration)
         {
@@ -108,102 +111,105 @@ namespace FreeMarketOne.ServerCore
         /// <returns></returns>
         public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys)
         {
-            _logger.Information(string.Format("GetAllSellerMarketItemsByPubKeys."));
-
-            var result = new List<MarketItemV1>();
-            var types = new Type[] { typeof(MarketItemV1) };
-
-            var ignoredSignatures = new List<string>();
-
-            var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
-            var chainId = marketBlockChain.GetCanonicalChainId();
-            var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
-
-            //checking pool
-            var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
-            if (poolItems.Any())
+            lock (_locked)
             {
-                _logger.Information(string.Format("Some offer found in pool. Loading them too."));
-                poolItems.Reverse();
+                _logger.Information(string.Format("GetAllSellerMarketItemsByPubKeys."));
 
-                foreach (var itemPool in poolItems)
+                var result = new List<MarketItemV1>();
+                var types = new Type[] { typeof(MarketItemV1) };
+
+                var ignoredSignatures = new List<string>();
+
+                var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
+                var chainId = marketBlockChain.GetCanonicalChainId();
+                var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+
+                //checking pool
+                var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+                if (poolItems.Any())
                 {
-                    var marketData = (MarketItemV1)itemPool;
+                    _logger.Information(string.Format("Some offer found in pool. Loading them too."));
+                    poolItems.Reverse();
 
-                    if (!ignoredSignatures.Exists(a => a == marketData.Signature))
+                    foreach (var itemPool in poolItems)
                     {
-                        var itemMarketBytes = marketData.ToByteArrayForSign();
-                        var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
+                        var marketData = (MarketItemV1)itemPool;
 
-                        foreach (var itemPubKey in itemPubKeys)
+                        if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                         {
-                            foreach (var itemUserPubKey in userPubKeys)
+                            var itemMarketBytes = marketData.ToByteArrayForSign();
+                            var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
+
+                            foreach (var itemPubKey in itemPubKeys)
                             {
-                                if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                foreach (var itemUserPubKey in userPubKeys)
                                 {
-                                    if (marketData.State != (int)ProductStateEnum.Removed)
+                                    if (itemPubKey.SequenceEqual(itemUserPubKey))
                                     {
-                                        _logger.Information(string.Format("Found Pool MarketItem for seller - item hash {0}.", marketData.Hash));
-                                        marketData.IsInPool = true;
-                                        result.Add(marketData);
-                                    }
-                                    else
-                                    {
-                                        _logger.Information(string.Format("Found deleted Pool MarketItem for seller - item hash {0}.", marketData.Hash));
-                                    }
+                                        if (marketData.State != (int)ProductStateEnum.Removed)
+                                        {
+                                            _logger.Information(string.Format("Found Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                            marketData.IsInPool = true;
+                                            result.Add(marketData);
+                                        }
+                                        else
+                                        {
+                                            _logger.Information(string.Format("Found deleted Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                        }
 
-                                    var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
-                                            marketBlockChain, chainId, countOfIndex, marketData, types);
+                                        var chainSignatures = GetChainSignaturesForMarketItem(
+                                                marketBlockChain, chainId, countOfIndex, marketData, types);
 
-                                    ignoredSignatures.AddRange(chainSignatures);
+                                        ignoredSignatures.AddRange(chainSignatures);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            //checking blockchain
-            for (long i = (countOfIndex - 1); i >= 0; i--)
-            {
-                var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
-                var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
-
-                foreach (var itemTx in block.Transactions)
+                //checking blockchain
+                for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    foreach (var itemAction in itemTx.Actions)
+                    var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
+                    var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+
+                    foreach (var itemTx in block.Transactions)
                     {
-                        foreach (var itemMarket in itemAction.BaseItems)
+                        foreach (var itemAction in itemTx.Actions)
                         {
-                            if (types.Contains(itemMarket.GetType()))
+                            foreach (var itemMarket in itemAction.BaseItems)
                             {
-                                var marketData = (MarketItemV1)itemMarket;
-
-                                if (!ignoredSignatures.Exists(a => a == marketData.Signature))
+                                if (types.Contains(itemMarket.GetType()))
                                 {
-                                    var itemMarketBytes = itemMarket.ToByteArrayForSign();
-                                    var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, itemMarket.Signature);
+                                    var marketData = (MarketItemV1)itemMarket;
 
-                                    foreach (var itemPubKey in itemPubKeys)
+                                    if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                                     {
-                                        foreach (var itemUserPubKey in userPubKeys)
+                                        var itemMarketBytes = itemMarket.ToByteArrayForSign();
+                                        var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, itemMarket.Signature);
+
+                                        foreach (var itemPubKey in itemPubKeys)
                                         {
-                                            if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                            foreach (var itemUserPubKey in userPubKeys)
                                             {
-                                                if (marketData.State != (int)ProductStateEnum.Removed)
+                                                if (itemPubKey.SequenceEqual(itemUserPubKey))
                                                 {
-                                                    _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
-                                                    result.Add(marketData);
-                                                } 
-                                                else
-                                                {
-                                                    _logger.Information(string.Format("Found deleted MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                    if (marketData.State != (int)ProductStateEnum.Removed)
+                                                    {
+                                                        _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                        result.Add(marketData);
+                                                    }
+                                                    else
+                                                    {
+                                                        _logger.Information(string.Format("Found deleted MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                    }
+
+                                                    var chainSignatures = GetChainSignaturesForMarketItem(
+                                                            marketBlockChain, chainId, countOfIndex, marketData, types);
+
+                                                    ignoredSignatures.AddRange(chainSignatures);
                                                 }
-
-                                                var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
-                                                        marketBlockChain, chainId, countOfIndex, marketData, types);
-
-                                                ignoredSignatures.AddRange(chainSignatures);
                                             }
                                         }
                                     }
@@ -212,9 +218,9 @@ namespace FreeMarketOne.ServerCore
                         }
                     }
                 }
-            }
 
-            return result;
+                return result;
+            }
         }
 
         /// <summary>
@@ -224,90 +230,94 @@ namespace FreeMarketOne.ServerCore
         /// <returns></returns>
         public List<MarketItemV1> GetAllActiveOffers(MarketCategoryEnum category = MarketCategoryEnum.All)
         {
-            _logger.Information(string.Format("GetAllActiveOffers {0}.", (int)category));
-
-            var result = new List<MarketItemV1>();
-            var types = new Type[] { typeof(MarketItemV1) };
-            var ignoredSignatures = new List<string>();
-
-            var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
-            var chainId = marketBlockChain.GetCanonicalChainId();
-            var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
-
-            //checking pool
-            var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
-            if (poolItems.Any())
+            lock (_locked)
             {
-                _logger.Information(string.Format("Some offer found in pool. Loading them too."));
-                poolItems.Reverse();
+                _logger.Information(string.Format("GetAllActiveOffers {0}.", (int)category));
 
-                foreach (var itemPool in poolItems)
+                var result = new List<MarketItemV1>();
+
+                var types = new Type[] { typeof(MarketItemV1) };
+                var ignoredSignatures = new List<string>();
+
+                var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
+                var chainId = marketBlockChain.GetCanonicalChainId();
+                var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+
+                //checking pool
+                var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+                if (poolItems.Any())
                 {
-                    var marketData = (MarketItemV1)itemPool;
+                    _logger.Information(string.Format("Some offer found in pool. Loading them too."));
+                    poolItems.Reverse();
 
-                    if ((category == MarketCategoryEnum.All)
-                        && (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
+                    foreach (var itemPool in poolItems)
                     {
-                        if (!ignoredSignatures.Exists(a => a == marketData.Signature))
+                        var marketData = (MarketItemV1)itemPool;
+
+                        if ((category == MarketCategoryEnum.All)
+                            && (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
                         {
-                            if (string.IsNullOrEmpty(marketData.BuyerSignature)
-                                && (marketData.State == (int)ProductStateEnum.Default))
+                            if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                             {
-                                _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
-                                marketData.IsInPool = true;
-                                result.Add(marketData);
+                                if (string.IsNullOrEmpty(marketData.BuyerSignature)
+                                    && (marketData.State == (int)ProductStateEnum.Default))
+                                {
+                                    _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
+                                    marketData.IsInPool = true;
+                                    result.Add(marketData);
+                                }
+
+                                var chainSignatures = GetChainSignaturesForMarketItem(
+                                    marketBlockChain, chainId, countOfIndex, marketData, types);
+
+                                ignoredSignatures.AddRange(chainSignatures);
                             }
-
-                            var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
-                                marketBlockChain, chainId, countOfIndex, marketData, types);
-
-                            ignoredSignatures.AddRange(chainSignatures);
                         }
                     }
                 }
-            }
 
-            //checking blockchain
-            for (long i = (countOfIndex - 1); i >= 0; i--)
-            {
-                var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
-                var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
-
-                foreach (var itemTx in block.Transactions)
+                //checking blockchain
+                for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    foreach (var itemAction in itemTx.Actions)
+                    var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
+                    var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+
+                    foreach (var itemTx in block.Transactions)
                     {
-                        foreach (var itemMarket in itemAction.BaseItems)
+                        foreach (var itemAction in itemTx.Actions)
                         {
-                            if (types.Contains(itemMarket.GetType()))
+                            foreach (var itemMarket in itemAction.BaseItems)
                             {
-                                var marketData = (MarketItemV1)itemMarket;
-
-                                if ((category == MarketCategoryEnum.All)
-                                    || (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
+                                if (types.Contains(itemMarket.GetType()))
                                 {
-                                    if (!ignoredSignatures.Exists(a => a == marketData.Signature))
+                                    var marketData = (MarketItemV1)itemMarket;
+
+                                    if ((category == MarketCategoryEnum.All)
+                                        || (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
                                     {
-                                        if (string.IsNullOrEmpty(marketData.BuyerSignature) 
-                                            && (marketData.State == (int)ProductStateEnum.Default))
+                                        if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                                         {
-                                            _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
-                                            result.Add(marketData);
+                                            if (string.IsNullOrEmpty(marketData.BuyerSignature)
+                                                && (marketData.State == (int)ProductStateEnum.Default))
+                                            {
+                                                _logger.Information(string.Format("Found MarketItem data hash {0}.", marketData.Hash));
+                                                result.Add(marketData);
+                                            }
+
+                                            var chainSignatures = GetChainSignaturesForMarketItem(
+                                                marketBlockChain, chainId, countOfIndex, marketData, types);
+
+                                            ignoredSignatures.AddRange(chainSignatures);
                                         }
-
-                                        var chainSignatures = MarketManagerHelper.GetChainSignaturesForMarketItem(
-                                            marketBlockChain, chainId, countOfIndex, marketData, types);
-
-                                        ignoredSignatures.AddRange(chainSignatures);
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            return result;
+                return result;
+            }
         }
 
         /// <summary>
@@ -318,70 +328,125 @@ namespace FreeMarketOne.ServerCore
         /// <returns></returns>
         public MarketItemV1 GetOfferBySignature(string signature)
         {
-            _logger.Information(string.Format("GetOfferBySignature signature {0}.", signature));
-
-            var types = new Type[] { typeof(MarketItemV1) };
-
-            //checking pool
-            var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
-            if (poolItems.Any())
+            lock (_locked)
             {
-                _logger.Information(string.Format("Some offer found in pool. Checking them by signature."));
-                poolItems.Reverse();
+                _logger.Information(string.Format("GetOfferBySignature signature {0}.", signature));
 
-                foreach (var itemPool in poolItems)
+                var types = new Type[] { typeof(MarketItemV1) };
+
+                //checking pool
+                var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+                if (poolItems.Any())
                 {
-                    var marketData = (MarketItemV1)itemPool;
-                    if (marketData.Signature == signature)
+                    _logger.Information(string.Format("Some offer found in pool. Checking them by signature."));
+                    poolItems.Reverse();
+
+                    foreach (var itemPool in poolItems)
                     {
-                        marketData.IsInPool = true;
-                        return marketData;
+                        var marketData = (MarketItemV1)itemPool;
+                        if (marketData.Signature == signature)
+                        {
+                            marketData.IsInPool = true;
+                            return marketData;
+                        }
                     }
                 }
-            }
 
-            //checking blockchain
-            var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
-            var chainId = marketBlockChain.GetCanonicalChainId();
-            var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+                //checking blockchain
+                var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
+                var chainId = marketBlockChain.GetCanonicalChainId();
+                var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
 
-            for (long i = (countOfIndex - 1); i >= 0; i--)
-            {
-                var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
-                var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
-
-                foreach (var itemTx in block.Transactions)
+                for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    foreach (var itemAction in itemTx.Actions)
+                    var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
+                    var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+
+                    foreach (var itemTx in block.Transactions)
                     {
-                        foreach (var itemMarket in itemAction.BaseItems)
+                        foreach (var itemAction in itemTx.Actions)
                         {
-                            if (types.Contains(itemMarket.GetType()))
+                            foreach (var itemMarket in itemAction.BaseItems)
                             {
-                                var marketData = (MarketItemV1)itemMarket;
-                                if (marketData.Signature == signature)
+                                if (types.Contains(itemMarket.GetType()))
                                 {
-                                    return marketData;
+                                    var marketData = (MarketItemV1)itemMarket;
+                                    if (marketData.Signature == signature)
+                                    {
+                                        return marketData;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            return null;
+                return null;
+            }
         }
 
         public MarketItemV1 SignMarketData(MarketItemV1 marketData)
         {
-            marketData.BaseSignature = marketData.Signature;
+            lock (_locked)
+            {
+                marketData.BaseSignature = marketData.Signature;
 
-            var bytesToSign = marketData.ToByteArrayForSign();
-            marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+                var bytesToSign = marketData.ToByteArrayForSign();
+                marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
 
-            marketData.Hash = marketData.GenerateHash();
+                marketData.Hash = marketData.GenerateHash();
 
-            return marketData;
+                return marketData;
+            }
+        }
+
+        private List<string> GetChainSignaturesForMarketItem(
+            RocksDBStore marketBlockChain,
+            Guid? chainId,
+            long countOfIndex,
+            MarketItemV1 itemMarket,
+            Type[] types)
+        {
+            lock (_locked)
+            {
+                var result = new List<string>();
+                result.Add(itemMarket.Signature);
+
+                if (!string.IsNullOrEmpty(itemMarket.BaseSignature))
+                {
+                    var lookingForSignature = itemMarket.BaseSignature;
+
+                    for (long i = (countOfIndex - 1); i >= 0; i--)
+                    {
+                        var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
+                        var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+
+                        foreach (var itemTx in block.Transactions)
+                        {
+                            foreach (var itemAction in itemTx.Actions)
+                            {
+                                foreach (var item in itemAction.BaseItems)
+                                {
+                                    if (types.Contains(item.GetType()) && item.Signature == lookingForSignature)
+                                    {
+                                        var marketData = (MarketItemV1)item;
+                                        result.Add(marketData.Signature);
+
+                                        lookingForSignature = marketData.BaseSignature;
+
+                                        if (string.IsNullOrEmpty(lookingForSignature))
+                                        {
+                                            return result;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return result;
+            }
         }
     }
 }

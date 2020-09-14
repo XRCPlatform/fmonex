@@ -165,7 +165,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbTitle.Text))
+                    if (!ValidationHelper.IsTextValid(tbTitle.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
                         errorCount++;
@@ -184,7 +184,7 @@ namespace FreeMarketApp.Views.Pages
                         errorCount++;
                     }
                 }
-                if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 10))
+                if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 2))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortShipping"));
                     errorCount++;
@@ -223,12 +223,6 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyDealValue"));
                     errorCount++;
                 }
-                var cbPriceTypeValue = cbPriceType.SelectedItem as ComboBoxItem;
-                if (cbPriceTypeValue.Tag.ToString() == "0")
-                {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPriceType"));
-                    errorCount++;
-                }
                 if (_offer.Photos.Count() == 0)
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPhoto"));
@@ -246,7 +240,7 @@ namespace FreeMarketApp.Views.Pages
                     _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
                     _offer.Price = float.Parse(tbPrice.Text.Trim());
-                    _offer.PriceType = int.Parse(cbPriceType.Tag.ToString());
+                    _offer.PriceType = (cbPriceType.Tag != null && cbPriceType.Tag.ToString() == "1" ? 1 : 0);
                     _offer.State = (int)ProductStateEnum.Default;
 
                     //get time to next block

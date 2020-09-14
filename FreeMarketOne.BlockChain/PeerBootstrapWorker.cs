@@ -91,11 +91,22 @@ namespace FreeMarketOne.BlockChain
 
                 Task.Run(async () =>
                 {
-                    await _swarmServer.WaitForRunningAsync();
-                    await _swarmServer.AddPeersAsync(
-                        _seedPeers,
-                        null,
-                        _cancellationToken.Token);
+                    try
+                    {
+                        await _swarmServer.WaitForRunningAsync();
+                        await _swarmServer.AddPeersAsync(
+                            _seedPeers,
+                            TimeSpan.FromMilliseconds(SwarmDialTimeout),
+                            _cancellationToken.Token);
+                    }
+                    catch (TimeoutException e)
+                    {
+                        _logger.Error(e.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(string.Format("Exception occurred during AddPeers {0}", e));
+                    }
 
                     var bootstrapTask = Task.Run(async () =>
                     {

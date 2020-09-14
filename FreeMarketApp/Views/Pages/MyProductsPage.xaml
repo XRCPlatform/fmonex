@@ -58,17 +58,19 @@
                           <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
                           <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
                         </StackPanel>
-                        <TextBlock Classes="H1" DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                        <TextBlock Classes="H2" Name="TBPriceType" DockPanel.Dock="Top" FontSize="14" >
-                          <i:Interaction.Behaviors>
-                            <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                              <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                            </ia:DataTriggerBehavior>
-                            <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                              <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                            </ia:DataTriggerBehavior>
-                          </i:Interaction.Behaviors>
-                        </TextBlock>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                          <TextBlock Classes="H1" DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
+                          <TextBlock Classes="H2" Name="TBPriceType" Margin="0 8 0 0" DockPanel.Dock="Top" FontSize="14" >
+                            <i:Interaction.Behaviors>
+                              <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
+                                <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
+                              </ia:DataTriggerBehavior>
+                              <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
+                                <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
+                              </ia:DataTriggerBehavior>
+                            </i:Interaction.Behaviors>
+                          </TextBlock>
+                        </StackPanel>
 							
                       <!-- Propagation notification -->
                         <WrapPanel Name="TBIsInPool" IsVisible="{Binding IsInPool}" HorizontalAlignment="Right" Margin="0 -25 10 0 " Orientation="Horizontal">

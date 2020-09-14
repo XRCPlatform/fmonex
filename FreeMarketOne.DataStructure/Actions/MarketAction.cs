@@ -4,6 +4,7 @@ using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Action;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FreeMarketOne.DataStructure
 {
@@ -24,6 +25,7 @@ namespace FreeMarketOne.DataStructure
                 return _baseItems;
             }
         }
+
         public void AddBaseItem(IBaseItem value)
         {
             _baseItems.Add(value);
@@ -38,10 +40,25 @@ namespace FreeMarketOne.DataStructure
         {
             get
             {
-                return new Bencodex.Types.Dictionary(new Dictionary<IKey, IValue>
+                if ((_serialized == null) || (_serialized.Length == 0))
                 {
-                    { (Text)"items", new Binary(_serialized) },
-                });
+                    if (BaseItems.Any())
+                    {
+                        var serializedItems = JsonConvert.SerializeObject(BaseItems);
+                        var compressedItems = ZipHelper.Compress(serializedItems);
+
+                        _serialized = compressedItems;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+
+                return new Dictionary(new Dictionary<IKey, IValue>
+                    {
+                        { (Text)"items", new Binary(_serialized) },
+                    });
             }
         }
 
@@ -55,14 +72,18 @@ namespace FreeMarketOne.DataStructure
             var dictionary = (Bencodex.Types.Dictionary)plainValue;
             var binaryValue = dictionary.GetValue<Binary>("items");
 
-            var serializedItems = ZipHelper.Decompress(binaryValue.Value);
-            _baseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
+            if ((binaryValue.Value != null) && (binaryValue.Value.Length > 0))
+            {
+                var serializedItems = ZipHelper.Decompress(binaryValue.Value);
+                _baseItems = JsonConvert.DeserializeObject<List<IBaseItem>>(serializedItems);
+            }
+
             _serialized = binaryValue.Value;
         }
 
         public void Render(IActionContext context, IAccountStateDelta nextStates)
         {
-            // throw new NotImplementedException();
+            //not used
         }
 
         public void Unrender(IActionContext context, IAccountStateDelta nextStates)

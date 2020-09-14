@@ -144,6 +144,7 @@ namespace FreeMarketOne.ServerCore
                                     if (marketData.State != (int)ProductStateEnum.Removed)
                                     {
                                         _logger.Information(string.Format("Found Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                        marketData.IsInPool = true;
                                         result.Add(marketData);
                                     }
                                     else
@@ -192,7 +193,6 @@ namespace FreeMarketOne.ServerCore
                                                 if (marketData.State != (int)ProductStateEnum.Removed)
                                                 {
                                                     _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
-                                                    marketData.IsInPool = true;
                                                     result.Add(marketData);
                                                 } 
                                                 else

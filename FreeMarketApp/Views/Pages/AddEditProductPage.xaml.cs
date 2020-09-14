@@ -99,10 +99,10 @@ namespace FreeMarketApp.Views.Pages
 
                 PagesHelper.Log(Instance._logger, string.Format("Loading editation of my product signature {0}", offer.Signature));
 
-                var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
-                var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
-                var tbShipping = Instance.FindControl<TextBlock>("TBShipping");
-                var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
+                var tbTitle = Instance.FindControl<TextBox>("TBTitle");
+                var tbDescription = Instance.FindControl<TextBox>("TBDescription");
+                var tbShipping = Instance.FindControl<TextBox>("TBShipping");
+                var tbPrice = Instance.FindControl<TextBox>("TBPrice");
                 var tbPageName = Instance.FindControl<TextBlock>("TBPageName");
 
                 var cbCategory = this.FindControl<ComboBox>("CBCategory");
@@ -115,9 +115,9 @@ namespace FreeMarketApp.Views.Pages
                 tbPrice.Text = _offer.Price.ToString();
                 tbPageName.Text = SharedResources.ResourceManager.GetString("AddEditProduct_EditPageName");
 
-                cbCategory.SelectedItem = cbCategory.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.Category));
-                cbDealType.SelectedItem = cbDealType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.DealType));
-                cbPriceType.SelectedItem = cbPriceType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.PriceType));
+                cbCategory.SelectedItem = cbCategory.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.Category.ToString()));
+                cbDealType.SelectedItem = cbDealType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.DealType.ToString()));
+                cbPriceType.SelectedItem = cbPriceType.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.PriceType.ToString()));
 
                 //photos loading
                 if ((_offer.Photos != null) && (_offer.Photos.Any()))

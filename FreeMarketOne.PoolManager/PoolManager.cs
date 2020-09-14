@@ -303,6 +303,18 @@ namespace FreeMarketOne.PoolManager
             return _actionItemsList.FirstOrDefault(a => a.Hash == hash);
         }
 
+        public int GetTotalCount()
+        {
+            var totalCount = 0;
+
+            if (_actionItemsList.Any()) totalCount = _actionItemsList.Count();
+
+            var staged = _storage.IterateStagedTransactionIds().ToImmutableHashSet();
+            if (staged != null) totalCount += staged.Count();
+
+            return totalCount;
+        }
+
         public List<IBaseItem> GetAllActionItemLocal()
         {
             return _actionItemsList;

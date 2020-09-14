@@ -283,8 +283,8 @@ namespace FreeMarketOne.ServerCore
                             {
                                 var marketData = (MarketItemV1)itemMarket;
 
-                                if ((category == MarketCategoryEnum.All) 
-                                    && (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
+                                if ((category == MarketCategoryEnum.All)
+                                    || (category != MarketCategoryEnum.All) && (marketData.Category == (int)category))
                                 {
                                     if (!ignoredSignatures.Exists(a => a == marketData.Signature))
                                     {

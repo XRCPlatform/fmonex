@@ -82,17 +82,19 @@ namespace FreeMarketApp
             FreeMarketOneServer.Current.SearchIndexer.IndexBlock(block);
         }
 
-       
-
         private static void BaseBlockChainChanged(object sender, EventArgs e)
         {
             //we have a new block
             _newBlock = true;
         }
 
-        private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> e)
+        private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> deletedHashes)
         {
-            //process deleted blocks
+            foreach (var item in deletedHashes)
+            {
+                FreeMarketOneServer.Current.SearchIndexer.DeleteMarketItemsByBlockHash(item.ToString());
+            }
+            
         }
 
         private static void ServerLoadedEvent(object sender, EventArgs e)

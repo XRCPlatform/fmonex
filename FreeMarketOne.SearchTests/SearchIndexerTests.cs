@@ -43,7 +43,7 @@ namespace FreeMarketOne.Search.Tests
             var marketManager = Substitute.For<IMarketManager>();
             SearchIndexer search = new SearchIndexer(indexDir, marketManager);
 
-            search.Index(marketItem);
+            search.Index(marketItem,"block-hash");
             search.Commit();
 
             //validate search
@@ -129,9 +129,9 @@ namespace FreeMarketOne.Search.Tests
 
             var marketManager = Substitute.For<IMarketManager>();
             SearchIndexer search = new SearchIndexer(indexDir, marketManager);
-            search.Index(marketItem);
-            search.Index(marketItem2);
-            search.Index(marketItem3);
+            search.Index(marketItem, "block-hash");
+            search.Index(marketItem2, "block-hash");
+            search.Index(marketItem3, "block-hash");
             search.Commit();
 
             //validate search
@@ -226,9 +226,9 @@ namespace FreeMarketOne.Search.Tests
             var marketManager = Substitute.For<IMarketManager>();
 
             SearchIndexer search = new SearchIndexer(indexDir, marketManager);
-            search.Index(marketItem);
-            search.Index(marketItem2);
-            search.Index(marketItem3);
+            search.Index(marketItem, "block-hash");
+            search.Index(marketItem2, "block-hash");
+            search.Index(marketItem3, "block-hash");
             search.Commit();
 
             //validate search

@@ -41,7 +41,7 @@
                   <DataTemplate>
                    
                     <!-- Product card -->
-                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
+                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Stretch" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
                       
                       <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
                         

@@ -371,5 +371,17 @@ namespace FreeMarketOne.ServerCore
 
             return null;
         }
+
+        public MarketItemV1 SignMarketData(MarketItemV1 marketData)
+        {
+            marketData.BaseSignature = marketData.Signature;
+
+            var bytesToSign = marketData.ToByteArrayForSign();
+            marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+
+            marketData.Hash = marketData.GenerateHash();
+
+            return marketData;
+        }
     }
 }

@@ -264,7 +264,7 @@ namespace FreeMarketApp.Views.Pages
                     }
 
                     //sign market data and generating chain connection
-                    _offer = SignMarketData(_offer);
+                    _offer = FreeMarketOneServer.Current.MarketManager.SignMarketData(_offer);
 
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 
@@ -347,18 +347,6 @@ namespace FreeMarketApp.Views.Pages
             var spLastPhoto = this.FindControl<StackPanel>("SPPhoto_" + lastIndex);
             spLastPhoto.IsVisible = false;
             _offer.Photos.RemoveAt(lastIndex);
-        }
-
-        private MarketItemV1 SignMarketData(MarketItemV1 marketData)
-        {
-            var bytesToSign = marketData.ToByteArrayForSign();
-
-            marketData.BaseSignature = marketData.Signature;
-            marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
-
-            marketData.Hash = marketData.GenerateHash();
-
-            return marketData;
         }
 
         private void ClearForm()

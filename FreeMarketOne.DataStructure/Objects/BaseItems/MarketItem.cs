@@ -57,13 +57,13 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         /* Rendering Helpers */
         [JsonIgnore]
-        public List<Bitmap> PrePhotos { get; set; }
+        public virtual List<Bitmap> PrePhotos { get; set; }
 
         [JsonIgnore]
-        public Bitmap PreTitlePhoto { get; set; }
+        public virtual Bitmap PreTitlePhoto { get; set; }
 
         [JsonIgnore]
-        public bool IsInPool { get; set; }
+        public virtual bool IsInPool { get; set; }
 
         public MarketItem()
         {

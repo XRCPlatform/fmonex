@@ -451,5 +451,22 @@ namespace FreeMarketOne.ServerCore
 
             return result;
         }
+
+        public UserDataV1 SignUserData(string userName, string description, UserDataV1 userData = null)
+        {
+            if (userData == null) userData = new UserDataV1();
+
+            userData.UserName = userName;
+            userData.Description = description;
+            userData.BaseSignature = userData.Signature;
+
+            var bytesToSign = userData.ToByteArrayForSign();
+
+            userData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+
+            userData.Hash = userData.GenerateHash();
+
+            return userData;
+        }
     }
 }

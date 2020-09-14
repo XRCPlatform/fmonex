@@ -352,10 +352,7 @@ namespace FreeMarketOne.PoolManager
                     }
                 }
 
-                var tx = Transaction<T>.Create(
-                    0,
-                    _privateKey,
-                    actions);
+                var tx = _blockChain.MakeTransaction(_privateKey, actions);
 
                 _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
 

@@ -33,7 +33,7 @@
                   <DockPanel Margin="0 0 0 0">
                     <WrapPanel Orientation="Vertical" Margin="0 0 0 0">
                       <TextBlock Classes="H1" Text="Password *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
-                      <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" BorderThickness="0" Padding="10"/>
+                      <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" Watermark="Must be at least 16 chars" HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" BorderThickness="0" Padding="10"/>
                     </WrapPanel>
                     <WrapPanel Orientation="Vertical" Margin="0 0 0 0">
                       <TextBlock Classes="H1" Text="Password Verification *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
@@ -41,8 +41,8 @@
                     </WrapPanel>
                   </DockPanel>
                   
-                  <TextBlock Classes="H1" Text="Your seed *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
-                  <TextBox Classes="TextBoxBackground" Name="TBSeed" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="60" Watermark="Add your seed" BorderThickness="0" Padding="10" TextWrapping="Wrap"/>
+                  <TextBlock Classes="H1" Text="Seed *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+                  <TextBox Classes="TextBoxBackground" Name="TBSeed" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="60" Watermark="Create your own seed (at least 200 characters)" BorderThickness="0" Padding="10" TextWrapping="Wrap"/>
 
                 </StackPanel>
 

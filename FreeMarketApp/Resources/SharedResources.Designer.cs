@@ -356,5 +356,14 @@ namespace FreeMarketApp.Resources {
                 return ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to N/A.
+        /// </summary>
+        internal static string UnknownValue {
+            get {
+                return ResourceManager.GetString("UnknownValue", resourceCulture);
+            }
+        }
     }
 }

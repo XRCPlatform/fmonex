@@ -2,8 +2,15 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
+using FreeMarketApp.ViewModels;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using Libplanet.Extensions;
 using Serilog;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -37,6 +44,20 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MyReviewsPage).Namespace, typeof(MyReviewsPage).Name));
 
+            if (FreeMarketOneServer.Current.UserManager != null)
+            {
+                SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
+
+                PagesHelper.Log(_logger, string.Format("Loading user reviews from chain."));
+
+                var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userPubKey);
+
+                GetAllUserNames(reviews);
+
+                DataContext = new MyReviewsViewModel(reviews);
+            }
+
             this.InitializeComponent();
         }
 
@@ -50,6 +71,8 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, MainPage.Instance);
+
+            ClearForm();
         }
 
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
@@ -57,6 +80,46 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, MyProfilePage.Instance);
+
+            ClearForm();
+        }
+
+        public void ButtonPublicProfile_Click(object sender, RoutedEventArgs args)
+        {
+            var signature = ((Button)sender).Tag.ToString();
+
+            /* TODO */
+
+        }
+
+        private void GetAllUserNames(List<ReviewUserDataV1> reviews)
+        {
+            if (reviews.Any())
+            {
+                for (int i = 0; i < reviews.Count; i++)
+                {
+                    var itemReview = reviews[i];
+
+                    var itemReviewBytes = itemReview.ToByteArrayForSign();
+                    var reviewUserPubKeys = UserPublicKey.Recover(itemReviewBytes, itemReview.Signature);
+
+                    var reviewUserData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(reviewUserPubKeys);
+
+                    if (reviewUserData != null)
+                    {
+                        reviews[i].UserName = reviewUserData.UserName;
+                    } 
+                    else
+                    {
+                        reviews[i].UserName = SharedResources.ResourceManager.GetString("UnknownValue");
+                    }
+                }
+            }
+        }
+
+        private void ClearForm()
+        {
+            _instance = null;
         }
     }
 }

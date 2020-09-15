@@ -7,6 +7,7 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
+using System;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -50,6 +51,7 @@ namespace FreeMarketApp.Views.Pages
 
                 var tbUserName = this.FindControl<TextBlock>("TBUserName");
                 var tbDescription = this.FindControl<TextBlock>("TBDescription");
+                var tbReviewStars = this.FindControl<TextBlock>("TBReviewStars");
 
                 tbUserName.Text = _userData.UserName;
                 tbDescription.Text = _userData.Description;
@@ -61,6 +63,13 @@ namespace FreeMarketApp.Views.Pages
                     var skynetStream = SkynetHelper.DownloadFromSkynet(_userData.Photo, _logger);
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
+
+                var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userPubKey);
+
+                var reviewStars = FreeMarketOneServer.Current.UserManager.GetUserReviewStars(reviews);
+                var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
+                tbReviewStars.Text = reviewStartRounded.ToString();
             }
         }
 

@@ -216,4 +216,7 @@
   <data name="Dialog_LoginPage_WatermarkWrongPassword" xml:space="preserve">
     <value>Your password was wrong. Try it again. Please.</value>
   </data>
+  <data name="UnknownValue" xml:space="preserve">
+    <value>N/A</value>
+  </data>
 </root>

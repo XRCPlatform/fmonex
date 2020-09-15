@@ -73,7 +73,7 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
       Height="16" Stretch="Fill" Width="17" Margin="0,1,5,0"/>
               <!-- Rating number binding -->
-              <TextBlock Classes="H1" Name="ReputationBinding" Text="3.4" FontWeight="Bold" FontSize="16"/>
+              <TextBlock Classes="H1" Name="TBReviewStars" Text="3.4" FontWeight="Bold" FontSize="16"/>
               <TextBlock Classes="H2" Text=" out of 5" FontSize="16"/>
             </StackPanel>
           </StackPanel>

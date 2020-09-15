@@ -23,6 +23,7 @@
     <None Remove="Models\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Styles\DarkStyle.xaml" />
     <AvaloniaResource Remove="Views\Controls\MessageBox.xaml" />
     <AvaloniaResource Remove="Views\Pages\MainPage.xaml" />
     <AvaloniaResource Remove="Views\Pages\ProductPage.xaml" />
@@ -32,6 +33,7 @@
     <None Remove="Assets\ico-user.png" />
     <None Remove="Assets\search-bar.png" />
     <None Remove="Assets\splash.png" />
+    <None Remove="Styles\DarkStyle.xaml" />
     <None Remove="Views\AddEditProductWindow.xaml" />
     <None Remove="Views\AddEditProfileWindow.xaml" />
     <None Remove="Views\Controls\MessageBox.xaml" />
@@ -40,6 +42,10 @@
     <None Remove="Views\Pages\MainPage.xaml" />
     <None Remove="Views\Pages\ProductPage.xaml" />
     <None Remove="Views\PublicProfileWindow.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Styles\DarkTheme.xml" />
+    <AvaloniaResource Include="Styles\LightTheme.xml" />
   </ItemGroup>
   <ItemGroup>
     <AvaloniaXaml Include="Views\Controls\MessageBox.xaml">

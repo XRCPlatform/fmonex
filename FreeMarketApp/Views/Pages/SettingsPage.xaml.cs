@@ -1,9 +1,13 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Styling;
 using FreeMarketApp.Helpers;
 using FreeMarketOne.ServerCore;
 using Serilog;
+using System;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -57,5 +61,19 @@ namespace FreeMarketApp.Views.Pages
 
             PagesHelper.Switch(mainWindow, _returnToInstanceOfPage);
         }
+
+        public void ButtonSave_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+
+ 
+    //        mainWindow.Styles.
+    //        var baseLight = (IStyle)AvaloniaXamlLoader.Load(
+    //new Uri("resm:Avalonia.Themes.Default.Accents.BaseLight.xaml?assembly=Avalonia.Themes.Default"));
+
+            //  mainWindow..Resources
+        }
+
     }
 }

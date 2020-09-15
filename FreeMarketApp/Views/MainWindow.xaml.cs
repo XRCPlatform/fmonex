@@ -2,6 +2,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Pages;
@@ -17,8 +19,20 @@ namespace FreeMarketApp.Views
 {
     public class MainWindow : WindowBase
     {
+        public static StyleInclude DarkTheme = new StyleInclude(new Uri("avares://FreeMarketApp/App.xaml"))
+        {
+            Source = new Uri("avares://FreeMarketApp/Styles/DarkTheme.xml")
+        };
+
+        public static StyleInclude LightTheme = new StyleInclude(new Uri("avares://FreeMarketApp/App.xaml"))
+        {
+            Source = new Uri("avares://FreeMarketApp/Styles/LightTheme.xml")
+        };
+
         public MainWindow()
         {
+            Application.Current.Styles.Add(LightTheme);
+
             InitializeComponent();
 
             if (FreeMarketOneServer.Current.UserManager != null)

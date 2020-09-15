@@ -1,10 +1,6 @@
-<Style
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=System.Runtime"
-    x:Class="FreeMarketApp.Styles.DarkTheme">
-
-    <Style.Resources>
+<Styles xmlns = "https://github.com/avaloniaui"
+        xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys = "clr-namespace: System; assembly=netstandard">
 
         	<!-- Avatar Button -->
 		<Style Selector="Button.user /template/ ContentPresenter">
@@ -169,7 +165,7 @@
 		
 		<!-- ELEMENTS -->
 		<Style Selector="Grid.Main">
-			<Setter Property="Background" Value="#000000" />
+			<Setter Property="Background" Value="#ffffff" />
 		</Style>
 
 		<!-- Main Toolbar -->
@@ -287,6 +283,4 @@
 			<Setter Property="Background" Value="#4E5C6E" />
 		</Style>
 
-    </Style.Resources>
-
-</Style>
+</Styles>

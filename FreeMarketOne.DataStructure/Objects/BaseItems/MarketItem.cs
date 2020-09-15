@@ -1,5 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
-using FreeMarketOne.Utils.Security;
+using Libplanet.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -86,7 +86,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         public virtual string GenerateHash()
         {
             var content = new StringBuilder();
-            var sha512processor = new Sha512Processor();
+            var shaProcessor = new SHAProcessor();
 
             content.Append(nametype);
             content.Append(Title);
@@ -101,7 +101,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
-            return sha512processor.GetSHA512(content.ToString());
+            return shaProcessor.GetSHA256(content.ToString());
         }
 
         public virtual byte[] ToByteArrayForSign()

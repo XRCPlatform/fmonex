@@ -1,4 +1,4 @@
-﻿using FreeMarketOne.Utils.Security;
+﻿using Libplanet.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,11 +40,11 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         public virtual string GenerateHash()
         {
             var content = new StringBuilder();
-            var sha512processor = new Sha512Processor();
+            var shaProcessor = new SHAProcessor();
 
             content.Append(CreatedUtc);
 
-            return sha512processor.GetSHA512(content.ToString());
+            return shaProcessor.GetSHA256(content.ToString());
         }
 
         public virtual byte[] ToByteArrayForSign()

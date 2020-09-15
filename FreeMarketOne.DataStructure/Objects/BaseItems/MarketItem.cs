@@ -1,5 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
-using FreeMarketOne.Utils.Security;
+using Libplanet.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("_nt")]
         public string nametype { get; set; }
 
-        [JsonProperty("n")]
+        [JsonProperty("t")]
         public string Title { get; set; }
 
         [JsonProperty("d")]
@@ -49,7 +49,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("c")]
         public DateTime CreatedUtc { get; set; }
 
-        [JsonProperty("t")]
+        [JsonProperty("s")]
         public string Signature { get; set; }
 
         /// <summary>
@@ -110,8 +110,8 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         public virtual string GenerateHash()
         {
             StringBuilder content = GetString();
-            var sha512processor = new Sha512Processor();
-            return sha512processor.GetSHA512(content.ToString());
+            var shaProcessor = new SHAProcessor();
+            return shaProcessor.GetSHA256(content.ToString());
         }
 
         public virtual byte[] ToByteArrayForSign()

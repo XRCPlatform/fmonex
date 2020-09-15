@@ -40,11 +40,9 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
                    
-                    <!-- Product card -->
-                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Stretch" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
-                      
-                      <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                        
+                  <!-- Product card -->
+                  <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="1" Cursor="Hand" Click="ButtonProduct_Click">
+                     <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
                         <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="0">
                           <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}" Stretch="UniformToFill" >
                             <Image.Clip>
@@ -52,37 +50,38 @@
                             </Image.Clip>
                           </Image>
                         </Border>
-                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="{Binding Title}"></TextBlock>
-                        
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                           <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
                           <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
                         </StackPanel>
-                        <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                        <TextBlock DockPanel.Dock="Top" Classes="H2" Name="TBPriceType" Margin="0 4 0 0" FontSize="14" >
-                           <i:Interaction.Behaviors>
-                             <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                               <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                             </ia:DataTriggerBehavior>
-                             <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                               <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                             </ia:DataTriggerBehavior>
-                           </i:Interaction.Behaviors>
-                        </TextBlock>
+						            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                            <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
+                            <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
+                               <i:Interaction.Behaviors>
+                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
+                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
+                                 </ia:DataTriggerBehavior>
+                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
+                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
+                                 </ia:DataTriggerBehavior>
+                               </i:Interaction.Behaviors>
+                            </TextBlock>
+						            </StackPanel>
 							
-                        <!-- Propagation notification -->
-                        <WrapPanel Name="TBIsInPool" IsVisible="{Binding IsInPool}" Margin="50 -25 10 0 " HorizontalAlignment="Right" Orientation="Horizontal">
-                          <Path Classes="H2" Data="M413.809,462.904v-51.088c0-60.171-46.494-96.158-91.179-131.268c-6.172-4.839-14.028-14.028-14.028-28.055
-                          s7.077-27.704,14.028-33.554c43.477-36.583,91.179-71.098,91.179-131.268V49.096h35.068V0H63.123v49.096h35.068v38.576
-                          c0,60.171,47.7,94.685,91.179,131.268c6.951,5.85,14.028,19.526,14.028,33.554c0,14.028-7.856,23.215-14.028,28.055
-                          c-44.684,35.111-91.179,71.098-91.179,131.268v51.088H63.123V512h385.753v-49.096H413.809z M167.438,133.26
-                          c-12.927-14.631-20.15-28.714-20.15-45.589V49.096h217.424v38.576c0,16.874-7.225,30.959-20.15,45.589H167.438z M364.712,449.221
-                          l-82.572-32.227c-14.378-5.611-37.895-5.611-52.273,0l-82.579,32.229v-37.404c0-34.045,27.059-57.035,71.217-91.725l1.171-0.918
-                          c16.762-13.144,27.634-31.449,31.324-51.621c3.303,0.736,6.698,0.736,10.001,0c3.675,20.165,14.56,38.471,31.301,51.6l1.192,0.939
-                          c44.158,34.688,71.217,57.672,71.217,91.724V449.221z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Stretch="Fill" Width="12" Margin="0 8 5 0"/>
-                          <TextBlock Classes="H2" FontSize="12" Text="Waiting for propagation" Margin="0 8 0 0"></TextBlock>       
+                          <!-- Propagation notification -->
+                        <WrapPanel Name="TBIsInPool" VerticalAlignment="Bottom" IsVisible="{Binding IsInPool}" Orientation="Horizontal">
+                            <Path Classes="H2" Data="M413.809,462.904v-51.088c0-60.171-46.494-96.158-91.179-131.268c-6.172-4.839-14.028-14.028-14.028-28.055
+                            s7.077-27.704,14.028-33.554c43.477-36.583,91.179-71.098,91.179-131.268V49.096h35.068V0H63.123v49.096h35.068v38.576
+                            c0,60.171,47.7,94.685,91.179,131.268c6.951,5.85,14.028,19.526,14.028,33.554c0,14.028-7.856,23.215-14.028,28.055
+                            c-44.684,35.111-91.179,71.098-91.179,131.268v51.088H63.123V512h385.753v-49.096H413.809z M167.438,133.26
+                            c-12.927-14.631-20.15-28.714-20.15-45.589V49.096h217.424v38.576c0,16.874-7.225,30.959-20.15,45.589H167.438z M364.712,449.221
+                            l-82.572-32.227c-14.378-5.611-37.895-5.611-52.273,0l-82.579,32.229v-37.404c0-34.045,27.059-57.035,71.217-91.725l1.171-0.918
+                            c16.762-13.144,27.634-31.449,31.324-51.621c3.303,0.736,6.698,0.736,10.001,0c3.675,20.165,14.56,38.471,31.301,51.6l1.192,0.939
+                            c44.158,34.688,71.217,57.672,71.217,91.724V449.221z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Stretch="Fill" Width="12" Margin="0 4 5 7"/>
+                            <TextBlock Classes="H2" FontSize="12" Text="Waiting for propagation" Margin="0 4 0 7"></TextBlock>       
                         </WrapPanel>                   
-                                                
+                                                              
                       </DockPanel>
                     </Button>
                     <!-- End of product card -->
@@ -107,22 +106,24 @@
                             </Image.Clip>
                           </Image>
                         </Border>
-                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" Height="50" FontSize="18" Margin="0 5 10 0" Text="{Binding Title}"></TextBlock>
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                           <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
                           <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
                         </StackPanel>
-                        <TextBlock Classes="H1" DockPanel.Dock="Top" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                        <TextBlock Classes="H2" Name="TBPriceType" DockPanel.Dock="Top" FontSize="14" >
-                          <i:Interaction.Behaviors>
-                            <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                              <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                            </ia:DataTriggerBehavior>
-                            <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                              <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                            </ia:DataTriggerBehavior>
-                          </i:Interaction.Behaviors>
-                        </TextBlock>                        
+						            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                            <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
+                            <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
+                               <i:Interaction.Behaviors>
+                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
+                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
+                                 </ia:DataTriggerBehavior>
+                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
+                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
+                                 </ia:DataTriggerBehavior>
+                               </i:Interaction.Behaviors>
+                            </TextBlock>
+						            </StackPanel>                        
                       </DockPanel>
                     </Button>
                     <!-- End of product card -->

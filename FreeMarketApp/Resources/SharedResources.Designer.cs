@@ -313,6 +313,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have to restart application to see changes..
+        /// </summary>
+        internal static string Dialog_Information_ChangeTheme {
+            get {
+                return ResourceManager.GetString("Dialog_Information_ChangeTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Information.
         /// </summary>
         internal static string Dialog_Information_Title {

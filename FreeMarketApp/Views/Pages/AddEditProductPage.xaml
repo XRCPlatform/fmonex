@@ -29,16 +29,16 @@
                 <TextBlock Text="Category" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <VirtualizingStackPanel>
                     <ComboBox Name="CBCategory" Classes="TextBoxBackground" MaxDropDownHeight="450" Height="45" SelectedIndex="0" BorderThickness="0" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
-                        <ComboBoxItem Padding="7" Tag="0" Content=""/>
-                        <ComboBoxItem Padding="7" Tag="1" Content="Gold"/>
-                        <ComboBoxItem Padding="7" Tag="2" Content="Silver"/>
-                        <ComboBoxItem Padding="7" Tag="3" Content="Platinum"/>
-                        <ComboBoxItem Padding="7" Tag="4" Content="Rhodium"/>
-                        <ComboBoxItem Padding="7" Tag="5" Content="Palladium"/>
-                        <ComboBoxItem Padding="7" Tag="6" Content="Copper"/>
-                        <ComboBoxItem Padding="7" Tag="7" Content="Rare Coins"/>
-                        <ComboBoxItem Padding="7" Tag="8" Content="Jewelry"/>
-                        <ComboBoxItem Padding="7" Tag="9" Content="Cryptocurrency"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="0" Content=""/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="1" Content="Gold"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="2" Content="Silver"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="3" Content="Platinum"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="4" Content="Rhodium"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="5" Content="Palladium"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="6" Content="Copper"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="7" Content="Rare Coins"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="8" Content="Jewelry"/>
+                        <ComboBoxItem Classes="DropDown" Padding="7" Tag="9" Content="Cryptocurrency"/>
                     </ComboBox>
                 </VirtualizingStackPanel>
 
@@ -190,8 +190,8 @@
 
                     <VirtualizingStackPanel>
                         <ComboBox Name="CBPriceType" Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" FontSize="16" Margin="0 10 50 0" Padding="10" Width="100" HorizontalAlignment="Left">
-                            <ComboBoxItem Tag="0" Padding="7" Content="XRC"/>
-                            <ComboBoxItem Tag="1" Padding="7" Content="USD"/>
+                            <ComboBoxItem Classes="DropDown" Tag="0" Padding="7" Content="XRC"/>
+                            <ComboBoxItem Classes="DropDown" Tag="1" Padding="7" Content="USD"/>
                         </ComboBox>
                     </VirtualizingStackPanel>
                 </StackPanel>
@@ -199,18 +199,18 @@
               <TextBlock Text="Deal Type" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
               <VirtualizingStackPanel>
                 <ComboBox Name="CBDealType" Classes="TextBoxBackground" MaxDropDownHeight="450" SelectedIndex="0" BorderThickness="0" Height="45" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
-                  <ComboBoxItem Padding="7" Tag="0" Content=""/>
-                  <ComboBoxItem Padding="7" Tag="1" Content="Pay 0% before 100% after"/>
-                  <ComboBoxItem Padding="7" Tag="2" Content="Pay 10% before 90% after"/>
-                  <ComboBoxItem Padding="7" Tag="3" Content="Pay 20% before 80% after"/>
-                  <ComboBoxItem Padding="7" Tag="4" Content="Pay 30% before 70% after"/>
-                  <ComboBoxItem Padding="7" Tag="5" Content="Pay 40% before 60% after"/>
-                  <ComboBoxItem Padding="7" Tag="6" Content="Pay 50% before 50% after"/>
-                  <ComboBoxItem Padding="7" Tag="7" Content="Pay 60% before 40% after"/>
-                  <ComboBoxItem Padding="7" Tag="8" Content="Pay 70% before 30% after"/>
-                  <ComboBoxItem Padding="7" Tag="9" Content="Pay 80% before 20% after"/>
-                  <ComboBoxItem Padding="7" Tag="10" Content="Pay 90% before 10% after"/>
-                  <ComboBoxItem Padding="7" Tag="11" Content="Pay 100% before 0% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="0" Content=""/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="1" Content="Pay 0% before 100% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="2" Content="Pay 10% before 90% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="3" Content="Pay 20% before 80% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="4" Content="Pay 30% before 70% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="5" Content="Pay 40% before 60% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="6" Content="Pay 50% before 50% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="7" Content="Pay 60% before 40% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="8" Content="Pay 70% before 30% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="9" Content="Pay 80% before 20% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="10" Content="Pay 90% before 10% after"/>
+                  <ComboBoxItem Classes="DropDown" Padding="7" Tag="11" Content="Pay 100% before 0% after"/>
                 </ComboBox>
               </VirtualizingStackPanel>
               

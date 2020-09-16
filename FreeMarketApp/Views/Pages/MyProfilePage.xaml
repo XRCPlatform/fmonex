@@ -62,7 +62,7 @@
             </WrapPanel>
             <!-- User binding -->
             <TextBlock Classes="H1" Text="UserName" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-            <TextBlock Classes="H1" Name="TBUserName" Text="" Margin="20 0 0 0" FontSize="16"/>
+            <TextBlock Classes="H1" Name="TBUserName" Text="N/A" Margin="20 0 0 0" FontSize="16"/>
             <TextBlock Classes="H1" Text="Rating" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
             <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
               <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
@@ -73,14 +73,14 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
       Height="16" Stretch="Fill" Width="17" Margin="0,1,5,0"/>
               <!-- Rating number binding -->
-              <TextBlock Classes="H1" Name="TBReviewStars" Text="3.4" FontWeight="Bold" FontSize="16"/>
+              <TextBlock Classes="H1" Name="TBReviewStars" Text="N/A" FontWeight="Bold" FontSize="16"/>
               <TextBlock Classes="H2" Text=" out of 5" FontSize="16"/>
             </StackPanel>
           </StackPanel>
 
           <TextBlock Classes="H1" Text="Description" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
           <!-- About user text binding -->
-          <TextBlock Classes="H1" Name="TBDescription" Text=""
+          <TextBlock Classes="H1" Name="TBDescription" Text="N/A"
            TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
 
         </StackPanel>

@@ -71,6 +71,8 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, _returnToInstanceOfPage);
+
+            ClearForm();
         }
 
         public async void ButtonSave_Click(object sender, RoutedEventArgs args)
@@ -93,6 +95,11 @@ namespace FreeMarketApp.Views.Pages
                 SharedResources.ResourceManager.GetString("Dialog_Information_ChangeTheme"),
                 SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
                 MessageBox.MessageBoxButtons.Ok);
+        }
+
+        private void ClearForm()
+        {
+            _instance = null;
         }
     }
 }

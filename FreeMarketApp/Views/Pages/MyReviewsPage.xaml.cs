@@ -86,10 +86,23 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonPublicProfile_Click(object sender, RoutedEventArgs args)
         {
-            var signature = ((Button)sender).Tag.ToString();
+            var signatureAndHash = ((Button)sender).Tag.ToString();
 
-            /* TODO */
+            if (!string.IsNullOrEmpty(signatureAndHash))
+            {
+                PagesHelper.Log(Instance._logger, string.Format("Loading public profile with array {0}", signatureAndHash));
 
+                var mainWindow = PagesHelper.GetParentWindow(this);
+
+                var publicProfilePage = PublicProfilePage.Instance;
+                publicProfilePage.SetReturnTo(MyReviewsPage.Instance);
+
+                var signature = signatureAndHash.Split("|")[0];
+                var hash = signatureAndHash.Split("|")[1];
+                publicProfilePage.LoadUser(signature, hash);
+
+                PagesHelper.Switch(mainWindow, publicProfilePage);
+            }
         }
 
         private void GetAllUserNames(List<ReviewUserDataV1> reviews)
@@ -108,6 +121,7 @@ namespace FreeMarketApp.Views.Pages
                     if (reviewUserData != null)
                     {
                         reviews[i].UserName = reviewUserData.UserName;
+                        reviews[i].UserSignatureAndHash = string.Format("{0}|{1}", reviewUserData.Signature, reviewUserData.Hash);
                     } 
                     else
                     {

@@ -313,6 +313,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have to restart application to see changes..
+        /// </summary>
+        internal static string Dialog_Information_ChangeTheme {
+            get {
+                return ResourceManager.GetString("Dialog_Information_ChangeTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Information.
         /// </summary>
         internal static string Dialog_Information_Title {
@@ -345,6 +354,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_LoginPage_WatermarkWrongPassword {
             get {
                 return ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to N/A.
+        /// </summary>
+        internal static string UnknownValue {
+            get {
+                return ResourceManager.GetString("UnknownValue", resourceCulture);
             }
         }
     }

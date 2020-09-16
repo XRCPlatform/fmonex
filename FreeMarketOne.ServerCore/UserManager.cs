@@ -442,7 +442,7 @@ namespace FreeMarketOne.ServerCore
                                     foreach (var itemUserData in allUserDatas)
                                     {
                                         if ((reviewData.UserSignature == itemUserData.Signature)
-                                            && (reviewData.Hash == itemUserData.Hash))
+                                            && (reviewData.UserHash == itemUserData.Hash))
                                         {
                                             _logger.Information(
                                                 string.Format("Found UserData signature {0} hash {1}.",
@@ -460,6 +460,26 @@ namespace FreeMarketOne.ServerCore
                 }
 
                 return result;
+            }
+        }
+
+        /// <summary>
+        /// Calculate stars based on median calculation
+        /// </summary>
+        /// <param name="userReviews"></param>
+        /// <returns></returns>
+        public double GetUserReviewStars(List<ReviewUserDataV1> userReviews)
+        {
+            if (userReviews.Any())
+            {
+                var arrayOfStars = userReviews.Select(a => (double)a.Stars).ToArray();
+                var medianOfStars = GetMedian<double>(arrayOfStars);
+
+                return medianOfStars;
+            } 
+            else
+            {
+                return 0;
             }
         }
 
@@ -481,6 +501,25 @@ namespace FreeMarketOne.ServerCore
 
                 return userData;
             }
+        }
+
+        private T GetMedian<T>(T[] sourceArray, bool cloneArray = true) where T : IComparable<T>
+        {      
+            if (sourceArray == null || sourceArray.Length == 0)
+                throw new ArgumentException("Median of empty array not defined.");
+
+            T[] sortedArray = cloneArray ? (T[])sourceArray.Clone() : sourceArray;
+            Array.Sort(sortedArray);
+
+            //get the median
+            int size = sortedArray.Length;
+            int mid = size / 2;
+            if (size % 2 != 0)
+                return sortedArray[mid];
+
+            dynamic value1 = sortedArray[mid];
+            dynamic value2 = sortedArray[mid - 1];
+            return (sortedArray[mid] + value2) * 0.5;
         }
     }
 }

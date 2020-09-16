@@ -201,6 +201,9 @@
   <data name="Dialog_FirstRun_ShortUserName" xml:space="preserve">
     <value>Your username is too short. Minimum is 10 chars.</value>
   </data>
+  <data name="Dialog_Information_ChangeTheme" xml:space="preserve">
+    <value>You have to restart application to see changes.</value>
+  </data>
   <data name="Dialog_Information_Title" xml:space="preserve">
     <value>Information</value>
   </data>
@@ -212,5 +215,8 @@
   </data>
   <data name="Dialog_LoginPage_WatermarkWrongPassword" xml:space="preserve">
     <value>Your password was wrong. Try it again. Please.</value>
+  </data>
+  <data name="UnknownValue" xml:space="preserve">
+    <value>N/A</value>
   </data>
 </root>

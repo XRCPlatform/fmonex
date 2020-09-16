@@ -27,13 +27,12 @@
 
 				<TextBlock Classes="H1" Text="Appearance" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
 				<StackPanel Orientation="Vertical" Margin="30 10 20 0">
-					<RadioButton Classes="H1" Content="Automatic" IsDefault="True" IsChecked="True" FontSize="16" Margin="0 0 0 10" ></RadioButton>
-					<RadioButton Classes="H1" Content="Light" FontSize="16" Margin="0 0 0 10"></RadioButton>
-					<RadioButton Classes="H1" Content="Dark" FontSize="16" Margin="0 0 0 10"></RadioButton>
+					<RadioButton Name="RBApperanceLight" Classes="H1" Content="Light" FontSize="16" Margin="0 0 0 10" Tag="Light"></RadioButton>
+					<RadioButton Name="RBApperanceDark" Classes="H1" Content="Dark" FontSize="16" Margin="0 0 0 10" Tag="Dark"></RadioButton>
 				</StackPanel>
 
         <DockPanel Margin="20 50 50 0">
-          <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
+          <Button DockPanel.Dock="Right" Classes="message" HorizontalAlignment="Right" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
         </DockPanel>
         
 			</StackPanel>

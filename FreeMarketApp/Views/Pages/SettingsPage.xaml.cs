@@ -1,13 +1,11 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Styling;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
+using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
 using Serilog;
-using System;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -48,6 +46,19 @@ namespace FreeMarketApp.Views.Pages
                             string.Format("{0}.{1}", typeof(SettingsPage).Namespace, typeof(SettingsPage).Name));
 
             this.InitializeComponent();
+
+            var rbApperanceLight = this.FindControl<RadioButton>("RBApperanceLight");
+            var rbApperanceDark = this.FindControl<RadioButton>("RBApperanceDark");
+
+            var theme = ThemeHelper.GetThemeName();
+            if (theme == ThemeHelper.DARK_THEME)
+            {
+                rbApperanceDark.IsChecked = true;
+            }
+            else
+            {
+                rbApperanceLight.IsChecked = true;
+            }
         }
 
         private void InitializeComponent()
@@ -62,18 +73,26 @@ namespace FreeMarketApp.Views.Pages
             PagesHelper.Switch(mainWindow, _returnToInstanceOfPage);
         }
 
-        public void ButtonSave_Click(object sender, RoutedEventArgs args)
+        public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
+            var rbApperanceLight = Instance.FindControl<RadioButton>("RBApperanceLight");
+            var rbApperanceDark = Instance.FindControl<RadioButton>("RBApperanceDark");
 
- 
-    //        mainWindow.Styles.
-    //        var baseLight = (IStyle)AvaloniaXamlLoader.Load(
-    //new Uri("resm:Avalonia.Themes.Default.Accents.BaseLight.xaml?assembly=Avalonia.Themes.Default"));
+            if ((rbApperanceDark.IsChecked.HasValue) && (rbApperanceDark.IsChecked.Value))
+            {
+                ThemeHelper.SetTheme(ThemeHelper.DARK_THEME);
+            } 
+            else
+            {
+                ThemeHelper.SetTheme(ThemeHelper.LIGHT_THEME);
+            }
 
-            //  mainWindow..Resources
+            var result = await MessageBox.Show(mainWindow,
+                SharedResources.ResourceManager.GetString("Dialog_Information_ChangeTheme"),
+                SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                MessageBox.MessageBoxButtons.Ok);
         }
-
     }
 }

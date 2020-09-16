@@ -2,25 +2,26 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Styling;
 using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace FreeMarketApp.Views
 {
     public class MainWindow : WindowBase
     {
+        private ILogger _logger;
+
         public MainWindow()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(MainWindow).Namespace, typeof(MainWindow).Name));
+
             Application.Current.Styles.Add(ThemeHelper.GetTheme());
 
             InitializeComponent();
@@ -36,7 +37,7 @@ namespace FreeMarketApp.Views
                     pcMainContent.Children.Add(MainPage.Instance);
 
                     PagesHelper.UnlockTools(this, true);
-                    PagesHelper.SetUserData(this);
+                    PagesHelper.SetUserData(_logger, this);
                 }
                 else
                 {
@@ -92,7 +93,7 @@ namespace FreeMarketApp.Views
         private void ServerLoadedEvent(object sender, EventArgs e)
         {
             Dispatcher.UIThread.InvokeAsync(() => { 
-                PagesHelper.SetUserData(this);
+                PagesHelper.SetUserData(_logger, this);
             });
         }
 

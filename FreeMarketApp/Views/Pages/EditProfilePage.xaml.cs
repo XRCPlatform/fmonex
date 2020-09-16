@@ -184,7 +184,7 @@ namespace FreeMarketApp.Views.Pages
                         FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                         FreeMarketOneServer.Current.Configuration.BlockChainUserPath);
 
-                    PagesHelper.SetUserData(mainWindow);
+                    PagesHelper.SetUserData(_logger, mainWindow);
                     PagesHelper.Log(_logger, string.Format("Propagating new user data of current user to chain."));
 
                     FreeMarketOneServer.Current.BasePoolManager.AcceptActionItem(updatedUserData);

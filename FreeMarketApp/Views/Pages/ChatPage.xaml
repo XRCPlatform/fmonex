@@ -84,7 +84,7 @@
         <!-- Typing and sending -->
         <Grid VerticalAlignment="Bottom" Height="80">
           <Border Classes="ReplyTextbox" HorizontalAlignment="Stretch" BorderThickness="1" Margin="20 10 60 10" Padding="10 4" VerticalAlignment="Center" CornerRadius="10">
-            <TextBox x:Name="TypeMessageField" AcceptsReturn="True" TextWrapping="Wrap" Padding="5" Watermark ="Type a message" Cursor="IBeam" VerticalAlignment="Top" Height="50" FontSize="15" BorderThickness="0" />
+            <TextBox x:Name="TypeMessageField" Classes="ReplyTextbox" AcceptsReturn="True" TextWrapping="Wrap" Padding="5" Watermark ="Type a message" Cursor="IBeam" VerticalAlignment="Top" Height="50" FontSize="15" BorderThickness="0" />
           </Border>
           <Button x:Name="SendMessageButton" Classes="message" HorizontalAlignment="Right" VerticalAlignment="Top" Height="36" Width="36" Margin="0 10 20 0">
             <Path Classes="WhiteIcon" Data="M437.2,178.7c12.8,12.8,12.8,33.4,0,46.2c-6.4,6.4-14.7,9.6-23.1,9.6s-16.7-3.2-23.1-9.6L277.7,111.5v345.8

@@ -108,7 +108,7 @@ namespace FreeMarketOne.ServerCore
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
 
-                SearchIndexer = new SearchIndexer(Configuration.FullBaseDirectory, MarketManager);
+                SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory,"SearchIndex").ToString(), MarketManager);
 
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);

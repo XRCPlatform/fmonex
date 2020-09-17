@@ -31,7 +31,8 @@ namespace FreeMarketOne.Search
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
 
             var dir = FSDirectory.Open(indexLocation);
-            var dirTaxonomy = FSDirectory.Open(indexLocation + "/taxonomy/");
+            
+            var dirTaxonomy = FSDirectory.Open(System.IO.Path.Combine(indexLocation, "taxonomy").ToString());
             SearchIndexPath = indexLocation;
             //create an analyzer to process the text
             var analyzer = new StandardAnalyzer(AppLuceneVersion);
@@ -115,7 +116,7 @@ namespace FreeMarketOne.Search
 
             Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
-
+            Writer.Commit();
         }
 
         /// <summary>
@@ -179,6 +180,7 @@ namespace FreeMarketOne.Search
                 Writer.DeleteDocuments(new Term("ID", marketItem.BaseSignature));
             }
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
         }
 
         public void DeleteMarketItemsByBlockHash(string blockHash)
@@ -190,25 +192,23 @@ namespace FreeMarketOne.Search
         {
             Writer.DeleteDocuments(new Term(fieldName, fieldValue));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
         }
 
         public void DeleteAll()
         {
             Writer.DeleteAll();
             Writer.Commit();
-            taxoWriter.Commit();
         }
 
         public void Commit()
         {
             Writer.Commit();
-            taxoWriter.Commit();
         }
 
         public void Dispose()
         {
             Writer.Commit();
-            taxoWriter.Commit();
             Writer.Dispose();
             taxoWriter.Dispose();
         }

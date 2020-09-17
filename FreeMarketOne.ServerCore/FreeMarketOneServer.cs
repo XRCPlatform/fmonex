@@ -43,6 +43,7 @@ namespace FreeMarketOne.ServerCore
         public UserManager UserManager;
         public MarketManager MarketManager;
         public SearchIndexer SearchIndexer;
+        public SearchEngine SearchEngine;
 
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
@@ -109,7 +110,7 @@ namespace FreeMarketOne.ServerCore
                 MarketManager = new MarketManager(Configuration);
 
                 SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory,"SearchIndex").ToString(), MarketManager);
-
+                SearchEngine = new SearchEngine(MarketManager, Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString());
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);
                 var torInitialized = TorProcessManager.Start();

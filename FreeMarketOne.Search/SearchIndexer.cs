@@ -14,10 +14,11 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace FreeMarketOne.Search
 {
-    public class SearchIndexer
+    public class SearchIndexer : IDisposable
     {
         private readonly IndexWriter writer;
         private readonly DirectoryTaxonomyWriter taxoWriter;
@@ -31,7 +32,7 @@ namespace FreeMarketOne.Search
 
             var dir = FSDirectory.Open(indexLocation);
             var dirTaxonomy = FSDirectory.Open(indexLocation + "/taxonomy/");
-
+            SearchIndexPath = indexLocation;
             //create an analyzer to process the text
             var analyzer = new StandardAnalyzer(AppLuceneVersion);
 
@@ -49,11 +50,14 @@ namespace FreeMarketOne.Search
                 return writer;
             }
         }
-       /// <summary>
-       /// Indexes market item for search, includes block hash so that old blocks can be wiped after new genesis
-       /// </summary>
-       /// <param name="marketItem"></param>
-       /// <param name="blockHash"></param>
+
+        public string SearchIndexPath { get; }
+
+        /// <summary>
+        /// Indexes market item for search, includes block hash so that old blocks can be wiped after new genesis
+        /// </summary>
+        /// <param name="marketItem"></param>
+        /// <param name="blockHash"></param>
         public void Index(MarketItem marketItem, string blockHash)
         {
             double pricePerGram = 0F;
@@ -61,15 +65,11 @@ namespace FreeMarketOne.Search
             new DealType().TryGetValue(marketItem.DealType, out string dealTypeString);
             
             //if we are re-running the block and same hash comes again, delete and add it again
-            Writer.DeleteDocuments(new Term("ID", marketItem.Hash));
-            if (!string.IsNullOrEmpty(marketItem.Signature))
-            {
-                Writer.DeleteDocuments(new Term("Signature", marketItem.Signature));
-            }
+            Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
             //if market item has a baseSignature then it's previous version's signature
             //to remove previous versions of document from search we delete by signature
             if (!string.IsNullOrEmpty(marketItem.BaseSignature)) {
-                Writer.DeleteDocuments(new Term("Signature", marketItem.BaseSignature));
+                Writer.DeleteDocuments(new Term("ID", marketItem.BaseSignature));
             }
 
             if (marketItem.WeightInGrams > 0 && marketItem.Price>0) {
@@ -78,7 +78,7 @@ namespace FreeMarketOne.Search
 
             if (marketItem.State == (int)ProductStateEnum.Removed)
             {
-                Writer.DeleteDocuments(new Term("ID", marketItem.Hash));
+                Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
                 Writer.Flush(triggerMerge: true, applyAllDeletes: true);
                 return;
             }
@@ -89,10 +89,10 @@ namespace FreeMarketOne.Search
 
             Document doc = new Document
             {
-                new StringField("ID", marketItem.Hash, Field.Store.YES),
+                new StringField("ID", marketItem.Signature, Field.Store.YES),
                 new StringField("BlockHash", blockHash, Field.Store.NO),
-                new TextField("Title",marketItem.Title,Field.Store.YES),
-                new TextField("Description",marketItem.Description,Field.Store.YES),
+                new TextField("Title",marketItem.Title,Field.Store.NO),
+                new TextField("Description",marketItem.Description,Field.Store.NO),
                 new FacetField("Category",cat.ToString()),
                 new FacetField("Shipping",marketItem.Shipping),
                 new FacetField("DealType",dealTypeString),
@@ -102,7 +102,8 @@ namespace FreeMarketOne.Search
                 new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
                 new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),                
                 new DoubleDocValuesField("PricePerGram", pricePerGram),
-                new DoubleDocValuesField("Price", marketItem.Price)
+                new DoubleDocValuesField("Price", marketItem.Price),
+                new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem))
             };
 
             //append all seller sha-hashes to a single multivalue field so that we can find by any.
@@ -170,16 +171,12 @@ namespace FreeMarketOne.Search
 
         public void DeleteMarketItem(MarketItem marketItem)
         {
-            Writer.DeleteDocuments(new Term("ID", marketItem.Hash));
-            if (!string.IsNullOrEmpty(marketItem.Signature))
-            {
-                Writer.DeleteDocuments(new Term("Signature", marketItem.Signature));
-            }
+            Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
             //if market item has a baseSignature then it's previous version's signature
             //to remove previous versions of document from search we delete by signature
             if (!string.IsNullOrEmpty(marketItem.BaseSignature))
             {
-                Writer.DeleteDocuments(new Term("Signature", marketItem.BaseSignature));
+                Writer.DeleteDocuments(new Term("ID", marketItem.BaseSignature));
             }
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
         }
@@ -206,6 +203,14 @@ namespace FreeMarketOne.Search
         {
             Writer.Commit();
             taxoWriter.Commit();
+        }
+
+        public void Dispose()
+        {
+            Writer.Commit();
+            taxoWriter.Commit();
+            Writer.Dispose();
+            taxoWriter.Dispose();
         }
     }
 }

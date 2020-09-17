@@ -26,7 +26,7 @@ namespace FreeMarketOne.Search.Tests
         {
             MarketItem marketItem = new MarketItem
             {
-                Hash = "A",
+                Signature = "A",
                 CreatedUtc = DateTime.UtcNow,
                 DealType = 3,
                 Category = 2,
@@ -42,6 +42,8 @@ namespace FreeMarketOne.Search.Tests
 
             var marketManager = Substitute.For<IMarketManager>();
             SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+            search.DeleteAll();
+            search.Commit();
 
             search.Index(marketItem,"block-hash");
             search.Commit();
@@ -77,7 +79,8 @@ namespace FreeMarketOne.Search.Tests
 
             indexReader.Dispose();
             taxoReader.Dispose();
-           // search.DeleteAll();
+            search.DeleteAll();
+            search.Dispose();
 
         }
 
@@ -87,7 +90,7 @@ namespace FreeMarketOne.Search.Tests
         {
             MarketItem marketItem = new MarketItem
             {
-                Hash = "A",
+                Signature = "A",
                 CreatedUtc = DateTime.UtcNow,
                 DealType = 1,
                 Category = 2,
@@ -100,7 +103,7 @@ namespace FreeMarketOne.Search.Tests
 
             MarketItem marketItem2 = new MarketItem
             {
-                Hash = "B",
+                Signature = "B",
                 CreatedUtc = DateTime.UtcNow,
                 DealType = 3,
                 Category = 1,
@@ -113,7 +116,7 @@ namespace FreeMarketOne.Search.Tests
 
             MarketItem marketItem3 = new MarketItem
             {
-                Hash = "C",
+                Signature = "C",
                 CreatedUtc = DateTime.UtcNow,
                 DealType = 3,
                 Category = 1,
@@ -129,6 +132,8 @@ namespace FreeMarketOne.Search.Tests
 
             var marketManager = Substitute.For<IMarketManager>();
             SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+            search.DeleteAll();
+            search.Commit();
             search.Index(marketItem, "block-hash");
             search.Index(marketItem2, "block-hash");
             search.Index(marketItem3, "block-hash");
@@ -170,7 +175,9 @@ namespace FreeMarketOne.Search.Tests
             Assert.AreEqual(results.Find(x => x.Dim.Equals("Shipping")).LabelValues[0].Value, 2);
             Assert.AreEqual(results.Find(x => x.Dim.Equals("Shipping")).LabelValues[1].Label, "Europe");
             Assert.AreEqual(results.Find(x => x.Dim.Equals("Shipping")).LabelValues[1].Value, 1);
-           // search.DeleteAll();
+            search.DeleteAll();
+            search.Commit();
+            search.Dispose();
         }
 
 
@@ -180,7 +187,7 @@ namespace FreeMarketOne.Search.Tests
             
             MarketItem marketItem = new MarketItem
             {
-                Hash = "F",
+                Signature = "F",
                 CreatedUtc = DateTime.UtcNow,
                 DealType = 1,
                 Category = 4,
@@ -197,7 +204,7 @@ namespace FreeMarketOne.Search.Tests
 
             MarketItem marketItem2 = new MarketItem
             {
-                Hash = "B",
+                Signature = "B",
                 CreatedUtc = DateTime.UtcNow,
                 DealType = 3,
                 Category = 1,
@@ -210,7 +217,7 @@ namespace FreeMarketOne.Search.Tests
 
             MarketItem marketItem3 = new MarketItem
             {
-                Hash = "C",
+                Signature = "C",
                 CreatedUtc = DateTime.UtcNow,
                 DealType = 3,
                 Category = 1,
@@ -226,6 +233,8 @@ namespace FreeMarketOne.Search.Tests
             var marketManager = Substitute.For<IMarketManager>();
 
             SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+            search.DeleteAll();
+            search.Commit();
             search.Index(marketItem, "block-hash");
             search.Index(marketItem2, "block-hash");
             search.Index(marketItem3, "block-hash");
@@ -257,11 +266,12 @@ namespace FreeMarketOne.Search.Tests
           
             int docId = hits[0].Doc;
             Document d = searcher.Doc(docId);
-            Assert.AreEqual("1oz Baird & Co Minted Rhodium Bar", d.Get("Title"));
+            Assert.AreEqual(d.Get("ID"), "F");
             Assert.AreEqual(3, hits.Length);
 
             indexReader.Dispose();
-           
+            search.Dispose();
+
         }
     }
 }

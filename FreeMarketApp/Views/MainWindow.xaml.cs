@@ -7,6 +7,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Pages;
+using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
@@ -19,6 +20,7 @@ namespace FreeMarketApp.Views
 {
     public class MainWindow : WindowBase
     {
+        private SearchEngine searchEngine;
         public MainWindow()
         {
             Application.Current.Styles.Add(ThemeHelper.GetTheme());
@@ -28,7 +30,6 @@ namespace FreeMarketApp.Views
             if (FreeMarketOneServer.Current.UserManager != null)
             {
                 FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
-
                 var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
                 if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
@@ -81,6 +82,10 @@ namespace FreeMarketApp.Views
 
         public void ButtonSearch_Click(object sender, RoutedEventArgs args)
         {
+            var searchField = this.FindControl<TextBox>("SearchField");
+            string searchText = searchField.Text;
+            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var result = engine.Search(engine.ParseQuery(searchText));
             PagesHelper.Switch(this, SearchResultsPage.Instance);
         }
 

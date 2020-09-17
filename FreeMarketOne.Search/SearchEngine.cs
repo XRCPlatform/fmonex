@@ -30,7 +30,7 @@ namespace FreeMarketOne.Search
         public SearchEngine(IMarketManager marketChainManager, string searchIndexBasePath, int hitsPerPage = 20)
         {
             string indexDir = searchIndexBasePath;
-            string taxoDir = indexDir + "/taxonomy/";
+            string taxoDir = System.IO.Path.Combine(indexDir,"taxonomy").ToString();
 
             //validate search
             fSDirectory = FSDirectory.Open(indexDir);

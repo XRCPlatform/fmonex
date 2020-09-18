@@ -99,7 +99,7 @@ namespace FreeMarketOne.Search
             Searcher.Search(query, collector);
             TopDocs docs = collector.GetTopDocs(startIndex, HitsPerPage);
             ScoreDoc[] hits = docs.ScoreDocs;
-            
+           
             foreach (var item in hits)
             {
                 var marketItem = JsonConvert.DeserializeObject<MarketItem>(Searcher.Doc(item.Doc).Get("MarketItem"));
@@ -117,7 +117,8 @@ namespace FreeMarketOne.Search
             SearchResult searchResult = new SearchResult
             {
                 Results = list,
-                Facets = facets
+                Facets = facets,
+                TotalHits = docs.TotalHits
             };
             return searchResult;
         }

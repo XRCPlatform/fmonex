@@ -122,5 +122,9 @@ namespace FreeMarketOne.Search
             };
             return searchResult;
         }
+
+        //TODO: SearchBySellerPubleyKey HASH
+        //TODO: Implement filter for faceted navigation
+        //TODO: Relevance ranks biased by Seller Reputation scores. Higher scored stars, more successful high value deals closed, staking deposits and etc could comprise seller reputation.
     }
 }

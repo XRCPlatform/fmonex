@@ -66,7 +66,7 @@ namespace FreeMarketApp.Views.Pages
             var errorCount = 0;
             var errorMessages = new StringBuilder();
 
-            if (string.IsNullOrEmpty(tbUserName.Text) || (tbUserName.Text.Length < 16))
+            if (string.IsNullOrEmpty(tbUserName.Text) || (tbUserName.Text.Length < 10))
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortUserName"));
                 errorCount++;

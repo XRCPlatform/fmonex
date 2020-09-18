@@ -58,7 +58,7 @@ namespace FreeMarketApp.Views.Pages
             var errorCount = 0;
             var errorMessages = new StringBuilder();
 
-            if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 16)
+            if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 10)
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_ShortPassword"));
                 errorCount++;

@@ -154,7 +154,6 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.Initialize(tbPassword.Text, firstUserData);
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
                     PagesHelper.UnlockTools(mainWindow, true);
-                    PagesHelper.SetUserData(_logger, mainWindow);
 
                     if (splashWindow != null)
                     {

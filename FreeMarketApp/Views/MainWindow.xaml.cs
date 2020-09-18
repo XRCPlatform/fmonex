@@ -34,6 +34,8 @@ namespace FreeMarketApp.Views
 
                 if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
                 {
+                    PagesHelper.Log(_logger, "Private Key is valid adding MainPage instance.");
+
                     pcMainContent.Children.Add(MainPage.Instance);
 
                     PagesHelper.UnlockTools(this, true);
@@ -41,6 +43,8 @@ namespace FreeMarketApp.Views
                 }
                 else
                 {
+                    PagesHelper.Log(_logger, "Private Key is not valid. Showing fist or login page.");
+
                     if ((FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
                         || (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
                     {
@@ -92,6 +96,8 @@ namespace FreeMarketApp.Views
 
         private void ServerLoadedEvent(object sender, EventArgs e)
         {
+            PagesHelper.Log(_logger, "ServerLoadedEvent on MainWindow was raised.");
+
             Dispatcher.UIThread.InvokeAsync(() => { 
                 PagesHelper.SetUserData(_logger, this);
             });

@@ -22,6 +22,7 @@ namespace FreeMarketOne.Search
         TaxonomyReader taxoReader = null;
         FacetsConfig facetConfig = null;
         IMarketManager? marketManager = null;
+        private readonly int MAX_RESULTS = 1000;
 
         public int HitsPerPage { get; set; }
         public IndexSearcher Searcher { get; set; }
@@ -90,11 +91,13 @@ namespace FreeMarketOne.Search
 
         }
 
-        public SearchResult Search(Query query)
+        public SearchResult Search(Query query, bool queryFacets = true, int page = 1)
         {
-            List<MarketItem> list = new List<MarketItem>();           
-            
-            TopDocs docs = Searcher.Search(query, HitsPerPage);
+            List<MarketItem> list = new List<MarketItem>();
+            TopScoreDocCollector collector = TopScoreDocCollector.Create(MAX_RESULTS, true);
+            int startIndex = (page - 1) * HitsPerPage;
+            Searcher.Search(query, collector);
+            TopDocs docs = collector.GetTopDocs(startIndex, HitsPerPage);
             ScoreDoc[] hits = docs.ScoreDocs;
             
             foreach (var item in hits)
@@ -106,9 +109,15 @@ namespace FreeMarketOne.Search
                 }
                 //var offer = marketManager.GetOfferBySignature(signature);
             }
+            List<FacetResult> facets = new List<FacetResult>();
+            if (queryFacets)
+            {
+                facets = GetFacetsForQuery(query, null);
+            }
             SearchResult searchResult = new SearchResult
             {
-                Results = list
+                Results = list,
+                Facets = facets
             };
             return searchResult;
         }

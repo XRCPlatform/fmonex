@@ -208,5 +208,46 @@ namespace FreeMarketOne.Search.Tests
 
            
         }
+
+        [TestMethod()]
+        public void SearchEngine_PaginationStartsAtSecondPage()
+        {
+            string indexDir = "./search";
+            var marketManager = Substitute.For<IMarketManager>();
+            SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+            search.DeleteAll();
+            search.Commit();
+            for (int i = 0; i < 100; i++)
+            {
+                MarketItem marketItem = new MarketItem
+                {
+                    Signature = i.ToString(),
+                    CreatedUtc = DateTime.UtcNow,
+                    DealType = 1,
+                    Category = 4,
+                    Price = 10868.4F,
+                    BuyerSignature = "a",
+                    Description = "These one ounce minted rhodium bars are produced by Baird & Co in London, England.Each bar is individually numbered, supplied as new in mint packaging and contains 31.1035 grams of 999.0 fine rhodium.",
+                    Title = "1oz Baird & Co Minted Rhodium Bar",
+                    Shipping = "International",
+                    Fineness = "999 fine rhodium",
+                    Size = "1oz",
+                    WeightInGrams = 28,
+                    Manufacturer = "Baird & Co",
+                };
+                search.Index(marketItem, "block-hash");
+            }
+            search.Commit();
+
+            SearchEngine engine = new SearchEngine(marketManager, indexDir);
+
+            var result = engine.Search(engine.ParseQuery("rhodium bar"), false, 2);
+            var topHit = result.Results[0];
+
+            Assert.AreEqual("21", topHit.Signature);
+            Assert.AreEqual(engine.HitsPerPage, result.Results.Count);
+
+        }
+       
     }
 }

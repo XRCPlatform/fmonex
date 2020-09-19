@@ -80,7 +80,7 @@ namespace FreeMarketOne.Search
             return GetFacetsForQuery(new MatchAllDocsQuery());
         }
 
-        public Query ParseQuery(string phrase)
+        public Query ParseQuery(string phrase, bool includeDims = true)
         {
             LuceneVersion version = LuceneVersion.LUCENE_48;
             StandardAnalyzer analyzer = new StandardAnalyzer(version);
@@ -92,8 +92,11 @@ namespace FreeMarketOne.Search
 
             //facets (removed as facet counts throw indexOutOfRange exception. Looks like the bug in lucene itself. 
             //When fixed, could re-enable or run facet counts on a separate query.
-            //bq.Add(new QueryParser(version, "Category", analyzer).Parse(phrase), Occur.SHOULD);
-            //bq.Add(new QueryParser(version, "Manufacturer", analyzer).Parse(phrase), Occur.SHOULD);
+            if (includeDims)
+            {
+                bq.Add(new QueryParser(version, "Category", analyzer).Parse(phrase), Occur.SHOULD);
+                bq.Add(new QueryParser(version, "Manufacturer", analyzer).Parse(phrase), Occur.SHOULD);
+            }
 
             return bq;        
 
@@ -116,6 +119,18 @@ namespace FreeMarketOne.Search
         }
 
     
+        /// <summary>
+        /// This allows performing dimsearch too as long as facet query is not selected, due to bug.
+        /// </summary>
+        /// <param name="queryPhrase"></param>
+        /// <param name="queryFacets"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public SearchResult Search(string queryPhrase, bool queryFacets = true, int page = 1)
+        {
+            var query = ParseQuery(queryPhrase, !queryFacets);
+            return Search(query, queryFacets, page);
+        }
 
         public SearchResult Search(Query query, bool queryFacets = true, int page = 1)
         {
@@ -125,7 +140,7 @@ namespace FreeMarketOne.Search
             Searcher.Search(query, collector);
             TopDocs docs = collector.GetTopDocs(startIndex, HitsPerPage);
             ScoreDoc[] hits = docs.ScoreDocs;
-           
+
             foreach (var item in hits)
             {
                 var marketItem = JsonConvert.DeserializeObject<MarketItem>(Searcher.Doc(item.Doc).Get("MarketItem"));

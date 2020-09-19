@@ -192,7 +192,7 @@ namespace FreeMarketOne.Search.Tests
 
             SearchEngine engine = new SearchEngine(marketManager, indexDir);
 
-            var result = engine.Search(engine.ParseQuery("rhodium bar"));
+            var result = engine.Search("rhodium bar");
             var topHit = result.Results[0];
 
             Assert.AreEqual("1oz Baird & Co Minted Rhodium Bar", topHit.Title);
@@ -278,7 +278,7 @@ namespace FreeMarketOne.Search.Tests
 
             SearchEngine engine = new SearchEngine(marketManager, indexDir);
 
-            var result = engine.Search(engine.ParseQuery("Royal Mint"), true);
+            var result = engine.Search("Royal Mint", false);
             var topHit = result.Results[0];
 
             Assert.AreEqual("1 Kilogram Gold Cast (C)", topHit.Title);
@@ -319,7 +319,7 @@ namespace FreeMarketOne.Search.Tests
 
             SearchEngine engine = new SearchEngine(marketManager, indexDir);
 
-            var result = engine.Search(engine.ParseQuery("rhodium bar"), false, 2);
+            var result = engine.Search("rhodium bar", false, 2);
             var topHit = result.Results[0];
 
             Assert.AreEqual("21", topHit.Signature);
@@ -363,7 +363,7 @@ namespace FreeMarketOne.Search.Tests
             selectors.Add(new Selector("Category", "Rhodium"));
             selectors.Add(new Selector("Manufacturer", "Baird & Co"));
             var query = engine.BuildDrillDown(selectors, null);
-            var result = engine.Search(query, false, 1);
+            var result = engine.Search(query);
        
             Assert.AreEqual(10, result.Results.Count);
 
@@ -405,7 +405,7 @@ namespace FreeMarketOne.Search.Tests
             selectors.Add(new Selector("Category", "Rhodium"));
             selectors.Add(new Selector("Manufacturer", "Baird & Co"));
             var query = engine.BuildDrillDown(selectors, engine.ParseQuery("rhodium bar"));
-            var result = engine.Search(query, false, 1);
+            var result = engine.Search(query);
 
             Assert.AreEqual(10, result.Results.Count);
 
@@ -448,7 +448,7 @@ namespace FreeMarketOne.Search.Tests
             selectors.Add(new Selector("Category", "Rhodium"));
             selectors.Add(new Selector("Manufacturer", "Baird & Co"));
             var query = engine.BuildDrillDown(selectors, engine.ParseQuery("gold"));
-            var result = engine.Search(query, false, 1);
+            var result = engine.Search(query);
 
             Assert.AreEqual(0, result.Results.Count);
 

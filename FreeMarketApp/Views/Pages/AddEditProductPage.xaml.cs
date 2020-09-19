@@ -20,7 +20,7 @@ namespace FreeMarketApp.Views.Pages
 {
     public class AddEditProductPage : UserControl
     {
-        private MarketItemV1 _offer;
+        private MarketItem _offer;
         private ILogger _logger;
 
         private static AddEditProductPage _instance;
@@ -270,6 +270,7 @@ namespace FreeMarketApp.Views.Pages
 
                     FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
                     FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
+                    FreeMarketOneServer.Current.SearchIndexer.Index(_offer,"pending");
 
                     MyProductsPage.Instance = null;
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);

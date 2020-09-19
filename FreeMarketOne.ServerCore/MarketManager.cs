@@ -97,7 +97,7 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(byte[] pubKey)
+        public List<MarketItem> GetAllSellerMarketItemsByPubKeys(byte[] pubKey)
         {
             return GetAllSellerMarketItemsByPubKeys(new List<byte[]> { pubKey });
         }
@@ -107,13 +107,13 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys)
+        public List<MarketItem> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys)
         {
             lock (_locked)
             {
                 _logger.Information(string.Format("GetAllSellerMarketItemsByPubKeys."));
 
-                var result = new List<MarketItemV1>();
+                var result = new List<MarketItem>();
                 var types = new Type[] { typeof(MarketItemV1) };
 
                 var ignoredSignatures = new List<string>();
@@ -226,13 +226,13 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllActiveOffers(MarketCategoryEnum category = MarketCategoryEnum.All)
+        public List<MarketItem> GetAllActiveOffers(MarketCategoryEnum category = MarketCategoryEnum.All)
         {
             lock (_locked)
             {
                 _logger.Information(string.Format("GetAllActiveOffers {0}.", (int)category));
 
-                var result = new List<MarketItemV1>();
+                var result = new List<MarketItem>();
 
                 var types = new Type[] { typeof(MarketItemV1) };
                 var ignoredSignatures = new List<string>();
@@ -324,7 +324,7 @@ namespace FreeMarketOne.ServerCore
         /// <param name="hash"></param>
         /// <param name="signature"></param>
         /// <returns></returns>
-        public MarketItemV1 GetOfferBySignature(string signature)
+        public MarketItem GetOfferBySignature(string signature)
         {
             lock (_locked)
             {
@@ -383,7 +383,7 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        public MarketItemV1 SignMarketData(MarketItemV1 marketData)
+        public MarketItem SignMarketData(MarketItem marketData)
         {
             lock (_locked)
             {

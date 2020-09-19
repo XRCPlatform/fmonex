@@ -196,21 +196,7 @@ namespace FreeMarketOne.Search.Tests
 
            
         }
-        /// <summary>
-        /// TODO: Raise issue to lucene.net team and look for solution
-        /// This test is failing due to bug in FacetCollector it seems. So I have commented out the Search accorss dimentions for now and then it gathers facets but does not match on dim names.
-        ///  Message: 
-        //  Test method FreeMarketOne.Search.Tests.SearchEngineTests.SearchEngine_FindsRhodiumBarBySearchPhraseIncludesManufacturer threw exception: 
-        //  System.IndexOutOfRangeException: Index was outside the bounds of the array.
-        //  Stack Trace: 
-        //  FastTaxonomyFacetCounts.Count(IList`1 matchingDocs)
-        //  FastTaxonomyFacetCounts.ctor(String indexFieldName, TaxonomyReader taxoReader, FacetsConfig config, FacetsCollector fc)
-        //  FastTaxonomyFacetCounts.ctor(TaxonomyReader taxoReader, FacetsConfig config, FacetsCollector fc)
-        //  SearchEngine.GetFacetsForQuery(Query query, List`1 FacetFieldNames) line 65
-        //  SearchEngine.GetFacetsForQuery(Query query) line 54
-        //  SearchEngine.Search(Query query, Boolean queryFacets, Int32 page) line 141
-        //  SearchEngineTests.SearchEngine_FindsRhodiumBarBySearchPhraseIncludesManufacturer() line 267
-        /// </summary>
+       
         [TestMethod()]
         public void SearchEngine_FindsRhodiumBarBySearchPhraseIncludesManufacturer()
         {
@@ -268,7 +254,7 @@ namespace FreeMarketOne.Search.Tests
 
             SearchEngine engine = new SearchEngine(marketManager, indexDir);
 
-            var result = engine.Search("Royal Mint", false);
+            var result = engine.Search("Royal Mint", true);
             var topHit = result.Results[0];
 
             Assert.AreEqual("1 Kilogram Gold Cast (C)", topHit.Title);

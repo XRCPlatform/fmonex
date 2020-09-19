@@ -119,6 +119,7 @@ namespace FreeMarketOne.Search
             Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
+            taxoWriter.Commit();
         }
 
         /// <summary>
@@ -154,6 +155,7 @@ namespace FreeMarketOne.Search
             }
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
+            taxoWriter.Commit();
         }
 
         public void DeleteMarketItemsByBlockHash(string blockHash)
@@ -166,17 +168,20 @@ namespace FreeMarketOne.Search
             Writer.DeleteDocuments(new Term(fieldName, fieldValue));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
+            taxoWriter.Commit();
         }
 
         public void DeleteAll()
         {
             Writer.DeleteAll();
             Writer.Commit();
+            taxoWriter.Commit();
         }
 
         public void Commit()
         {
             Writer.Commit();
+            taxoWriter.Commit();
         }
 
         public void Dispose()

@@ -19,14 +19,11 @@ namespace FreeMarketOne.Search
     {
         Directory fSDirectory = null;
         Directory txFSDirectory = null;
-        DirectoryReader indexReader = null;
-        TaxonomyReader taxoReader = null;
         FacetsConfig facetConfig = null;
         IMarketManager? marketManager = null;
         private readonly int MAX_RESULTS = 1000;
 
         public int HitsPerPage { get; set; }
-        public IndexSearcher Searcher { get; set; }
         public List<string> FacetFieldNames { get; set; }
 
         public SearchEngine(IMarketManager marketChainManager, string searchIndexBasePath, int hitsPerPage = 20)
@@ -37,9 +34,6 @@ namespace FreeMarketOne.Search
             //validate search
             fSDirectory = FSDirectory.Open(indexDir);
             txFSDirectory = FSDirectory.Open(taxoDir);
-            indexReader = DirectoryReader.Open(fSDirectory);
-            Searcher = new IndexSearcher(indexReader);
-            taxoReader = new DirectoryTaxonomyReader(txFSDirectory);
             facetConfig = new FacetsConfig();
             HitsPerPage = hitsPerPage;
             marketManager = marketChainManager;
@@ -57,12 +51,14 @@ namespace FreeMarketOne.Search
         {
             FacetsCollector fc = new FacetsCollector();
 
-            Searcher.Search(query, fc);
+            var indexReader = DirectoryReader.Open(fSDirectory);
+            var searcher = new IndexSearcher(indexReader);
+            searcher.Search(query, fc);
 
             List<FacetResult> results = new List<FacetResult>();
+            var taxoReader = new DirectoryTaxonomyReader(txFSDirectory);
 
             Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetConfig, fc);
-            //Facets facets = new TaxonomyFacetCounts(new DocValuesOrdinalsReader(),taxoReader, facetConfig, fc);
 
             foreach (var facet in FacetFieldNames)
             {
@@ -80,7 +76,7 @@ namespace FreeMarketOne.Search
             return GetFacetsForQuery(new MatchAllDocsQuery());
         }
 
-        public Query ParseQuery(string phrase, bool includeDims = true)
+        public Query ParseQuery(string phrase)
         {
             LuceneVersion version = LuceneVersion.LUCENE_48;
             StandardAnalyzer analyzer = new StandardAnalyzer(version);
@@ -90,13 +86,8 @@ namespace FreeMarketOne.Search
             bq.Add(new QueryParser(version, "Title", analyzer).Parse(phrase), Occur.SHOULD);
             bq.Add(new QueryParser(version, "Description", analyzer).Parse(phrase), Occur.SHOULD);
 
-            //facets (removed as facet counts throw indexOutOfRange exception. Looks like the bug in lucene itself. 
-            //When fixed, could re-enable or run facet counts on a separate query.
-            if (includeDims)
-            {
-                bq.Add(new QueryParser(version, "Category", analyzer).Parse(phrase), Occur.SHOULD);
-                bq.Add(new QueryParser(version, "Manufacturer", analyzer).Parse(phrase), Occur.SHOULD);
-            }
+            bq.Add(new QueryParser(version, "Category", analyzer).Parse(phrase), Occur.SHOULD);
+            bq.Add(new QueryParser(version, "Manufacturer", analyzer).Parse(phrase), Occur.SHOULD);
 
             return bq;        
 
@@ -120,7 +111,7 @@ namespace FreeMarketOne.Search
 
     
         /// <summary>
-        /// This allows performing dimsearch too as long as facet query is not selected, due to bug.
+        /// This allows performing dimsearch too.
         /// </summary>
         /// <param name="queryPhrase"></param>
         /// <param name="queryFacets"></param>
@@ -128,7 +119,11 @@ namespace FreeMarketOne.Search
         /// <returns></returns>
         public SearchResult Search(string queryPhrase, bool queryFacets = true, int page = 1)
         {
-            var query = ParseQuery(queryPhrase, !queryFacets);
+            Query query = new MatchAllDocsQuery();
+            if (!string.IsNullOrEmpty(queryPhrase) || !string.IsNullOrWhiteSpace(queryPhrase))
+            {
+                query = ParseQuery(queryPhrase);
+            }            
             return Search(query, queryFacets, page);
         }
 
@@ -137,13 +132,17 @@ namespace FreeMarketOne.Search
             List<MarketItem> list = new List<MarketItem>();
             TopScoreDocCollector collector = TopScoreDocCollector.Create(MAX_RESULTS, true);
             int startIndex = (page - 1) * HitsPerPage;
-            Searcher.Search(query, collector);
+
+            var indexReader = DirectoryReader.Open(fSDirectory);
+            var searcher = new IndexSearcher(indexReader);
+            searcher.Search(query, collector);
+
             TopDocs docs = collector.GetTopDocs(startIndex, HitsPerPage);
             ScoreDoc[] hits = docs.ScoreDocs;
 
             foreach (var item in hits)
             {
-                var marketItem = JsonConvert.DeserializeObject<MarketItem>(Searcher.Doc(item.Doc).Get("MarketItem"));
+                var marketItem = JsonConvert.DeserializeObject<MarketItem>(searcher.Doc(item.Doc).Get("MarketItem"));
                 if (marketItem != null)
                 {
                     list.Add(marketItem);

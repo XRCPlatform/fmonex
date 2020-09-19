@@ -17,6 +17,6 @@ namespace FreeMarketOne.Search
         public int PageSize { get; internal set; }
 
         //currently applied facet filters
-        //current query
+        //add isMyProduct flag?
     }
 }

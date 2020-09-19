@@ -6,10 +6,10 @@ namespace FreeMarketOne.ServerCore
     public interface IMarketManager
     {
         //List<MarketItemV1> GetAllActiveOffers(string category = "All"); 
-        List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(byte[] pubKey);
-        List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys);
+        List<MarketItem> GetAllSellerMarketItemsByPubKeys(byte[] pubKey);
+        List<MarketItem> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys);
         List<byte[]> GetBuyerPubKeyFromMarketItem(MarketItem itemMarket);
-        MarketItemV1 GetOfferBySignature(string signature);
+        MarketItem GetOfferBySignature(string signature);
         List<byte[]> GetSellerPubKeyFromMarketItem(MarketItem itemMarket);
     }
 }

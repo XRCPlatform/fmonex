@@ -2,8 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Styling;
 using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Pages;
@@ -11,18 +9,21 @@ using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace FreeMarketApp.Views
 {
     public class MainWindow : WindowBase
     {
+        private ILogger _logger;
         private SearchEngine searchEngine;
+
         public MainWindow()
         {
+            if (FreeMarketOneServer.Current.Logger != null)
+                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+                            string.Format("{0}.{1}", typeof(MainWindow).Namespace, typeof(MainWindow).Name));
+
             Application.Current.Styles.Add(ThemeHelper.GetTheme());
 
             InitializeComponent();
@@ -34,13 +35,17 @@ namespace FreeMarketApp.Views
 
                 if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
                 {
+                    PagesHelper.Log(_logger, "Private Key is valid adding MainPage instance.");
+
                     pcMainContent.Children.Add(MainPage.Instance);
 
                     PagesHelper.UnlockTools(this, true);
-                    PagesHelper.SetUserData(this);
+                    PagesHelper.SetUserData(_logger, this);
                 }
                 else
                 {
+                    PagesHelper.Log(_logger, "Private Key is not valid. Showing fist or login page.");
+
                     if ((FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
                         || (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
                     {
@@ -96,8 +101,10 @@ namespace FreeMarketApp.Views
 
         private void ServerLoadedEvent(object sender, EventArgs e)
         {
+            PagesHelper.Log(_logger, "ServerLoadedEvent on MainWindow was raised.");
+
             Dispatcher.UIThread.InvokeAsync(() => { 
-                PagesHelper.SetUserData(this);
+                PagesHelper.SetUserData(_logger, this);
             });
         }
 

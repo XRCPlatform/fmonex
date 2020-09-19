@@ -9,7 +9,7 @@
 			<Setter Property="CornerRadius" Value="22" />
 		</Style>
 		<Style Selector="Button:pointerover.user /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#fcfeff" />
+			<Setter Property="BorderBrush" Value="#3a3a3c" />
 			<Setter Property="Background" Value="transparent"/>
 		</Style>
 		<Style Selector="Button:pressed.user /template/ ContentPresenter">
@@ -24,145 +24,145 @@
 			<Setter Property="Padding" Value="20 0 10 0"/>
 			<Setter Property="Margin" Value="15 0 15 2"/>
 			<Setter Property="FontSize" Value="16"/>
-			<Setter Property="Foreground" Value="#000000" />
-			<Setter Property="Background" Value="#ffffff" />
-			<Setter Property="BorderBrush" Value="#ffffff" />
+			<Setter Property="Foreground" Value="#ffffff" />
+			<Setter Property="Background" Value="#000000" />
+			<Setter Property="BorderBrush" Value="#000000" />
 		</Style>
 		<Style Selector="Button.sidebar /template/ ContentPresenter">
 			<Setter Property="CornerRadius" Value="5"/>
 		</Style>
 		<Style Selector="Button:pointerover.sidebar /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#eff0f1" />
-			<Setter Property="Background" Value="#eff0f1" />
+			<Setter Property="BorderBrush" Value="#1c1c1e" />
+			<Setter Property="Background" Value="#1c1c1e" />
 		</Style>
 		<Style Selector="Button:pressed.sidebar /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#f4f3f8" />
-			<Setter Property="Background" Value="#f4f3f8" />
+			<Setter Property="BorderBrush" Value="#363636" />
+			<Setter Property="Background" Value="#363636" />
 		</Style>
 		<Style Selector="Button:disabled.sidebar /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#f4f3f8" />
-			<Setter Property="Background" Value="#f4f3f8" />
+			<Setter Property="BorderBrush" Value="#1c1c1e" />
+			<Setter Property="Background" Value="#1c1c1e" />
 		</Style>
 
 		<!-- Search Button -->
 		<Style Selector="Button.search">
-			<Setter Property="Background" Value="#e6e5ea" />
+			<Setter Property="Background" Value="#3a3a3c" />
 		</Style>
 		<Style Selector="Button.search /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#e6e5ea" />
+			<Setter Property="BorderBrush" Value="#3a3a3c" />
 			<Setter Property="CornerRadius" Value="4"/>
 		</Style>
 		<Style Selector="Button:pointerover.search /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#cfced6" />
-			<Setter Property="Background" Value="#cfced6" />
+			<Setter Property="BorderBrush" Value="#545454" />
+			<Setter Property="Background" Value="#545454" />
 		</Style>
 		<Style Selector="Button:pressed.search /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#c3c1c9" />
-			<Setter Property="Background" Value="#c3c1c9" />
+			<Setter Property="BorderBrush" Value="#6b6b6b" />
+			<Setter Property="Background" Value="#6b6b6b" />
 		</Style>
 
 		<!-- My Products Button -->
 		<Style Selector="Button.products">
-			<Setter Property="Background" Value="#f8b400" />
+			<Setter Property="Background" Value="#ff8409" />
 			<Setter Property="Foreground" Value="#ffffff"/>
 		</Style>
 		<Style Selector="Button.products /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#f8b400" />
+			<Setter Property="BorderBrush" Value="#ff8409" />
 			<Setter Property="CornerRadius" Value="3"/>
 		</Style>
 		<Style Selector="Button:pointerover.products /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#edaf09" />
-			<Setter Property="Background" Value="#edaf09" />
+			<Setter Property="BorderBrush" Value="#ef7700" />
+			<Setter Property="Background" Value="#ef7700" />
 		</Style>
 		<Style Selector="Button:pressed.products /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#f8b400" />
-			<Setter Property="Background" Value="#f8b400" />
+			<Setter Property="BorderBrush" Value="#d56b00" />
+			<Setter Property="Background" Value="#d56b00" />
 		</Style>
 
 		<!-- Chat Button -->
 		<Style Selector="Button.chat">
-			<Setter Property="Background" Value="#5c636e" />
+			<Setter Property="Background" Value="#646b76" />
 			<Setter Property="Foreground" Value="#ffffff"/>
 		</Style>
 		<Style Selector="Button.chat /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#5c636e" />
+			<Setter Property="BorderBrush" Value="#646b76" />
 			<Setter Property="CornerRadius" Value="3"/>
 		</Style>
 		<Style Selector="Button:pointerover.chat /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#222831" />
-			<Setter Property="Background" Value="#222831" />
+			<Setter Property="BorderBrush" Value="#4d525a" />
+			<Setter Property="Background" Value="#4d525a" />
 		</Style>
 		<Style Selector="Button:pressed.chat /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#5c636e" />
-			<Setter Property="Background" Value="#5c636e" />
+			<Setter Property="BorderBrush" Value="#41454d" />
+			<Setter Property="Background" Value="#41454d" />
 		</Style>
 
 		<!-- Product Card Button -->
 		<Style Selector="Button.productcard">
-			<Setter Property="Background" Value="#ffffff" />
-			<Setter Property="BorderBrush" Value="#ffffff" />
+			<Setter Property="Background" Value="#000000" />
+			<Setter Property="BorderBrush" Value="#000000" />
 		</Style>
 		<Style Selector="Button.productcard /template/ ContentPresenter">
 			<Setter Property="CornerRadius" Value="7"/>
 		</Style>
 		<Style Selector="Button:pointerover.productcard /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#f4f3f8" />
-			<Setter Property="Background" Value="#f4f3f8" />
+			<Setter Property="BorderBrush" Value="#1c1c1e" />
+			<Setter Property="Background" Value="#1c1c1e" />
 		</Style>
 		<Style Selector="Button:pressed.productcard /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#fafafb" />
-			<Setter Property="Background" Value="#fafafb" />
+			<Setter Property="BorderBrush" Value="#363636" />
+			<Setter Property="Background" Value="#363636" />
 		</Style>
 
 		<!-- Main action Button -->
 		<Style Selector="Button.action">
-			<Setter Property="Background" Value="#ffffff" />
-			<Setter Property="BorderBrush" Value="#167efb" />
-			<Setter Property="Foreground" Value="#167efb" />
+			<Setter Property="Background" Value="#000000" />
+			<Setter Property="BorderBrush" Value="#0a84ff" />
+			<Setter Property="Foreground" Value="#0a84ff" />
 		</Style>
 		<Style Selector="Button.action /template/ ContentPresenter">
 			<Setter Property="CornerRadius" Value="20"/>
 		</Style>
 		<Style Selector="Button:pointerover.action /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#167efb" />
-			<Setter Property="Background" Value="#ebefff" />
+			<Setter Property="BorderBrush" Value="#0a84ff" />
+			<Setter Property="Background" Value="#002244" />
 		</Style>
 		<Style Selector="Button:pressed.action /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#167efb" />
-			<Setter Property="Background" Value="#e1e6f7" />
+			<Setter Property="BorderBrush" Value="#0a84ff" />
+			<Setter Property="Background" Value="#000e1d" />
 		</Style>
 
 		<!-- Send Message Button -->
 		<Style Selector="Button.message">
-			<Setter Property="Background" Value="#167efb" />
-			<Setter Property="BorderBrush" Value="#ffffff" />
+			<Setter Property="Background" Value="#0a84ff" />
+			<Setter Property="BorderBrush" Value="#000000" />
 			<Setter Property="Foreground" Value="#ffffff" />
 		</Style>
 		<Style Selector="Button.message /template/ ContentPresenter">
 			<Setter Property="CornerRadius" Value="25"/>
 		</Style>
 		<Style Selector="Button:pointerover.message /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#1176f1" />
-			<Setter Property="Background" Value="#1176f1" />
+			<Setter Property="BorderBrush" Value="#0a84ff" />
+			<Setter Property="Background" Value="#0a84ff" />
 		</Style>
 		<Style Selector="Button:pressed.message /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#0f70e6" />
-			<Setter Property="Background" Value="#0f70e6" />
-		</Style>
-		
-		<!-- Add Photo Button -->
-		<Style Selector="Button.AddPhoto">
-			<Setter Property="Background" Value="#f9f9f9" />
-			<Setter Property="BorderBrush" Value="#167efb" />
-		</Style>
-		
-		<!-- Remove Photo Button -->
-		<Style Selector="Button.AddPhoto">
-			<Setter Property="Background" Value="#f9f9f9" />
-			<Setter Property="BorderBrush" Value="#167efb" />
+			<Setter Property="BorderBrush" Value="#006bd6" />
+			<Setter Property="Background" Value="#006bd6" />
 		</Style>
 
-		
+		<!-- Add Photo Button -->
+		<Style Selector="Button.AddPhoto">
+			<Setter Property="Background" Value="#3a3a3c" />
+			<Setter Property="BorderBrush" Value="#0a84ff" />
+		</Style>
+
+		<!-- Remove Photo Button -->
+		<Style Selector="Button.AddPhoto">
+			<Setter Property="Background" Value="#3a3a3c" />
+			<Setter Property="BorderBrush" Value="#0a84ff" />
+		</Style>
+
+
 		<!-- ELEMENTS -->
 		<Style Selector="Grid.Main">
 			<Setter Property="Background" Value="#000000" />
@@ -170,15 +170,15 @@
 
 		<!-- Main Toolbar -->
 		<Style Selector="Grid.ToolBar">
-			<Setter Property="Background" Value="#f4f3f8" />
+			<Setter Property="Background" Value="#1c1c1e" />
 		</Style>
 
 		<Style Selector="TextBlock.H1">
-			<Setter Property="Foreground" Value="#000000" />
+			<Setter Property="Foreground" Value="#ffffff" />
 		</Style>
 
 		<Style Selector="RadioButton.H1">
-			<Setter Property="Foreground" Value="#000000" />
+			<Setter Property="Foreground" Value="#ffffff" />
 		</Style>
 
 		<Style Selector="TextBlock.H2">
@@ -190,23 +190,23 @@
 		</Style>
 
 		<Style Selector="Path.InactiveStar">
-			<Setter Property="Fill" Value="#FFECECEC" />
+			<Setter Property="Fill" Value="#767680" />
 		</Style>
 
 		<Style Selector="Border.SearchBar">
-			<Setter Property="BorderBrush" Value="#e6e5ea" />
-			<Setter Property="Background" Value="#e6e5ea" />
+			<Setter Property="BorderBrush" Value="#3a3a3c" />
+			<Setter Property="Background" Value="#3a3a3c" />
 		</Style>
 
 		<Style Selector="TextBox.SearchBar">
-			<Setter Property="Foreground" Value="#606060" />
-			<Setter Property="Background" Value="#e6e5ea" />
+			<Setter Property="Foreground" Value="#dadae2" />
+			<Setter Property="Background" Value="#3a3a3c" />
 		</Style>
 
 		<!-- Status Bar -->
 		<Style Selector="Border.StatusBar">
-			<Setter Property="BorderBrush" Value="#ebefff" />
-			<Setter Property="Background" Value="#ebefff" />
+			<Setter Property="BorderBrush" Value="#3a3a3c" />
+			<Setter Property="Background" Value="#3a3a3c" />
 		</Style>
 
 		<Style Selector="Path.StatusBarIconGreen">
@@ -222,65 +222,85 @@
 		</Style>
 
 		<Style Selector="Border.StatusBarIconRed">
-        	<Setter Property="Background" Value="#ff2400" />
-    	</Style>
+			<Setter Property="Background" Value="#ff2400" />
+		</Style>
 
 		<Style Selector="Path.StatusBarIconOrange">
 			<Setter Property="Fill" Value="#ff9234" />
 		</Style>
 
 		<Style Selector="TextBlock.StatusBarText">
-			<Setter Property="Foreground" Value="#606060" />
+			<Setter Property="Foreground" Value="#ffffff" />
 		</Style>
 
 		<Style Selector="Separator.SideBarSeparator">
-			<Setter Property="Background" Value="#eff0f1" />
+			<Setter Property="Background" Value="#2c2c2e" />
 		</Style>
 
 		<Style Selector="Path.BlueIcon">
-			<Setter Property="Fill" Value="#167efb" />
+			<Setter Property="Fill" Value="#0a84ff" />
 		</Style>
-		
+
 		<Style Selector="Path.WhiteIcon">
 			<Setter Property="Fill" Value="#ffffff" />
 		</Style>
 
 		<Style Selector="TextBox.TextBoxBackground">
-			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="Background" Value="#3a3a3c" />
+			<Setter Property="Foreground" Value="#dadae2" />
 		</Style>
 
 		<Style Selector="ComboBox.TextBoxBackground">
-			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="Background" Value="#3a3a3c" />
+			<Setter Property="Foreground" Value="#dadae2" />
 		</Style>
 		
+		<Style Selector="ComboBoxItem.DropDown">
+			<Setter Property="Background" Value="#535356" />
+			<Setter Property="Foreground" Value="#ffffff" />
+		</Style>
+		
+		<Style Selector="ComboBoxItem:pointerover.DropDown /template/ ContentPresenter">
+			<Setter Property="Background" Value="#3a3a3c" />
+		</Style>
+
 		<Style Selector="Border.PhotoPlaceholder">
-			<Setter Property="BorderBrush" Value="#e6e5ea" />
-			<Setter Property="Background" Value="#e6e5ea" />
+			<Setter Property="BorderBrush" Value="#3a3a3c" />
+			<Setter Property="Background" Value="#3a3a3c" />
 		</Style>
-		
+
 		<Style Selector="Border.Notification">
 			<Setter Property="Background" Value="Orange" />
 		</Style>
-		
+
 		<Style Selector="Border.IncomingChatMessage">
-			<Setter Property="Background" Value="#f9f6f7" />
+			<Setter Property="Background" Value="#213348" />
 		</Style>
-		
+
 		<Style Selector="Border.OutcomingChatMessage">
-			<Setter Property="Background" Value="#dee0d9" />
+			<Setter Property="Background" Value="#4a535a" />
 		</Style>
-		
+
 		<Style Selector="Border.ReplyTextbox">
-			<Setter Property="BorderBrush" Value="#848d95" />
-			<Setter Property="Background" Value="#ffffff" />
+			<Setter Property="BorderBrush" Value="#e8e8ed" />
+			<Setter Property="Background" Value="#000000" />
 		</Style>
-		
+
+		<Style Selector="TextBox.ReplyTextbox">
+			<Setter Property="Background" Value="#000000" />
+			<Setter Property="Foreground" Value="#e8e8ed" />
+		</Style>
+
 		<Style Selector="Path.SideBarIcon">
-			<Setter Property="Fill" Value="#4E5C6E" />
+			<Setter Property="Fill" Value="#9e9ea5" />
 		</Style>
-	  
-	  <Style Selector="Border.SideBarIcon">
-			<Setter Property="Background" Value="#4E5C6E" />
+
+		<Style Selector="Border.SideBarIcon">
+			<Setter Property="Background" Value="#9e9ea5" />
+		</Style>
+
+		<Style Selector="Path.FirstRunLogo">
+			<Setter Property="Fill" Value="#fefefe"/>
 		</Style>
 
 </Styles>

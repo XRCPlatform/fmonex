@@ -36,12 +36,14 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         /// User stars
         /// </summary>
         [JsonProperty("t")]
+        public int Stars { get; set; }
 
         /* Rendering Helpers */
         [JsonIgnore]
         public virtual string UserName { get; set; }
 
-        public int Stars { get; set; }
+        [JsonIgnore]
+        public virtual string UserSignatureAndHash { get; set; }
 
         public override string GenerateHash()
         {

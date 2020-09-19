@@ -66,16 +66,32 @@ namespace FreeMarketApp.Views.Pages
             var errorCount = 0;
             var errorMessages = new StringBuilder();
 
-            if (!ValidationHelper.IsTextValid(tbUserName.Text))
+            if (string.IsNullOrEmpty(tbUserName.Text) || (tbUserName.Text.Length < 10))
             {
-                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortUserName"));
                 errorCount++;
             }
-
-            if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
+            else
             {
-                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                if (!ValidationHelper.IsTextValid(tbUserName.Text))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
+                    errorCount++;
+                }
+            }
+
+            if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
+            {
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortDescription"));
                 errorCount++;
+            }
+            else
+            {
+                if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                    errorCount++;
+                }
             }
 
             if (string.IsNullOrEmpty(tbPassword.Text) || string.IsNullOrEmpty(tbPasswordVerify.Text) || tbPassword.Text.Length < 16)
@@ -138,7 +154,6 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.Initialize(tbPassword.Text, firstUserData);
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
                     PagesHelper.UnlockTools(mainWindow, true);
-                    PagesHelper.SetUserData(mainWindow);
 
                     if (splashWindow != null)
                     {

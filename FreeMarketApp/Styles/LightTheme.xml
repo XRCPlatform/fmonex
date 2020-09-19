@@ -283,4 +283,8 @@
 			<Setter Property="Background" Value="#4E5C6E" />
 		</Style>
 
+	<Style Selector="Path.FirstRunLogo">
+		<Setter Property="Fill" Value="#07233d"/>
+	</Style>
+
 </Styles>

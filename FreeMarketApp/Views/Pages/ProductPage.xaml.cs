@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketOne.ServerCore;
 using Serilog;
+using System;
 using System.Linq;
 using static FreeMarketOne.ServerCore.MarketManager;
 
@@ -57,6 +58,29 @@ namespace FreeMarketApp.Views.Pages
             ClearForm();
         }
 
+        public void ButtonSeller_Click(object sender, RoutedEventArgs args)
+        {
+            var signatureAndHash = ((Button)sender).Tag.ToString();
+
+            if (!string.IsNullOrEmpty(signatureAndHash))
+            {
+                PagesHelper.Log(Instance._logger, string.Format("Loading public profile with array {0}", signatureAndHash));
+
+                var mainWindow = PagesHelper.GetParentWindow(this);
+
+                var publicProfilePage = PublicProfilePage.Instance;
+                publicProfilePage.SetReturnTo(ProductPage.Instance);
+
+                var signature = signatureAndHash.Split("|")[0];
+                var hash = signatureAndHash.Split("|")[1];
+                publicProfilePage.LoadUser(signature, hash);
+
+                PagesHelper.Switch(mainWindow, publicProfilePage);
+
+                ClearForm();
+            }
+        }
+
         public void LoadProduct(string signature)
         {
             var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
@@ -71,6 +95,9 @@ namespace FreeMarketApp.Views.Pages
                 var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
                 var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
                 var tbSeller = Instance.FindControl<TextBlock>("TBSeller");
+                var tbSellerStars = Instance.FindControl<TextBlock>("TBSellerStars");
+                var tbSellerReviewsCount = Instance.FindControl<TextBlock>("TBSellerReviewsCount");
+                var btSeller = Instance.FindControl<Button>("BTSeller");
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
@@ -81,7 +108,18 @@ namespace FreeMarketApp.Views.Pages
                 //seller userdata loading
                 var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(offer);
                 var userData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(userPubKey);
-                if (userData != null) tbSeller.Text = userData.UserName;
+                if (userData != null)
+                {
+                    tbSeller.Text = userData.UserName;
+                    btSeller.Tag = string.Format("{0}|{1}", userData.Signature, userData.Hash);
+
+                    var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userPubKey);
+                    var reviewStars = FreeMarketOneServer.Current.UserManager.GetUserReviewStars(reviews);
+                    var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
+
+                    tbSellerStars.Text = reviewStartRounded.ToString();
+                    tbSellerReviewsCount.Text = reviews.Count().ToString();
+                }
 
                 //photos loading
                 if ((offer.Photos != null) && (offer.Photos.Any()))

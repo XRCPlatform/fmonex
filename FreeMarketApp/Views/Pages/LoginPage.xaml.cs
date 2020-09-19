@@ -58,7 +58,7 @@ namespace FreeMarketApp.Views.Pages
             var errorCount = 0;
             var errorMessages = new StringBuilder();
 
-            if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 16)
+            if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 10)
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_ShortPassword"));
                 errorCount++;
@@ -88,7 +88,7 @@ namespace FreeMarketApp.Views.Pages
                     if (FreeMarketOneServer.Current.UserManager.PrivateKeyState != UserManager.PrivateKeyStates.WrongPassword) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
-                        PagesHelper.SetUserData(mainWindow);
+                        PagesHelper.SetUserData(_logger, mainWindow);
                     } 
                     else
                     {

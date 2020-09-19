@@ -135,7 +135,7 @@
 
                           <TextBlock Classes="H2" FontSize="14" VerticalAlignment="Center" Margin="5 0 0 0" Text="From "></TextBlock>
                           <!-- Reviewer Profile Link Binding -->
-                          <Button Classes="action" BorderThickness="0" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonPublicProfile_Click">
+                          <Button Classes="action" BorderThickness="0" Tag="{Binding UserSignatureAndHash}" Name="BTUserPublicProfile" Cursor="Hand" Click="ButtonPublicProfile_Click">
                             <TextBlock FontSize="14" Text="{Binding UserName}"></TextBlock>
                           </Button>
                         </StackPanel>

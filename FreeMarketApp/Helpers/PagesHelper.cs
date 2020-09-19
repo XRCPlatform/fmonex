@@ -1,8 +1,13 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
+using Avalonia.Media.Imaging;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.ServerCore;
+using FreeMarketOne.Skynet;
 using Serilog;
 using Serilog.Events;
+using System;
+using System.Linq;
 
 namespace FreeMarketApp.Helpers
 {
@@ -63,13 +68,41 @@ namespace FreeMarketApp.Helpers
             btPrivateChat.IsEnabled = isUnlocked;
         }
 
-        internal static void SetUserData(Window mainWindow)
+        internal static void SetUserData(ILogger _logger, Window mainWindow)
         {
             var userManager = FreeMarketOneServer.Current.UserManager;
             if ((userManager != null) && (userManager.UserData != null))
             {
                 var tbUserName = mainWindow.FindControl<TextBlock>("TBUserName");
                 tbUserName.Text = userManager.UserData.UserName;
+
+                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userManager.GetCurrentUserPublicKey());
+                
+                if (reviews.Any())
+                {
+                    var reviewStars = userManager.GetUserReviewStars(reviews);
+                    var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
+
+                    var tbStar1 = mainWindow.FindControl<Path>("TBStar1");
+                    var tbStar2 = mainWindow.FindControl<Path>("TBStar2");
+                    var tbStar3 = mainWindow.FindControl<Path>("TBStar3");
+                    var tbStar4 = mainWindow.FindControl<Path>("TBStar4");
+                    var tbStar5 = mainWindow.FindControl<Path>("TBStar5");
+
+                    if (reviewStartRounded >= 1) tbStar1.IsVisible = true;
+                    if (reviewStartRounded >= 2) tbStar2.IsVisible = true;
+                    if (reviewStartRounded >= 3) tbStar3.IsVisible = true;
+                    if (reviewStartRounded >= 4) tbStar4.IsVisible = true;
+                    if (reviewStartRounded >= 5) tbStar5.IsVisible = true;
+                }
+
+                if (!string.IsNullOrEmpty(userManager.UserData.Photo) && (userManager.UserData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX)))
+                {
+                    var iPhoto = mainWindow.FindControl<Image>("IPhoto");
+
+                    var skynetStream = SkynetHelper.DownloadFromSkynet(userManager.UserData.Photo, _logger);
+                    iPhoto.Source = new Bitmap(skynetStream);
+                }
             }
         }
 

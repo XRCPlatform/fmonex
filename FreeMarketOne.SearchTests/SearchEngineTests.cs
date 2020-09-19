@@ -444,7 +444,7 @@ namespace FreeMarketOne.Search.Tests
 
             search1.DeleteAll();
             search1.Commit();
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
   
                 int cat = (i + 1) % 10;
@@ -490,6 +490,46 @@ namespace FreeMarketOne.Search.Tests
             var result = engine.Search(query);
 
             Assert.AreEqual(testcase.Item1.Signature,result.Results[0].Signature);
+
+        }
+
+
+
+        [TestMethod()]
+        public void SearchEngine_SearchBySignature()
+        {
+            search.DeleteAll();
+            search.Commit();
+            for (int i = 0; i < 15; i++)
+            {
+                int cat = (i + 1) % 10;
+                MarketItem marketItem = new MarketItem
+                {
+                    Signature = i.ToString(),
+                    CreatedUtc = DateTime.UtcNow,
+                    DealType = 1,
+                    Category = cat,
+                    Price = 10868.4F,
+                    BuyerSignature = "a",
+                    Description = "These one ounce minted rhodium bars are produced by Baird & Co in London, England.Each bar is individually numbered, supplied as new in mint packaging and contains 31.1035 grams of 999.0 fine rhodium.",
+                    Title = "1oz Baird & Co Minted Rhodium Bar",
+                    Shipping = "International",
+                    Fineness = "999 fine rhodium",
+                    Size = "1oz",
+                    WeightInGrams = 28,
+                    Manufacturer = "Baird & Co",
+                };
+                search.Index(marketItem, "block-hash");
+            }
+            search.Commit();
+
+            SearchEngine engine = new SearchEngine(marketManager, indexDir);
+            string signature = "10";
+            var query = engine.BuildQueryBySignature(signature);
+            var result = engine.Search(query);
+
+            Assert.AreEqual(1, result.Results.Count);
+            Assert.AreEqual(signature, result.Results[0].Signature);
 
         }
 

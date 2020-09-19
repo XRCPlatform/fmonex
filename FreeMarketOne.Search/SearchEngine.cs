@@ -167,8 +167,34 @@ namespace FreeMarketOne.Search
             return searchResult;
         }
 
-        //TODO: SearchBySellerPubleyKey HASH
-        //TODO: Implement filter for faceted navigation
+        /// <summary>
+        /// One of the list of pubkeys will be indexed. We should seek with all to find a right one.
+        /// </summary>
+        /// <param name="sellerPubKeys"></param>
+        /// <returns></returns>
+        public Query BuildQueryBySellerPubKeys(List<byte[]> sellerPubKeys) {
+
+            BooleanQuery bq = new BooleanQuery();
+            var sellerPubKeyHashes = SearchHelper.GenerateSellerPubKeyHashes(sellerPubKeys);
+            foreach (var sellerPubKeyHash in sellerPubKeyHashes)
+            {
+                bq.Add(new TermQuery(new Term("SellerPubKeyHash", sellerPubKeyHash)), Occur.SHOULD);
+            }
+            return bq;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="signature"></param>
+        /// <returns></returns>
+        public Query BuildQueryBySignature(string signature)
+        {
+            return new TermQuery(new Term("ID", signature));
+        }
+
+
         //TODO: Relevance ranks biased by Seller Reputation scores. Higher scored stars, more successful high value deals closed, staking deposits and etc could comprise seller reputation.
     }
 }

@@ -86,7 +86,7 @@ namespace FreeMarketOne.Search
 
             //transform seller pubkeys to sha hashes for simplified search use
             var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
-            List<string> sellerPubKeyHashes = GenerateSellerPubKeyHashes(sellerPubKeys);
+            List<string> sellerPubKeyHashes = SearchHelper.GenerateSellerPubKeyHashes(sellerPubKeys);
 
             Document doc = new Document
             {
@@ -140,35 +140,6 @@ namespace FreeMarketOne.Search
                         }
                     }
                 }
-            }
-        }
-
-        private List<string> GenerateSellerPubKeyHashes(List<byte[]> pubKeys)
-        {
-            List<string> list = new List<string>();
-            if (pubKeys == null)
-            {
-                return list;
-            }
-            foreach (var pubKey in pubKeys)
-            {
-                list.Add(Sha256Hash(pubKey));
-            }
-            return list;
-        }
-
-       //TODO: consider migrating to lower grade hash for speed and disk space efficiency as colisions are irrelevant in this context
-        private static string Sha256Hash(byte[] rawData)
-        {
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(rawData);
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
             }
         }
 

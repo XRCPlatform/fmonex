@@ -432,5 +432,66 @@ namespace FreeMarketOne.Search.Tests
 
         }
 
+
+        [TestMethod()]
+        public void SearchEngine_SearchBySellerPubKeys()
+        {
+            string indexDir2 = "search2";
+            var marketManager1 = Substitute.For<IMarketManager>();
+            var search1 = new SearchIndexer(indexDir2, marketManager1);
+
+            List<ValueTuple<MarketItem, List<byte[]>>> lst = new List<ValueTuple<MarketItem, List<byte[]>>>();
+
+            search1.DeleteAll();
+            search1.Commit();
+            for (int i = 0; i < 2; i++)
+            {
+  
+                int cat = (i + 1) % 10;
+                MarketItem marketItem = new MarketItem
+                {
+                    Signature = i.ToString(),
+                    CreatedUtc = DateTime.UtcNow,
+                    DealType = 1,
+                    Category = cat,
+                    Price = 10868.4F,
+                    BuyerSignature = "a",
+                    Description = "These one ounce minted rhodium bars are produced by Baird & Co in London, England.Each bar is individually numbered, supplied as new in mint packaging and contains 31.1035 grams of 999.0 fine rhodium.",
+                    Title = "1oz Baird & Co Minted Rhodium Bar",
+                    Shipping = "International",
+                    Fineness = "999 fine rhodium",
+                    Size = "1oz",
+                    WeightInGrams = 28,
+                    Manufacturer = "Baird & Co",
+                };
+
+
+                List<byte[]> pubKeys = new List<byte[]>();
+                for (int z = 0; z < 3; z++)
+                {
+                    pubKeys.Add(Guid.NewGuid().ToByteArray());
+                }
+                //setup stub
+                marketManager1.GetSellerPubKeyFromMarketItem(marketItem).Returns(pubKeys);
+
+                var t = (marketItem, pubKeys);
+                lst.Add(t);               
+                
+                //index
+                search1.Index(marketItem, "block-hash");
+            }
+            search1.Commit();
+            search1.Dispose();
+
+            SearchEngine engine = new SearchEngine(marketManager1, indexDir2);
+
+            var testcase = lst[0];
+            var query = engine.BuildQueryBySellerPubKeys(testcase.Item2);
+            var result = engine.Search(query);
+
+            Assert.AreEqual(testcase.Item1.Signature,result.Results[0].Signature);
+
+        }
+
     }
 }

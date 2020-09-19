@@ -102,6 +102,12 @@ namespace FreeMarketApp.Views.Pages
                 var tbTitle = Instance.FindControl<TextBox>("TBTitle");
                 var tbDescription = Instance.FindControl<TextBox>("TBDescription");
                 var tbShipping = Instance.FindControl<TextBox>("TBShipping");
+                
+                var tbManufacturer = this.FindControl<TextBox>("TBManufacturer");
+                var tbFineness = this.FindControl<TextBox>("TBFineness");
+                var tbSize = this.FindControl<TextBox>("TBSize");
+                var tbWeightInGrams = this.FindControl<TextBox>("TBWeightInGrams");
+
                 var tbPrice = Instance.FindControl<TextBox>("TBPrice");
                 var tbPageName = Instance.FindControl<TextBlock>("TBPageName");
 
@@ -113,6 +119,12 @@ namespace FreeMarketApp.Views.Pages
                 tbDescription.Text = _offer.Description;
                 tbShipping.Text = _offer.Shipping;
                 tbPrice.Text = _offer.Price.ToString();
+
+                tbManufacturer.Text = _offer.Manufacturer;
+                tbFineness.Text = _offer.Fineness;
+                tbSize.Text = _offer.Size;
+                tbWeightInGrams.Text = _offer.WeightInGrams.ToString();
+
                 tbPageName.Text = SharedResources.ResourceManager.GetString("AddEditProduct_EditPageName");
 
                 cbCategory.SelectedItem = cbCategory.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.Category.ToString()));
@@ -150,6 +162,12 @@ namespace FreeMarketApp.Views.Pages
                 var tbTitle = this.FindControl<TextBox>("TBTitle");
                 var tbDescription = this.FindControl<TextBox>("TBDescription");
                 var tbShipping = this.FindControl<TextBox>("TBShipping");
+
+                var tbManufacturer = this.FindControl<TextBox>("TBManufacturer");
+                var tbFineness = this.FindControl<TextBox>("TBFineness");
+                var tbSize = this.FindControl<TextBox>("TBSize");
+                var tbWeightInGrams = this.FindControl<TextBox>("TBWeightInGrams");
+
                 var tbPrice = this.FindControl<TextBox>("TBPrice");
                 var cbCategory = this.FindControl<ComboBox>("CBCategory");
                 var cbDealType = this.FindControl<ComboBox>("CBDealType");
@@ -178,11 +196,11 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
-                    {
-                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
-                        errorCount++;
-                    }
+                    //if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
+                    //{
+                    //    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
+                    //    errorCount++;
+                    //}
                 }
                 if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 2))
                 {
@@ -191,11 +209,11 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbShipping.Text))
-                    {
-                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
-                        errorCount++;
-                    }
+                    //if (!ValidationHelper.IsTextValid(tbShipping.Text, true)) //Multiword countries, regions, European Union, United Kingdon, Arab Emitares
+                    //{
+                    //    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
+                    //    errorCount++;
+                    //}
                 }
                 if (string.IsNullOrEmpty(tbPrice.Text) || (tbPrice.Text.Length < 1))
                 {
@@ -207,6 +225,20 @@ namespace FreeMarketApp.Views.Pages
                     if (!ValidationHelper.IsNumberValid(tbPrice.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsPrice"));
+                        errorCount++;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(tbWeightInGrams.Text) || (tbWeightInGrams.Text.Length < 1))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_WeightInGrams"));
+                    errorCount++;
+                }
+                else
+                {
+                    if (!ValidationHelper.IsNumberValid(tbWeightInGrams.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsWeightInGrams"));
                         errorCount++;
                     }
                 }
@@ -237,6 +269,12 @@ namespace FreeMarketApp.Views.Pages
                     _offer.Title = tbTitle.Text;
                     _offer.Description = tbDescription.Text;
                     _offer.Shipping = tbShipping.Text;
+
+                    _offer.Manufacturer = tbManufacturer.Text;
+                    _offer.Fineness = tbFineness.Text;
+                    _offer.Size = tbSize.Text;
+                    _offer.WeightInGrams = long.Parse(tbWeightInGrams.Text);             
+
                     _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
                     _offer.Price = float.Parse(tbPrice.Text.Trim());

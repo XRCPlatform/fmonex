@@ -185,7 +185,7 @@ namespace FreeMarketOne.Search
 
 
         /// <summary>
-        /// 
+        /// Builds query to retrieve market item by Seller Signature (ID)
         /// </summary>
         /// <param name="signature"></param>
         /// <returns></returns>

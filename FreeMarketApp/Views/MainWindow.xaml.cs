@@ -89,8 +89,9 @@ namespace FreeMarketApp.Views
         {
             var searchField = this.FindControl<TextBox>("SearchField");
             string searchText = searchField.Text;
-            var engine = FreeMarketOneServer.Current.SearchEngine;
-            var result = engine.Search(engine.ParseQuery(searchText));
+            SearchResultsPage.ResetInstance();
+            SearchResultsPage.SetSearchPhrase(searchText);
+
             PagesHelper.Switch(this, SearchResultsPage.Instance);
         }
 

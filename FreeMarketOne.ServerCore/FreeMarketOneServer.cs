@@ -109,8 +109,8 @@ namespace FreeMarketOne.ServerCore
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
 
-                SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory,"SearchIndex").ToString(), MarketManager);
-                SearchIndexer.Commit();
+                SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
+
                 SearchEngine = new SearchEngine(MarketManager, Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString());
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);
@@ -143,12 +143,13 @@ namespace FreeMarketOne.ServerCore
                 {
                     _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
                 }
-            } 
+            }
             else
             {
                 _logger.Warning("No user account is necessary to create one.");
             }
         }
+
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {

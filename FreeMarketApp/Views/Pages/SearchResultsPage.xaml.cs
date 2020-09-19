@@ -2,8 +2,12 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.ViewModels;
 using FreeMarketOne.ServerCore;
 using Serilog;
+using System;
+using System.Linq;
+using System.Threading;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -11,6 +15,7 @@ namespace FreeMarketApp.Views.Pages
     {
         private static SearchResultsPage _instance;
         private ILogger _logger;
+        private static string _searchPhrase;
 
         public static SearchResultsPage Instance
         {
@@ -26,9 +31,19 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+        public static void SetSearchPhrase(string searchPhrase = null)
+        {
+            _searchPhrase = searchPhrase;
+        }
+
         public static SearchResultsPage GetInstance()
         {
             return _instance;
+        }
+
+        public static void ResetInstance()
+        {
+            _instance = null;
         }
 
         public SearchResultsPage()
@@ -36,6 +51,20 @@ namespace FreeMarketApp.Views.Pages
             if (FreeMarketOneServer.Current.Logger != null)
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(SearchResultsPage).Namespace, typeof(SearchResultsPage).Name));
+
+            if ((FreeMarketOneServer.Current.MarketManager != null) && (FreeMarketOneServer.Current.UserManager != null))
+            {
+                SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
+
+                PagesHelper.Log(_logger, string.Format("Loading search results from lucene."));
+
+                var engine = FreeMarketOneServer.Current.SearchEngine;
+                var result = engine.Search(_searchPhrase);
+
+                SkynetHelper.PreloadTitlePhotos(result.Results, _logger);                
+
+                DataContext = new SearchResultsPageViewModel(result);
+            }
 
             this.InitializeComponent();
         }
@@ -58,5 +87,7 @@ namespace FreeMarketApp.Views.Pages
 
             PagesHelper.Switch(mainWindow, ProductPage.Instance);
         }
+
+       
     }
 }

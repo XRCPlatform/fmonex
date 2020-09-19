@@ -93,6 +93,8 @@ namespace FreeMarketOne.Search
                 new StringField("ID", marketItem.Signature, Field.Store.YES),
                 new StringField("BlockHash", blockHash, Field.Store.NO),
                 new TextField("Title",marketItem.Title,Field.Store.NO),
+                new TextField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer,Field.Store.NO),
+                new TextField("Category",cat.ToString(),Field.Store.NO),
                 new TextField("Description",marketItem.Description,Field.Store.NO),
                 new FacetField("Category",cat.ToString()),
                 new FacetField("Shipping",marketItem.Shipping),

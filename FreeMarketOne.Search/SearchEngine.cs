@@ -5,6 +5,7 @@ using Lucene.Net.Facet;
 using Lucene.Net.Facet.Taxonomy;
 using Lucene.Net.Facet.Taxonomy.Directory;
 using Lucene.Net.Index;
+using Lucene.Net.Queries;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
@@ -43,22 +44,26 @@ namespace FreeMarketOne.Search
             HitsPerPage = hitsPerPage;
             marketManager = marketChainManager;
             FacetFieldNames = new List<string> { "DealType", "Category", "Shipping", "Fineness", "Manufacturer", "Size", "Sold", "WeightInGrams", "PricePerGram", "Price" };
+            //facetConfig.SetHierarchical("Category", true);
+
         }
 
-        public List<FacetResult> GetFacetsForQuery(Query query, Filter filter)
+        public List<FacetResult> GetFacetsForQuery(Query query)
         {
-            return GetFacetsForQuery(query, filter, FacetFieldNames);
+            return GetFacetsForQuery(query, FacetFieldNames);
         }
 
-        public List<FacetResult> GetFacetsForQuery(Query query, Filter filter, List<string> FacetFieldNames)
+        public List<FacetResult> GetFacetsForQuery(Query query, List<string> FacetFieldNames)
         {
             FacetsCollector fc = new FacetsCollector();
-            Searcher.Search(query, filter, fc);
+
+            Searcher.Search(query, fc);
 
             List<FacetResult> results = new List<FacetResult>();
 
             Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetConfig, fc);
-            
+            //Facets facets = new TaxonomyFacetCounts(new DocValuesOrdinalsReader(),taxoReader, facetConfig, fc);
+
             foreach (var facet in FacetFieldNames)
             {
                 var f = facets.GetTopChildren(10, facet);
@@ -72,7 +77,7 @@ namespace FreeMarketOne.Search
 
         public List<FacetResult> GetFacetsForAllDocuments()
         {
-            return GetFacetsForQuery(new MatchAllDocsQuery(), null);
+            return GetFacetsForQuery(new MatchAllDocsQuery());
         }
 
         public Query ParseQuery(string phrase)
@@ -81,15 +86,36 @@ namespace FreeMarketOne.Search
             StandardAnalyzer analyzer = new StandardAnalyzer(version);
 
             BooleanQuery bq = new BooleanQuery();
-            QueryParser qp = new QueryParser(version, "Title", analyzer);
-            Query query = qp.Parse(phrase);
-            bq.Add(query, Occur.MUST);
-            QueryParser qp1 = new QueryParser(version, "Description", analyzer);
-            Query query1 = qp1.Parse(phrase);
-            bq.Add(query1, Occur.SHOULD);
+   
+            bq.Add(new QueryParser(version, "Title", analyzer).Parse(phrase), Occur.SHOULD);
+            bq.Add(new QueryParser(version, "Description", analyzer).Parse(phrase), Occur.SHOULD);
+
+            //facets (removed as facet counts throw indexOutOfRange exception. Looks like the bug in lucene itself. 
+            //When fixed, could re-enable or run facet counts on a separate query.
+            //bq.Add(new QueryParser(version, "Category", analyzer).Parse(phrase), Occur.SHOULD);
+            //bq.Add(new QueryParser(version, "Manufacturer", analyzer).Parse(phrase), Occur.SHOULD);
+
             return bq;        
 
         }
+
+        public DrillDownQuery BuildDrillDown(List<Selector> selectors, Query baseQuery)
+        {
+            DrillDownQuery drillDownQuery = new DrillDownQuery(facetConfig);
+            if (baseQuery != null)
+            {
+                drillDownQuery = new DrillDownQuery(facetConfig, baseQuery);
+            }
+            
+            foreach (var selector in selectors)
+            {
+                drillDownQuery.Add(selector.Name, selector.Value);
+            }            
+            return drillDownQuery;
+
+        }
+
+    
 
         public SearchResult Search(Query query, bool queryFacets = true, int page = 1)
         {
@@ -112,13 +138,16 @@ namespace FreeMarketOne.Search
             List<FacetResult> facets = new List<FacetResult>();
             if (queryFacets)
             {
-                facets = GetFacetsForQuery(query, null);
+                facets = GetFacetsForQuery(query);
             }
             SearchResult searchResult = new SearchResult
             {
                 Results = list,
                 Facets = facets,
-                TotalHits = docs.TotalHits
+                TotalHits = docs.TotalHits,
+                CurrentPage = page,
+                PageSize = HitsPerPage,
+                CurrentQuery = query
             };
             return searchResult;
         }

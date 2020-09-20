@@ -6,9 +6,9 @@ namespace FreeMarketOne.DataStructure
 {
     public class TestConfiguration : BaseConfiguration
     {
-        private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(60);
-        private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(32);
-        private static readonly TimeSpan _validBlockInterval = TimeSpan.FromDays(30);
+        private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan _validBlockInterval = TimeSpan.FromDays(15);
         private static readonly long _difficulty = 100000;
 
         public TestConfiguration()

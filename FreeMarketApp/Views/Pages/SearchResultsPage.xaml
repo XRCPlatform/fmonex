@@ -19,12 +19,12 @@
 				</Button>
 
 				<!-- Filter By -->
-				<DockPanel HorizontalAlignment="Left" Width="210" Margin="20 36 0 15">
-					<TextBlock Classes="H1" Text="Filter by:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
-					<Button x:Name="ClearFilters" BorderThickness="0" Classes="action" HorizontalAlignment="Right" HorizontalContentAlignment="Right" >
-						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-					</Button>
-				</DockPanel>
+		<DockPanel HorizontalAlignment="Stretch"  Margin="20 36 0 15">
+			<TextBlock Classes="H1" Text="Filter by:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
+			<Button x:Name="ClearFilters" BorderThickness="0" Margin="0 0 20 0" Classes="action" HorizontalAlignment="Right" HorizontalContentAlignment="Right" >
+				<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+			</Button>	
+         </DockPanel>
 
 				<ItemsControl Items="{Binding Facets}">
 					<ItemsControl.ItemTemplate>

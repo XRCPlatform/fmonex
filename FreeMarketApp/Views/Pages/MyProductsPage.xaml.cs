@@ -55,7 +55,9 @@ namespace FreeMarketApp.Views.Pages
 
                 //my own offers or sells
                 var myOffers = FreeMarketOneServer.Current.MarketManager.GetAllSellerMarketItemsByPubKeys(userPubKey);
-                SkynetHelper.PreloadTitlePhotos(myOffers, _logger);
+
+                var skynetHelper = new SkynetHelper();
+                skynetHelper.PreloadTitlePhotos(myOffers, _logger);
 
                 var myOffersActive = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Default);
                 var myOffersSold = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);

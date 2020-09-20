@@ -11,9 +11,9 @@ using System.Net.Http;
 
 namespace FreeMarketApp.Helpers
 {
-    internal static class SkynetHelper
+    internal class SkynetHelper
     {
-        internal static string UploadToSkynet(string localPath, ILogger logger)
+        internal string UploadToSkynet(string localPath, ILogger logger)
         {
             string skylinkUrl = null;
 
@@ -52,7 +52,7 @@ namespace FreeMarketApp.Helpers
             return skylinkUrl;
         }
 
-        internal static Stream DownloadFromSkynet(string skylink, ILogger logger)
+        internal Stream DownloadFromSkynet(string skylink, ILogger logger)
         {
             PagesHelper.Log(logger, string.Format("Skynet Download File: {0}", skylink));
 
@@ -77,7 +77,7 @@ namespace FreeMarketApp.Helpers
             }
         }
 
-        internal static void PreloadTitlePhotos(List<MarketItemV1> offers, ILogger logger)
+        internal void PreloadTitlePhotos(List<MarketItemV1> offers, ILogger logger)
         {
             if (offers.Any())
             {
@@ -89,7 +89,7 @@ namespace FreeMarketApp.Helpers
                         {
                             PagesHelper.Log(logger, string.Format("Skynet Preloading Title File: {0}", offers[i].Photos[0]));
 
-                            var skynetStream = SkynetHelper.DownloadFromSkynet(offers[i].Photos[0], logger);
+                            var skynetStream = DownloadFromSkynet(offers[i].Photos[0], logger);
                             offers[i].PreTitlePhoto = new Bitmap(skynetStream);
                         }
                     }
@@ -97,7 +97,7 @@ namespace FreeMarketApp.Helpers
             }
         }
 
-        internal static void PreloadPhotos(MarketItemV1 offers, ILogger logger)
+        internal void PreloadPhotos(MarketItemV1 offers, ILogger logger)
         {
             if (offers != null)
             {
@@ -105,7 +105,7 @@ namespace FreeMarketApp.Helpers
             }    
         }
 
-        internal static void PreloadPhotos(List<MarketItemV1> offers, ILogger logger)
+        internal void PreloadPhotos(List<MarketItemV1> offers, ILogger logger)
         {
             if (offers.Any())
             {
@@ -121,7 +121,7 @@ namespace FreeMarketApp.Helpers
                             {
                                 PagesHelper.Log(logger, string.Format("Skynet Preloading Title File: {0}", offers[i].Photos[n]));
 
-                                var skynetStream = SkynetHelper.DownloadFromSkynet(offers[i].Photos[n], logger);
+                                var skynetStream = DownloadFromSkynet(offers[i].Photos[n], logger);
                                 offers[i].PrePhotos.Add(new Bitmap(skynetStream));
                             }
                         }

@@ -192,7 +192,8 @@ namespace FreeMarketApp.Views.Pages
                 //photos loading
                 if ((_offer.Photos != null) && (_offer.Photos.Any()))
                 {
-                    SkynetHelper.PreloadPhotos(_offer, Instance._logger);
+                    var skynetHelper = new SkynetHelper();
+                    skynetHelper.PreloadPhotos(_offer, Instance._logger);
 
                     for (int i = 0; i < _offer.Photos.Count; i++)
                     {

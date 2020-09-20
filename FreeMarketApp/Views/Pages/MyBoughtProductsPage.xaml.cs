@@ -50,7 +50,9 @@ namespace FreeMarketApp.Views.Pages
 
                 //my own offers or sells
                 var myBoughtOffers = FreeMarketOneServer.Current.MarketManager.GetAllBuyerMarketItemsByPubKeys(userPubKey);
-                SkynetHelper.PreloadTitlePhotos(myBoughtOffers, _logger);
+
+                var skynetHelper = new SkynetHelper();
+                skynetHelper.PreloadTitlePhotos(myBoughtOffers, _logger);
 
                 DataContext = new MyBoughtProductsPageViewModel(myBoughtOffers);
             }

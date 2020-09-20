@@ -29,5 +29,15 @@ namespace Libplanet.Extensions
         /// </summary>
         /// <returns></returns>
         TimeSpan GetApproxTimeSpanToMineNextBlock();
+
+        /// <summary>
+        /// Valid type of action to accept tx
+        /// </summary>
+        Type ValidTypeOfAction { get; }
+
+        /// <summary>
+        /// Valid items in action to accept tx
+        /// </summary>
+        Type[] ValidTypesOfActionItems { get; }
     }
 }

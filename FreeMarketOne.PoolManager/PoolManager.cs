@@ -278,7 +278,15 @@ namespace FreeMarketOne.PoolManager
         {
             if (actionItem.IsValid() && !_actionItemsList.Exists(mt => mt == actionItem))
             {
-                return true;
+                //Verify type of item in tx
+                if (!((IDefaultBlockPolicy<BaseAction>)_blockChain.Policy).ValidTypesOfActionItems.Contains(actionItem.GetType()))
+                {
+                    return false;
+                } 
+                else
+                {
+                    return true;
+                }
             }
             else
             {
@@ -334,7 +342,7 @@ namespace FreeMarketOne.PoolManager
             }
         }
 
-        public bool PropagateAllActionItemLocal(List<IBaseAction> extraActions = null)
+        public bool PropagateAllActionItemLocal()
         {
             var actions = new List<T>();
             var action = new T();
@@ -343,14 +351,6 @@ namespace FreeMarketOne.PoolManager
             {
                 action.BaseItems.AddRange(_actionItemsList);
                 actions.Add(action);
-
-                if ((extraActions != null) && extraActions.Any())
-                {
-                    foreach (var extraAction in extraActions)
-                    {
-                        actions.Add((T)extraAction);
-                    }
-                }
 
                 var tx = _blockChain.MakeTransaction(_privateKey, actions);
 

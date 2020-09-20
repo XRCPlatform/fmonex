@@ -95,10 +95,8 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            var parent = ((Button)sender).Parent;
-            //var p = ((Avalonia.Controls.Control)((Avalonia.AvaloniaObject)((Avalonia.Controls.Control)parent).Parent).InheritanceParent);
             var p3 = ((Button)sender).Parent.Parent.InteractiveParent;
-            var category = ((DockPanel)p3).Tag.ToString();
+            var category = ((StackPanel)p3).Tag.ToString();
             var filter = ((Button)sender).Tag.ToString();
             Selector selector = new Selector(category, filter);
             var searchResultsPage = SearchResultsPage.Instance;
@@ -113,12 +111,11 @@ namespace FreeMarketApp.Views.Pages
             var engine = FreeMarketOneServer.Current.SearchEngine;
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
             var currentQuery = currentSearchResult.CurrentQuery;
-            Query newQuery = currentQuery;
 
             List<Selector> list = new List<Selector>();
             list.Add(selector);
 
-            newQuery = engine.BuildDrillDown(list, currentQuery);
+            Query newQuery = engine.BuildDrillDown(list, currentQuery);
 
 
             var result = engine.Search(newQuery, true, currentSearchResult.CurrentPage);

@@ -219,5 +219,10 @@ namespace FreeMarketOne.BlockChain.Policy
                 return MinimumDifficulty;
             }
         }
+
+        public TimeSpan GetApproxTimeSpanToMineNextBlock()
+        {
+            return BlockInterval + PoolCheckInterval;
+        }
     }
 }

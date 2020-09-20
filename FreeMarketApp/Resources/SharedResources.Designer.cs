@@ -187,6 +187,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure that you want to buy this product? This step is irreversible. Changes will be propagated in next block (&quot;approx {0} sec&quot;)..
+        /// </summary>
+        internal static string Dialog_Confirmation_BuyProduct {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_BuyProduct", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure that you want to leave this item?.
         /// </summary>
         internal static string Dialog_Confirmation_Cancel {

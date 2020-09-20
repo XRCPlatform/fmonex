@@ -139,8 +139,9 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
+            var approxSpanToNewBlock = FreeMarketOneServer.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             var result = await MessageBox.Show(mainWindow,
-                string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_SaveMyItem"), 300),
+                string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_SaveMyItem"), approxSpanToNewBlock.TotalSeconds),
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                 MessageBox.MessageBoxButtons.YesNo);
 

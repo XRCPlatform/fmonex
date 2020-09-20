@@ -153,7 +153,7 @@
             </Button>
           </StackPanel>
         </StackPanel>
-        <Button HorizontalAlignment="Left" Width="300" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message">Buy Product</Button>
+        <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
       </StackPanel>
     </ScrollViewer>
   </Grid>

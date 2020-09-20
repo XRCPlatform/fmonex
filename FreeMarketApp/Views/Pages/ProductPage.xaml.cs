@@ -3,10 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
+using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
 using System.Linq;
+using static FreeMarketApp.Views.Controls.MessageBox;
 using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
@@ -58,6 +61,25 @@ namespace FreeMarketApp.Views.Pages
             ClearForm();
         }
 
+        public async void ButtonBuy_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+            var signature = ((Button)sender).Tag.ToString();
+
+            var approxSpanToNewBlock = FreeMarketOneServer.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+
+            var result = await MessageBox.Show(mainWindow,
+                string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_BuyProduct"), approxSpanToNewBlock.TotalSeconds),
+                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                MessageBox.MessageBoxButtons.YesNo);
+
+            if (result == MessageBoxResult.Yes)
+            {
+
+                
+            }
+        }
+
         public void ButtonSeller_Click(object sender, RoutedEventArgs args)
         {
             var signatureAndHash = ((Button)sender).Tag.ToString();
@@ -98,12 +120,14 @@ namespace FreeMarketApp.Views.Pages
                 var tbSellerStars = Instance.FindControl<TextBlock>("TBSellerStars");
                 var tbSellerReviewsCount = Instance.FindControl<TextBlock>("TBSellerReviewsCount");
                 var btSeller = Instance.FindControl<Button>("BTSeller");
+                var btBuyButton = Instance.FindControl<Button>("BTBuyButton");
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
                 tbShipping.Text = offer.Shipping;
                 tbPrice.Text = offer.Price.ToString();
                 tbPriceType.Text = ((ProductPriceTypeEnum)offer.PriceType).ToString();
+                btBuyButton.Tag = offer.Signature;
 
                 //seller userdata loading
                 var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(offer);

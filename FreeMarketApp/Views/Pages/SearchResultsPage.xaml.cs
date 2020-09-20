@@ -19,6 +19,7 @@ namespace FreeMarketApp.Views.Pages
         private static SearchResultsPage _instance;
         private ILogger _logger;
         private static string _searchPhrase;
+        private static List<Selector> _appliedFilters = new List<Selector>();
 
         public static SearchResultsPage Instance
         {
@@ -37,6 +38,7 @@ namespace FreeMarketApp.Views.Pages
         public static void SetSearchPhrase(string searchPhrase = null)
         {
             _searchPhrase = searchPhrase;
+            _appliedFilters = new List<Selector>();
         }
 
         public static SearchResultsPage GetInstance()
@@ -47,6 +49,7 @@ namespace FreeMarketApp.Views.Pages
         public static void ResetInstance()
         {
             _instance = null;
+            _appliedFilters = new List<Selector>();
         }
 
         public SearchResultsPage()
@@ -59,17 +62,22 @@ namespace FreeMarketApp.Views.Pages
             {
                 SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
 
-                PagesHelper.Log(_logger, string.Format("Loading search results from lucene."));
-
-                var engine = FreeMarketOneServer.Current.SearchEngine;
-                var result = engine.Search(_searchPhrase);
-
-                SkynetHelper.PreloadTitlePhotos(result.Results, _logger);                
-
-                DataContext = new SearchResultsPageViewModel(result);
+                GetAndRenderQueryResults();
             }
 
             this.InitializeComponent();
+        }
+
+        private void GetAndRenderQueryResults()
+        {
+            PagesHelper.Log(_logger, string.Format("Loading search results from lucene."));
+
+            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var result = engine.Search(_searchPhrase);
+
+            SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+
+            DataContext = new SearchResultsPageViewModel(result);
         }
 
         private void InitializeComponent()
@@ -93,31 +101,37 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonFacet_Click(object sender, RoutedEventArgs args)
         {
-            var mainWindow = PagesHelper.GetParentWindow(this);
-
             var p3 = ((Button)sender).Parent.Parent.InteractiveParent;
             var category = ((StackPanel)p3).Tag.ToString();
             var filter = ((Button)sender).Tag.ToString();
-            Selector selector = new Selector(category, filter);
-            var searchResultsPage = SearchResultsPage.Instance;
-            searchResultsPage.FilterList(selector);
 
-            PagesHelper.Switch(mainWindow, searchResultsPage);
+            Selector selector = new Selector(category, filter);
+
+            var targetItem = _appliedFilters.Find(i => i.Name == selector.Name && i.Value == selector.Value);
+            if (targetItem == null)
+            {
+                _appliedFilters.Add(selector);
+            }
+            else
+            {
+                _appliedFilters.Remove(targetItem);
+            }
+            FilterList();
         }
 
-        private void FilterList(Selector selector)
+        private void FilterList()
         {
-
             var engine = FreeMarketOneServer.Current.SearchEngine;
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
-            var currentQuery = currentSearchResult.CurrentQuery;
+            
+            //current query has currently applied filters embeded, but also has page position and other parameters.
+            //var currentQuery = currentSearchResult.CurrentQuery;
+            
+            //this has page level query and will allow filter management here
+            var query = engine.ParseQuery(_searchPhrase);          
 
-            List<Selector> list = new List<Selector>
-            {
-                selector
-            };
-
-            Query newQuery = engine.BuildDrillDown(list, currentQuery);
+            //compose drildown with accumulated filters in page level list instead of queries
+            Query newQuery = engine.BuildDrillDown(_appliedFilters, query);
 
             var result = engine.Search(newQuery, true, currentSearchResult.CurrentPage);
 
@@ -125,5 +139,34 @@ namespace FreeMarketApp.Views.Pages
             DataContext = new SearchResultsPageViewModel(result);
 
         }
+
+        public void ButtonResetAllFacets_Click(object sender, RoutedEventArgs args)
+        {
+            _appliedFilters = new List<Selector>();
+            FilterList();
+        }
+
+        public void ButtonResetFacet_Click(object sender, RoutedEventArgs args)
+        {
+            string unselectedFilterName = ((Button)sender).Tag.ToString();
+            List<Selector> toBeRemoved = new List<Selector>();
+            foreach (var item in _appliedFilters)
+            {
+                if (item.Name == unselectedFilterName)
+                {
+                    //removing item directly kills enumerator and throws exception
+                    //_appliedFilters.Remove(item);
+                    toBeRemoved.Add(item);
+                    //break; must not break as could be more than one facet per given dimention
+                }
+            }
+            foreach (var item in toBeRemoved)
+            {
+                _appliedFilters.Remove(item);
+            }
+           
+            FilterList();
+        }
+
     }
 }

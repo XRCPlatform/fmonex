@@ -78,6 +78,10 @@ namespace FreeMarketOne.Search
 
         public Query ParseQuery(string phrase)
         {
+            if (string.IsNullOrEmpty(phrase) || string.IsNullOrWhiteSpace(phrase))
+            {
+                return new MatchAllDocsQuery();
+            }
             LuceneVersion version = LuceneVersion.LUCENE_48;
             StandardAnalyzer analyzer = new StandardAnalyzer(version);
 

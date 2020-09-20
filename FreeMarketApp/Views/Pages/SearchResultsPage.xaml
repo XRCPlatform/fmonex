@@ -29,7 +29,7 @@
 				<ItemsControl Items="{Binding Facets}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<!-- Faucets -->
+							<!-- Facets -->
 							<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch"  Tag="{Binding Dim}">
 								<DockPanel HorizontalAlignment="Stretch">
 									<TextBlock Classes="H1" Margin="20 5 0 0" FontWeight="Bold" Text="{Binding Dim}" DockPanel.Dock="Left"></TextBlock>
@@ -70,11 +70,12 @@
 				<TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
 				<StackPanel Margin="20 0 0 20" Orientation="Horizontal">
 					<TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+
 					<!-- Number of search results -->
-					<TextBlock Classes="H1" FontSize="14" Text="21 "></TextBlock>
+					<TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
 
 					<TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
-					<VirtualizingStackPanel>
+          <VirtualizingStackPanel>
 						
 						<!-- Dropdown menu -->
 						<ComboBox Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" Margin="0 -2 0 0">
@@ -139,21 +140,21 @@
           </ItemsControl>
 
 			<StackPanel Orientation="Horizontal" Margin="20 30 0 30">
-				<Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
+				<Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonPreviousPage_Click" IsVisible="{Binding ShowPreviousPage}" >
 					<StackPanel Orientation="Horizontal">
 						<Path Classes="BlueIcon" Data="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0 c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744	c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"
 							  HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
 						<TextBlock Text="Previous " Margin="5 0 0 0" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
 						<!-- Bind sellected page size -->
-						<TextBlock Text="20" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+						<TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
 					</StackPanel>
 				</Button>
 
-				<Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
+				<Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonNextPage_Click" IsVisible="{Binding ShowNextPage}">
 					<StackPanel Orientation="Horizontal">
 						<TextBlock Text="Next " HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
 						<!-- Bind sellected page size -->
-						<TextBlock Text="20" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
+						<TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
 						<Path Classes="BlueIcon" Data="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284	c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"
 							  HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
 					</StackPanel>

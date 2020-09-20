@@ -112,18 +112,18 @@ namespace FreeMarketApp.Views.Pages
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
             var currentQuery = currentSearchResult.CurrentQuery;
 
-            List<Selector> list = new List<Selector>();
-            list.Add(selector);
+            List<Selector> list = new List<Selector>
+            {
+                selector
+            };
 
             Query newQuery = engine.BuildDrillDown(list, currentQuery);
-
 
             var result = engine.Search(newQuery, true, currentSearchResult.CurrentPage);
 
             SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
             DataContext = new SearchResultsPageViewModel(result);
 
-            //this.InitializeComponent();// not sure if need this again??
         }
     }
 }

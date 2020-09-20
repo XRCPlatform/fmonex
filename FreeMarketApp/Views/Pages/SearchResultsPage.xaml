@@ -18,31 +18,29 @@
             </StackPanel>
           </Button>
 
-          <TextBlock Classes="H1" Text="Sort by category" Margin="20 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
-          <Button Classes="sidebar" Cursor="Hand" HorizontalContentAlignment="Stretch">
-            <DockPanel HorizontalAlignment="Stretch">
-              <TextBlock Text="All results" DockPanel.Dock="Left"></TextBlock>
-              <!-- Binding: number of all search results -->
-              <TextBlock Text="3" FontStyle="Italic" Margin="0 0 4 0" HorizontalAlignment="Right"></TextBlock>
-            </DockPanel>
-          </Button>
+          <TextBlock Classes="H1" Text="Filter by" Margin="20 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
+          <ItemsControl Items="{Binding Facets}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <DockPanel HorizontalAlignment="Stretch">
+                    <TextBlock Text="{Binding Dim}" DockPanel.Dock="Left"></TextBlock>
+                    <ItemsControl Items="{Binding LabelValues}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Classes="sidebar" Cursor="Hand" HorizontalContentAlignment="Stretch">
+                            <DockPanel HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding Label} ({Binding Value})" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
+                            </DockPanel>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DockPanel>
 
-          <!-- Binding: category that has some results -->
-          <Button Classes="sidebar" Cursor="Hand" HorizontalContentAlignment="Stretch">
-            <DockPanel HorizontalAlignment="Stretch">
-              <TextBlock Text="Gold" DockPanel.Dock="Left"></TextBlock>
-              <!-- Binding: number of search results for this category -->
-              <TextBlock Text="1" FontStyle="Italic" Margin="0 0 4 0" HorizontalAlignment="Right"></TextBlock>
-            </DockPanel>
-          </Button>
-
-          <!-- Just an example of another button -->
-          <Button Classes="sidebar" Cursor="Hand" HorizontalContentAlignment="Stretch">
-            <DockPanel>
-              <TextBlock Text="Silver" DockPanel.Dock="Left"></TextBlock>
-              <TextBlock Text="2" FontStyle="Italic" Margin="0 0 4 0" HorizontalAlignment="Right"></TextBlock>
-            </DockPanel>
-          </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          
 
         </StackPanel>
       </ScrollViewer>

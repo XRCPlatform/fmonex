@@ -44,8 +44,10 @@
 											<Button Classes="sidebar" MaxWidth="210" Padding="10 0 5 0" Cursor="Hand" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" Tag="{Binding Label}"  Click="ButtonFacet_Click">
 												<DockPanel HorizontalAlignment="Stretch">
                           <StackPanel Orientation="Horizontal">
-													<TextBlock Text="{Binding Label}" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
-                          <TextBlock Text="{Binding Value}" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
+														<TextBlock Text="{Binding Label}" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
+                            <TextBlock Text=" (" HorizontalAlignment="Left" DockPanel.Dock="Left">  </TextBlock>
+                            <TextBlock Text="{Binding Value}" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
+                            <TextBlock Text=")" HorizontalAlignment="Left" DockPanel.Dock="Left">  </TextBlock>
                           </StackPanel>
 												</DockPanel>
 											</Button>

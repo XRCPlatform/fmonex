@@ -3,9 +3,12 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
+using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore;
+using Lucene.Net.Search;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -88,6 +91,42 @@ namespace FreeMarketApp.Views.Pages
             PagesHelper.Switch(mainWindow, ProductPage.Instance);
         }
 
-       
+        public void ButtonFacet_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            var parent = ((Button)sender).Parent;
+            //var p = ((Avalonia.Controls.Control)((Avalonia.AvaloniaObject)((Avalonia.Controls.Control)parent).Parent).InheritanceParent);
+            var p3 = ((Button)sender).Parent.Parent.InteractiveParent;
+            var category = ((DockPanel)p3).Tag.ToString();
+            var filter = ((Button)sender).Tag.ToString();
+            Selector selector = new Selector(category, filter);
+            var searchResultsPage = SearchResultsPage.Instance;
+            searchResultsPage.FilterList(selector);
+
+            PagesHelper.Switch(mainWindow, searchResultsPage);
+        }
+
+        private void FilterList(Selector selector)
+        {
+
+            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
+            var currentQuery = currentSearchResult.CurrentQuery;
+            Query newQuery = currentQuery;
+
+            List<Selector> list = new List<Selector>();
+            list.Add(selector);
+
+            newQuery = engine.BuildDrillDown(list, currentQuery);
+
+
+            var result = engine.Search(newQuery, true, currentSearchResult.CurrentPage);
+
+            SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+            DataContext = new SearchResultsPageViewModel(result);
+
+            //this.InitializeComponent();// not sure if need this again??
+        }
     }
 }

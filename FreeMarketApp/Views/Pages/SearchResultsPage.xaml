@@ -8,48 +8,76 @@
              x:Class="FreeMarketApp.Views.Pages.SearchResultsPage">
 
     <Grid Margin="0" Classes="Main">
-      <!-- SIDEBAR -->
-      <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
-        <StackPanel x:Name="SideBar" Orientation="Vertical">
-          <Button x:Name="BackButton" Cursor="Hand" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click">
-            <StackPanel Orientation="Horizontal">
-              <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
-              <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
-            </StackPanel>
-          </Button>
+		<!-- SIDEBAR -->
+		<ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,40" Width="250">
+			<StackPanel x:Name="SideBar" Orientation="Vertical">
+				<Button x:Name="BackButton" Cursor="Hand" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click">
+					<StackPanel Orientation="Horizontal">
+						<Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
+						<TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
+					</StackPanel>
+				</Button>
 
-          <TextBlock Classes="H1" Text="Filter by" Margin="20 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
-          <ItemsControl Items="{Binding Facets}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <DockPanel HorizontalAlignment="Stretch">
-                    <TextBlock Text="{Binding Dim}" DockPanel.Dock="Left"></TextBlock>
-                    <ItemsControl Items="{Binding LabelValues}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Button Classes="sidebar" Cursor="Hand" HorizontalContentAlignment="Stretch">
-                            <DockPanel HorizontalAlignment="Stretch">
-                            <TextBlock Text="{Binding Label} ({Binding Value})" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
-                            </DockPanel>
-                          </Button>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </DockPanel>
+				<!-- Filter By -->
+				<DockPanel HorizontalAlignment="Left" Width="210" Margin="20 36 0 15">
+					<TextBlock Classes="H1" Text="Filter by:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
+					<Button x:Name="ClearFilters" BorderThickness="0" Classes="action" HorizontalAlignment="Right" HorizontalContentAlignment="Right" >
+						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+					</Button>
+				</DockPanel>
 
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          
+				<ItemsControl Items="{Binding Facets}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<!-- Faucets -->
+							<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+								<DockPanel HorizontalAlignment="Stretch">
+									<TextBlock Classes="H1" Margin="20 5 0 0" FontWeight="Bold" Text="{Binding Dim}" DockPanel.Dock="Left"></TextBlock>
+									<Button x:Name="ClearIndividualFilter" BorderThickness="0" Classes="action" Margin="0 0 20 0" HorizontalAlignment="Right" HorizontalContentAlignment="Right" >
+										<TextBlock Text="Clear filter" FontWeight="Bold" FontSize="12" />
+									</Button>
+								</DockPanel>
 
-        </StackPanel>
-      </ScrollViewer>
-      <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
+								<ItemsControl Items="{Binding LabelValues}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate>
+											<Button Classes="sidebar" MaxWidth="210" Padding="10 0 5 0" Cursor="Hand" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch">
+												<DockPanel HorizontalAlignment="Stretch">
+													<TextBlock Text="{Binding Label} ({Binding Value})" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
+												</DockPanel>
+											</Button>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
 
-      <!-- CONTENT AREA -->
-      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
-        <StackPanel HorizontalAlignment="Stretch">
-          <TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" Margin="20 20 20 20" FontSize="28" FontWeight="Bold" />
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+
+			</StackPanel>
+		</ScrollViewer>
+		<Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
+
+		<!-- CONTENT AREA -->
+		<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
+			<StackPanel HorizontalAlignment="Stretch">
+				<TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
+				<StackPanel Margin="20 0 0 20" Orientation="Horizontal">
+					<TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+					<!-- Number of search results -->
+					<TextBlock Classes="H1" FontSize="14" Text="21 "></TextBlock>
+
+					<TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
+					<VirtualizingStackPanel>
+						
+						<!-- Dropdown menu -->
+						<ComboBox Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" Margin="0 -2 0 0">
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
+						</ComboBox>
+					</VirtualizingStackPanel>
+			</StackPanel>
 
           <ItemsControl Items="{Binding Items}">
             <ItemsControl.ItemTemplate>
@@ -105,6 +133,28 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
 
+			<StackPanel Orientation="Horizontal" Margin="20 30 0 30">
+				<Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
+					<StackPanel Orientation="Horizontal">
+						<Path Classes="BlueIcon" Data="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0 c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744	c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"
+							  HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+						<TextBlock Text="Previous " Margin="5 0 0 0" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+						<!-- Bind sellected page size -->
+						<TextBlock Text="20" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+					</StackPanel>
+				</Button>
+
+				<Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="Next " HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+						<!-- Bind sellected page size -->
+						<TextBlock Text="20" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
+						<Path Classes="BlueIcon" Data="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284	c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"
+							  HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+					</StackPanel>
+				</Button>
+			</StackPanel>
+			
         </StackPanel>
       </ScrollViewer>
 </Grid>

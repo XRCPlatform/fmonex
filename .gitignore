@@ -331,3 +331,11 @@ ASALocalRun/
 /#tools/CertGen/CertGen/App.config
 /#Tor/WalletWasabi-master
 /#Tor/WalletWasabi-master.zip
+
+# Installer artifacts
+freemarketone*deb
+FreeMarketOne*app
+freemarketone*exe
+FreeMarketOne*dmg
+tmp-tools/
+wine/

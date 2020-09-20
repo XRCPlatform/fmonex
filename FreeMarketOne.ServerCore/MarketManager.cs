@@ -227,7 +227,7 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeys(byte[] pubKey)
+        public List<MarketItem> GetAllBuyerMarketItemsByPubKeys(byte[] pubKey)
         {
             return GetAllBuyerMarketItemsByPubKeys(new List<byte[]> { pubKey });
         }
@@ -237,13 +237,13 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeys(List<byte[]> userPubKeys)
+        public List<MarketItem> GetAllBuyerMarketItemsByPubKeys(List<byte[]> userPubKeys)
         {
             lock (_locked)
             {
                 _logger.Information(string.Format("GetAllBuyerMarketItemsByPubKeys."));
 
-                var result = new List<MarketItemV1>();
+                var result = new List<MarketItem>();
                 var types = new Type[] { typeof(MarketItemV1) };
 
                 var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
@@ -508,7 +508,7 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        public MarketItemV1 SignBuyerMarketData(MarketItemV1 marketData)
+        public MarketItem SignBuyerMarketData(MarketItem marketData)
         {
             lock (_locked)
             {

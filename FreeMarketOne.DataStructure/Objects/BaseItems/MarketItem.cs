@@ -97,6 +97,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Price);
             content.Append(PriceType);
             content.Append(State);
+            content.Append(BuyerSignature);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
@@ -115,7 +116,6 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Category);
             content.Append(Price);
             content.Append(PriceType);
-            content.Append(State);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));

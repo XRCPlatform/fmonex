@@ -61,8 +61,6 @@ namespace FreeMarketApp.Views.Pages
                 var myOffersSold = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);
                 if (myOffersSold.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
 
-
-
                 DataContext = new MyProductsPageViewModel(myOffersActive, myOffersSold);
             }
 

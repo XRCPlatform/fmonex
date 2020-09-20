@@ -82,6 +82,11 @@ namespace FreeMarketApp.Views.Pages
 
                     PagesHelper.Log(_logger, string.Format("Saving remove of product to chain {0}.", signature));
 
+                    await MessageBox.Show(mainWindow,
+                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                        MessageBox.MessageBoxButtons.Ok);
+
                     FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(offer);
                     FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
 

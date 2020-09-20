@@ -272,6 +272,11 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
                     FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
+                    await MessageBox.Show(mainWindow,
+                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                        MessageBox.MessageBoxButtons.Ok);
+
                     MyProductsPage.Instance = null;
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                     ClearForm();

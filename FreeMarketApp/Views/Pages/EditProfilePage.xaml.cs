@@ -191,6 +191,12 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.BasePoolManager.AcceptActionItem(updatedUserData);
                     FreeMarketOneServer.Current.BasePoolManager.PropagateAllActionItemLocal();
 
+                    await MessageBox.Show(mainWindow,
+                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                        MessageBox.MessageBoxButtons.Ok);
+
+                    PagesHelper.Switch(mainWindow, MainPage.Instance);
                     ClearForm();
                 }
                 else

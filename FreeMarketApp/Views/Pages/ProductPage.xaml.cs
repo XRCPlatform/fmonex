@@ -5,7 +5,9 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
+using Libplanet.Extensions;
 using Serilog;
 using System;
 using System.Linq;
@@ -18,6 +20,7 @@ namespace FreeMarketApp.Views.Pages
     {
         private static ProductPage _instance;
         private ILogger _logger;
+        private MarketItemV1 _offer;
 
         public static ProductPage Instance
         {
@@ -75,8 +78,47 @@ namespace FreeMarketApp.Views.Pages
 
             if (result == MessageBoxResult.Yes)
             {
+                //is it my offer?
+                var itemReviewBytes = _offer.ToByteArrayForSign();
+                var offerUserPubKeys = UserPublicKey.Recover(itemReviewBytes, _offer.Signature);
+                var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
 
-                
+                foreach (var itemUserPubKey in offerUserPubKeys)
+                {
+                    if (userPubKey.SequenceEqual(itemUserPubKey))
+                    {
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_YouCantBuyYourOffer")),
+                            SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
+
+                        break;
+                    } 
+                    else
+                    {
+                        //sign market data and generating chain connection
+                        _offer = FreeMarketOneServer.Current.MarketManager.SignBuyerMarketData(_offer);
+
+                        PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));
+
+                        FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
+                        FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
+
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                            SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
+
+                        var chatPage = ChatPage.Instance;
+                        chatPage.LoadChatByProduct(_offer.Signature);
+
+                        PagesHelper.Switch(mainWindow, chatPage);
+
+                        ClearForm();
+
+                        break;
+                    }
+                }
             }
         }
 
@@ -109,7 +151,9 @@ namespace FreeMarketApp.Views.Pages
 
             if (offer != null)
             {
-                PagesHelper.Log(Instance._logger, string.Format("Loading detail of product signature {0}", offer.Signature));
+                _offer = offer;
+
+                PagesHelper.Log(Instance._logger, string.Format("Loading detail of product signature {0}", _offer.Signature));
 
                 var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
                 var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
@@ -122,15 +166,15 @@ namespace FreeMarketApp.Views.Pages
                 var btSeller = Instance.FindControl<Button>("BTSeller");
                 var btBuyButton = Instance.FindControl<Button>("BTBuyButton");
 
-                tbTitle.Text = offer.Title;
-                tbDescription.Text = offer.Description;
-                tbShipping.Text = offer.Shipping;
-                tbPrice.Text = offer.Price.ToString();
-                tbPriceType.Text = ((ProductPriceTypeEnum)offer.PriceType).ToString();
-                btBuyButton.Tag = offer.Signature;
+                tbTitle.Text = _offer.Title;
+                tbDescription.Text = _offer.Description;
+                tbShipping.Text = _offer.Shipping;
+                tbPrice.Text = _offer.Price.ToString();
+                tbPriceType.Text = ((ProductPriceTypeEnum)_offer.PriceType).ToString();
+                btBuyButton.Tag = _offer.Signature;
 
                 //seller userdata loading
-                var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(offer);
+                var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(_offer);
                 var userData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(userPubKey);
                 if (userData != null)
                 {
@@ -146,17 +190,17 @@ namespace FreeMarketApp.Views.Pages
                 }
 
                 //photos loading
-                if ((offer.Photos != null) && (offer.Photos.Any()))
+                if ((_offer.Photos != null) && (_offer.Photos.Any()))
                 {
-                    SkynetHelper.PreloadPhotos(offer, Instance._logger);
+                    SkynetHelper.PreloadPhotos(_offer, Instance._logger);
 
-                    for (int i = 0; i < offer.Photos.Count; i++)
+                    for (int i = 0; i < _offer.Photos.Count; i++)
                     {
                         var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
                         var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
 
                         spPhoto.IsVisible = true;
-                        iPhoto.Source = offer.PrePhotos[i];
+                        iPhoto.Source = _offer.PrePhotos[i];
                     }
                 }
             }

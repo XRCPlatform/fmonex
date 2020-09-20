@@ -241,6 +241,24 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Now wait for full propagation of this information to network..
+        /// </summary>
+        internal static string Dialog_Confirmation_Waiting {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_Waiting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t buy your offer..
+        /// </summary>
+        internal static string Dialog_Confirmation_YouCantBuyYourOffer {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_YouCantBuyYourOffer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your description contains invalid chars..
         /// </summary>
         internal static string Dialog_FirstRun_InvalidCharsDescription {

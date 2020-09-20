@@ -231,7 +231,7 @@ namespace FreeMarketOne.ServerCore
         /// <returns></returns>
         public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeys(byte[] pubKey)
         {
-            return GetAllSellerMarketItemsByPubKeys(new List<byte[]> { pubKey });
+            return GetAllBuyerMarketItemsByPubKeys(new List<byte[]> { pubKey });
         }
 
         /// <summary>
@@ -262,20 +262,24 @@ namespace FreeMarketOne.ServerCore
                     foreach (var itemPool in poolItems)
                     {
                         var marketData = (MarketItemV1)itemPool;
-                        var itemMarketBytes = marketData.ToByteArrayForSign();
-                        var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
 
-                        foreach (var itemPubKey in itemPubKeys)
+                        if (!string.IsNullOrEmpty(marketData.BuyerSignature))
                         {
-                            foreach (var itemUserPubKey in userPubKeys)
+                            var itemMarketBytes = marketData.ToByteArrayForSign();
+                            var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
+
+                            foreach (var itemPubKey in itemPubKeys)
                             {
-                                if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                foreach (var itemUserPubKey in userPubKeys)
                                 {
-                                    if (marketData.State == (int)ProductStateEnum.Sold)
+                                    if (itemPubKey.SequenceEqual(itemUserPubKey))
                                     {
-                                        _logger.Information(string.Format("Found Sold MarketItem for buyer - item hash {0}.", marketData.Hash));
-                                        marketData.IsInPool = true;
-                                        result.Add(marketData);
+                                        if (marketData.State == (int)ProductStateEnum.Sold)
+                                        {
+                                            _logger.Information(string.Format("Found Sold MarketItem for buyer - item hash {0}.", marketData.Hash));
+                                            marketData.IsInPool = true;
+                                            result.Add(marketData);
+                                        }
                                     }
                                 }
                             }
@@ -298,19 +302,23 @@ namespace FreeMarketOne.ServerCore
                                 if (types.Contains(itemMarket.GetType()))
                                 {
                                     var marketData = (MarketItemV1)itemMarket;
-                                    var itemMarketBytes = itemMarket.ToByteArrayForSign();
-                                    var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
 
-                                    foreach (var itemPubKey in itemPubKeys)
+                                    if (!string.IsNullOrEmpty(marketData.BuyerSignature))
                                     {
-                                        foreach (var itemUserPubKey in userPubKeys)
+                                        var itemMarketBytes = itemMarket.ToByteArrayForSign();
+                                        var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
+
+                                        foreach (var itemPubKey in itemPubKeys)
                                         {
-                                            if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                            foreach (var itemUserPubKey in userPubKeys)
                                             {
-                                                if (marketData.State == (int)ProductStateEnum.Sold)
+                                                if (itemPubKey.SequenceEqual(itemUserPubKey))
                                                 {
-                                                    _logger.Information(string.Format("Found Sold MarketItem for buyer - item hash {0}.", itemMarket.Hash));
-                                                    result.Add(marketData);
+                                                    if (marketData.State == (int)ProductStateEnum.Sold)
+                                                    {
+                                                        _logger.Information(string.Format("Found Sold MarketItem for buyer - item hash {0}.", itemMarket.Hash));
+                                                        result.Add(marketData);
+                                                    }
                                                 }
                                             }
                                         }
@@ -495,6 +503,21 @@ namespace FreeMarketOne.ServerCore
 
                 var bytesToSign = marketData.ToByteArrayForSign();
                 marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+
+                marketData.Hash = marketData.GenerateHash();
+
+                return marketData;
+            }
+        }
+
+        public MarketItemV1 SignBuyerMarketData(MarketItemV1 marketData)
+        {
+            lock (_locked)
+            {
+                marketData.State = (int)MarketManager.ProductStateEnum.Sold;
+
+                var bytesToSign = marketData.ToByteArrayForSign();
+                marketData.BuyerSignature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
 
                 marketData.Hash = marketData.GenerateHash();
 

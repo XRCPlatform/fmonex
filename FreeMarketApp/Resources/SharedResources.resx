@@ -177,6 +177,12 @@
   <data name="Dialog_Confirmation_Title" xml:space="preserve">
     <value>Confirmation</value>
   </data>
+  <data name="Dialog_Confirmation_Waiting" xml:space="preserve">
+    <value>Now wait for full propagation of this information to network.</value>
+  </data>
+  <data name="Dialog_Confirmation_YouCantBuyYourOffer" xml:space="preserve">
+    <value>You can't buy your offer.</value>
+  </data>
   <data name="Dialog_FirstRun_InvalidCharsDescription" xml:space="preserve">
     <value>Your description contains invalid chars.</value>
   </data>

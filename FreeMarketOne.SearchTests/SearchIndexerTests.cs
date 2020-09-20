@@ -24,7 +24,7 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void CorrectlyCountsFacetsOnTermQuery()
         {
-            MarketItem marketItem = new MarketItem
+            MarketItemV1 marketItem = new MarketItemV1
             {
                 Signature = "A",
                 CreatedUtc = DateTime.UtcNow,
@@ -88,7 +88,7 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void CorrectlyCountsCategoryAndDealTypeFacetsWithNoFilters()
         {
-            MarketItem marketItem = new MarketItem
+            MarketItemV1 marketItem = new MarketItemV1
             {
                 Signature = "A",
                 CreatedUtc = DateTime.UtcNow,
@@ -101,7 +101,7 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "International"
             };
 
-            MarketItem marketItem2 = new MarketItem
+            MarketItemV1 marketItem2 = new MarketItemV1
             {
                 Signature = "B",
                 CreatedUtc = DateTime.UtcNow,
@@ -114,7 +114,7 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "International"
             };
 
-            MarketItem marketItem3 = new MarketItem
+            MarketItemV1 marketItem3 = new MarketItemV1
             {
                 Signature = "C",
                 CreatedUtc = DateTime.UtcNow,
@@ -184,8 +184,8 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void FindsRhodiumBarBySearchPhrase()
         {
-            
-            MarketItem marketItem = new MarketItem
+
+            MarketItemV1 marketItem = new MarketItemV1
             {
                 Signature = "F",
                 CreatedUtc = DateTime.UtcNow,
@@ -202,7 +202,7 @@ namespace FreeMarketOne.Search.Tests
                 Manufacturer = "Baird & Co",
             };
 
-            MarketItem marketItem2 = new MarketItem
+            MarketItemV1 marketItem2 = new MarketItemV1
             {
                 Signature = "B",
                 CreatedUtc = DateTime.UtcNow,
@@ -215,7 +215,7 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "International"
             };
 
-            MarketItem marketItem3 = new MarketItem
+            MarketItemV1 marketItem3 = new MarketItemV1
             {
                 Signature = "C",
                 CreatedUtc = DateTime.UtcNow,

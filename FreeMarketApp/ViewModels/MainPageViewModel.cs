@@ -8,11 +8,11 @@ namespace FreeMarketApp.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        public MainPageViewModel(IEnumerable<MarketItem> items)
+        public MainPageViewModel(IEnumerable<MarketItemV1> items)
         {
-            Items = new ObservableCollection<MarketItem>(items);
+            Items = new ObservableCollection<MarketItemV1>(items);
         }
 
-        public ObservableCollection<MarketItem> Items { get; set; }
+        public ObservableCollection<MarketItemV1> Items { get; set; }
     }
 }

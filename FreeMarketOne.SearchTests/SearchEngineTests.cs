@@ -29,7 +29,7 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void SearchEngine_CorrectlyCountsFacetsOnTermQuery()
         {
-            MarketItem marketItem = new MarketItem
+            MarketItemV1 marketItem = new MarketItemV1
             {
                 Signature = "A",
                 CreatedUtc = DateTime.UtcNow,
@@ -65,7 +65,7 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void SearchEngine_CorrectlyCountsCategoryAndDealTypeFacetsWithNoFilters()
         {
-            MarketItem marketItem = new MarketItem
+            MarketItemV1 marketItem = new MarketItemV1
             {
                 Signature = "A",
                 CreatedUtc = DateTime.UtcNow,
@@ -78,7 +78,7 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "International"
             };
 
-            MarketItem marketItem2 = new MarketItem
+            MarketItemV1 marketItem2 = new MarketItemV1
             {
                 Signature = "B",
                 CreatedUtc = DateTime.UtcNow,
@@ -91,7 +91,7 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "International"
             };
 
-            MarketItem marketItem3 = new MarketItem
+            MarketItemV1 marketItem3 = new MarketItemV1
             {
                 Signature = "C",
                 CreatedUtc = DateTime.UtcNow,
@@ -134,8 +134,8 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void SearchEngine_FindsRhodiumBarBySearchPhrase()
         {
-            
-            MarketItem marketItem = new MarketItem
+
+            MarketItemV1 marketItem = new MarketItemV1
             {
                 Signature = "F",
                 CreatedUtc = DateTime.UtcNow,
@@ -152,7 +152,7 @@ namespace FreeMarketOne.Search.Tests
                 Manufacturer = "Baird & Co",
             };
 
-            MarketItem marketItem2 = new MarketItem
+            MarketItemV1 marketItem2 = new MarketItemV1
             {
                 Signature = "B",
                 CreatedUtc = DateTime.UtcNow,
@@ -165,7 +165,7 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "International"
             };
 
-            MarketItem marketItem3 = new MarketItem
+            MarketItemV1 marketItem3 = new MarketItemV1
             {
                 Signature = "C",
                 CreatedUtc = DateTime.UtcNow,
@@ -201,7 +201,7 @@ namespace FreeMarketOne.Search.Tests
         public void SearchEngine_FindsRhodiumBarBySearchPhraseIncludesManufacturer()
         {
 
-            MarketItem marketItem = new MarketItem
+            MarketItemV1 marketItem = new MarketItemV1
             {
                 Signature = "F",
                 CreatedUtc = DateTime.UtcNow,
@@ -218,7 +218,7 @@ namespace FreeMarketOne.Search.Tests
                 Manufacturer = "Baird & Co",
             };
 
-            MarketItem marketItem2 = new MarketItem
+            MarketItemV1 marketItem2 = new MarketItemV1
             {
                 Signature = "B",
                 CreatedUtc = DateTime.UtcNow,
@@ -231,7 +231,7 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "International"
             };
 
-            MarketItem marketItem3 = new MarketItem
+            MarketItemV1 marketItem3 = new MarketItemV1
             {
                 Signature = "C",
                 CreatedUtc = DateTime.UtcNow,
@@ -270,7 +270,7 @@ namespace FreeMarketOne.Search.Tests
             search.Commit();
             for (int i = 0; i < 100; i++)
             {
-                MarketItem marketItem = new MarketItem
+                MarketItemV1 marketItem = new MarketItemV1
                 {
                     Signature = i.ToString(),
                     CreatedUtc = DateTime.UtcNow,
@@ -308,7 +308,7 @@ namespace FreeMarketOne.Search.Tests
             for (int i = 0; i < 100; i++)
             {
                 int cat = (i + 1) % 10;
-                MarketItem marketItem = new MarketItem
+                MarketItemV1 marketItem = new MarketItemV1
                 {
                     Signature = i.ToString(),
                     CreatedUtc = DateTime.UtcNow,
@@ -347,7 +347,7 @@ namespace FreeMarketOne.Search.Tests
             for (int i = 0; i < 100; i++)
             {
                 int cat = (i + 1) % 10;
-                MarketItem marketItem = new MarketItem
+                MarketItemV1 marketItem = new MarketItemV1
                 {
                     Signature = i.ToString(),
                     CreatedUtc = DateTime.UtcNow,
@@ -387,7 +387,7 @@ namespace FreeMarketOne.Search.Tests
             for (int i = 0; i < 100; i++)
             {
                 int cat = (i + 1) % 10;
-                MarketItem marketItem = new MarketItem
+                MarketItemV1 marketItem = new MarketItemV1
                 {
                     Signature = i.ToString(),
                     CreatedUtc = DateTime.UtcNow,
@@ -434,7 +434,7 @@ namespace FreeMarketOne.Search.Tests
             {
   
                 int cat = (i + 1) % 10;
-                MarketItem marketItem = new MarketItem
+                MarketItemV1 marketItem = new MarketItemV1
                 {
                     Signature = i.ToString(),
                     CreatedUtc = DateTime.UtcNow,
@@ -489,7 +489,7 @@ namespace FreeMarketOne.Search.Tests
             for (int i = 0; i < 15; i++)
             {
                 int cat = (i + 1) % 10;
-                MarketItem marketItem = new MarketItem
+                MarketItemV1 marketItem = new MarketItemV1
                 {
                     Signature = i.ToString(),
                     CreatedUtc = DateTime.UtcNow,

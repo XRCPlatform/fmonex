@@ -10,11 +10,11 @@ namespace FreeMarketApp.ViewModels
     {
         public SearchResultsPageViewModel(SearchResult searchResult)
         {
-            Items = new ObservableCollection<MarketItem>((IEnumerable<MarketItem>)searchResult.Results);
+            Items = new ObservableCollection<MarketItemV1>((IEnumerable<MarketItemV1>)searchResult.Results);
             Facets = new ObservableCollection<FacetResult>((IEnumerable<FacetResult>)searchResult.Facets);
             Result = searchResult;
         }
-        public ObservableCollection<MarketItem> Items { get; set; }
+        public ObservableCollection<MarketItemV1> Items { get; set; }
         public ObservableCollection<FacetResult> Facets { get; set; }
         public SearchResult Result { get; set; }
     }

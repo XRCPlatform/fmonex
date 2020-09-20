@@ -59,7 +59,7 @@ namespace FreeMarketOne.Search
         /// </summary>
         /// <param name="marketItem"></param>
         /// <param name="blockHash"></param>
-        public void Index(MarketItem marketItem, string blockHash)
+        public void Index(MarketItemV1 marketItem, string blockHash)
         {
             double pricePerGram = 0F;
             MarketItemCategory cat = (MarketItemCategory)marketItem.Category;
@@ -144,7 +144,7 @@ namespace FreeMarketOne.Search
             }
         }
 
-        public void DeleteMarketItem(MarketItem marketItem)
+        public void DeleteMarketItem(MarketItemV1 marketItem)
         {
             Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
             //if market item has a baseSignature then it's previous version's signature

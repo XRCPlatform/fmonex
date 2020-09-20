@@ -77,7 +77,7 @@ namespace FreeMarketApp.Helpers
             }
         }
 
-        internal static void PreloadTitlePhotos(List<MarketItem> offers, ILogger logger)
+        internal static void PreloadTitlePhotos(List<MarketItemV1> offers, ILogger logger)
         {
             if (offers.Any())
             {
@@ -97,15 +97,15 @@ namespace FreeMarketApp.Helpers
             }
         }
 
-        internal static void PreloadPhotos(MarketItem offers, ILogger logger)
+        internal static void PreloadPhotos(MarketItemV1 offers, ILogger logger)
         {
             if (offers != null)
             {
-                PreloadPhotos(new List<MarketItem>() { offers }, logger);
+                PreloadPhotos(new List<MarketItemV1>() { offers }, logger);
             }    
         }
 
-        internal static void PreloadPhotos(List<MarketItem> offers, ILogger logger)
+        internal static void PreloadPhotos(List<MarketItemV1> offers, ILogger logger)
         {
             if (offers.Any())
             {

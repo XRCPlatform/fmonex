@@ -9,7 +9,7 @@ namespace FreeMarketOne.Search
     public class SearchResult
     {
         int totalHits;
-        public List<MarketItem> Results { get; set; } = new List<MarketItem>();
+        public List<MarketItemV1> Results { get; set; } = new List<MarketItemV1>();
         public List<FacetResult> Facets { get; set; } = new List<FacetResult>();
         public int TotalHits { get => totalHits; set => totalHits = value; }
         public int CurrentPage { get; internal set; }

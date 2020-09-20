@@ -129,7 +129,7 @@ namespace FreeMarketOne.Search
 
         public SearchResult Search(Query query, bool queryFacets = true, int page = 1)
         {
-            List<MarketItem> list = new List<MarketItem>();
+            List<MarketItemV1> list = new List<MarketItemV1>();
             TopScoreDocCollector collector = TopScoreDocCollector.Create(MAX_RESULTS, true);
             int startIndex = (page - 1) * HitsPerPage;
 
@@ -142,7 +142,7 @@ namespace FreeMarketOne.Search
 
             foreach (var item in hits)
             {
-                var marketItem = JsonConvert.DeserializeObject<MarketItem>(searcher.Doc(item.Doc).Get("MarketItem"));
+                var marketItem = JsonConvert.DeserializeObject<MarketItemV1>(searcher.Doc(item.Doc).Get("MarketItem"));
                 if (marketItem != null)
                 {
                     list.Add(marketItem);

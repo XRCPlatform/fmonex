@@ -20,7 +20,7 @@ namespace FreeMarketApp.Views.Pages
     {
         private static ProductPage _instance;
         private ILogger _logger;
-        private MarketItem _offer;
+        private MarketItemV1 _offer;
 
         public static ProductPage Instance
         {

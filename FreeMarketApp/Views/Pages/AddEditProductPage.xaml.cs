@@ -20,7 +20,7 @@ namespace FreeMarketApp.Views.Pages
 {
     public class AddEditProductPage : UserControl
     {
-        private MarketItem _offer;
+        private MarketItemV1 _offer;
         private ILogger _logger;
 
         private static AddEditProductPage _instance;

@@ -162,6 +162,24 @@
 			<Setter Property="BorderBrush" Value="#167efb" />
 		</Style>
 
+		<!-- Pagination Button -->
+		<Style Selector="Button.pagination">
+			<Setter Property="Background" Value="#ebefff" />
+			<Setter Property="BorderBrush" Value="#ebefff" />
+			<Setter Property="Foreground" Value="#167efb" />
+			<Setter Property="Padding" Value="15 5" />
+		</Style>
+		<Style Selector="Button.pagination /template/ ContentPresenter">
+			<Setter Property="CornerRadius" Value="2"/>
+		</Style>
+		<Style Selector="Button:pointerover.pagination /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#167efb" />
+			<Setter Property="Background" Value="#ebefff" />
+		</Style>
+		<Style Selector="Button:pressed.pagination /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#167efb" />
+			<Setter Property="Background" Value="#e1e6f7" />
+		</Style>		
 		
 		<!-- ELEMENTS -->
 		<Style Selector="Grid.Main">

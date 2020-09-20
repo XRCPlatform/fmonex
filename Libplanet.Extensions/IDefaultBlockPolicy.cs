@@ -23,5 +23,11 @@ namespace Libplanet.Extensions
         /// If Blockchain has expiration this value cant be null
         /// </summary>
         TimeSpan? ValidBlockInterval { get; }
+
+        /// <summary>
+        /// Return approx time to mine next block
+        /// </summary>
+        /// <returns></returns>
+        TimeSpan GetApproxTimeSpanToMineNextBlock();
     }
 }

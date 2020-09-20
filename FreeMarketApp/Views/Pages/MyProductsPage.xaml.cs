@@ -52,13 +52,13 @@ namespace FreeMarketApp.Views.Pages
                 PagesHelper.Log(_logger, string.Format("Loading my market offers from chain."));
 
                 var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
-                var myOffers = FreeMarketOneServer.Current.MarketManager.GetAllSellerMarketItemsByPubKeys(userPubKey);
 
+                //my own offers or sells
+                var myOffers = FreeMarketOneServer.Current.MarketManager.GetAllSellerMarketItemsByPubKeys(userPubKey);
                 SkynetHelper.PreloadTitlePhotos(myOffers, _logger);
 
                 var myOffersActive = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Default);
                 var myOffersSold = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);
-
                 if (myOffersSold.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
 
                 DataContext = new MyProductsPageViewModel(myOffersActive, myOffersSold);
@@ -86,6 +86,17 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, AddEditProductPage.Instance);
+
+            ClearForm();
+        }
+
+        public void ButtonBoughtProducts_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, MyBoughtProductsPage.Instance);
+
+            ClearForm();
         }
 
         public void ButtonProduct_Click(object sender, RoutedEventArgs args)
@@ -101,6 +112,22 @@ namespace FreeMarketApp.Views.Pages
                 myProductItemPage.LoadProduct(signature);
 
                 PagesHelper.Switch(mainWindow, myProductItemPage);
+            }
+        }
+
+        public void ButtonSoldProduct_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            var signature = ((Button)sender).Tag.ToString();
+
+            var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
+            if ((marketItem != null) && (!marketItem.IsInPool))
+            {
+                var chatPage = ChatPage.Instance;
+                chatPage.LoadChatByProduct(signature);
+
+                PagesHelper.Switch(mainWindow, chatPage);
             }
         }
 

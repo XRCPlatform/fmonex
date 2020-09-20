@@ -18,7 +18,7 @@
             }
         }
 
-        internal static bool IsTextValid(string text, bool allowSpace = false)
+        internal static bool IsTextValid(string text, bool allowSpaceDotComma = false)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -31,7 +31,9 @@
                     var charTest = text.Substring(i, 1);
                     if (!VALIDCHARS.Contains(charTest))
                     {
-                        if ((charTest == " ") && (allowSpace == true))
+                        if ((charTest == " ") && (allowSpaceDotComma == true) ||
+                            (charTest == ",") && (allowSpaceDotComma == true) ||
+                            (charTest == ".") && (allowSpaceDotComma == true))
                         {
                             //silence
                         }

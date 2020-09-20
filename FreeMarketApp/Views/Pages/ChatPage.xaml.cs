@@ -5,6 +5,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
 using Serilog;
+using System;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -57,6 +58,11 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             MessageBox.Show(mainWindow, "Test", "Test title", MessageBox.MessageBoxButtons.YesNoCancel);
+        }
+
+        internal void LoadChatByProduct(string signature)
+        {
+            throw new NotImplementedException();
         }
     }
 }

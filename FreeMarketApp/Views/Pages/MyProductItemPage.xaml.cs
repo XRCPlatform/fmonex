@@ -63,8 +63,9 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonRemove_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
+            var approxSpanToNewBlock = FreeMarketOneServer.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             var result = await MessageBox.Show(mainWindow,
-                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_RemoveProduct"), 300),
+                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_RemoveProduct"), approxSpanToNewBlock.TotalSeconds),
                  SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                  MessageBox.MessageBoxButtons.YesNo);
 
@@ -80,6 +81,11 @@ namespace FreeMarketApp.Views.Pages
                     offer = FreeMarketOneServer.Current.MarketManager.SignMarketData(offer);
 
                     PagesHelper.Log(_logger, string.Format("Saving remove of product to chain {0}.", signature));
+
+                    await MessageBox.Show(mainWindow,
+                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                        MessageBox.MessageBoxButtons.Ok);
 
                     FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(offer);
                     FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();

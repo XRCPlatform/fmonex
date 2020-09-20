@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using System;
 
@@ -6,9 +7,9 @@ namespace FreeMarketOne.DataStructure
 {
     public class TestConfiguration : BaseConfiguration
     {
-        private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(60);
-        private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(32);
-        private static readonly TimeSpan _validBlockInterval = TimeSpan.FromDays(30);
+        private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan _validBlockInterval = TimeSpan.FromDays(15);
         private static readonly long _difficulty = 100000;
 
         public TestConfiguration()
@@ -35,14 +36,25 @@ namespace FreeMarketOne.DataStructure
                     _blockInterval,
                     _difficulty,
                     _poolCheckInterval,
-                    null);
+                    null,
+                    typeof(BaseAction),
+                    new Type[] { 
+                        typeof(CheckPointMarketDataV1),
+                        typeof(ReviewUserDataV1),
+                        typeof(UserDataV1)
+                    });
 
             this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
                     null,
                     _blockInterval,
                     _difficulty,
                     _poolCheckInterval,
-                    _validBlockInterval);
+                    _validBlockInterval,
+                    typeof(MarketAction),
+                    new Type[] {
+                        typeof(MarketItemV1)
+                    });
+
         }
     }
 }

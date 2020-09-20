@@ -109,18 +109,18 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         public virtual string GenerateHash()
         {
-            StringBuilder content = GetString();
+            StringBuilder content = GetString(true);
             var shaProcessor = new SHAProcessor();
             return shaProcessor.GetSHA256(content.ToString());
         }
 
         public virtual byte[] ToByteArrayForSign()
         {
-            StringBuilder content = GetString();
+            StringBuilder content = GetString(false);
             return Encoding.ASCII.GetBytes(content.ToString());
         }
 
-        private StringBuilder GetString()
+        private StringBuilder GetString(bool includeState)
         {
             var content = new StringBuilder();
             content.Append(nametype);
@@ -131,7 +131,11 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Category);
             content.Append(Price);
             content.Append(PriceType);
-            content.Append(State);
+            if (includeState) 
+            {
+                content.Append(State);
+            }
+            content.Append(BuyerSignature);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));

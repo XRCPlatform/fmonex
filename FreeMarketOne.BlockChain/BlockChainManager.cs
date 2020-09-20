@@ -172,7 +172,7 @@ namespace FreeMarketOne.BlockChain
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
 
-                var peers = GetPeersFromOnionManager();
+                var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
                 _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
 
@@ -204,7 +204,7 @@ namespace FreeMarketOne.BlockChain
             return true;
         }
 
-        private List<Peer> GetPeersFromOnionManager()
+        private List<Peer> GetPeersFromOnionManager(Type typeOfT)
         {
             var peers = new List<Peer>();
 
@@ -218,10 +218,13 @@ namespace FreeMarketOne.BlockChain
 
             foreach (var itemPeer in _onionSeedManager.OnionSeedPeers)
             {
+                var port = itemPeer.PortBlockChainBase;
+
                 if (itemPeer.SecretKeyHex == pubKey) continue;
+                if (typeOfT != typeof(BaseAction)) port = itemPeer.PortBlockChainMaster;
 
                 var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.UrlBlockChain, itemPeer.PortBlockChainBase), default(AppProtocolVersion));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.UrlBlockChain, port), default(AppProtocolVersion));
                 peers.Add(boundPeer);
             }
 

@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
+using Bencodex.Types;
+using FreeMarketOne.DataStructure;
 using Libplanet;
 using Libplanet.Action;
 using Libplanet.Blockchain;
@@ -10,13 +14,22 @@ using Libplanet.Tx;
 
 namespace FreeMarketOne.BlockChain.Policy
 {
+    [Serializable]
+    public class InvalidBlockTypeActionException : InvalidBlockException
+    {
+        public InvalidBlockTypeActionException(string message)
+            : base(message)
+        {
+        }
+    }
+
     /// <summary>
     /// A default implementation of <see cref="IBlockPolicy{T}"/> interface.
     /// </summary>
     /// <typeparam name="T">An <see cref="IAction"/> type.  It should match
     /// to <see cref="Block{T}"/>'s type parameter.</typeparam>
     public class BaseBlockPolicy<T> : IDefaultBlockPolicy<T>
-        where T : IAction, new()
+        where T : IBaseAction, IAction, new()
     {
         private readonly Predicate<Transaction<T>> _doesTransactionFollowPolicy;
 
@@ -45,22 +58,24 @@ namespace FreeMarketOne.BlockChain.Policy
         /// <param name="doesTransactionFollowPolicy">
         /// A predicate that determines if the transaction follows the block policy.
         /// </param>
-        public BaseBlockPolicy(
-            IAction blockAction = null,
-            int blockIntervalMilliseconds = 5000,
-            long minimumDifficulty = 1024,
-            int poolCheckIntervalMilliseconds = 5000,
-            int? validBlockInterval = null,
-            Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
-            : this(
-                blockAction,
-                TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
-                minimumDifficulty,
-                TimeSpan.FromMilliseconds(poolCheckIntervalMilliseconds),
-                (validBlockInterval.HasValue ? TimeSpan.FromMilliseconds(validBlockInterval.Value) : default(TimeSpan?)),
-                doesTransactionFollowPolicy)
-        {
-        }
+        //public BaseBlockPolicy(
+        //    IAction blockAction = null,
+        //    int blockIntervalMilliseconds = 5000,
+        //    long minimumDifficulty = 1024,
+        //    int poolCheckIntervalMilliseconds = 5000,
+        //    int? validBlockInterval = null,
+        //    Type validTypeOfAction = null,
+        //    Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
+        //    : this(
+        //        blockAction,
+        //        TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
+        //        minimumDifficulty,
+        //        TimeSpan.FromMilliseconds(poolCheckIntervalMilliseconds),
+        //        (validBlockInterval.HasValue ? TimeSpan.FromMilliseconds(validBlockInterval.Value) : default(TimeSpan?)),
+        //        validTypeOfAction,
+        //        doesTransactionFollowPolicy)
+        //{
+        //}
 
         /// <summary>
         /// Creates a <see cref="BlockPolicy{T}"/> with configuring
@@ -87,6 +102,8 @@ namespace FreeMarketOne.BlockChain.Policy
             long minimumDifficulty,
             TimeSpan poolCheckInterval,
             TimeSpan? validBlockInterval,
+            Type validTypeOfAction,
+            Type[] validTypesOfActionItems,
             Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
         {
             if (blockInterval < TimeSpan.Zero)
@@ -108,6 +125,8 @@ namespace FreeMarketOne.BlockChain.Policy
             MinimumDifficulty = minimumDifficulty;
             PoolCheckInterval = poolCheckInterval;
             ValidBlockInterval = validBlockInterval;
+            ValidTypeOfAction = validTypeOfAction;
+            ValidTypesOfActionItems = validTypesOfActionItems;
             _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? (_ => true);
         }
 
@@ -132,8 +151,23 @@ namespace FreeMarketOne.BlockChain.Policy
 
         private long MinimumDifficulty { get; }
 
+        public Type ValidTypeOfAction { get; }
+
+        public Type[] ValidTypesOfActionItems { get; }
+
         public bool DoesTransactionFollowsPolicy(Transaction<T> transaction)
         {
+            foreach (var itemAction in transaction.Actions)
+            {
+                foreach (var itemBase in itemAction.BaseItems)
+                {
+                    if (!ValidTypesOfActionItems.Contains(itemBase.GetType()))
+                    {
+                        return false;
+                    }
+                }
+            }
+
             return _doesTransactionFollowPolicy(transaction);
         }
 
@@ -196,6 +230,23 @@ namespace FreeMarketOne.BlockChain.Policy
                     $" the block #{index - 1}'s with block interval ({prevTimestamp.Value.Add(BlockInterval)})");
             }
 
+            if (nextBlock.Transactions.Any())
+            {
+                foreach (var itemTx in nextBlock.Transactions)
+                {
+                    if (itemTx.Actions.Any()) { 
+                        foreach (var itemAction in itemTx.Actions)
+                        {
+                            if (ValidTypeOfAction != itemAction.GetType())
+                            {
+                                return new InvalidBlockTypeActionException(
+                                    $"Block contains wrong type of action ({itemAction.GetType()}) expecting ({ValidTypeOfAction})");
+                            }
+                        }
+                    }
+                }
+            }
+
             return null;
         }
 
@@ -218,6 +269,11 @@ namespace FreeMarketOne.BlockChain.Policy
             {
                 return MinimumDifficulty;
             }
+        }
+
+        public TimeSpan GetApproxTimeSpanToMineNextBlock()
+        {
+            return BlockInterval + PoolCheckInterval;
         }
     }
 }

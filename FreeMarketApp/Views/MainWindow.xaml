@@ -107,7 +107,7 @@
             <!-- Top Right Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Name="BTMyProducts" Content="My Products" FontSize="14" Height="34" Width="130" Margin="20 0 0 0" Classes="products" Click="ButtonMyProducts_Click" Cursor="Hand" />
-                <Button Name="BTPrivateChat" Content="Private Chat" FontSize="14" Height="34" Width="130" Margin="10 0 20 0" Classes="chat" Click="ButtonPrivateChat_Click" Cursor="Hand" />
+                <Button Name="BTPrivateChat" Content="Private Chats" FontSize="14" Height="34" Width="130" Margin="10 0 20 0" Classes="chat" Click="ButtonPrivateChat_Click" Cursor="Hand" />
             </StackPanel>
         </Grid>
 

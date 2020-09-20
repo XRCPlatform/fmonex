@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using System;
 
@@ -33,19 +34,30 @@ namespace FreeMarketOne.DataStructure
             this.ChangellyApiBaseUrl = "https://api.changelly.com";
             this.TelemetryServerUri = "https://telemetry.freemarket.one/";
 
+
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,
                     _blockInterval,
                     _difficulty,
                     _poolCheckInterval,
-                    null);
+                    null,
+                    typeof(BaseAction),
+                    new Type[] {
+                        typeof(CheckPointMarketDataV1),
+                        typeof(ReviewUserDataV1),
+                        typeof(UserDataV1)
+                    });
 
             this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
                     null,
                     _blockInterval,
                     _difficulty,
                     _poolCheckInterval,
-                    _validBlockInterval);
+                    _validBlockInterval,
+                    typeof(MarketAction),
+                    new Type[] {
+                        typeof(MarketItemV1)
+                    });
         }
     }
 }

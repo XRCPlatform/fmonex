@@ -1,5 +1,6 @@
 ﻿using FreeMarketOne.BlockChain.Policy;
 using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using System;
 using System.Collections.Generic;
@@ -31,19 +32,30 @@ namespace FreeMarketOne.BlockChain.Test
             this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9114/");
             this.TelemetryServerUri = "http://40.115.21.64:8088/services/collector/event";
 
+
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,
                     _blockInterval,
                     _difficulty,
                     _poolCheckInterval,
-                    null);
+                    null,
+                    typeof(BaseAction),
+                    new Type[] {
+                        typeof(CheckPointMarketDataV1),
+                        typeof(ReviewUserDataV1),
+                        typeof(UserDataV1)
+                    });
 
             this.BlockChainMarketPolicy = new BaseBlockPolicy<MarketAction>(
                     null,
                     _blockInterval,
                     _difficulty,
                     _poolCheckInterval,
-                    _validBlockInterval);
+                    _validBlockInterval,
+                    typeof(MarketAction),
+                    new Type[] {
+                        typeof(MarketItemV1)
+                    });
         }
     }
 }

@@ -161,7 +161,14 @@ namespace FreeMarketOne.BlockChain.Policy
             {
                 foreach (var itemBase in itemAction.BaseItems)
                 {
+                    //Verify type of item in tx
                     if (!ValidTypesOfActionItems.Contains(itemBase.GetType()))
+                    {
+                        return false;
+                    }
+
+                    //Verify item internal integrity
+                    if (!itemBase.IsValid())
                     {
                         return false;
                     }

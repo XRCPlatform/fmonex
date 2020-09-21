@@ -60,7 +60,7 @@ namespace FreeMarketApp.Views.Pages
             MessageBox.Show(mainWindow, "Test", "Test title", MessageBox.MessageBoxButtons.YesNoCancel);
         }
 
-        internal void LoadChatByProduct(string signature)
+        public void LoadChatByProduct(string signature)
         {
             throw new NotImplementedException();
         }

@@ -35,5 +35,7 @@ namespace FreeMarketOne.DataStructure
         bool ListenersUseTor { get; set; }
 
         string ListenersForceThisIp { get; set; }
+
+        string ChatPath { get; set; }
     }
 }

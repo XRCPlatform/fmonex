@@ -33,7 +33,7 @@ namespace FreeMarketOne.DataStructure
             this.ChangellySecret = "2b8c94c3c7befcc751c932117a63b63e12c2f2c176ebf6553b5e375da2a8b656";
             this.ChangellyApiBaseUrl = "https://api.changelly.com";
             this.TelemetryServerUri = "https://telemetry.freemarket.one/";
-
+            this.ChatPath = "data/chat";
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

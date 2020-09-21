@@ -1,5 +1,6 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.ServerCore.Helpers;
 using Libplanet.Extensions;
 using Libplanet.RocksDBStore;
@@ -514,7 +515,10 @@ namespace FreeMarketOne.ServerCore
         {
             lock (_locked)
             {
+                var ipHelper = new IpHelper(); //TODO: there have to be detection of onion address
+
                 marketData.State = (int)MarketManager.ProductStateEnum.Sold;
+                marketData.BuyerOnionEndpoint = ipHelper.PublicIp.MapToIPv4().ToString();
 
                 var bytesToSign = marketData.ToByteArrayForSign();
                 marketData.BuyerSignature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));

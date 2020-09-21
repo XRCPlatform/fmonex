@@ -49,6 +49,7 @@ namespace FreeMarketOne.ServerCore
 
         public BasePoolManager BasePoolManager;
         public MarketPoolManager MarketPoolManager;
+        public ChatManager ChatManager;
 
         public IBlockChainManager<BaseAction> BaseBlockChainManager;
         public IBlockChainManager<MarketAction> MarketBlockChainManager;
@@ -104,6 +105,9 @@ namespace FreeMarketOne.ServerCore
 
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
+
+                //Market Manager
+                ChatManager = new ChatManager(Configuration);
 
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);

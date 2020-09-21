@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
@@ -84,15 +85,44 @@ namespace FreeMarketApp.Views
         {
             PagesHelper.Switch(this, MyProductsPage.Instance);
         }
+        public void SearchTextbox_keyDownEvent(object sender, KeyEventArgs e)
+        {
+            if (e.Key.Equals(Key.Enter))
+            {
+                var searchField = this.FindControl<TextBox>("SearchField");
+
+                string searchText = searchField.Text;
+                if (searchText != null)
+                {
+                    searchText = searchText.Replace("*", "").Replace("?", "");
+                }
+                if (SearchResultsPage.ValidateQuery(searchText))
+                {
+                    SearchResultsPage.ResetInstance();
+                    SearchResultsPage.SetSearchPhrase(searchText);
+
+                    PagesHelper.Switch(this, SearchResultsPage.Instance);
+                }
+
+            }
+        }
 
         public void ButtonSearch_Click(object sender, RoutedEventArgs args)
         {
             var searchField = this.FindControl<TextBox>("SearchField");
-            string searchText = searchField.Text;
-            SearchResultsPage.ResetInstance();
-            SearchResultsPage.SetSearchPhrase(searchText);
 
-            PagesHelper.Switch(this, SearchResultsPage.Instance);
+            string searchText = searchField.Text;
+            if (searchText != null)
+            {
+                searchText = searchText.Replace("*", "").Replace("?", "");
+            }
+            if (SearchResultsPage.ValidateQuery(searchText))
+            {
+                SearchResultsPage.ResetInstance();
+                SearchResultsPage.SetSearchPhrase(searchText);
+
+                PagesHelper.Switch(this, SearchResultsPage.Instance);
+            }            
         }
 
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)

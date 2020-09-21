@@ -46,6 +46,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("u")]
         public string BuyerSignature { get; set; }
 
+        [JsonProperty("o")]
+        public string BuyerOnionEndpoint { get; set; }
+
         [JsonProperty("c")]
         public DateTime CreatedUtc { get; set; }
 
@@ -98,6 +101,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(PriceType);
             content.Append(State);
             content.Append(BuyerSignature);
+            content.Append(BuyerOnionEndpoint);
             content.Append(string.Join(string.Empty, Photos.ToArray()));
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));

@@ -40,6 +40,7 @@ namespace FreeMarketApp.Views
 
                     PagesHelper.UnlockTools(this, true);
                     PagesHelper.SetUserData(_logger, this);
+                    PagesHelper.SetServerData(_logger, this);
                 }
                 else
                 {
@@ -100,6 +101,7 @@ namespace FreeMarketApp.Views
 
             Dispatcher.UIThread.InvokeAsync(() => { 
                 PagesHelper.SetUserData(_logger, this);
+                PagesHelper.SetServerData(_logger, this);
             });
         }
 

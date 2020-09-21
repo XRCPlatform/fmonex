@@ -12,5 +12,8 @@ namespace FreeMarketOne.DataStructure.Chat
 
         [JsonProperty("d")]
         public DateTime DateCreated { get; set; }
+
+        [JsonProperty("t")]
+        public int Type { get; set; }
     }
 }

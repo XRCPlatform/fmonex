@@ -16,6 +16,12 @@ namespace FreeMarketOne.ServerCore
 {
     public class ChatManager
     {
+        public enum ChatItemTypeEnum
+        {
+            Buyer = 0,
+            Seller = 1
+        }
+
         private IBaseConfiguration _configuration;
 
         private ILogger _logger { get; set; }
@@ -73,7 +79,7 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="signature"></param>
         /// <returns></returns>
-        public ChatDataV1 LoadChat(string signature)
+        public ChatDataV1 GetChat(string signature)
         {
             try
             {
@@ -106,7 +112,7 @@ namespace FreeMarketOne.ServerCore
         /// Load all chats from drive
         /// </summary>
         /// <returns></returns>
-        public List<ChatDataV1> LoadAllChatsSignatures()
+        public List<ChatDataV1> GetAllChats()
         {
             var fullPath = CheckExistenceOfFolder();
             var result = new List<ChatDataV1>();
@@ -114,7 +120,7 @@ namespace FreeMarketOne.ServerCore
 
             foreach (var file in d.GetFiles("*"))
             {
-                var chat = LoadChat(file.Name);
+                var chat = GetChat(file.Name);
                 if (chat != null) result.Add(chat);
             }
 

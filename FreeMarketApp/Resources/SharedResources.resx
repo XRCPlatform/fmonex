@@ -225,6 +225,12 @@
   <data name="Dialog_LoginPage_WatermarkWrongPassword" xml:space="preserve">
     <value>Your password was wrong. Try it again. Please.</value>
   </data>
+  <data name="State_Down" xml:space="preserve">
+    <value>offline</value>
+  </data>
+  <data name="State_Running" xml:space="preserve">
+    <value>online</value>
+  </data>
   <data name="UnknownValue" xml:space="preserve">
     <value>N/A</value>
   </data>

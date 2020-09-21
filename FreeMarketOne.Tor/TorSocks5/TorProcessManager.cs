@@ -50,8 +50,8 @@ namespace FreeMarketOne.Tor
             _logger.Information("Initializing Tor Process Manager");
 
             _configuration = configuration;
-            running = 0;
-			_stop = new CancellationTokenSource();
+            Interlocked.Exchange(ref running, 0);
+            _stop = new CancellationTokenSource();
 			_torProcess = null;
 		}
 
@@ -164,6 +164,8 @@ namespace FreeMarketOne.Tor
                     return false;
                 }
             //}).Start();
+
+            Interlocked.Exchange(ref running, 1);
 
             return true;
         }
@@ -372,7 +374,7 @@ namespace FreeMarketOne.Tor
         //          });
         //      }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             Interlocked.CompareExchange(ref running, 2, 1); // If running, make it stopping.
 
@@ -382,10 +384,6 @@ namespace FreeMarketOne.Tor
             }
 
             _stop?.Cancel();
-            while (Interlocked.CompareExchange(ref running, 3, 0) == 2)
-            {
-                await Task.Delay(50).ConfigureAwait(false);
-            }
             _stop?.Dispose();
             _stop = null;
             _torProcess?.Kill();
@@ -397,7 +395,7 @@ namespace FreeMarketOne.Tor
 
         public void Dispose()
         {
-            StopAsync().GetAwaiter().GetResult();
+            Stop();
         }
     }
 }

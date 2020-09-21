@@ -296,7 +296,7 @@ namespace FreeMarketOne.Search.Tests
             var topHit = result.Results[0];
 
             Assert.IsTrue(int.Parse(topHit.Signature)>20 && int.Parse(topHit.Signature)<30);
-            Assert.AreEqual(engine.HitsPerPage, result.Results.Count);
+            Assert.AreEqual(engine.PageSize, result.Results.Count);
 
         }
 

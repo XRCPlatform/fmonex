@@ -20,6 +20,7 @@ namespace FreeMarketApp.Views.Pages
         private ILogger _logger;
         private static string _searchPhrase;
         private static List<Selector> _appliedFilters = new List<Selector>();
+        private static int selectedPageSize = 20;
 
         public static SearchResultsPage Instance
         {
@@ -97,6 +98,22 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, ProductPage.Instance);
+        }
+
+        public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
+        {
+            string selection = ((Avalonia.Controls.ContentControl)((Avalonia.Controls.Primitives.SelectingItemsControl)sender).SelectedItem).Content.ToString();
+            if (int.TryParse(selection, out selectedPageSize))
+            {
+                var engine = FreeMarketOneServer.Current.SearchEngine;
+                engine.PageSize = selectedPageSize;
+
+                var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
+                var result = engine.Search(currentSearchResult.CurrentQuery, true, 1);
+
+                SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+                DataContext = new SearchResultsPageViewModel(result);
+            } 
         }
 
         public void ButtonFacet_Click(object sender, RoutedEventArgs args)

@@ -78,7 +78,7 @@
           <VirtualizingStackPanel>
 						
 						<!-- Dropdown menu -->
-						<ComboBox Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" Margin="0 -2 0 0">
+						<ComboBox Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
 							<ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
 							<ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
 						</ComboBox>

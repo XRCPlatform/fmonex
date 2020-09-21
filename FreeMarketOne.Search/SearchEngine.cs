@@ -23,7 +23,7 @@ namespace FreeMarketOne.Search
         IMarketManager? marketManager = null;
         private readonly int MAX_RESULTS = 1000;
 
-        public int HitsPerPage { get; set; }
+        public int PageSize { get; set; }
         public List<string> FacetFieldNames { get; set; }
 
         public SearchEngine(IMarketManager marketChainManager, string searchIndexBasePath, int hitsPerPage = 20)
@@ -35,7 +35,7 @@ namespace FreeMarketOne.Search
             fSDirectory = FSDirectory.Open(indexDir);
             txFSDirectory = FSDirectory.Open(taxoDir);
             facetConfig = new FacetsConfig();
-            HitsPerPage = hitsPerPage;
+            PageSize = hitsPerPage;
             marketManager = marketChainManager;
             FacetFieldNames = new List<string> { "DealType", "Category", "Shipping", "Fineness", "Manufacturer", "Size", "Sold", "WeightInGrams", "PricePerGram", "Price" };
             //facetConfig.SetHierarchical("Category", true);
@@ -135,13 +135,13 @@ namespace FreeMarketOne.Search
         {
             List<MarketItemV1> list = new List<MarketItemV1>();
             TopScoreDocCollector collector = TopScoreDocCollector.Create(MAX_RESULTS, true);
-            int startIndex = (page - 1) * HitsPerPage;
+            int startIndex = (page - 1) * PageSize;
 
             var indexReader = DirectoryReader.Open(fSDirectory);
             var searcher = new IndexSearcher(indexReader);
             searcher.Search(query, collector);
 
-            TopDocs docs = collector.GetTopDocs(startIndex, HitsPerPage);
+            TopDocs docs = collector.GetTopDocs(startIndex, PageSize);
             ScoreDoc[] hits = docs.ScoreDocs;
 
             foreach (var item in hits)
@@ -164,7 +164,7 @@ namespace FreeMarketOne.Search
                 Facets = facets,
                 TotalHits = docs.TotalHits,
                 CurrentPage = page,
-                PageSize = HitsPerPage,
+                PageSize = PageSize,
                 CurrentQuery = query
             };
             return searchResult;

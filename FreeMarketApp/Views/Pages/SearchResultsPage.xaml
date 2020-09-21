@@ -26,19 +26,19 @@
 			</Button>	
          </DockPanel>
 
-				<ItemsControl Items="{Binding Facets}">
+				<ItemsControl Items="{Binding Filters}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<!-- Facets -->
-							<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch"  Tag="{Binding Dim}">
+							<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch"  Tag="{Binding FacetResult.Dim}">
 								<DockPanel HorizontalAlignment="Stretch">
-									<TextBlock Classes="H1" Margin="20 5 0 0" FontWeight="Bold" Text="{Binding Dim}" DockPanel.Dock="Left"></TextBlock>
-									<Button x:Name="ClearIndividualFilter" BorderThickness="0" Classes="action" Margin="0 0 20 0" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Tag="{Binding Dim}" Click="ButtonResetFacet_Click">
+									<TextBlock Classes="H1" Margin="20 5 0 0" FontWeight="Bold" Text="{Binding FacetResult.Dim}" DockPanel.Dock="Left"></TextBlock>
+									<Button x:Name="ClearIndividualFilter" BorderThickness="0" Classes="action" Margin="0 0 20 0" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Tag="{Binding FacetResult.Dim}" IsVisible="{Binding IsSelected}" Click="ButtonResetFacet_Click">
 										<TextBlock Text="Clear filter" FontWeight="Bold" FontSize="12" />
 									</Button>
 								</DockPanel>
 
-								<ItemsControl Items="{Binding LabelValues}">
+								<ItemsControl Items="{Binding FacetResult.LabelValues}">
 									<ItemsControl.ItemTemplate>
 										<DataTemplate>
 											<Button Classes="sidebar" MaxWidth="210" Padding="10 0 5 0" Cursor="Hand" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" Tag="{Binding Label}"  Click="ButtonFacet_Click">

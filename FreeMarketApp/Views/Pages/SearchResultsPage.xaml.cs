@@ -78,7 +78,7 @@ namespace FreeMarketApp.Views.Pages
 
             SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
 
-            DataContext = new SearchResultsPageViewModel(result);
+            DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
         }
 
         private void InitializeComponent()
@@ -112,7 +112,7 @@ namespace FreeMarketApp.Views.Pages
                 var result = engine.Search(currentSearchResult.CurrentQuery, true, 1);
 
                 SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
-                DataContext = new SearchResultsPageViewModel(result);
+                DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
             } 
         }
 
@@ -153,7 +153,7 @@ namespace FreeMarketApp.Views.Pages
             var result = engine.Search(newQuery, true, currentSearchResult.CurrentPage);
 
             SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
-            DataContext = new SearchResultsPageViewModel(result);
+            DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
 
         }
 
@@ -198,7 +198,7 @@ namespace FreeMarketApp.Views.Pages
                 var result = engine.Search(currentQuery, true, currentSearchResult.CurrentPage + 1);
 
                 SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
-                DataContext = new SearchResultsPageViewModel(result);
+                DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
             }
             
         }
@@ -214,7 +214,7 @@ namespace FreeMarketApp.Views.Pages
                 var currentQuery = currentSearchResult.CurrentQuery;
                 var result = engine.Search(currentQuery, true, currentSearchResult.CurrentPage - 1);
                 SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
-                DataContext = new SearchResultsPageViewModel(result);
+                DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
             }
         }
 

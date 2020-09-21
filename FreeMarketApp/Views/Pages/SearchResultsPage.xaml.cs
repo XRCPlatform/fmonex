@@ -21,6 +21,7 @@ namespace FreeMarketApp.Views.Pages
         private static string _searchPhrase;
         private static List<Selector> _appliedFilters = new List<Selector>();
         private static int selectedPageSize = 20;
+        private bool _initialized = false;
 
         public static SearchResultsPage Instance
         {
@@ -67,6 +68,8 @@ namespace FreeMarketApp.Views.Pages
             }
 
             this.InitializeComponent();
+
+            SetPageSizeOnControl(selectedPageSize);
         }
 
         private void GetAndRenderQueryResults()
@@ -74,16 +77,19 @@ namespace FreeMarketApp.Views.Pages
             PagesHelper.Log(_logger, string.Format("Loading search results from lucene."));
 
             var engine = FreeMarketOneServer.Current.SearchEngine;
+            engine.PageSize = selectedPageSize;
             var result = engine.Search(_searchPhrase);
 
             SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
 
             DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
+
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+            _initialized = true;
         }
 
         public void ButtonBack_Click(object sender, RoutedEventArgs args)
@@ -102,11 +108,17 @@ namespace FreeMarketApp.Views.Pages
 
         public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
         {
+     
+            int thisPageSize = selectedPageSize;
+
             string selection = ((Avalonia.Controls.ContentControl)((Avalonia.Controls.Primitives.SelectingItemsControl)sender).SelectedItem).Content.ToString();
-            if (int.TryParse(selection, out selectedPageSize))
+            if (int.TryParse(selection, out thisPageSize) && !thisPageSize.Equals(selectedPageSize))
             {
+                if (!_initialized) return;// this is just false signal by app setting to expected value.
+
                 var engine = FreeMarketOneServer.Current.SearchEngine;
-                engine.PageSize = selectedPageSize;
+                engine.PageSize = thisPageSize;
+                selectedPageSize = thisPageSize;
 
                 var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
                 var result = engine.Search(currentSearchResult.CurrentQuery, true, 1);
@@ -140,12 +152,12 @@ namespace FreeMarketApp.Views.Pages
         {
             var engine = FreeMarketOneServer.Current.SearchEngine;
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
-            
+
             //current query has currently applied filters embeded, but also has page position and other parameters.
             //var currentQuery = currentSearchResult.CurrentQuery;
-            
+
             //this has page level query and will allow filter management here
-            var query = engine.ParseQuery(_searchPhrase);          
+            var query = engine.ParseQuery(_searchPhrase);
 
             //compose drildown with accumulated filters in page level list instead of queries
             Query newQuery = engine.BuildDrillDown(_appliedFilters, query);
@@ -154,7 +166,14 @@ namespace FreeMarketApp.Views.Pages
 
             SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
             DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
+        }
 
+        private void SetPageSizeOnControl(int pageSize)
+        {
+            if (!_initialized) return;
+
+            var cbPageSize = this.FindControl<ComboBox>("CBPageSize");
+            cbPageSize.SelectedItem = cbPageSize.Items.OfType<ComboBoxItem>().Single(t => t.Content.Equals(pageSize.ToString()));
         }
 
         public void ButtonResetAllFacets_Click(object sender, RoutedEventArgs args)
@@ -190,7 +209,7 @@ namespace FreeMarketApp.Views.Pages
             var engine = FreeMarketOneServer.Current.SearchEngine;
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
 
-            if (currentSearchResult.CurrentPage < (currentSearchResult.TotalHits/ currentSearchResult.PageSize))
+            if (currentSearchResult.CurrentPage * currentSearchResult.PageSize < (currentSearchResult.TotalHits))
             {
                 //current query has currently applied filters embeded, but also has page position and other parameters.
                 var currentQuery = currentSearchResult.CurrentQuery;

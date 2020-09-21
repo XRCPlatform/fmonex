@@ -41,6 +41,7 @@ namespace FreeMarketApp.Views.Pages
         {
             _searchPhrase = searchPhrase;
             _appliedFilters = new List<Selector>();
+            _appliedFilters.Add(new Selector("Sold", "No"));
         }
 
         public static SearchResultsPage GetInstance()
@@ -52,6 +53,7 @@ namespace FreeMarketApp.Views.Pages
         {
             _instance = null;
             _appliedFilters = new List<Selector>();
+            _appliedFilters.Add(new Selector("Sold", "No"));
         }
 
         public SearchResultsPage()
@@ -78,7 +80,16 @@ namespace FreeMarketApp.Views.Pages
 
             var engine = FreeMarketOneServer.Current.SearchEngine;
             engine.PageSize = selectedPageSize;
-            var result = engine.Search(_searchPhrase);
+
+            //var result = engine.Search(_searchPhrase);
+
+            //this has page level query and will allow filter management here
+            var query = engine.ParseQuery(_searchPhrase);
+
+            //compose drildown with accumulated filters in page level list instead of queries
+            Query newQuery = engine.BuildDrillDown(_appliedFilters, query);
+
+            var result = engine.Search(newQuery, true, 1);
 
             SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
 
@@ -146,6 +157,11 @@ namespace FreeMarketApp.Views.Pages
                 _appliedFilters.Remove(targetItem);
             }
             FilterList();
+        }
+
+        public static bool ValidateQuery(string Query)
+        {
+            return FreeMarketOneServer.Current.SearchEngine.ValidateQuery(Query);
         }
 
         private void FilterList()

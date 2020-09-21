@@ -76,6 +76,20 @@ namespace FreeMarketOne.Search
             return GetFacetsForQuery(new MatchAllDocsQuery());
         }
 
+        public bool ValidateQuery(string phrase)
+        {
+            try
+            {
+                ParseQuery(phrase);
+                return true;
+            }
+            catch (System.Exception)
+            {
+
+                return false;
+            }
+        }
+
         public Query ParseQuery(string phrase)
         {
             if (string.IsNullOrEmpty(phrase) || string.IsNullOrWhiteSpace(phrase))

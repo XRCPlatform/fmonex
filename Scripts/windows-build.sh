@@ -11,6 +11,7 @@ git_commit=$(git log --format=%h --abbrev=7 -n 1)
 publish_directory="../FreeMarketApp/bin/${configuration}/netcoreapp3.1/${dotnet_runtime}/publish"
 download_directory="/tmp"
 project_path="../FreeMarketApp/FreeMarketApp.csproj"
+ico_path="../FreeMarketApp/Assets/freemarket.ico"
 
 version=0.0.1
 
@@ -38,8 +39,7 @@ popd
 
 mkdir -p $WINEPREFIX/drive_c/fmone
 cp $publish_directory/* $WINEPREFIX/drive_c/fmone
-# TODO: need to include ico
-cp fmone.ico $WINEPREFIX/drive_c/fmone/fmone.ico
+cp $ico_path $WINEPREFIX/drive_c/fmone/fmone.ico
 
 echo "$nsis_sha256 $cache_dir/$nsis_filename" | if sha256sum --check ; then
     echo "Building with nsis"

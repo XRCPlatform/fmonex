@@ -9,8 +9,8 @@
 
     <Grid Margin="0" Classes="Main">
 		<!-- SIDEBAR -->
-		<ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,40" Width="250">
-			<StackPanel x:Name="SideBar" Orientation="Vertical">
+		<ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
+			<StackPanel x:Name="SideBar" Margin="0,0,0,40" Orientation="Vertical">
 				<Button x:Name="BackButton" Cursor="Hand" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click">
 					<StackPanel Orientation="Horizontal">
 						<Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
@@ -19,43 +19,41 @@
 				</Button>
 
 				<!-- Filter By -->
-		<DockPanel HorizontalAlignment="Stretch"  Margin="20 36 0 15">
-			<TextBlock Classes="H1" Text="Filter by:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
-			<Button x:Name="ClearFilters" BorderThickness="0" Margin="0 0 20 0" Classes="action" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Click="ButtonResetAllFacets_Click" >
-				<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-			</Button>	
-         </DockPanel>
+				<DockPanel HorizontalAlignment="Stretch"  Margin="20 36 0 5">
+					<TextBlock Classes="H1" Text="FILTER BY:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
+					<Button x:Name="ClearFilters" BorderThickness="0" Margin="0 0 20 0" Classes="action" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Click="ButtonResetAllFacets_Click" >
+						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+					</Button>	
+				 </DockPanel>
+				<Separator HorizontalAlignment="Stretch" Height="1" Margin="20 5" Classes="SideBarSeparator"></Separator>
 
 				<ItemsControl Items="{Binding Filters}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<!-- Facets -->
-							<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch"  Tag="{Binding FacetResult.Dim}">
+							<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Margin="0 5 0 5" Tag="{Binding FacetResult.Dim}">
 								<DockPanel HorizontalAlignment="Stretch">
 									<TextBlock Classes="H1" Margin="20 5 0 0" FontWeight="Bold" Text="{Binding FacetResult.Dim}" DockPanel.Dock="Left"></TextBlock>
-									<Button x:Name="ClearIndividualFilter" BorderThickness="0" Classes="action" Margin="0 0 20 0" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Tag="{Binding FacetResult.Dim}" IsVisible="{Binding IsSelected}" Click="ButtonResetFacet_Click">
-										<TextBlock Text="Clear filter" FontWeight="Bold" FontSize="12" />
+									<Button BorderThickness="0" Classes="action" Width="22" Height="22" Margin="0 4 20 0" HorizontalAlignment="Right" HorizontalContentAlignment="Center" Tag="{Binding FacetResult.Dim}" IsVisible="{Binding IsSelected}" Click="ButtonResetFacet_Click">
+										<Path Classes="BlueIcon" Data="M300.188,246L484.14,62.04c5.06-5.064,7.852-11.82,7.86-19.024c0-7.208-2.792-13.972-7.86-19.028L468.02,7.872 c-5.068-5.076-11.824-7.856-19.036-7.856c-7.2,0-13.956,2.78-19.024,7.856L246.008,191.82L62.048,7.872 c-5.06-5.076-11.82-7.856-19.028-7.856c-7.2,0-13.96,2.78-19.02,7.856L7.872,23.988c-10.496,10.496-10.496,27.568,0,38.052 L191.828,246L7.872,429.952c-5.064,5.072-7.852,11.828-7.852,19.032c0,7.204,2.788,13.96,7.852,19.028l16.124,16.116 c5.06,5.072,11.824,7.856,19.02,7.856c7.208,0,13.968-2.784,19.028-7.856l183.96-183.952l183.952,183.952	c5.068,5.072,11.824,7.856,19.024,7.856h0.008c7.204,0,13.96-2.784,19.028-7.856l16.12-16.116 c5.06-5.064,7.852-11.824,7.852-19.028c0-7.204-2.792-13.96-7.852-19.028L300.188,246z" 
+											Height="10" Stretch="Fill" Width="10"/>
 									</Button>
 								</DockPanel>
 
 								<ItemsControl Items="{Binding FacetResult.LabelValues}">
 									<ItemsControl.ItemTemplate>
 										<DataTemplate>
-											<Button Classes="sidebar" MaxWidth="210" Padding="10 0 5 0" Cursor="Hand" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" Tag="{Binding Label}"  Click="ButtonFacet_Click">
+											<Button Classes="sidebar" MaxWidth="210"  Cursor="Hand" Padding="10 7 5 7" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" Tag="{Binding Label}"  Click="ButtonFacet_Click">
 												<DockPanel HorizontalAlignment="Stretch">
-                          <StackPanel Orientation="Horizontal">
-														<TextBlock Text="{Binding Label}" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
-                            <TextBlock Text=" (" HorizontalAlignment="Left" DockPanel.Dock="Left">  </TextBlock>
-                            <TextBlock Text="{Binding Value}" HorizontalAlignment="Left" DockPanel.Dock="Left"></TextBlock>
-                            <TextBlock Text=")" HorizontalAlignment="Left" DockPanel.Dock="Left">  </TextBlock>
-                          </StackPanel>
+													<TextBlock Text="{Binding Label}" HorizontalAlignment="Left" MaxWidth="150" TextWrapping="Wrap" DockPanel.Dock="Left"></TextBlock>
+													<TextBlock Text="{Binding Value}" FontStyle="Italic" MaxWidth="40" HorizontalAlignment="Right"></TextBlock>		
 												</DockPanel>
 											</Button>
 										</DataTemplate>
 									</ItemsControl.ItemTemplate>
 								</ItemsControl>
 							</StackPanel>
-
+							<Separator HorizontalAlignment="Stretch" Height="1" Margin="20 5" Classes="SideBarSeparator"></Separator>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>

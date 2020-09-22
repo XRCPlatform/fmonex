@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using DynamicData;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Chat;
@@ -12,6 +13,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -82,9 +84,67 @@ namespace FreeMarketApp.Views.Pages
             LoadChatByProduct(signature);
         }
 
-        public void ButtonSendMessage_Click(object sender, RoutedEventArgs args)
+        public async void ButtonSendMessage_Click(object sender, RoutedEventArgs args)
         {
+            var mainWindow = PagesHelper.GetParentWindow(this);
             var signature = ((Button)sender).Tag.ToString();
+
+            var errorCount = 0;
+            var errorMessages = new StringBuilder();
+            var textHelper = new TextHelper();
+
+            var tbMessage = Instance.FindControl<TextBox>("TBMessage");
+            if (string.IsNullOrEmpty(tbMessage.Text) || (tbMessage.Text.Length < 1))
+            {
+                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_ChatPage_ShortMessage"));
+                errorCount++;
+            }
+            else
+            {
+                if (!textHelper.IsTextValid(tbMessage.Text, true))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_ChatPage_InvalidCharsMessage"));
+                    errorCount++;
+                }
+            }
+
+            if (errorCount == 0)
+            {
+                var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Signature == signature);
+                if (chatData != null)
+                {
+                    var chatManager = FreeMarketOneServer.Current.ChatManager;
+
+                    if (string.IsNullOrEmpty(chatData.SellerEndPoint))
+                    {
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Information_ChatWaitForAnswer")),
+                            SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
+                    }
+                    else
+                    {
+                        if (!chatManager.CanSendNextMessage(chatData))
+                        {
+                            await MessageBox.Show(mainWindow,
+                                string.Format(SharedResources.ResourceManager.GetString("Dialog_Information_CantSendNextMessage")),
+                                SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                                MessageBox.MessageBoxButtons.Ok);
+                        }
+                        else
+                        {
+                            chatManager.SendMessageToWorker(chatData, tbMessage.Text);
+                        }
+                    }
+                }
+            } 
+            else
+            {
+                await MessageBox.Show(mainWindow,
+                    errorMessages.ToString(),
+                    SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                    MessageBox.MessageBoxButtons.Ok);
+            }
         }
 
         public void LoadChatByProduct(string signature)

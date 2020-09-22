@@ -279,7 +279,7 @@ namespace FreeMarketOne.PoolManager
             if (actionItem.IsValid() && !_actionItemsList.Exists(mt => mt == actionItem))
             {
                 //Verify type of item in tx
-                if (!((IDefaultBlockPolicy<BaseAction>)_blockChain.Policy).ValidTypesOfActionItems.Contains(actionItem.GetType()))
+                if (!((IDefaultBlockPolicy<T>)_blockChain.Policy).ValidTypesOfActionItems.Contains(actionItem.GetType()))
                 {
                     return false;
                 } 

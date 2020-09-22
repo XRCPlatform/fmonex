@@ -187,6 +187,24 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your message contains invalid chars..
+        /// </summary>
+        internal static string Dialog_ChatPage_InvalidCharsMessage {
+            get {
+                return ResourceManager.GetString("Dialog_ChatPage_InvalidCharsMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your message is too short..
+        /// </summary>
+        internal static string Dialog_ChatPage_ShortMessage {
+            get {
+                return ResourceManager.GetString("Dialog_ChatPage_ShortMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure that you want to buy this product? This step is irreversible. Changes will be propagated in next block (&quot;approx {0} sec&quot;)..
         /// </summary>
         internal static string Dialog_Confirmation_BuyProduct {
@@ -340,11 +358,29 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You can send next message after 10 seconds..
+        /// </summary>
+        internal static string Dialog_Information_CantSendNextMessage {
+            get {
+                return ResourceManager.GetString("Dialog_Information_CantSendNextMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have to restart application to see changes..
         /// </summary>
         internal static string Dialog_Information_ChangeTheme {
             get {
                 return ResourceManager.GetString("Dialog_Information_ChangeTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have to wait for answer from seller..
+        /// </summary>
+        internal static string Dialog_Information_ChatWaitForAnswer {
+            get {
+                return ResourceManager.GetString("Dialog_Information_ChatWaitForAnswer", resourceCulture);
             }
         }
         

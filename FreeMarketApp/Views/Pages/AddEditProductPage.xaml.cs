@@ -177,6 +177,7 @@ namespace FreeMarketApp.Views.Pages
 
                 var errorCount = 0;
                 var errorMessages = new StringBuilder();
+                var textHelper = new TextHelper();
 
                 if (string.IsNullOrEmpty(tbTitle.Text) || (tbTitle.Text.Length < 10))
                 {
@@ -185,7 +186,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbTitle.Text, true))
+                    if (!textHelper.IsTextValid(tbTitle.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
                         errorCount++;
@@ -198,11 +199,11 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    //if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
-                    //{
-                    //    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
-                    //    errorCount++;
-                    //}
+                    if (!textHelper.IsTextValid(tbDescription.Text, true))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
+                        errorCount++;
+                    }
                 }
                 if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 2))
                 {
@@ -211,11 +212,11 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    //if (!ValidationHelper.IsTextValid(tbShipping.Text, true)) //Multiword countries, regions, European Union, United Kingdon, Arab Emitares
-                    //{
-                    //    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
-                    //    errorCount++;
-                    //}
+                    if (!textHelper.IsTextValid(tbShipping.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
+                        errorCount++;
+                    }
                 }
                 if (string.IsNullOrEmpty(tbPrice.Text) || (tbPrice.Text.Length < 1))
                 {
@@ -224,7 +225,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsNumberValid(tbPrice.Text))
+                    if (!textHelper.IsNumberValid(tbPrice.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsPrice"));
                         errorCount++;
@@ -238,7 +239,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsNumberValid(tbWeightInGrams.Text))
+                    if (!textHelper.IsNumberValid(tbWeightInGrams.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsWeightInGrams"));
                         errorCount++;

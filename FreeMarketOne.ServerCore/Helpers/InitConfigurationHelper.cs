@@ -108,11 +108,11 @@ namespace FreeMarketOne.ServerCore.Helpers
             {
                 if (string.IsNullOrEmpty(configuration.ListenersForceThisIp))
                 {
-                    var ipHelper = new IpHelper(); //TODO: there have to be detection of onion address
-                    if (ipHelper.PublicIp != null)
+                    var publicIp = FreeMarketOneServer.Current.ServerOnionAddress.PublicIp;
+                    if (publicIp != null)
                     {
-                        SetToPublicIp(configuration.ListenerBaseEndPoint, ipHelper.PublicIp.MapToIPv4());
-                        SetToPublicIp(configuration.ListenerMarketEndPoint, ipHelper.PublicIp.MapToIPv4());
+                        SetToPublicIp(configuration.ListenerBaseEndPoint, publicIp.MapToIPv4());
+                        SetToPublicIp(configuration.ListenerMarketEndPoint, publicIp.MapToIPv4());
                     }
                 } 
                 else

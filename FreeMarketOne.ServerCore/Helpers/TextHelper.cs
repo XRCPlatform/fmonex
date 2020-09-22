@@ -1,10 +1,12 @@
-﻿namespace FreeMarketApp.Helpers
-{
-    internal static class ValidationHelper
-    {
-        private const string VALIDCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+﻿using System;
 
-        internal static bool IsNumberValid(string text)
+namespace FreeMarketApp.Helpers
+{
+    public class TextHelper
+    {
+        private const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+
+        public bool IsNumberValid(string text)
         {
             float number;
 
@@ -18,7 +20,7 @@
             }
         }
 
-        internal static bool IsTextValid(string text, bool allowSpaceDotComma = false)
+        public bool IsTextValid(string text, bool allowSpaceDotComma = false)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -29,7 +31,7 @@
                 for (int i = 0; i < text.Length; i++)
                 {
                     var charTest = text.Substring(i, 1);
-                    if (!VALIDCHARS.Contains(charTest))
+                    if (!CHARS.Contains(charTest))
                     {
                         if ((charTest == " ") && (allowSpaceDotComma == true) ||
                             (charTest == ",") && (allowSpaceDotComma == true) ||
@@ -46,6 +48,19 @@
             }
 
             return true;
+        }
+
+        public string GetRandomText(int length)
+        {
+            var stringChars = new char[length];
+            var random = new Random();
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = CHARS[random.Next(CHARS.Length)];
+            }
+
+            return new string(stringChars);
         }
     }
 }

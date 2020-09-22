@@ -159,6 +159,12 @@
   <data name="Dialog_AddEditProduct_ShortTitle" xml:space="preserve">
     <value>Your title is too short. Minimum is 10 chars.</value>
   </data>
+  <data name="Dialog_ChatPage_InvalidCharsMessage" xml:space="preserve">
+    <value>Your message contains invalid chars.</value>
+  </data>
+  <data name="Dialog_ChatPage_ShortMessage" xml:space="preserve">
+    <value>Your message is too short.</value>
+  </data>
   <data name="Dialog_Confirmation_BuyProduct" xml:space="preserve">
     <value>Are you sure that you want to buy this product? This step is irreversible. Changes will be propagated in next block ("approx {0} sec").</value>
   </data>
@@ -210,8 +216,14 @@
   <data name="Dialog_FirstRun_ShortUserName" xml:space="preserve">
     <value>Your username is too short. Minimum is 10 chars.</value>
   </data>
+  <data name="Dialog_Information_CantSendNextMessage" xml:space="preserve">
+    <value>You can send next message after 10 seconds.</value>
+  </data>
   <data name="Dialog_Information_ChangeTheme" xml:space="preserve">
     <value>You have to restart application to see changes.</value>
+  </data>
+  <data name="Dialog_Information_ChatWaitForAnswer" xml:space="preserve">
+    <value>You have to wait for answer from seller.</value>
   </data>
   <data name="Dialog_Information_Title" xml:space="preserve">
     <value>Information</value>

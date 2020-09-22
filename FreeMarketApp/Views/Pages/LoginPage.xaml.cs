@@ -57,6 +57,7 @@ namespace FreeMarketApp.Views.Pages
 
             var errorCount = 0;
             var errorMessages = new StringBuilder();
+            var textHelper = new TextHelper();
 
             if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 10)
             {
@@ -65,7 +66,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!ValidationHelper.IsTextValid(tbPassword.Text, true))
+                if (!textHelper.IsTextValid(tbPassword.Text, true))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_InvalidCharsPassword"));
                     errorCount++;

@@ -1,14 +1,18 @@
-﻿using FreeMarketOne.DataStructure;
+﻿using FreeMarketApp.Helpers;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.ServerCore;
+using Libplanet.Blocks;
 using Libplanet.Crypto;
+using Libplanet.Extensions;
 using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -46,6 +50,28 @@ namespace FreeMarketOne.ServerCore
             var result = new ChatDataV1();
             result.DateCreated = DateTime.UtcNow;
             result.MarketItem = offer;
+            return result;
+        }
+
+        /// <summary>
+        /// Generate a new chat data at seller side
+        /// </summary>
+        /// <param name="offer"></param>
+        /// <returns></returns>
+        public ChatDataV1 CreateNewSellerChat(MarketItemV1 offer)
+        {
+            var result = CreateNewChat(offer);
+            result.SellerEndPoint = FreeMarketOneServer.Current.ServerOnionAddress.PublicIp.ToString();
+            result.ChatItems = new List<ChatItem>();
+
+            var newInitialMessage = new ChatItem();
+            var textHelper = new TextHelper();
+            newInitialMessage.Message = textHelper.GetRandomText(32);
+            newInitialMessage.ExtraMessage = result.SellerEndPoint;
+            newInitialMessage.DateCreated = DateTime.UtcNow;
+            newInitialMessage.Type = (int)ChatItemTypeEnum.Seller;
+
+            result.ChatItems.Add(newInitialMessage);
             return result;
         }
 
@@ -137,6 +163,118 @@ namespace FreeMarketOne.ServerCore
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
             return folderPath;
+        }
+
+        /// <summary>
+        /// Verification agains spamming
+        /// </summary>
+        /// <param name="chatData"></param>
+        /// <returns></returns>
+        public bool CanSendNextMessage(ChatDataV1 chatData)
+        {
+            if (chatData != null)
+            {
+                if (chatData.ChatItems.Any())
+                {
+                    var lastChatItem = chatData.ChatItems.Last();
+                    if (lastChatItem.DateCreated.AddSeconds(10) > DateTime.UtcNow)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Add message to our worker
+        /// </summary>
+        /// <param name="chatData"></param>
+        /// <param name="message"></param>
+        public void SendMessageToWorker(ChatDataV1 chatData, string message)
+        {
+            if (chatData != null)
+            {
+                if (chatData.ChatItems == null) chatData.ChatItems = new List<ChatItem>();
+
+                var newChatItem = new ChatItem();
+                newChatItem.Message = message;
+                newChatItem.DateCreated = DateTime.UtcNow;
+                newChatItem.Type = (int)DetectWhoIm(chatData);
+
+                chatData.ChatItems.Add(newChatItem);
+            }
+        }
+
+        /// <summary>
+        /// Detect ownership of market item from Chat Data
+        /// </summary>
+        /// <param name="chatData"></param>
+        /// <returns></returns>
+        private ChatItemTypeEnum DetectWhoIm(ChatDataV1 chatData)
+        {
+            var marketItem = chatData.MarketItem;
+
+            var userManager = FreeMarketOneServer.Current.UserManager;
+            var userPubKey = userManager.GetCurrentUserPublicKey();
+            var marketItemBytes = marketItem.ToByteArrayForSign();
+
+            var signaturePubKeys = UserPublicKey.Recover(marketItemBytes, marketItem.Signature);
+
+            foreach (var itemPubKey in signaturePubKeys)
+            {
+                if (itemPubKey.SequenceEqual(userPubKey))
+                {
+                    return ChatItemTypeEnum.Seller;
+                }
+            }
+
+            return ChatItemTypeEnum.Buyer;
+        }
+
+        /// <summary>
+        /// Process new accepted block... if it is market item and it is mine then create a new chat
+        /// </summary>
+        /// <param name="block"></param>
+        public void ProcessNewBlock(Block<MarketAction> block)
+        {
+            var types = new Type[] { typeof(MarketItemV1) };
+
+            var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+
+            foreach (var itemTx in block.Transactions)
+            {
+                foreach (var itemAction in itemTx.Actions)
+                {
+                    foreach (var itemMarket in itemAction.BaseItems)
+                    {
+                        if (types.Contains(itemMarket.GetType()))
+                        {
+                            var marketData = (MarketItemV1)itemMarket;
+                            var itemMarketBytes = itemMarket.ToByteArrayForSign();
+                            var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
+
+                            foreach (var itemPubKey in itemPubKeys)
+                            {
+                                if (itemPubKey.SequenceEqual(userPubKey))
+                                {
+                                    if (marketData.State == (int)MarketManager.ProductStateEnum.Sold)
+                                    {
+                                        _logger.Information(string.Format("Creating a new chat for item {0}.", itemMarket.Hash));
+                                        var newChat = FreeMarketOneServer.Current.ChatManager.CreateNewSellerChat((MarketItemV1)itemMarket);
+                                        FreeMarketOneServer.Current.ChatManager.SaveChat(newChat);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

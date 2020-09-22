@@ -130,6 +130,7 @@ namespace FreeMarketApp.Views.Pages
 
                 var errorCount = 0;
                 var errorMessages = new StringBuilder();
+                var textHelper = new TextHelper();
 
                 if (string.IsNullOrEmpty(tbUserName.Text) || (tbUserName.Text.Length < 10))
                 {
@@ -138,7 +139,7 @@ namespace FreeMarketApp.Views.Pages
                 } 
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbUserName.Text))
+                    if (!textHelper.IsTextValid(tbUserName.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
                         errorCount++;
@@ -152,7 +153,7 @@ namespace FreeMarketApp.Views.Pages
                 } 
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
+                    if (!textHelper.IsTextValid(tbDescription.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
                         errorCount++;

@@ -515,10 +515,10 @@ namespace FreeMarketOne.ServerCore
         {
             lock (_locked)
             {
-                var ipHelper = new IpHelper(); //TODO: there have to be detection of onion address
+                var publicIp = FreeMarketOneServer.Current.ServerOnionAddress.PublicIp;
 
                 marketData.State = (int)MarketManager.ProductStateEnum.Sold;
-                marketData.BuyerOnionEndpoint = ipHelper.PublicIp.MapToIPv4().ToString();
+                marketData.BuyerOnionEndpoint = publicIp.MapToIPv4().ToString();
 
                 var bytesToSign = marketData.ToByteArrayForSign();
                 marketData.BuyerSignature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));

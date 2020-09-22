@@ -159,6 +159,7 @@ namespace FreeMarketApp.Views.Pages
 
                 var errorCount = 0;
                 var errorMessages = new StringBuilder();
+                var textHelper = new TextHelper();
 
                 if (string.IsNullOrEmpty(tbTitle.Text) || (tbTitle.Text.Length < 10))
                 {
@@ -167,7 +168,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbTitle.Text, true))
+                    if (!textHelper.IsTextValid(tbTitle.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
                         errorCount++;
@@ -180,7 +181,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbDescription.Text, true))
+                    if (!textHelper.IsTextValid(tbDescription.Text, true))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
                         errorCount++;
@@ -193,7 +194,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsTextValid(tbShipping.Text))
+                    if (!textHelper.IsTextValid(tbShipping.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
                         errorCount++;
@@ -206,7 +207,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (!ValidationHelper.IsNumberValid(tbPrice.Text))
+                    if (!textHelper.IsNumberValid(tbPrice.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsPrice"));
                         errorCount++;

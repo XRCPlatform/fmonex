@@ -1,18 +1,21 @@
 ﻿using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
 using FreeMarketOne.ServerCore.Helpers;
 using FreeMarketOne.Tor;
 using Libplanet;
 using Libplanet.Blockchain;
+using Libplanet.Extensions;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,6 +53,7 @@ namespace FreeMarketOne.ServerCore
         public BasePoolManager BasePoolManager;
         public MarketPoolManager MarketPoolManager;
         public ChatManager ChatManager;
+        public IpHelper ServerOnionAddress;
 
         public IBlockChainManager<BaseAction> BaseBlockChainManager;
         public IBlockChainManager<MarketAction> MarketBlockChainManager;
@@ -72,6 +76,9 @@ namespace FreeMarketOne.ServerCore
                 .SetBasePath(fullBaseDirectory)
                 .AddJsonFile("appsettings.json", true, false);
             var configFile = builder.Build();
+
+            //IP Helper //TODO: Later hidden service !!!!
+            ServerOnionAddress = new IpHelper();
 
             //Environment
             Configuration = InitConfigurationHelper.InitializeEnvironment(configFile);
@@ -168,6 +175,7 @@ namespace FreeMarketOne.ServerCore
 
                 //Initialize Market Blockchain Manager
                 MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
+                MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(Current.MarketBlockChainChanged);
 
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
                 var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
@@ -245,6 +253,21 @@ namespace FreeMarketOne.ServerCore
 
                 FreeMarketOneServerLoadedEvent?.Invoke(this, null);
             }).ConfigureAwait(true);
+        }
+
+        /// <summary>
+        /// Processing event Market BlockChain Changed for Chat
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MarketBlockChainChanged(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
+        {
+            _logger.Information(string.Format("New block processing for chat - item hash {0}.", e.Hash));
+
+            var marketBlockChain = Current.MarketBlockChainManager.Storage;
+            var block = marketBlockChain.GetBlock<MarketAction>(e.Hash);
+
+            Current.ChatManager.ProcessNewBlock(block);
         }
 
         public FreeMarketOneServerStates GetServerState()

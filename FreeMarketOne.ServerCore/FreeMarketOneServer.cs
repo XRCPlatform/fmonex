@@ -113,8 +113,9 @@ namespace FreeMarketOne.ServerCore
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
 
-                //Market Manager
+                //Chat Manager
                 ChatManager = new ChatManager(Configuration);
+                ChatManager.Start();
 
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);
@@ -284,9 +285,6 @@ namespace FreeMarketOne.ServerCore
 
         public void Stop()
         {
-            _logger?.Information("Ending User Manager...");
-            UserManager = null;
-
             _logger?.Information("Ending Service Manager...");
             ServiceManager?.Dispose();
 
@@ -305,6 +303,15 @@ namespace FreeMarketOne.ServerCore
 
             _logger?.Information("Ending Tor...");
             TorProcessManager?.Dispose();
+
+            _logger?.Information("Ending Chat Manager...");
+            ChatManager?.Dispose();
+
+            _logger?.Information("Ending User Manager...");
+            UserManager = null;
+
+            _logger?.Information("Ending Market Manager...");
+            MarketManager = null;
 
             _logger?.Information("Application End");
         }

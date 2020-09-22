@@ -22,7 +22,7 @@ namespace FreeMarketApp.Views.Pages
         private static List<Selector> _appliedFilters = new List<Selector>();
         private static int selectedPageSize = 20;
         private bool _initialized = false;
-
+        private SkynetHelper _skynetHelper;
         public static SearchResultsPage Instance
         {
             get
@@ -65,7 +65,8 @@ namespace FreeMarketApp.Views.Pages
             if ((FreeMarketOneServer.Current.MarketManager != null) && (FreeMarketOneServer.Current.UserManager != null))
             {
                 SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
-
+                
+                _skynetHelper = new SkynetHelper();
                 GetAndRenderQueryResults();
             }
 
@@ -91,7 +92,7 @@ namespace FreeMarketApp.Views.Pages
 
             var result = engine.Search(newQuery, true, 1);
 
-            SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+            _skynetHelper.PreloadTitlePhotos(result.Results, _logger);
 
             DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
 
@@ -134,7 +135,7 @@ namespace FreeMarketApp.Views.Pages
                 var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
                 var result = engine.Search(currentSearchResult.CurrentQuery, true, 1);
 
-                SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+                _skynetHelper.PreloadTitlePhotos(result.Results, _logger);
                 DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
             } 
         }
@@ -180,7 +181,7 @@ namespace FreeMarketApp.Views.Pages
 
             var result = engine.Search(newQuery, true, currentSearchResult.CurrentPage);
 
-            SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+            _skynetHelper.PreloadTitlePhotos(result.Results, _logger);
             DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
         }
 
@@ -232,7 +233,7 @@ namespace FreeMarketApp.Views.Pages
 
                 var result = engine.Search(currentQuery, true, currentSearchResult.CurrentPage + 1);
 
-                SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+                _skynetHelper.PreloadTitlePhotos(result.Results, _logger);
                 DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
             }
             
@@ -248,7 +249,7 @@ namespace FreeMarketApp.Views.Pages
                 //current query has currently applied filters embeded, but also has page position and other parameters.
                 var currentQuery = currentSearchResult.CurrentQuery;
                 var result = engine.Search(currentQuery, true, currentSearchResult.CurrentPage - 1);
-                SkynetHelper.PreloadTitlePhotos(result.Results, _logger);
+                _skynetHelper.PreloadTitlePhotos(result.Results, _logger);
                 DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
             }
         }

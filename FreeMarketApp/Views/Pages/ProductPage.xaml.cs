@@ -104,6 +104,10 @@ namespace FreeMarketApp.Views.Pages
                         FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
                         FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
+                        //create a new chat
+                        var newChat = FreeMarketOneServer.Current.ChatManager.CreateNewChat(_offer);
+                        FreeMarketOneServer.Current.ChatManager.SaveChat(newChat);
+
                         await MessageBox.Show(mainWindow,
                             string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
                             SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
@@ -192,7 +196,8 @@ namespace FreeMarketApp.Views.Pages
                 //photos loading
                 if ((_offer.Photos != null) && (_offer.Photos.Any()))
                 {
-                    SkynetHelper.PreloadPhotos(_offer, Instance._logger);
+                    var skynetHelper = new SkynetHelper();
+                    skynetHelper.PreloadPhotos(_offer, Instance._logger);
 
                     for (int i = 0; i < _offer.Photos.Count; i++)
                     {

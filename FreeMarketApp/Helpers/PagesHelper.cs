@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media.Imaging;
+using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
@@ -101,9 +102,30 @@ namespace FreeMarketApp.Helpers
                 {
                     var iPhoto = mainWindow.FindControl<Image>("IPhoto");
 
-                    var skynetStream = SkynetHelper.DownloadFromSkynet(userManager.UserData.Photo, _logger);
+                    var skynetHelper = new SkynetHelper();
+                    var skynetStream = skynetHelper.DownloadFromSkynet(userManager.UserData.Photo, _logger);
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
+            }
+        }
+
+        internal static void SetServerData(ILogger _logger, Window mainWindow)
+        {
+            var torProcessManager = FreeMarketOneServer.Current.TorProcessManager;
+            var swarmServer = FreeMarketOneServer.Current.BaseBlockChainManager.SwarmServer;
+
+            if (swarmServer != null)
+            {
+                var tbPeers = mainWindow.FindControl<TextBlock>("TBPeers");
+                tbPeers.Text = swarmServer.Peers.Count().ToString();
+            }
+
+            if (torProcessManager != null)
+            {
+                var tbTorStatus = mainWindow.FindControl<TextBlock>("TBTorStatus");
+                tbTorStatus.Text = torProcessManager.IsRunning ?
+                    SharedResources.ResourceManager.GetString("State_Running") :
+                    SharedResources.ResourceManager.GetString("State_Down");
             }
         }
 

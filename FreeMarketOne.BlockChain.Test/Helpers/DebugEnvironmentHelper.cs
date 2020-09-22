@@ -49,7 +49,8 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             onionSeedsManager = new MockSeedManager();
 
             //Initialize genesis blocks
-            var genesis = GenesisHelper.GenerateIt(configuration);
+            var genesisHelper = new GenesisHelper();
+            var genesis = genesisHelper.GenerateIt(configuration);
 
             //Initialize Base BlockChain Manager
             baseBlockChainManager = new BlockChainManager<BaseAction>(

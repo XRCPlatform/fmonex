@@ -1,11 +1,17 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using DynamicData;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure.Chat;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -38,6 +44,20 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(ChatPage).Namespace, typeof(ChatPage).Name));
 
+            if (FreeMarketOneServer.Current.ChatManager != null)
+            {
+                var chatManager = FreeMarketOneServer.Current.ChatManager;
+                PagesHelper.Log(_logger, string.Format("Loading chats from data folder."));
+
+                var chats = chatManager.GetAllChats();
+                DataContext = new ChatPageViewModel(chats);
+
+                if (chats.Any())
+                {
+                    LoadChatByProduct(chats.First().MarketItem.Signature);
+                }
+            }
+
             this.InitializeComponent();
         }
 
@@ -51,18 +71,48 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             PagesHelper.Switch(mainWindow, MainPage.Instance);
+
+            ClearForm();
         }
 
-        public void ButtonRemove_Click(object sender, RoutedEventArgs args)
+        public void ButtonChat_Click(object sender, RoutedEventArgs args)
         {
-            var mainWindow = PagesHelper.GetParentWindow(this);
+            var signature = ((Button)sender).Tag.ToString();
 
-            MessageBox.Show(mainWindow, "Test", "Test title", MessageBox.MessageBoxButtons.YesNoCancel);
+            LoadChatByProduct(signature);
         }
 
-        internal void LoadChatByProduct(string signature)
+        public void ButtonSendMessage_Click(object sender, RoutedEventArgs args)
         {
-            throw new NotImplementedException();
+            var signature = ((Button)sender).Tag.ToString();
+        }
+
+        public void LoadChatByProduct(string signature)
+        {
+            var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Signature == signature);
+
+            if (chatData != null)
+            {
+                var btSendMessage = Instance.FindControl<Button>("BTSendMessage");
+                var srTitle = Instance.FindControl<Separator>("SRTitle");
+                var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
+                var tbMessage = Instance.FindControl<TextBox>("TBMessage");
+
+                btSendMessage.Tag = chatData.MarketItem.Signature;
+                tbTitle.Text = chatData.MarketItem.Title;
+                srTitle.IsVisible = true;
+
+                ((ChatPageViewModel)DataContext).ChatItems.Clear();
+                if ((chatData.ChatItems != null) && (chatData.ChatItems.Any()))
+                {
+                    ((ChatPageViewModel)DataContext).ChatItems.AddRange(chatData.ChatItems);
+                }
+            }
+        }
+
+        private void ClearForm()
+        {
+            _instance = null;
         }
     }
 }

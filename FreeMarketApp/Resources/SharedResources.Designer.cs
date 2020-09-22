@@ -385,6 +385,24 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to offline.
+        /// </summary>
+        internal static string State_Down {
+            get {
+                return ResourceManager.GetString("State_Down", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to online.
+        /// </summary>
+        internal static string State_Running {
+            get {
+                return ResourceManager.GetString("State_Running", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to N/A.
         /// </summary>
         internal static string UnknownValue {

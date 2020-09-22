@@ -2,7 +2,7 @@
 {
     internal static class ValidationHelper
     {
-        private const string VALIDCHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+        private const string VALIDCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
 
         internal static bool IsNumberValid(string text)
         {

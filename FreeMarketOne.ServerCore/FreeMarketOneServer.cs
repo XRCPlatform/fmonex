@@ -52,6 +52,7 @@ namespace FreeMarketOne.ServerCore
 
         public BasePoolManager BasePoolManager;
         public MarketPoolManager MarketPoolManager;
+        public ChatManager ChatManager;
 
         public IBlockChainManager<BaseAction> BaseBlockChainManager;
         public IBlockChainManager<MarketAction> MarketBlockChainManager;
@@ -108,6 +109,9 @@ namespace FreeMarketOne.ServerCore
 
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
+
+                //Market Manager
+                ChatManager = new ChatManager(Configuration);
 
                 SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
 

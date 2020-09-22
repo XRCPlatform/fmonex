@@ -108,7 +108,7 @@ namespace FreeMarketOne.ServerCore.Helpers
             {
                 if (string.IsNullOrEmpty(configuration.ListenersForceThisIp))
                 {
-                    var ipHelper = new IpHelper();
+                    var ipHelper = new IpHelper(); //TODO: there have to be detection of onion address
                     if (ipHelper.PublicIp != null)
                     {
                         SetToPublicIp(configuration.ListenerBaseEndPoint, ipHelper.PublicIp.MapToIPv4());

@@ -134,7 +134,8 @@ namespace FreeMarketApp.Views.Pages
                 //photos loading
                 if ((_offer.Photos != null) && (_offer.Photos.Any()))
                 {
-                    SkynetHelper.PreloadPhotos(_offer, Instance._logger);
+                    var skynetHelper = new SkynetHelper();
+                    skynetHelper.PreloadPhotos(_offer, Instance._logger);
 
                     for (int i = 0; i < _offer.Photos.Count; i++)
                     {
@@ -290,7 +291,8 @@ namespace FreeMarketApp.Views.Pages
                         {
                             PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _offer.Photos[i - 1]));
 
-                            var skynetUrl = SkynetHelper.UploadToSkynet(_offer.Photos[i - 1], _logger);
+                            var skynetHelper = new SkynetHelper();
+                            var skynetUrl = skynetHelper.UploadToSkynet(_offer.Photos[i - 1], _logger);
                             if (skynetUrl == null)
                             {
                                 _offer.Photos.RemoveAt(i - 1);

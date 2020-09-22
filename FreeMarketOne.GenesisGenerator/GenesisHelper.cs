@@ -4,21 +4,23 @@ using Libplanet;
 using Libplanet.Blockchain;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
+using Libplanet.Extensions;
 using Org.BouncyCastle.Crypto.Generators;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace FreeMarketOne.GenesisBlock
 {
-    public static class GenesisHelper
+    public class GenesisHelper
     {
         private const string _privateBaseKey = "7dabd5472929a0c388c7d1af6e9e53848d89cb7ad844ed9d8e587aeefd749a5b";
         private const string _privateMarketKey = "24cd3da85fab65992b5d3fc313d5f6fd35879fc13d6bbf36c0d008978fd85c0b";
         private const long _chainUnixTimeMiliseconds = 1356088341000;
 
-        public static Block<BaseAction> GenerateIt(IBaseConfiguration configuration)
+        public Block<BaseAction> GenerateIt(IBaseConfiguration configuration)
         {
             //get fmone keys
             var privateBaseBytesKey = ByteUtil.ParseHex(_privateBaseKey);
@@ -68,7 +70,7 @@ namespace FreeMarketOne.GenesisBlock
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static byte[] GetGenesis(string name)
+        public byte[] GetGenesis(string name)
         {
             return ExtractResource(Assembly.GetExecutingAssembly()
                                    , "FreeMarketOne.GenesisBlock.Genesis." + name
@@ -81,7 +83,7 @@ namespace FreeMarketOne.GenesisBlock
         /// <param name="assembly"></param>
         /// <param name="resourceName"></param>
         /// <returns></returns>
-        private static byte[] ExtractResource(Assembly assembly, string resourceName)
+        private byte[] ExtractResource(Assembly assembly, string resourceName)
         {
             if (assembly == null)
             {
@@ -99,6 +101,40 @@ namespace FreeMarketOne.GenesisBlock
                 resFilestream.Read(bytes, 0, bytes.Length);
 
                 return bytes;
+            }
+        }
+
+        public Block<MarketAction> GetGenesisMarketBlockByHash(
+            List<IBaseItem> blockCheckPoints,
+            IDefaultBlockPolicy<MarketAction> blockPolicy)
+        {
+            if (blockCheckPoints.Any())
+            {
+                //ADDDDDD STORAGE genesis chain!!!! if it is valid!!!
+
+                var now = DateTime.UtcNow;
+                now = now.AddMilliseconds(blockPolicy.ValidBlockInterval.Value.Negate().TotalMilliseconds);
+
+                CheckPointMarketDataV1 genesisCheckPointAction = null;
+
+                //looking for the old genesis block
+                foreach (var itemBlockCheckPoint in blockCheckPoints)
+                {
+                    genesisCheckPointAction = (CheckPointMarketDataV1)itemBlockCheckPoint;
+                    if (itemBlockCheckPoint.CreatedUtc < now) break;
+                }
+
+                if (genesisCheckPointAction == null)
+                    genesisCheckPointAction = (CheckPointMarketDataV1)blockCheckPoints.First();
+
+                var genesisBlockBytes = ByteUtil.ParseHex(genesisCheckPointAction.Block);
+                var genesisBlock = Block<MarketAction>.Deserialize(genesisBlockBytes);
+
+                return genesisBlock;
+            }
+            else
+            {
+                return null;
             }
         }
     }

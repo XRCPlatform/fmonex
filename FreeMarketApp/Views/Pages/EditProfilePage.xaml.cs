@@ -64,7 +64,8 @@ namespace FreeMarketApp.Views.Pages
                 {
                     var iPhoto = this.FindControl<Image>("IPhoto");
 
-                    var skynetStream = SkynetHelper.DownloadFromSkynet(_userData.Photo, _logger);
+                    var skynetHelper = new SkynetHelper();
+                    var skynetStream = skynetHelper.DownloadFromSkynet(_userData.Photo, _logger);
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
             }
@@ -167,7 +168,8 @@ namespace FreeMarketApp.Views.Pages
                     {
                         PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _userData.Photo));
 
-                        var skynetUrl = SkynetHelper.UploadToSkynet(_userData.Photo, _logger);
+                        var skynetHelper = new SkynetHelper();
+                        var skynetUrl = skynetHelper.UploadToSkynet(_userData.Photo, _logger);
                         if (skynetUrl == null)
                         {
                             _userData.Photo = null;;

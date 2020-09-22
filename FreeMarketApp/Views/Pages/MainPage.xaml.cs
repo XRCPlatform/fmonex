@@ -55,7 +55,8 @@ namespace FreeMarketApp.Views.Pages
 
                 var offers = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
 
-                SkynetHelper.PreloadTitlePhotos(offers, _logger);
+                var skynetHelper = new SkynetHelper();
+                skynetHelper.PreloadTitlePhotos(offers, _logger);
                 DataContext = new MainPageViewModel(offers);
             }
             this.InitializeComponent();
@@ -86,7 +87,8 @@ namespace FreeMarketApp.Views.Pages
 
             if (offers.Any())
             {
-                SkynetHelper.PreloadTitlePhotos(offers, _logger);
+                var skynetHelper = new SkynetHelper();
+                skynetHelper.PreloadTitlePhotos(offers, _logger);
                 ((MainPageViewModel)DataContext).Items.AddRange(offers);
             }
         }

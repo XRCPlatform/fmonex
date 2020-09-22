@@ -148,12 +148,13 @@
 						c50.877,36.828,100.976,59.42,103.084,60.363c1.949,0.873,4.039,1.31,6.129,1.31s4.18-0.436,6.129-1.31
 						c2.107-0.943,52.205-23.535,103.082-60.363c30.285-21.923,54.525-44.376,72.047-66.736c22.941-29.276,34.572-58.69,34.572-87.425
 						V75.25C471.832,68.626,467.489,62.786,461.143,60.883z" VerticalAlignment="Center" HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="11" Margin="10 0 0 0"/>
-			  <TextBlock x:Name="TorStatus" Classes="StatusBarText" Text="Tor is running" FontSize="12" Margin="5 5 15 5" VerticalAlignment="Center"/>
+			  <TextBlock Classes="StatusBarText" Text="Tor is: " FontSize="12" Margin="5 5 0 5" VerticalAlignment="Center"/>
+			  <TextBlock Name="TBTorStatus" Classes="StatusBarText" Text="offline" FontSize="12" Margin="0 5 15 5" VerticalAlignment="Center"/>
 
 			  <!-- Peers -->
-			  <Border x:Name="PeersStatus" Classes="StatusBarIconRed" CornerRadius="10" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
+			  <Border Name="PeersStatus" Classes="StatusBarIconRed" CornerRadius="10" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
 			  <TextBlock Text="Peers: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
-			  <TextBlock x:Name="PeersNumber" Text="0 " Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
+			  <TextBlock Name="TBPeers" Text="0" Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 		  </WrapPanel>
 	  </Border>
     </Grid>

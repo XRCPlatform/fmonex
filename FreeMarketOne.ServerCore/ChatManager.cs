@@ -15,6 +15,8 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -27,17 +29,71 @@ namespace FreeMarketOne.ServerCore
         }
 
         private IBaseConfiguration _configuration;
+        private CancellationTokenSource _cancellationToken { get; set; }
+        private IAsyncLoopFactory _asyncLoopFactory { get; set; }
+        /// <summary>
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped, 4: Mining
+        /// </summary>
+        private long _running;
 
         private ILogger _logger { get; set; }
 
         private readonly object _locked = new object();
 
+        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+
         public ChatManager(IBaseConfiguration configuration)
         {
             _logger = Log.Logger.ForContext<ChatManager>();
             _logger.Information("Initializing Chat Manager");
-
+            
+            _asyncLoopFactory = new AsyncLoopFactory(_logger);
             _configuration = configuration;
+            _cancellationToken = new CancellationTokenSource();
+        }
+
+        public bool IsChatManagerRunning()
+        {
+            if (Interlocked.Read(ref _running) == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Start()
+        {
+            Interlocked.Exchange(ref _running, 1);
+
+            IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ChatManagerChecker", (cancellation) =>
+            {
+                var dateTimeUtc = DateTime.UtcNow;
+
+                var chats = GetAllChats();
+                if (chats.Any())
+                {
+                    foreach (var chatItem in chats)
+                    {
+                        if ((chatItem.ChatItems != null) && (chatItem.ChatItems.Any())) {
+                            
+                        }
+                    }
+                }
+
+                //StringBuilder periodicCheckLog = new StringBuilder();
+
+                //periodicCheckLog.AppendLine("======Service Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
+
+                //Console.WriteLine(periodicCheckLog.ToString());
+
+                return Task.CompletedTask;
+            },
+            _cancellationToken.Token,
+            repeatEvery: TimeSpans.HalfMinute,
+            startAfter: TimeSpans.FiveSeconds);
         }
 
         /// <summary>
@@ -81,23 +137,28 @@ namespace FreeMarketOne.ServerCore
         /// <param name="chatData"></param>
         public void SaveChat(ChatDataV1 chatData)
         {
-            var fullPath = CheckExistenceOfFolder();
+            var _object = new Object();
 
-            _logger.Information(string.Format("Saving chat data."));
+            lock (_object)
+            {
+                var fullPath = CheckExistenceOfFolder();
 
-            var privateKey = FreeMarketOneServer.Current.UserManager.PrivateKey.ByteArray;
-            byte[] keyBytes = new byte[32];
-            Array.Copy(privateKey, keyBytes, keyBytes.Length);
-            var aes = new SymmetricKey(keyBytes);
+                _logger.Information(string.Format("Saving chat data."));
 
-            var serializedChatData = JsonConvert.SerializeObject(chatData);
-            var compressedChatData = ZipHelper.Compress(serializedChatData);
+                var privateKey = FreeMarketOneServer.Current.UserManager.PrivateKey.ByteArray;
+                byte[] keyBytes = new byte[32];
+                Array.Copy(privateKey, keyBytes, keyBytes.Length);
+                var aes = new SymmetricKey(keyBytes);
 
-            var encryptedChatData = aes.Encrypt(compressedChatData);
+                var serializedChatData = JsonConvert.SerializeObject(chatData);
+                var compressedChatData = ZipHelper.Compress(serializedChatData);
 
-            var pathKey = Path.Combine(fullPath, chatData.MarketItem.Signature);
+                var encryptedChatData = aes.Encrypt(compressedChatData);
 
-            File.WriteAllBytes(pathKey, encryptedChatData);
+                var pathKey = Path.Combine(fullPath, chatData.MarketItem.Signature);
+
+                File.WriteAllBytes(pathKey, encryptedChatData);
+            }
         }
 
         /// <summary>
@@ -208,6 +269,8 @@ namespace FreeMarketOne.ServerCore
                 newChatItem.Type = (int)DetectWhoIm(chatData);
 
                 chatData.ChatItems.Add(newChatItem);
+
+                SaveChat(chatData);
             }
         }
 
@@ -275,6 +338,15 @@ namespace FreeMarketOne.ServerCore
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            Interlocked.Exchange(ref _running, 2);
+
+            _cancellationToken.Cancel();
+
+            Interlocked.Exchange(ref _running, 3);
         }
     }
 }

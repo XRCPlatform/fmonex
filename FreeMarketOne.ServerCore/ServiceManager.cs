@@ -68,6 +68,7 @@ namespace FreeMarketOne.ServerCore
                 CheckBasePoolManager(periodicCheckLog);
                 CheckMarketBlockChainManager(periodicCheckLog);
                 CheckMarketPoolManager(periodicCheckLog);
+                CheckChatManager(periodicCheckLog);
 
                 Console.WriteLine(periodicCheckLog.ToString());
 
@@ -332,6 +333,31 @@ namespace FreeMarketOne.ServerCore
             }
             periodicCheckLog?.Append("|" + (state ? "Active" : "Idle"));
             periodicCheckLog?.AppendLine();
+
+            return fullState;
+        }
+
+        private bool CheckChatManager(StringBuilder periodicCheckLog = null)
+        {
+            var state = false;
+            var fullState = false;
+
+            try
+            {
+                var isChatManagerRunning = FreeMarketOneServer.Current.ChatManager?.IsChatManagerRunning();
+                if (isChatManagerRunning.GetValueOrDefault(false))
+                {
+                    state = true;
+                }
+            }
+            catch
+            {
+                state = false;
+            }
+
+            periodicCheckLog?.Append("Chat Manager : " + (state ? "Active" : "Idle"));
+            periodicCheckLog?.AppendLine();
+            if (state) fullState = true;
 
             return fullState;
         }

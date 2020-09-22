@@ -52,8 +52,9 @@
 										</DataTemplate>
 									</ItemsControl.ItemTemplate>
 								</ItemsControl>
+                <Separator HorizontalAlignment="Stretch" Height="1" Margin="20 5" Classes="SideBarSeparator"></Separator>
 							</StackPanel>
-							<Separator HorizontalAlignment="Stretch" Height="1" Margin="20 5" Classes="SideBarSeparator"></Separator>
+							
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>

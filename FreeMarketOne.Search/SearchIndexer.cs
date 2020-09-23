@@ -63,7 +63,7 @@ namespace FreeMarketOne.Search
         {
             double pricePerGram = 0F;
             MarketItemCategory cat = (MarketItemCategory)marketItem.Category;
-            new DealType().TryGetValue(marketItem.DealType, out string dealTypeString);
+            //new DealType().TryGetValue(marketItem.DealType, out string dealTypeString);
             
             //if we are re-running the block and same hash comes again, delete and add it again
             Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
@@ -98,11 +98,11 @@ namespace FreeMarketOne.Search
                 new TextField("Description",marketItem.Description,Field.Store.NO),
                 new FacetField("Category",cat.ToString()),
                 new FacetField("Shipping",marketItem.Shipping),
-                new FacetField("DealType",dealTypeString),
+                //new FacetField("DealType",dealTypeString),
                 new FacetField("Fineness",string.IsNullOrEmpty(marketItem.Fineness) ? "Unspecified":marketItem.Fineness),
                 new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
                 new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),
-                new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
+                //new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
                 new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),                
                 new DoubleDocValuesField("PricePerGram", pricePerGram),
                 new DoubleDocValuesField("Price", marketItem.Price),

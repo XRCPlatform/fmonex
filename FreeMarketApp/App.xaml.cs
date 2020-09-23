@@ -101,6 +101,7 @@ namespace FreeMarketApp
         {
             var state = FreeMarketOneServer.Current.GetServerState();
 
+            FreeMarketOneServer.Current.SearchIndexer.DeleteAll();
             //this is temporary and will be shortly removed. just to get search bootstrapped for testing.
             var list = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
             foreach (var item in list)

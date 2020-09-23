@@ -41,7 +41,7 @@ namespace FreeMarketApp.Views.Pages
         {
             _searchPhrase = searchPhrase;
             _appliedFilters = new List<Selector>();
-            _appliedFilters.Add(new Selector("Sold", "No"));
+            //_appliedFilters.Add(new Selector("Sold", "No"));
         }
 
         public static SearchResultsPage GetInstance()
@@ -53,7 +53,7 @@ namespace FreeMarketApp.Views.Pages
         {
             _instance = null;
             _appliedFilters = new List<Selector>();
-            _appliedFilters.Add(new Selector("Sold", "No"));
+            //_appliedFilters.Add(new Selector("Sold", "No"));
         }
 
         public SearchResultsPage()

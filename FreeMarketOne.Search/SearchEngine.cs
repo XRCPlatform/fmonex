@@ -37,7 +37,7 @@ namespace FreeMarketOne.Search
             facetConfig = new FacetsConfig();
             PageSize = hitsPerPage;
             marketManager = marketChainManager;
-            FacetFieldNames = new List<string> { "DealType", "Category", "Shipping", "Fineness", "Manufacturer", "Size", "Sold", "WeightInGrams", "PricePerGram", "Price" };
+            FacetFieldNames = new List<string> { "Category", "Shipping", "Fineness", "Manufacturer", "Size", "WeightInGrams", "PricePerGram", "Price" };
             //facetConfig.SetHierarchical("Category", true);
 
         }

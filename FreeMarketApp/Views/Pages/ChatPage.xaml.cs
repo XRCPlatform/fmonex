@@ -133,7 +133,7 @@ namespace FreeMarketApp.Views.Pages
                         }
                         else
                         {
-                            chatManager.SendMessageToWorker(chatData, tbMessage.Text);
+                            chatManager.PrepaireMessageToWorker(chatData, tbMessage.Text);
                         }
                     }
                 }

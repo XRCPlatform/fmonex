@@ -20,8 +20,8 @@ namespace FreeMarketOne.DataStructure
         string BlockChainMarketPath { get; set; }
         string BlockChainSecretPath { get; set; }
         string BlockChainUserPath { get; set; }
-        EndPoint ListenerBaseEndPoint { get; set; }
-        EndPoint ListenerMarketEndPoint { get; set; }
+        IPEndPoint ListenerBaseEndPoint { get; set; }
+        IPEndPoint ListenerMarketEndPoint { get; set; }
         string ChangellyApiKey { get; set; }
         string ChangellySecret { get; set; }
         string ChangellyApiBaseUrl { get; set; }
@@ -37,5 +37,7 @@ namespace FreeMarketOne.DataStructure
         string ListenersForceThisIp { get; set; }
 
         string ChatPath { get; set; }
+
+        IPEndPoint ListenerChatEndPoint { get; set; }
     }
 }

@@ -7,13 +7,15 @@ using FreeMarketOne.ServerCore;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
+using NetMQ;
+using NetMQ.Sockets;
 using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -72,28 +74,160 @@ namespace FreeMarketOne.ServerCore
             {
                 var dateTimeUtc = DateTime.UtcNow;
 
+                StringBuilder periodicCheckLog = new StringBuilder();
                 var chats = GetAllChats();
                 if (chats.Any())
                 {
-                    foreach (var chatItem in chats)
+                    foreach (var chat in chats)
                     {
-                        if ((chatItem.ChatItems != null) && (chatItem.ChatItems.Any())) {
-                            
+                        var anyChange = false;
+
+                        if ((chat.ChatItems != null) && (chat.ChatItems.Any())) {
+
+                            for (int i = 0; i < chat.ChatItems.Count; i++)
+                            {
+                                if (!chat.ChatItems[i].Propagated)
+                                {
+                                    var peer = chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller ?
+                                                    chat.MarketItem.BuyerOnionEndpoint : chat.SellerEndPoint;
+
+                                    if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Signature, peer))
+                                    {
+                                        chat.ChatItems[i].Propagated = true;
+                                        anyChange = true;
+                                    } 
+                                }
+                            }
                         }
+
+                        if (anyChange) SaveChat(chat);
                     }
                 }
 
-                //StringBuilder periodicCheckLog = new StringBuilder();
+                if (periodicCheckLog.Length > 0) {
+                    var periodicCheckLogResult = new StringBuilder();
+                    
+                    periodicCheckLogResult.AppendLine("======Chat Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture));
 
-                //periodicCheckLog.AppendLine("======Service Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
-
-                //Console.WriteLine(periodicCheckLog.ToString());
+                    Console.WriteLine(periodicCheckLogResult.ToString());
+                }
 
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
             repeatEvery: TimeSpans.HalfMinute,
             startAfter: TimeSpans.FiveSeconds);
+
+            StartMQListener();
+        }
+
+
+        /// <summary>
+        /// Send message by NetMQ
+        /// </summary>
+        /// <param name="chatItem"></param>
+        /// <param name="signature"></param>
+        /// <returns></returns>
+        private bool SendNQMessage(ChatItem chatItem, string signature, string peer)
+        {
+            var endPoint = EndPointHelper.ParseIPEndPoint(peer);
+            using (var socket = new DealerSocket(endPoint.ToString()))
+            {
+                try
+                {
+                    var chatMessage = new ChatMessage();
+                    chatMessage.Message = chatItem.Message;
+                    chatMessage.ExtraMessage = chatItem.ExtraMessage;
+                    chatMessage.DateCreated = chatItem.DateCreated;
+                    chatMessage.Signature = signature;
+
+                    if (socket.TrySendMultipartMessage(TimeSpan.FromSeconds(5), chatMessage.ToNetMQMessage()))
+                    {
+                        return true;
+                    } 
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Load separate chat listener ovwe NetMQ
+        /// </summary>
+        private void StartMQListener()
+        {
+            Task.Run(() =>
+            {
+                var endPoint = _configuration.ListenerChatEndPoint.ToString();
+                using (var server = new RouterSocket())
+                {
+                    try
+                    {
+                        server.Options.RouterHandover = true;
+
+                        server.Bind(endPoint);
+                        server.ReceiveReady += ReceiveMessageEvent;
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// Event for receiving message
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ReceiveMessageEvent(object sender, NetMQSocketEventArgs e)
+        {
+            try
+            {
+                NetMQMessage rawMessage = e.Socket.ReceiveMultipartMessage();
+
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                if (rawMessage.FrameCount == 0)
+                {
+                    throw new ArgumentException("Can't parse empty NetMQMessage.");
+                }
+
+                var receivedChatItem = new ChatMessage(rawMessage);
+
+                var allLocalChats = GetAllChats();
+                var localChat = allLocalChats.FirstOrDefault(a => a.MarketItem.Signature == receivedChatItem.Signature);
+                if (localChat != null)
+                {
+                    var newChatItem = new ChatItem();
+                    newChatItem.DateCreated = receivedChatItem.DateCreated;
+                    newChatItem.Message = receivedChatItem.Message;
+                    newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
+                    newChatItem.Type = (int)DetectWhoIm(localChat);
+                    newChatItem.Propagated = true;
+
+                    localChat.ChatItems.Add(newChatItem);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(
+                    ex,
+                    $"An unexpected exception occurred during ReceiveMessageEvent(): {ex}"
+                );
+            }
         }
 
         /// <summary>
@@ -117,7 +251,7 @@ namespace FreeMarketOne.ServerCore
         public ChatDataV1 CreateNewSellerChat(MarketItemV1 offer)
         {
             var result = CreateNewChat(offer);
-            result.SellerEndPoint = FreeMarketOneServer.Current.ServerOnionAddress.PublicIp.ToString();
+            result.SellerEndPoint = _configuration.ListenerChatEndPoint.ToString();
             result.ChatItems = new List<ChatItem>();
 
             var newInitialMessage = new ChatItem();
@@ -155,23 +289,23 @@ namespace FreeMarketOne.ServerCore
 
                 var encryptedChatData = aes.Encrypt(compressedChatData);
 
-                var pathKey = Path.Combine(fullPath, chatData.MarketItem.Signature);
+                var pathKey = Path.Combine(fullPath, chatData.MarketItem.Hash);
 
                 File.WriteAllBytes(pathKey, encryptedChatData);
             }
         }
 
         /// <summary>
-        /// Load chat by his signature from drive
+        /// Load chat by his hash from drive
         /// </summary>
-        /// <param name="signature"></param>
+        /// <param name="hash"></param>
         /// <returns></returns>
-        public ChatDataV1 GetChat(string signature)
+        public ChatDataV1 GetChat(string hash)
         {
             try
             {
                 var fullPath = CheckExistenceOfFolder();
-                var fileChatPath = Path.Combine(fullPath, signature);
+                var fileChatPath = Path.Combine(fullPath, hash);
 
                 if (File.Exists(fileChatPath))
                 {
@@ -257,7 +391,7 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="chatData"></param>
         /// <param name="message"></param>
-        public void SendMessageToWorker(ChatDataV1 chatData, string message)
+        public void PrepaireMessageToWorker(ChatDataV1 chatData, string message)
         {
             if (chatData != null)
             {

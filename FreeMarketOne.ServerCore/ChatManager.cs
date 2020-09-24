@@ -70,53 +70,55 @@ namespace FreeMarketOne.ServerCore
         {
             Interlocked.Exchange(ref _running, 1);
 
-            //IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ChatManagerChecker", (cancellation) =>
-            //{
-            //    var dateTimeUtc = DateTime.UtcNow;
+            IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ChatManagerChecker", (cancellation) =>
+            {
+                var dateTimeUtc = DateTime.UtcNow;
 
-            //    StringBuilder periodicCheckLog = new StringBuilder();
-            //    var chats = GetAllChats();
-            //    if (chats.Any())
-            //    {
-            //        foreach (var chat in chats)
-            //        {
-            //            var anyChange = false;
+                StringBuilder periodicCheckLog = new StringBuilder();
+                var chats = GetAllChats();
+                if (chats.Any())
+                {
+                    foreach (var chat in chats)
+                    {
+                        var anyChange = false;
 
-            //            if ((chat.ChatItems != null) && (chat.ChatItems.Any())) {
+                        if ((chat.ChatItems != null) && (chat.ChatItems.Any()))
+                        {
 
-            //                for (int i = 0; i < chat.ChatItems.Count; i++)
-            //                {
-            //                    if (!chat.ChatItems[i].Propagated)
-            //                    {
-            //                        var peer = chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller ?
-            //                                        chat.MarketItem.BuyerOnionEndpoint : chat.SellerEndPoint;
+                            for (int i = 0; i < chat.ChatItems.Count; i++)
+                            {
+                                if (!chat.ChatItems[i].Propagated)
+                                {
+                                    var peer = chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller ?
+                                                    chat.MarketItem.BuyerOnionEndpoint : chat.SellerEndPoint;
 
-            //                        if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Signature, peer))
-            //                        {
-            //                            chat.ChatItems[i].Propagated = true;
-            //                            anyChange = true;
-            //                        } 
-            //                    }
-            //                }
-            //            }
+                                    if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Signature, peer))
+                                    {
+                                        chat.ChatItems[i].Propagated = true;
+                                        anyChange = true;
+                                    }
+                                }
+                            }
+                        }
 
-            //            if (anyChange) SaveChat(chat);
-            //        }
-            //    }
+                        if (anyChange) SaveChat(chat);
+                    }
+                }
 
-            //    if (periodicCheckLog.Length > 0) {
-            //        var periodicCheckLogResult = new StringBuilder();
-                    
-            //        periodicCheckLogResult.AppendLine("======Chat Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture));
+                if (periodicCheckLog.Length > 0)
+                {
+                    var periodicCheckLogResult = new StringBuilder();
 
-            //        Console.WriteLine(periodicCheckLogResult.ToString());
-            //    }
+                    periodicCheckLogResult.AppendLine("======Chat Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture));
 
-            //    return Task.CompletedTask;
-            //},
-            //_cancellationToken.Token,
-            //repeatEvery: TimeSpans.HalfMinute,
-            //startAfter: TimeSpans.HalfMinute);
+                    Console.WriteLine(periodicCheckLogResult.ToString());
+                }
+
+                return Task.CompletedTask;
+            },
+            _cancellationToken.Token,
+            repeatEvery: TimeSpans.HalfMinute,
+            startAfter: TimeSpans.HalfMinute);
 
             StartMQListener();
         }

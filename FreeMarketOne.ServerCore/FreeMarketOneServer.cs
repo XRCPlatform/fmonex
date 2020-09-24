@@ -122,6 +122,7 @@ namespace FreeMarketOne.ServerCore
                 ChatManager.Start();
 
                 SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
+                SearchIndexer.Initialize();
 
                 SearchEngine = new SearchEngine(MarketManager, Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString());
                 //Initialize Tor

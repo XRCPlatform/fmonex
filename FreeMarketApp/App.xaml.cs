@@ -102,12 +102,12 @@ namespace FreeMarketApp
             var state = FreeMarketOneServer.Current.GetServerState();
 
             //FreeMarketOneServer.Current.SearchIndexer.DeleteAll();
-            ////this is temporary and will be shortly removed. just to get search bootstrapped for testing.
-            //var list = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
-            //foreach (var item in list)
-            //{
-            //    FreeMarketOneServer.Current.SearchIndexer.Index(item, "unknown");
-            //}
+            //this is temporary and will be shortly removed. just to get search bootstrapped for testing.
+            var list = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
+            foreach (var item in list)
+            {
+                FreeMarketOneServer.Current.SearchIndexer.Index(item, "unknown");
+            }
 
             //var testActionItem2 = new ReviewUserDataV1();
             //testActionItem2.ReviewDateTime = DateTime.UtcNow.AddMinutes(-1);

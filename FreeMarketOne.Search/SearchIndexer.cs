@@ -43,6 +43,26 @@ namespace FreeMarketOne.Search
             taxoWriter = new DirectoryTaxonomyWriter(dirTaxonomy);
             _marketManager = marketManager;
         }
+        
+        public bool Initialize()
+        {
+            Document doc = new Document()
+            {
+                new StringField("PrimeID", "prime-id", Field.Store.YES)
+            };
+
+            Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
+            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
+            taxoWriter.Commit();
+
+            Writer.DeleteDocuments(new Term("PrimeID", "prime-id"));
+            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
+            taxoWriter.Commit();
+
+            return true;
+        }
 
         private IndexWriter Writer
         {

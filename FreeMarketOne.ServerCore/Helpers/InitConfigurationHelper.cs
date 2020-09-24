@@ -86,16 +86,10 @@ namespace FreeMarketOne.ServerCore.Helpers
             if (!string.IsNullOrEmpty(blockChainSecretPath)) configuration.BlockChainSecretPath = blockChainSecretPath;
         }
 
-        internal static void InitializeListenerEndPoints(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        internal static void InitializeTorUsage(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
-            var baseEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerBaseEndPoint"];
-            var marketEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerMarketEndPoint"];
-            var chatEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerChatEndPoint"];
             var useTor = configFile.GetSection("FreeMarketOneConfiguration")["ListenersUseTor"];
 
-            if (!string.IsNullOrEmpty(baseEndPoint)) configuration.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint(baseEndPoint);
-            if (!string.IsNullOrEmpty(marketEndPoint)) configuration.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint(marketEndPoint);
-            if (!string.IsNullOrEmpty(chatEndPoint)) configuration.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint(chatEndPoint);
             if (!string.IsNullOrEmpty(useTor))
             {
                 bool useTorParsed;
@@ -104,13 +98,24 @@ namespace FreeMarketOne.ServerCore.Helpers
                     configuration.ListenersUseTor = useTorParsed;
                 }
             }
+        }
+
+        internal static void InitializeListenerEndPoints(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var baseEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerBaseEndPoint"];
+            var marketEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerMarketEndPoint"];
+            var chatEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerChatEndPoint"];
+
+            if (!string.IsNullOrEmpty(baseEndPoint)) configuration.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint(baseEndPoint);
+            if (!string.IsNullOrEmpty(marketEndPoint)) configuration.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint(marketEndPoint);
+            if (!string.IsNullOrEmpty(chatEndPoint)) configuration.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint(chatEndPoint);
 
             //apply public IP address or force to use defined
             if (!configuration.ListenersUseTor)
             {
                 if (string.IsNullOrEmpty(configuration.ListenersForceThisIp))
                 {
-                    var publicIp = FreeMarketOneServer.Current.ServerOnionAddress.PublicIp;
+                    var publicIp = FreeMarketOneServer.Current.ServerPublicAddress.PublicIP;
                     if (publicIp != null)
                     {
                         SetToPublicIp(configuration.ListenerBaseEndPoint, publicIp.MapToIPv4());

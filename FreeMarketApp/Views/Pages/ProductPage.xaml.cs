@@ -82,46 +82,48 @@ namespace FreeMarketApp.Views.Pages
                 var itemReviewBytes = _offer.ToByteArrayForSign();
                 var offerUserPubKeys = UserPublicKey.Recover(itemReviewBytes, _offer.Signature);
                 var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+                var isMine = false;
 
                 foreach (var itemUserPubKey in offerUserPubKeys)
                 {
                     if (userPubKey.SequenceEqual(itemUserPubKey))
                     {
-                        await MessageBox.Show(mainWindow,
-                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_YouCantBuyYourOffer")),
-                            SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
-                            MessageBox.MessageBoxButtons.Ok);
-
-                        break;
-                    } 
-                    else
-                    {
-                        //sign market data and generating chain connection
-                        _offer = FreeMarketOneServer.Current.MarketManager.SignBuyerMarketData(_offer);
-
-                        PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));
-
-                        FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
-                        FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
-
-                        //create a new chat
-                        var newChat = FreeMarketOneServer.Current.ChatManager.CreateNewChat(_offer);
-                        FreeMarketOneServer.Current.ChatManager.SaveChat(newChat);
-
-                        await MessageBox.Show(mainWindow,
-                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
-                            SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
-                            MessageBox.MessageBoxButtons.Ok);
-
-                        var chatPage = ChatPage.Instance;
-                        chatPage.LoadChatByProduct(_offer.Signature);
-
-                        PagesHelper.Switch(mainWindow, chatPage);
-
-                        ClearForm();
-
+                        isMine = true;
                         break;
                     }
+                }
+
+                if (isMine) {
+                    await MessageBox.Show(mainWindow,
+                                string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_YouCantBuyYourOffer")),
+                                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                                MessageBox.MessageBoxButtons.Ok);
+                }
+                else
+                {
+                    //sign market data and generating chain connection
+                    _offer = FreeMarketOneServer.Current.MarketManager.SignBuyerMarketData(_offer);
+
+                    PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));
+
+                    FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
+                    FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
+
+                    //create a new chat
+                    var newChat = FreeMarketOneServer.Current.ChatManager.CreateNewChat(_offer);
+                    FreeMarketOneServer.Current.ChatManager.SaveChat(newChat);
+
+                    await MessageBox.Show(mainWindow,
+                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                        MessageBox.MessageBoxButtons.Ok);
+
+                    var chatPage = ChatPage.Instance;
+                    chatPage.LoadChatByProduct(_offer.Signature);
+
+                    PagesHelper.Switch(mainWindow, chatPage);
+
+                    ClearForm();
                 }
             }
         }

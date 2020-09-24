@@ -82,7 +82,8 @@ namespace FreeMarketOne.ServerCore
                     {
                         var anyChange = false;
 
-                        if ((chat.ChatItems != null) && (chat.ChatItems.Any())) {
+                        if ((chat.ChatItems != null) && (chat.ChatItems.Any()))
+                        {
 
                             for (int i = 0; i < chat.ChatItems.Count; i++)
                             {
@@ -95,7 +96,7 @@ namespace FreeMarketOne.ServerCore
                                     {
                                         chat.ChatItems[i].Propagated = true;
                                         anyChange = true;
-                                    } 
+                                    }
                                 }
                             }
                         }
@@ -104,9 +105,10 @@ namespace FreeMarketOne.ServerCore
                     }
                 }
 
-                if (periodicCheckLog.Length > 0) {
+                if (periodicCheckLog.Length > 0)
+                {
                     var periodicCheckLogResult = new StringBuilder();
-                    
+
                     periodicCheckLogResult.AppendLine("======Chat Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture));
 
                     Console.WriteLine(periodicCheckLogResult.ToString());
@@ -116,7 +118,7 @@ namespace FreeMarketOne.ServerCore
             },
             _cancellationToken.Token,
             repeatEvery: TimeSpans.HalfMinute,
-            startAfter: TimeSpans.FiveSeconds);
+            startAfter: TimeSpans.HalfMinute);
 
             StartMQListener();
         }
@@ -441,6 +443,8 @@ namespace FreeMarketOne.ServerCore
         public void ProcessNewBlock(Block<MarketAction> block)
         {
             var types = new Type[] { typeof(MarketItemV1) };
+
+            _logger.Information(string.Format("Processing a new block {0}.", block.Hash));
 
             var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
 

@@ -515,7 +515,7 @@ namespace FreeMarketOne.ServerCore
         {
             lock (_locked)
             {
-                var publicIp = FreeMarketOneServer.Current.ServerOnionAddress.PublicIp;
+                var publicIp = FreeMarketOneServer.Current.ServerPublicAddress.PublicIP;
 
                 marketData.State = (int)MarketManager.ProductStateEnum.Sold;
                 marketData.BuyerOnionEndpoint = publicIp.MapToIPv4().ToString();

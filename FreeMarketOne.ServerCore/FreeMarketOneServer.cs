@@ -53,7 +53,7 @@ namespace FreeMarketOne.ServerCore
         public BasePoolManager BasePoolManager;
         public MarketPoolManager MarketPoolManager;
         public ChatManager ChatManager;
-        public IpHelper ServerOnionAddress;
+        public IpHelper ServerPublicAddress;
 
         public IBlockChainManager<BaseAction> BaseBlockChainManager;
         public IBlockChainManager<MarketAction> MarketBlockChainManager;
@@ -77,9 +77,6 @@ namespace FreeMarketOne.ServerCore
                 .AddJsonFile("appsettings.json", true, false);
             var configFile = builder.Build();
 
-            //IP Helper //TODO: Later hidden service !!!!
-            ServerOnionAddress = new IpHelper();
-
             //Environment
             Configuration = InitConfigurationHelper.InitializeEnvironment(configFile);
 
@@ -90,6 +87,10 @@ namespace FreeMarketOne.ServerCore
             InitConfigurationHelper.InitializeLogFilePath(Configuration, configFile);
             InitConfigurationHelper.InitializeMemoryPoolPaths(Configuration, configFile);
             InitConfigurationHelper.InitializeBlockChainPaths(Configuration, configFile);
+            InitConfigurationHelper.InitializeTorUsage(Configuration, configFile);
+
+            //IP Helper
+            ServerPublicAddress = new IpHelper(Configuration);
             InitConfigurationHelper.InitializeListenerEndPoints(Configuration, configFile);
 
             //Initialize Logger
@@ -124,6 +125,9 @@ namespace FreeMarketOne.ServerCore
                 SpinWait.SpinUntil(() => torInitialized, 10000);
                 if (torInitialized)
                 {
+                    //Loading 
+                    ServerPublicAddress.GetMyTorExitIP();
+
                     //Initialize OnionSeeds
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
                     OnionSeedsManager.Start();

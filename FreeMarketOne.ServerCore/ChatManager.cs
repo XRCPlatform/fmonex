@@ -442,6 +442,8 @@ namespace FreeMarketOne.ServerCore
         {
             var types = new Type[] { typeof(MarketItemV1) };
 
+            _logger.Information(string.Format("Processing a new block {0}.", block.Hash));
+
             var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
 
             foreach (var itemTx in block.Transactions)

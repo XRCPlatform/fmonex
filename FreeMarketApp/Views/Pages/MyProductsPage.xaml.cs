@@ -44,6 +44,7 @@ namespace FreeMarketApp.Views.Pages
             if (FreeMarketOneServer.Current.Logger != null)
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MyProductsPage).Namespace, typeof(MyProductsPage).Name));
+            this.InitializeComponent();
 
             if ((FreeMarketOneServer.Current.MarketManager != null) && (FreeMarketOneServer.Current.UserManager != null))
             {
@@ -64,9 +65,7 @@ namespace FreeMarketApp.Views.Pages
                 if (myOffersSold.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
 
                 DataContext = new MyProductsPageViewModel(myOffersActive, myOffersSold);
-            }
-
-            this.InitializeComponent();
+            }           
         }
 
         private void InitializeComponent()

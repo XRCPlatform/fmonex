@@ -8,6 +8,7 @@ namespace FreeMarketOne.DataStructure.Chat
 {
     [JsonConverter(typeof(JsonSubtypes), "_nt")]
     [JsonSubtypes.KnownSubTypeWithProperty(typeof(ChatDataV1), "ChatDataV1")]
+    [JsonSubtypes.KnownSubTypeWithProperty(typeof(MarketItemV1), "MarketItemV1")]
     public interface IChatData
     {
         string nametype { get; set; }

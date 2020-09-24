@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.ServerCore;
 using Serilog;
@@ -77,22 +78,33 @@ namespace FreeMarketApp.Views
 
         public void ButtonPrivateChat_Click(object sender, RoutedEventArgs args)
         {
-            PagesHelper.Switch(this, ChatPage.Instance);
+            var chatPage = ChatPage.Instance;
+            var chatItems = ((ChatPageViewModel)chatPage.DataContext).Items;
+
+            if (chatItems.Any())
+            {
+                chatPage.LoadChatByProduct(chatItems.First().MarketItem.Signature);
+            }
+
+            PagesHelper.Switch(this, chatPage);
         }
 
         public void ButtonMyProducts_Click(object sender, RoutedEventArgs args)
         {
             PagesHelper.Switch(this, MyProductsPage.Instance);
+            ChatPage.Instance = null;
         }
 
         public void ButtonSearch_Click(object sender, RoutedEventArgs args)
         {
             PagesHelper.Switch(this, SearchResultsPage.Instance);
+            ChatPage.Instance = null;
         }
 
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
         {
             PagesHelper.Switch(this, MyProfilePage.Instance);
+            ChatPage.Instance = null;
         }
 
         private void ServerLoadedEvent(object sender, EventArgs e)
@@ -115,6 +127,7 @@ namespace FreeMarketApp.Views
             }
 
             PagesHelper.Switch(this, settingsPage);
+            ChatPage.Instance = null;
         }
     }
 }

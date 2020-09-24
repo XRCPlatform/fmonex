@@ -19,7 +19,7 @@
       <ScrollViewer HorizontalAlignment="Left" Margin="0,90,0,0" Width="250">
         <StackPanel Orientation="Vertical">
           <TextBlock Text="All Chats" Classes="H1" TextWrapping="Wrap" FontSize="28" Margin="25 10 0 10" FontWeight="Bold"/>
-
+          
           <ItemsControl Items="{Binding Items}">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
@@ -27,15 +27,15 @@
                 <!-- Chat thread-->
                 <Button Name="BTChat" Tag="{Binding MarketItem.Signature}" Classes="sidebar" Height="50" HorizontalContentAlignment="Stretch" Cursor="Hand" Click="ButtonChat_Click">
                   <DockPanel>
-                    <TextBlock DockPanel.Dock="Left" Margin="7,0,0,0" VerticalAlignment="Center" MaxWidth="145" TextWrapping="NoWrap" Text="{Binding MarketItem.Title}"/>
-                 </DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Margin="0,0,0,0" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" MaxWidth="145" TextWrapping="NoWrap" Text="{Binding MarketItem.Title}"/>
+                  </DockPanel>
                 </Button>
                 <!-- End of chat thread-->
 
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-          
+                    
         </StackPanel>
       </ScrollViewer>
       <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>

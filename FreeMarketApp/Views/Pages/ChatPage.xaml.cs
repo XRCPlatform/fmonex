@@ -54,13 +54,8 @@ namespace FreeMarketApp.Views.Pages
                 var chats = chatManager.GetAllChats();
                 DataContext = new ChatPageViewModel(chats);
 
-                if (chats.Any())
-                {
-                    LoadChatByProduct(chats.First().MarketItem.Signature);
-                }
+                this.InitializeComponent();
             }
-
-            this.InitializeComponent();
         }
 
         private void InitializeComponent()
@@ -166,6 +161,10 @@ namespace FreeMarketApp.Views.Pages
                 if ((chatData.ChatItems != null) && (chatData.ChatItems.Any()))
                 {
                     ((ChatPageViewModel)DataContext).ChatItems.AddRange(chatData.ChatItems);
+                } 
+                else
+                {
+
                 }
             }
         }

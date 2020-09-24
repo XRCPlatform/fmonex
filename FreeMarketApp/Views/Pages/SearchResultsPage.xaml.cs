@@ -114,8 +114,11 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonProduct_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
+            var signature = ((Button)sender).Tag.ToString();
 
-            PagesHelper.Switch(mainWindow, ProductPage.Instance);
+            var productPage = ProductPage.Instance;
+            productPage.LoadProduct(signature);
+            PagesHelper.Switch(mainWindow, productPage);
         }
 
         public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)

@@ -130,7 +130,10 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(BaseSignature);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
             content.Append(Fineness);
-            content.Append(WeightInGrams);
+            if (WeightInGrams>0)
+            {
+                content.Append(WeightInGrams);
+            }            
             content.Append(Size);
             content.Append(Manufacturer);
             return shaProcessor.GetSHA256(content.ToString());

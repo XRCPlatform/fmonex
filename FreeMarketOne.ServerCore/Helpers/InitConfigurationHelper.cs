@@ -90,10 +90,12 @@ namespace FreeMarketOne.ServerCore.Helpers
         {
             var baseEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerBaseEndPoint"];
             var marketEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerMarketEndPoint"];
+            var chatEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerChatEndPoint"];
             var useTor = configFile.GetSection("FreeMarketOneConfiguration")["ListenersUseTor"];
 
             if (!string.IsNullOrEmpty(baseEndPoint)) configuration.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint(baseEndPoint);
             if (!string.IsNullOrEmpty(marketEndPoint)) configuration.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint(marketEndPoint);
+            if (!string.IsNullOrEmpty(chatEndPoint)) configuration.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint(chatEndPoint);
             if (!string.IsNullOrEmpty(useTor))
             {
                 bool useTorParsed;
@@ -113,6 +115,7 @@ namespace FreeMarketOne.ServerCore.Helpers
                     {
                         SetToPublicIp(configuration.ListenerBaseEndPoint, publicIp.MapToIPv4());
                         SetToPublicIp(configuration.ListenerMarketEndPoint, publicIp.MapToIPv4());
+                        SetToPublicIp(configuration.ListenerChatEndPoint, publicIp.MapToIPv4());
                     }
                 } 
                 else
@@ -122,6 +125,7 @@ namespace FreeMarketOne.ServerCore.Helpers
                     {
                         SetToPublicIp(configuration.ListenerBaseEndPoint, newIp);
                         SetToPublicIp(configuration.ListenerMarketEndPoint, newIp);
+                        SetToPublicIp(configuration.ListenerChatEndPoint, newIp);
                     }
                 }
             }

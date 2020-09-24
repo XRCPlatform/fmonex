@@ -31,7 +31,8 @@ namespace FreeMarketOne.BlockChain.Test
             this.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9113/");
             this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9114/");
             this.TelemetryServerUri = "http://40.115.21.64:8088/services/collector/event";
-
+            this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://127.0.0.1:9115/");
+            this.ChatPath = "data/debug_chat";
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

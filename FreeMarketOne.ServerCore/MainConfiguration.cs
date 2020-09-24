@@ -34,6 +34,7 @@ namespace FreeMarketOne.DataStructure
             this.ChangellyApiBaseUrl = "https://api.changelly.com";
             this.TelemetryServerUri = "https://telemetry.freemarket.one/";
             this.ChatPath = "data/chat";
+            this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://127.0.0.1:9110/");
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

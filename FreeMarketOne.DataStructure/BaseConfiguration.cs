@@ -46,9 +46,9 @@ namespace FreeMarketOne.DataStructure
 
         public string BlockChainUserPath { get; set; }
 
-        public EndPoint ListenerBaseEndPoint { get; set; }
+        public IPEndPoint ListenerBaseEndPoint { get; set; }
 
-        public EndPoint ListenerMarketEndPoint { get; set; }
+        public IPEndPoint ListenerMarketEndPoint { get; set; }
 
         public string ChangellyApiKey { get; set; }
 
@@ -65,5 +65,6 @@ namespace FreeMarketOne.DataStructure
         public string ListenersForceThisIp { get; set; }
 
         public string ChatPath { get; set; }
+        public IPEndPoint ListenerChatEndPoint { get; set; }
     }
 }

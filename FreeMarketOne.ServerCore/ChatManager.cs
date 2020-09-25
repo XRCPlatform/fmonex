@@ -43,7 +43,7 @@ namespace FreeMarketOne.ServerCore
 
         private readonly object _locked = new object();
 
-        private const int RequestTimeout = 1000; // ms
+        private const int RequestTimeout = 5000; // ms
 
         public bool IsRunning => Interlocked.Read(ref _running) == 1;
 

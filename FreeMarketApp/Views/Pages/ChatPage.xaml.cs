@@ -159,9 +159,12 @@ namespace FreeMarketApp.Views.Pages
                 srTitle.IsVisible = true;
 
                 ((ChatPageViewModel)DataContext).ChatItems.Clear();
-                if ((chatData.ChatItems != null) && (chatData.ChatItems.Any()))
+                if ((chatData.ChatItems != null) && chatData.ChatItems.Any() && (chatData.ChatItems.Count > 1))
                 {
-                    ((ChatPageViewModel)DataContext).ChatItems.AddRange(chatData.ChatItems);
+                    var chatManager = FreeMarketOneServer.Current.ChatManager;
+
+                    var decryptedChat = chatManager.DecryptChatItems(chatData.ChatItems);
+                    ((ChatPageViewModel)DataContext).ChatItems.AddRange(decryptedChat);
                     btWithoutMessage.IsVisible = false;
                 } 
                 else

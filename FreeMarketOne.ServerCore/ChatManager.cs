@@ -43,6 +43,8 @@ namespace FreeMarketOne.ServerCore
 
         private readonly object _locked = new object();
 
+        private const int RequestTimeout = 1000; // ms
+
         public bool IsRunning => Interlocked.Read(ref _running) == 1;
 
         public ChatManager(IBaseConfiguration configuration)
@@ -71,6 +73,8 @@ namespace FreeMarketOne.ServerCore
         {
             Interlocked.Exchange(ref _running, 1);
 
+            StartMQListener();
+
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ChatManagerChecker", (cancellation) =>
             {
                 var dateTimeUtc = DateTime.UtcNow;
@@ -85,19 +89,31 @@ namespace FreeMarketOne.ServerCore
 
                         if ((chat.ChatItems != null) && (chat.ChatItems.Any()))
                         {
-
                             for (int i = 0; i < chat.ChatItems.Count; i++)
                             {
                                 if (!chat.ChatItems[i].Propagated)
                                 {
-                                    var peer = chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller ?
+                                    var chatPeerIp = chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller ?
                                                     chat.MarketItem.BuyerOnionEndpoint : chat.SellerEndPoint;
-                                    var endPoint = GetChatPeerEndpoint(peer);
+                                    var endPoint = GetChatPeerEndpoint(chatPeerIp);
+
+                                    //DELETE: endPoint = EndPointHelper.ParseIPEndPoint("127.0.0.1:9115");
+                         
+                                    periodicCheckLog.AppendLine(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
+                                    _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
 
                                     if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Signature, endPoint))
                                     {
+                                        periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
+                                        _logger.Information(string.Format("Sending chat message done."));
+
                                         chat.ChatItems[i].Propagated = true;
                                         anyChange = true;
+                                    } 
+                                    else
+                                    {
+                                        periodicCheckLog.AppendLine(string.Format("Chat peer is offline."));
+                                        _logger.Information(string.Format("Chat peer is offline."));
                                     }
                                 }
                             }
@@ -112,7 +128,7 @@ namespace FreeMarketOne.ServerCore
                     var periodicCheckLogResult = new StringBuilder();
 
                     periodicCheckLogResult.AppendLine("======Chat Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture));
-
+                    periodicCheckLogResult.Append(periodicCheckLog.ToString());
                     Console.WriteLine(periodicCheckLogResult.ToString());
                 }
 
@@ -121,8 +137,6 @@ namespace FreeMarketOne.ServerCore
             _cancellationToken.Token,
             repeatEvery: TimeSpans.HalfMinute,
             startAfter: TimeSpans.HalfMinute);
-
-            StartMQListener();
         }
 
         /// <summary>
@@ -138,6 +152,11 @@ namespace FreeMarketOne.ServerCore
             return endPoint;
         }
 
+        private static void ClientOnReceiveReady(object sender, NetMQSocketEventArgs args)
+        {
+            //Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
+        }
+
         /// <summary>
         /// Send message by NetMQ
         /// </summary>
@@ -147,7 +166,8 @@ namespace FreeMarketOne.ServerCore
         private bool SendNQMessage(ChatItem chatItem, string signature, IPEndPoint endPoint)
         {
             var connectionString = string.Format("tcp://{0}", endPoint.ToString());
-            using (var socket = new DealerSocket(connectionString))
+
+            using (var client = new RequestSocket())
             {
                 try
                 {
@@ -157,22 +177,70 @@ namespace FreeMarketOne.ServerCore
                     chatMessage.DateCreated = chatItem.DateCreated;
                     chatMessage.Signature = signature;
 
-                    if (socket.TrySendMultipartMessage(TimeSpan.FromSeconds(5), chatMessage.ToNetMQMessage()))
-                    {
-                        return true;
-                    } 
-                    else
-                    {
-                        return false;
-                    }
+                    client.Options.Linger = TimeSpan.Zero;
+
+                    client.Connect(connectionString);
+
+                    client.SendMultipartMessage(chatMessage.ToNetMQMessage());
+                    client.ReceiveReady += ClientOnReceiveReady;
+                    bool pollResult = client.Poll(TimeSpan.FromMilliseconds(RequestTimeout));
+                    client.ReceiveReady -= ClientOnReceiveReady;
+                    client.Disconnect(connectionString);
+                    
+                    return pollResult;
                 }
                 catch (Exception ex)
                 {
-
+                    _logger.Error(
+                        ex,
+                        $"An unexpected exception occurred during SendNQMessage(): {ex}"
+                    );
                 }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Descrypt chat items in chat
+        /// </summary>
+        /// <param name="chatItems"></param>
+        /// <returns></returns>
+        public List<ChatItem> DecryptChatItems(List<ChatItem> chatItems)
+        {
+            var result = new List<ChatItem>();
+
+            var password = chatItems.First().Message;
+            var aes = new SymmetricKey(Encoding.ASCII.GetBytes(password));
+            var first = true;
+
+            foreach (var item in chatItems)
+            {
+                if (first)
+                {
+                    first = false;
+                    continue;
+                }
+
+                item.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
+                result.Add(item);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// TODO DEBUG TOOL DELETE TOO
+        /// </summary>
+        /// <param name="operationType"></param>
+        /// <param name="message"></param>
+        private void PrintFrames(string operationType, NetMQMessage message)
+        {
+            for (int i = 0; i < message.FrameCount; i++)
+            {
+                Console.WriteLine("{0} Socket : Frame[{1}] = {2}", operationType, i,
+                    message[i].ConvertToString());
+            }
         }
 
         /// <summary>
@@ -183,67 +251,47 @@ namespace FreeMarketOne.ServerCore
             Task.Run(() =>
             {
                 var endPoint = _configuration.ListenerChatEndPoint.ToString();
-                using (var server = new RouterSocket())
+
+                using (var response = new ResponseSocket())
                 {
-                    try
-                    {
-                        server.Options.RouterHandover = true;
+                    response.Options.Linger = TimeSpan.Zero;
+                    Console.WriteLine("Binding {0}", endPoint);
+                    response.Bind(endPoint);
 
-                        server.Bind(endPoint);
-                        server.ReceiveReady += ReceiveMessageEvent;
-                    }
-                    catch (Exception ex)
+                    while (true)
                     {
+                        var clientMessage = response.ReceiveMultipartMessage(4);
 
+                        Console.WriteLine("Msg received!");
+                        _logger.Information("Receiving chat message from peer.");
+
+                        var receivedChatItem = new ChatMessage(clientMessage);
+
+                        var allLocalChats = GetAllChats();
+                        var localChat = allLocalChats.FirstOrDefault(a => a.MarketItem.Signature == receivedChatItem.Signature);
+                        if (localChat != null)
+                        {
+                            var newChatItem = new ChatItem();
+                            newChatItem.DateCreated = receivedChatItem.DateCreated;
+                            newChatItem.Message = receivedChatItem.Message;
+                            newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
+                            newChatItem.Type = (int)DetectWhoIm(localChat);
+                            newChatItem.Propagated = true;
+
+                            localChat.ChatItems.Add(newChatItem);
+                            localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
+
+                            _logger.Information("Saving local chat with new data.");
+
+                            SaveChat(localChat);
+                        }
+
+                        response.SendMultipartMessage(clientMessage);
+
+                        Thread.Sleep(1000);
                     }
                 }
             });
-        }
-
-        /// <summary>
-        /// Event for receiving message
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ReceiveMessageEvent(object sender, NetMQSocketEventArgs e)
-        {
-            try
-            {
-                NetMQMessage rawMessage = e.Socket.ReceiveMultipartMessage();
-
-                if (_cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                if (rawMessage.FrameCount == 0)
-                {
-                    throw new ArgumentException("Can't parse empty NetMQMessage.");
-                }
-
-                var receivedChatItem = new ChatMessage(rawMessage);
-
-                var allLocalChats = GetAllChats();
-                var localChat = allLocalChats.FirstOrDefault(a => a.MarketItem.Signature == receivedChatItem.Signature);
-                if (localChat != null)
-                {
-                    var newChatItem = new ChatItem();
-                    newChatItem.DateCreated = receivedChatItem.DateCreated;
-                    newChatItem.Message = receivedChatItem.Message;
-                    newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
-                    newChatItem.Type = (int)DetectWhoIm(localChat);
-                    newChatItem.Propagated = true;
-
-                    localChat.ChatItems.Add(newChatItem);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(
-                    ex,
-                    $"An unexpected exception occurred during ReceiveMessageEvent(): {ex}"
-                );
-            }
         }
 
         /// <summary>
@@ -267,7 +315,7 @@ namespace FreeMarketOne.ServerCore
         public ChatDataV1 CreateNewSellerChat(MarketItemV1 offer)
         {
             var result = CreateNewChat(offer);
-            result.SellerEndPoint = _configuration.ListenerChatEndPoint.ToString();
+            result.SellerEndPoint = _configuration.ListenerChatEndPoint.Address.MapToIPv4().ToString();
             result.ChatItems = new List<ChatItem>();
 
             var newInitialMessage = new ChatItem();
@@ -411,16 +459,20 @@ namespace FreeMarketOne.ServerCore
         {
             if (chatData != null)
             {
-                if (chatData.ChatItems == null) chatData.ChatItems = new List<ChatItem>();
+                if (chatData.ChatItems.Any())
+                {
+                    var password = chatData.ChatItems.First().Message;
+                    var aes = new SymmetricKey(Encoding.ASCII.GetBytes(password));
 
-                var newChatItem = new ChatItem();
-                newChatItem.Message = message;
-                newChatItem.DateCreated = DateTime.UtcNow;
-                newChatItem.Type = (int)DetectWhoIm(chatData);
+                    var newChatItem = new ChatItem();
+                    newChatItem.Message = Convert.ToBase64String(aes.Encrypt(Encoding.UTF8.GetBytes(message)));
+                    newChatItem.DateCreated = DateTime.UtcNow;
+                    newChatItem.Type = (int)DetectWhoIm(chatData);
 
-                chatData.ChatItems.Add(newChatItem);
+                    chatData.ChatItems.Add(newChatItem);
 
-                SaveChat(chatData);
+                    SaveChat(chatData);
+                }
             }
         }
 

@@ -114,10 +114,6 @@ namespace FreeMarketOne.ServerCore
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
 
-                //Chat Manager
-                ChatManager = new ChatManager(Configuration);
-                ChatManager.Start();
-
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);
                 var torInitialized = TorProcessManager.Start();
@@ -127,6 +123,10 @@ namespace FreeMarketOne.ServerCore
                 {
                     //Loading 
                     ServerPublicAddress.GetMyTorExitIP();
+
+                    //Chat Manager
+                    ChatManager = new ChatManager(Configuration);
+                    ChatManager.Start();
 
                     //Initialize OnionSeeds
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);

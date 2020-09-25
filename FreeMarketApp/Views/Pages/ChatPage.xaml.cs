@@ -46,6 +46,8 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(ChatPage).Namespace, typeof(ChatPage).Name));
 
+            this.InitializeComponent();
+
             if (FreeMarketOneServer.Current.ChatManager != null)
             {
                 var chatManager = FreeMarketOneServer.Current.ChatManager;
@@ -53,8 +55,6 @@ namespace FreeMarketApp.Views.Pages
 
                 var chats = chatManager.GetAllChats();
                 DataContext = new ChatPageViewModel(chats);
-
-                this.InitializeComponent();
             }
         }
 

@@ -47,6 +47,8 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MainPage).Namespace, typeof(MainPage).Name));
 
+            this.InitializeComponent();
+
             if (FreeMarketOneServer.Current.MarketManager != null)
             {
                 SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
@@ -59,7 +61,6 @@ namespace FreeMarketApp.Views.Pages
                 skynetHelper.PreloadTitlePhotos(offers, _logger);
                 DataContext = new MainPageViewModel(offers);
             }
-            this.InitializeComponent();
         }
 
         private void InitializeComponent()

@@ -20,7 +20,16 @@ namespace FreeMarketOne.Search.Tests
     [TestClass()]
     public class SearchIndexerTests
     {
-    
+    /*TODO: implement following 
+     * fields to consider:
+     * Seller rating stars: facet
+     * Seller number of reviews range facet
+     * Seller active since epoch (probaly x days, x months, x years) range facet
+     * Seller name search for convenience
+     * Seller reviews, text? 
+     * Seller number of closed transactions?
+     * on product details page "see more from of this seller"
+     */
         [TestMethod()]
         public void CorrectlyCountsFacetsOnTermQuery()
         {

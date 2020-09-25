@@ -171,13 +171,27 @@ namespace FreeMarketApp.Views.Pages
                 var tbSellerReviewsCount = Instance.FindControl<TextBlock>("TBSellerReviewsCount");
                 var btSeller = Instance.FindControl<Button>("BTSeller");
                 var btBuyButton = Instance.FindControl<Button>("BTBuyButton");
+                var tbManufacturer = Instance.FindControl<TextBlock>("TBManufacturer");
+                var tbFineness = Instance.FindControl<TextBlock>("TBFineness");
+                var tbWeightInGrams = Instance.FindControl<TextBlock>("TBWeightInGrams");
+                var tbSize = Instance.FindControl<TextBlock>("TBSize");
 
                 tbTitle.Text = _offer.Title;
                 tbDescription.Text = _offer.Description;
                 tbShipping.Text = _offer.Shipping;
                 tbPrice.Text = _offer.Price.ToString();
                 tbPriceType.Text = ((ProductPriceTypeEnum)_offer.PriceType).ToString();
-                btBuyButton.Tag = _offer.Signature;
+                btBuyButton.Tag = _offer.Signature;            
+                tbManufacturer.Text = _offer.Manufacturer;
+                tbFineness.Text = _offer.Fineness;
+                tbWeightInGrams.Text = _offer.WeightInGrams.ToString();
+                tbSize.Text = _offer.Size;
+
+                btBuyButton.IsEnabled = true;
+                if (!String.IsNullOrEmpty(_offer.BaseSignature))
+                {
+                    btBuyButton.IsEnabled = false;
+                }
 
                 //seller userdata loading
                 var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(_offer);

@@ -118,10 +118,6 @@ namespace FreeMarketOne.ServerCore
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
 
-                //Chat Manager
-                ChatManager = new ChatManager(Configuration);
-                ChatManager.Start();
-
                 SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
                 SearchIndexer.Initialize();
 
@@ -135,6 +131,10 @@ namespace FreeMarketOne.ServerCore
                 {
                     //Loading 
                     ServerPublicAddress.GetMyTorExitIP();
+
+                    //Chat Manager
+                    ChatManager = new ChatManager(Configuration);
+                    ChatManager.Start();
 
                     //Initialize OnionSeeds
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);

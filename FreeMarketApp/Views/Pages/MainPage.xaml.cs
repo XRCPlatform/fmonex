@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using DynamicData;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
+using System.Xml;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -50,6 +52,8 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MainPage).Namespace, typeof(MainPage).Name));
 
+            this.InitializeComponent();
+
             if (FreeMarketOneServer.Current.MarketManager != null)
             {
                 SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
@@ -66,7 +70,6 @@ namespace FreeMarketApp.Views.Pages
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
                 DataContext = new MainPageViewModel(result, _appliedFilters);
             }
-            this.InitializeComponent();
 
             SetPageSizeOnControl(selectedPageSize);
         }

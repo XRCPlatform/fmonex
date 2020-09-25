@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,8 +92,9 @@ namespace FreeMarketOne.ServerCore
                                 {
                                     var peer = chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller ?
                                                     chat.MarketItem.BuyerOnionEndpoint : chat.SellerEndPoint;
+                                    var endPoint = GetChatPeerEndpoint(peer);
 
-                                    if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Signature, peer))
+                                    if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Signature, endPoint))
                                     {
                                         chat.ChatItems[i].Propagated = true;
                                         anyChange = true;
@@ -123,6 +125,18 @@ namespace FreeMarketOne.ServerCore
             StartMQListener();
         }
 
+        /// <summary>
+        /// Add port to chat peer endpoint
+        /// </summary>
+        /// <param name="peerIp"></param>
+        /// <returns></returns>
+        private IPEndPoint GetChatPeerEndpoint(string peerIp)
+        {
+            var endPoint = EndPointHelper.ParseIPEndPoint(peerIp);
+            endPoint.Port = _configuration.ListenerChatEndPoint.Port;
+
+            return endPoint;
+        }
 
         /// <summary>
         /// Send message by NetMQ
@@ -130,10 +144,10 @@ namespace FreeMarketOne.ServerCore
         /// <param name="chatItem"></param>
         /// <param name="signature"></param>
         /// <returns></returns>
-        private bool SendNQMessage(ChatItem chatItem, string signature, string peer)
+        private bool SendNQMessage(ChatItem chatItem, string signature, IPEndPoint endPoint)
         {
-            var endPoint = EndPointHelper.ParseIPEndPoint(peer);
-            using (var socket = new DealerSocket(endPoint.ToString()))
+            var connectionString = string.Format("tcp://{0}", endPoint.ToString());
+            using (var socket = new DealerSocket(connectionString))
             {
                 try
                 {

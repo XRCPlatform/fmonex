@@ -1,18 +1,16 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.ServerCore.Helpers;
 using Libplanet.Extensions;
 using Libplanet.RocksDBStore;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FreeMarketOne.ServerCore
 {
-    public class MarketManager
+    public class MarketManager : IMarketManager
     {
         public enum MarketCategoryEnum
         {
@@ -60,7 +58,7 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="itemMarket"></param>
         /// <returns></returns>
-        public List<byte[]> GetBuyerPubKeyFromMarketItem(MarketItem itemMarket)
+        public List<byte[]> GetBuyerPubKeyFromMarketItem(MarketItemV1 itemMarket)
         {
             if (!string.IsNullOrEmpty(itemMarket.BuyerSignature))
             {
@@ -80,7 +78,7 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="itemMarket"></param>
         /// <returns></returns>
-        public List<byte[]> GetSellerPubKeyFromMarketItem(MarketItem itemMarket)
+        public List<byte[]> GetSellerPubKeyFromMarketItem(MarketItemV1 itemMarket)
         {
             if (!string.IsNullOrEmpty(itemMarket.Signature))
             {

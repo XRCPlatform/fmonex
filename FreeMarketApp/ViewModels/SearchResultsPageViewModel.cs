@@ -1,27 +1,20 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Search;
 using Lucene.Net.Facet;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace FreeMarketApp.ViewModels
 {
-    public class MainPageViewModel : ViewModelBase
+    public class SearchResultsPageViewModel : ViewModelBase
     {
-        public MainPageViewModel(SearchResult searchResult, List<Selector> appliedFilters)
+        public SearchResultsPageViewModel(SearchResult searchResult, List<Selector> appliedFilters)
         {
             AppliedFilters = appliedFilters;
             Items = new ObservableCollection<MarketItemV1>((IEnumerable<MarketItemV1>)searchResult.Results);
             Facets = new ObservableCollection<FacetResult>((IEnumerable<FacetResult>)searchResult.Facets);
             Filters = new ObservableCollection<PresentableFacet>((IEnumerable<PresentableFacet>)JoinAppliedFilters(AppliedFilters, searchResult.Facets));
             Result = searchResult;
-        }
-
-        [Obsolete("This is now obsolete, please use constructor with SearchResult as this will enable paging and etc")]
-        public MainPageViewModel(IEnumerable<MarketItemV1> items)
-        {
-            Items = new ObservableCollection<MarketItemV1>(items);
         }
 
         /// <summary>
@@ -43,7 +36,7 @@ namespace FreeMarketApp.ViewModels
         /// Search result sumary object providing search result counts, page size, current page and etc.
         /// </summary>
         public SearchResult Result { get; set; }
-
+        
         /// <summary>
         /// Applied filters. 
         /// </summary>
@@ -71,7 +64,7 @@ namespace FreeMarketApp.ViewModels
             }
         }
 
-        private List<PresentableFacet> JoinAppliedFilters(List<Selector> selectors, List<FacetResult> facetResults)
+        private List<PresentableFacet> JoinAppliedFilters(List<Selector> selectors, List<FacetResult> facetResults )
         {
             var result = new List<PresentableFacet>();
             foreach (var facetResult in facetResults)
@@ -85,7 +78,7 @@ namespace FreeMarketApp.ViewModels
                 {
                     result.Add(new PresentableFacet(facetResult, false, false));
                 }
-
+                
             }
             return result;
         }

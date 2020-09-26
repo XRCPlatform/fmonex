@@ -1,11 +1,13 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Pages;
+using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
@@ -16,6 +18,7 @@ namespace FreeMarketApp.Views
     public class MainWindow : WindowBase
     {
         private ILogger _logger;
+        private SearchEngine searchEngine;
 
         public MainWindow()
         {
@@ -30,7 +33,6 @@ namespace FreeMarketApp.Views
             if (FreeMarketOneServer.Current.UserManager != null)
             {
                 FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
-
                 var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
                 if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
@@ -94,10 +96,44 @@ namespace FreeMarketApp.Views
             PagesHelper.Switch(this, MyProductsPage.Instance);
             ChatPage.Instance = null;
         }
+        public void SearchTextbox_keyDownEvent(object sender, KeyEventArgs e)
+        {
+            if (e.Key.Equals(Key.Enter))
+            {
+                var searchField = this.FindControl<TextBox>("SearchField");
+
+                string searchText = searchField.Text;
+                if (searchText != null)
+                {
+                    searchText = searchText.Replace("*", "").Replace("?", "");
+                }
+                if (SearchResultsPage.ValidateQuery(searchText))
+                {
+                    SearchResultsPage.ResetInstance();
+                    SearchResultsPage.SetSearchPhrase(searchText);
+
+                    PagesHelper.Switch(this, SearchResultsPage.Instance);
+                }
+
+            }
+        }
 
         public void ButtonSearch_Click(object sender, RoutedEventArgs args)
         {
-            PagesHelper.Switch(this, SearchResultsPage.Instance);
+            var searchField = this.FindControl<TextBox>("SearchField");
+
+            string searchText = searchField.Text;
+            if (searchText != null)
+            {
+                searchText = searchText.Replace("*", "").Replace("?", "");
+            }
+            if (SearchResultsPage.ValidateQuery(searchText))
+            {
+                SearchResultsPage.ResetInstance();
+                SearchResultsPage.SetSearchPhrase(searchText);
+
+                PagesHelper.Switch(this, SearchResultsPage.Instance);
+            }            
             ChatPage.Instance = null;
         }
 

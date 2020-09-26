@@ -4,6 +4,7 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
+using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore.Helpers;
 using FreeMarketOne.Tor;
 using Libplanet;
@@ -44,6 +45,8 @@ namespace FreeMarketOne.ServerCore
         public ServiceManager ServiceManager;
         public UserManager UserManager;
         public MarketManager MarketManager;
+        public SearchIndexer SearchIndexer;
+        public SearchEngine SearchEngine;
 
         public IBaseConfiguration Configuration;
         public TorProcessManager TorProcessManager;
@@ -103,6 +106,7 @@ namespace FreeMarketOne.ServerCore
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
 
+            
             //User manager
             UserManager = new UserManager(Configuration);
             if (UserManager.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
@@ -114,6 +118,10 @@ namespace FreeMarketOne.ServerCore
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
 
+                SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
+                SearchIndexer.Initialize();
+
+                SearchEngine = new SearchEngine(MarketManager, Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString());
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);
                 var torInitialized = TorProcessManager.Start();
@@ -152,12 +160,13 @@ namespace FreeMarketOne.ServerCore
                 {
                     _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
                 }
-            } 
+            }
             else
             {
                 _logger.Warning("No user account is necessary to create one.");
             }
         }
+
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
@@ -318,6 +327,7 @@ namespace FreeMarketOne.ServerCore
             MarketManager = null;
 
             _logger?.Information("Application End");
+            SearchIndexer.Dispose();
         }
     }
 }

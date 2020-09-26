@@ -28,6 +28,7 @@
     <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\FreeMarketOne.P2P\FreeMarketOne.P2P.csproj" />
     <ProjectReference Include="..\FreeMarketOne.PoolManager\FreeMarketOne.PoolManager.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Search\FreeMarketOne.Search.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Tor\FreeMarketOne.Tor.csproj" />
   </ItemGroup>
 

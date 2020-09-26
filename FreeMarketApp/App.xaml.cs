@@ -1,10 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
-using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.ServerCore;
@@ -13,8 +11,9 @@ using Libplanet.Blockchain;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
+using Libplanet.Blocks;
 
 namespace FreeMarketApp
 {
@@ -70,10 +69,17 @@ namespace FreeMarketApp
                 FreeMarketOneServer.Current.BaseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
                 FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 FreeMarketOneServer.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
+                FreeMarketOneServer.Current.MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockChainChangedEvent);
                 FreeMarketOneServer.Current.Initialize();
             }).ConfigureAwait(true);
 
             return new MainWindow { DataContext = new MainWindowViewModel() };
+        }
+
+        private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
+        {
+            var block = FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain?.Tip;
+            FreeMarketOneServer.Current.SearchIndexer.IndexBlock(block);
         }
 
         private static void BaseBlockChainChanged(object sender, EventArgs e)
@@ -82,14 +88,26 @@ namespace FreeMarketApp
             _newBlock = true;
         }
 
-        private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> e)
+        private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> deletedHashes)
         {
-            //process deleted blocks
+            foreach (var item in deletedHashes)
+            {
+                FreeMarketOneServer.Current.SearchIndexer.DeleteMarketItemsByBlockHash(item.ToString());
+            }
+            
         }
 
         private static void ServerLoadedEvent(object sender, EventArgs e)
         {
             var state = FreeMarketOneServer.Current.GetServerState();
+
+            //FreeMarketOneServer.Current.SearchIndexer.DeleteAll();
+            //this is temporary and will be shortly removed. just to get search bootstrapped for testing.
+            var list = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
+            foreach (var item in list)
+            {
+                FreeMarketOneServer.Current.SearchIndexer.Index(item, "unknown");
+            }
 
             //var testActionItem2 = new ReviewUserDataV1();
             //testActionItem2.ReviewDateTime = DateTime.UtcNow.AddMinutes(-1);

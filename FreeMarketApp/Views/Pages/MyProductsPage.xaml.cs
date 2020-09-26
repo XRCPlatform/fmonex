@@ -66,7 +66,7 @@ namespace FreeMarketApp.Views.Pages
                 if (myOffersSold.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
 
                 DataContext = new MyProductsPageViewModel(myOffersActive, myOffersSold);
-            }
+            }           
         }
 
         private void InitializeComponent()

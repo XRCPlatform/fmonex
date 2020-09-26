@@ -122,6 +122,33 @@
           <!-- product shipping binding -->
           <TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
         </StackPanel>
+
+        <TextBlock Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+          <!--Manufacturer binding -->
+          <TextBlock Classes="H1" Name="TBFineness"  Text="Fineness" Margin="0 2 0 0" FontSize="16"/>
+        </StackPanel>
+
+        <TextBlock Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+          <!--Manufacturer binding -->
+          <TextBlock Classes="H1" Name="TBManufacturer" Text="Manufacturer" Margin="0 2 0 0" FontSize="16"/>
+        </StackPanel>
+
+        <TextBlock Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+          <!--Size binding -->
+          <TextBlock Classes="H1" Name="TBSize" Text="1oz" Margin="0 2 0 0" FontSize="16"/>
+        </StackPanel>
+
+        <TextBlock Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+          <!--TBWeightInGrams binding -->
+          <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="31" Margin="0 2 0 0" FontSize="16"/>
+        </StackPanel>
+
+        
+
         <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <TextBlock Classes="H1" Text="$" Margin="0 2 0 0" FontSize="16"/>

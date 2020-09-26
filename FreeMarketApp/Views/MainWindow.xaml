@@ -93,7 +93,7 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <Border Classes="SearchBar" BorderThickness="3" CornerRadius="3">
-                    <TextBox x:Name="SearchField" Classes="SearchBar" Grid.Column="1" Padding="20 0 50 0" Watermark ="Search in offers" Cursor="IBeam" VerticalAlignment="Center" FontSize="15" BorderThickness="0"/>
+                    <TextBox x:Name="SearchField" Classes="SearchBar" Grid.Column="1" Padding="20 0 50 0" Watermark ="Search in offers (leave empty and search for all offers)" Cursor="IBeam" VerticalAlignment="Center" FontSize="15" BorderThickness="0" KeyDown="SearchTextbox_keyDownEvent"/>
                 </Border>
                 <Button Name="BTSearch" HorizontalAlignment="Right" Height="34" Width="45" Margin="0 0 5 0" Classes="search" Cursor="Hand" Click="ButtonSearch_Click">
                     <Path Classes="SideBarIcon" Data="M20.194,3.46c-4.613-4.613-12.121-4.613-16.734,0c-4.612,4.614-4.612,12.121,0,16.735   

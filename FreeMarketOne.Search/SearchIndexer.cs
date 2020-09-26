@@ -104,6 +104,13 @@ namespace FreeMarketOne.Search
                 return;
             }
 
+            if (marketItem.State == (int)ProductStateEnum.Sold)
+            {
+                Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
+                Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+                return;
+            }
+
             //transform seller pubkeys to sha hashes for simplified search use
             var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
             List<string> sellerPubKeyHashes = SearchHelper.GenerateSellerPubKeyHashes(sellerPubKeys);

@@ -118,10 +118,6 @@ namespace FreeMarketOne.ServerCore
                 //Market Manager
                 MarketManager = new MarketManager(Configuration);
 
-                SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
-                SearchIndexer.Initialize();
-
-                SearchEngine = new SearchEngine(MarketManager, Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString());
                 //Initialize Tor
                 TorProcessManager = new TorProcessManager(Configuration);
                 var torInitialized = TorProcessManager.Start();
@@ -129,6 +125,12 @@ namespace FreeMarketOne.ServerCore
                 SpinWait.SpinUntil(() => torInitialized, 10000);
                 if (torInitialized)
                 {
+                    //Search indexer
+                    SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
+                    SearchIndexer.Initialize();
+
+                    SearchEngine = new SearchEngine(MarketManager, Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString());
+
                     //Loading 
                     ServerPublicAddress.GetMyTorExitIP();
 
@@ -311,6 +313,9 @@ namespace FreeMarketOne.ServerCore
             BaseBlockChainManager?.Dispose();
             MarketBlockChainManager?.Dispose();
 
+            _logger?.Information("Ending Search Indexer...");
+            SearchIndexer?.Dispose();
+
             _logger?.Information("Ending Onion Seeds ...");
             OnionSeedsManager?.Dispose();
 
@@ -327,7 +332,6 @@ namespace FreeMarketOne.ServerCore
             MarketManager = null;
 
             _logger?.Information("Application End");
-            SearchIndexer.Dispose();
         }
     }
 }

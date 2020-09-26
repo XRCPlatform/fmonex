@@ -23,7 +23,7 @@ namespace FreeMarketOne.Search.Tests
         {
             indexDir = "./search";
             marketManager = Substitute.For<IMarketManager>();
-            search = new SearchIndexer(indexDir, marketManager);
+            search = new SearchIndexer(marketManager, indexDir);
         }
 
         [TestMethod()]
@@ -424,7 +424,7 @@ namespace FreeMarketOne.Search.Tests
         {
             string indexDir2 = "search2";
             var marketManager1 = Substitute.For<IMarketManager>();
-            var search1 = new SearchIndexer(indexDir2, marketManager1);
+            var search1 = new SearchIndexer(marketManager1, indexDir2);
 
             List<ValueTuple<MarketItem, List<byte[]>>> lst = new List<ValueTuple<MarketItem, List<byte[]>>>();
 

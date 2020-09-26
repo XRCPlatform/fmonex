@@ -140,5 +140,19 @@ namespace FreeMarketOne.ServerCore.Helpers
         {
             ((IPEndPoint)endPoint).Address = newIp;
         }
+
+        internal static void InitializeChatPaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var chatPath = configFile.GetSection("FreeMarketOneConfiguration")["ChatPath"];
+
+            if (!string.IsNullOrEmpty(chatPath)) configuration.SearchEnginePath = chatPath;
+        }
+
+        internal static void InitializeSearchEnginePaths(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var searchEnginePath = configFile.GetSection("FreeMarketOneConfiguration")["SearchEnginePath"];
+
+            if (!string.IsNullOrEmpty(searchEnginePath)) configuration.SearchEnginePath = searchEnginePath;
+        }
     }
 }

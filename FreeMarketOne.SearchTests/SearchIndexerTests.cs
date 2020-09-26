@@ -50,7 +50,7 @@ namespace FreeMarketOne.Search.Tests
             string taxoDir = indexDir + "/taxonomy/";
 
             var marketManager = Substitute.For<IMarketManager>();
-            SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
             search.DeleteAll();
             search.Commit();
 
@@ -140,7 +140,7 @@ namespace FreeMarketOne.Search.Tests
             string taxoDir = indexDir + "/taxonomy/";
 
             var marketManager = Substitute.For<IMarketManager>();
-            SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");
@@ -241,7 +241,7 @@ namespace FreeMarketOne.Search.Tests
 
             var marketManager = Substitute.For<IMarketManager>();
 
-            SearchIndexer search = new SearchIndexer(indexDir, marketManager);
+            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");

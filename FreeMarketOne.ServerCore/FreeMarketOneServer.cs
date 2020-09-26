@@ -91,6 +91,8 @@ namespace FreeMarketOne.ServerCore
             InitConfigurationHelper.InitializeMemoryPoolPaths(Configuration, configFile);
             InitConfigurationHelper.InitializeBlockChainPaths(Configuration, configFile);
             InitConfigurationHelper.InitializeTorUsage(Configuration, configFile);
+            InitConfigurationHelper.InitializeChatPaths(Configuration, configFile);
+            InitConfigurationHelper.InitializeSearchEnginePaths(Configuration, configFile);
 
             //IP Helper
             ServerPublicAddress = new IpHelper(Configuration);
@@ -126,10 +128,10 @@ namespace FreeMarketOne.ServerCore
                 if (torInitialized)
                 {
                     //Search indexer
-                    SearchIndexer = new SearchIndexer(Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString(), MarketManager);
+                    SearchIndexer = new SearchIndexer(MarketManager, SearchHelper.GetDataFolder(Configuration));
                     SearchIndexer.Initialize();
 
-                    SearchEngine = new SearchEngine(MarketManager, Path.Combine(Configuration.FullBaseDirectory, "SearchIndex").ToString());
+                    SearchEngine = new SearchEngine(MarketManager, SearchHelper.GetDataFolder(Configuration));
 
                     //Loading 
                     ServerPublicAddress.GetMyTorExitIP();

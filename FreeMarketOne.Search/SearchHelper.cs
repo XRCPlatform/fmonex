@@ -1,12 +1,20 @@
-﻿using System;
+﻿using FreeMarketOne.DataStructure;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace FreeMarketOne.Search
 {
-    public class SearchHelper
+    public static class SearchHelper
     {
+        public static string GetDataFolder(IBaseConfiguration baseConfiguration)
+        {
+            return Path.Combine(baseConfiguration.FullBaseDirectory, baseConfiguration.SearchEnginePath);
+        }
+
+
         public static List<string> GenerateSellerPubKeyHashes(List<byte[]> pubKeys)
         {
             List<string> list = new List<string>();

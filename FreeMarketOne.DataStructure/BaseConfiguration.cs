@@ -66,5 +66,7 @@ namespace FreeMarketOne.DataStructure
 
         public string ChatPath { get; set; }
         public IPEndPoint ListenerChatEndPoint { get; set; }
+
+        public string SearchEnginePath { get; set; }
     }
 }

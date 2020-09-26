@@ -32,6 +32,7 @@ namespace FreeMarketOne.DataStructure
             this.TelemetryServerUri = "http://40.115.21.64:8088/services/collector/event";
             this.ChatPath = "data/testnet_chat";
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://127.0.0.1:9115/");
+            this.SearchEnginePath = "data/testnet_searchindex";
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

@@ -26,7 +26,7 @@ namespace FreeMarketOne.Search
         private readonly FacetsConfig facetConfig = new FacetsConfig();
         private IMarketManager _marketManager;
 
-        public SearchIndexer(string indexLocation, IMarketManager marketManager)
+        public SearchIndexer(IMarketManager marketManager, string indexLocation)
         {
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
 

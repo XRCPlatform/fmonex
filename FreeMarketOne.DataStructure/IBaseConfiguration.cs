@@ -38,5 +38,7 @@ namespace FreeMarketOne.DataStructure
         string ChatPath { get; set; }
 
         IPEndPoint ListenerChatEndPoint { get; set; }
+
+        string SearchEnginePath { get; set; }
     }
 }

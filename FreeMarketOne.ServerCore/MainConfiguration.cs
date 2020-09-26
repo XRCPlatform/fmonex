@@ -35,6 +35,7 @@ namespace FreeMarketOne.DataStructure
             this.TelemetryServerUri = "https://telemetry.freemarket.one/";
             this.ChatPath = "data/chat";
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://127.0.0.1:9110/");
+            this.SearchEnginePath = "data/searchindex";
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

@@ -97,14 +97,7 @@ namespace FreeMarketOne.Search
                 pricePerGram = marketItem.Price / marketItem.WeightInGrams;
             }
 
-            if (marketItem.State == (int)ProductStateEnum.Removed)
-            {
-                Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
-                Writer.Flush(triggerMerge: true, applyAllDeletes: true);
-                return;
-            }
-
-            if (marketItem.State == (int)ProductStateEnum.Sold)
+            if (marketItem.State == (int)ProductStateEnum.Removed || marketItem.State == (int)ProductStateEnum.Sold)
             {
                 Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
                 Writer.Flush(triggerMerge: true, applyAllDeletes: true);

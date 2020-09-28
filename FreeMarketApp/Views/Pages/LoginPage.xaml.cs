@@ -86,7 +86,7 @@ namespace FreeMarketApp.Views.Pages
 
                     FreeMarketOneServer.Current.Initialize(tbPassword.Text);
                     
-                    if (FreeMarketOneServer.Current.UserManager.PrivateKeyState != UserManager.PrivateKeyStates.WrongPassword) {
+                    if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
                         PagesHelper.SetUserData(_logger, mainWindow);

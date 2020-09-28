@@ -57,9 +57,17 @@
                   <Path Classes="BlueIcon" Data="m114.6875 284.675781-73.800781-73.800781 178.5-178.5 73.800781 73.800781zm-80.699219-60.800781 67.699219 67.699219-101.5 33.800781zm281.898438-140.300781-12.800781 12.800781-73.898438-73.898438 12.800781-12.800781c12.894531-12.902343 33.804688-12.902343 46.699219 0l27.199219 27.199219c12.800781 12.9375 12.800781 33.765625 0 46.699219zm0 0"
         HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13" />
                   <TextBlock Margin="7,0,0,0" Text="Edit" FontSize="14"/>
-                </StackPanel>
+                </StackPanel>                
               </Button>
             </WrapPanel>
+            <Border Classes="PhotoPlaceholder" Width="70" Height="70" CornerRadius="35" HorizontalAlignment="Left">
+              <!-- User avatar binding -->
+              <Image Name="IPhoto"  Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
+                <Image.Clip>
+                  <EllipseGeometry Rect="0,0,60,60" />
+                </Image.Clip>
+              </Image>
+            </Border>
             <!-- User binding -->
             <TextBlock Classes="H1" Text="UserName" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
             <TextBlock Classes="H1" Name="TBUserName" Text="N/A" Margin="20 0 0 0" FontSize="16"/>

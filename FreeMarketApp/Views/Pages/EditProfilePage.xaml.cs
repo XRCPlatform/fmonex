@@ -165,7 +165,7 @@ namespace FreeMarketApp.Views.Pages
                     PagesHelper.Log(_logger, string.Format("Saving new user data of current user to chain username {0} description {1}.", tbUserName.Text, tbDescription.Text));
 
                     //upload to sia
-                    if (_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX))
+                    if (_userData.Photo != null && !_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX))
                     {
                         PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _userData.Photo));
 

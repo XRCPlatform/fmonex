@@ -312,7 +312,7 @@ namespace FreeMarketApp.Views.Pages
 
                     FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
                     FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
-                    FreeMarketOneServer.Current.SearchIndexer.Index(_offer,"pending");
+                    //FreeMarketOneServer.Current.SearchIndexer.Index(_offer,"pending");
 
                     await MessageBox.Show(mainWindow,
                         string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),

@@ -495,7 +495,7 @@ namespace FreeMarketOne.ServerCore
 
                 var bytesToSign = userData.ToByteArrayForSign();
 
-                userData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+                userData.Signature = Convert.ToBase64String(PrivateKey.Sign(bytesToSign));
 
                 userData.Hash = userData.GenerateHash();
 

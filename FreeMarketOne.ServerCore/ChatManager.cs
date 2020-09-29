@@ -258,20 +258,6 @@ namespace FreeMarketOne.ServerCore
         }
 
         /// <summary>
-        /// TODO DEBUG TOOL DELETE TOO
-        /// </summary>
-        /// <param name="operationType"></param>
-        /// <param name="message"></param>
-        private void PrintFrames(string operationType, NetMQMessage message)
-        {
-            for (int i = 0; i < message.FrameCount; i++)
-            {
-                Console.WriteLine("{0} Socket : Frame[{1}] = {2}", operationType, i,
-                    message[i].ConvertToString());
-            }
-        }
-
-        /// <summary>
         /// Load separate chat listener ovwe NetMQ
         /// </summary>
         private void StartMQListener()
@@ -284,14 +270,14 @@ namespace FreeMarketOne.ServerCore
                 using (var response = new ResponseSocket())
                 {
                     response.Options.Linger = TimeSpan.Zero;
-                    Console.WriteLine("Binding {0}", endPoint);
+                    Console.WriteLine("Chat listener binding {0}", endPoint);
                     response.Bind(connectionString);
 
                     while (true)
                     {
                         var clientMessage = response.ReceiveMultipartMessage(4);
 
-                        Console.WriteLine("Msg received!");
+                        Console.WriteLine("Receiving chat message from peer.");
                         _logger.Information("Receiving chat message from peer.");
 
                         var receivedChatItem = new ChatMessage(clientMessage);

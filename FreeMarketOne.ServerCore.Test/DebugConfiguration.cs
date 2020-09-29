@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FreeMarketOne.BlockChain.Test
+namespace FreeMarketOne.ServerCore.Test
 {
     internal class DebugConfiguration : BaseConfiguration
     {

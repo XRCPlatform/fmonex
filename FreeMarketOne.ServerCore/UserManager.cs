@@ -27,7 +27,7 @@ namespace FreeMarketOne.ServerCore
             Valid = 3
         }
 
-        private UserPrivateKey _privateKey;
+        public UserPrivateKey PrivateKey { get; set; }
 
         private IBaseConfiguration _configuration;
         private PrivateKeyStates _privateKeyState;
@@ -36,7 +36,6 @@ namespace FreeMarketOne.ServerCore
         private ILogger _logger { get; set; }
 
         public PrivateKeyStates PrivateKeyState => _privateKeyState;
-        public UserPrivateKey PrivateKey => _privateKey;
         public UserDataV1 UserData => _userData;
         public bool UsedDataForceToPropagate => _userDataForceToPropagate;
 
@@ -69,7 +68,7 @@ namespace FreeMarketOne.ServerCore
                         var aes = new SymmetricKey(Encoding.ASCII.GetBytes(key));
                         var decryptedPrivKey = aes.Decrypt(keyBytes);
 
-                        _privateKey = new UserPrivateKey(decryptedPrivKey);
+                        PrivateKey = new UserPrivateKey(decryptedPrivKey);
                         _privateKeyState = PrivateKeyStates.Valid;
 
                         _logger.Information(string.Format("Private Key Decrypted."));
@@ -136,11 +135,11 @@ namespace FreeMarketOne.ServerCore
             _logger.Information(string.Format("Saving new private key."));
 
             password = password.Substring(0, 16);
-            _privateKey = new UserPrivateKey(seed);
+            PrivateKey = new UserPrivateKey(seed);
             var key = password + password; //expecting 32 chars
 
             var aes = new SymmetricKey(Encoding.ASCII.GetBytes(key));
-            var encryptedPrivKey = aes.Encrypt(_privateKey.ByteArray);
+            var encryptedPrivKey = aes.Encrypt(PrivateKey.ByteArray);
 
             var pathKey = Path.Combine(pathRoot, pathFileKey);
 
@@ -179,9 +178,9 @@ namespace FreeMarketOne.ServerCore
         {
             _logger.Information(string.Format("Loading user data from pool or blockchain."));
 
-            if (_privateKey != null)
+            if (PrivateKey != null)
             {
-                var userPubKey = _privateKey.PublicKey.KeyParam.Q.GetEncoded();
+                var userPubKey = PrivateKey.PublicKey.KeyParam.Q.GetEncoded();
                 _userData = GetUserDataByPublicKey(userPubKey);
             }
 
@@ -196,9 +195,9 @@ namespace FreeMarketOne.ServerCore
         {
             _logger.Information(string.Format("Getting current public key for actual user."));
 
-            if (_privateKey != null)
+            if (PrivateKey != null)
             {
-                return _privateKey.PublicKey.KeyParam.Q.GetEncoded();
+                return PrivateKey.PublicKey.KeyParam.Q.GetEncoded();
             }
 
             return null;

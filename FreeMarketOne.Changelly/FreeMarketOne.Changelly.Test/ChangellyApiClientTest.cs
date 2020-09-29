@@ -1,5 +1,6 @@
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Price;
+using FreeMarketOne.ServerCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 

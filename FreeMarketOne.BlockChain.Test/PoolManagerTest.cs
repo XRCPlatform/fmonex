@@ -5,6 +5,7 @@ using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
 using Libplanet;
 using Libplanet.Blockchain;
+using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using System;
@@ -25,6 +26,7 @@ namespace FreeMarketOne.BlockChain.Test
         private event EventHandler _baseBlockChainLoadedEvent;
         private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
         private IBlockChainManager<BaseAction> _baseBlockChainManager;
+        private UserPrivateKey _userPrivateKey;
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
@@ -61,6 +63,7 @@ namespace FreeMarketOne.BlockChain.Test
                 ref _onionSeedsManager,
                 ref _basePoolManager,
                 ref _baseBlockChainManager,
+                ref _userPrivateKey,
                 ref _baseBlockChainLoadedEvent,
                 ref _baseBlockChainChangedEvent);
 

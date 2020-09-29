@@ -71,6 +71,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Search", "Fre
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.SearchTests", "FreeMarketOne.SearchTests\FreeMarketOne.SearchTests.csproj", "{2E5DBCF9-EDF0-44FE-8C33-2239BDF70D75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.ServerCore.Test", "FreeMarketOne.ServerCore.Test\FreeMarketOne.ServerCore.Test.csproj", "{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -309,6 +311,14 @@ Global
 		{2E5DBCF9-EDF0-44FE-8C33-2239BDF70D75}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2E5DBCF9-EDF0-44FE-8C33-2239BDF70D75}.Release|x86.ActiveCfg = Release|Any CPU
 		{2E5DBCF9-EDF0-44FE-8C33-2239BDF70D75}.Release|x86.Build.0 = Release|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Debug|x86.Build.0 = Debug|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Release|x86.ActiveCfg = Release|Any CPU
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -341,6 +351,7 @@ Global
 		{D67E1448-B769-4D28-BBAB-B067F2E89E03} = {C59FF8D9-20E4-40D3-8159-F8ECC2255A47}
 		{995D983D-AE69-45A1-A5B9-91DDFD9558B3} = {A794BE5D-399B-4C5F-BB57-1F473B76F5C1}
 		{2E5DBCF9-EDF0-44FE-8C33-2239BDF70D75} = {A794BE5D-399B-4C5F-BB57-1F473B76F5C1}
+		{9C51D3A1-A0E5-45F6-8603-CDB44901D7CF} = {5EF04D79-24F7-4CD5-845E-0938217976B0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

@@ -3,6 +3,7 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.P2P;
 using FreeMarketOne.PoolManager;
+using FreeMarketOne.ServerCore.Test;
 using Libplanet.Blockchain;
 using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,14 +16,15 @@ using System.Text;
 
 namespace FreeMarketOne.BlockChain.Test.Helpers
 {
-    internal class DebugEnvironmentHelper
+    public class DebugEnvironmentHelper
     {
-        internal void Initialize<T>(
+        public void Initialize<T>(
             ref IBaseConfiguration configuration,
             ref ILogger logger, 
             ref IOnionSeedsManager onionSeedsManager, 
             ref BasePoolManager basePoolManager, 
             ref IBlockChainManager<BaseAction> baseBlockChainManager,
+            ref UserPrivateKey userPrivateKey,
             ref EventHandler _baseBlockChainLoadedEvent,
             ref EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent)
         {
@@ -43,8 +45,8 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             logger.Information("Debug Start");
 
             //Mock user private key
-            var newPrivateKey = new UserPrivateKey();
-
+            userPrivateKey = new UserPrivateKey();
+            
             //Initialize Mock OnionSeeds
             onionSeedsManager = new MockSeedManager();
 
@@ -61,7 +63,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 configuration.BlockChainBasePolicy,
                 configuration.ListenerBaseEndPoint,
                 onionSeedsManager,
-                newPrivateKey,
+                userPrivateKey,
                 genesisBlock: genesis,
                 preloadEnded: _baseBlockChainLoadedEvent,
                 blockChainChanged: _baseBlockChainChangedEvent);
@@ -87,6 +89,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             var folderPathBase = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainBasePath);
             var folderPathMarket = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainMarketPath);
             var folderLog = Path.Combine(configuration.FullBaseDirectory, configuration.LogFilePath);
+            var folderChat = Path.Combine(configuration.FullBaseDirectory, configuration.ChatPath);
 
             var keyFile = Path.Combine(configuration.FullBaseDirectory, configuration.BlockChainSecretPath);
             var memoryBasePoolFile = Path.Combine(configuration.FullBaseDirectory, configuration.MemoryBasePoolPath);
@@ -94,7 +97,8 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
 
             if (Directory.Exists(folderPathBase)) Directory.Delete(folderPathBase, true);
             if (Directory.Exists(folderPathMarket)) Directory.Delete(folderPathMarket, true);
-            if (Directory.Exists(folderLog)) Directory.Delete(folderPathMarket, true);
+            if (Directory.Exists(folderLog)) Directory.Delete(folderLog, true);
+            if (Directory.Exists(folderChat)) Directory.Delete(folderChat, true);
 
             if (File.Exists(keyFile)) File.Delete(keyFile);
             if (File.Exists(memoryBasePoolFile)) File.Delete(memoryBasePoolFile);

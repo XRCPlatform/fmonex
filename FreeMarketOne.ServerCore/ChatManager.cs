@@ -34,6 +34,12 @@ namespace FreeMarketOne.ServerCore
         private IBaseConfiguration _configuration;
         private CancellationTokenSource _cancellationToken { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
+        private UserPrivateKey _userPrivateKey { get; set; }
+        private UserManager _userManager { get; set; }
+        private TimeSpan _repeatEvery { get; set; }
+        private TimeSpan _startAfter { get; set; }
+
+
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped, 4: Mining
         /// </summary>
@@ -47,7 +53,11 @@ namespace FreeMarketOne.ServerCore
 
         public bool IsRunning => Interlocked.Read(ref _running) == 1;
 
-        public ChatManager(IBaseConfiguration configuration)
+        public ChatManager(IBaseConfiguration configuration,
+            UserPrivateKey privateKey,
+            UserManager userManager,
+            TimeSpan? repeatEvery = null,
+            TimeSpan? startAfter = null)
         {
             _logger = Log.Logger.ForContext<ChatManager>();
             _logger.Information("Initializing Chat Manager");
@@ -55,6 +65,26 @@ namespace FreeMarketOne.ServerCore
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
             _configuration = configuration;
             _cancellationToken = new CancellationTokenSource();
+            _userPrivateKey = privateKey;
+            _userManager = userManager;
+
+            if (!repeatEvery.HasValue)
+            {
+                _repeatEvery = TimeSpans.HalfMinute;
+            } 
+            else
+            {
+                _repeatEvery = repeatEvery.Value;
+            }
+
+            if (!startAfter.HasValue)
+            {
+                _startAfter = TimeSpans.HalfMinute;
+            }
+            else
+            {
+                _startAfter = startAfter.Value;
+            }
         }
 
         public bool IsChatManagerRunning()
@@ -135,8 +165,8 @@ namespace FreeMarketOne.ServerCore
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
-            repeatEvery: TimeSpans.HalfMinute,
-            startAfter: TimeSpans.HalfMinute);
+            repeatEvery: _repeatEvery,
+            startAfter: _startAfter);
         }
 
         /// <summary>
@@ -176,8 +206,6 @@ namespace FreeMarketOne.ServerCore
                     chatMessage.ExtraMessage = chatItem.ExtraMessage;
                     chatMessage.DateCreated = chatItem.DateCreated;
                     chatMessage.Signature = signature;
-
-                    client.Options.Linger = TimeSpan.Zero;
 
                     client.Connect(connectionString);
 
@@ -251,12 +279,13 @@ namespace FreeMarketOne.ServerCore
             Task.Run(() =>
             {
                 var endPoint = _configuration.ListenerChatEndPoint.ToString();
+                var connectionString = string.Format("tcp://{0}", endPoint.ToString());
 
                 using (var response = new ResponseSocket())
                 {
                     response.Options.Linger = TimeSpan.Zero;
                     Console.WriteLine("Binding {0}", endPoint);
-                    response.Bind(endPoint);
+                    response.Bind(connectionString);
 
                     while (true)
                     {
@@ -343,9 +372,8 @@ namespace FreeMarketOne.ServerCore
 
                 _logger.Information(string.Format("Saving chat data."));
 
-                var privateKey = FreeMarketOneServer.Current.UserManager.PrivateKey.ByteArray;
                 byte[] keyBytes = new byte[32];
-                Array.Copy(privateKey, keyBytes, keyBytes.Length);
+                Array.Copy(_userPrivateKey.ByteArray, keyBytes, keyBytes.Length);
                 var aes = new SymmetricKey(keyBytes);
 
                 var serializedChatData = JsonConvert.SerializeObject(chatData);
@@ -373,7 +401,7 @@ namespace FreeMarketOne.ServerCore
 
                 if (File.Exists(fileChatPath))
                 {
-                    var privateKey = FreeMarketOneServer.Current.UserManager.PrivateKey.ByteArray;
+                    var privateKey = _userPrivateKey.ByteArray;
                     byte[] keyBytes = new byte[32];
                     Array.Copy(privateKey, keyBytes, keyBytes.Length);
                     var aes = new SymmetricKey(keyBytes);
@@ -485,7 +513,7 @@ namespace FreeMarketOne.ServerCore
         {
             var marketItem = chatData.MarketItem;
 
-            var userManager = FreeMarketOneServer.Current.UserManager;
+            var userManager = _userManager;
             var userPubKey = userManager.GetCurrentUserPublicKey();
             var marketItemBytes = marketItem.ToByteArrayForSign();
 
@@ -512,7 +540,7 @@ namespace FreeMarketOne.ServerCore
 
             _logger.Information(string.Format("Processing a new block {0}.", block.Hash));
 
-            var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+            var userPubKey = _userPrivateKey.ByteArray;
 
             foreach (var itemTx in block.Transactions)
             {
@@ -533,8 +561,8 @@ namespace FreeMarketOne.ServerCore
                                     if (marketData.State == (int)MarketManager.ProductStateEnum.Sold)
                                     {
                                         _logger.Information(string.Format("Creating a new chat for item {0}.", itemMarket.Hash));
-                                        var newChat = FreeMarketOneServer.Current.ChatManager.CreateNewSellerChat((MarketItemV1)itemMarket);
-                                        FreeMarketOneServer.Current.ChatManager.SaveChat(newChat);
+                                        var newChat = CreateNewSellerChat((MarketItemV1)itemMarket);
+                                        SaveChat(newChat);
                                     }
                                 }
                             }

@@ -9,6 +9,7 @@ using FreeMarketOne.Tor;
 using Libplanet;
 using Libplanet.Blockchain;
 using Libplanet.Blocks;
+using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using Serilog.Core;
@@ -29,6 +30,7 @@ namespace FreeMarketOne.BlockChain.Test
         private IOnionSeedsManager _onionSeedsManager;
         private BasePoolManager _basePoolManager;
         private bool _newBlock = false;
+        private UserPrivateKey _userPrivateKey;
 
         private event EventHandler _baseBlockChainLoadedEvent;
         private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
@@ -76,6 +78,7 @@ namespace FreeMarketOne.BlockChain.Test
                 ref _onionSeedsManager,
                 ref _basePoolManager,
                 ref _baseBlockChainManager,
+                ref _userPrivateKey,
                 ref _baseBlockChainLoadedEvent,
                 ref _baseBlockChainChangedEvent);
 

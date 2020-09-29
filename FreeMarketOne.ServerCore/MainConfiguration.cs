@@ -1,9 +1,10 @@
 ﻿using FreeMarketOne.BlockChain.Policy;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using System;
 
-namespace FreeMarketOne.DataStructure
+namespace FreeMarketOne.ServerCore
 {
     public class MainConfiguration : BaseConfiguration
     {

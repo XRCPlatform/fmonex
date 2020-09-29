@@ -137,7 +137,7 @@ namespace FreeMarketOne.ServerCore
                     ServerPublicAddress.GetMyTorExitIP();
 
                     //Chat Manager
-                    ChatManager = new ChatManager(Configuration);
+                    ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager);
                     ChatManager.Start();
 
                     //Initialize OnionSeeds

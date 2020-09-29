@@ -184,40 +184,43 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortTitle"));
                     errorCount++;
                 }
-                else
-                {
-                    if (!textHelper.IsTextValid(tbTitle.Text, true))
-                    {
-                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
-                        errorCount++;
-                    }
-                }
+                //temporary removing limitation as JSON library should handle the escaping.
+                //else
+                //{
+                //    if (!textHelper.IsTextValid(tbTitle.Text, true))
+                //    {
+                //        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
+                //        errorCount++;
+                //    }
+                //}
                 if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortDescription"));
                     errorCount++;
                 }
-                else
-                {
-                    if (!textHelper.IsTextValid(tbDescription.Text, true))
-                    {
-                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
-                        errorCount++;
-                    }
-                }
+                //https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_StringEscapeHandling.htm 
+                //temporary removing limitation as JSON library should handle the escaping.
+                //else
+                //{
+                //    if (!textHelper.IsTextValid(tbDescription.Text, true))
+                //    {
+                //        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
+                //        errorCount++;
+                //    }
+                //}
                 if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 2))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortShipping"));
                     errorCount++;
                 }
-                else
-                {
-                    if (!textHelper.IsTextValid(tbShipping.Text))
-                    {
-                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
-                        errorCount++;
-                    }
-                }
+                //else
+                //{
+                //    if (!textHelper.IsTextValid(tbShipping.Text))
+                //    {
+                //        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
+                //        errorCount++;
+                //    }
+                //}
                 if (string.IsNullOrEmpty(tbPrice.Text) || (tbPrice.Text.Length < 1))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortPrice"));

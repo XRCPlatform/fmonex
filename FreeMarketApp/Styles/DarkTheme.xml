@@ -185,9 +185,17 @@
 			<Setter Property="Background" Value="#000000" />
 		</Style>
 
+		<Style Selector="Border.Main">
+			<Setter Property="BorderBrush" Value="#000000" />
+		</Style>
+
 		<!-- Main Toolbar -->
 		<Style Selector="Grid.ToolBar">
 			<Setter Property="Background" Value="#1c1c1e" />
+		</Style>
+
+		<Style Selector="Border.ToolBar">
+			<Setter Property="BorderBrush" Value="#1c1c1e" />
 		</Style>
 
 		<Style Selector="TextBlock.H1">

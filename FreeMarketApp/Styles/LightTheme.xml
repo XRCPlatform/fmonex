@@ -2,14 +2,14 @@
         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys = "clr-namespace: System; assembly=netstandard">
 
-        	<!-- Avatar Button -->
+        <!-- Avatar Button -->
 		<Style Selector="Button.user /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="transparent" />
 			<Setter Property="BorderThickness" Value="3" />
 			<Setter Property="CornerRadius" Value="22" />
 		</Style>
 		<Style Selector="Button:pointerover.user /template/ ContentPresenter">
-			<Setter Property="BorderBrush" Value="#fcfeff" />
+			<Setter Property="BorderBrush" Value="#167efb" />
 			<Setter Property="Background" Value="transparent"/>
 		</Style>
 		<Style Selector="Button:pressed.user /template/ ContentPresenter">

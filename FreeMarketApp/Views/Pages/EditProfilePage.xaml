@@ -53,16 +53,19 @@
                     <WrapPanel Orientation="Horizontal" Margin="20 19 20 10">
                         <TextBlock Classes="H1" Text="My Profile" TextWrapping="Wrap" FontSize="28" Margin="0 0 30 0" FontWeight="Bold" />
                     </WrapPanel>
-                    <TextBlock Classes="H1" Text="Avatar" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Classes="H1" ZIndex="1" Text="Avatar" Margin="20 30 0 -10" FontSize="16" FontWeight="Bold"/>
                     <DockPanel Margin="20 7 0 0">
+						
+						
                         <Border Classes="PhotoPlaceholder" Width="70" Height="70" CornerRadius="35" HorizontalAlignment="Left">
                             <!-- User avatar binding -->
-                            <Image Name="IPhoto" Source="{Binding Avatar}" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
-                                <Image.Clip>
-                                    <EllipseGeometry Rect="0,0,60,60" />
-                                </Image.Clip>
-                            </Image>
+                            <Image Name="IPhoto" HorizontalAlignment="Left" Source="{Binding Avatar}" Width="70" Height="70" Stretch="UniformToFill" >
+								<Image.Clip>
+									<RectangleGeometry Rect="0,0,70,70" />
+								</Image.Clip>
+							</Image>
                         </Border>
+						<Border Classes="Main" Margin="-88 0 -15 0" HorizontalAlignment="Left" Width="106" Height="106" BorderThickness="18" CornerRadius="50" Background="Transparent"></Border>
                         <Button Margin="10 0 0 0" Classes="action" Height="35" HorizontalAlignment="Left" Padding="15 0" FontSize="14" BorderThickness="0" Cursor="Hand" Click="ButtonChangePhoto_Click">Upload image</Button>
                     </DockPanel>
 

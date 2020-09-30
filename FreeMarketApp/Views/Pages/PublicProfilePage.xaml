@@ -28,14 +28,16 @@
 
 
                 <DockPanel Margin="20 20 0 0">
-                    <Border Classes="PhotoPlaceholder" Width="60" Height="60" CornerRadius="30" HorizontalAlignment="Left">
+                    <Border Classes="PhotoPlaceholder" Width="60" Height="60" CornerRadius="35" VerticalAlignment="Top" HorizontalAlignment="Left"></Border>
                         <!-- User avatar binding -->
-                        <Image Name="IPhoto" Width="30" Height="30" RenderOptions.BitmapInterpolationMode="HighQuality">
-                            <Image.Clip>
-                                <EllipseGeometry Rect="0,0,60,60" />
-                            </Image.Clip>
+                        <Image Name="IPhoto" HorizontalAlignment="Left" Margin="-60 0 0 0" VerticalAlignment="Top" Width="60" Height="60" Stretch="UniformToFill" >
+                          <Image.Clip>
+                            <RectangleGeometry Rect="0,0,60,60" />
+                          </Image.Clip>
                         </Image>
-                    </Border>
+                      
+                    <Border Classes="Main" Margin="-75 -15 -15 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Height="90" BorderThickness="15" CornerRadius="50" Background="Transparent"></Border>
+                    
                     <StackPanel Orientation="Vertical">
                         <!-- User binding -->
                         <TextBlock Classes="H1" Name="TBUserName" Text="N/A" Margin="10 0 0 2" FontWeight="Bold" FontSize="28"/>

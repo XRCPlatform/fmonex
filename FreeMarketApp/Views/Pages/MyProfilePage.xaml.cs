@@ -66,7 +66,10 @@ namespace FreeMarketApp.Views.Pages
                 }
 
                 var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
-                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userPubKey);
+                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                    userPubKey,
+                    FreeMarketOneServer.Current.BasePoolManager,
+                    FreeMarketOneServer.Current.BaseBlockChainManager);
 
                 var reviewStars = FreeMarketOneServer.Current.UserManager.GetUserReviewStars(reviews);
                 var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);

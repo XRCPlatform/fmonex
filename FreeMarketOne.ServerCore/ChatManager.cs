@@ -3,7 +3,6 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.ServerCore;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
@@ -87,6 +86,10 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        /// <summary>
+        /// Is change manager running
+        /// </summary>
+        /// <returns></returns>
         public bool IsChatManagerRunning()
         {
             if (Interlocked.Read(ref _running) == 1)
@@ -99,6 +102,9 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        /// <summary>
+        /// Start loop task to listen chat messages
+        /// </summary>
         public void Start()
         {
             Interlocked.Exchange(ref _running, 1);
@@ -127,8 +133,6 @@ namespace FreeMarketOne.ServerCore
                                                     chat.MarketItem.BuyerOnionEndpoint : chat.SellerEndPoint;
                                     var endPoint = GetChatPeerEndpoint(chatPeerIp);
 
-                                    //DELETE: endPoint = EndPointHelper.ParseIPEndPoint("127.0.0.1:9115");
-                         
                                     periodicCheckLog.AppendLine(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
                                     _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
 
@@ -182,6 +186,11 @@ namespace FreeMarketOne.ServerCore
             return endPoint;
         }
 
+        /// <summary>
+        /// This can be deleted is it for development
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         private static void ClientOnReceiveReady(object sender, NetMQSocketEventArgs args)
         {
             //Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());

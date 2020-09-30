@@ -53,7 +53,10 @@ namespace FreeMarketApp.Views.Pages
                 PagesHelper.Log(_logger, string.Format("Loading user reviews from chain."));
 
                 var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
-                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userPubKey);
+                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                    userPubKey,
+                    FreeMarketOneServer.Current.BasePoolManager,
+                    FreeMarketOneServer.Current.BaseBlockChainManager);
 
                 GetAllUserNames(reviews);
 
@@ -116,7 +119,10 @@ namespace FreeMarketApp.Views.Pages
                     var itemReviewBytes = itemReview.ToByteArrayForSign();
                     var reviewUserPubKeys = UserPublicKey.Recover(itemReviewBytes, itemReview.Signature);
 
-                    var reviewUserData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(reviewUserPubKeys);
+                    var reviewUserData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(
+                        reviewUserPubKeys,
+                        FreeMarketOneServer.Current.BasePoolManager,
+                        FreeMarketOneServer.Current.BaseBlockChainManager);
 
                     if (reviewUserData != null)
                     {

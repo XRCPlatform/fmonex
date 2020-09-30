@@ -195,13 +195,21 @@ namespace FreeMarketApp.Views.Pages
 
                 //seller userdata loading
                 var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(_offer);
-                var userData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(userPubKey);
+                var userData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(
+                    userPubKey, 
+                    FreeMarketOneServer.Current.BasePoolManager,
+                    FreeMarketOneServer.Current.BaseBlockChainManager);
+
                 if (userData != null)
                 {
                     tbSeller.Text = userData.UserName;
                     btSeller.Tag = string.Format("{0}|{1}", userData.Signature, userData.Hash);
 
-                    var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userPubKey);
+                    var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                        userPubKey,
+                        FreeMarketOneServer.Current.BasePoolManager,
+                        FreeMarketOneServer.Current.BaseBlockChainManager);
+
                     var reviewStars = FreeMarketOneServer.Current.UserManager.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 

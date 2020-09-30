@@ -1,6 +1,5 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Extensions;
 using Libplanet.RocksDBStore;
 using Serilog;
@@ -45,6 +44,10 @@ namespace FreeMarketOne.ServerCore
 
         private readonly object _locked = new object();
 
+        /// <summary>
+        /// Inicialization of market manager
+        /// </summary>
+        /// <param name="configuration"></param>
         public MarketManager(IBaseConfiguration configuration)
         {
             _logger = Log.Logger.ForContext<ServiceManager>();
@@ -494,6 +497,11 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        /// <summary>
+        /// Sign market data
+        /// </summary>
+        /// <param name="marketData"></param>
+        /// <returns></returns>
         public MarketItemV1 SignMarketData(MarketItemV1 marketData)
         {
             lock (_locked)
@@ -509,13 +517,18 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        /// <summary>
+        /// Sign buyer market data
+        /// </summary>
+        /// <param name="marketData"></param>
+        /// <returns></returns>
         public MarketItemV1 SignBuyerMarketData(MarketItemV1 marketData)
         {
             lock (_locked)
             {
                 var publicIp = FreeMarketOneServer.Current.ServerPublicAddress.PublicIP;
 
-                marketData.State = (int)MarketManager.ProductStateEnum.Sold;
+                marketData.State = (int)ProductStateEnum.Sold;
                 marketData.BuyerOnionEndpoint = publicIp.MapToIPv4().ToString();
 
                 var bytesToSign = marketData.ToByteArrayForSign();
@@ -527,6 +540,15 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        /// <summary>
+        /// Get chain of signatures for market item
+        /// </summary>
+        /// <param name="marketBlockChain"></param>
+        /// <param name="chainId"></param>
+        /// <param name="countOfIndex"></param>
+        /// <param name="itemMarket"></param>
+        /// <param name="types"></param>
+        /// <returns></returns>
         private List<string> GetChainSignaturesForMarketItem(
             RocksDBStore marketBlockChain,
             Guid? chainId,

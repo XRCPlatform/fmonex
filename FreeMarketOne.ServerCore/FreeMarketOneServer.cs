@@ -108,7 +108,6 @@ namespace FreeMarketOne.ServerCore
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
 
-            
             //User manager
             UserManager = new UserManager(Configuration);
             if (UserManager.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
@@ -264,7 +263,7 @@ namespace FreeMarketOne.ServerCore
                     else
                     {
                         //loading actual user data from pool or blockchain
-                        var userData = UserManager.GetActualUserData();
+                        var userData = UserManager.GetActualUserData(Current.BasePoolManager, Current.BaseBlockChainManager);
                         UserManager.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
                     }
                 }

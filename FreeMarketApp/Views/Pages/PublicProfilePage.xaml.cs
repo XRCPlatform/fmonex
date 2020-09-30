@@ -61,7 +61,8 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadUser(string signature, string hash)
         {
-            var userData = FreeMarketOneServer.Current.UserManager.GetUserDataBySignatureAndHash(signature, hash);
+            var userData = FreeMarketOneServer.Current.UserManager.GetUserDataBySignatureAndHash(
+                signature, hash, FreeMarketOneServer.Current.BasePoolManager, FreeMarketOneServer.Current.BaseBlockChainManager);
 
             if (userData != null)
             {
@@ -79,7 +80,10 @@ namespace FreeMarketApp.Views.Pages
                 var userBytes = userData.ToByteArrayForSign();
                 var userPubKeys = UserPublicKey.Recover(userBytes, userData.Signature);
 
-                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userPubKeys);
+                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                    userPubKeys,
+                    FreeMarketOneServer.Current.BasePoolManager,
+                    FreeMarketOneServer.Current.BaseBlockChainManager);
 
                 if (reviews.Any())
                 {
@@ -115,7 +119,10 @@ namespace FreeMarketApp.Views.Pages
                     var itemReviewBytes = itemReview.ToByteArrayForSign();
                     var reviewUserPubKeys = UserPublicKey.Recover(itemReviewBytes, itemReview.Signature);
 
-                    var reviewUserData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(reviewUserPubKeys);
+                    var reviewUserData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(
+                        reviewUserPubKeys,
+                        FreeMarketOneServer.Current.BasePoolManager,
+                        FreeMarketOneServer.Current.BaseBlockChainManager);
 
                     if (reviewUserData != null)
                     {

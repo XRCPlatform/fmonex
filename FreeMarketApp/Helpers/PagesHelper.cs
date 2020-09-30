@@ -78,7 +78,10 @@ namespace FreeMarketApp.Helpers
                 var tbUserName = mainWindow.FindControl<TextBlock>("TBUserName");
                 tbUserName.Text = userManager.UserData.UserName;
 
-                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(userManager.GetCurrentUserPublicKey());
+                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                    userManager.GetCurrentUserPublicKey(),
+                    FreeMarketOneServer.Current.BasePoolManager,
+                    FreeMarketOneServer.Current.BaseBlockChainManager);
                 
                 if (reviews.Any())
                 {

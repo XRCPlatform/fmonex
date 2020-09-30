@@ -1,18 +1,17 @@
-﻿using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.BlockChain;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.ServerCore.Helpers;
+using FreeMarketOne.PoolManager;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.RocksDBStore;
-using LiteDB;
 using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 
 namespace FreeMarketOne.ServerCore
@@ -50,6 +49,12 @@ namespace FreeMarketOne.ServerCore
             _privateKeyState = PrivateKeyStates.NoKey;
         }
 
+        /// <summary>
+        /// Inicialization of user manager class
+        /// </summary>
+        /// <param name="password"></param>
+        /// <param name="newUserData"></param>
+        /// <returns></returns>
         internal PrivateKeyStates Initialize(string password = null, UserDataV1 newUserData = null)
         {
             var fileKeyPath = Path.Combine(_configuration.FullBaseDirectory, _configuration.BlockChainSecretPath);
@@ -110,6 +115,11 @@ namespace FreeMarketOne.ServerCore
             return _privateKeyState;
         }
 
+        /// <summary>
+        /// Create random seed for user
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public string CreateRandomSeed(int length = 200)
         {
             Random random = new Random();
@@ -174,14 +184,14 @@ namespace FreeMarketOne.ServerCore
         /// Get actual user data from blockchain or pool
         /// </summary>
         /// <returns></returns>
-        public UserDataV1 GetActualUserData()
+        public UserDataV1 GetActualUserData(BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChainManager)
         {
             _logger.Information(string.Format("Loading user data from pool or blockchain."));
 
             if (PrivateKey != null)
             {
                 var userPubKey = PrivateKey.PublicKey.KeyParam.Q.GetEncoded();
-                _userData = GetUserDataByPublicKey(userPubKey);
+                _userData = GetUserDataByPublicKey(userPubKey, basePoolManager, baseBlockChainManager);
             }
 
             return UserData;
@@ -208,9 +218,12 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="userPubKeys"></param>
         /// <returns></returns>
-        public UserDataV1 GetUserDataByPublicKey(byte[] userPubKey)
+        public UserDataV1 GetUserDataByPublicKey(
+            byte[] userPubKey, 
+            BasePoolManager basePoolManager,
+            IBlockChainManager<BaseAction> blockChainManager)
         {
-            return GetUserDataByPublicKey(new List<byte[]> { userPubKey });
+            return GetUserDataByPublicKey(new List<byte[]> { userPubKey }, basePoolManager, blockChainManager);
         }
 
         /// <summary>
@@ -218,14 +231,17 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="userPubKeys"></param>
         /// <returns></returns>
-        public UserDataV1 GetUserDataByPublicKey(List<byte[]> userPubKeys)
+        public UserDataV1 GetUserDataByPublicKey(
+            List<byte[]> userPubKeys, 
+            BasePoolManager basePoolManager,
+            IBlockChainManager<BaseAction> blockChainManager)
         {
             lock (_locked)
             {
                 var types = new Type[] { typeof(UserDataV1) };
 
                 //checking pool
-                var poolItems = FreeMarketOneServer.Current.BasePoolManager.GetAllActionItemByType(types);
+                var poolItems = basePoolManager.GetAllActionItemByType(types);
                 if (poolItems.Any())
                 {
                     _logger.Information(string.Format("Some UserData found in pool. Checking if they are mine."));
@@ -247,7 +263,7 @@ namespace FreeMarketOne.ServerCore
                                     var userData = (UserDataV1)itemPool;
                                     if (!string.IsNullOrEmpty(userData.BaseSignature))
                                     {
-                                        if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys))
+                                        if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys, blockChainManager))
                                         {
                                             return userData;
                                         }
@@ -267,14 +283,14 @@ namespace FreeMarketOne.ServerCore
                 }
 
                 //checking blockchain
-                var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
-                var chainId = baseBlockChain.GetCanonicalChainId();
-                var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+                var baseStorage = blockChainManager.Storage;
+                var chainId = baseStorage.GetCanonicalChainId();
+                var countOfIndex = baseStorage.CountIndex(chainId.Value);
 
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+                    var blockHashId = baseStorage.IndexBlockHash(chainId.Value, i);
+                    var block = baseStorage.GetBlock<BaseAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {
@@ -298,7 +314,7 @@ namespace FreeMarketOne.ServerCore
                                                 var userData = (UserDataV1)itemBase;
                                                 if (!string.IsNullOrEmpty(userData.BaseSignature))
                                                 {
-                                                    if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys))
+                                                    if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys, blockChainManager))
                                                     {
                                                         return userData;
                                                     }
@@ -332,7 +348,11 @@ namespace FreeMarketOne.ServerCore
         /// <param name="signature"></param>
         /// <param name="hash"></param>
         /// <returns></returns>
-        public UserDataV1 GetUserDataBySignatureAndHash(string signature, string hash)
+        public UserDataV1 GetUserDataBySignatureAndHash(
+            string signature, 
+            string hash,
+            BasePoolManager basePoolManager,
+            IBlockChainManager<BaseAction> blockChainManager)
         {
             lock (_locked)
             {
@@ -341,7 +361,7 @@ namespace FreeMarketOne.ServerCore
                 _logger.Information(string.Format("GetUserDataBySignatureAndHash signature {0} hash {1}.", signature, hash));
 
                 //checking pool
-                var poolItems = FreeMarketOneServer.Current.BasePoolManager.GetAllActionItemByType(types);
+                var poolItems = basePoolManager.GetAllActionItemByType(types);
                 if (poolItems.Any())
                 {
                     _logger.Information(string.Format("Some UserData found in pool."));
@@ -357,14 +377,14 @@ namespace FreeMarketOne.ServerCore
                 }
 
                 //checking blockchain
-                var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
-                var chainId = baseBlockChain.GetCanonicalChainId();
-                var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+                var baseStorage = blockChainManager.Storage;
+                var chainId = baseStorage.GetCanonicalChainId();
+                var countOfIndex = baseStorage.CountIndex(chainId.Value);
 
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+                    var blockHashId = baseStorage.IndexBlockHash(chainId.Value, i);
+                    var block = baseStorage.GetBlock<BaseAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {
@@ -395,9 +415,12 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<ReviewUserDataV1> GetAllReviewsForPubKey(byte[] pubKey)
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(
+            byte[] pubKey,
+            BasePoolManager basePoolManager,
+            IBlockChainManager<BaseAction> baseBlockChain)
         {
-            return GetAllReviewsForPubKey(new List<byte[]> { pubKey });
+            return GetAllReviewsForPubKey(new List<byte[]> { pubKey }, basePoolManager, baseBlockChain);
         }
 
         /// <summary>
@@ -405,7 +428,10 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="userPubKeys"></param>
         /// <returns></returns>
-        public List<ReviewUserDataV1> GetAllReviewsForPubKey(List<byte[]> userPubKeys)
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(
+            List<byte[]> userPubKeys,
+            BasePoolManager basePoolManager,
+            IBlockChainManager<BaseAction> baseBlockChain)
         {
             lock (_locked)
             {
@@ -416,18 +442,22 @@ namespace FreeMarketOne.ServerCore
                 var result = new List<ReviewUserDataV1>();
 
                 //checking blockchain
-                var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
-                var chainId = baseBlockChain.GetCanonicalChainId();
-                var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+                var baseStorage = baseBlockChain.Storage;
+                var chainId = baseStorage.GetCanonicalChainId();
+                var countOfIndex = baseStorage.CountIndex(chainId.Value);
 
-                var userData = GetUserDataByPublicKey(userPubKeys);
+                var userData = GetUserDataByPublicKey(
+                    userPubKeys,
+                    basePoolManager,
+                    baseBlockChain);
+
                 var allUserDatas = GetChainUserData(
-                    baseBlockChain, chainId, countOfIndex, userData, typesUser);
+                    baseStorage, chainId, countOfIndex, userData, typesUser);
 
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+                    var blockHashId = baseStorage.IndexBlockHash(chainId.Value, i);
+                    var block = baseStorage.GetBlock<BaseAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {
@@ -483,6 +513,13 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        /// <summary>
+        /// Sign user data
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="description"></param>
+        /// <param name="userData"></param>
+        /// <returns></returns>
         public UserDataV1 SignUserData(string userName, string description, UserDataV1 userData = null)
         {
             lock (_locked)
@@ -503,6 +540,13 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        /// <summary>
+        /// Get median of params
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sourceArray"></param>
+        /// <param name="cloneArray"></param>
+        /// <returns></returns>
         private T GetMedian<T>(T[] sourceArray, bool cloneArray = true) where T : IComparable<T>
         {
             lock (_locked)
@@ -525,19 +569,31 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        private bool VerifyUserDataByBaseSignature(string baseSignature, UserDataV1 userData, List<byte[]> userPubKeys)
+        /// <summary>
+        /// Verification of userdata with base signature
+        /// </summary>
+        /// <param name="baseSignature"></param>
+        /// <param name="userData"></param>
+        /// <param name="userPubKeys"></param>
+        /// <param name="baseBlockChain"></param>
+        /// <returns></returns>
+        private bool VerifyUserDataByBaseSignature(
+            string baseSignature,
+            UserDataV1 userData,
+            List<byte[]> userPubKeys,
+            IBlockChainManager<BaseAction> baseBlockChain)
         {
             lock (_locked)
             {
                 var types = new Type[] { typeof(UserDataV1) };
-                var baseBlockChain = FreeMarketOneServer.Current.BaseBlockChainManager.Storage;
-                var chainId = baseBlockChain.GetCanonicalChainId();
-                var countOfIndex = baseBlockChain.CountIndex(chainId.Value);
+                var baseStorage = baseBlockChain.Storage;
+                var chainId = baseStorage.GetCanonicalChainId();
+                var countOfIndex = baseStorage.CountIndex(chainId.Value);
 
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = baseBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = baseBlockChain.GetBlock<BaseAction>(blockHashId.Value);
+                    var blockHashId = baseStorage.IndexBlockHash(chainId.Value, i);
+                    var block = baseStorage.GetBlock<BaseAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {

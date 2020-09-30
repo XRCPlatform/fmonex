@@ -36,7 +36,7 @@
 					<RectangleGeometry Rect="0,0,38,38" />
 				</Image.Clip>
 			</Image>
-			<Border Classes="Toolbar" Margin="11 0 0 0" HorizontalAlignment="Left" Width="60" Height="60" BorderThickness="11" CornerRadius="50" Background="Transparent"></Border>
+			<Border Classes="ToolBar" Margin="11 0 0 0" HorizontalAlignment="Left" Width="60" Height="60" BorderThickness="11" CornerRadius="50" Background="Transparent"></Border>
 			<Button Name="BTMyProfile" Width="46" Height="46" HorizontalAlignment="Left" Background="Transparent" Margin="18 0 0 0" Classes="user" Click="ButtonMyProfile_Click" Cursor="Hand"></Button>
 
             <!-- Name and Reputation -->

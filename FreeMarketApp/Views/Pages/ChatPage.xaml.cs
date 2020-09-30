@@ -48,9 +48,9 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.ChatManager != null)
+            if (FreeMarketOneServer.Current.Chats != null)
             {
-                var chatManager = FreeMarketOneServer.Current.ChatManager;
+                var chatManager = FreeMarketOneServer.Current.Chats;
                 PagesHelper.Log(_logger, string.Format("Loading chats from data folder."));
 
                 var chats = chatManager.GetAllChats();
@@ -108,7 +108,7 @@ namespace FreeMarketApp.Views.Pages
                 var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Signature == signature);
                 if (chatData != null)
                 {
-                    var chatManager = FreeMarketOneServer.Current.ChatManager;
+                    var chatManager = FreeMarketOneServer.Current.Chats;
 
                     if (string.IsNullOrEmpty(chatData.SellerEndPoint))
                     {
@@ -161,7 +161,7 @@ namespace FreeMarketApp.Views.Pages
                 ((ChatPageViewModel)DataContext).ChatItems.Clear();
                 if ((chatData.ChatItems != null) && chatData.ChatItems.Any() && (chatData.ChatItems.Count > 1))
                 {
-                    var chatManager = FreeMarketOneServer.Current.ChatManager;
+                    var chatManager = FreeMarketOneServer.Current.Chats;
 
                     var decryptedChat = chatManager.DecryptChatItems(chatData.ChatItems);
                     ((ChatPageViewModel)DataContext).ChatItems.AddRange(decryptedChat);

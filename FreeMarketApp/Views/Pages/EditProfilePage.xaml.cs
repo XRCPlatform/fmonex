@@ -13,7 +13,6 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static FreeMarketApp.Views.Controls.MessageBox;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -48,11 +47,11 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.UserManager != null)
+            if (FreeMarketOneServer.Current.Users != null)
             {
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to edit profile page."));
 
-                _userData = FreeMarketOneServer.Current.UserManager.UserData;
+                _userData = FreeMarketOneServer.Current.Users.UserData;
 
                 var tbUserName = this.FindControl<TextBox>("TBUserName");
                 var tbDescription = this.FindControl<TextBox>("TBDescription");
@@ -121,7 +120,7 @@ namespace FreeMarketApp.Views.Pages
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                 MessageBox.MessageBoxButtons.YesNo);
 
-            if (result == MessageBoxResult.Yes)
+            if (result == MessageBox.MessageBoxResult.Yes)
             {
 
                 ////check form
@@ -181,9 +180,9 @@ namespace FreeMarketApp.Views.Pages
                         }
                     }
 
-                    var updatedUserData = FreeMarketOneServer.Current.UserManager.SignUserData(tbUserName.Text, tbDescription.Text, _userData);
+                    var updatedUserData = FreeMarketOneServer.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text, _userData);
 
-                    FreeMarketOneServer.Current.UserManager.SaveUserData(
+                    FreeMarketOneServer.Current.Users.SaveUserData(
                         updatedUserData,
                         FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                         FreeMarketOneServer.Current.Configuration.BlockChainUserPath);

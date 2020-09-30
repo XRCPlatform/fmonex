@@ -80,8 +80,11 @@
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.Chats\FreeMarketOne.Chats.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Markets\FreeMarketOne.Markets.csproj" />
     <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Skynet\FreeMarketOne.Skynet.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Users\FreeMarketOne.Users.csproj" />
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Update="Views\AddEditProductWindow.xaml">

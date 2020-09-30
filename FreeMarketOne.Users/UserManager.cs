@@ -2,7 +2,7 @@
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.PoolManager;
+using FreeMarketOne.Pools;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.RocksDBStore;
@@ -14,9 +14,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace FreeMarketOne.ServerCore
+namespace FreeMarketOne.Users
 {
-    public class UserManager
+    public class UserManager : IUserManager
     {
         public enum PrivateKeyStates
         {
@@ -42,7 +42,7 @@ namespace FreeMarketOne.ServerCore
 
         public UserManager(IBaseConfiguration configuration)
         {
-            _logger = Log.Logger.ForContext<ServiceManager>();
+            _logger = Log.Logger.ForContext<UserManager>();
             _logger.Information("Initializing User Manager");
 
             _configuration = configuration;
@@ -55,7 +55,7 @@ namespace FreeMarketOne.ServerCore
         /// <param name="password"></param>
         /// <param name="newUserData"></param>
         /// <returns></returns>
-        internal PrivateKeyStates Initialize(string password = null, UserDataV1 newUserData = null)
+        public PrivateKeyStates Initialize(string password = null, UserDataV1 newUserData = null)
         {
             var fileKeyPath = Path.Combine(_configuration.FullBaseDirectory, _configuration.BlockChainSecretPath);
             var fileUserPath = Path.Combine(_configuration.FullBaseDirectory, _configuration.BlockChainUserPath);

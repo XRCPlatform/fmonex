@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FreeMarketOne.PoolManager
+namespace FreeMarketOne.Pools
 {
     public class PoolManager<T> : IPoolManager, IDisposable where T : IBaseAction, new()
     {

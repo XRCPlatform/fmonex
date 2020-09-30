@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Markets;
 using FreeMarketOne.ServerCore;
 using Lucene.Net.Facet;
 using Lucene.Net.Index;

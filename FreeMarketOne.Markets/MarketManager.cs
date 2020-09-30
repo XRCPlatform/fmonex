@@ -1,13 +1,16 @@
-﻿using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.BlockChain;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Pools;
 using Libplanet.Extensions;
 using Libplanet.RocksDBStore;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
-namespace FreeMarketOne.ServerCore
+namespace FreeMarketOne.Markets
 {
     public class MarketManager : IMarketManager
     {
@@ -50,7 +53,7 @@ namespace FreeMarketOne.ServerCore
         /// <param name="configuration"></param>
         public MarketManager(IBaseConfiguration configuration)
         {
-            _logger = Log.Logger.ForContext<ServiceManager>();
+            _logger = Log.Logger.ForContext<MarketManager>();
             _logger.Information("Initializing Market Manager");
 
             _configuration = configuration;
@@ -101,9 +104,11 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(byte[] pubKey)
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(byte[] pubKey,
+            MarketPoolManager marketPoolManager,
+            IBlockChainManager<MarketAction> marketBlockChainManager)
         {
-            return GetAllSellerMarketItemsByPubKeys(new List<byte[]> { pubKey });
+            return GetAllSellerMarketItemsByPubKeys(new List<byte[]> { pubKey }, marketPoolManager, marketBlockChainManager);
         }
 
         /// <summary>
@@ -111,7 +116,10 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(List<byte[]> userPubKeys)
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeys(
+            List<byte[]> userPubKeys,
+            MarketPoolManager marketPoolManager,
+            IBlockChainManager<MarketAction> marketBlockChainManager)
         {
             lock (_locked)
             {
@@ -122,12 +130,12 @@ namespace FreeMarketOne.ServerCore
 
                 var ignoredSignatures = new List<string>();
 
-                var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
-                var chainId = marketBlockChain.GetCanonicalChainId();
-                var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+                var marketStorage = marketBlockChainManager.Storage;
+                var chainId = marketStorage.GetCanonicalChainId();
+                var countOfIndex = marketStorage.CountIndex(chainId.Value);
 
                 //checking pool
-                var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+                var poolItems = marketPoolManager.GetAllActionItemByType(types);
                 if (poolItems.Any())
                 {
                     _logger.Information(string.Format("Some offers found in pool. Loading them too."));
@@ -160,7 +168,7 @@ namespace FreeMarketOne.ServerCore
                                         }
 
                                         var chainSignatures = GetChainSignaturesForMarketItem(
-                                                marketBlockChain, chainId, countOfIndex, marketData, types);
+                                                marketStorage, chainId, countOfIndex, marketData, types);
 
                                         ignoredSignatures.AddRange(chainSignatures);
                                     }
@@ -173,8 +181,8 @@ namespace FreeMarketOne.ServerCore
                 //checking blockchain
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+                    var blockHashId = marketStorage.IndexBlockHash(chainId.Value, i);
+                    var block = marketStorage.GetBlock<MarketAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {
@@ -208,7 +216,7 @@ namespace FreeMarketOne.ServerCore
                                                     }
 
                                                     var chainSignatures = GetChainSignaturesForMarketItem(
-                                                            marketBlockChain, chainId, countOfIndex, marketData, types);
+                                                            marketStorage, chainId, countOfIndex, marketData, types);
 
                                                     ignoredSignatures.AddRange(chainSignatures);
                                                 }
@@ -231,9 +239,11 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeys(byte[] pubKey)
+        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeys(byte[] pubKey,
+            MarketPoolManager marketPoolManager,
+            IBlockChainManager<MarketAction> marketBlockChainManager)
         {
-            return GetAllBuyerMarketItemsByPubKeys(new List<byte[]> { pubKey });
+            return GetAllBuyerMarketItemsByPubKeys(new List<byte[]> { pubKey }, marketPoolManager, marketBlockChainManager);
         }
 
         /// <summary>
@@ -241,7 +251,9 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeys(List<byte[]> userPubKeys)
+        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeys(List<byte[]> userPubKeys,
+            MarketPoolManager marketPoolManager,
+            IBlockChainManager<MarketAction> marketBlockChainManager)
         {
             lock (_locked)
             {
@@ -250,12 +262,12 @@ namespace FreeMarketOne.ServerCore
                 var result = new List<MarketItemV1>();
                 var types = new Type[] { typeof(MarketItemV1) };
 
-                var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
-                var chainId = marketBlockChain.GetCanonicalChainId();
-                var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+                var marketStorage = marketBlockChainManager.Storage;
+                var chainId = marketStorage.GetCanonicalChainId();
+                var countOfIndex = marketStorage.CountIndex(chainId.Value);
 
                 //checking pool
-                var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+                var poolItems = marketPoolManager.GetAllActionItemByType(types);
                 if (poolItems.Any())
                 {
                     _logger.Information(string.Format("Some offers found in pool. Loading them too."));
@@ -292,8 +304,8 @@ namespace FreeMarketOne.ServerCore
                 //checking blockchain
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+                    var blockHashId = marketStorage.IndexBlockHash(chainId.Value, i);
+                    var block = marketStorage.GetBlock<MarketAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {
@@ -340,7 +352,10 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public List<MarketItemV1> GetAllActiveOffers(MarketCategoryEnum category = MarketCategoryEnum.All)
+        public List<MarketItemV1> GetAllActiveOffers(
+            MarketPoolManager marketPoolManager,
+            IBlockChainManager<MarketAction> marketBlockChainManager,
+            MarketCategoryEnum category = MarketCategoryEnum.All)
         {
             lock (_locked)
             {
@@ -351,12 +366,12 @@ namespace FreeMarketOne.ServerCore
                 var types = new Type[] { typeof(MarketItemV1) };
                 var ignoredSignatures = new List<string>();
 
-                var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
-                var chainId = marketBlockChain.GetCanonicalChainId();
-                var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+                var marketStorage = marketBlockChainManager.Storage;
+                var chainId = marketStorage.GetCanonicalChainId();
+                var countOfIndex = marketStorage.CountIndex(chainId.Value);
 
                 //checking pool
-                var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+                var poolItems = marketPoolManager.GetAllActionItemByType(types);
                 if (poolItems.Any())
                 {
                     _logger.Information(string.Format("Some offers found in pool. Loading them too."));
@@ -380,7 +395,7 @@ namespace FreeMarketOne.ServerCore
                                 }
 
                                 var chainSignatures = GetChainSignaturesForMarketItem(
-                                    marketBlockChain, chainId, countOfIndex, marketData, types);
+                                    marketStorage, chainId, countOfIndex, marketData, types);
 
                                 ignoredSignatures.AddRange(chainSignatures);
                             }
@@ -391,8 +406,8 @@ namespace FreeMarketOne.ServerCore
                 //checking blockchain
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+                    var blockHashId = marketStorage.IndexBlockHash(chainId.Value, i);
+                    var block = marketStorage.GetBlock<MarketAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {
@@ -417,7 +432,7 @@ namespace FreeMarketOne.ServerCore
                                             }
 
                                             var chainSignatures = GetChainSignaturesForMarketItem(
-                                                marketBlockChain, chainId, countOfIndex, marketData, types);
+                                                marketStorage, chainId, countOfIndex, marketData, types);
 
                                             ignoredSignatures.AddRange(chainSignatures);
                                         }
@@ -438,7 +453,10 @@ namespace FreeMarketOne.ServerCore
         /// <param name="hash"></param>
         /// <param name="signature"></param>
         /// <returns></returns>
-        public MarketItemV1 GetOfferBySignature(string signature)
+        public MarketItemV1 GetOfferBySignature(
+            string signature, 
+            MarketPoolManager marketPoolManager,
+            IBlockChainManager<MarketAction> marketBlockChainManager)
         {
             lock (_locked)
             {
@@ -447,7 +465,7 @@ namespace FreeMarketOne.ServerCore
                 var types = new Type[] { typeof(MarketItemV1) };
 
                 //checking pool
-                var poolItems = FreeMarketOneServer.Current.MarketPoolManager.GetAllActionItemByType(types);
+                var poolItems = marketPoolManager.GetAllActionItemByType(types);
                 if (poolItems.Any())
                 {
                     _logger.Information(string.Format("Some offers found in pool. Checking them by signature."));
@@ -465,14 +483,14 @@ namespace FreeMarketOne.ServerCore
                 }
 
                 //checking blockchain
-                var marketBlockChain = FreeMarketOneServer.Current.MarketBlockChainManager.Storage;
-                var chainId = marketBlockChain.GetCanonicalChainId();
-                var countOfIndex = marketBlockChain.CountIndex(chainId.Value);
+                var marketStorage = marketBlockChainManager.Storage;
+                var chainId = marketStorage.GetCanonicalChainId();
+                var countOfIndex = marketStorage.CountIndex(chainId.Value);
 
                 for (long i = (countOfIndex - 1); i >= 0; i--)
                 {
-                    var blockHashId = marketBlockChain.IndexBlockHash(chainId.Value, i);
-                    var block = marketBlockChain.GetBlock<MarketAction>(blockHashId.Value);
+                    var blockHashId = marketStorage.IndexBlockHash(chainId.Value, i);
+                    var block = marketStorage.GetBlock<MarketAction>(blockHashId.Value);
 
                     foreach (var itemTx in block.Transactions)
                     {
@@ -502,14 +520,15 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="marketData"></param>
         /// <returns></returns>
-        public MarketItemV1 SignMarketData(MarketItemV1 marketData)
+        public MarketItemV1 SignMarketData(
+            MarketItemV1 marketData, UserPrivateKey privateKey)
         {
             lock (_locked)
             {
                 marketData.BaseSignature = marketData.Signature;
 
                 var bytesToSign = marketData.ToByteArrayForSign();
-                marketData.Signature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+                marketData.Signature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
 
                 marketData.Hash = marketData.GenerateHash();
 
@@ -522,17 +541,18 @@ namespace FreeMarketOne.ServerCore
         /// </summary>
         /// <param name="marketData"></param>
         /// <returns></returns>
-        public MarketItemV1 SignBuyerMarketData(MarketItemV1 marketData)
+        public MarketItemV1 SignBuyerMarketData(
+            MarketItemV1 marketData, 
+            IPAddress publicIP,
+            UserPrivateKey privateKey)
         {
             lock (_locked)
             {
-                var publicIp = FreeMarketOneServer.Current.ServerPublicAddress.PublicIP;
-
                 marketData.State = (int)ProductStateEnum.Sold;
-                marketData.BuyerOnionEndpoint = publicIp.MapToIPv4().ToString();
+                marketData.BuyerOnionEndpoint = publicIP.MapToIPv4().ToString();
 
                 var bytesToSign = marketData.ToByteArrayForSign();
-                marketData.BuyerSignature = Convert.ToBase64String(FreeMarketOneServer.Current.UserManager.PrivateKey.Sign(bytesToSign));
+                marketData.BuyerSignature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
 
                 marketData.Hash = marketData.GenerateHash();
 

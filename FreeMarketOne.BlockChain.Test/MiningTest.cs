@@ -4,7 +4,7 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.P2P;
-using FreeMarketOne.PoolManager;
+using FreeMarketOne.Pools;
 using FreeMarketOne.Tor;
 using Libplanet;
 using Libplanet.Blockchain;

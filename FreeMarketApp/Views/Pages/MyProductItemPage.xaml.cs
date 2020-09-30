@@ -5,12 +5,11 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Markets;
 using FreeMarketOne.ServerCore;
 using Serilog;
 using System;
 using System.Linq;
-using static FreeMarketApp.Views.Controls.MessageBox;
-using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -70,15 +69,19 @@ namespace FreeMarketApp.Views.Pages
                  MessageBox.MessageBoxButtons.YesNo);
 
             var signature = ((Button)sender).Tag.ToString();
-            if (result == MessageBoxResult.Yes)
+            if (result == MessageBox.MessageBoxResult.Yes)
             {
-                var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
+                var offer = FreeMarketOneServer.Current.Markets.GetOfferBySignature(
+                    signature,
+                    FreeMarketOneServer.Current.MarketPoolManager,
+                    FreeMarketOneServer.Current.MarketBlockChainManager);
+
                 if (offer != null)
                 {
                     offer.State = (int)MarketManager.ProductStateEnum.Removed;
 
                     //sign market data and generating chain connection
-                    offer = FreeMarketOneServer.Current.MarketManager.SignMarketData(offer);
+                    offer = FreeMarketOneServer.Current.Markets.SignMarketData(offer, FreeMarketOneServer.Current.Users.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Saving remove of product to chain {0}.", signature));
 
@@ -112,7 +115,10 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
+            var offer = FreeMarketOneServer.Current.Markets.GetOfferBySignature(
+                signature,
+                FreeMarketOneServer.Current.MarketPoolManager,
+                FreeMarketOneServer.Current.MarketBlockChainManager);
 
             if (offer != null)
             {
@@ -130,7 +136,7 @@ namespace FreeMarketApp.Views.Pages
                 tbDescription.Text = offer.Description;
                 tbShipping.Text = offer.Shipping;
                 tbPrice.Text = offer.Price.ToString();
-                tbPriceType.Text = ((ProductPriceTypeEnum)offer.PriceType).ToString();
+                tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)offer.PriceType).ToString();
                 btEdit.Tag = signature;
                 btRemove.Tag = signature;
 

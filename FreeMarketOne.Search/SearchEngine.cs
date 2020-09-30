@@ -1,5 +1,4 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Facet;
 using Lucene.Net.Facet.Taxonomy;
@@ -12,6 +11,7 @@ using Lucene.Net.Store;
 using Lucene.Net.Util;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using FreeMarketOne.Markets;
 
 namespace FreeMarketOne.Search
 {

@@ -6,13 +6,12 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Markets;
 using FreeMarketOne.ServerCore;
 using Libplanet.Extensions;
 using Serilog;
 using System;
 using System.Linq;
-using static FreeMarketApp.Views.Controls.MessageBox;
-using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -76,12 +75,12 @@ namespace FreeMarketApp.Views.Pages
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                 MessageBox.MessageBoxButtons.YesNo);
 
-            if (result == MessageBoxResult.Yes)
+            if (result == MessageBox.MessageBoxResult.Yes)
             {
                 //is it my offer?
                 var itemReviewBytes = _offer.ToByteArrayForSign();
                 var offerUserPubKeys = UserPublicKey.Recover(itemReviewBytes, _offer.Signature);
-                var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+                var userPubKey = FreeMarketOneServer.Current.Users.GetCurrentUserPublicKey();
                 var isMine = false;
 
                 foreach (var itemUserPubKey in offerUserPubKeys)
@@ -102,7 +101,10 @@ namespace FreeMarketApp.Views.Pages
                 else
                 {
                     //sign market data and generating chain connection
-                    _offer = FreeMarketOneServer.Current.MarketManager.SignBuyerMarketData(_offer);
+                    _offer = FreeMarketOneServer.Current.Markets.SignBuyerMarketData(
+                        _offer,
+                        FreeMarketOneServer.Current.ServerPublicAddress.PublicIP,
+                        FreeMarketOneServer.Current.Users.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));
 
@@ -110,8 +112,8 @@ namespace FreeMarketApp.Views.Pages
                     FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
                     //create a new chat
-                    var newChat = FreeMarketOneServer.Current.ChatManager.CreateNewChat(_offer);
-                    FreeMarketOneServer.Current.ChatManager.SaveChat(newChat);
+                    var newChat = FreeMarketOneServer.Current.Chats.CreateNewChat(_offer);
+                    FreeMarketOneServer.Current.Chats.SaveChat(newChat);
 
                     await MessageBox.Show(mainWindow,
                         string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
@@ -153,7 +155,10 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
+            var offer = FreeMarketOneServer.Current.Markets.GetOfferBySignature(
+                signature,
+                FreeMarketOneServer.Current.MarketPoolManager,
+                FreeMarketOneServer.Current.MarketBlockChainManager);
 
             if (offer != null)
             {
@@ -180,7 +185,7 @@ namespace FreeMarketApp.Views.Pages
                 tbDescription.Text = _offer.Description;
                 tbShipping.Text = _offer.Shipping;
                 tbPrice.Text = _offer.Price.ToString();
-                tbPriceType.Text = ((ProductPriceTypeEnum)_offer.PriceType).ToString();
+                tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)_offer.PriceType).ToString();
                 btBuyButton.Tag = _offer.Signature;            
                 tbManufacturer.Text = _offer.Manufacturer;
                 tbFineness.Text = _offer.Fineness;
@@ -194,8 +199,8 @@ namespace FreeMarketApp.Views.Pages
                 }
 
                 //seller userdata loading
-                var userPubKey = FreeMarketOneServer.Current.MarketManager.GetSellerPubKeyFromMarketItem(_offer);
-                var userData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(
+                var userPubKey = FreeMarketOneServer.Current.Markets.GetSellerPubKeyFromMarketItem(_offer);
+                var userData = FreeMarketOneServer.Current.Users.GetUserDataByPublicKey(
                     userPubKey, 
                     FreeMarketOneServer.Current.BasePoolManager,
                     FreeMarketOneServer.Current.BaseBlockChainManager);
@@ -205,12 +210,12 @@ namespace FreeMarketApp.Views.Pages
                     tbSeller.Text = userData.UserName;
                     btSeller.Tag = string.Format("{0}|{1}", userData.Signature, userData.Hash);
 
-                    var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                    var reviews = FreeMarketOneServer.Current.Users.GetAllReviewsForPubKey(
                         userPubKey,
                         FreeMarketOneServer.Current.BasePoolManager,
                         FreeMarketOneServer.Current.BaseBlockChainManager);
 
-                    var reviewStars = FreeMarketOneServer.Current.UserManager.GetUserReviewStars(reviews);
+                    var reviewStars = FreeMarketOneServer.Current.Users.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 
                     tbSellerStars.Text = reviewStartRounded.ToString();

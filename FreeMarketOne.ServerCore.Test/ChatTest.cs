@@ -1,10 +1,12 @@
 using FreeMarketOne.BlockChain;
 using FreeMarketOne.BlockChain.Test.Helpers;
+using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P;
-using FreeMarketOne.PoolManager;
+using FreeMarketOne.Pools;
+using FreeMarketOne.Users;
 using Libplanet.Blockchain;
 using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

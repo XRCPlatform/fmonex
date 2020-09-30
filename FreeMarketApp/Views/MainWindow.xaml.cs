@@ -9,6 +9,7 @@ using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore;
+using FreeMarketOne.Users;
 using Serilog;
 using System;
 using System.Linq;
@@ -18,7 +19,6 @@ namespace FreeMarketApp.Views
     public class MainWindow : WindowBase
     {
         private ILogger _logger;
-        private SearchEngine searchEngine;
 
         public MainWindow()
         {
@@ -30,12 +30,12 @@ namespace FreeMarketApp.Views
 
             InitializeComponent();
 
-            if (FreeMarketOneServer.Current.UserManager != null)
+            if (FreeMarketOneServer.Current.Users != null)
             {
                 FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
-                if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
+                if (FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
                 {
                     PagesHelper.Log(_logger, "Private Key is valid adding MainPage instance.");
 
@@ -49,8 +49,8 @@ namespace FreeMarketApp.Views
                 {
                     PagesHelper.Log(_logger, "Private Key is not valid. Showing fist or login page.");
 
-                    if ((FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
-                        || (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
+                    if ((FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
+                        || (FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
                     {
                         pcMainContent.Children.Add(LoginPage.Instance);
                     }

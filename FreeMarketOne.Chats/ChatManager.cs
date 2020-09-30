@@ -1,8 +1,9 @@
-﻿using FreeMarketApp.Helpers;
-using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
+using FreeMarketOne.Markets;
+using FreeMarketOne.Users;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
@@ -20,9 +21,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FreeMarketOne.ServerCore
+namespace FreeMarketOne.Chats
 {
-    public class ChatManager
+    public class ChatManager : IChatManager
     {
         public enum ChatItemTypeEnum
         {
@@ -30,11 +31,13 @@ namespace FreeMarketOne.ServerCore
             Seller = 1
         }
 
+        private const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+
         private IBaseConfiguration _configuration;
         private CancellationTokenSource _cancellationToken { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
         private UserPrivateKey _userPrivateKey { get; set; }
-        private UserManager _userManager { get; set; }
+        private IUserManager _userManager { get; set; }
         private TimeSpan _repeatEvery { get; set; }
         private TimeSpan _startAfter { get; set; }
 
@@ -54,7 +57,7 @@ namespace FreeMarketOne.ServerCore
 
         public ChatManager(IBaseConfiguration configuration,
             UserPrivateKey privateKey,
-            UserManager userManager,
+            IUserManager userManager,
             TimeSpan? repeatEvery = null,
             TimeSpan? startAfter = null)
         {
@@ -343,14 +346,26 @@ namespace FreeMarketOne.ServerCore
             result.ChatItems = new List<ChatItem>();
 
             var newInitialMessage = new ChatItem();
-            var textHelper = new TextHelper();
-            newInitialMessage.Message = textHelper.GetRandomText(32);
+            newInitialMessage.Message = GetRandomText(32);
             newInitialMessage.ExtraMessage = result.SellerEndPoint;
             newInitialMessage.DateCreated = DateTime.UtcNow;
             newInitialMessage.Type = (int)ChatItemTypeEnum.Seller;
 
             result.ChatItems.Add(newInitialMessage);
             return result;
+        }
+
+        public string GetRandomText(int length)
+        {
+            var stringChars = new char[length];
+            var random = new Random();
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = CHARS[random.Next(CHARS.Length)];
+            }
+
+            return new string(stringChars);
         }
 
         /// <summary>

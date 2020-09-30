@@ -43,11 +43,11 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.UserManager != null)
+            if (FreeMarketOneServer.Current.Users != null)
             {
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to profile page."));
 
-                _userData = FreeMarketOneServer.Current.UserManager.UserData;
+                _userData = FreeMarketOneServer.Current.Users.UserData;
 
                 var tbUserName = this.FindControl<TextBlock>("TBUserName");
                 var tbDescription = this.FindControl<TextBlock>("TBDescription");
@@ -65,13 +65,13 @@ namespace FreeMarketApp.Views.Pages
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
 
-                var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
-                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                var userPubKey = FreeMarketOneServer.Current.Users.GetCurrentUserPublicKey();
+                var reviews = FreeMarketOneServer.Current.Users.GetAllReviewsForPubKey(
                     userPubKey,
                     FreeMarketOneServer.Current.BasePoolManager,
                     FreeMarketOneServer.Current.BaseBlockChainManager);
 
-                var reviewStars = FreeMarketOneServer.Current.UserManager.GetUserReviewStars(reviews);
+                var reviewStars = FreeMarketOneServer.Current.Users.GetUserReviewStars(reviews);
                 var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
                 tbReviewStars.Text = reviewStartRounded.ToString();
             }

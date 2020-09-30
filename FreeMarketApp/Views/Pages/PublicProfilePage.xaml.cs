@@ -61,7 +61,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadUser(string signature, string hash)
         {
-            var userData = FreeMarketOneServer.Current.UserManager.GetUserDataBySignatureAndHash(
+            var userData = FreeMarketOneServer.Current.Users.GetUserDataBySignatureAndHash(
                 signature, hash, FreeMarketOneServer.Current.BasePoolManager, FreeMarketOneServer.Current.BaseBlockChainManager);
 
             if (userData != null)
@@ -80,14 +80,14 @@ namespace FreeMarketApp.Views.Pages
                 var userBytes = userData.ToByteArrayForSign();
                 var userPubKeys = UserPublicKey.Recover(userBytes, userData.Signature);
 
-                var reviews = FreeMarketOneServer.Current.UserManager.GetAllReviewsForPubKey(
+                var reviews = FreeMarketOneServer.Current.Users.GetAllReviewsForPubKey(
                     userPubKeys,
                     FreeMarketOneServer.Current.BasePoolManager,
                     FreeMarketOneServer.Current.BaseBlockChainManager);
 
                 if (reviews.Any())
                 {
-                    var reviewStars = FreeMarketOneServer.Current.UserManager.GetUserReviewStars(reviews);
+                    var reviewStars = FreeMarketOneServer.Current.Users.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 
                     tbStars.Text = reviewStartRounded.ToString();
@@ -119,7 +119,7 @@ namespace FreeMarketApp.Views.Pages
                     var itemReviewBytes = itemReview.ToByteArrayForSign();
                     var reviewUserPubKeys = UserPublicKey.Recover(itemReviewBytes, itemReview.Signature);
 
-                    var reviewUserData = FreeMarketOneServer.Current.UserManager.GetUserDataByPublicKey(
+                    var reviewUserData = FreeMarketOneServer.Current.Users.GetUserDataByPublicKey(
                         reviewUserPubKeys,
                         FreeMarketOneServer.Current.BasePoolManager,
                         FreeMarketOneServer.Current.BaseBlockChainManager);

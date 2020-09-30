@@ -49,18 +49,5 @@ namespace FreeMarketApp.Helpers
 
             return true;
         }
-
-        public string GetRandomText(int length)
-        {
-            var stringChars = new char[length];
-            var random = new Random();
-
-            for (int i = 0; i < stringChars.Length; i++)
-            {
-                stringChars[i] = CHARS[random.Next(CHARS.Length)];
-            }
-
-            return new string(stringChars);
-        }
     }
 }

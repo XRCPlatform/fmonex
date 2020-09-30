@@ -130,15 +130,15 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                FreeMarketOneServer.Current.UserManager.SaveNewPrivKey(
+                FreeMarketOneServer.Current.Users.SaveNewPrivKey(
                     tbSeed.Text, 
                     tbPassword.Text, 
                     FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                     FreeMarketOneServer.Current.Configuration.BlockChainSecretPath);
                 
-                var firstUserData = FreeMarketOneServer.Current.UserManager.SignUserData(tbUserName.Text, tbDescription.Text);
+                var firstUserData = FreeMarketOneServer.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text);
 
-                FreeMarketOneServer.Current.UserManager.SaveUserData(
+                FreeMarketOneServer.Current.Users.SaveUserData(
                     firstUserData,
                     FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
                     FreeMarketOneServer.Current.Configuration.BlockChainUserPath);
@@ -176,7 +176,7 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonRandomSeed_Click(object sender, RoutedEventArgs args)
         {
             var tbSeed = this.FindControl<TextBox>("TBSeed");
-            tbSeed.Text = FreeMarketOneServer.Current.UserManager.CreateRandomSeed();
+            tbSeed.Text = FreeMarketOneServer.Current.Users.CreateRandomSeed();
         }
     }
 }

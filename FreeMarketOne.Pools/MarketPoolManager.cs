@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FreeMarketOne.PoolManager
+namespace FreeMarketOne.Pools
 {
     public class MarketPoolManager : PoolManager<MarketAction>
     {

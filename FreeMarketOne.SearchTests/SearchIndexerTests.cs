@@ -1,5 +1,5 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
+using FreeMarketOne.Markets;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Facet;

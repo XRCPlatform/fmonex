@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.BlockChain\FreeMarketOne.BlockChain.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Pools\FreeMarketOne.Pools.csproj" />
+  </ItemGroup>
+
+</Project>

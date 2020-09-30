@@ -42,16 +42,19 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if ((FreeMarketOneServer.Current.MarketManager != null) && (FreeMarketOneServer.Current.UserManager != null))
+            if ((FreeMarketOneServer.Current.Markets != null) && (FreeMarketOneServer.Current.Users != null))
             {
                 SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
 
                 PagesHelper.Log(_logger, string.Format("Loading my bought market offers from chain."));
 
-                var userPubKey = FreeMarketOneServer.Current.UserManager.GetCurrentUserPublicKey();
+                var userPubKey = FreeMarketOneServer.Current.Users.GetCurrentUserPublicKey();
 
                 //my own offers or sells
-                var myBoughtOffers = FreeMarketOneServer.Current.MarketManager.GetAllBuyerMarketItemsByPubKeys(userPubKey);
+                var myBoughtOffers = FreeMarketOneServer.Current.Markets.GetAllBuyerMarketItemsByPubKeys(
+                    userPubKey,
+                    FreeMarketOneServer.Current.MarketPoolManager,
+                    FreeMarketOneServer.Current.MarketBlockChainManager);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(myBoughtOffers, _logger);

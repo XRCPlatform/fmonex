@@ -3,7 +3,7 @@ using FreeMarketOne.DataStructure.Objects.BaseItems;
 using System;
 using System.Collections.Generic;
 
-namespace FreeMarketOne.PoolManager
+namespace FreeMarketOne.Pools
 {
     public interface IPoolManager : IDisposable 
     {

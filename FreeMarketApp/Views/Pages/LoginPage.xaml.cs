@@ -6,6 +6,7 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.ServerCore;
+using FreeMarketOne.Users;
 using Serilog;
 using System.Text;
 using System.Threading.Tasks;
@@ -86,7 +87,7 @@ namespace FreeMarketApp.Views.Pages
 
                     FreeMarketOneServer.Current.Initialize(tbPassword.Text);
                     
-                    if (FreeMarketOneServer.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
+                    if (FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
                         PagesHelper.SetUserData(_logger, mainWindow);

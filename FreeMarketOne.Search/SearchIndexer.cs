@@ -1,6 +1,5 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using Libplanet.Blocks;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -15,6 +14,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
 using Newtonsoft.Json;
+using FreeMarketOne.Markets;
 
 namespace FreeMarketOne.Search
 {

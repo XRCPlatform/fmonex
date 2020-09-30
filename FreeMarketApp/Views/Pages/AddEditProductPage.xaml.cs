@@ -6,6 +6,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Markets;
 using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
@@ -13,8 +14,6 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static FreeMarketApp.Views.Controls.MessageBox;
-using static FreeMarketOne.ServerCore.MarketManager;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -82,7 +81,7 @@ namespace FreeMarketApp.Views.Pages
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                 MessageBox.MessageBoxButtons.YesNo);
 
-            if (result == MessageBoxResult.Yes)
+            if (result == MessageBox.MessageBoxResult.Yes)
             {
                 PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                 ClearForm();
@@ -91,7 +90,10 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FreeMarketOneServer.Current.MarketManager.GetOfferBySignature(signature);
+            var offer = FreeMarketOneServer.Current.Markets.GetOfferBySignature(
+                signature,
+                FreeMarketOneServer.Current.MarketPoolManager,
+                FreeMarketOneServer.Current.MarketBlockChainManager);
 
             if (offer != null)
             {
@@ -158,7 +160,7 @@ namespace FreeMarketApp.Views.Pages
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                 MessageBox.MessageBoxButtons.YesNo);
 
-            if (result == MessageBoxResult.Yes)
+            if (result == MessageBox.MessageBoxResult.Yes)
             {
                 //check form
                 var tbTitle = this.FindControl<TextBox>("TBTitle");
@@ -285,7 +287,7 @@ namespace FreeMarketApp.Views.Pages
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
                     _offer.Price = float.Parse(tbPrice.Text.Trim());
                     _offer.PriceType = (cbPriceType.Tag != null && cbPriceType.Tag.ToString() == "1" ? 1 : 0);
-                    _offer.State = (int)ProductStateEnum.Default;
+                    _offer.State = (int)MarketManager.ProductStateEnum.Default;
 
                     //get time to next block
                     //upload to sia
@@ -309,7 +311,7 @@ namespace FreeMarketApp.Views.Pages
                     }
 
                     //sign market data and generating chain connection
-                    _offer = FreeMarketOneServer.Current.MarketManager.SignMarketData(_offer);
+                    _offer = FreeMarketOneServer.Current.Markets.SignMarketData(_offer, FreeMarketOneServer.Current.Users.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 

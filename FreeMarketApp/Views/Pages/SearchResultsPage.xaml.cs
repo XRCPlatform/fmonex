@@ -62,7 +62,7 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(SearchResultsPage).Namespace, typeof(SearchResultsPage).Name));
 
-            if ((FreeMarketOneServer.Current.MarketManager != null) && (FreeMarketOneServer.Current.UserManager != null))
+            if ((FreeMarketOneServer.Current.Markets != null) && (FreeMarketOneServer.Current.Users != null))
             {
                 SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
                 

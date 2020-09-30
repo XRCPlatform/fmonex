@@ -19,7 +19,6 @@ namespace FreeMarketApp
 {
     public class App : Application
     {
-        private static bool _newBlock = false;
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -85,7 +84,6 @@ namespace FreeMarketApp
         private static void BaseBlockChainChanged(object sender, EventArgs e)
         {
             //we have a new block
-            _newBlock = true;
         }
 
         private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> deletedHashes)

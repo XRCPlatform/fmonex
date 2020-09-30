@@ -2,7 +2,7 @@
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.P2P;
-using FreeMarketOne.PoolManager;
+using FreeMarketOne.Pools;
 using FreeMarketOne.ServerCore.Test;
 using Libplanet.Blockchain;
 using Libplanet.Extensions;

@@ -5,6 +5,7 @@ using DynamicData;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Markets;
 using FreeMarketOne.Search;
 using FreeMarketOne.ServerCore;
 using Lucene.Net.Search;
@@ -54,7 +55,7 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.MarketManager != null)
+            if (FreeMarketOneServer.Current.Markets != null)
             {
                 SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
 

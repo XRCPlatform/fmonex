@@ -4,8 +4,8 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
-using FreeMarketOne.ServerCore;
 using Serilog;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -41,8 +41,8 @@ namespace FreeMarketApp.Views.Pages
 
         public SettingsPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(SettingsPage).Namespace, typeof(SettingsPage).Name));
 
             this.InitializeComponent();

@@ -4,13 +4,12 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.Search;
-using FreeMarketOne.ServerCore;
 using Lucene.Net.Search;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -58,13 +57,13 @@ namespace FreeMarketApp.Views.Pages
 
         public SearchResultsPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(SearchResultsPage).Namespace, typeof(SearchResultsPage).Name));
 
-            if ((FreeMarketOneServer.Current.Markets != null) && (FreeMarketOneServer.Current.Users != null))
+            if ((FMONE.Current.Markets != null) && (FMONE.Current.Users != null))
             {
-                SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
+                SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
                 
                 _skynetHelper = new SkynetHelper();
                 GetAndRenderQueryResults();
@@ -79,7 +78,7 @@ namespace FreeMarketApp.Views.Pages
         {
             PagesHelper.Log(_logger, string.Format("Loading search results from lucene."));
 
-            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var engine = FMONE.Current.SearchEngine;
             engine.PageSize = selectedPageSize;
 
             //var result = engine.Search(_searchPhrase);
@@ -123,15 +122,14 @@ namespace FreeMarketApp.Views.Pages
 
         public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
         {
-     
             int thisPageSize = selectedPageSize;
 
-            string selection = ((Avalonia.Controls.ContentControl)((Avalonia.Controls.Primitives.SelectingItemsControl)sender).SelectedItem).Content.ToString();
+            string selection = ((ContentControl)((Avalonia.Controls.Primitives.SelectingItemsControl)sender).SelectedItem).Content.ToString();
             if (int.TryParse(selection, out thisPageSize) && !thisPageSize.Equals(selectedPageSize))
             {
                 if (!_initialized) return;// this is just false signal by app setting to expected value.
 
-                var engine = FreeMarketOneServer.Current.SearchEngine;
+                var engine = FMONE.Current.SearchEngine;
                 engine.PageSize = thisPageSize;
                 selectedPageSize = thisPageSize;
 
@@ -165,12 +163,12 @@ namespace FreeMarketApp.Views.Pages
 
         public static bool ValidateQuery(string Query)
         {
-            return FreeMarketOneServer.Current.SearchEngine.ValidateQuery(Query);
+            return FMONE.Current.SearchEngine.ValidateQuery(Query);
         }
 
         private void FilterList()
         {
-            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var engine = FMONE.Current.SearchEngine;
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
 
             //current query has currently applied filters embeded, but also has page position and other parameters.
@@ -226,7 +224,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonNextPage_Click(object sender, RoutedEventArgs args)
         {
-            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var engine = FMONE.Current.SearchEngine;
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
 
             if (currentSearchResult.CurrentPage * currentSearchResult.PageSize < (currentSearchResult.TotalHits))
@@ -244,7 +242,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonPreviousPage_Click(object sender, RoutedEventArgs args)
         {
-            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var engine = FMONE.Current.SearchEngine;
             var currentSearchResult = ((SearchResultsPageViewModel)this.DataContext).Result;
 
             if (currentSearchResult.CurrentPage > 1)

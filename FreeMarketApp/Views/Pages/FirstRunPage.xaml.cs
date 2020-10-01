@@ -5,13 +5,10 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
-using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using Serilog;
-using System;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -40,8 +37,8 @@ namespace FreeMarketApp.Views.Pages
 
         public FirstRunPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(FirstRunPage).Namespace, typeof(FirstRunPage).Name));
 
             this.InitializeComponent();
@@ -130,18 +127,18 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                FreeMarketOneServer.Current.Users.SaveNewPrivKey(
+                FMONE.Current.Users.SaveNewPrivKey(
                     tbSeed.Text, 
-                    tbPassword.Text, 
-                    FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
-                    FreeMarketOneServer.Current.Configuration.BlockChainSecretPath);
+                    tbPassword.Text,
+                    FMONE.Current.Configuration.FullBaseDirectory,
+                    FMONE.Current.Configuration.BlockChainSecretPath);
                 
-                var firstUserData = FreeMarketOneServer.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text);
+                var firstUserData = FMONE.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text);
 
-                FreeMarketOneServer.Current.Users.SaveUserData(
+                FMONE.Current.Users.SaveUserData(
                     firstUserData,
-                    FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
-                    FreeMarketOneServer.Current.Configuration.BlockChainUserPath);
+                    FMONE.Current.Configuration.FullBaseDirectory,
+                    FMONE.Current.Configuration.BlockChainUserPath);
 
                 //reloading server with splash window
                 async void AppAsyncLoadingStart()
@@ -152,7 +149,7 @@ namespace FreeMarketApp.Views.Pages
                     splashWindow.Show();
                     await Task.Delay(10);
 
-                    FreeMarketOneServer.Current.Initialize(tbPassword.Text, firstUserData);
+                    FMONE.Current.Initialize(tbPassword.Text, firstUserData);
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
                     PagesHelper.UnlockTools(mainWindow, true);
 
@@ -176,7 +173,7 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonRandomSeed_Click(object sender, RoutedEventArgs args)
         {
             var tbSeed = this.FindControl<TextBox>("TBSeed");
-            tbSeed.Text = FreeMarketOneServer.Current.Users.CreateRandomSeed();
+            tbSeed.Text = FMONE.Current.Users.CreateRandomSeed();
         }
     }
 }

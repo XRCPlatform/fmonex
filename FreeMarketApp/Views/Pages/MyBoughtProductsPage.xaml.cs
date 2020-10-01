@@ -3,10 +3,10 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
-using FreeMarketOne.ServerCore;
 using Serilog;
 using System.Linq;
 using System.Threading;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -36,25 +36,25 @@ namespace FreeMarketApp.Views.Pages
 
         public MyBoughtProductsPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MyBoughtProductsPage).Namespace, typeof(MyBoughtProductsPage).Name));
 
             this.InitializeComponent();
 
-            if ((FreeMarketOneServer.Current.Markets != null) && (FreeMarketOneServer.Current.Users != null))
+            if ((FMONE.Current.Markets != null) && (FMONE.Current.Users != null))
             {
-                SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
+                SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
 
                 PagesHelper.Log(_logger, string.Format("Loading my bought market offers from chain."));
 
-                var userPubKey = FreeMarketOneServer.Current.Users.GetCurrentUserPublicKey();
+                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
 
                 //my own offers or sells
-                var myBoughtOffers = FreeMarketOneServer.Current.Markets.GetAllBuyerMarketItemsByPubKeys(
+                var myBoughtOffers = FMONE.Current.Markets.GetAllBuyerMarketItemsByPubKeys(
                     userPubKey,
-                    FreeMarketOneServer.Current.MarketPoolManager,
-                    FreeMarketOneServer.Current.MarketBlockChainManager);
+                    FMONE.Current.MarketPoolManager,
+                    FMONE.Current.MarketBlockChainManager);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(myBoughtOffers, _logger);

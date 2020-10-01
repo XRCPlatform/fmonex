@@ -6,14 +6,10 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
-using FreeMarketOne.DataStructure.Chat;
-using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using Serilog;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -42,15 +38,15 @@ namespace FreeMarketApp.Views.Pages
 
         public ChatPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(ChatPage).Namespace, typeof(ChatPage).Name));
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.Chats != null)
+            if (FMONE.Current.Chats != null)
             {
-                var chatManager = FreeMarketOneServer.Current.Chats;
+                var chatManager = FMONE.Current.Chats;
                 PagesHelper.Log(_logger, string.Format("Loading chats from data folder."));
 
                 var chats = chatManager.GetAllChats();
@@ -108,7 +104,7 @@ namespace FreeMarketApp.Views.Pages
                 var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Signature == signature);
                 if (chatData != null)
                 {
-                    var chatManager = FreeMarketOneServer.Current.Chats;
+                    var chatManager = FMONE.Current.Chats;
 
                     if (string.IsNullOrEmpty(chatData.SellerEndPoint))
                     {
@@ -161,7 +157,7 @@ namespace FreeMarketApp.Views.Pages
                 ((ChatPageViewModel)DataContext).ChatItems.Clear();
                 if ((chatData.ChatItems != null) && chatData.ChatItems.Any() && (chatData.ChatItems.Count > 1))
                 {
-                    var chatManager = FreeMarketOneServer.Current.Chats;
+                    var chatManager = FMONE.Current.Chats;
 
                     var decryptedChat = chatManager.DecryptChatItems(chatData.ChatItems);
                     ((ChatPageViewModel)DataContext).ChatItems.AddRange(decryptedChat);

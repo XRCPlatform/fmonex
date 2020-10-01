@@ -3,12 +3,12 @@ using Avalonia.Controls.Shapes;
 using Avalonia.Media.Imaging;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Pages;
-using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
 using Serilog.Events;
 using System;
 using System.Linq;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Helpers
 {
@@ -72,16 +72,16 @@ namespace FreeMarketApp.Helpers
 
         internal static void SetUserData(ILogger _logger, Window mainWindow)
         {
-            var userManager = FreeMarketOneServer.Current.Users;
+            var userManager = FMONE.Current.Users;
             if ((userManager != null) && (userManager.UserData != null))
             {
                 var tbUserName = mainWindow.FindControl<TextBlock>("TBUserName");
                 tbUserName.Text = userManager.UserData.UserName;
 
-                var reviews = FreeMarketOneServer.Current.Users.GetAllReviewsForPubKey(
+                var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
                     userManager.GetCurrentUserPublicKey(),
-                    FreeMarketOneServer.Current.BasePoolManager,
-                    FreeMarketOneServer.Current.BaseBlockChainManager);
+                    FMONE.Current.BasePoolManager,
+                    FMONE.Current.BaseBlockChainManager);
                 
                 if (reviews.Any())
                 {
@@ -114,8 +114,8 @@ namespace FreeMarketApp.Helpers
 
         internal static void SetServerData(ILogger _logger, Window mainWindow)
         {
-            var torProcessManager = FreeMarketOneServer.Current.TorProcessManager;
-            var swarmServer = FreeMarketOneServer.Current.BaseBlockChainManager.SwarmServer;
+            var torProcessManager = FMONE.Current.TorProcessManager;
+            var swarmServer = FMONE.Current.BaseBlockChainManager.SwarmServer;
 
             if (swarmServer != null)
             {

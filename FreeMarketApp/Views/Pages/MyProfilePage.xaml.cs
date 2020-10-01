@@ -4,10 +4,10 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using FreeMarketApp.Helpers;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
 using System;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -37,17 +37,17 @@ namespace FreeMarketApp.Views.Pages
 
         public MyProfilePage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MyProfilePage).Namespace, typeof(MyProfilePage).Name));
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.Users != null)
+            if (FMONE.Current.Users != null)
             {
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to profile page."));
 
-                _userData = FreeMarketOneServer.Current.Users.UserData;
+                _userData = FMONE.Current.Users.UserData;
 
                 var tbUserName = this.FindControl<TextBlock>("TBUserName");
                 var tbDescription = this.FindControl<TextBlock>("TBDescription");
@@ -65,13 +65,13 @@ namespace FreeMarketApp.Views.Pages
                     iPhoto.Source = new Bitmap(skynetStream);
                 }
 
-                var userPubKey = FreeMarketOneServer.Current.Users.GetCurrentUserPublicKey();
-                var reviews = FreeMarketOneServer.Current.Users.GetAllReviewsForPubKey(
+                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
+                var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
                     userPubKey,
-                    FreeMarketOneServer.Current.BasePoolManager,
-                    FreeMarketOneServer.Current.BaseBlockChainManager);
+                    FMONE.Current.BasePoolManager,
+                    FMONE.Current.BaseBlockChainManager);
 
-                var reviewStars = FreeMarketOneServer.Current.Users.GetUserReviewStars(reviews);
+                var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
                 var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
                 tbReviewStars.Text = reviewStartRounded.ToString();
             }

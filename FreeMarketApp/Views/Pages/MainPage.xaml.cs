@@ -1,13 +1,11 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using DynamicData;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
 using FreeMarketOne.Search;
-using FreeMarketOne.ServerCore;
 using Lucene.Net.Search;
 using Serilog;
 using System;
@@ -15,7 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
-using System.Xml;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -49,23 +47,21 @@ namespace FreeMarketApp.Views.Pages
 
         public MainPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MainPage).Namespace, typeof(MainPage).Name));
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.Markets != null)
+            if (FMONE.Current.Markets != null)
             {
-                SpinWait.SpinUntil(() => FreeMarketOneServer.Current.GetServerState() == FreeMarketOneServer.FreeMarketOneServerStates.Online);
+                SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
 
                 PagesHelper.Log(_logger, string.Format("Loading market offers from chain."));
 
-                var engine = FreeMarketOneServer.Current.SearchEngine;
+                var engine = FMONE.Current.SearchEngine;
 
                 var result = engine.Search("", true, 1);
-
-                //var offers = FreeMarketOneServer.Current.MarketManager.GetAllActiveOffers();
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -115,7 +111,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void FilterList()
         {
-            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var engine = FMONE.Current.SearchEngine;
             var currentSearchResult = ((MainPageViewModel)this.DataContext).Result;
 
             Query newQuery = engine.BuildDrillDown(_appliedFilters, engine.ParseQuery(""));
@@ -137,7 +133,7 @@ namespace FreeMarketApp.Views.Pages
             {
                 if (!_initialized) return;// this is just false signal by app setting to expected value.
 
-                var engine = FreeMarketOneServer.Current.SearchEngine;
+                var engine = FMONE.Current.SearchEngine;
                 engine.PageSize = thisPageSize;
                 selectedPageSize = thisPageSize;
 
@@ -152,7 +148,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonNextPage_Click(object sender, RoutedEventArgs args)
         {
-            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var engine = FMONE.Current.SearchEngine;
             var currentSearchResult = ((MainPageViewModel)this.DataContext).Result;
 
             if (currentSearchResult.CurrentPage * currentSearchResult.PageSize < (currentSearchResult.TotalHits))
@@ -171,7 +167,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonPreviousPage_Click(object sender, RoutedEventArgs args)
         {
-            var engine = FreeMarketOneServer.Current.SearchEngine;
+            var engine = FMONE.Current.SearchEngine;
             var currentSearchResult = ((MainPageViewModel)this.DataContext).Result;
 
             if (currentSearchResult.CurrentPage > 1)

@@ -7,13 +7,13 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Libplanet.Extensions;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -50,8 +50,8 @@ namespace FreeMarketApp.Views.Pages
 
         public PublicProfilePage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(PublicProfilePage).Namespace, typeof(PublicProfilePage).Name));
 
             this.InitializeComponent();
@@ -61,8 +61,8 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadUser(string signature, string hash)
         {
-            var userData = FreeMarketOneServer.Current.Users.GetUserDataBySignatureAndHash(
-                signature, hash, FreeMarketOneServer.Current.BasePoolManager, FreeMarketOneServer.Current.BaseBlockChainManager);
+            var userData = FMONE.Current.Users.GetUserDataBySignatureAndHash(
+                signature, hash, FMONE.Current.BasePoolManager, FMONE.Current.BaseBlockChainManager);
 
             if (userData != null)
             {
@@ -80,14 +80,14 @@ namespace FreeMarketApp.Views.Pages
                 var userBytes = userData.ToByteArrayForSign();
                 var userPubKeys = UserPublicKey.Recover(userBytes, userData.Signature);
 
-                var reviews = FreeMarketOneServer.Current.Users.GetAllReviewsForPubKey(
+                var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
                     userPubKeys,
-                    FreeMarketOneServer.Current.BasePoolManager,
-                    FreeMarketOneServer.Current.BaseBlockChainManager);
+                    FMONE.Current.BasePoolManager,
+                    FMONE.Current.BaseBlockChainManager);
 
                 if (reviews.Any())
                 {
-                    var reviewStars = FreeMarketOneServer.Current.Users.GetUserReviewStars(reviews);
+                    var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 
                     tbStars.Text = reviewStartRounded.ToString();
@@ -119,10 +119,10 @@ namespace FreeMarketApp.Views.Pages
                     var itemReviewBytes = itemReview.ToByteArrayForSign();
                     var reviewUserPubKeys = UserPublicKey.Recover(itemReviewBytes, itemReview.Signature);
 
-                    var reviewUserData = FreeMarketOneServer.Current.Users.GetUserDataByPublicKey(
+                    var reviewUserData = FMONE.Current.Users.GetUserDataByPublicKey(
                         reviewUserPubKeys,
-                        FreeMarketOneServer.Current.BasePoolManager,
-                        FreeMarketOneServer.Current.BaseBlockChainManager);
+                        FMONE.Current.BasePoolManager,
+                        FMONE.Current.BaseBlockChainManager);
 
                     if (reviewUserData != null)
                     {

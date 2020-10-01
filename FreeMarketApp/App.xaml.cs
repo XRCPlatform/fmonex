@@ -4,16 +4,13 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
 using FreeMarketOne.DataStructure;
-using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using Libplanet;
 using Libplanet.Blockchain;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using System.Linq;
-using Libplanet.Blocks;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp
 {
@@ -65,11 +62,11 @@ namespace FreeMarketApp
         {
             await Task.Run(() =>
             {
-                FreeMarketOneServer.Current.BaseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
-                FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
-                FreeMarketOneServer.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
-                FreeMarketOneServer.Current.MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockChainChangedEvent);
-                FreeMarketOneServer.Current.Initialize();
+                FMONE.Current.BaseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
+                FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
+                FMONE.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
+                FMONE.Current.MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockChainChangedEvent);
+                FMONE.Current.Initialize();
             }).ConfigureAwait(true);
 
             return new MainWindow { DataContext = new MainWindowViewModel() };
@@ -77,8 +74,8 @@ namespace FreeMarketApp
 
         private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
         {
-            var block = FreeMarketOneServer.Current.MarketBlockChainManager.BlockChain?.Tip;
-            FreeMarketOneServer.Current.SearchIndexer.IndexBlock(block);
+            var block = FMONE.Current.MarketBlockChainManager.BlockChain?.Tip;
+            FMONE.Current.SearchIndexer.IndexBlock(block);
         }
 
         private static void BaseBlockChainChanged(object sender, EventArgs e)
@@ -90,14 +87,14 @@ namespace FreeMarketApp
         {
             foreach (var item in deletedHashes)
             {
-                FreeMarketOneServer.Current.SearchIndexer.DeleteMarketItemsByBlockHash(item.ToString());
+                FMONE.Current.SearchIndexer.DeleteMarketItemsByBlockHash(item.ToString());
             }
             
         }
 
         private static void ServerLoadedEvent(object sender, EventArgs e)
         {
-            var state = FreeMarketOneServer.Current.GetServerState();
+            var state = FMONE.Current.GetServerState();
 
             //FreeMarketOneServer.Current.SearchIndexer.DeleteAll();
             //this is temporary and will be shortly removed. just to get search bootstrapped for testing.
@@ -142,7 +139,7 @@ namespace FreeMarketApp
 
         private static void OnExit(object sender, EventArgs e)
         {
-            FreeMarketOneServer.Current.Stop();
+            FMONE.Current.Stop();
         }
     }
 }

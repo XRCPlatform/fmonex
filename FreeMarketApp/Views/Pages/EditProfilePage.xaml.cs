@@ -6,13 +6,12 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
-using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -41,17 +40,17 @@ namespace FreeMarketApp.Views.Pages
         }
         public EditProfilePage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(EditProfilePage).Namespace, typeof(EditProfilePage).Name));
 
             this.InitializeComponent();
 
-            if (FreeMarketOneServer.Current.Users != null)
+            if (FMONE.Current.Users != null)
             {
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to edit profile page."));
 
-                _userData = FreeMarketOneServer.Current.Users.UserData;
+                _userData = FMONE.Current.Users.UserData;
 
                 var tbUserName = this.FindControl<TextBox>("TBUserName");
                 var tbDescription = this.FindControl<TextBox>("TBDescription");
@@ -114,7 +113,7 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FreeMarketOneServer.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             var result = await MessageBox.Show(mainWindow,
                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_SaveMyProfile"), approxSpanToNewBlock.TotalSeconds),
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
@@ -180,18 +179,18 @@ namespace FreeMarketApp.Views.Pages
                         }
                     }
 
-                    var updatedUserData = FreeMarketOneServer.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text, _userData);
+                    var updatedUserData = FMONE.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text, _userData);
 
-                    FreeMarketOneServer.Current.Users.SaveUserData(
+                    FMONE.Current.Users.SaveUserData(
                         updatedUserData,
-                        FreeMarketOneServer.Current.Configuration.FullBaseDirectory,
-                        FreeMarketOneServer.Current.Configuration.BlockChainUserPath);
+                        FMONE.Current.Configuration.FullBaseDirectory,
+                        FMONE.Current.Configuration.BlockChainUserPath);
 
                     PagesHelper.SetUserData(_logger, mainWindow);
                     PagesHelper.Log(_logger, string.Format("Propagating new user data of current user to chain."));
 
-                    FreeMarketOneServer.Current.BasePoolManager.AcceptActionItem(updatedUserData);
-                    FreeMarketOneServer.Current.BasePoolManager.PropagateAllActionItemLocal();
+                    FMONE.Current.BasePoolManager.AcceptActionItem(updatedUserData);
+                    FMONE.Current.BasePoolManager.PropagateAllActionItemLocal();
 
                     await MessageBox.Show(mainWindow,
                         string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),

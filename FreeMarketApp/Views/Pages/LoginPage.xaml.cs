@@ -5,11 +5,11 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
-using FreeMarketOne.ServerCore;
 using FreeMarketOne.Users;
 using Serilog;
 using System.Text;
 using System.Threading.Tasks;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -38,8 +38,8 @@ namespace FreeMarketApp.Views.Pages
 
         public LoginPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(LoginPage).Namespace, typeof(LoginPage).Name));
 
             this.InitializeComponent();
@@ -85,9 +85,9 @@ namespace FreeMarketApp.Views.Pages
                     splashWindow.Show();
                     await Task.Delay(10);
 
-                    FreeMarketOneServer.Current.Initialize(tbPassword.Text);
+                    FMONE.Current.Initialize(tbPassword.Text);
                     
-                    if (FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
+                    if (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
                         PagesHelper.SetUserData(_logger, mainWindow);

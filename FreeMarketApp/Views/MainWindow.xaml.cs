@@ -7,12 +7,11 @@ using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Pages;
-using FreeMarketOne.Search;
-using FreeMarketOne.ServerCore;
 using FreeMarketOne.Users;
 using Serilog;
 using System;
 using System.Linq;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views
 {
@@ -22,20 +21,20 @@ namespace FreeMarketApp.Views
 
         public MainWindow()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MainWindow).Namespace, typeof(MainWindow).Name));
 
             Application.Current.Styles.Add(ThemeHelper.GetTheme());
 
             InitializeComponent();
 
-            if (FreeMarketOneServer.Current.Users != null)
+            if (FMONE.Current.Users != null)
             {
-                FreeMarketOneServer.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
+                FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
-                if (FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
+                if (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
                 {
                     PagesHelper.Log(_logger, "Private Key is valid adding MainPage instance.");
 
@@ -49,8 +48,8 @@ namespace FreeMarketApp.Views
                 {
                     PagesHelper.Log(_logger, "Private Key is not valid. Showing fist or login page.");
 
-                    if ((FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
-                        || (FreeMarketOneServer.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
+                    if ((FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
+                        || (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
                     {
                         pcMainContent.Children.Add(LoginPage.Instance);
                     }

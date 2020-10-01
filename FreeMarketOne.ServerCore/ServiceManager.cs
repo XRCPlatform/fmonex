@@ -2,12 +2,12 @@
 using FreeMarketOne.Extensions.Helpers;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -84,7 +84,7 @@ namespace FreeMarketOne.ServerCore
             var state = false;
             try
             {
-                var isOnionSeedRunning = FreeMarketOneServer.Current.OnionSeedsManager?.IsOnionSeedsManagerRunning();
+                var isOnionSeedRunning = FMONE.Current.OnionSeedsManager?.IsOnionSeedsManagerRunning();
                 if (isOnionSeedRunning.GetValueOrDefault(false)) state = true;
             }
             catch
@@ -101,7 +101,7 @@ namespace FreeMarketOne.ServerCore
             var state = false;
             try
             {
-                var isTorRunning = FreeMarketOneServer.Current.TorProcessManager?.IsTorRunningAsync().Result;
+                var isTorRunning = FMONE.Current.TorProcessManager?.IsTorRunningAsync().Result;
                 if (isTorRunning.GetValueOrDefault(false)) state = true;
             }
             catch
@@ -119,7 +119,7 @@ namespace FreeMarketOne.ServerCore
             var fullState = false;
             try
             {
-                var isBlockChainManagerRunning = FreeMarketOneServer.Current.BaseBlockChainManager?.IsBlockChainManagerRunning();
+                var isBlockChainManagerRunning = FMONE.Current.BaseBlockChainManager?.IsBlockChainManagerRunning();
                 if (isBlockChainManagerRunning.GetValueOrDefault(false)) state = true;
             }
             catch
@@ -132,7 +132,7 @@ namespace FreeMarketOne.ServerCore
             state = false;
             try
             {
-                var isSwarpServerRunning = FreeMarketOneServer.Current.BaseBlockChainManager?.SwarmServer?.Running;
+                var isSwarpServerRunning = FMONE.Current.BaseBlockChainManager?.SwarmServer?.Running;
                 if (isSwarpServerRunning.GetValueOrDefault(false)) state = true;
             }
             catch
@@ -146,11 +146,11 @@ namespace FreeMarketOne.ServerCore
             long? index = 0;
             try
             {
-                var chainId = FreeMarketOneServer.Current.BaseBlockChainManager?.Storage?.GetCanonicalChainId();
-                var hashSets = FreeMarketOneServer.Current.BaseBlockChainManager?.Storage?.IterateBlockHashes().ToHashSet();
+                var chainId = FMONE.Current.BaseBlockChainManager?.Storage?.GetCanonicalChainId();
+                var hashSets = FMONE.Current.BaseBlockChainManager?.Storage?.IterateBlockHashes().ToHashSet();
                 if (chainId.HasValue)
                 {
-                    index = FreeMarketOneServer.Current.BaseBlockChainManager?.Storage?.CountIndex(chainId.Value);
+                    index = FMONE.Current.BaseBlockChainManager?.Storage?.CountIndex(chainId.Value);
                     if (index.HasValue) state = true;
                 }
             }
@@ -165,7 +165,7 @@ namespace FreeMarketOne.ServerCore
             index = 0;
             try
             {
-                index = FreeMarketOneServer.Current.BaseBlockChainManager?.BlockChain?.Tip?.Index;
+                index = FMONE.Current.BaseBlockChainManager?.BlockChain?.Tip?.Index;
                 if (index.HasValue) state = true;
             }
             catch
@@ -186,7 +186,7 @@ namespace FreeMarketOne.ServerCore
             var fullState = false;
             try
             {
-                var isBlockChainManagerRunning = FreeMarketOneServer.Current.MarketBlockChainManager?.IsBlockChainManagerRunning();
+                var isBlockChainManagerRunning = FMONE.Current.MarketBlockChainManager?.IsBlockChainManagerRunning();
                 if (isBlockChainManagerRunning.GetValueOrDefault(false)) state = true;
             }
             catch
@@ -199,7 +199,7 @@ namespace FreeMarketOne.ServerCore
             state = false;
             try
             {
-                var isSwarpServerRunning = FreeMarketOneServer.Current.MarketBlockChainManager?.SwarmServer?.Running;
+                var isSwarpServerRunning = FMONE.Current.MarketBlockChainManager?.SwarmServer?.Running;
                 if (isSwarpServerRunning.GetValueOrDefault(false)) state = true;
             }
             catch
@@ -213,11 +213,11 @@ namespace FreeMarketOne.ServerCore
             long? index = 0;
             try
             {
-                var chainId = FreeMarketOneServer.Current.MarketBlockChainManager?.Storage?.GetCanonicalChainId();
-                var hashSets = FreeMarketOneServer.Current.MarketBlockChainManager?.Storage?.IterateBlockHashes().ToHashSet();
+                var chainId = FMONE.Current.MarketBlockChainManager?.Storage?.GetCanonicalChainId();
+                var hashSets = FMONE.Current.MarketBlockChainManager?.Storage?.IterateBlockHashes().ToHashSet();
                 if (chainId.HasValue)
                 {
-                    index = FreeMarketOneServer.Current.MarketBlockChainManager?.Storage?.CountIndex(chainId.Value);
+                    index = FMONE.Current.MarketBlockChainManager?.Storage?.CountIndex(chainId.Value);
                     if (index.HasValue) state = true;
                 }
             }
@@ -232,7 +232,7 @@ namespace FreeMarketOne.ServerCore
             index = 0;
             try
             {
-                index = FreeMarketOneServer.Current.MarketBlockChainManager?.BlockChain?.Tip?.Index;
+                index = FMONE.Current.MarketBlockChainManager?.BlockChain?.Tip?.Index;
                 if (index.HasValue) state = true;
             }
             catch
@@ -247,7 +247,7 @@ namespace FreeMarketOne.ServerCore
             return fullState;
         }
 
-        internal FreeMarketOneServer.FreeMarketOneServerStates GetServerState()
+        internal FMONE.FreeMarketOneServerStates GetServerState()
         {
             if (CheckOnionSeedManager() &&
                 CheckTorManager() &&
@@ -256,11 +256,11 @@ namespace FreeMarketOne.ServerCore
                 CheckMarketBlockChainManager() &&
                 CheckMarketPoolManager())
             {
-                return FreeMarketOneServer.FreeMarketOneServerStates.Online;
+                return FMONE.FreeMarketOneServerStates.Online;
             } 
             else
             {
-                return FreeMarketOneServer.FreeMarketOneServerStates.Offline;
+                return FMONE.FreeMarketOneServerStates.Offline;
             }
         }
 
@@ -271,11 +271,11 @@ namespace FreeMarketOne.ServerCore
             var entries = 0;
             try
             {
-                var isPoolManagerRunning = FreeMarketOneServer.Current.BasePoolManager?.IsPoolManagerRunning();
+                var isPoolManagerRunning = FMONE.Current.BasePoolManager?.IsPoolManagerRunning();
                 if (isPoolManagerRunning.GetValueOrDefault(false))
                 {
                     state = true;
-                    entries = FreeMarketOneServer.Current.BasePoolManager.GetTotalCount();
+                    entries = FMONE.Current.BasePoolManager.GetTotalCount();
                 }
             }
             catch
@@ -288,7 +288,7 @@ namespace FreeMarketOne.ServerCore
             state = false;
             try
             {
-                var isMiningRunning = FreeMarketOneServer.Current.BasePoolManager?.IsMiningWorkerRunning();
+                var isMiningRunning = FMONE.Current.BasePoolManager?.IsMiningWorkerRunning();
                 if (isMiningRunning.GetValueOrDefault(false)) state = true;
             }
             catch
@@ -308,11 +308,11 @@ namespace FreeMarketOne.ServerCore
             var entries = 0;
             try
             {
-                var isPoolManagerRunning = FreeMarketOneServer.Current.MarketPoolManager?.IsPoolManagerRunning();
+                var isPoolManagerRunning = FMONE.Current.MarketPoolManager?.IsPoolManagerRunning();
                 if (isPoolManagerRunning.GetValueOrDefault(false))
                 {
                     state = true;
-                    entries = FreeMarketOneServer.Current.MarketPoolManager.GetTotalCount();
+                    entries = FMONE.Current.MarketPoolManager.GetTotalCount();
                 }
             }
             catch
@@ -325,7 +325,7 @@ namespace FreeMarketOne.ServerCore
             state = false;
             try
             {
-                var isMiningRunning = FreeMarketOneServer.Current.MarketPoolManager?.IsMiningWorkerRunning();
+                var isMiningRunning = FMONE.Current.MarketPoolManager?.IsMiningWorkerRunning();
                 if (isMiningRunning.GetValueOrDefault(false)) state = true;
             }
             catch {
@@ -344,7 +344,7 @@ namespace FreeMarketOne.ServerCore
 
             try
             {
-                var isChatManagerRunning = FreeMarketOneServer.Current.Chats?.IsChatManagerRunning();
+                var isChatManagerRunning = FMONE.Current.Chats?.IsChatManagerRunning();
                 if (isChatManagerRunning.GetValueOrDefault(false))
                 {
                     state = true;

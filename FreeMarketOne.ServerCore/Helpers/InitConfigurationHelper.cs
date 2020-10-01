@@ -1,14 +1,11 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.Extensions.Helpers;
 using Microsoft.Extensions.Configuration;
-using Serilog;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using static FreeMarketOne.DataStructure.BaseConfiguration;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketOne.ServerCore.Helpers
 {
@@ -39,10 +36,10 @@ namespace FreeMarketOne.ServerCore.Helpers
         {
             var settings = configFile.GetSection("FreeMarketOneConfiguration")["ServerEnvironment"];
 
-            var environment = EnvironmentTypes.Test;
+            var environment = BaseConfiguration.EnvironmentTypes.Test;
             Enum.TryParse(settings, out environment);
 
-            if (environment == EnvironmentTypes.Main)
+            if (environment == BaseConfiguration.EnvironmentTypes.Main)
             {
                 return new MainConfiguration();
             }
@@ -115,7 +112,7 @@ namespace FreeMarketOne.ServerCore.Helpers
             {
                 if (string.IsNullOrEmpty(configuration.ListenersForceThisIp))
                 {
-                    var publicIp = FreeMarketOneServer.Current.ServerPublicAddress.PublicIP;
+                    var publicIp = FMONE.Current.ServerPublicAddress.PublicIP;
                     if (publicIp != null)
                     {
                         SetToPublicIp(configuration.ListenerBaseEndPoint, publicIp.MapToIPv4());

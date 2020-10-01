@@ -7,13 +7,12 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
-using FreeMarketOne.ServerCore;
 using FreeMarketOne.Skynet;
 using Serilog;
-using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -42,8 +41,8 @@ namespace FreeMarketApp.Views.Pages
         }
         public AddEditProductPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(AddEditProductPage).Namespace, typeof(AddEditProductPage).Name));
 
             _offer = new MarketItemV1();
@@ -90,10 +89,10 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FreeMarketOneServer.Current.Markets.GetOfferBySignature(
+            var offer = FMONE.Current.Markets.GetOfferBySignature(
                 signature,
-                FreeMarketOneServer.Current.MarketPoolManager,
-                FreeMarketOneServer.Current.MarketBlockChainManager);
+                FMONE.Current.MarketPoolManager,
+                FMONE.Current.MarketBlockChainManager);
 
             if (offer != null)
             {
@@ -154,7 +153,7 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FreeMarketOneServer.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             var result = await MessageBox.Show(mainWindow,
                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_SaveMyItem"), approxSpanToNewBlock.TotalSeconds),
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
@@ -311,12 +310,12 @@ namespace FreeMarketApp.Views.Pages
                     }
 
                     //sign market data and generating chain connection
-                    _offer = FreeMarketOneServer.Current.Markets.SignMarketData(_offer, FreeMarketOneServer.Current.Users.PrivateKey);
+                    _offer = FMONE.Current.Markets.SignMarketData(_offer, FMONE.Current.Users.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 
-                    FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(_offer);
-                    FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
+                    FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
+                    FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
                     //FreeMarketOneServer.Current.SearchIndexer.Index(_offer,"pending");
 
                     await MessageBox.Show(mainWindow,

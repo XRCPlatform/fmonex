@@ -4,12 +4,10 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
-using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
-using FreeMarketOne.ServerCore;
 using Serilog;
-using System;
 using System.Linq;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -38,8 +36,8 @@ namespace FreeMarketApp.Views.Pages
 
         public MyProductItemPage()
         {
-            if (FreeMarketOneServer.Current.Logger != null)
-                _logger = FreeMarketOneServer.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
+            if (FMONE.Current.Logger != null)
+                _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MyProductItemPage).Namespace, typeof(MyProductItemPage).Name));
 
             this.InitializeComponent();
@@ -62,7 +60,7 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonRemove_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FreeMarketOneServer.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             var result = await MessageBox.Show(mainWindow,
                  string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_RemoveProduct"), approxSpanToNewBlock.TotalSeconds),
                  SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
@@ -71,17 +69,17 @@ namespace FreeMarketApp.Views.Pages
             var signature = ((Button)sender).Tag.ToString();
             if (result == MessageBox.MessageBoxResult.Yes)
             {
-                var offer = FreeMarketOneServer.Current.Markets.GetOfferBySignature(
+                var offer = FMONE.Current.Markets.GetOfferBySignature(
                     signature,
-                    FreeMarketOneServer.Current.MarketPoolManager,
-                    FreeMarketOneServer.Current.MarketBlockChainManager);
+                    FMONE.Current.MarketPoolManager,
+                    FMONE.Current.MarketBlockChainManager);
 
                 if (offer != null)
                 {
                     offer.State = (int)MarketManager.ProductStateEnum.Removed;
 
                     //sign market data and generating chain connection
-                    offer = FreeMarketOneServer.Current.Markets.SignMarketData(offer, FreeMarketOneServer.Current.Users.PrivateKey);
+                    offer = FMONE.Current.Markets.SignMarketData(offer, FMONE.Current.Users.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Saving remove of product to chain {0}.", signature));
 
@@ -90,8 +88,8 @@ namespace FreeMarketApp.Views.Pages
                         SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                         MessageBox.MessageBoxButtons.Ok);
 
-                    FreeMarketOneServer.Current.MarketPoolManager.AcceptActionItem(offer);
-                    FreeMarketOneServer.Current.MarketPoolManager.PropagateAllActionItemLocal();
+                    FMONE.Current.MarketPoolManager.AcceptActionItem(offer);
+                    FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
                     MyProductsPage.Instance = null;
                     PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
@@ -115,10 +113,10 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FreeMarketOneServer.Current.Markets.GetOfferBySignature(
+            var offer = FMONE.Current.Markets.GetOfferBySignature(
                 signature,
-                FreeMarketOneServer.Current.MarketPoolManager,
-                FreeMarketOneServer.Current.MarketBlockChainManager);
+                FMONE.Current.MarketPoolManager,
+                FMONE.Current.MarketBlockChainManager);
 
             if (offer != null)
             {

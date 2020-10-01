@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.ServerCore.Test
 {
@@ -73,6 +74,9 @@ namespace FreeMarketOne.ServerCore.Test
             ChatManager.SaveChat(newChat);
 
             Thread.Sleep((int)TimeSpans.HalfMinute.TotalMilliseconds);
+
+            var syncedChat = ChatManager.GetChat(newChat.MarketItem.Hash);
+            Assert.IsTrue(syncedChat.ChatItems.Count > 0);
         }
     }
 }

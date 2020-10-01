@@ -139,7 +139,7 @@ namespace FreeMarketOne.Chats
                                     periodicCheckLog.AppendLine(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
                                     _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
 
-                                    if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Signature, endPoint))
+                                    if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Hash, endPoint))
                                     {
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
@@ -205,7 +205,7 @@ namespace FreeMarketOne.Chats
         /// <param name="chatItem"></param>
         /// <param name="signature"></param>
         /// <returns></returns>
-        private bool SendNQMessage(ChatItem chatItem, string signature, IPEndPoint endPoint)
+        private bool SendNQMessage(ChatItem chatItem, string hash, IPEndPoint endPoint)
         {
             var connectionString = string.Format("tcp://{0}", endPoint.ToString());
 
@@ -217,7 +217,7 @@ namespace FreeMarketOne.Chats
                     chatMessage.Message = chatItem.Message;
                     chatMessage.ExtraMessage = chatItem.ExtraMessage;
                     chatMessage.DateCreated = chatItem.DateCreated;
-                    chatMessage.Signature = signature;
+                    chatMessage.Hash = hash;
 
                     client.Connect(connectionString);
 
@@ -294,8 +294,7 @@ namespace FreeMarketOne.Chats
 
                         var receivedChatItem = new ChatMessage(clientMessage);
 
-                        var allLocalChats = GetAllChats();
-                        var localChat = allLocalChats.FirstOrDefault(a => a.MarketItem.Signature == receivedChatItem.Signature);
+                        var localChat = GetChat(receivedChatItem.Hash);
                         if (localChat != null)
                         {
                             var newChatItem = new ChatItem();
@@ -314,8 +313,6 @@ namespace FreeMarketOne.Chats
                         }
 
                         response.SendMultipartMessage(clientMessage);
-
-                        Thread.Sleep(1000);
                     }
                 }
             });
@@ -404,28 +401,33 @@ namespace FreeMarketOne.Chats
         /// <returns></returns>
         public ChatDataV1 GetChat(string hash)
         {
-            try
-            {
-                var fullPath = CheckExistenceOfFolder();
-                var fileChatPath = Path.Combine(fullPath, hash);
+            var _object = new Object();
 
-                if (File.Exists(fileChatPath))
+            lock (_object)
+            {
+                try
                 {
-                    var privateKey = _userPrivateKey.ByteArray;
-                    byte[] keyBytes = new byte[32];
-                    Array.Copy(privateKey, keyBytes, keyBytes.Length);
-                    var aes = new SymmetricKey(keyBytes);
+                    var fullPath = CheckExistenceOfFolder();
+                    var fileChatPath = Path.Combine(fullPath, hash);
 
-                    var chatBytes = File.ReadAllBytes(fileChatPath);
-                    var decryptedChatData = aes.Decrypt(chatBytes);
-                    var serializedChatData = ZipHelper.Decompress(decryptedChatData);
+                    if (File.Exists(fileChatPath))
+                    {
+                        var privateKey = _userPrivateKey.ByteArray;
+                        byte[] keyBytes = new byte[32];
+                        Array.Copy(privateKey, keyBytes, keyBytes.Length);
+                        var aes = new SymmetricKey(keyBytes);
 
-                    return JsonConvert.DeserializeObject<ChatDataV1>(serializedChatData);
+                        var chatBytes = File.ReadAllBytes(fileChatPath);
+                        var decryptedChatData = aes.Decrypt(chatBytes);
+                        var serializedChatData = ZipHelper.Decompress(decryptedChatData);
+
+                        return JsonConvert.DeserializeObject<ChatDataV1>(serializedChatData);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e.Message + " " + e.StackTrace);
+                catch (Exception e)
+                {
+                    _logger.Error(e.Message + " " + e.StackTrace);
+                }
             }
 
             return null;

@@ -12,7 +12,7 @@ namespace FreeMarketOne.DataStructure.Chat
 
         public DateTime DateCreated { get; set; }
 
-        public string Signature { get; set; }
+        public string Hash { get; set; }
 
         public ChatMessage()
         {
@@ -32,7 +32,7 @@ namespace FreeMarketOne.DataStructure.Chat
             DateCreated = DateTime.ParseExact(it.Current.ConvertToString(), "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'", null);
 
             it.MoveNext();
-            Signature = it.Current.ConvertToString();
+            Hash = it.Current.ConvertToString();
         }
 
         public NetMQMessage ToNetMQMessage()
@@ -42,7 +42,7 @@ namespace FreeMarketOne.DataStructure.Chat
             message.Append(new NetMQFrame(Message));
             message.Append(new NetMQFrame(ExtraMessage));
             message.Append(new NetMQFrame(DateCreated.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'", null)));
-            message.Append(new NetMQFrame(Signature));
+            message.Append(new NetMQFrame(Hash));
 
             return message;
         }

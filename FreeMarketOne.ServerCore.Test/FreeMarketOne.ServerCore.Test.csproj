@@ -17,7 +17,7 @@
     <ProjectReference Include="..\FreeMarketOne.BlockChain\FreeMarketOne.BlockChain.csproj" />
     <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Extensions\FreeMarketOne.Extensions.csproj" />
-    <ProjectReference Include="..\FreeMarketOne.PoolManager\FreeMarketOne.Pool.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Pools\FreeMarketOne.Pools.csproj" />
     <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
   </ItemGroup>
 

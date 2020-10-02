@@ -7,6 +7,17 @@
 	    <FileVersion>0.3.0.0</FileVersion>
 	    <ApplicationIcon>freemarket.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ContentWithTargetPath Include="bin\Release\netcoreapp3.1\appsettings.json"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>appsettings.json</TargetPath>
+    </ContentWithTargetPath>
+
+    <ContentWithTargetPath Include="bin\Release\netcoreapp3.1\tools\**\*.*"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>tools\%(FileName)%(Extension)</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>

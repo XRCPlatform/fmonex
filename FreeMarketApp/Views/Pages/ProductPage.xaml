@@ -151,13 +151,8 @@
 
         <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <TextBlock Classes="H1" Text="$" Margin="0 2 0 0" FontSize="16"/>
-          <!-- USD price binding -->
-          <TextBlock Classes="H1" Name="TBPrice" Text="" FontSize="20"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Margin="20 0 0 0">
-          <!-- XRC price binding -->
-          <TextBlock Classes="H2" Name="TBPriceType" Text="" FontSize="16"/>
+          <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
+          <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
         </StackPanel>
         <TextBlock Classes="H1" Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Vertical">

@@ -8,11 +8,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Caching;
 
 namespace FreeMarketApp.Helpers
 {
     internal class SkynetHelper
     {
+        private static readonly MemoryCache imageCache;
+        private static readonly CacheItemPolicy itemPolicy;
+
+        static SkynetHelper()
+        {
+            imageCache = new MemoryCache("skynet.images");
+            itemPolicy = new CacheItemPolicy();
+            //one day
+            itemPolicy.SlidingExpiration = new TimeSpan(1, 0, 0, 0);
+        }
+
         internal string UploadToSkynet(string localPath, ILogger logger)
         {
             string skylinkUrl = null;
@@ -59,22 +72,50 @@ namespace FreeMarketApp.Helpers
             if (!string.IsNullOrEmpty(skylink))
             {
                 skylink = skylink.Replace(SkynetWebPortal.SKYNET_PREFIX, string.Empty);
-
-                var httpClient = new HttpClient()
+                if (!imageCache.Contains(skylink))
                 {
-                    BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
-                };
+                    var httpClient = new HttpClient()
+                    {
+                        BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
+                    };
 
-                var skynetWebPortal = new SkynetWebPortal(httpClient);
+                    httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                    {
+                        Public = true                        
+                    };                
 
-                var content = skynetWebPortal.DownloadFile(skylink).Result;
+                    var skynetWebPortal = new SkynetWebPortal(httpClient);
 
-                return content.ReadAsStreamAsync().Result;
+                    var content = skynetWebPortal.DownloadFile(skylink).Result;
+                    var stream = content.ReadAsStreamAsync().Result;
+                    MemoryStream readOnlyStream = new MemoryStream();
+                    stream.CopyTo(readOnlyStream);
+                    
+                    //reset
+                    stream.Position = 0;
+                    readOnlyStream.Position = 0;
+
+                    imageCache.Add(skylink, readOnlyStream, itemPolicy);
+                    return stream;
+                }
+                else
+                {
+                    MemoryStream clonedStream = new MemoryStream();
+                    var cachedStream = imageCache.Get(skylink) as Stream;
+                    if (cachedStream != null)
+                    {
+                        cachedStream.Position = 0;
+                        cachedStream.CopyTo(clonedStream);
+                        cachedStream.Position = 0;
+                    }
+                    clonedStream.Position = 0;
+                    return clonedStream;
+                }
             }
             else
             {
                 return null;
-            }
+            }           
         }
 
         internal void PreloadTitlePhotos(List<MarketItemV1> offers, ILogger logger)

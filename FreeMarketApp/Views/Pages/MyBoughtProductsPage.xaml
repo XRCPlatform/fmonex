@@ -32,7 +32,7 @@
                 </StackPanel>
               </Button>
               
-              <Button Classes="sidebar" Click="ButtonBoughtProducts_Click" Cursor="Hand">
+              <Button Classes="sidebar" Click="ButtonBoughtProduct_Click" Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                   <Path Classes="SideBarIcon" Data="M479.823,495.711L463.782,14.5C463.512,6.415,456.88,0,448.791,0H63.19c-8.09,0-14.723,6.415-14.992,14.5l-16.066,482
 			c-0.135,4.063,1.385,8.007,4.211,10.929S43.06,512,47.124,512h417.733c0.009,0.001,0.015,0.001,0.021,0c8.283,0,15-6.716,15-15

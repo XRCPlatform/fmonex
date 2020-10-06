@@ -30,81 +30,57 @@
         <WrapPanel Margin="18 0 20 10">
 
           <StackPanel Name="SPPhoto_0" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_0" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_0" >
               </Image>
             </Border>
           </StackPanel>
 
           <StackPanel Name="SPPhoto_1" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_1" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_1" >
               </Image>
             </Border>
           </StackPanel>
 
           <StackPanel Name="SPPhoto_2" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_2" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_2" >
               </Image>
             </Border>
           </StackPanel>
 
           <StackPanel Name="SPPhoto_3" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_3" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_3" >
               </Image>
             </Border>
           </StackPanel>
 
           <StackPanel Name="SPPhoto_4" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_4" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_4" >
               </Image>
             </Border>
           </StackPanel>
 
           <StackPanel Name="SPPhoto_5" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_5" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_5" >
               </Image>
             </Border>
           </StackPanel>
 
           <StackPanel Name="SPPhoto_6" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_6" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_6" >
               </Image>
             </Border>
           </StackPanel>
 
           <StackPanel Name="SPPhoto_7" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_7" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,168,100" />
-                </Image.Clip>
+            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+              <Image Name="IPhoto_7" >
               </Image>
             </Border>
           </StackPanel>

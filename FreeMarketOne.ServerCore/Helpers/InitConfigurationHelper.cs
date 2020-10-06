@@ -117,7 +117,6 @@ namespace FreeMarketOne.ServerCore.Helpers
                     {
                         SetToPublicIp(configuration.ListenerBaseEndPoint, publicIp.MapToIPv4());
                         SetToPublicIp(configuration.ListenerMarketEndPoint, publicIp.MapToIPv4());
-                        SetToPublicIp(configuration.ListenerChatEndPoint, publicIp.MapToIPv4());
                     }
                 } 
                 else
@@ -127,7 +126,6 @@ namespace FreeMarketOne.ServerCore.Helpers
                     {
                         SetToPublicIp(configuration.ListenerBaseEndPoint, newIp);
                         SetToPublicIp(configuration.ListenerMarketEndPoint, newIp);
-                        SetToPublicIp(configuration.ListenerChatEndPoint, newIp);
                     }
                 }
             }

@@ -3,6 +3,7 @@ using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
+using FreeMarketOne.P2P;
 using FreeMarketOne.Users;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
@@ -40,6 +41,7 @@ namespace FreeMarketOne.Chats
         private IUserManager _userManager { get; set; }
         private TimeSpan _repeatEvery { get; set; }
         private TimeSpan _startAfter { get; set; }
+        private IPAddress _serverPublicAddress { get; set; }
 
 
         /// <summary>
@@ -58,6 +60,7 @@ namespace FreeMarketOne.Chats
         public ChatManager(IBaseConfiguration configuration,
             UserPrivateKey privateKey,
             IUserManager userManager,
+            IPAddress serverPublicAddress,
             TimeSpan? repeatEvery = null,
             TimeSpan? startAfter = null)
         {
@@ -69,6 +72,7 @@ namespace FreeMarketOne.Chats
             _cancellationToken = new CancellationTokenSource();
             _userPrivateKey = privateKey;
             _userManager = userManager;
+            _serverPublicAddress = serverPublicAddress;
 
             if (!repeatEvery.HasValue)
             {
@@ -339,7 +343,7 @@ namespace FreeMarketOne.Chats
         public ChatDataV1 CreateNewSellerChat(MarketItemV1 offer)
         {
             var result = CreateNewChat(offer);
-            result.SellerEndPoint = _configuration.ListenerChatEndPoint.Address.MapToIPv4().ToString();
+            result.SellerEndPoint = _serverPublicAddress.MapToIPv4().ToString();
             result.ChatItems = new List<ChatItem>();
 
             var newInitialMessage = new ChatItem();

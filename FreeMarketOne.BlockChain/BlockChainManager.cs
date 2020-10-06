@@ -57,6 +57,7 @@ namespace FreeMarketOne.BlockChain
         private EventHandler<PreloadState> _preloadProcessed { get; set; }
         private EventHandler _preloadEnded { get; set; }
         private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockChainChanged { get; set; }
+        private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockDownloaded { get; set; }
         private EventHandler<List<HashDigest<SHA256>>> _clearedOlderBlocks { get; set; }
         private IBaseConfiguration _configuration { get; }
         private IDefaultBlockPolicy<T> _blockChainPolicy { get; }
@@ -99,7 +100,8 @@ namespace FreeMarketOne.BlockChain
             EventHandler<PreloadState> preloadProcessed = null,
             EventHandler preloadEnded = null,
             EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null,
-            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null)
+            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null,
+            EventHandler<BlockChain<T>.TipChangedEventArgs> blockDownloaded = null)
         {
             _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
@@ -130,6 +132,7 @@ namespace FreeMarketOne.BlockChain
             _preloadEnded = preloadEnded;
             _blockChainChanged = blockChainChanged;
             _clearedOlderBlocks = clearedOlderBlocks;
+            _blockDownloaded = blockDownloaded;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
         }
@@ -172,10 +175,12 @@ namespace FreeMarketOne.BlockChain
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
 
+                _swarmServer.BlockDownloadedEvent += _blockDownloaded;
+
                 var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
                 _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
-
+                
                 Interlocked.Exchange(ref _running, 1);
 
                 //init Peer Bootstrap Worker

@@ -67,6 +67,7 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
+        public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockDownloadedEvent;
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
 
         public event EventHandler FreeMarketOneServerLoadedEvent;
@@ -157,7 +158,8 @@ namespace FreeMarketOne.ServerCore
                         OnionSeedsManager,
                         Users.PrivateKey,
                         preloadEnded: BaseBlockChainLoadEndedEvent,
-                        blockChainChanged: BaseBlockChainChangedEvent);
+                        blockChainChanged: BaseBlockChainChangedEvent,
+                        blockDownloaded:null);
                     BaseBlockChainManager.Start();
                 }
                 else
@@ -194,6 +196,7 @@ namespace FreeMarketOne.ServerCore
                 //Initialize Market Blockchain Manager
                 MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
                 MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(Current.MarketBlockChainChanged);
+                MarketBlockDownloadedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockDownloadedEventHandler);
 
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
                 var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
@@ -211,13 +214,24 @@ namespace FreeMarketOne.ServerCore
                     genesisBlock,
                     preloadEnded: MarketBlockChainLoadEndedEvent,
                     blockChainChanged: MarketBlockChainChangedEvent,
-                    clearedOlderBlocks: MarketBlockClearedOldersEvent);
+                    clearedOlderBlocks: MarketBlockClearedOldersEvent,
+                    blockDownloaded: MarketBlockDownloadedEvent);
                 MarketBlockChainManager.Start();
             }
             else
             {
                 _logger.Error("Base Chain isnt loaded!");
                 Stop();
+            }
+        }
+
+        private void MarketBlockDownloadedEventHandler(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
+        {
+            //base chain items won't be here. not sure why this is coming?
+            if (MarketBlockChainManager.Storage.ContainsBlock(e.Hash))
+            {
+                var block = MarketBlockChainManager.Storage.GetBlock<MarketAction>(e.Hash);
+                SearchIndexer.IndexBlock(block);
             }
         }
 

@@ -15,7 +15,7 @@ ico_path="../FreeMarketApp/Assets/freemarket.ico"
 
 version=0.0.1
 
-. common.sh
+. common-windows.sh
 
 #######
 
@@ -38,8 +38,8 @@ fi
 popd
 
 mkdir -p $WINEPREFIX/drive_c/fmone
-cp $publish_directory/* $WINEPREFIX/drive_c/fmone
-cp $ico_path $WINEPREFIX/drive_c/fmone/fmone.ico
+cp -f -R $publish_directory/* $WINEPREFIX/drive_c/fmone
+cp -f -R $ico_path $WINEPREFIX/drive_c/fmone/fmone.ico
 
 echo "$nsis_sha256 $cache_dir/$nsis_filename" | if sha256sum --check ; then
     echo "Building with nsis"

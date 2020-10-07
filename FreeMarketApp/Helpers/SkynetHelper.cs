@@ -86,17 +86,25 @@ namespace FreeMarketApp.Helpers
 
                     var skynetWebPortal = new SkynetWebPortal(httpClient);
 
-                    var content = skynetWebPortal.DownloadFile(skylink).Result;
-                    var stream = content.ReadAsStreamAsync().Result;
-                    MemoryStream readOnlyStream = new MemoryStream();
-                    stream.CopyTo(readOnlyStream);
-                    
-                    //reset
-                    stream.Position = 0;
-                    readOnlyStream.Position = 0;
+                    try
+                    {
+                        var content = skynetWebPortal.DownloadFile(skylink).Result;
+                        var stream = content.ReadAsStreamAsync().Result;
+                        MemoryStream readOnlyStream = new MemoryStream();
+                        stream.CopyTo(readOnlyStream);
 
-                    imageCache.Add(skylink, readOnlyStream, itemPolicy);
-                    return stream;
+                        stream.Position = 0;
+                        readOnlyStream.Position = 0;
+
+                        imageCache.Add(skylink, readOnlyStream, itemPolicy);
+                        return stream;
+                    }
+                    catch (Exception e)
+                    {
+                        PagesHelper.Log(logger, string.Format("Error during skynet Download File: {0} {1}", skylink, e.Message), Serilog.Events.LogEventLevel.Error);
+                    }
+
+                    return null;
                 }
                 else
                 {

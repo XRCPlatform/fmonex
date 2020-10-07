@@ -118,6 +118,10 @@ namespace FreeMarketOne.Tor
                         string torArguments = $" -f torrc";
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
+                            _logger.Information($"toolsDir : {_toolsDir}/Tor/");
+                            _logger.Information($"torPath : {torPath}");
+                            _logger.Information($"torArguments : {torArguments}");
+
                             _torProcess = Process.Start(new ProcessStartInfo
                             {
                                 WorkingDirectory = $@"{_toolsDir}/Tor/",

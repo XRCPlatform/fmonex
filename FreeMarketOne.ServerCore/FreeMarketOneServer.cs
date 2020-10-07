@@ -227,10 +227,11 @@ namespace FreeMarketOne.ServerCore
 
         private void MarketBlockDownloadedEventHandler(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
         {
-            //base chain items won't be here. not sure why this is coming?
+            _logger.Information($"Recieved block downloaded notification {e.Hash}");
             if (MarketBlockChainManager.Storage.ContainsBlock(e.Hash))
             {
                 var block = MarketBlockChainManager.Storage.GetBlock<MarketAction>(e.Hash);
+                _logger.Information($"SearchIndexing block {e.Hash}");
                 SearchIndexer.IndexBlock(block);
             }
         }

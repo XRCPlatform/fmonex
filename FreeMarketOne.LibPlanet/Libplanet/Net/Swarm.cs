@@ -629,19 +629,16 @@ namespace Libplanet.Net
                     );
                     wStore.PutBlock(block);
 
-                    if (BlockDownloadedEvent != null)
-                    {
-                        //raise block BlockDownloadedEvent
-                        BlockDownloadedEvent.Invoke(this,
-                            new BlockChain<T>.TipChangedEventArgs()
-                            {
-                                Hash = block.Hash,
-                                Index = block.Index,
-                                PreviousHash = block.PreviousHash,
-                                PreviousIndex = block.Index > 0 ? block.Index - 1 : 0
-                            }); ;
-                    }
-                    
+                    //raise block BlockDownloadedEvent
+                    BlockDownloadedEvent?.Invoke(this,
+                        new BlockChain<T>.TipChangedEventArgs()
+                        {
+                            Hash = block.Hash,
+                            Index = block.Index,
+                            PreviousHash = block.PreviousHash,
+                            PreviousIndex = block.Index > 0 ? block.Index - 1 : 0
+                        }); 
+
 
                     if (tempTip is null || block.Index > tempTip.Index)
                     {

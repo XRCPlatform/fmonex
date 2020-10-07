@@ -103,7 +103,7 @@ namespace FreeMarketApp.Views
         {
             if (e.Key.Equals(Key.Enter))
             {
-                var searchField = this.FindControl<TextBox>("SearchField");
+                var searchField = this.FindControl<TextBox>("TBSearchField");
 
                 string searchText = searchField.Text;
                 if (searchText != null)
@@ -123,7 +123,7 @@ namespace FreeMarketApp.Views
 
         public void ButtonSearch_Click(object sender, RoutedEventArgs args)
         {
-            var searchField = this.FindControl<TextBox>("SearchField");
+            var searchField = this.FindControl<TextBox>("TBSearchField");
 
             string searchText = searchField.Text;
             if (searchText != null)

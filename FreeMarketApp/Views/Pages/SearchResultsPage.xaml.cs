@@ -161,9 +161,9 @@ namespace FreeMarketApp.Views.Pages
             FilterList();
         }
 
-        public static bool ValidateQuery(string Query)
+        public static bool ValidateQuery(string query)
         {
-            return FMONE.Current.SearchEngine.ValidateQuery(Query);
+            return FMONE.Current.SearchEngine.ValidateQuery(query);
         }
 
         private void FilterList()

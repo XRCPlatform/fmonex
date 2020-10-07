@@ -63,11 +63,13 @@ namespace FreeMarketApp.Helpers
             var btSearch = mainWindow.FindControl<Button>("BTSearch");
             var btMyProducts = mainWindow.FindControl<Button>("BTMyProducts");
             var btPrivateChat = mainWindow.FindControl<Button>("BTPrivateChat");
+            var tbSearchField = mainWindow.FindControl<TextBox>("TBSearchField");
 
             btMyProfile.IsEnabled = isUnlocked;
             btSearch.IsEnabled = isUnlocked;
             btMyProducts.IsEnabled = isUnlocked;
             btPrivateChat.IsEnabled = isUnlocked;
+            tbSearchField.IsEnabled = isUnlocked;
         }
 
         internal static void SetUserData(ILogger _logger, Window mainWindow)

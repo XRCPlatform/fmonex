@@ -224,6 +224,8 @@ namespace Libplanet.Net
 
         internal AsyncAutoResetEvent FillBlocksAsyncFailed { get; } = new AsyncAutoResetEvent();
 
+        public event EventHandler<BlockChain<T>.TipChangedEventArgs> BlockDownloadedEvent;
+
         /// <summary>
         /// Waits until this <see cref="Swarm{T}"/> instance gets started to run.
         /// </summary>
@@ -626,6 +628,18 @@ namespace Libplanet.Net
                         block.Hash
                     );
                     wStore.PutBlock(block);
+
+                    //raise block BlockDownloadedEvent
+                    BlockDownloadedEvent?.Invoke(this,
+                        new BlockChain<T>.TipChangedEventArgs()
+                        {
+                            Hash = block.Hash,
+                            Index = block.Index,
+                            PreviousHash = block.PreviousHash,
+                            PreviousIndex = block.Index > 0 ? block.Index - 1 : 0
+                        }); 
+
+
                     if (tempTip is null || block.Index > tempTip.Index)
                     {
                         tempTip = block;

@@ -399,6 +399,12 @@ namespace FreeMarketApp.Views.Pages
             var spLastPhoto = this.FindControl<StackPanel>("SPPhoto_" + lastIndex);
             spLastPhoto.IsVisible = false;
             _offer.Photos.RemoveAt(lastIndex);
+
+            if (_offer.Photos.Count < 8)
+            {
+                var btAddPhoto = this.FindControl<Button>("BTAddPhoto");
+                btAddPhoto.IsVisible = true;
+            }
         }
 
         private void ClearForm()

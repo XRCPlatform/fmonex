@@ -421,6 +421,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your profile.
+        /// </summary>
+        internal static string LoginPage_UserName_LoginName {
+            get {
+                return ResourceManager.GetString("LoginPage_UserName_LoginName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to offline.
         /// </summary>
         internal static string State_Down {

@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.Users;
@@ -52,6 +53,9 @@ namespace FreeMarketApp.Views
                         || (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
                     {
                         pcMainContent.Children.Add(LoginPage.Instance);
+
+                        var tbUserName = this.FindControl<TextBlock>("TBUserName");
+                        tbUserName.Text = SharedResources.ResourceManager.GetString("LoginPage_UserName_LoginName");
                     }
                     else
                     {

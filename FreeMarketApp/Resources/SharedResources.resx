@@ -237,6 +237,9 @@
   <data name="Dialog_LoginPage_WatermarkWrongPassword" xml:space="preserve">
     <value>Your password was wrong. Try it again. Please.</value>
   </data>
+  <data name="LoginPage_UserName_LoginName" xml:space="preserve">
+    <value>Your profile</value>
+  </data>
   <data name="State_Down" xml:space="preserve">
     <value>offline</value>
   </data>

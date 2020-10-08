@@ -151,7 +151,7 @@
 			  <TextBlock Name="TBTorStatus" Classes="StatusBarText" Text="offline" FontSize="12" Margin="0 5 15 5" VerticalAlignment="Center"/>
 
 			  <!-- Peers -->
-			  <Border Name="PeersStatus" Classes="StatusBarIconRed" CornerRadius="10" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
+			  <Border Name="BPeersStatus" Classes="StatusBarIconRed" CornerRadius="10" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
 			  <TextBlock Text="Peers: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
 			  <TextBlock Name="TBPeers" Text="0" Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 		  </WrapPanel>

@@ -122,7 +122,17 @@ namespace FreeMarketApp.Helpers
             if (swarmServer != null)
             {
                 var tbPeers = mainWindow.FindControl<TextBlock>("TBPeers");
+                var bPeersStatus = mainWindow.FindControl<Border>("BPeersStatus");
                 tbPeers.Text = swarmServer.Peers.Count().ToString();
+                
+                if (swarmServer.Peers.Count() > 0)
+                {
+                    bPeersStatus.Classes = new Classes(new[] { "StatusBarIconGreen" });
+                } 
+                else
+                {
+                    bPeersStatus.Classes = new Classes(new[] { "StatusBarIconRed" });
+                }
             }
 
             if (torProcessManager != null)

@@ -43,6 +43,16 @@
 			<Setter Property="Background" Value="#1c1c1e" />
 		</Style>
 
+		<Style Selector="Button:sidebarSelected /template/ ContentPresenter">
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Padding" Value="20 10 10 10"/>
+      <Setter Property="Margin" Value="15 0 15 2"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Foreground" Value="#ffffff" />
+			<Setter Property="BorderBrush" Value="#363636" />
+			<Setter Property="Background" Value="#363636" />
+		</Style>
+
 		<!-- Search Button -->
 		<Style Selector="Button.search">
 			<Setter Property="Background" Value="#3a3a3c" />

@@ -42,7 +42,17 @@
 			<Setter Property="BorderBrush" Value="#f4f3f8" />
 			<Setter Property="Background" Value="#f4f3f8" />
 		</Style>
-
+  
+  <Style Selector="Button.sidebarSelected">
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="Padding" Value="20 10 10 10"/>
+    <Setter Property="Margin" Value="15 0 15 2"/>
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Foreground" Value="#000000" />
+    <Setter Property="BorderBrush" Value="#f4f3f8" />
+    <Setter Property="Background" Value="#f4f3f8" />
+  </Style>
+  
 		<!-- Search Button -->
 		<Style Selector="Button.search">
 			<Setter Property="Background" Value="#e6e5ea" />

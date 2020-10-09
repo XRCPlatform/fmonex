@@ -47,103 +47,105 @@
               <WrapPanel Margin="18 0 20 10">
 
                 <StackPanel Name="SPPhoto_0" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_0" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_0" >
                     </Image>
                   </Border>
                 </StackPanel>
 
                 <StackPanel Name="SPPhoto_1" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_1" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_1" >
                     </Image>
                   </Border>
                 </StackPanel>
 
                 <StackPanel Name="SPPhoto_2" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_2" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_2" >
                     </Image>
                   </Border>
                 </StackPanel>
 
                 <StackPanel Name="SPPhoto_3" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_3" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_3" >
                     </Image>
                   </Border>
                 </StackPanel>
 
                 <StackPanel Name="SPPhoto_4" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_4" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_4" >
                     </Image>
                   </Border>
                 </StackPanel>
 
                 <StackPanel Name="SPPhoto_5" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_5" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_5" >
                     </Image>
                   </Border>
                 </StackPanel>
 
                 <StackPanel Name="SPPhoto_6" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_6" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_6" >
                     </Image>
                   </Border>
                 </StackPanel>
 
                 <StackPanel Name="SPPhoto_7" IsVisible="false">
-                  <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="0">
-                    <Image Name="IPhoto_7" Stretch="UniformToFill" >
-                      <Image.Clip>
-                        <RectangleGeometry Rect="0,0,168,100" />
-                      </Image.Clip>
+                  <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+                    <Image Name="IPhoto_7" >
                     </Image>
                   </Border>
                 </StackPanel>
-
+                
               </WrapPanel>
+              
+              <TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+              <!-- product description binding -->
+              <TextBlock Classes="H1" Name="TBDescription" Text=""
+                    TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
+              <TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                <Path Classes="StatusBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
+                  Height="14" Stretch="Fill" Width="11" Margin="0,1,5,0"/>
+                <!-- product shipping binding -->
+                <TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
+              </StackPanel>
 
+              <TextBlock Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                <!--Manufacturer binding -->
+                <TextBlock Classes="H1" Name="TBFineness"  Text="Fineness" Margin="0 2 0 0" FontSize="16"/>
+              </StackPanel>
 
-                <TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
-                <TextBlock Classes="H1" Name="TBDescription" Text="N/A" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
-                <TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-                <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                    <Path Classes="StatushBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
-						Height="14" Stretch="Fill" Width="11" Fill="#f8b500" Margin="0,1,5,0"/>
-                    <TextBlock Classes="H1" Name="TBShipping" Text="N/A" FontSize="16"/>
-                </StackPanel>
-                <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-                <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                    <TextBlock Classes="H1" Name="TBPrice" Text="N/A" FontSize="20"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="20 0 0 0">
-                    <TextBlock Classes="H2" Name="TBPriceType" Text="" FontSize="16"/>
-                </StackPanel>
+              <TextBlock Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                <!--Manufacturer binding -->
+                <TextBlock Classes="H1" Name="TBManufacturer" Text="Manufacturer" Margin="0 2 0 0" FontSize="16"/>
+              </StackPanel>
+
+              <TextBlock Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                <!--Size binding -->
+                <TextBlock Classes="H1" Name="TBSize" Text="1oz" Margin="0 2 0 0" FontSize="16"/>
+              </StackPanel>
+
+              <TextBlock Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                <!--TBWeightInGrams binding -->
+                <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="31" Margin="0 2 0 0" FontSize="16"/>
+              </StackPanel>
+
+              <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
+                <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
+              </StackPanel>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>

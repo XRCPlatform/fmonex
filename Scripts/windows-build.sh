@@ -46,7 +46,7 @@ echo "$nsis_sha256 $cache_dir/$nsis_filename" | if sha256sum --check ; then
     if [ ! -f "$WINEPREFIX/drive_c/Program Files/NSIS/makensis.exe" ]; then
         wine "$cache_dir/$nsis_filename"
     fi
-    wine "$WINEPREFIX/drive_c/Program Files/NSIS/makensis.exe" /DPRODUCT_VERSION=$version fmone.nsi
+    wine "$WINEPREFIX/drive_c/Program Files/NSIS/makensis.exe" /DPRODUCT_VERSION=$version fmone-windows.nsi
 else
     echo "nsis file was not the correct checksum" >&2
 fi

@@ -46,7 +46,7 @@
   !define MUI_ABORTWARNING
   !define MUI_ABORTWARNING_TEXT "Are you sure you wish to abort the installation of ${PRODUCT_NAME}?"
 
-  !define MUI_ICON "c:\fmone\fmone.ico"
+  !define MUI_ICON "c:\fmone\FreeMarket.ico"
 
 ;--------------------------------
 ;Pages
@@ -141,7 +141,7 @@ Section
 
   ;Create desktop shortcut
   DetailPrint "Creating desktop shortcut..."
-  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\FreeMarketApp.exe" ""
+  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\FreeMarketApp.exe" "" "$INSTDIR\FreeMarket.ico" 0
   ;hack to set run as admin
   push "$DESKTOP\${PRODUCT_NAME}.lnk"
   call ShellLinkSetRunAs
@@ -152,7 +152,7 @@ Section
   DetailPrint "Creating start-menu items..."
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\FreeMarketApp.exe" "" "$INSTDIR\FreeMarketApp.exe" 0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\FreeMarketApp.exe" "" "$INSTDIR\FreeMarket.ico" 0
   ;hack to set run as admin
   push "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
   call ShellLinkSetRunAs
@@ -160,7 +160,7 @@ Section
   DetailPrint HR=$0
 
   ;Create link in app folder
-  CreateShortCut "$INSTDIR\${PRODUCT_NAME}.lnk" "$INSTDIR\FreeMarketApp.exe" "" "$INSTDIR\FreeMarketApp.exe" 0
+  CreateShortCut "$INSTDIR\${PRODUCT_NAME}.lnk" "$INSTDIR\FreeMarketApp.exe" "" "$INSTDIR\FreeMarket.ico" 0
   ;hack to set run as admin
   push "$INSTDIR\${PRODUCT_NAME}.lnk"
   call ShellLinkSetRunAs
@@ -173,7 +173,7 @@ Section
   WriteRegStr HKCU "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKCU "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr HKCU "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
-  WriteRegStr HKCU "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\fmone.ico"
+  WriteRegStr HKCU "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\FreeMarket.ico"
 
   ;Fixes Windows broken size estimates
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2

@@ -66,7 +66,7 @@
 							</Image>
                         </Border>
 						<Border Classes="Main" Margin="-88 0 -15 0" HorizontalAlignment="Left" Width="106" Height="106" BorderThickness="18" CornerRadius="50" Background="Transparent"></Border>
-                        <Button Margin="10 0 0 0" Classes="action" Height="35" HorizontalAlignment="Left" Padding="15 0" FontSize="14" BorderThickness="0" Cursor="Hand" Click="ButtonChangePhoto_Click">Upload image</Button>
+                        <Button Margin="10 0 0 0" Classes="pagination" Height="35" HorizontalAlignment="Left" Padding="15 0" FontSize="14" BorderThickness="1" Cursor="Hand" Click="ButtonChangePhoto_Click">Upload image</Button>
                     </DockPanel>
 
                     <!-- Username binding -->

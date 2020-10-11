@@ -24,14 +24,14 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
                 <StackPanel Name="EditBar" Height="40" Margin="20 18 20 10" Orientation="Horizontal">
-                    <Button Name="BTEdit" Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0" Cursor="Hand" Click="ButtonEdit_Click">
+                    <Button Name="BTEdit" Classes="pagination" BorderThickness="1" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0" Cursor="Hand" Click="ButtonEdit_Click">
                         <StackPanel Orientation="Horizontal">
                             <Path Classes="BlueIcon" Data="m114.6875 284.675781-73.800781-73.800781 178.5-178.5 73.800781 73.800781zm-80.699219-60.800781 67.699219 67.699219-101.5 33.800781zm281.898438-140.300781-12.800781 12.800781-73.898438-73.898438 12.800781-12.800781c12.894531-12.902343 33.804688-12.902343 46.699219 0l27.199219 27.199219c12.800781 12.9375 12.800781 33.765625 0 46.699219zm0 0"
 								  HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13"/>
                             <TextBlock Margin="7,0,0,0" Text="Edit listing" FontSize="14"/>
                         </StackPanel>
                     </Button>
-                    <Button Name="BTRemove" Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0"  Cursor="Hand" Click="ButtonRemove_Click">
+                    <Button Name="BTRemove" Classes="pagination" BorderThickness="1" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0"  Cursor="Hand" Click="ButtonRemove_Click">
                         <StackPanel Orientation="Horizontal">
                             <Path Classes="BlueIcon" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
 								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>

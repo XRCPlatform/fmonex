@@ -145,7 +145,7 @@
             <!-- seller rating binding -->
             <TextBlock Classes="H1" Name="TBSellerStars" Text="N/A" FontSize="16"/>
             <TextBlock Classes="H1" Text="Reviews" Margin="20 0 5 0" FontSize="16"/>
-            <Button Padding="10 0 10 0" BorderThickness="1" Classes="action" Name="BTSeller" Tag="" Cursor="Hand" Click="ButtonSeller_Click">
+            <Button Padding="10 0 10 0" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" Click="ButtonSeller_Click">
               <!-- link to a seller's public profile and number of reviews binding -->
               <TextBlock Name="TBSellerReviewsCount" FontWeight="Bold" Text="0"/>
             </Button>

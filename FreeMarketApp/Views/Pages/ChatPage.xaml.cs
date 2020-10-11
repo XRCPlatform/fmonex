@@ -7,6 +7,7 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using Serilog;
+using System;
 using System.Linq;
 using System.Text;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
@@ -17,6 +18,7 @@ namespace FreeMarketApp.Views.Pages
     {
         private static ChatPage _instance;
         private ILogger _logger;
+        private UserControl backPage;
 
         public static ChatPage Instance
         {
@@ -63,7 +65,14 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            PagesHelper.Switch(mainWindow, MainPage.Instance);
+            if (backPage != null)
+            {
+                PagesHelper.Switch(mainWindow, backPage);
+            }
+            else
+            {
+                PagesHelper.Switch(mainWindow, MainPage.Instance);
+            }
 
             ClearForm();
         }
@@ -73,6 +82,11 @@ namespace FreeMarketApp.Views.Pages
             var signature = ((Button)sender).Tag.ToString();
 
             LoadChatByProduct(signature);
+        }
+
+        public void SetBackPage(UserControl back)
+        {
+            backPage = back;
         }
 
         public async void ButtonSendMessage_Click(object sender, RoutedEventArgs args)
@@ -138,6 +152,7 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+  
         public void LoadChatByProduct(string signature)
         {
             var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Signature == signature);

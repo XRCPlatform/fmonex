@@ -18,7 +18,7 @@
                     </StackPanel>
                 </Button>
 
-              <Button Classes="sidebar" Cursor="Hand">
+                <Button Classes="sidebarSelected" Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                   <Path Classes="SideBarIcon" Data="M435.2,51.2H384V25.6C384,10.24,373.76,0,358.4,0c-15.36,0-25.6,10.24-25.6,25.6v25.6h-51.2V25.6
 			C281.6,10.24,271.36,0,256,0s-25.6,10.24-25.6,25.6v25.6h-51.2V25.6c0-15.36-10.24-25.6-25.6-25.6C138.24,0,128,10.24,128,25.6

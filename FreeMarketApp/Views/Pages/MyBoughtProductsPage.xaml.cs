@@ -90,16 +90,18 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            var signature = ((Button)sender).Tag.ToString();
-
-            var marketItem = ((MyBoughtProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
-            if ((marketItem != null) && (!marketItem.IsInPool))
+            var signature = ((Button)sender)?.Tag?.ToString();
+            if (signature != null)
             {
-                var chatPage = ChatPage.Instance;
-                chatPage.LoadChatByProduct(signature);
-
-                PagesHelper.Switch(mainWindow, chatPage);
-            }
+                var marketItem = ((MyBoughtProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
+                if ((marketItem != null) && (!marketItem.IsInPool))
+                {
+                    var chatPage = ChatPage.Instance;
+                    chatPage.LoadChatByProduct(signature);
+                    chatPage.SetBackPage(MyBoughtProductsPage.Instance);
+                    PagesHelper.Switch(mainWindow, chatPage);
+                }
+            }            
         }
 
         private void ClearForm()

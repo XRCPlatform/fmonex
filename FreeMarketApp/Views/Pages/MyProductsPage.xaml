@@ -54,7 +54,7 @@
             <StackPanel HorizontalAlignment="Stretch">
                 <WrapPanel Orientation="Horizontal" Margin="20 20 20 10">
                     <TextBlock Classes="H1" Text="My Products" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
-                    <Button Classes="action" BorderThickness="0" Height="24" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="10 0 10 0" Click="ButtonAdd_Click" Cursor="Hand">
+                    <Button Classes="pagination" BorderThickness="1" Height="24" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="10 0 10 0" Click="ButtonAdd_Click" Cursor="Hand">
                         <StackPanel Orientation="Horizontal">
                             <Path Classes="BlueIcon" Data="m408 184h-136c-4.417969 0-8-3.582031-8-8v-136c0-22.089844-17.910156-40-40-40s-40 17.910156-40 40v136c0 4.417969-3.582031 8-8 8h-136c-22.089844 0-40 17.910156-40 40s17.910156 40 40 40h136c4.417969 0 8 3.582031 8 8v136c0 22.089844 17.910156 40 40 40s40-17.910156 40-40v-136c0-4.417969 3.582031-8 8-8h136c22.089844 0 40-17.910156 40-40s-17.910156-40-40-40zm0 0"
 								  HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13" />

@@ -107,6 +107,24 @@ namespace FreeMarketApp.Views.Pages
             }
             
             FilterList();
+
+
+            var sidebarPanel = this.FindControl<StackPanel>("SideBar");
+            if (sidebarPanel != null) {
+
+                foreach (var item in sidebarPanel.Children)
+                {
+                    if (item is Button)
+                    {
+                        ((Button)item).Classes.Remove("sidebarSelected");
+                        ((Button)item).Classes.Add("sidebar");
+                    }
+                }
+
+                ((Button)sender).Classes.Add("sidebarSelected");
+                ((Button)sender).Classes.Remove("sidebar");
+            }
+           
         }
 
         private void FilterList()

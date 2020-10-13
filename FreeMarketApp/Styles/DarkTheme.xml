@@ -278,6 +278,10 @@
 			<Setter Property="Fill" Value="#ff9234" />
 		</Style>
 
+		<Style Selector="Border.StatusBarIconOrange">
+			<Setter Property="Background" Value="#ff9234" />
+		</Style>
+
 		<Style Selector="TextBlock.StatusBarText">
 			<Setter Property="Foreground" Value="#ffffff" />
 		</Style>

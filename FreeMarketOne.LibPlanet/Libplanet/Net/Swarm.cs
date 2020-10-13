@@ -226,6 +226,7 @@ namespace Libplanet.Net
 
         public event EventHandler<BlockChain<T>.TipChangedEventArgs> BlockDownloadedEvent;
 
+
         /// <summary>
         /// Waits until this <see cref="Swarm{T}"/> instance gets started to run.
         /// </summary>
@@ -1283,7 +1284,10 @@ namespace Libplanet.Net
                     {
                         throw t.Exception;
                     }
-
+                    if (t.IsCompleted)
+                    {
+                        LastReceived = DateTimeOffset.UtcNow;
+                    }
                     return t.Result.Where(pair => !(pair.Item1 is null)).ToArray();
                 },
                 cancellationToken
@@ -1325,7 +1329,6 @@ namespace Libplanet.Net
                             timeout: RecentStateRecvTimeout,
                             cancellationToken: cancellationToken
                         );
-
                         _logger.Debug("Received recent states from a peer ({Peer}).", peer);
                     }
                     catch (TimeoutException e)
@@ -1346,6 +1349,7 @@ namespace Libplanet.Net
                             recentStates.StateReferences.Count,
                             recentStates.BlockStates.Count);
                         count++;
+                        LastReceived = DateTimeOffset.UtcNow;
 
                         ReaderWriterLockSlim rwlock = blockChain._rwlock;
                         rwlock.EnterWriteLock();
@@ -1530,6 +1534,8 @@ namespace Libplanet.Net
 
         private void ProcessMessageHandler(object target, Message message)
         {
+            LastReceived = DateTimeOffset.UtcNow;
+
             switch (message)
             {
                 case Ping ping:

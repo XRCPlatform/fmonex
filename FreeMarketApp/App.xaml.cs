@@ -1,9 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views;
 using FreeMarketOne.DataStructure;
+using FreeMarketOne.ServerCore;
 using Libplanet;
 using Libplanet.Blockchain;
 using System;
@@ -16,6 +18,8 @@ namespace FreeMarketApp
 {
     public class App : Application
     {
+        private static MainWindow mainWindow;
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -66,10 +70,23 @@ namespace FreeMarketApp
                 FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 FMONE.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
                 FMONE.Current.MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockChainChangedEvent);
+                FMONE.Current.NetworkHearbeatEvent += new EventHandler<NetworkHearbeatArgs>(NetworkHeartbeatEvent);
+
                 FMONE.Current.Initialize();
             }).ConfigureAwait(true);
 
-            return new MainWindow { DataContext = new MainWindowViewModel() };
+            mainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
+
+            return mainWindow;
+        }
+
+        private static void NetworkHeartbeatEvent(object sender, NetworkHearbeatArgs e)
+        {
+            PagesHelper.SetServerData(
+                mainWindow, 
+                e.IsBaseChainNetworkConnected && e.IsMarketChainNetworkConnected, 
+                e.IsTorUp, 
+                e.PeerCount);
         }
 
         private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)

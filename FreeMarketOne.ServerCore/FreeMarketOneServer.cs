@@ -2,7 +2,6 @@
 using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
-using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
@@ -12,7 +11,6 @@ using FreeMarketOne.Tor;
 using FreeMarketOne.Users;
 using Libplanet;
 using Libplanet.Blockchain;
-using Libplanet.Extensions;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
@@ -69,8 +67,12 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockDownloadedEvent;
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
-
+        public event EventHandler<NetworkHearbeatArgs> NetworkHearbeatEvent;
         public event EventHandler FreeMarketOneServerLoadedEvent;
+
+        private DateTimeOffset ExpectedMarketChainPulse;
+        private DateTimeOffset ExpectedBaseChainPulse;
+        private Timer networkHeartbeat;
 
         public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
@@ -179,6 +181,7 @@ namespace FreeMarketOne.ServerCore
             //Initialize Base Pool Manager
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
+
                 //Add Swarm server to seed manager
                 OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
 
@@ -241,6 +244,12 @@ namespace FreeMarketOne.ServerCore
             //Initialize Market Pool Manager
             if (MarketBlockChainManager.IsBlockChainManagerRunning())
             {
+
+                ExpectedMarketChainPulse = DateTimeOffset.UtcNow;
+                ExpectedBaseChainPulse = DateTimeOffset.UtcNow;
+
+                networkHeartbeat = new Timer(ValidateNetworkHeartbeat, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
+
                 //Add Swarm server to seed manager
                 OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
 
@@ -262,6 +271,36 @@ namespace FreeMarketOne.ServerCore
                 _logger.Error("Market Chain isnt loaded!");
                 Stop();
             }
+        }
+   
+
+        private void ValidateNetworkHeartbeat(object state)
+        {
+            bool baseUp = true;
+            bool marketUp = true;
+
+            var marketDiff = ExpectedMarketChainPulse - MarketBlockChainManager.SwarmServer.LastReceived;
+            var baseDiff = ExpectedBaseChainPulse - BaseBlockChainManager.SwarmServer.LastReceived;
+            if (marketDiff.TotalMinutes > 1)
+            {
+                marketUp = false;
+            }
+            if (baseDiff.TotalMinutes > 1 )
+            {
+                baseUp = false;
+            }
+
+            NetworkHearbeatEvent.Invoke(this, new NetworkHearbeatArgs()
+            {
+                IsMarketChainNetworkConnected = marketUp,
+                IsBaseChainNetworkConnected = baseUp,
+                PeerCount = MarketBlockChainManager.SwarmServer.Peers.Count(),
+                IsTorUp = TorProcessManager.IsTorRunningAsync().ConfigureAwait(false).GetAwaiter().GetResult()
+
+            });
+
+            ExpectedMarketChainPulse = DateTimeOffset.UtcNow;
+            ExpectedBaseChainPulse = DateTimeOffset.UtcNow;
         }
 
         async void RaiseAsyncServerLoadedEvent()

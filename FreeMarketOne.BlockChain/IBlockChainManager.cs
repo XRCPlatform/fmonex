@@ -7,6 +7,7 @@ using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -21,5 +22,6 @@ namespace FreeMarketOne.BlockChain
         bool IsBlockChainManagerRunning();
         void Stop();
         List<IBaseItem> GetActionItemsByType(Type type);
+        Task ReConnectAfterNetworkLossAsync();
     }
 }

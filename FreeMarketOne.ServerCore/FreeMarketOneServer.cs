@@ -73,6 +73,7 @@ namespace FreeMarketOne.ServerCore
         private DateTimeOffset ExpectedMarketChainPulse;
         private DateTimeOffset ExpectedBaseChainPulse;
         private Timer networkHeartbeat;
+        private readonly object swarmRecoveryLock = new object();
 
         public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
@@ -301,6 +302,27 @@ namespace FreeMarketOne.ServerCore
 
             ExpectedMarketChainPulse = DateTimeOffset.UtcNow;
             ExpectedBaseChainPulse = DateTimeOffset.UtcNow;
+            
+            //skip on inicialization
+            if ((!marketUp || !MarketBlockChainManager.SwarmServer.Peers.Any()) && MarketBlockChainManager.IsBlockChainManagerRunning())
+            {
+                lock (swarmRecoveryLock)
+                {
+                    //if this should refresh the swarm server if network was down and recovered.
+                    MarketBlockChainManager.ReConnectAfterNetworkLossAsync();
+                }
+                    
+            }
+
+            if ((!baseUp || !BaseBlockChainManager.SwarmServer.Peers.Any())  && BaseBlockChainManager.IsBlockChainManagerRunning())
+            {
+                lock (swarmRecoveryLock)
+                {
+                    //if this should refresh the swarm server if network was down and recovered.
+                    BaseBlockChainManager.ReConnectAfterNetworkLossAsync();
+                }
+            }
+
         }
 
         async void RaiseAsyncServerLoadedEvent()

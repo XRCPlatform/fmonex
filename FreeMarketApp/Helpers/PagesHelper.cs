@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.Skynet;
@@ -142,6 +143,48 @@ namespace FreeMarketApp.Helpers
                     SharedResources.ResourceManager.GetString("State_Running") :
                     SharedResources.ResourceManager.GetString("State_Down");
             }
+        }
+
+        internal static void SetServerData(Window mainWindow, bool peersUp, bool torUp, int peersCount)
+        {
+            Dispatcher.UIThread.Post(() => {
+                try
+                {
+                    if (mainWindow != null)
+                    {
+                        var tbPeers = mainWindow.FindControl<TextBlock>("TBPeers");
+                        tbPeers.Text = peersCount.ToString();
+
+                        var bPeersStatus = mainWindow.FindControl<Border>("BPeersStatus");
+
+                        if (peersUp)
+                        {
+                            bPeersStatus.Classes = new Classes(new[] { "StatusBarIconGreen" });
+                        }
+                        else
+                        {
+                            bPeersStatus.Classes = new Classes(new[] { "StatusBarIconRed" });
+                        }
+
+                        var tbTorIcon = mainWindow.FindControl<Path>("TorIcon");
+                        var tbTorStatus = mainWindow.FindControl<TextBlock>("TBTorStatus");
+                        if (torUp)
+                        {
+                            tbTorIcon.Classes = new Classes(new[] { "StatusBarIconGreen" });
+                            tbTorStatus.Text = SharedResources.ResourceManager.GetString("State_Running");
+                        }
+                        else
+                        {
+                            tbTorIcon.Classes = new Classes(new[] { "StatusBarIconRed" });
+                            tbTorStatus.Text = SharedResources.ResourceManager.GetString("State_Down");
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    //swallow not important that can't update UI
+                }               
+            });           
         }
 
         internal static void Log(ILogger _logger, string message, LogEventLevel level = LogEventLevel.Information)

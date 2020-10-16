@@ -5,6 +5,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Pools;
 using Serilog;
 using System.Linq;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
@@ -88,12 +89,30 @@ namespace FreeMarketApp.Views.Pages
                         SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                         MessageBox.MessageBoxButtons.Ok);
 
-                    FMONE.Current.MarketPoolManager.AcceptActionItem(offer);
-                    FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
+                    var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(offer);
+                    if (resultPool == null)
+                    {
+                        FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
-                    MyProductsPage.Instance = null;
-                    PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
-                    ClearForm();
+                        MyProductsPage.Instance = null;
+                        PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                        ClearForm();
+                    }
+                    else
+                    {
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Error_" + resultPool.Value.ToString())),
+                            SharedResources.ResourceManager.GetString("Dialog_Error_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
+
+                        //not allow change in case of another state is in process
+                        if (resultPool == PoolManagerStates.Errors.StateOfItemIsInProgress)
+                        {
+                            MyProductsPage.Instance = null;
+                            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                            ClearForm();
+                        }
+                    }
                 }
             }
         }

@@ -29,6 +29,7 @@ namespace FreeMarketOne.Pools
 {
     public class PoolManager<T> : IPoolManager, IDisposable where T : IBaseAction, new()
     {
+
         private ILogger _logger { get; set; }
 
         /// <summary>
@@ -203,17 +204,19 @@ namespace FreeMarketOne.Pools
             Stop();
         }
 
-        public bool AcceptActionItem(IBaseItem actionItem)
+        public PoolManagerStates.Errors? AcceptActionItem(IBaseItem actionItem)
         {
-            if (CheckActionItemInProcessing(actionItem))
+            if (_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount)
             {
-                _actionItemsList.Add(actionItem);
+                var isValid = CheckActionItemInProcessing(actionItem);
 
-                return true;
-            }
+                if (isValid == null) _actionItemsList.Add(actionItem);
+
+                return isValid;
+            } 
             else
             {
-                return false;
+                return PoolManagerStates.Errors.NoMinimalPeer;
             }
         }
 
@@ -261,7 +264,7 @@ namespace FreeMarketOne.Pools
                     //check all loaded tx in list
                     foreach (var itemTx in temporaryMemoryActionItemsList)
                     {
-                        if (CheckActionItemInProcessing(itemTx))
+                        if (CheckActionItemInProcessing(itemTx) == null)
                         {
                             _actionItemsList.Add(itemTx);
                         }
@@ -274,47 +277,46 @@ namespace FreeMarketOne.Pools
             return true;
         }
 
-        public bool CheckActionItemInProcessing(IBaseItem actionItem)
+        public PoolManagerStates.Errors? CheckActionItemInProcessing(IBaseItem actionItem)
         {
             if (actionItem.IsValid() && !_actionItemsList.Exists(mt => mt == actionItem))
             {
-                var resultOfValidation = true;
-
                 //Verify type of item in tx
                 if (!((IDefaultBlockPolicy<T>)_blockChain.Policy).ValidTypesOfActionItems.Contains(actionItem.GetType()))
                 {
-                    resultOfValidation = false;
+                    return PoolManagerStates.Errors.WrontTypeOfContent;
                 }
 
                 //Verify existence of equal action item in unstaged tx
                 if (ExistInStagedTransactions(actionItem))
                 {
-                    resultOfValidation = false;
+                    return PoolManagerStates.Errors.Duplication;
                 }
 
                 //Verification based on type
-                if (actionItem.GetType() == typeof(MarketItemV1))
+                if (actionItem.GetType() == typeof(MarketItemV1) && (!IsMarketItemValid(actionItem)))
                 {
-                    if (!IsMarketItemValid(actionItem)) resultOfValidation = false;
+                    return PoolManagerStates.Errors.StateOfItemIsInProgress;
                 }
 
                 //Verification based on type
-                if (actionItem.GetType() == typeof(UserDataV1))
+                if (actionItem.GetType() == typeof(UserDataV1) && (!IsUserDataValid(actionItem)))
                 {
-                    if (!IsUserDataValid(actionItem)) resultOfValidation = false;
+                    return PoolManagerStates.Errors.StateOfItemIsInProgress;
                 }
 
-                return resultOfValidation;
+                return null;
             }
             else
             {
-                return false;
+                return PoolManagerStates.Errors.NoValidContentHash;
             }
         }
 
         private bool IsUserDataValid(IBaseItem actionItem)
         {
             var userData = (UserDataV1)actionItem;
+            if (string.IsNullOrEmpty(userData.BaseSignature)) return true;
 
             //Checking existence of chain of identical items in pool
             foreach (var itemLocalPoolItem in _actionItemsList)
@@ -360,6 +362,7 @@ namespace FreeMarketOne.Pools
         private bool IsMarketItemValid(IBaseItem actionItem)
         {
             var marketItem = (MarketItemV1)actionItem;
+            if (string.IsNullOrEmpty(marketItem.BaseSignature)) return true;
 
             //Checking existence of chain of identical items in pool
             foreach (var itemLocalPoolItem in _actionItemsList)
@@ -474,32 +477,39 @@ namespace FreeMarketOne.Pools
             }
         }
 
-        public bool PropagateAllActionItemLocal()
+        public PoolManagerStates.Errors? PropagateAllActionItemLocal()
         {
             var actions = new List<T>();
             var action = new T();
 
-            try
+            if (_swarmServer.Peers.Count() > _configuration.MinimalPeerAmount)
             {
-                action.BaseItems.AddRange(_actionItemsList);
-                actions.Add(action);
+                try
+                {
+                    action.BaseItems.AddRange(_actionItemsList);
+                    actions.Add(action);
 
-                var tx = _blockChain.MakeTransaction(_privateKey, actions);
+                    var tx = _blockChain.MakeTransaction(_privateKey, actions);
 
-                _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
+                    _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
 
-                _blockChain.StageTransaction(tx);
+                    _blockChain.StageTransaction(tx);
 
-                _logger.Information("Clearing all item actions from local pool.");
-                _actionItemsList.Clear();
+                    _logger.Information("Clearing all item actions from local pool.");
+                    _actionItemsList.Clear();
 
-                return true;
+                    return null;
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Unexpected error suring propagation of transaction.", e);
+                    return PoolManagerStates.Errors.Unexpected;
+                }
             }
-            catch (Exception e)
+            else
             {
-                _logger.Error("Unexpected error suring propagation of transaction.", e);
-                return false;
-            } 
+                return PoolManagerStates.Errors.NoMinimalPeer;
+            }
         }
 
         public List<IBaseItem> GetAllActionItemStaged()

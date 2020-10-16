@@ -189,6 +189,27 @@
   <data name="Dialog_Confirmation_YouCantBuyYourOffer" xml:space="preserve">
     <value>You can't buy your offer.</value>
   </data>
+  <data name="Dialog_Error_Duplication" xml:space="preserve">
+    <value>This item exist in pool.</value>
+  </data>
+  <data name="Dialog_Error_NoMinimalPeer" xml:space="preserve">
+    <value>You need to have at least one peer to propagate transaction.</value>
+  </data>
+  <data name="Dialog_Error_NoValidContentHash" xml:space="preserve">
+    <value>Content of this item isn't valid with actual hash.</value>
+  </data>
+  <data name="Dialog_Error_StateOfItemIsInProgress" xml:space="preserve">
+    <value>Change of this item is in the pool. Please wait for next block sychronization.</value>
+  </data>
+  <data name="Dialog_Error_Title" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Dialog_Error_Unexpected" xml:space="preserve">
+    <value>Unexpected error during propagation of data. Please to read application log.</value>
+  </data>
+  <data name="Dialog_Error_WrontTypeOfContent" xml:space="preserve">
+    <value>Content of action is wrong and can't be propagated.</value>
+  </data>
   <data name="Dialog_FirstRun_InvalidCharsDescription" xml:space="preserve">
     <value>Your description contains invalid chars.</value>
   </data>

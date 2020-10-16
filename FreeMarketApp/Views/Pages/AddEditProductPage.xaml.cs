@@ -7,6 +7,7 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Pools;
 using FreeMarketOne.Skynet;
 using Serilog;
 using System.Linq;
@@ -314,18 +315,35 @@ namespace FreeMarketApp.Views.Pages
 
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 
-                    FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
-                    FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
-                    //FreeMarketOneServer.Current.SearchIndexer.Index(_offer,"pending");
+                    var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
+                    if (resultPool == null)
+                    {
+                        FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
-                    await MessageBox.Show(mainWindow,
-                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
-                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
-                        MessageBox.MessageBoxButtons.Ok);
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                            SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
 
-                    MyProductsPage.Instance = null;
-                    PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
-                    ClearForm();
+                        MyProductsPage.Instance = null;
+                        PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                        ClearForm();
+                    } 
+                    else
+                    {
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Error_" + resultPool.Value.ToString())),
+                            SharedResources.ResourceManager.GetString("Dialog_Error_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
+
+                        //not allow change in case of another state is in process
+                        if (resultPool == PoolManagerStates.Errors.StateOfItemIsInProgress)
+                        {
+                            MyProductsPage.Instance = null;
+                            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+                            ClearForm();
+                        }
+                    }
 
                 } else {
 

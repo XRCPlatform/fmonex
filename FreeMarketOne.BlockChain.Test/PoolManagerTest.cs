@@ -80,12 +80,12 @@ namespace FreeMarketOne.BlockChain.Test
             testActionItem2.Message = "This is a test message";
             testActionItem2.Hash = testActionItem2.GenerateHash();
 
-            Assert.IsFalse(_basePoolManager.CheckActionItemInProcessing(testActionItem1));
+            Assert.IsNotNull(_basePoolManager.CheckActionItemInProcessing(testActionItem1));
             testActionItem1.Hash = testActionItem1.GenerateHash();
-            Assert.IsTrue(_basePoolManager.CheckActionItemInProcessing(testActionItem1));
+            Assert.IsNull(_basePoolManager.CheckActionItemInProcessing(testActionItem1));
 
-            Assert.IsTrue(_basePoolManager.AcceptActionItem(testActionItem1));
-            Assert.IsTrue(_basePoolManager.AcceptActionItem(testActionItem2));
+            Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem1));
+            Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem2));
 
             Assert.IsTrue(_basePoolManager.SaveActionItemsToFile());
             Assert.AreEqual(2, _basePoolManager.GetAllActionItemLocal().Count());
@@ -103,8 +103,8 @@ namespace FreeMarketOne.BlockChain.Test
             Assert.IsFalse(_basePoolManager.DeleteActionItemLocal(testActionItem1.Hash));
 
             //again add it and add again the same
-            Assert.IsTrue(_basePoolManager.AcceptActionItem(testActionItem1));
-            Assert.IsFalse(_basePoolManager.AcceptActionItem(testActionItem1));
+            Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem1));
+            Assert.IsNotNull(_basePoolManager.AcceptActionItem(testActionItem1));
 
             Assert.IsNull(_basePoolManager.GetActionItemStaged("UNKNOWN HASH"));
             Assert.IsNotNull(_basePoolManager.GetActionItemLocal(testActionItem1.Hash));

@@ -277,6 +277,69 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This item exist in pool..
+        /// </summary>
+        internal static string Dialog_Error_Duplication {
+            get {
+                return ResourceManager.GetString("Dialog_Error_Duplication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You need to have at least one peer to propagate transaction..
+        /// </summary>
+        internal static string Dialog_Error_NoMinimalPeer {
+            get {
+                return ResourceManager.GetString("Dialog_Error_NoMinimalPeer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Content of this item isn&apos;t valid with actual hash..
+        /// </summary>
+        internal static string Dialog_Error_NoValidContentHash {
+            get {
+                return ResourceManager.GetString("Dialog_Error_NoValidContentHash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change of this item is in the pool. Please wait for next block sychronization..
+        /// </summary>
+        internal static string Dialog_Error_StateOfItemIsInProgress {
+            get {
+                return ResourceManager.GetString("Dialog_Error_StateOfItemIsInProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string Dialog_Error_Title {
+            get {
+                return ResourceManager.GetString("Dialog_Error_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unexpected error during propagation of data. Please to read application log..
+        /// </summary>
+        internal static string Dialog_Error_Unexpected {
+            get {
+                return ResourceManager.GetString("Dialog_Error_Unexpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Content of action is wrong and can&apos;t be propagated..
+        /// </summary>
+        internal static string Dialog_Error_WrontTypeOfContent {
+            get {
+                return ResourceManager.GetString("Dialog_Error_WrontTypeOfContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your description contains invalid chars..
         /// </summary>
         internal static string Dialog_FirstRun_InvalidCharsDescription {

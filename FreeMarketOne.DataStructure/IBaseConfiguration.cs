@@ -32,13 +32,10 @@ namespace FreeMarketOne.DataStructure
         IDefaultBlockPolicy<MarketAction> BlockChainMarketPolicy { get; set; }
 
         bool ListenersUseTor { get; set; }
-
         string ListenersForceThisIp { get; set; }
-
         string ChatPath { get; set; }
-
         IPEndPoint ListenerChatEndPoint { get; set; }
-
         string SearchEnginePath { get; set; }
+        int MinimalPeerAmount { get; set; }
     }
 }

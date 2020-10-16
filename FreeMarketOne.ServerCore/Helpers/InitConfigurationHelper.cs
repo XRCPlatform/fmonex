@@ -56,6 +56,20 @@ namespace FreeMarketOne.ServerCore.Helpers
             if (!string.IsNullOrEmpty(seedsEndPoint)) configuration.OnionSeedsEndPoint = seedsEndPoint;
         }
 
+        internal static void InitializeMinimalPeerAmount(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            var minimalPeerAmount = configFile.GetSection("FreeMarketOneConfiguration")["MinimalPeerAmount"];
+
+            if (!string.IsNullOrEmpty(minimalPeerAmount))
+            {
+                int peerAmount = 0;
+                if (int.TryParse(minimalPeerAmount, out peerAmount))
+                {
+                    configuration.MinimalPeerAmount = peerAmount;
+                }
+            }
+        }
+
         internal static void InitializeBaseTorEndPoint(IBaseConfiguration configuration, IConfigurationRoot configFile)
         {
             var torEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["TorEndPoint"];

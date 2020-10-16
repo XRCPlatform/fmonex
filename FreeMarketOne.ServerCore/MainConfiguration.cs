@@ -37,6 +37,7 @@ namespace FreeMarketOne.ServerCore
             this.ChatPath = "data/chat";
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://0.0.0.0:9110/");
             this.SearchEnginePath = "data/searchindex";
+            this.MinimalPeerAmount = 4;
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

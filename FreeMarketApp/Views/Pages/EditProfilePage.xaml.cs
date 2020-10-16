@@ -189,16 +189,33 @@ namespace FreeMarketApp.Views.Pages
                     PagesHelper.SetUserData(_logger, mainWindow);
                     PagesHelper.Log(_logger, string.Format("Propagating new user data of current user to chain."));
 
-                    FMONE.Current.BasePoolManager.AcceptActionItem(updatedUserData);
-                    FMONE.Current.BasePoolManager.PropagateAllActionItemLocal();
+                    var resultPool = FMONE.Current.BasePoolManager.AcceptActionItem(updatedUserData);
+                    if (resultPool == null)
+                    {
+                        FMONE.Current.BasePoolManager.PropagateAllActionItemLocal();
 
-                    await MessageBox.Show(mainWindow,
-                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
-                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
-                        MessageBox.MessageBoxButtons.Ok);
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                            SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
 
-                    PagesHelper.Switch(mainWindow, MainPage.Instance);
-                    ClearForm();
+                        PagesHelper.Switch(mainWindow, MainPage.Instance);
+                        ClearForm();
+                    }
+                    else
+                    {
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Error_" + resultPool.Value.ToString())),
+                            SharedResources.ResourceManager.GetString("Dialog_Error_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
+
+                        //not allow change in case of another state is in process
+                        if (resultPool == FreeMarketOne.Pools.PoolManagerStates.Errors.StateOfItemIsInProgress)
+                        {
+                            PagesHelper.Switch(mainWindow, MainPage.Instance);
+                            ClearForm();
+                        }
+                    }
                 }
                 else
                 {

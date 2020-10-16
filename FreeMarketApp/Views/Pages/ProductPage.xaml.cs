@@ -66,8 +66,6 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonBuy_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var signature = ((Button)sender).Tag.ToString();
-
             var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
 
             var result = await MessageBox.Show(mainWindow,

@@ -304,7 +304,7 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Change of this item is in the pool. Please wait for next block..
+        ///   Looks up a localized string similar to Change of this item is in the pool. Please wait for next block sychronization..
         /// </summary>
         internal static string Dialog_Error_StateOfItemIsInProgress {
             get {

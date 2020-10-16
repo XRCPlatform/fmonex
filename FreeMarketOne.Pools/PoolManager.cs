@@ -88,6 +88,7 @@ namespace FreeMarketOne.Pools
             _blockPolicy = blockPolicy;
 
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
+            _cancellationToken = new CancellationTokenSource();
 
             _miningWorker = new MiningWorker<T>(
                     _logger,
@@ -95,13 +96,13 @@ namespace FreeMarketOne.Pools
                     _blockChain,
                     _privateKey.ToAddress(),
                     _storage,
-                    _privateKey
+                    _privateKey,
+                    _cancellationToken
                     );
 
             _logger.Information("Initializing Base Pool Manager");
 
             Interlocked.Exchange(ref _running, 0);
-            _cancellationToken = new CancellationTokenSource();
 
             LoadActionItemsFromFile();
         }
@@ -115,6 +116,8 @@ namespace FreeMarketOne.Pools
             coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
 
             var miningDelayStart = DateTime.MinValue;
+            var oldActionStaged = 0;
+            var oldActionLocal = 0;
 
             var periodicLogLoop = this._asyncLoopFactory.Run("Mining_" + typeof(T).Name, (cancellation) =>
             {
@@ -128,11 +131,25 @@ namespace FreeMarketOne.Pools
                 {
                     if (Interlocked.Read(ref _running) == 4)
                     {
-                        if ((miningDelayStart <= DateTime.UtcNow) && (!coMiningRunner.IsActive))
+                        if ((actionStaged.Count < oldActionStaged) || (actionLocal.Count < oldActionLocal))
                         {
-                            _logger.Information(string.Format("Starting mining after mining delay."));
-                            coMiningRunner.Start();
+                            _logger.Information("Stopping Mining Loop Checker.");
+                            Interlocked.Exchange(ref _running, 1);
+
+                            coMiningRunner.Stop();
+                            coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
+                            oldActionStaged = 0;
+                            oldActionLocal = 0;
                         }
+
+                        if (!coMiningRunner.IsActive)
+                        {
+                            if (miningDelayStart <= DateTime.UtcNow)
+                            {
+                                _logger.Information(string.Format("Starting mining after mining delay."));
+                                coMiningRunner.Start();
+                            }
+                        } 
                     }
                     else
                     {
@@ -140,6 +157,8 @@ namespace FreeMarketOne.Pools
 
                         Interlocked.Exchange(ref _running, 4);
                         miningDelayStart = DateTime.UtcNow.Add(_blockPolicy.BlockInterval);
+                        oldActionLocal = actionLocal.Count;
+                        oldActionStaged = actionStaged.Count;
                     }
                 }
                 else
@@ -150,6 +169,9 @@ namespace FreeMarketOne.Pools
                         Interlocked.Exchange(ref _running, 1);
 
                         coMiningRunner.Stop();
+                        coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
+                        oldActionStaged = 0;
+                        oldActionLocal = 0;
                     }
                 }
 

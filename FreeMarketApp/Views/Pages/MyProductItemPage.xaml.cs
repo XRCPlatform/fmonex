@@ -5,6 +5,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Pools;
 using Serilog;
 using System.Linq;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;

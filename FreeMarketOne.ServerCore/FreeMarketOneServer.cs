@@ -98,6 +98,7 @@ namespace FreeMarketOne.ServerCore
             InitConfigurationHelper.InitializeTorUsage(Configuration, configFile);
             InitConfigurationHelper.InitializeChatPaths(Configuration, configFile);
             InitConfigurationHelper.InitializeSearchEnginePaths(Configuration, configFile);
+            InitConfigurationHelper.InitializeMinimalPeerAmount(Configuration, configFile);
 
             //IP Helper
             ServerPublicAddress = new IpHelper(Configuration);

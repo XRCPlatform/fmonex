@@ -6,6 +6,7 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Pools;
 using Libplanet.Extensions;
 using Serilog;
 using System;
@@ -107,24 +108,42 @@ namespace FreeMarketApp.Views.Pages
 
                     PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));
 
-                    FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
-                    FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
+                    var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
+                    if (resultPool == null)
+                    {
+                        FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
 
-                    //create a new chat
-                    var newChat = FMONE.Current.Chats.CreateNewChat(_offer);
-                    FMONE.Current.Chats.SaveChat(newChat);
+                        //create a new chat
+                        var newChat = FMONE.Current.Chats.CreateNewChat(_offer);
+                        FMONE.Current.Chats.SaveChat(newChat);
 
-                    await MessageBox.Show(mainWindow,
-                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
-                        SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
-                        MessageBox.MessageBoxButtons.Ok);
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
+                            SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
 
-                    var chatPage = ChatPage.Instance;
-                    chatPage.LoadChatByProduct(_offer.Signature);
+                        var chatPage = ChatPage.Instance;
+                        chatPage.LoadChatByProduct(_offer.Signature);
 
-                    PagesHelper.Switch(mainWindow, chatPage);
+                        PagesHelper.Switch(mainWindow, chatPage);
 
-                    ClearForm();
+                        ClearForm();
+                    }
+                    else
+                    {
+                        await MessageBox.Show(mainWindow,
+                            string.Format(SharedResources.ResourceManager.GetString("Dialog_Error_" + resultPool.Value.ToString())),
+                            SharedResources.ResourceManager.GetString("Dialog_Error_Title"),
+                            MessageBox.MessageBoxButtons.Ok);
+
+                        //not allow change in case of another state is in process
+                        if (resultPool == PoolManagerStates.Errors.StateOfItemIsInProgress)
+                        {
+                            PagesHelper.Switch(mainWindow, MainPage.Instance);
+
+                            ClearForm();
+                        }
+                    }
                 }
             }
         }

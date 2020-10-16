@@ -10,16 +10,16 @@ namespace FreeMarketOne.Pools
         bool Start();
         bool IsPoolManagerRunning();
         void Stop();
-        bool AcceptActionItem(IBaseItem actionItem);
+        PoolManagerStates.Errors? AcceptActionItem(IBaseItem actionItem);
         bool SaveActionItemsToFile();
         bool LoadActionItemsFromFile();
-        bool CheckActionItemInProcessing(IBaseItem actionItem);
+        PoolManagerStates.Errors? CheckActionItemInProcessing(IBaseItem actionItem);
         bool ClearActionItemsBasedOnHashes(List<string> hashs);
 
         IBaseItem GetActionItemLocal(string hash);
         List<IBaseItem> GetAllActionItemLocal();
         bool DeleteActionItemLocal(string hash);
-        bool PropagateAllActionItemLocal();
+        PoolManagerStates.Errors? PropagateAllActionItemLocal();
 
         List<IBaseItem> GetAllActionItemStaged();
         IBaseItem GetActionItemStaged(string hash);

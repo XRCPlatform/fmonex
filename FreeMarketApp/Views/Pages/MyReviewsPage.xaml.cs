@@ -100,9 +100,9 @@ namespace FreeMarketApp.Views.Pages
                 var publicProfilePage = PublicProfilePage.Instance;
                 publicProfilePage.SetReturnTo(MyReviewsPage.Instance);
 
-                var signature = signatureAndHash.Split("|")[0];
-                var hash = signatureAndHash.Split("|")[1];
-                publicProfilePage.LoadUser(signature, hash);
+                var safeArrayHelper = new SafeArrayTransportHelper();
+                var arrUserData = safeArrayHelper.GetArray(signatureAndHash);
+                publicProfilePage.LoadUser(arrUserData[0], arrUserData[1]);
 
                 PagesHelper.Switch(mainWindow, publicProfilePage);
             }
@@ -112,6 +112,8 @@ namespace FreeMarketApp.Views.Pages
         {
             if (reviews.Any())
             {
+                var safeArrayHelper = new SafeArrayTransportHelper();
+
                 for (int i = 0; i < reviews.Count; i++)
                 {
                     var itemReview = reviews[i];
@@ -127,7 +129,8 @@ namespace FreeMarketApp.Views.Pages
                     if (reviewUserData != null)
                     {
                         reviews[i].UserName = reviewUserData.UserName;
-                        reviews[i].UserSignatureAndHash = string.Format("{0}|{1}", reviewUserData.Signature, reviewUserData.Hash);
+                        reviews[i].UserSignatureAndHash = safeArrayHelper.GetString(
+                            new[] { reviewUserData.Signature , reviewUserData.Hash });
                     } 
                     else
                     {

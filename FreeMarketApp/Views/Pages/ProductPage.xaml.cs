@@ -142,9 +142,9 @@ namespace FreeMarketApp.Views.Pages
                 var publicProfilePage = PublicProfilePage.Instance;
                 publicProfilePage.SetReturnTo(ProductPage.Instance);
 
-                var signature = signatureAndHash.Split("|")[0];
-                var hash = signatureAndHash.Split("|")[1];
-                publicProfilePage.LoadUser(signature, hash);
+                var safeArrayHelper = new SafeArrayTransportHelper();
+                var arrUserData = safeArrayHelper.GetArray(signatureAndHash);
+                publicProfilePage.LoadUser(arrUserData[0], arrUserData[1]);
 
                 PagesHelper.Switch(mainWindow, publicProfilePage);
 
@@ -206,8 +206,11 @@ namespace FreeMarketApp.Views.Pages
 
                 if (userData != null)
                 {
+                    var safeArrayHelper = new SafeArrayTransportHelper();
+
                     tbSeller.Text = userData.UserName;
-                    btSeller.Tag = string.Format("{0}|{1}", userData.Signature, userData.Hash);
+                    btSeller.Tag = safeArrayHelper.GetString(
+                            new[] { userData.Signature, userData.Hash }); 
 
                     var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
                         userPubKey,

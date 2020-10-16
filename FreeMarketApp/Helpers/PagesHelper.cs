@@ -159,11 +159,18 @@ namespace FreeMarketApp.Helpers
 
                         if (peersUp)
                         {
-                            bPeersStatus.Classes = new Classes(new[] { "StatusBarIconGreen" });
+                            if (peersCount > 0)
+                            {
+                                bPeersStatus.Classes = new Classes(new[] { "StatusBarIconGreen" });
+                            }
+                            else
+                            {
+                                bPeersStatus.Classes = new Classes(new[] { "StatusBarIconRed" });
+                            }
                         }
                         else
                         {
-                            bPeersStatus.Classes = new Classes(new[] { "StatusBarIconRed" });
+                            bPeersStatus.Classes = new Classes(new[] { "StatusBarIconOrange" });
                         }
 
                         var tbTorIcon = mainWindow.FindControl<Path>("TorIcon");

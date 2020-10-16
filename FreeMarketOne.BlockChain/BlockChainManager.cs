@@ -50,6 +50,8 @@ namespace FreeMarketOne.BlockChain
         private IImmutableSet<Address> _trustedPeers;
 
         private IOnionSeedsManager _onionSeedManager;
+        private readonly object reconnectionLock = new object();
+
         private PeerBootstrapWorker<T> _peerBootstrapWorker { get; set; }
         private List<CheckPointMarketDataV1> _hashCheckPoints { get; set; }
         private EventHandler _bootstrapStarted { get; set; }
@@ -365,6 +367,22 @@ namespace FreeMarketOne.BlockChain
             Stop();
 
             Interlocked.Exchange(ref _running, 3);
+        }
+
+        public async Task ReConnectAfterNetworkLossAsync()
+        {
+            lock (reconnectionLock)
+            {
+                if (!_swarmServer.Peers.Any())
+                {
+                    var peers = GetPeersFromOnionManager(typeof(T));
+                    _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
+                    
+                    //blocking calls deliberately as we don't want to create a DDOS attack here when newtrok re-connected
+                    _swarmServer.AddPeersAsync(_seedPeers, TimeSpan.FromSeconds(30)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    _swarmServer.CheckAllPeersAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                }        
+            }        
         }
     }
 }

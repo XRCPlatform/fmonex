@@ -504,7 +504,7 @@ namespace FreeMarketOne.Pools
             var actions = new List<T>();
             var action = new T();
 
-            if (_swarmServer.Peers.Count() > _configuration.MinimalPeerAmount)
+            if (_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount)
             {
                 try
                 {

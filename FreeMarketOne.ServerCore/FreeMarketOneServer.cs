@@ -333,16 +333,31 @@ namespace FreeMarketOne.ServerCore
             {
                 if (Users != null)
                 {
-                    if ((Users.UsedDataForceToPropagate) && (Users.UserData != null))
+                    if (Users.UsedDataForceToPropagate && (Users.UserData != null))
                     {
-                        BasePoolManager.AcceptActionItem(Users.UserData);
-                        BasePoolManager.PropagateAllActionItemLocal();
+                        if (BasePoolManager.AcceptActionItem(Users.UserData) == null)
+                        {
+                            BasePoolManager.PropagateAllActionItemLocal();
+                        }
                     }
                     else
                     {
                         //loading actual user data from pool or blockchain
                         var userData = Users.GetActualUserData(Current.BasePoolManager, Current.BaseBlockChainManager);
-                        Users.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
+                        if (userData != null)
+                        {
+                            if (userData != Users.UserData)
+                            {
+                                Users.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
+                            }
+                        } 
+                        else
+                        {
+                            if (BasePoolManager.AcceptActionItem(Users.UserData) == null)
+                            {
+                                BasePoolManager.PropagateAllActionItemLocal();
+                            }
+                        }
                     }
                 }
 

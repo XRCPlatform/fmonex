@@ -194,7 +194,7 @@ namespace FreeMarketOne.Users
                 _userData = GetUserDataByPublicKey(userPubKey, basePoolManager, baseBlockChainManager);
             }
 
-            return UserData;
+            return _userData;
         }
 
         /// <summary>

@@ -294,13 +294,13 @@ namespace FreeMarketOne.Pools
                 }
 
                 //Verification based on type
-                if (actionItem.GetType() == typeof(MarketItemV1))
+                if (actionItem.GetType() == typeof(MarketItemV1) && (!IsMarketItemValid(actionItem)))
                 {
                     return PoolManagerStates.Errors.StateOfItemIsInProgress;
                 }
 
                 //Verification based on type
-                if (actionItem.GetType() == typeof(UserDataV1))
+                if (actionItem.GetType() == typeof(UserDataV1) && (!IsUserDataValid(actionItem)))
                 {
                     return PoolManagerStates.Errors.StateOfItemIsInProgress;
                 }
@@ -316,6 +316,7 @@ namespace FreeMarketOne.Pools
         private bool IsUserDataValid(IBaseItem actionItem)
         {
             var userData = (UserDataV1)actionItem;
+            if (string.IsNullOrEmpty(userData.BaseSignature)) return true;
 
             //Checking existence of chain of identical items in pool
             foreach (var itemLocalPoolItem in _actionItemsList)
@@ -361,6 +362,7 @@ namespace FreeMarketOne.Pools
         private bool IsMarketItemValid(IBaseItem actionItem)
         {
             var marketItem = (MarketItemV1)actionItem;
+            if (string.IsNullOrEmpty(marketItem.BaseSignature)) return true;
 
             //Checking existence of chain of identical items in pool
             foreach (var itemLocalPoolItem in _actionItemsList)

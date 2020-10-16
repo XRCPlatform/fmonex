@@ -344,19 +344,9 @@ namespace FreeMarketOne.ServerCore
                     {
                         //loading actual user data from pool or blockchain
                         var userData = Users.GetActualUserData(Current.BasePoolManager, Current.BaseBlockChainManager);
-                        if (userData != null)
+                        if ((userData != null) && (userData != Users.UserData))
                         {
-                            if (userData != Users.UserData)
-                            {
-                                Users.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
-                            }
-                        } 
-                        else
-                        {
-                            if (BasePoolManager.AcceptActionItem(Users.UserData) == null)
-                            {
-                                BasePoolManager.PropagateAllActionItemLocal();
-                            }
+                            Users.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
                         }
                     }
                 }

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using FreeMarketOne.DataStructure;
 using Libplanet.Extensions.Helpers;
 
-namespace FreeMarketOne.BlockChain
+namespace FreeMarketOne.Pools
 {
     public class MiningWorker<T> : IDisposable where T : IBaseAction, new()
     {
@@ -37,6 +37,7 @@ namespace FreeMarketOne.BlockChain
             Address address,
             RocksDBStore storage,
             PrivateKey privateKey,
+            CancellationTokenSource cancellationTokenSource,
             EventHandler eventNewBlock = null)
         {
             _logger = serverLogger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
@@ -50,7 +51,7 @@ namespace FreeMarketOne.BlockChain
             _eventNewBlock = eventNewBlock;
             _address = address;
 
-            _cancellationToken = new CancellationTokenSource();
+            _cancellationToken = cancellationTokenSource;
 
             _logger.Information("Initializing Mining Worker");
         }
@@ -63,7 +64,7 @@ namespace FreeMarketOne.BlockChain
 
                 var taskMiner = Task.Run(async () =>
                 {
-                    var block = await _blockChain.MineBlock(_address);
+                    var block = await _blockChain.MineBlock(_address, DateTimeOffset.UtcNow, _cancellationToken.Token);
 
                     if (_swarmServer?.Running ?? false)
                     {

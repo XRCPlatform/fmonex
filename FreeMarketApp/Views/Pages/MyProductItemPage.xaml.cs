@@ -153,6 +153,13 @@ namespace FreeMarketApp.Views.Pages
                         iPhoto.Source = offer.PrePhotos[i];
                     }
                 }
+
+                //if item is sold or removed lock remove and edit activity
+                if (offer.State != (int)MarketManager.ProductStateEnum.Default)
+                {
+                    btRemove.IsVisible = false;
+                    btEdit.IsVisible = false;
+                } 
             }
         }
 

@@ -278,20 +278,152 @@ namespace FreeMarketOne.Pools
         {
             if (actionItem.IsValid() && !_actionItemsList.Exists(mt => mt == actionItem))
             {
+                var resultOfValidation = true;
+
                 //Verify type of item in tx
                 if (!((IDefaultBlockPolicy<T>)_blockChain.Policy).ValidTypesOfActionItems.Contains(actionItem.GetType()))
                 {
-                    return false;
-                } 
-                else
-                {
-                    return true;
+                    resultOfValidation = false;
                 }
+
+                //Verify existence of equal action item in unstaged tx
+                if (ExistInStagedTransactions(actionItem))
+                {
+                    resultOfValidation = false;
+                }
+
+                //Verification based on type
+                if (actionItem.GetType() == typeof(MarketItemV1))
+                {
+                    if (!IsMarketItemValid(actionItem)) resultOfValidation = false;
+                }
+
+                //Verification based on type
+                if (actionItem.GetType() == typeof(UserDataV1))
+                {
+                    if (!IsUserDataValid(actionItem)) resultOfValidation = false;
+                }
+
+                return resultOfValidation;
             }
             else
             {
                 return false;
             }
+        }
+
+        private bool IsUserDataValid(IBaseItem actionItem)
+        {
+            var userData = (UserDataV1)actionItem;
+
+            //Checking existence of chain of identical items in pool
+            foreach (var itemLocalPoolItem in _actionItemsList)
+            {
+                if (itemLocalPoolItem.GetType() == typeof(UserDataV1))
+                {
+                    if (((UserDataV1)itemLocalPoolItem).BaseSignature == userData.BaseSignature)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            //Checking existence of chain in staged tx
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                if (itemAction.GetType() == typeof(UserDataV1))
+                                {
+                                    if (((UserDataV1)itemAction).BaseSignature == userData.BaseSignature)
+                                    {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsMarketItemValid(IBaseItem actionItem)
+        {
+            var marketItem = (MarketItemV1)actionItem;
+
+            //Checking existence of chain of identical items in pool
+            foreach (var itemLocalPoolItem in _actionItemsList)
+            {
+                if (itemLocalPoolItem.GetType() == typeof(MarketItemV1))
+                {
+                    if (((MarketItemV1)itemLocalPoolItem).BaseSignature == marketItem.BaseSignature)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            //Checking existence of chain in staged tx
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                if (itemAction.GetType() == typeof(MarketItemV1))
+                                {
+                                    if (((MarketItemV1)itemAction).BaseSignature == marketItem.BaseSignature)
+                                    {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public bool ExistInStagedTransactions(IBaseItem actionItem)
+        {
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                if (itemAction == actionItem) return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         public bool ClearActionItemsBasedOnHashes(List<string> hashsToRemove)

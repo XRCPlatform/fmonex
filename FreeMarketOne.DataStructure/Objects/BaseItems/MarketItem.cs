@@ -91,6 +91,12 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         [JsonIgnore]
         public virtual bool IsInPool { get; set; }
+        
+        [JsonProperty("xr")]
+        public string XRCReceivingAddress { get; set; }
+        
+        [JsonProperty("xt")]
+        public string XRCTransactionHash { get; set; }
 
         public MarketItem()
         {

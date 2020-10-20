@@ -20,16 +20,29 @@ namespace FreeMarketOne.Search.Tests
     [TestClass()]
     public class SearchIndexerTests
     {
-    /*TODO: implement following 
-     * fields to consider:
-     * Seller rating stars: facet
-     * Seller number of reviews range facet
-     * Seller active since epoch (probaly x days, x months, x years) range facet
-     * Seller name search for convenience
-     * Seller reviews, text? 
-     * Seller number of closed transactions?
-     * on product details page "see more from of this seller"
-     */
+        private IXRCHelper xrcHelper;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            xrcHelper = Substitute.For<IXRCHelper>();
+            xrcHelper.GetTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
+            {
+                Confirmations = 10,
+                Date = DateTimeOffset.UtcNow.AddMinutes(-50),
+                Total = new Random(int.MaxValue).Next()
+            });
+        }
+        /*TODO: implement following 
+         * fields to consider:
+         * Seller rating stars: facet
+         * Seller number of reviews range facet
+         * Seller active since epoch (probaly x days, x months, x years) range facet
+         * Seller name search for convenience
+         * Seller reviews, text? 
+         * Seller number of closed transactions?
+         * on product details page "see more from of this seller"
+         */
         [TestMethod()]
         public void CorrectlyCountsFacetsOnTermQuery()
         {
@@ -50,7 +63,9 @@ namespace FreeMarketOne.Search.Tests
             string taxoDir = indexDir + "/taxonomy/";
 
             var marketManager = Substitute.For<IMarketManager>();
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
+
+
+            SearchIndexer search = new SearchIndexer(marketManager, indexDir, xrcHelper);
             search.DeleteAll();
             search.Commit();
 
@@ -140,7 +155,7 @@ namespace FreeMarketOne.Search.Tests
             string taxoDir = indexDir + "/taxonomy/";
 
             var marketManager = Substitute.For<IMarketManager>();
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
+            SearchIndexer search = new SearchIndexer(marketManager, indexDir, xrcHelper);
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");
@@ -241,7 +256,7 @@ namespace FreeMarketOne.Search.Tests
 
             var marketManager = Substitute.For<IMarketManager>();
 
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
+            SearchIndexer search = new SearchIndexer(marketManager, indexDir, xrcHelper);
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");

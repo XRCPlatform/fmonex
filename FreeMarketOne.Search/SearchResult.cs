@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+using Lucene.Net.Documents;
 using Lucene.Net.Facet;
 using Lucene.Net.Search;
 using System;
@@ -15,6 +16,8 @@ namespace FreeMarketOne.Search
         public int CurrentPage { get; internal set; }
         public Query CurrentQuery { get; internal set; }
         public int PageSize { get; internal set; }
+
+        public List<Document> Documents { get; set; } = new List<Document>();
 
         //currently applied facet filters
         //add isMyProduct flag?

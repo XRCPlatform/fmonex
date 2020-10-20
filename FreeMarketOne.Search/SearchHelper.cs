@@ -1,4 +1,5 @@
 ﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace FreeMarketOne.Search
 {
-    public static class SearchHelper
+    public static class SearchHelper 
     {
         public static string GetDataFolder(IBaseConfiguration baseConfiguration)
         {
@@ -47,6 +48,15 @@ namespace FreeMarketOne.Search
                 }
                 return builder.ToString();
             }
+        }
+
+        public static SellerAggregate CalculateSellerXRCTotal(MarketItemV1 marketItem, List<string> sellerPubKeyHashes, IXRCHelper calculator)
+        {
+            return new SellerAggregate()
+            {
+                PublicKeyHashes = sellerPubKeyHashes,
+                TotalXRCVolume = calculator.GetTransaction(marketItem.XRCReceivingAddress, marketItem.XRCTransactionHash).Total
+            };
         }
     }
 }

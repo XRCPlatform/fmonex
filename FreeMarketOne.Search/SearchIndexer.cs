@@ -25,8 +25,9 @@ namespace FreeMarketOne.Search
         private readonly IndexWriterConfig indexConfig;
         private readonly FacetsConfig facetConfig = new FacetsConfig();
         private IMarketManager _marketManager;
+        private readonly IXRCHelper xrcCalculator;
 
-        public SearchIndexer(IMarketManager marketManager, string indexLocation)
+        public SearchIndexer(IMarketManager marketManager, string indexLocation, IXRCHelper XRCHelper)
         {
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
 
@@ -42,6 +43,7 @@ namespace FreeMarketOne.Search
             writer = new IndexWriter(dir, indexConfig);
             taxoWriter = new DirectoryTaxonomyWriter(dirTaxonomy);
             _marketManager = marketManager;
+            xrcCalculator = XRCHelper;
         }
         
         public bool Initialize()
@@ -107,6 +109,7 @@ namespace FreeMarketOne.Search
             //transform seller pubkeys to sha hashes for simplified search use
             var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
             List<string> sellerPubKeyHashes = SearchHelper.GenerateSellerPubKeyHashes(sellerPubKeys);
+            SellerAggregate sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, sellerPubKeyHashes, xrcCalculator);
 
             Document doc = new Document
             {
@@ -126,7 +129,8 @@ namespace FreeMarketOne.Search
                 new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),                
                 new DoubleDocValuesField("PricePerGram", pricePerGram),
                 new DoubleDocValuesField("Price", marketItem.Price),
-                new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem))
+                new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
+                new StoredField("XrcTotal", (long)sellerAggregate.TotalXRCVolume)
             };
 
             //append all seller sha-hashes to a single multivalue field so that we can find by any.
@@ -140,6 +144,19 @@ namespace FreeMarketOne.Search
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
             taxoWriter.Commit();
+
+            //updateAllSellerDocumentsWithLatest(sellerAggregate);
+        }
+
+        private void updateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate)
+        {
+            foreach (var sellerPubKeyHash in sellerAggregate.PublicKeyHashes)
+            {
+               Writer.UpdateNumericDocValue(new Term("SellerPubKeyHash", sellerPubKeyHash), "XrcTotal", (long?)sellerAggregate.TotalXRCVolume);
+               //add star rating update 
+            }
+            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
         }
 
         /// <summary>

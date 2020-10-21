@@ -1,5 +1,7 @@
-﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
+using FreeMarketOne.SearchTests;
 using FreeMarketOne.ServerCore;
 using Lucene.Net.Facet;
 using Lucene.Net.Index;
@@ -19,11 +21,12 @@ namespace FreeMarketOne.Search.Tests
         private static IMarketManager marketManager;
         private static IXRCHelper xrcHelper;
         private static string indexDir;
+        private static IBaseConfiguration config;
 
         [ClassInitialize()]
         public static void ClassInit(TestContext context)
         {
-            indexDir = "./search";
+            indexDir = "search";
             marketManager = Substitute.For<IMarketManager>();
             xrcHelper = Substitute.For<IXRCHelper>();
             xrcHelper.GetTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
@@ -32,8 +35,17 @@ namespace FreeMarketOne.Search.Tests
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),
                 Total = new Random(int.MaxValue).Next()
             });
+            config = Substitute.For<IBaseConfiguration>();
+            config.SearchEnginePath.Returns(indexDir);
+            config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
+           
 
-            search = new SearchIndexer(marketManager, indexDir, xrcHelper);
+            if (System.IO.Directory.Exists(SearchHelper.GetDataFolder(config)))
+            {
+                System.IO.Directory.Delete(SearchHelper.GetDataFolder(config), true);
+            }
+
+            search = new SearchIndexer(marketManager, config, xrcHelper);
         }
 
         [TestMethod()]
@@ -432,9 +444,9 @@ namespace FreeMarketOne.Search.Tests
         [TestMethod()]
         public void SearchEngine_SearchBySellerPubKeys()
         {
-            string indexDir2 = "search2";
+
             var marketManager1 = Substitute.For<IMarketManager>();
-            var search1 = new SearchIndexer(marketManager1, indexDir2, xrcHelper);
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper);
 
             List<ValueTuple<MarketItem, List<byte[]>>> lst = new List<ValueTuple<MarketItem, List<byte[]>>>();
 
@@ -479,7 +491,7 @@ namespace FreeMarketOne.Search.Tests
             search1.Commit();
             search1.Dispose();
 
-            SearchEngine engine = new SearchEngine(marketManager1, indexDir2);
+            SearchEngine engine = new SearchEngine(marketManager1, SearchHelper.GetDataFolder(config));
 
             var testcase = lst[0];
             var query = engine.BuildQueryBySellerPubKeys(testcase.Item2);
@@ -536,8 +548,9 @@ namespace FreeMarketOne.Search.Tests
             search.Commit();
             var marketManager1 = Substitute.For<IMarketManager>();
             xrcHelper = Substitute.For<IXRCHelper>();
-            string indexDir = "search2";
-            var search1 = new SearchIndexer(marketManager1, indexDir, xrcHelper);
+            config.SearchEnginePath.Returns("search2");
+
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper);
             bool generateSellerKeys = true;
             List<byte[]> pubKeys = new List<byte[]>();
 
@@ -597,7 +610,7 @@ namespace FreeMarketOne.Search.Tests
             }
             search.Commit();
 
-            SearchEngine engine = new SearchEngine(marketManager, indexDir);
+            SearchEngine engine = new SearchEngine(marketManager, SearchHelper.GetDataFolder(config));
 
             XRCTransactionScoreQuery msm = new XRCTransactionScoreQuery(engine.ParseQuery("rhodium"));
             var result = engine.Search(msm);
@@ -608,6 +621,93 @@ namespace FreeMarketOne.Search.Tests
         }
 
 
+        [TestMethod()]
+        public void SearchEngine_AllSellerOffersUpdatedWithLatestTransactionVolume()
+        {
+            Dictionary<string, List<byte[]>> item_pubkeys = new Dictionary<string, List<byte[]>>();
+            search.DeleteAll();
+            search.Commit();
+            var marketManager1 = new MoqMarketManager(item_pubkeys);
+            xrcHelper = Substitute.For<IXRCHelper>();
+            config.SearchEnginePath.Returns("search2");
 
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper);
+            bool generateSellerKeys = true;
+            List<byte[]> pubKeys = new List<byte[]>();
+
+            for (int i = 0; i < 15; i++)
+            {
+                int cat = (i + 1) % 10;
+                string xrcAddress = "RpPrTiDj6rEYrGCxyBYGe18TCWkoMwyMhj" + i;
+                string xrcTransactionHash = "cd484fccea9f886ee019f15193417b272a74300d2e30e229eabf262fccf0ee26" + i;
+
+                xrcHelper.GetTransaction(xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
+                {
+                    Confirmations = 10,
+                    Date = DateTimeOffset.UtcNow.AddMinutes(-50),
+                    Total = 1000 * (i + 1)
+                });
+
+                MarketItemV1 marketItem = new MarketItemV1
+                {
+                    Signature = i.ToString(),
+                    CreatedUtc = DateTime.UtcNow,
+                    DealType = 1,
+                    Category = cat,
+                    Price = 10868.4F,
+                    BuyerSignature = "a",
+                    Description = "These one ounce minted rhodium bars are produced by Baird & Co in London, England.Each bar is individually numbered, supplied as new in mint packaging and contains 31.1035 grams of 999.0 fine rhodium.",
+                    Title = "1oz Baird & Co Minted Rhodium Bar",
+                    Shipping = "International",
+                    Fineness = "999 fine rhodium",
+                    Size = "1oz",
+                    WeightInGrams = 28,
+                    Manufacturer = "Baird & Co",
+                    XRCReceivingAddress = xrcAddress,
+                    XRCTransactionHash = xrcTransactionHash
+                };
+
+                // assign every third offer new seller
+                if (i % 3 == 0)
+                {
+                    generateSellerKeys = true;
+                }
+                else
+                {
+                    generateSellerKeys = false;
+                }
+
+                if (generateSellerKeys)
+                {
+                    pubKeys = new List<byte[]>();
+                    for (int z = 0; z < 3; z++)
+                    {
+                        pubKeys.Add(Guid.NewGuid().ToByteArray());
+                    }
+                }
+                if (item_pubkeys.ContainsKey(marketItem.Signature))
+                {
+                    pubKeys = item_pubkeys[marketItem.Signature];
+                }
+                else
+                {
+                    item_pubkeys.Add(marketItem.Signature, pubKeys);
+                }
+
+                search1.Index(marketItem, "block-hash");
+            }
+            search.Commit();
+
+            SearchEngine engine = new SearchEngine(marketManager, SearchHelper.GetDataFolder(config));
+
+            XRCTransactionScoreQuery msm = new XRCTransactionScoreQuery(engine.ParseQuery("rhodium"));
+            var result = engine.Search(msm);
+
+            Assert.AreEqual(15, result.Results.Count);
+            Assert.AreEqual(result.Documents[0].Get("XrcTotal") , result.Documents[1].Get("XrcTotal"));
+            Assert.AreEqual(result.Documents[1].Get("XrcTotal") , result.Documents[2].Get("XrcTotal"));
+
+
+        }
     }
 }

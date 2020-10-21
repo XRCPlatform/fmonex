@@ -10,6 +10,7 @@ namespace FreeMarketOne.Search
         public int StarRating { get; set; }
         public List<string> PublicKeyHashes { get; set; }
         public string SellerName { get; set; }
-
+        public List<byte[]> PublicKeys { get; set; }
+        public Dictionary<string,double> XRCTransactions { get; set; } = new Dictionary<string, double>();
     }
 }

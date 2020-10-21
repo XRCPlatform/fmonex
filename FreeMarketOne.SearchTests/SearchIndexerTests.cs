@@ -1,4 +1,5 @@
-﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -21,6 +22,7 @@ namespace FreeMarketOne.Search.Tests
     public class SearchIndexerTests
     {
         private IXRCHelper xrcHelper;
+        private static IBaseConfiguration config;
 
         [TestInitialize]
         public void TestInitialize()
@@ -32,6 +34,10 @@ namespace FreeMarketOne.Search.Tests
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),
                 Total = new Random(int.MaxValue).Next()
             });
+            string indexDir = "search";
+            config = Substitute.For<IBaseConfiguration>();
+            config.SearchEnginePath.Returns(indexDir);
+            config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
         }
         /*TODO: implement following 
          * fields to consider:
@@ -58,14 +64,14 @@ namespace FreeMarketOne.Search.Tests
                 Title = "1 Kilogram Gold Cast Bar Baird & Co",
                 Shipping = "International"
             };
-            
-            string indexDir = "./search";
-            string taxoDir = indexDir + "/taxonomy/";
+
+
 
             var marketManager = Substitute.For<IMarketManager>();
+            var indexDir = SearchHelper.GetDataFolder(config);
+            var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
 
-
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir, xrcHelper);
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper);
             search.DeleteAll();
             search.Commit();
 
@@ -151,11 +157,14 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "Europe"
             };
 
-            string indexDir = "./search";
-            string taxoDir = indexDir + "/taxonomy/";
-
+            
             var marketManager = Substitute.For<IMarketManager>();
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir, xrcHelper);
+            
+            var indexDir = SearchHelper.GetDataFolder(config);
+            var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
+
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper); 
+
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");
@@ -252,11 +261,14 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "Europe"
             };
 
-            string indexDir = "./search";
+            
 
             var marketManager = Substitute.For<IMarketManager>();
 
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir, xrcHelper);
+            var indexDir = SearchHelper.GetDataFolder(config);
+
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper);
+
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");

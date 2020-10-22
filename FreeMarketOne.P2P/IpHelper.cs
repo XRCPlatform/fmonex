@@ -43,7 +43,7 @@ namespace FreeMarketOne.P2P
                 {
                     try
                     {
-                        return IPAddress.Parse(webclient.DownloadString(service));
+                        return IPAddress.Parse(webclient.DownloadString(service).Replace("\n",""));
                     }
                     catch
                     {

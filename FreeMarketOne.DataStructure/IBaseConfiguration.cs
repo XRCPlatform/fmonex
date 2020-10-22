@@ -37,5 +37,9 @@ namespace FreeMarketOne.DataStructure
         IPEndPoint ListenerChatEndPoint { get; set; }
         string SearchEnginePath { get; set; }
         int MinimalPeerAmount { get; set; }
+        string XRCDaemonUri { get; set; }
+        bool XRCDaemonUriSsl { get; set; }
+        string XRCDaemonUser { get; set; }
+        string XRCDaemonPassword { get; set; }
     }
 }

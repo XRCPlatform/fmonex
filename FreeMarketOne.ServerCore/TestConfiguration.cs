@@ -35,6 +35,7 @@ namespace FreeMarketOne.ServerCore
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://0.0.0.0:9115/");
             this.SearchEnginePath = "data/testnet_searchindex";
             this.MinimalPeerAmount = 1;
+            this.XRCDaemonUri = "https://tpool.bitcoinrh.org/rpc/";
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

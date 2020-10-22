@@ -177,10 +177,14 @@ namespace FreeMarketApp.Views.Pages
                     var decryptedChat = chatManager.DecryptChatItems(chatData.ChatItems);
                     ((ChatPageViewModel)DataContext).ChatItems.AddRange(decryptedChat);
                     btWithoutMessage.IsVisible = false;
+                    btSendMessage.IsEnabled = true;
+                    tbMessage.IsEnabled = true;
                 } 
                 else
                 {
                     btWithoutMessage.IsVisible = true;
+                    btSendMessage.IsEnabled = false;
+                    tbMessage.IsEnabled = false;
                 }
             }
         }

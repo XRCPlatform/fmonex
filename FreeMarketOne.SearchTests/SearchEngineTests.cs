@@ -27,17 +27,19 @@ namespace FreeMarketOne.Search.Tests
         public static void ClassInit(TestContext context)
         {
             indexDir = "search";
+            config = Substitute.For<IBaseConfiguration>();
+            config.SearchEnginePath.Returns(indexDir);
+            config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
+
             marketManager = Substitute.For<IMarketManager>();
             xrcHelper = Substitute.For<IXRCHelper>();
-            xrcHelper.GetTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
+            xrcHelper.GetTransaction(config, Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
             {
                 Confirmations = 10,
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),
                 Total = new Random(int.MaxValue).Next()
             });
-            config = Substitute.For<IBaseConfiguration>();
-            config.SearchEnginePath.Returns(indexDir);
-            config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
+  
            
 
             if (System.IO.Directory.Exists(SearchHelper.GetDataFolder(config)))
@@ -560,7 +562,7 @@ namespace FreeMarketOne.Search.Tests
                 string xrcAddress = "RpPrTiDj6rEYrGCxyBYGe18TCWkoMwyMhj" + i;
                 string xrcTransactionHash = "cd484fccea9f886ee019f15193417b272a74300d2e30e229eabf262fccf0ee26" + i;
 
-                xrcHelper.GetTransaction(xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
+                xrcHelper.GetTransaction(config, xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
                 {
                     Confirmations = 10,
                     Date = DateTimeOffset.UtcNow.AddMinutes(-50),
@@ -641,7 +643,7 @@ namespace FreeMarketOne.Search.Tests
                 string xrcAddress = "RpPrTiDj6rEYrGCxyBYGe18TCWkoMwyMhj" + i;
                 string xrcTransactionHash = "cd484fccea9f886ee019f15193417b272a74300d2e30e229eabf262fccf0ee26" + i;
 
-                xrcHelper.GetTransaction(xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
+                xrcHelper.GetTransaction(config, xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
                 {
                     Confirmations = 10,
                     Date = DateTimeOffset.UtcNow.AddMinutes(-50),

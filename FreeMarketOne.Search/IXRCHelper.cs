@@ -1,7 +1,9 @@
-﻿namespace FreeMarketOne.Search
+﻿using FreeMarketOne.DataStructure;
+
+namespace FreeMarketOne.Search
 {
     public interface IXRCHelper
     {
-        XRCTransactionSummary GetTransaction(string hash, string address);
+        XRCTransactionSummary GetTransaction(IBaseConfiguration baseConfiguration, string hash, string address);
     }
 }

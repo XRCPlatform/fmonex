@@ -27,17 +27,19 @@ namespace FreeMarketOne.Search.Tests
         [TestInitialize]
         public void TestInitialize()
         {
+            string indexDir = "search";
+            config = Substitute.For<IBaseConfiguration>();
+            config.SearchEnginePath.Returns(indexDir);
+            config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
+
             xrcHelper = Substitute.For<IXRCHelper>();
-            xrcHelper.GetTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
+            xrcHelper.GetTransaction(config, Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
             {
                 Confirmations = 10,
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),
                 Total = new Random(int.MaxValue).Next()
             });
-            string indexDir = "search";
-            config = Substitute.For<IBaseConfiguration>();
-            config.SearchEnginePath.Returns(indexDir);
-            config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
+     
         }
         /*TODO: implement following 
          * fields to consider:

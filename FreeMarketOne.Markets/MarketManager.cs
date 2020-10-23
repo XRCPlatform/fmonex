@@ -208,6 +208,7 @@ namespace FreeMarketOne.Markets
                                                     if (marketData.State != (int)ProductStateEnum.Removed)
                                                     {
                                                         _logger.Information(string.Format("Found MarketItem for seller - item hash {0}.", itemMarket.Hash));
+                                                        marketData.IsInPool = false;
                                                         result.Add(marketData);
                                                     }
                                                     else

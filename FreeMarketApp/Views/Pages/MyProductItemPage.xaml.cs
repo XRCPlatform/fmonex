@@ -149,12 +149,12 @@ namespace FreeMarketApp.Views.Pages
                 var btEdit = Instance.FindControl<Button>("BTEdit");
                 var btRemove = Instance.FindControl<Button>("BTRemove");
 
-                var tbManufacturer = this.FindControl<TextBox>("TBManufacturer");
-                var tbFineness = this.FindControl<TextBox>("TBFineness");
-                var tbSize = this.FindControl<TextBox>("TBSize");
-                var tbWeightInGrams = this.FindControl<TextBox>("TBWeightInGrams");
-                var tbCategory = this.FindControl<TextBox>("TBCategory");
-                var tbDealType = this.FindControl<TextBox>("TBDealType");
+                var tbManufacturer = this.FindControl<TextBlock>("TBManufacturer");
+                var tbFineness = this.FindControl<TextBlock>("TBFineness");
+                var tbSize = this.FindControl<TextBlock>("TBSize");
+                var tbWeightInGrams = this.FindControl<TextBlock>("TBWeightInGrams");
+                var tbCategory = this.FindControl<TextBlock>("TBCategory");
+                var tbDealType = this.FindControl<TextBlock>("TBDealType");
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;

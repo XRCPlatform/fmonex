@@ -149,9 +149,23 @@ namespace FreeMarketApp.Views.Pages
                 var btEdit = Instance.FindControl<Button>("BTEdit");
                 var btRemove = Instance.FindControl<Button>("BTRemove");
 
+                var tbManufacturer = this.FindControl<TextBox>("TBManufacturer");
+                var tbFineness = this.FindControl<TextBox>("TBFineness");
+                var tbSize = this.FindControl<TextBox>("TBSize");
+                var tbWeightInGrams = this.FindControl<TextBox>("TBWeightInGrams");
+                var tbCategory = this.FindControl<TextBox>("TBCategory");
+                var tbDealType = this.FindControl<TextBox>("TBDealType");
+
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
                 tbShipping.Text = offer.Shipping;
+                tbManufacturer.Text = offer.Manufacturer;
+                tbFineness.Text = offer.Fineness;
+                tbSize.Text = offer.Size;
+                tbWeightInGrams.Text = offer.WeightInGrams.ToString();
+                tbCategory.Text = SharedResources.ResourceManager.GetString("MarketCategory_Label_" + offer.Category.ToString());
+                tbDealType.Text = SharedResources.ResourceManager.GetString("MarketDealType_Label_" + offer.DealType.ToString());
+
                 tbPrice.Text = offer.Price.ToString();
                 tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)offer.PriceType).ToString();
                 btEdit.Tag = signature;

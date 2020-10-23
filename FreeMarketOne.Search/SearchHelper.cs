@@ -57,7 +57,7 @@ namespace FreeMarketOne.Search
 
         public static SellerAggregate CalculateSellerXRCTotal(MarketItemV1 marketItem, IBaseConfiguration baseConfiguration, List<byte[]> sellerPubKeys, IXRCHelper xrcDataProvider, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> blockChainManager)
         {
-            SellerAggregate seller;
+            SellerAggregate seller = null;
             byte[] publicKey = null;
             string pubKeyHash = null;
             UserDataV1 user = null;
@@ -65,33 +65,46 @@ namespace FreeMarketOne.Search
 
             List<string> sellerPubKeyHashes = GenerateSellerPubKeyHashes(sellerPubKeys);
 
-            seller = new SellerAggregate()
-            {
-                PublicKeyHashes = sellerPubKeyHashes,
-                PublicKeys = sellerPubKeys
-            };
-
-
             var sellerDataFolder = GetSellerDataFolder(baseConfiguration);
 
+            //seek for cache in local fs
             foreach (var key in sellerPubKeys)
             {
-                List<byte[]> singleKey = new List<byte[]>();
-                singleKey.Add(key);
-                user = userManager.GetUserDataByPublicKey(key, basePoolManager, blockChainManager);
-                reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
-                if (user != null)
+                var tempPubKeyHash = Hash(key);
+                if (SeekLocalSellerInfoBySellerHash(sellerDataFolder, tempPubKeyHash))
                 {
-                    publicKey = key;
-                    pubKeyHash = Hash(key);
-                    break;
+                    seller = ReadSellerInfoBySellerHash(sellerDataFolder, tempPubKeyHash);
+                    if (seller != null)
+                    {
+                        publicKey = key;
+                        pubKeyHash = Hash(key);
+                        break;
+                    }
+                }               
+            }
+            
+            //only run if cache miss
+            if (pubKeyHash == null && seller == null)
+            {
+                foreach (var key in sellerPubKeys)
+                {
+                    List<byte[]> singleKey = new List<byte[]>();
+                    singleKey.Add(key);
+                    user = userManager.GetUserDataByPublicKey(singleKey, basePoolManager, blockChainManager);
+                    reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
+                    if (user != null)
+                    {
+                        publicKey = key;
+                        pubKeyHash = Hash(key);
+                        break;
+                    }
                 }
             }
+
 
             if (pubKeyHash != null && user != null && user?.Signature != null)
             {
                 //TODO: consider caching for perf optimizations
-                seller = ReadSellerInfoBySellerHash(sellerDataFolder, pubKeyHash);
                 if (seller == null)
                 {
                     seller = new SellerAggregate()
@@ -126,7 +139,16 @@ namespace FreeMarketOne.Search
 
                 }
 
-                SaveSellerInfo(seller, sellerDataFolder);
+                SaveSellerInfo(seller, sellerDataFolder, pubKeyHash);
+            }
+            //for sellers that could not be found. // should really never happen
+            if(seller == null)
+            {
+                seller = new SellerAggregate()
+                {
+                    PublicKeyHashes = sellerPubKeyHashes,
+                    PublicKeys = sellerPubKeys
+                };
             }
             return seller;
         }
@@ -137,13 +159,13 @@ namespace FreeMarketOne.Search
         }
 
 
-        public static void SaveSellerInfo(SellerAggregate seller, string filePath)
+        public static void SaveSellerInfo(SellerAggregate seller, string filePath, string sellerPublicKeyHash)
         {
             if (!Directory.Exists(filePath))
             {
                 Directory.CreateDirectory(filePath);
             }
-            string sellerFilePath = Path.Combine(filePath, $"{seller.PublicKeyHashes[0]}.json");
+            string sellerFilePath = Path.Combine(filePath, $"{sellerPublicKeyHash}.json");
             using (StreamWriter file = File.CreateText(sellerFilePath))
             {
                 JsonSerializer serializer = new JsonSerializer();
@@ -156,6 +178,12 @@ namespace FreeMarketOne.Search
         {
             string sellerFilePath = Path.Combine(filePath, $"{sellerPublicKeyHash}.json");
             return ReadSellerInfo(sellerFilePath);
+        }
+
+        public static bool SeekLocalSellerInfoBySellerHash(string filePath, string sellerPublicKeyHash)
+        {
+            string sellerFilePath = Path.Combine(filePath, $"{sellerPublicKeyHash}.json");
+            return File.Exists(sellerFilePath);
         }
 
         public static SellerAggregate ReadSellerInfo(string filePath)

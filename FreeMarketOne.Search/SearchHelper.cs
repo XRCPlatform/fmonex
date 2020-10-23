@@ -56,13 +56,20 @@ namespace FreeMarketOne.Search
 
         public static SellerAggregate CalculateSellerXRCTotal(MarketItemV1 marketItem, IBaseConfiguration baseConfiguration, List<byte[]> sellerPubKeys, IXRCHelper xrcDataProvider, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> blockChainManager)
         {
-            SellerAggregate seller = null;
+            SellerAggregate seller;
             byte[] publicKey = null;
             string pubKeyHash = null;
             UserDataV1 user = null;
             List<ReviewUserDataV1> reviews = null;
 
             List<string> sellerPubKeyHashes = GenerateSellerPubKeyHashes(sellerPubKeys);
+
+            seller = new SellerAggregate()
+            {
+                PublicKeyHashes = sellerPubKeyHashes,
+                PublicKeys = sellerPubKeys
+            };
+
 
             var sellerDataFolder = GetSellerDataFolder(baseConfiguration);
 
@@ -137,6 +144,7 @@ namespace FreeMarketOne.Search
             using (StreamWriter file = File.CreateText(sellerFilePath))
             {
                 JsonSerializer serializer = new JsonSerializer();
+                serializer.Formatting = Formatting.Indented;
                 serializer.Serialize(file, seller);
             }
         }

@@ -132,12 +132,6 @@ namespace FreeMarketOne.ServerCore
                 SpinWait.SpinUntil(() => torInitialized, 10000);
                 if (torInitialized)
                 {
-                    //Search indexer
-                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(), Users, BasePoolManager, BaseBlockChainManager);
-                    SearchIndexer.Initialize();
-
-                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
-
                     //Loading 
                     ServerPublicAddress.GetMyTorExitIP();
 
@@ -222,6 +216,13 @@ namespace FreeMarketOne.ServerCore
                     clearedOlderBlocks: MarketBlockClearedOldersEvent,
                     blockDownloaded: MarketBlockDownloadedEvent);
                 MarketBlockChainManager.Start();
+
+                //Search indexer
+                SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(), Users, BasePoolManager, BaseBlockChainManager);
+                SearchIndexer.Initialize();
+
+                SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
+
             }
             else
             {

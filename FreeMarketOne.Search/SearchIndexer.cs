@@ -15,6 +15,7 @@ using System.Text;
 using System.Linq;
 using Newtonsoft.Json;
 using FreeMarketOne.Markets;
+using static FreeMarketOne.Markets.MarketManager;
 
 namespace FreeMarketOne.Search
 {
@@ -82,7 +83,7 @@ namespace FreeMarketOne.Search
         public void Index(MarketItemV1 marketItem, string blockHash)
         {
             double pricePerGram = 0F;
-            MarketItemCategory cat = (MarketItemCategory)marketItem.Category;
+            MarketCategoryEnum cat = (MarketCategoryEnum)marketItem.Category;
             //new DealType().TryGetValue(marketItem.DealType, out string dealTypeString);
             
             //if we are re-running the block and same hash comes again, delete and add it again

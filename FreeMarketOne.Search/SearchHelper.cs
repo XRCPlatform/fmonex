@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -75,8 +76,10 @@ namespace FreeMarketOne.Search
 
             foreach (var key in sellerPubKeys)
             {
-                user = userManager.GetUserDataByPublicKey(sellerPubKeys, basePoolManager, blockChainManager);
-                reviews = userManager.GetAllReviewsForPubKey(sellerPubKeys, basePoolManager, blockChainManager);
+                List<byte[]> singleKey = new List<byte[]>();
+                singleKey.Add(key);
+                user = userManager.GetUserDataByPublicKey(key, basePoolManager, blockChainManager);
+                reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
                 if (user != null)
                 {
                     publicKey = key;

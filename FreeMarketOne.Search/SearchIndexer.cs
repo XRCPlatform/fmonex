@@ -159,7 +159,8 @@ namespace FreeMarketOne.Search
                 new DoubleDocValuesField("PricePerGram", pricePerGram),
                 new DoubleDocValuesField("Price", marketItem.Price),
                 new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
-                new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
+                //new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
+                new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
             };
 
             //append all seller sha-hashes to a single multivalue field so that we can find by any.
@@ -176,12 +177,24 @@ namespace FreeMarketOne.Search
 
             if (updateAllSellerDocuments)
             {
-                updateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
+                //UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
+                UpdateAllSellerDocumentsWithLatest(sellerAggregate);
             }
             
         }
 
-        private void updateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
+        private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate)
+        {
+            foreach (var sellerPubKeyHash in sellerAggregate.PublicKeyHashes)
+            {
+                Writer.UpdateNumericDocValue(new Term("SellerPubKeyHash", sellerPubKeyHash), "XrcTotal", (long?)sellerAggregate?.TotalXRCVolume);
+                //add star rating update 
+            }
+            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
+        }
+
+        private void UpdateAllSellerDocumentsWithLatest_X(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
         {
             //search all market items by seller pubkey hash
             SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 50);

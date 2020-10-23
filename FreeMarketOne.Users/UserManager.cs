@@ -500,7 +500,7 @@ namespace FreeMarketOne.Users
         /// <returns></returns>
         public double GetUserReviewStars(List<ReviewUserDataV1> userReviews)
         {
-            if (userReviews.Any())
+            if (userReviews !=null && userReviews.Any())
             {
                 var arrayOfStars = userReviews.Select(a => (double)a.Stars).ToArray();
                 var medianOfStars = GetMedian<double>(arrayOfStars);

@@ -1,6 +1,7 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Users;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Facet;
@@ -23,6 +24,7 @@ namespace FreeMarketOne.Search.Tests
     {
         private IXRCHelper xrcHelper;
         private static IBaseConfiguration config;
+        private IUserManager userManager;
 
         [TestInitialize]
         public void TestInitialize()
@@ -39,7 +41,9 @@ namespace FreeMarketOne.Search.Tests
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),
                 Total = new Random(int.MaxValue).Next()
             });
-     
+
+            userManager = Substitute.For<IUserManager>();
+
         }
         /*TODO: implement following 
          * fields to consider:
@@ -73,7 +77,7 @@ namespace FreeMarketOne.Search.Tests
             var indexDir = SearchHelper.GetDataFolder(config);
             var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
 
-            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper);
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
             search.DeleteAll();
             search.Commit();
 
@@ -165,7 +169,7 @@ namespace FreeMarketOne.Search.Tests
             var indexDir = SearchHelper.GetDataFolder(config);
             var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
 
-            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper); 
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null); 
 
             search.DeleteAll();
             search.Commit();
@@ -269,7 +273,7 @@ namespace FreeMarketOne.Search.Tests
 
             var indexDir = SearchHelper.GetDataFolder(config);
 
-            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper);
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
 
             search.DeleteAll();
             search.Commit();

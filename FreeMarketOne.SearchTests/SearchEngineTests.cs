@@ -1,8 +1,11 @@
-﻿using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.BlockChain;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Pools;
 using FreeMarketOne.SearchTests;
 using FreeMarketOne.ServerCore;
+using FreeMarketOne.Users;
 using Lucene.Net.Facet;
 using Lucene.Net.Index;
 using Lucene.Net.Queries;
@@ -22,6 +25,7 @@ namespace FreeMarketOne.Search.Tests
         private static IXRCHelper xrcHelper;
         private static string indexDir;
         private static IBaseConfiguration config;
+        private static IUserManager userManager;
 
         [ClassInitialize()]
         public static void ClassInit(TestContext context)
@@ -39,15 +43,17 @@ namespace FreeMarketOne.Search.Tests
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),
                 Total = new Random(int.MaxValue).Next()
             });
-  
-           
+
+            userManager = Substitute.For<IUserManager>();
+
+
 
             if (System.IO.Directory.Exists(SearchHelper.GetDataFolder(config)))
             {
                 System.IO.Directory.Delete(SearchHelper.GetDataFolder(config), true);
             }
 
-            search = new SearchIndexer(marketManager, config, xrcHelper);
+            search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
         }
 
         [TestMethod()]
@@ -448,7 +454,8 @@ namespace FreeMarketOne.Search.Tests
         {
 
             var marketManager1 = Substitute.For<IMarketManager>();
-            var search1 = new SearchIndexer(marketManager1, config, xrcHelper);
+
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager, null, null);
 
             List<ValueTuple<MarketItem, List<byte[]>>> lst = new List<ValueTuple<MarketItem, List<byte[]>>>();
 
@@ -552,7 +559,7 @@ namespace FreeMarketOne.Search.Tests
             xrcHelper = Substitute.For<IXRCHelper>();
             config.SearchEnginePath.Returns("search2");
 
-            var search1 = new SearchIndexer(marketManager1, config, xrcHelper);
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager, null, null);
             bool generateSellerKeys = true;
             List<byte[]> pubKeys = new List<byte[]>();
 
@@ -632,8 +639,9 @@ namespace FreeMarketOne.Search.Tests
             var marketManager1 = new MoqMarketManager(item_pubkeys);
             xrcHelper = Substitute.For<IXRCHelper>();
             config.SearchEnginePath.Returns("search2");
+            
 
-            var search1 = new SearchIndexer(marketManager1, config, xrcHelper);
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager, null, null);
             bool generateSellerKeys = true;
             List<byte[]> pubKeys = new List<byte[]>();
 
@@ -695,6 +703,12 @@ namespace FreeMarketOne.Search.Tests
                 {
                     item_pubkeys.Add(marketItem.Signature, pubKeys);
                 }
+                userManager.GetUserDataByPublicKey(pubKeys, Arg.Any<BasePoolManager>(), Arg.Any<IBlockChainManager<BaseAction>>()).Returns(
+                    new UserDataV1() 
+                    { 
+                        UserName = "MoqUsername",
+                        Signature = "FakeSignature"
+                    });
 
                 search1.Index(marketItem, "block-hash");
             }

@@ -133,7 +133,7 @@ namespace FreeMarketOne.ServerCore
                 if (torInitialized)
                 {
                     //Search indexer
-                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper());
+                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(), Users, BasePoolManager, BaseBlockChainManager);
                     SearchIndexer.Initialize();
 
                     SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));

@@ -1,5 +1,8 @@
-﻿using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.BlockChain;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Pools;
+using FreeMarketOne.Users;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -51,27 +54,48 @@ namespace FreeMarketOne.Search
             }
         }
 
-        public static SellerAggregate CalculateSellerXRCTotal(MarketItemV1 marketItem, IBaseConfiguration baseConfiguration, List<byte[]> sellerPubKeys, IXRCHelper xrcDataProvider)
+        public static SellerAggregate CalculateSellerXRCTotal(MarketItemV1 marketItem, IBaseConfiguration baseConfiguration, List<byte[]> sellerPubKeys, IXRCHelper xrcDataProvider, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> blockChainManager)
         {
             SellerAggregate seller = null;
+            byte[] publicKey = null;
+            string pubKeyHash = null;
+            UserDataV1 user = null;
+            List<ReviewUserDataV1> reviews = null;
 
             List<string> sellerPubKeyHashes = GenerateSellerPubKeyHashes(sellerPubKeys);
 
             var sellerDataFolder = GetSellerDataFolder(baseConfiguration);
-            if (sellerPubKeyHashes.Count > 0 && sellerPubKeyHashes[0] != null)
+
+            foreach (var key in sellerPubKeys)
+            {
+                user = userManager.GetUserDataByPublicKey(sellerPubKeys, basePoolManager, blockChainManager);
+                reviews = userManager.GetAllReviewsForPubKey(sellerPubKeys, basePoolManager, blockChainManager);
+                if (user != null)
+                {
+                    publicKey = key;
+                    pubKeyHash = Hash(key);
+                    break;
+                }
+            }
+
+            if (pubKeyHash != null && user != null && user?.Signature != null)
             {
                 //TODO: consider caching for perf optimizations
-                seller = ReadSellerInfoBySellerHash(sellerDataFolder, sellerPubKeyHashes[0]);
+                seller = ReadSellerInfoBySellerHash(sellerDataFolder, pubKeyHash);
                 if (seller == null)
                 {
                     seller = new SellerAggregate()
                     {
                         PublicKeyHashes = sellerPubKeyHashes,
-                        PublicKeys = sellerPubKeys
+                        PublicKeys = sellerPubKeys,
+                        SellerName = user.UserName,
+                        StarRating = userManager.GetUserReviewStars(reviews)
                     };
                 }
 
-                if (!seller.XRCTransactions.ContainsKey(marketItem.XRCTransactionHash))
+                if (!String.IsNullOrEmpty(marketItem.XRCTransactionHash) 
+                    && !String.IsNullOrEmpty(marketItem.XRCReceivingAddress) 
+                    && !seller.XRCTransactions.ContainsKey(marketItem.XRCTransactionHash))
                 {
                     var summary = xrcDataProvider.GetTransaction(baseConfiguration, marketItem.XRCReceivingAddress, marketItem.XRCTransactionHash);
                     //can't handle confirmations now. will need some block notify or long poll later or some zMq broadcast

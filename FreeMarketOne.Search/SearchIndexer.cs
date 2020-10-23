@@ -16,6 +16,9 @@ using System.Linq;
 using Newtonsoft.Json;
 using FreeMarketOne.Markets;
 using System.IO;
+using FreeMarketOne.Users;
+using FreeMarketOne.Pools;
+using FreeMarketOne.BlockChain;
 
 namespace FreeMarketOne.Search
 {
@@ -29,8 +32,11 @@ namespace FreeMarketOne.Search
         private readonly IXRCHelper _xrcCalculator;
         private readonly string _indexLocation;
         private readonly IBaseConfiguration _configuration;
+        private readonly IUserManager _userManager;
+        private readonly BasePoolManager _basePoolManager;
+        private readonly IBlockChainManager<BaseAction> _baseBlockChain;
 
-        public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper)
+        public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
         {
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
             string indexLocation = SearchHelper.GetDataFolder(baseConfiguration);
@@ -50,6 +56,9 @@ namespace FreeMarketOne.Search
             _indexLocation = indexLocation;
             _xrcCalculator = XRCHelper;
             _configuration = baseConfiguration;
+            _userManager = userManager;
+            _basePoolManager = basePoolManager;
+            _baseBlockChain = baseBlockChain;
         }
         
         public bool Initialize()
@@ -114,8 +123,14 @@ namespace FreeMarketOne.Search
 
             var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
             
-            SellerAggregate sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys,  _xrcCalculator);
-
+            SellerAggregate sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys,  _xrcCalculator, _userManager , _basePoolManager , _baseBlockChain);
+            if (sellerAggregate == null)
+            {
+                sellerAggregate = new SellerAggregate()
+                {
+                    TotalXRCVolume = 0
+                };
+            }
             Document doc = new Document
             {
                 new StringField("ID", marketItem.Signature, Field.Store.YES),
@@ -126,7 +141,6 @@ namespace FreeMarketOne.Search
                 new TextField("Description",marketItem.Description,Field.Store.NO),
                 new FacetField("Category",cat.ToString()),
                 new FacetField("Shipping",marketItem.Shipping),
-                //new FacetField("DealType",dealTypeString),
                 new FacetField("Fineness",string.IsNullOrEmpty(marketItem.Fineness) ? "Unspecified":marketItem.Fineness),
                 new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
                 new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),

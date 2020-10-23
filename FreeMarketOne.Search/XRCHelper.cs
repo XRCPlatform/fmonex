@@ -1,13 +1,12 @@
-﻿namespace FreeMarketOne.Search
+﻿using FreeMarketOne.DataStructure;
+
+namespace FreeMarketOne.Search
 {
     public class XRCHelper : IXRCHelper
     {
-        public XRCTransactionSummary GetTransaction(string hash, string address)
+        public XRCTransactionSummary GetTransaction(IBaseConfiguration baseConfiguration, string hash, string address)
         {
-            return new XRCTransactionSummary()
-            {
-                Total = 0
-            };
+            throw new System.NotImplementedException();
         }
     }
 }

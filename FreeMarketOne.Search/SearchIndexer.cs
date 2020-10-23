@@ -96,7 +96,7 @@ namespace FreeMarketOne.Search
         /// </summary>
         /// <param name="marketItem"></param>
         /// <param name="blockHash"></param>
-        public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true)
+        public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null)
         {
             double pricePerGram = 0F;
             MarketItemCategory cat = (MarketItemCategory)marketItem.Category;
@@ -120,17 +120,27 @@ namespace FreeMarketOne.Search
                 Writer.Flush(triggerMerge: true, applyAllDeletes: true);
                 return;
             }
-
-            var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
             
-            SellerAggregate sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys,  _xrcCalculator, _userManager , _basePoolManager , _baseBlockChain);
-            if (sellerAggregate == null)
+            SellerAggregate sellerAggregate = null;
+
+            if (currentSellerAggregate == null)
             {
-                sellerAggregate = new SellerAggregate()
+                var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
+
+                sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain);
+                if (sellerAggregate == null)
                 {
-                    TotalXRCVolume = 0
-                };
+                    sellerAggregate = new SellerAggregate()
+                    {
+                        TotalXRCVolume = 0
+                    };
+                }
             }
+            else
+            {
+                sellerAggregate = currentSellerAggregate;
+            }
+
             Document doc = new Document
             {
                 new StringField("ID", marketItem.Signature, Field.Store.YES),
@@ -198,7 +208,7 @@ namespace FreeMarketOne.Search
                     if (!searchResult.Results[y].Signature.Equals(skipSignature) 
                         && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
                     {
-                        Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false);
+                        Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate);
                     }
                 }
             }           

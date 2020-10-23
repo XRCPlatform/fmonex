@@ -99,7 +99,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            _instance = null;
+            _instance = new SettingsPage();
         }
     }
 }

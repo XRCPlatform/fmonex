@@ -97,7 +97,6 @@ namespace FreeMarketApp.Views
         public void ButtonMyProducts_Click(object sender, RoutedEventArgs args)
         {
             PagesHelper.Switch(this, MyProductsPage.Instance);
-            ChatPage.Instance = null;
         }
         public void SearchTextbox_keyDownEvent(object sender, KeyEventArgs e)
         {
@@ -137,13 +136,11 @@ namespace FreeMarketApp.Views
 
                 PagesHelper.Switch(this, SearchResultsPage.Instance);
             }            
-            ChatPage.Instance = null;
         }
 
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
         {
             PagesHelper.Switch(this, MyProfilePage.Instance);
-            ChatPage.Instance = null;
         }
 
         private void ServerLoadedEvent(object sender, EventArgs e)
@@ -162,11 +159,25 @@ namespace FreeMarketApp.Views
             
             Panel panel = this.FindControl<Panel>("PCMainContent");
             if (panel.Children.Any()) {
-                settingsPage.SetReturnTo((UserControl)panel.Children.First());
+
+                var pageInstance = panel.Children.Last();
+
+                if (pageInstance.GetType() == typeof(AddEditProductPage)) {
+                    settingsPage.SetReturnTo(MyProductsPage.GetInstance());
+                } 
+                else if (pageInstance.GetType() == typeof(EditProfilePage)) {
+                    settingsPage.SetReturnTo(MyProfilePage.GetInstance());
+                }
+                else if (pageInstance.GetType() == typeof(SearchResultsPage)) {
+                    settingsPage.SetReturnTo(MainPage.GetInstance());
+                } 
+                else
+                {
+                    settingsPage.SetReturnTo((UserControl)panel.Children.Last());
+                }
             }
 
             PagesHelper.Switch(this, settingsPage);
-            ChatPage.Instance = null;
         }
     }
 }

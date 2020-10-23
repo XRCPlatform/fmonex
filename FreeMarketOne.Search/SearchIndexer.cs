@@ -166,15 +166,15 @@ namespace FreeMarketOne.Search
 
             if (updateAllSellerDocuments)
             {
-                updateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature);
+                updateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
             }
             
         }
 
-        private void updateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature)
+        private void updateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
         {
             //search all market items by seller pubkey hash
-            SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 2);
+            SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 50);
             var query = engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
             var searchResult = engine.Search(query, false);
 
@@ -194,7 +194,10 @@ namespace FreeMarketOne.Search
 
                 for (int y = 0; y < searchResult.Results.Count; y++)
                 {
-                    if (!searchResult.Results[y].Signature.Equals(skipSignature)){
+                    //items that have allready been indexed shall be skipped for efficiency
+                    if (!searchResult.Results[y].Signature.Equals(skipSignature) 
+                        && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
+                    {
                         Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false);
                     }
                 }

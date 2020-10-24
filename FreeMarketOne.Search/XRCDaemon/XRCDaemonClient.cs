@@ -26,7 +26,7 @@ namespace FreeMarketOne.Search
     /// <summary>
     /// Provides JsonRpc based interface to a cluster of xrc daemons for improved fault tolerance
     /// </summary>
-    public class XRCDaemonClient
+    public class XRCDaemonClient : IXRCDaemonClient
     {
         private readonly JsonSerializerSettings serializerSettings;
         private readonly JsonSerializer serializer;

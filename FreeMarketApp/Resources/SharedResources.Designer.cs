@@ -493,6 +493,204 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to N/A.
+        /// </summary>
+        internal static string MarketCategory_Label_0 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gold.
+        /// </summary>
+        internal static string MarketCategory_Label_1 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Silver.
+        /// </summary>
+        internal static string MarketCategory_Label_2 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Platinum.
+        /// </summary>
+        internal static string MarketCategory_Label_3 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rhodium.
+        /// </summary>
+        internal static string MarketCategory_Label_4 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Palladium.
+        /// </summary>
+        internal static string MarketCategory_Label_5 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copper.
+        /// </summary>
+        internal static string MarketCategory_Label_6 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rare Coins.
+        /// </summary>
+        internal static string MarketCategory_Label_7 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Jewelry.
+        /// </summary>
+        internal static string MarketCategory_Label_8 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cryptocurrency.
+        /// </summary>
+        internal static string MarketCategory_Label_9 {
+            get {
+                return ResourceManager.GetString("MarketCategory_Label_9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to N/A.
+        /// </summary>
+        internal static string MarketDealType_Label_0 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 0% before 100% after.
+        /// </summary>
+        internal static string MarketDealType_Label_1 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 90% before 10% after.
+        /// </summary>
+        internal static string MarketDealType_Label_10 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 100% before 0% after.
+        /// </summary>
+        internal static string MarketDealType_Label_11 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 10% before 90% after.
+        /// </summary>
+        internal static string MarketDealType_Label_2 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 20% before 80% after.
+        /// </summary>
+        internal static string MarketDealType_Label_3 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 30% before 70% after.
+        /// </summary>
+        internal static string MarketDealType_Label_4 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 40% before 60% after.
+        /// </summary>
+        internal static string MarketDealType_Label_5 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 50% before 50% after.
+        /// </summary>
+        internal static string MarketDealType_Label_6 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 60% before 40% after.
+        /// </summary>
+        internal static string MarketDealType_Label_7 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 70% before 30% after.
+        /// </summary>
+        internal static string MarketDealType_Label_8 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pay 80% before 20% after.
+        /// </summary>
+        internal static string MarketDealType_Label_9 {
+            get {
+                return ResourceManager.GetString("MarketDealType_Label_9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to offline.
         /// </summary>
         internal static string State_Down {

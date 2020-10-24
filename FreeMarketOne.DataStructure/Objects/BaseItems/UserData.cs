@@ -20,6 +20,9 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         [JsonProperty("b")]
         public string BaseSignature { get; set; }
 
+        [JsonProperty("k")]
+        public string PublicKey { get; set; }
+
         public override string GenerateHash()
         {
             var content = new StringBuilder();
@@ -30,6 +33,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Description);
             content.Append(Photo);
             content.Append(BaseSignature);
+            content.Append(PublicKey);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
             return shaProcessor.GetSHA256(content.ToString());
@@ -43,6 +47,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Description);
             content.Append(Photo);
             content.Append(BaseSignature);
+            content.Append(PublicKey);
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 
             return Encoding.ASCII.GetBytes(content.ToString());

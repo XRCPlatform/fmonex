@@ -37,7 +37,7 @@ namespace FreeMarketOne.Search.Tests
 
             marketManager = Substitute.For<IMarketManager>();
             xrcHelper = Substitute.For<IXRCHelper>();
-            xrcHelper.GetTransaction(config, Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
+            xrcHelper.GetTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
             {
                 Confirmations = 10,
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),
@@ -569,7 +569,7 @@ namespace FreeMarketOne.Search.Tests
                 string xrcAddress = "RpPrTiDj6rEYrGCxyBYGe18TCWkoMwyMhj" + i;
                 string xrcTransactionHash = "cd484fccea9f886ee019f15193417b272a74300d2e30e229eabf262fccf0ee26" + i;
 
-                xrcHelper.GetTransaction(config, xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
+                xrcHelper.GetTransaction(xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
                 {
                     Confirmations = 10,
                     Date = DateTimeOffset.UtcNow.AddMinutes(-50),
@@ -651,7 +651,7 @@ namespace FreeMarketOne.Search.Tests
                 string xrcAddress = "RpPrTiDj6rEYrGCxyBYGe18TCWkoMwyMhj" + i;
                 string xrcTransactionHash = "cd484fccea9f886ee019f15193417b272a74300d2e30e229eabf262fccf0ee26" + i;
 
-                xrcHelper.GetTransaction(config, xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
+                xrcHelper.GetTransaction(xrcAddress, xrcTransactionHash).Returns(new XRCTransactionSummary()
                 {
                     Confirmations = 10,
                     Date = DateTimeOffset.UtcNow.AddMinutes(-50),

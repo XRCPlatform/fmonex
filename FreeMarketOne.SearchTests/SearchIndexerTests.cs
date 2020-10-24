@@ -35,7 +35,7 @@ namespace FreeMarketOne.Search.Tests
             config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
 
             xrcHelper = Substitute.For<IXRCHelper>();
-            xrcHelper.GetTransaction(config, Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
+            xrcHelper.GetTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
             {
                 Confirmations = 10,
                 Date = DateTimeOffset.UtcNow.AddMinutes(-50),

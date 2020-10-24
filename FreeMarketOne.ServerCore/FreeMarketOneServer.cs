@@ -12,6 +12,7 @@ using FreeMarketOne.Users;
 using Libplanet;
 using Libplanet.Blockchain;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using System;
@@ -218,7 +219,8 @@ namespace FreeMarketOne.ServerCore
                 MarketBlockChainManager.Start();
 
                 //Search indexer
-                SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(), Users, BasePoolManager, BaseBlockChainManager);
+                XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+                SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
                 SearchIndexer.Initialize();
 
                 SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));

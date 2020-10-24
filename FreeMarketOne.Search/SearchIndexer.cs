@@ -159,8 +159,10 @@ namespace FreeMarketOne.Search
                 new DoubleDocValuesField("PricePerGram", pricePerGram),
                 new DoubleDocValuesField("Price", marketItem.Price),
                 new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
-                //new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
-                new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
+                new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
+                new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
+                new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
+                //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
             };
 
             //append all seller sha-hashes to a single multivalue field so that we can find by any.
@@ -177,8 +179,8 @@ namespace FreeMarketOne.Search
 
             if (updateAllSellerDocuments)
             {
-                //UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
-                UpdateAllSellerDocumentsWithLatest(sellerAggregate);
+                UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
+                //UpdateAllSellerDocumentsWithLatest(sellerAggregate);
             }
             
         }
@@ -194,7 +196,7 @@ namespace FreeMarketOne.Search
             Writer.Commit();
         }
 
-        private void UpdateAllSellerDocumentsWithLatest_X(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
+        private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
         {
             //search all market items by seller pubkey hash
             SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 50);

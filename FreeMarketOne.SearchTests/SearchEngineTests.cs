@@ -703,12 +703,17 @@ namespace FreeMarketOne.Search.Tests
                 {
                     item_pubkeys.Add(marketItem.Signature, pubKeys);
                 }
-                userManager.GetUserDataByPublicKey(pubKeys, Arg.Any<BasePoolManager>(), Arg.Any<IBlockChainManager<BaseAction>>()).Returns(
-                    new UserDataV1() 
-                    { 
-                        UserName = "MoqUsername",
-                        Signature = "FakeSignature"
-                    });
+
+                var singleKey = new List<byte[]>();
+                singleKey.Add(pubKeys[0]);
+
+                userManager.GetUserDataByPublicKey(Arg.Any<List<byte[]>>(), null, null).Returns(
+                   new UserDataV1()
+                   {
+                       UserName = "MoqUsername",
+                       Signature = "FakeSignature"
+                   });
+
 
                 search1.Index(marketItem, "block-hash");
             }
@@ -720,9 +725,10 @@ namespace FreeMarketOne.Search.Tests
             var result = engine.Search(msm);
 
             Assert.AreEqual(15, result.Results.Count);
+            Assert.IsTrue("13"==result.Results[0].Signature || "14" == result.Results[0].Signature || "12" == result.Results[0].Signature);
             Assert.AreEqual(result.Documents[0].Get("XrcTotal") , result.Documents[1].Get("XrcTotal"));
             Assert.AreEqual(result.Documents[1].Get("XrcTotal") , result.Documents[2].Get("XrcTotal"));
-
+            Assert.IsTrue(double.Parse(result.Documents[2].Get("XrcTotal")) > double.Parse(result.Documents[3].Get("XrcTotal")));
 
         }
     }

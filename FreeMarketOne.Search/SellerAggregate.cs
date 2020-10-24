@@ -6,11 +6,11 @@ namespace FreeMarketOne.Search
 {
     public class SellerAggregate
     {
-        public double TotalXRCVolume { get; set; }
+        public decimal TotalXRCVolume { get; set; }
         public double StarRating { get; set; }
         public List<string> PublicKeyHashes { get; set; } = new List<string>();
         public string SellerName { get; set; }
         public List<byte[]> PublicKeys { get; set; }
-        public Dictionary<string,double> XRCTransactions { get; set; } = new Dictionary<string, double>();
+        public Dictionary<string,decimal> XRCTransactions { get; set; } = new Dictionary<string, decimal>();
     }
 }

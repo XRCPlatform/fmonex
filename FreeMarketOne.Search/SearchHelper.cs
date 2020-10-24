@@ -119,7 +119,7 @@ namespace FreeMarketOne.Search
                     && !String.IsNullOrEmpty(marketItem.XRCReceivingAddress) 
                     && !seller.XRCTransactions.ContainsKey(marketItem.XRCTransactionHash))
                 {
-                    var summary = xrcDataProvider.GetTransaction(baseConfiguration, marketItem.XRCReceivingAddress, marketItem.XRCTransactionHash);
+                    var summary = xrcDataProvider.GetTransaction(marketItem.XRCReceivingAddress, marketItem.XRCTransactionHash);
                     //can't handle confirmations now. will need some block notify or long poll later or some zMq broadcast
                     //when xrc node is embeded block notify could fix this
                     //if (summary.Confirmations > 5)
@@ -128,7 +128,7 @@ namespace FreeMarketOne.Search
                     if (summary != null && summary.Total > 0)
                     {
                         seller.XRCTransactions.Add(marketItem.XRCTransactionHash, summary.Total);
-                        double total = 0;
+                        decimal total = 0;
                         foreach (var item in seller.XRCTransactions.Values)
                         {
                             total += item;

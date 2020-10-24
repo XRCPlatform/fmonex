@@ -104,7 +104,6 @@ namespace FreeMarketOne.Search
 
             if (pubKeyHash != null && user != null && user?.Signature != null)
             {
-                //TODO: consider caching for perf optimizations
                 if (seller == null)
                 {
                     seller = new SellerAggregate()

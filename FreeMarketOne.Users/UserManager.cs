@@ -529,6 +529,7 @@ namespace FreeMarketOne.Users
                 userData.UserName = userName;
                 userData.Description = description;
                 userData.BaseSignature = userData.Signature;
+                userData.PublicKey = Convert.ToBase64String(PrivateKey.PublicKey.KeyParam.Q.GetEncoded());
 
                 var bytesToSign = userData.ToByteArrayForSign();
 

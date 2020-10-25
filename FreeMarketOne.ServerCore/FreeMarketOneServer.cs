@@ -160,6 +160,13 @@ namespace FreeMarketOne.ServerCore
                         blockChainChanged: BaseBlockChainChangedEvent,
                         blockDownloaded:null);
                     BaseBlockChainManager.Start();
+
+                    //Search indexer
+                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
+                    SearchIndexer.Initialize();
+
+                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
                 }
                 else
                 {
@@ -218,13 +225,7 @@ namespace FreeMarketOne.ServerCore
                     blockDownloaded: MarketBlockDownloadedEvent);
                 MarketBlockChainManager.Start();
 
-                //Search indexer
-                XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
-                SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
-                SearchIndexer.Initialize();
-
-                SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
-
+ 
             }
             else
             {

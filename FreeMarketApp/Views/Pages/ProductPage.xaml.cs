@@ -196,6 +196,8 @@ namespace FreeMarketApp.Views.Pages
                 var tbFineness = Instance.FindControl<TextBlock>("TBFineness");
                 var tbWeightInGrams = Instance.FindControl<TextBlock>("TBWeightInGrams");
                 var tbSize = Instance.FindControl<TextBlock>("TBSize");
+                var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
+                
 
                 tbTitle.Text = _offer.Title;
                 tbDescription.Text = _offer.Description;
@@ -207,6 +209,7 @@ namespace FreeMarketApp.Views.Pages
                 tbFineness.Text = _offer.Fineness;
                 tbWeightInGrams.Text = _offer.WeightInGrams.ToString();
                 tbSize.Text = _offer.Size;
+                tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
 
                 btBuyButton.IsEnabled = true;
                 if (!String.IsNullOrEmpty(_offer.BaseSignature))

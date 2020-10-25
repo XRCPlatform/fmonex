@@ -109,6 +109,7 @@ namespace FreeMarketApp.Views.Pages
                 var tbFineness = this.FindControl<TextBox>("TBFineness");
                 var tbSize = this.FindControl<TextBox>("TBSize");
                 var tbWeightInGrams = this.FindControl<TextBox>("TBWeightInGrams");
+                var tbTBXRCReceivingAddress = this.FindControl<TextBox>("TBXRCReceivingAddress");
 
                 var tbPrice = Instance.FindControl<TextBox>("TBPrice");
                 var tbPageName = Instance.FindControl<TextBlock>("TBPageName");
@@ -126,7 +127,7 @@ namespace FreeMarketApp.Views.Pages
                 tbFineness.Text = _offer.Fineness;
                 tbSize.Text = _offer.Size;
                 tbWeightInGrams.Text = _offer.WeightInGrams.ToString();
-
+                tbTBXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
                 tbPageName.Text = SharedResources.ResourceManager.GetString("AddEditProduct_EditPageName");
 
                 cbCategory.SelectedItem = cbCategory.Items.OfType<ComboBoxItem>().Single(t => t.Tag.Equals(offer.Category.ToString()));
@@ -171,11 +172,11 @@ namespace FreeMarketApp.Views.Pages
                 var tbFineness = this.FindControl<TextBox>("TBFineness");
                 var tbSize = this.FindControl<TextBox>("TBSize");
                 var tbWeightInGrams = this.FindControl<TextBox>("TBWeightInGrams");
-
+                var tbTBXRCReceivingAddress = this.FindControl<TextBox>("TBXRCReceivingAddress");
                 var tbPrice = this.FindControl<TextBox>("TBPrice");
                 var cbCategory = this.FindControl<ComboBox>("CBCategory");
                 var cbDealType = this.FindControl<ComboBox>("CBDealType");
-                var cbPriceType = this.FindControl<ComboBox>("CBPriceType");
+                //var cbPriceType = this.FindControl<ComboBox>("CBPriceType");
 
                 var errorCount = 0;
                 var errorMessages = new StringBuilder();
@@ -186,43 +187,19 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortTitle"));
                     errorCount++;
                 }
-                //temporary removing limitation as JSON library should handle the escaping.
-                //else
-                //{
-                //    if (!textHelper.IsTextValid(tbTitle.Text, true))
-                //    {
-                //        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTitle"));
-                //        errorCount++;
-                //    }
-                //}
+              
                 if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortDescription"));
                     errorCount++;
                 }
-                //https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_StringEscapeHandling.htm 
-                //temporary removing limitation as JSON library should handle the escaping.
-                //else
-                //{
-                //    if (!textHelper.IsTextValid(tbDescription.Text, true))
-                //    {
-                //        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsDescription"));
-                //        errorCount++;
-                //    }
-                //}
+                
                 if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 2))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortShipping"));
                     errorCount++;
                 }
-                //else
-                //{
-                //    if (!textHelper.IsTextValid(tbShipping.Text))
-                //    {
-                //        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping"));
-                //        errorCount++;
-                //    }
-                //}
+               
                 if (string.IsNullOrEmpty(tbPrice.Text) || (tbPrice.Text.Length < 1))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortPrice"));
@@ -237,18 +214,10 @@ namespace FreeMarketApp.Views.Pages
                     }
                 }
 
-                if (string.IsNullOrEmpty(tbWeightInGrams.Text) || (tbWeightInGrams.Text.Length < 1))
+                if (!string.IsNullOrEmpty(tbWeightInGrams.Text) && !textHelper.IsNumberValid(tbWeightInGrams.Text))
                 {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_WeightInGrams"));
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsWeightInGrams"));
                     errorCount++;
-                }
-                else
-                {
-                    if (!textHelper.IsNumberValid(tbWeightInGrams.Text))
-                    {
-                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsWeightInGrams"));
-                        errorCount++;
-                    }
                 }
 
                 var cbCategoryValue = cbCategory.SelectedItem as ComboBoxItem;
@@ -268,6 +237,8 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPhoto"));
                     errorCount++;
                 }
+                
+                _offer.XRCReceivingAddress = tbTBXRCReceivingAddress.Text;
 
                 if (errorCount == 0)
                 {
@@ -286,7 +257,7 @@ namespace FreeMarketApp.Views.Pages
                     _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
                     _offer.Price = float.Parse(tbPrice.Text.Trim());
-                    _offer.PriceType = (cbPriceType.Tag != null && cbPriceType.Tag.ToString() == "1" ? 1 : 0);
+                    //_offer.PriceType = (cbPriceType.Tag != null && cbPriceType.Tag.ToString() == "1" ? 1 : 0);
                     _offer.State = (int)MarketManager.ProductStateEnum.Default;
 
                     //get time to next block

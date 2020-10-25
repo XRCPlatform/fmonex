@@ -102,34 +102,36 @@
         <TextBlock Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--Manufacturer binding -->
-          <TextBlock Classes="H1" Name="TBFineness"  Text="Fineness" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H1" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--Manufacturer binding -->
-          <TextBlock Classes="H1" Name="TBManufacturer" Text="Manufacturer" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H1" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--Size binding -->
-          <TextBlock Classes="H1" Name="TBSize" Text="1oz" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H1" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--TBWeightInGrams binding -->
-          <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="31" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         
 
         <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <!--
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
           <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
         </StackPanel>
+        -->
         <TextBlock Classes="H1" Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Vertical">
           <!-- seller profile binding -->
@@ -151,6 +153,12 @@
             </Button>
           </StackPanel>
         </StackPanel>
+        <TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+          <TextBlock Classes="H1"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
+        </StackPanel>
+
+        
         <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
       </StackPanel>
     </ScrollViewer>

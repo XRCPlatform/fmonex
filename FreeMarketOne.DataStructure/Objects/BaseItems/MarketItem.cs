@@ -142,6 +142,8 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             }            
             content.Append(Size);
             content.Append(Manufacturer);
+            content.Append(XRCReceivingAddress);
+            content.Append(XRCTransactionHash);
             return shaProcessor.GetSHA256(content.ToString());
         }
 
@@ -166,6 +168,8 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             }
             content.Append(Size);
             content.Append(Manufacturer);
+            content.Append(XRCReceivingAddress);
+            content.Append(XRCTransactionHash);
             return Encoding.ASCII.GetBytes(content.ToString());
         }
     }

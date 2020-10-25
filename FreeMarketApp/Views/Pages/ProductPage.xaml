@@ -126,12 +126,12 @@
         
 
         <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <!--
+       
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
           <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
         </StackPanel>
-        -->
+        
         <TextBlock Classes="H1" Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Vertical">
           <!-- seller profile binding -->
@@ -157,8 +157,10 @@
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <TextBlock Classes="H1"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
+        <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+        <TextBox Name="TBXRCReceivingAddress" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="35" HorizontalAlignment="Left" Padding="10" Watermark="RbWDj3rh9vYNdiZSWtEL8X3CaKuBCYWveJ" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
-        
+
         <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
       </StackPanel>
     </ScrollViewer>

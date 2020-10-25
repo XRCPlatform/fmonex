@@ -143,13 +143,14 @@
                 <!--TBWeightInGrams binding -->
                 <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
-              <!--
+              
               <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
                 <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
               </StackPanel>
--->
+              
               <TextBlock Classes="H1" Text="Deal Type" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <TextBlock Classes="H1"  Name="TBDealType" Text="" Margin="0 2 0 0" FontSize="16"/>
@@ -170,3 +171,4 @@
         </ScrollViewer>
     </Grid>
 </UserControl>
+

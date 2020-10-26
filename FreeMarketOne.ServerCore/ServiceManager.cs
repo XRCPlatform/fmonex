@@ -25,7 +25,13 @@ namespace FreeMarketOne.ServerCore
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
         private string _appVersion { get; set; }
 
-        public ServiceManager(IBaseConfiguration configuration)
+        private DateTimeOffset? _expectedMarketChainPulse;
+        private DateTimeOffset? _expectedBaseChainPulse;
+        private readonly object _swarmRecoveryLock = new object();
+        private EventHandler<NetworkHeartbeatArgs> _networkHeartbeatEvent;
+
+        public ServiceManager(IBaseConfiguration configuration, 
+            EventHandler<NetworkHeartbeatArgs> networkHeartbeatEvent)
         {
             _logger = Log.Logger.ForContext<ServiceManager>();
             _logger.Information("Initializing Onion Seeds Manager");
@@ -34,6 +40,8 @@ namespace FreeMarketOne.ServerCore
             _configuration = configuration;
             _appVersion = configuration.Version;
             _cancellationToken = new CancellationTokenSource();
+
+            _networkHeartbeatEvent = networkHeartbeatEvent;
         }
 
         public bool IsRunning => Interlocked.Read(ref _running) == 1;
@@ -57,7 +65,6 @@ namespace FreeMarketOne.ServerCore
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ServiceManagerChecker", (cancellation) =>
             {
                 var dateTimeUtc = DateTime.UtcNow;
-
                 StringBuilder periodicCheckLog = new StringBuilder();
 
                 periodicCheckLog.AppendLine("======Service Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
@@ -72,11 +79,86 @@ namespace FreeMarketOne.ServerCore
 
                 Console.WriteLine(periodicCheckLog.ToString());
 
+                //Network Heartbeat validation
+                if ((FMONE.Current.MarketBlockChainManager != null) 
+                    && (FMONE.Current.MarketBlockChainManager.IsBlockChainManagerRunning()))
+                {
+                    if (!_expectedMarketChainPulse.HasValue) _expectedMarketChainPulse = DateTimeOffset.UtcNow;
+                    if (!_expectedBaseChainPulse.HasValue) _expectedBaseChainPulse = DateTimeOffset.UtcNow;
+
+                    ValidateNetworkHeartbeat();
+                }
+
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
-            repeatEvery: TimeSpans.TenSeconds,
+            repeatEvery: TimeSpans.TenSeconds + TimeSpans.FiveSeconds,
             startAfter: TimeSpans.FiveSeconds);
+        }
+
+
+        private void ValidateNetworkHeartbeat()
+        {
+            bool baseUp = true;
+            bool marketUp = true;
+
+            var marketDiff = _expectedMarketChainPulse - FMONE.Current.MarketBlockChainManager.SwarmServer.LastReceived;
+            var baseDiff = _expectedBaseChainPulse - FMONE.Current.BaseBlockChainManager.SwarmServer.LastReceived;
+            if (marketDiff.Value.TotalMinutes > 1)
+            {
+                marketUp = false;
+            }
+            if (baseDiff.Value.TotalMinutes > 1)
+            {
+                baseUp = false;
+            }
+
+            //publishing info to GUI
+            var networkHeartbeat = new NetworkHeartbeatArgs()
+            {
+                IsMarketChainNetworkConnected = marketUp,
+                IsBaseChainNetworkConnected = baseUp,
+                PeerCount = FMONE.Current.MarketBlockChainManager.SwarmServer.Peers.Count(),
+                IsTorUp = FMONE.Current.TorProcessManager.IsTorRunningAsync().ConfigureAwait(false).GetAwaiter().GetResult()
+            };
+
+            var isPoolBaseRunning = FMONE.Current.BasePoolManager?.IsPoolManagerRunning();
+            if (isPoolBaseRunning.GetValueOrDefault(false))
+            {
+                networkHeartbeat.PoolBaseLocalItems = FMONE.Current.BasePoolManager.GetAllActionItemLocalCount();
+                networkHeartbeat.PoolBaseStagedItems = FMONE.Current.BasePoolManager.GetAllActionItemStagedCount();
+            }
+            var isPoolMarketRunning = FMONE.Current.MarketPoolManager?.IsPoolManagerRunning();
+            if (isPoolMarketRunning.GetValueOrDefault(false))
+            {
+                networkHeartbeat.PoolMarketLocalItems = FMONE.Current.MarketPoolManager.GetAllActionItemLocalCount();
+                networkHeartbeat.PoolMarketStagedItems = FMONE.Current.MarketPoolManager.GetAllActionItemStagedCount();
+            }
+
+            _networkHeartbeatEvent.Invoke(this, networkHeartbeat);
+
+            _expectedMarketChainPulse = DateTimeOffset.UtcNow;
+            _expectedBaseChainPulse = DateTimeOffset.UtcNow;
+
+            //skip on inicialization
+            if ((!marketUp || !FMONE.Current.MarketBlockChainManager.SwarmServer.Peers.Any()) && FMONE.Current.MarketBlockChainManager.IsBlockChainManagerRunning())
+            {
+                lock (_swarmRecoveryLock)
+                {
+                    //if this should refresh the swarm server if network was down and recovered.
+                    FMONE.Current.MarketBlockChainManager.ReConnectAfterNetworkLossAsync();
+                }
+
+            }
+
+            if ((!baseUp || !FMONE.Current.BaseBlockChainManager.SwarmServer.Peers.Any()) && FMONE.Current.BaseBlockChainManager.IsBlockChainManagerRunning())
+            {
+                lock (_swarmRecoveryLock)
+                {
+                    //if this should refresh the swarm server if network was down and recovered.
+                    FMONE.Current.BaseBlockChainManager.ReConnectAfterNetworkLossAsync();
+                }
+            }
         }
 
         private bool CheckOnionSeedManager(StringBuilder periodicCheckLog = null)

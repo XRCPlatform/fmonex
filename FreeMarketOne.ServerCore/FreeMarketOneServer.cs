@@ -68,13 +68,8 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockDownloadedEvent;
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
-        public event EventHandler<NetworkHearbeatArgs> NetworkHearbeatEvent;
+        public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
         public event EventHandler FreeMarketOneServerLoadedEvent;
-
-        private DateTimeOffset ExpectedMarketChainPulse;
-        private DateTimeOffset ExpectedBaseChainPulse;
-        private Timer networkHeartbeat;
-        private readonly object swarmRecoveryLock = new object();
 
         public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
@@ -120,7 +115,7 @@ namespace FreeMarketOne.ServerCore
             if (Users.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
             {
                 //Service manager
-                Services = new ServiceManager(Configuration);
+                Services = new ServiceManager(Configuration, NetworkHeartbeatEvent);
                 Services.Start();
 
                 //Market Manager
@@ -250,12 +245,6 @@ namespace FreeMarketOne.ServerCore
             //Initialize Market Pool Manager
             if (MarketBlockChainManager.IsBlockChainManagerRunning())
             {
-
-                ExpectedMarketChainPulse = DateTimeOffset.UtcNow;
-                ExpectedBaseChainPulse = DateTimeOffset.UtcNow;
-
-                networkHeartbeat = new Timer(ValidateNetworkHeartbeat, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
-
                 //Add Swarm server to seed manager
                 OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
 
@@ -277,57 +266,6 @@ namespace FreeMarketOne.ServerCore
                 _logger.Error("Market Chain isnt loaded!");
                 Stop();
             }
-        }
-   
-
-        private void ValidateNetworkHeartbeat(object state)
-        {
-            bool baseUp = true;
-            bool marketUp = true;
-
-            var marketDiff = ExpectedMarketChainPulse - MarketBlockChainManager.SwarmServer.LastReceived;
-            var baseDiff = ExpectedBaseChainPulse - BaseBlockChainManager.SwarmServer.LastReceived;
-            if (marketDiff.TotalMinutes > 1)
-            {
-                marketUp = false;
-            }
-            if (baseDiff.TotalMinutes > 1 )
-            {
-                baseUp = false;
-            }
-
-            NetworkHearbeatEvent.Invoke(this, new NetworkHearbeatArgs()
-            {
-                IsMarketChainNetworkConnected = marketUp,
-                IsBaseChainNetworkConnected = baseUp,
-                PeerCount = MarketBlockChainManager.SwarmServer.Peers.Count(),
-                IsTorUp = TorProcessManager.IsTorRunningAsync().ConfigureAwait(false).GetAwaiter().GetResult()
-
-            });
-
-            ExpectedMarketChainPulse = DateTimeOffset.UtcNow;
-            ExpectedBaseChainPulse = DateTimeOffset.UtcNow;
-            
-            //skip on inicialization
-            if ((!marketUp || !MarketBlockChainManager.SwarmServer.Peers.Any()) && MarketBlockChainManager.IsBlockChainManagerRunning())
-            {
-                lock (swarmRecoveryLock)
-                {
-                    //if this should refresh the swarm server if network was down and recovered.
-                    MarketBlockChainManager.ReConnectAfterNetworkLossAsync();
-                }
-                    
-            }
-
-            if ((!baseUp || !BaseBlockChainManager.SwarmServer.Peers.Any())  && BaseBlockChainManager.IsBlockChainManagerRunning())
-            {
-                lock (swarmRecoveryLock)
-                {
-                    //if this should refresh the swarm server if network was down and recovered.
-                    BaseBlockChainManager.ReConnectAfterNetworkLossAsync();
-                }
-            }
-
         }
 
         async void RaiseAsyncServerLoadedEvent()
@@ -374,6 +312,10 @@ namespace FreeMarketOne.ServerCore
             Current.Chats.ProcessNewBlock(block);
         }
 
+        /// <summary>
+        /// Get information about state of server
+        /// </summary>
+        /// <returns></returns>
         public FreeMarketOneServerStates GetServerState()
         {
             if (Services == null)

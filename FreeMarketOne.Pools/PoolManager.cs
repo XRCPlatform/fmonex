@@ -485,6 +485,11 @@ namespace FreeMarketOne.Pools
             return _actionItemsList;
         }
 
+        public int GetAllActionItemLocalCount()
+        {
+            return _actionItemsList.Count();
+        }
+
         public bool DeleteActionItemLocal(string hash)
         {
             var actionItem = _actionItemsList.FirstOrDefault(a => a.Hash == hash);
@@ -558,6 +563,12 @@ namespace FreeMarketOne.Pools
             }
 
             return result;
+        }
+
+        public int GetAllActionItemStagedCount()
+        {
+            var staged = _storage.IterateStagedTransactionIds().ToImmutableHashSet();
+            return staged.Count();
         }
 
         public IBaseItem GetActionItemStaged(string hash)

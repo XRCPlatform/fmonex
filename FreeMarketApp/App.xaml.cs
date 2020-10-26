@@ -70,7 +70,7 @@ namespace FreeMarketApp
                 FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 FMONE.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
                 FMONE.Current.MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockChainChangedEvent);
-                FMONE.Current.NetworkHearbeatEvent += new EventHandler<NetworkHearbeatArgs>(NetworkHeartbeatEvent);
+                FMONE.Current.NetworkHeartbeatEvent += new EventHandler<NetworkHeartbeatArgs>(NetworkHeartbeatEvent);
 
                 FMONE.Current.Initialize();
             }).ConfigureAwait(true);
@@ -80,13 +80,17 @@ namespace FreeMarketApp
             return mainWindow;
         }
 
-        private static void NetworkHeartbeatEvent(object sender, NetworkHearbeatArgs e)
+        private static void NetworkHeartbeatEvent(object sender, NetworkHeartbeatArgs e)
         {
             PagesHelper.SetServerData(
                 mainWindow, 
                 e.IsBaseChainNetworkConnected && e.IsMarketChainNetworkConnected, 
                 e.IsTorUp, 
-                e.PeerCount);
+                e.PeerCount,
+                e.PoolBaseLocalItems,
+                e.PoolBaseStagedItems,
+                e.PoolMarketLocalItems,
+                e.PoolMarketStagedItems);
         }
 
         private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)

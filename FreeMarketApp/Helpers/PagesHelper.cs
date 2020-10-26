@@ -145,13 +145,21 @@ namespace FreeMarketApp.Helpers
             }
         }
 
-        internal static void SetServerData(Window mainWindow, bool peersUp, bool torUp, int peersCount)
+        internal static void SetServerData(Window mainWindow, 
+            bool peersUp, 
+            bool torUp, 
+            int peersCount, 
+            int poolBaseLocalItemsCount, 
+            int poolBaseStagedItemsCount, 
+            int poolMarketLocalItemsCount, 
+            int poolMarketStagedItemsCount)
         {
             Dispatcher.UIThread.Post(() => {
                 try
                 {
                     if (mainWindow != null)
                     {
+                        //publishing peer count info
                         var tbPeers = mainWindow.FindControl<TextBlock>("TBPeers");
                         tbPeers.Text = peersCount.ToString();
 
@@ -173,6 +181,7 @@ namespace FreeMarketApp.Helpers
                             bPeersStatus.Classes = new Classes(new[] { "StatusBarIconOrange" });
                         }
 
+                        //publishing TOR info 
                         var tbTorIcon = mainWindow.FindControl<Path>("TorIcon");
                         var tbTorStatus = mainWindow.FindControl<TextBlock>("TBTorStatus");
                         if (torUp)
@@ -185,6 +194,14 @@ namespace FreeMarketApp.Helpers
                             tbTorIcon.Classes = new Classes(new[] { "StatusBarIconRed" });
                             tbTorStatus.Text = SharedResources.ResourceManager.GetString("State_Down");
                         }
+
+                        //publishing Base Pool info
+                        var tbBasePool = mainWindow.FindControl<TextBlock>("TBBasePool");
+                        tbBasePool.Text = string.Format("{0}/{1}", poolBaseLocalItemsCount, poolBaseStagedItemsCount);
+
+                        //publishing Market Pool info
+                        var tbMarketPools = mainWindow.FindControl<TextBlock>("TBMarketPools");
+                        tbMarketPools.Text = string.Format("{0}/{1}", poolMarketLocalItemsCount, poolMarketStagedItemsCount);
                     }
                 }
                 catch (Exception)

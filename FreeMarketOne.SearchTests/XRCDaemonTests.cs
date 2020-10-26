@@ -37,18 +37,18 @@ namespace FreeMarketOne.SearchTests
             
             config = Substitute.For<IBaseConfiguration>();
             config.XRCDaemonUriSsl.Returns(false);
-            config.XRCDaemonUri.Returns("localhost:16661");
-            config.XRCDaemonUser.Returns("c78vdfa2sf1c");
-            config.XRCDaemonPassword.Returns("fg781vd4vg6");
+            config.XRCDaemonUri.Returns("188.127.231.159:16661");
+            config.XRCDaemonUser.Returns("fm1_xrc_testnet_user");
+            config.XRCDaemonPassword.Returns("fm1_xrc_testnet_password");
             
             var logger = Substitute.For<Serilog.ILogger>();
 
             XRCDaemonClient client = new XRCDaemonClient(serializerSettings, config, logger);
 
-            var transaction = client.GetTransaction("5c20ecff8c0a517b9770784198f56cacac212f5f057329388240686af0134039").ConfigureAwait(false).GetAwaiter().GetResult();
-            Assert.AreEqual(transaction.TxId, "5c20ecff8c0a517b9770784198f56cacac212f5f057329388240686af0134039");
-            Assert.AreEqual(transaction.VOut.FirstOrDefault().Value, 1050000.00000000m);
-            Assert.AreEqual(transaction.VOut.FirstOrDefault().ScriptPubKey.Addresses.FirstOrDefault(), "RsYMxMxMrW7KngFEq9jWfmuHakYL3pY8f8");
+            var transaction = client.GetTransaction("0830cfff8e379e60fb56049811ef3fb332e505068a3a7e4edd9764d7721e98be").ConfigureAwait(false).GetAwaiter().GetResult();
+            Assert.AreEqual(transaction.TxId, "0830cfff8e379e60fb56049811ef3fb332e505068a3a7e4edd9764d7721e98be");
+            Assert.AreEqual(transaction.VOut.FirstOrDefault().Value, 2.50000000m);
+            Assert.AreEqual(transaction.VOut.FirstOrDefault().ScriptPubKey.Addresses.FirstOrDefault(), "TRbPDkwa8a73TS2FwGJv9ZhmTgnjtdPSkm");
         }
 
         

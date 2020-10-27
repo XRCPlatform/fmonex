@@ -158,7 +158,7 @@
           <TextBlock Classes="H1"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
         <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="35" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
+        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
 
         <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>

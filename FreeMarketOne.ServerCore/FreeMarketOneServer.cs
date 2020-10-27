@@ -217,8 +217,6 @@ namespace FreeMarketOne.ServerCore
                     clearedOlderBlocks: MarketBlockClearedOldersEvent,
                     blockDownloaded: MarketBlockDownloadedEvent);
                 MarketBlockChainManager.Start();
-
- 
             }
             else
             {

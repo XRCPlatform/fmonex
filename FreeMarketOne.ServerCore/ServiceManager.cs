@@ -62,6 +62,7 @@ namespace FreeMarketOne.ServerCore
         {
             Interlocked.Exchange(ref _running, 1);
 
+            //Service loop checker
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ServiceManagerChecker", (cancellation) =>
             {
                 var dateTimeUtc = DateTime.UtcNow;
@@ -79,8 +80,17 @@ namespace FreeMarketOne.ServerCore
 
                 Console.WriteLine(periodicCheckLog.ToString());
 
+                return Task.CompletedTask;
+            },
+            _cancellationToken.Token,
+            repeatEvery: TimeSpans.FifteenSeconds,
+            startAfter: TimeSpans.FiveSeconds);
+
+            //Network HeartBeat loop checker
+            IAsyncLoop periodicNetworkHeartbeatLoop = this._asyncLoopFactory.Run("NetworkHeartbeatChecker", (cancellation) =>
+            {
                 //Network Heartbeat validation
-                if ((FMONE.Current.MarketBlockChainManager != null) 
+                if ((FMONE.Current.MarketBlockChainManager != null)
                     && (FMONE.Current.MarketBlockChainManager.IsBlockChainManagerRunning()))
                 {
                     if (!_expectedMarketChainPulse.HasValue) _expectedMarketChainPulse = DateTimeOffset.UtcNow;
@@ -92,10 +102,9 @@ namespace FreeMarketOne.ServerCore
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
-            repeatEvery: TimeSpans.TenSeconds + TimeSpans.FiveSeconds,
-            startAfter: TimeSpans.FiveSeconds);
+            repeatEvery: TimeSpans.HalfMinute,
+            startAfter: TimeSpans.TwentySeconds);
         }
-
 
         private void ValidateNetworkHeartbeat()
         {
@@ -141,17 +150,18 @@ namespace FreeMarketOne.ServerCore
             _expectedBaseChainPulse = DateTimeOffset.UtcNow;
 
             //skip on inicialization
-            if ((!marketUp || !FMONE.Current.MarketBlockChainManager.SwarmServer.Peers.Any()) && FMONE.Current.MarketBlockChainManager.IsBlockChainManagerRunning())
+            if ((!marketUp || !FMONE.Current.MarketBlockChainManager.SwarmServer.Peers.Any()) 
+                && FMONE.Current.MarketBlockChainManager.IsBlockChainManagerRunning())
             {
                 lock (_swarmRecoveryLock)
                 {
                     //if this should refresh the swarm server if network was down and recovered.
                     FMONE.Current.MarketBlockChainManager.ReConnectAfterNetworkLossAsync();
                 }
-
             }
 
-            if ((!baseUp || !FMONE.Current.BaseBlockChainManager.SwarmServer.Peers.Any()) && FMONE.Current.BaseBlockChainManager.IsBlockChainManagerRunning())
+            if ((!baseUp || !FMONE.Current.BaseBlockChainManager.SwarmServer.Peers.Any()) 
+                && FMONE.Current.BaseBlockChainManager.IsBlockChainManagerRunning())
             {
                 lock (_swarmRecoveryLock)
                 {

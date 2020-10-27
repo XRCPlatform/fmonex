@@ -21,6 +21,12 @@ namespace FreeMarketOne.Extensions.Helpers
         /// <summary>Time span of 10 seconds.</summary>
         public static TimeSpan TenSeconds => TimeSpan.FromSeconds(10);
 
+        /// <summary>Time span of 15 seconds.</summary>
+        public static TimeSpan FifteenSeconds => TimeSpan.FromSeconds(15);
+
+        /// <summary>Time span of 20 seconds.</summary>
+        public static TimeSpan TwentySeconds => TimeSpan.FromSeconds(20);
+
         /// <summary>Time span of half minute.</summary>
         public static TimeSpan HalfMinute => TimeSpan.FromSeconds(30);
 

@@ -115,7 +115,7 @@
       </Panel>
       
      <!-- Status bar -->
-	  <Border CornerRadius="0 7 0 0" Classes="StatusBar" VerticalAlignment="Bottom" HorizontalAlignment="Left">
+	  <Border CornerRadius="0 5 0 0" Classes="StatusBar" VerticalAlignment="Bottom" HorizontalAlignment="Left">
 		  <WrapPanel Orientation="Horizontal">
 			  
             <!-- Settings -->
@@ -141,26 +141,29 @@
 			  VerticalAlignment="Center" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="14" />
 		</Button>  
 			
-			  <!-- Tor --> 
+			  <!-- Tor -->  
 			  <Path x:Name="TorIcon" Classes="StatusBarIconRed" Data="M461.143,60.883l-200.83-60.25c-2.812-0.844-5.809-0.844-8.622,0L50.857,60.883c-6.344,1.903-10.689,7.743-10.689,14.367
 						v220.916c0,28.734,11.633,58.148,34.574,87.425c17.521,22.36,41.762,44.813,72.047,66.736
 						c50.877,36.828,100.976,59.42,103.084,60.363c1.949,0.873,4.039,1.31,6.129,1.31s4.18-0.436,6.129-1.31
 						c2.107-0.943,52.205-23.535,103.082-60.363c30.285-21.923,54.525-44.376,72.047-66.736c22.941-29.276,34.572-58.69,34.572-87.425
 						V75.25C471.832,68.626,467.489,62.786,461.143,60.883z" VerticalAlignment="Center" HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="11" Margin="10 0 0 0"/>
-			  <TextBlock Classes="StatusBarText" Text="Tor is: " FontSize="12" Margin="5 5 0 5" VerticalAlignment="Center"/>
+			  <TextBlock Classes="StatusBarText" Text="Tor is " FontSize="12" Margin="5 5 0 5" VerticalAlignment="Center"/>
 			  <TextBlock Name="TBTorStatus" Classes="StatusBarText" Text="offline" FontSize="12" Margin="0 5 15 5" VerticalAlignment="Center"/>
 
 			  <!-- Peers -->
-			  <Border Name="BPeersStatus" Classes="StatusBarIconRed" CornerRadius="10" VerticalAlignment="Center" Margin="0 2 0 0 " Width="9" Height="9"/>
+			  <Border Name="BPeersStatus" Classes="StatusBarIconRed" CornerRadius="10" VerticalAlignment="Center" Margin="5 0 0 0 " Width="10" Height="10"/>
 			  <TextBlock Text="Peers: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
 			  <TextBlock Name="TBPeers" Text="0" Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 
-        	<!-- Pool Base Info -->
-			<Border Classes="SideBarIcon" Height="14" Width="1" Margin="5 0 12 0"/>
+			 <!-- Pool Base Info -->
+			 <Path Classes="SideBarIcon" Data="m26.667969 298.667969h94.226562l-19.453125 183.914062c-.085937.554688-.109375 2.195313-.109375 2.75 0 14.699219 11.96875 26.667969 26.667969 26.667969 8.363281 0 16.339844-4.011719 21.632812-11.113281l186.367188-266.21875c3.433594-4.589844 5.332031-10.261719 5.332031-16 0-14.699219-11.964843-26.667969-26.664062-26.667969h-115.328125l19.199218-162.199219c.0625-.617187.105469-2.515625.105469-3.132812.023438-14.699219-11.945312-26.667969-26.644531-26.667969-8.363281 0-16.339844 4.011719-21.800781 11.328125l-164.867188 244.671875c-3.433593 4.585938-5.332031 10.261719-5.332031 16 0 14.699219 11.96875 26.667969 26.667969 26.667969zm0 0" 
+				   VerticalAlignment="Center" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="9" Margin="5 0 0 0"/>
 			<TextBlock Text="BasePool: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
 			<TextBlock Name="TBBasePool" Text="0/0" Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 
 			<!-- Pool Market Info -->
+			 <Path Classes="SideBarIcon" Data="m26.667969 298.667969h94.226562l-19.453125 183.914062c-.085937.554688-.109375 2.195313-.109375 2.75 0 14.699219 11.96875 26.667969 26.667969 26.667969 8.363281 0 16.339844-4.011719 21.632812-11.113281l186.367188-266.21875c3.433594-4.589844 5.332031-10.261719 5.332031-16 0-14.699219-11.964843-26.667969-26.664062-26.667969h-115.328125l19.199218-162.199219c.0625-.617187.105469-2.515625.105469-3.132812.023438-14.699219-11.945312-26.667969-26.644531-26.667969-8.363281 0-16.339844 4.011719-21.800781 11.328125l-164.867188 244.671875c-3.433593 4.585938-5.332031 10.261719-5.332031 16 0 14.699219 11.96875 26.667969 26.667969 26.667969zm0 0" 
+				   VerticalAlignment="Center" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="9" Margin="5 0 0 0"/>
 			<TextBlock Text="MarketPool: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
 			<TextBlock Name="TBMarketPools" Text="0/0" Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
       </WrapPanel>

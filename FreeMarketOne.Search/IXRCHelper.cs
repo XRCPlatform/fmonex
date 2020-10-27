@@ -4,6 +4,6 @@ namespace FreeMarketOne.Search
 {
     public interface IXRCHelper
     {
-        XRCTransactionSummary GetTransaction(string hash, string address);
+        XRCTransactionSummary GetTransaction(string address, string hash);
     }
 }

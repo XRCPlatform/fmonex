@@ -96,52 +96,25 @@ namespace FreeMarketOne.Search
                     {
                         publicKey = key;
                         pubKeyHash = Hash(key);
+
+                        if (seller == null)
+                        {
+                            seller = new SellerAggregate()
+                            {
+                                PublicKeyHashes = sellerPubKeyHashes,
+                                PublicKeys = sellerPubKeys,
+                                SellerName = user.UserName,
+                                StarRating = userManager.GetUserReviewStars(reviews)
+                            };
+                        }
+
                         break;
                     }
                 }
             }
 
-
-            if (pubKeyHash != null && user != null && user?.Signature != null)
-            {
-                if (seller == null)
-                {
-                    seller = new SellerAggregate()
-                    {
-                        PublicKeyHashes = sellerPubKeyHashes,
-                        PublicKeys = sellerPubKeys,
-                        SellerName = user.UserName,
-                        StarRating = userManager.GetUserReviewStars(reviews)
-                    };
-                }
-
-                if (!String.IsNullOrEmpty(marketItem.XRCTransactionHash) 
-                    && !String.IsNullOrEmpty(marketItem.XRCReceivingAddress) 
-                    && !seller.XRCTransactions.ContainsKey(marketItem.XRCTransactionHash))
-                {
-                    var summary = xrcDataProvider.GetTransaction(marketItem.XRCReceivingAddress, marketItem.XRCTransactionHash);
-                    //can't handle confirmations now. will need some block notify or long poll later or some zMq broadcast
-                    //when xrc node is embeded block notify could fix this
-                    //if (summary.Confirmations > 5)
-                    //summary.Date.CompareTo(marketItem.SaleDate) saleDate is missing so for this round won't do validation on dates
-                    //TODO: tighten this later XRC transaction should be within 24 hrs of checkout time
-                    if (summary != null && summary.Total > 0)
-                    {
-                        seller.XRCTransactions.Add(marketItem.XRCTransactionHash, summary.Total);
-                        decimal total = 0;
-                        foreach (var item in seller.XRCTransactions.Values)
-                        {
-                            total += item;
-                        }
-                        seller.TotalXRCVolume = total;
-                    }
-
-                }
-
-                SaveSellerInfo(seller, sellerDataFolder, pubKeyHash);
-            }
-            //for sellers that could not be found. // should really never happen
-            if(seller == null)
+            //should not happen 
+            if (seller == null)
             {
                 seller = new SellerAggregate()
                 {
@@ -149,6 +122,35 @@ namespace FreeMarketOne.Search
                     PublicKeys = sellerPubKeys
                 };
             }
+
+            if (!String.IsNullOrEmpty(marketItem.XRCTransactionHash)
+                    && !String.IsNullOrEmpty(marketItem.XRCReceivingAddress)
+                    && !seller.XRCTransactions.ContainsKey(marketItem.XRCTransactionHash))
+            {
+                var summary = xrcDataProvider.GetTransaction(marketItem.XRCReceivingAddress, marketItem.XRCTransactionHash);
+                //can't handle confirmations now. will need some block notify or long poll later or some zMq broadcast
+                //when xrc node is embeded block notify could fix this
+                //if (summary.Confirmations > 5)
+                //summary.Date.CompareTo(marketItem.SaleDate) saleDate is missing so for this round won't do validation on dates
+                //TODO: tighten this later XRC transaction should be within 24 hrs of checkout time
+                if (summary != null && summary.Total > 0)
+                {
+                    seller.XRCTransactions.Add(marketItem.XRCTransactionHash, summary.Total);
+                    decimal total = 0;
+                    foreach (var item in seller.XRCTransactions.Values)
+                    {
+                        total += item;
+                    }
+                    seller.TotalXRCVolume = total;
+                }
+
+            }
+
+            if (pubKeyHash != null )
+            {
+                SaveSellerInfo(seller, sellerDataFolder, pubKeyHash);
+            }
+
             return seller;
         }
 

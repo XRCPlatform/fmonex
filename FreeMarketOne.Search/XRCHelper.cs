@@ -14,7 +14,7 @@ namespace FreeMarketOne.Search
             _client = client;
         }
 
-        public XRCTransactionSummary GetTransaction(string hash, string address)
+        public XRCTransactionSummary GetTransaction(string address, string hash)
         {
             var xrcTransaction = _client.GetTransaction(hash).ConfigureAwait(false).GetAwaiter().GetResult();
             if (xrcTransaction == null){

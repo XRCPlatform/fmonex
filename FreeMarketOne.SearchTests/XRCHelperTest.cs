@@ -28,7 +28,7 @@ namespace FreeMarketOne.SearchTests
             IXRCDaemonClient client = Substitute.For<IXRCDaemonClient>();
             client.GetTransaction(txHash).Returns(transaction);
             XRCHelper helper = new XRCHelper(client);
-            var summary = helper.GetTransaction(txHash, "RsYMxMxMrW7KngFEq9jWfmuHakYL3pY8f8");
+            var summary = helper.GetTransaction("RsYMxMxMrW7KngFEq9jWfmuHakYL3pY8f8", txHash);
 
             Assert.AreEqual(summary.Confirmations, 12171);
             Assert.AreEqual(summary.Total, 1050000.00000000m);
@@ -46,7 +46,7 @@ namespace FreeMarketOne.SearchTests
             IXRCDaemonClient client = Substitute.For<IXRCDaemonClient>();
             client.GetTransaction(txHash).Returns(transaction);
             XRCHelper helper = new XRCHelper(client);
-            var summary = helper.GetTransaction(txHash, "RsYMxMxMrW7KngFEq9jWfmuHakYL3pY8f8");
+            var summary = helper.GetTransaction("RsYMxMxMrW7KngFEq9jWfmuHakYL3pY8f8", txHash);
 
             Assert.AreEqual(summary.Confirmations, 12171);
             Assert.AreEqual(summary.Total, 2100000.00000000m);

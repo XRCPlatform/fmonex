@@ -109,14 +109,7 @@ namespace FreeMarketOne.Search
 
             if (marketItem.WeightInGrams > 0 && marketItem.Price>0) {
                 pricePerGram = marketItem.Price / marketItem.WeightInGrams;
-            }
-
-            if (marketItem.State == (int)ProductStateEnum.Removed || marketItem.State == (int)ProductStateEnum.Sold)
-            {
-                Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
-                Writer.Flush(triggerMerge: true, applyAllDeletes: true);
-                return;
-            }
+            }           
             
             SellerAggregate sellerAggregate = null;
 
@@ -173,6 +166,14 @@ namespace FreeMarketOne.Search
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
             _taxoWriter.Commit();
+
+            //remove now after all the toltals calculations
+            if (marketItem.State == (int)ProductStateEnum.Removed || marketItem.State == (int)ProductStateEnum.Sold)
+            {
+                Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
+                Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+                return;
+            }
 
             if (updateAllSellerDocuments)
             {

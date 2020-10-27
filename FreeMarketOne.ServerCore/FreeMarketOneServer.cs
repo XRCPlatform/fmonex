@@ -156,6 +156,18 @@ namespace FreeMarketOne.ServerCore
                         blockDownloaded:null);
                     BaseBlockChainManager.Start();
 
+
+                    //Initialize Base Pool
+                    BasePoolManager = new BasePoolManager(
+                        Configuration,
+                        Configuration.MemoryBasePoolPath,
+                        BaseBlockChainManager.Storage,
+                        BaseBlockChainManager.SwarmServer,
+                        BaseBlockChainManager.PrivateKey,
+                        BaseBlockChainManager.BlockChain,
+                        Configuration.BlockChainBasePolicy);
+                    BasePoolManager.Start();
+
                     //Search indexer
                     XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
                     SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
@@ -181,17 +193,6 @@ namespace FreeMarketOne.ServerCore
 
                 //Add Swarm server to seed manager
                 OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
-
-                //Initialize Base Pool
-                BasePoolManager = new BasePoolManager(
-                    Configuration,
-                    Configuration.MemoryBasePoolPath,
-                    BaseBlockChainManager.Storage,
-                    BaseBlockChainManager.SwarmServer,
-                    BaseBlockChainManager.PrivateKey,
-                    BaseBlockChainManager.BlockChain,
-                    Configuration.BlockChainBasePolicy);
-                BasePoolManager.Start();
 
                 //Initialize Market Blockchain Manager
                 MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);

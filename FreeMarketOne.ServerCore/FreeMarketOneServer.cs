@@ -173,8 +173,6 @@ namespace FreeMarketOne.ServerCore
                 _logger.Warning("No user account is necessary to create one.");
             }
         }
-
-
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
             //Initialize Base Pool Manager

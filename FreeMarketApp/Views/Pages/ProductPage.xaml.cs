@@ -67,6 +67,7 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
             var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var TBXRCReceivingTransaction = Instance.FindControl<TextBox>("TBXRCReceivingTransaction");
 
             var result = await MessageBox.Show(mainWindow,
                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_BuyProduct"), approxSpanToNewBlock.TotalSeconds),
@@ -98,6 +99,16 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
+                    if (String.IsNullOrEmpty(TBXRCReceivingTransaction.Text))
+                    {
+                        await MessageBox.Show(mainWindow,
+                              string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_PleaseProvideXRCTransactionHash")),
+                              SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                              MessageBox.MessageBoxButtons.Ok);
+                        return;
+                    }
+
+                    _offer.XRCTransactionHash = TBXRCReceivingTransaction.Text;
                     //sign market data and generating chain connection
                     _offer = FMONE.Current.Markets.SignBuyerMarketData(
                         _offer,
@@ -196,6 +207,8 @@ namespace FreeMarketApp.Views.Pages
                 var tbFineness = Instance.FindControl<TextBlock>("TBFineness");
                 var tbWeightInGrams = Instance.FindControl<TextBlock>("TBWeightInGrams");
                 var tbSize = Instance.FindControl<TextBlock>("TBSize");
+                var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
+                
 
                 tbTitle.Text = _offer.Title;
                 tbDescription.Text = _offer.Description;
@@ -207,6 +220,7 @@ namespace FreeMarketApp.Views.Pages
                 tbFineness.Text = _offer.Fineness;
                 tbWeightInGrams.Text = _offer.WeightInGrams.ToString();
                 tbSize.Text = _offer.Size;
+                tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
 
                 btBuyButton.IsEnabled = true;
                 if (!String.IsNullOrEmpty(_offer.BaseSignature))

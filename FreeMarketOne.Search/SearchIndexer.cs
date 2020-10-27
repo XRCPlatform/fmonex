@@ -9,27 +9,34 @@ using Lucene.Net.Index;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
 using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using System.Linq;
 using Newtonsoft.Json;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Users;
+using FreeMarketOne.Pools;
+using FreeMarketOne.BlockChain;
 using static FreeMarketOne.Markets.MarketManager;
 
 namespace FreeMarketOne.Search
 {
     public class SearchIndexer : IDisposable
     {
-        private readonly IndexWriter writer;
-        private readonly DirectoryTaxonomyWriter taxoWriter;
-        private readonly IndexWriterConfig indexConfig;
+        private readonly IndexWriter _writer;
+        private readonly DirectoryTaxonomyWriter _taxoWriter;
+        private readonly IndexWriterConfig _indexConfig;
         private readonly FacetsConfig facetConfig = new FacetsConfig();
-        private IMarketManager _marketManager;
+        private readonly IMarketManager _marketManager;
+        private readonly IXRCHelper _xrcCalculator;
+        private readonly string _indexLocation;
+        private readonly IBaseConfiguration _configuration;
+        private readonly IUserManager _userManager;
+        private readonly BasePoolManager _basePoolManager;
+        private readonly IBlockChainManager<BaseAction> _baseBlockChain;
 
-        public SearchIndexer(IMarketManager marketManager, string indexLocation)
+        public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
         {
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
+            string indexLocation = SearchHelper.GetDataFolder(baseConfiguration);
 
             var dir = FSDirectory.Open(indexLocation);
             
@@ -39,10 +46,16 @@ namespace FreeMarketOne.Search
             var analyzer = new StandardAnalyzer(AppLuceneVersion);
 
             //create an index writer
-            indexConfig = new IndexWriterConfig(AppLuceneVersion, analyzer);
-            writer = new IndexWriter(dir, indexConfig);
-            taxoWriter = new DirectoryTaxonomyWriter(dirTaxonomy);
+            _indexConfig = new IndexWriterConfig(AppLuceneVersion, analyzer);
+            _writer = new IndexWriter(dir, _indexConfig);
+            _taxoWriter = new DirectoryTaxonomyWriter(dirTaxonomy);
             _marketManager = marketManager;
+            _indexLocation = indexLocation;
+            _xrcCalculator = XRCHelper;
+            _configuration = baseConfiguration;
+            _userManager = userManager;
+            _basePoolManager = basePoolManager;
+            _baseBlockChain = baseBlockChain;
         }
         
         public bool Initialize()
@@ -52,15 +65,15 @@ namespace FreeMarketOne.Search
                 new StringField("PrimeID", "prime-id", Field.Store.YES)
             };
 
-            Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
+            Writer.AddDocument(facetConfig.Build(_taxoWriter, doc));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
-            taxoWriter.Commit();
+            _taxoWriter.Commit();
 
             Writer.DeleteDocuments(new Term("PrimeID", "prime-id"));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
-            taxoWriter.Commit();
+            _taxoWriter.Commit();
 
             return true;
         }
@@ -69,7 +82,7 @@ namespace FreeMarketOne.Search
         {
             get
             {
-                return writer;
+                return _writer;
             }
         }
 
@@ -80,7 +93,7 @@ namespace FreeMarketOne.Search
         /// </summary>
         /// <param name="marketItem"></param>
         /// <param name="blockHash"></param>
-        public void Index(MarketItemV1 marketItem, string blockHash)
+        public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null)
         {
             double pricePerGram = 0F;
             MarketCategoryEnum cat = (MarketCategoryEnum)marketItem.Category;
@@ -104,22 +117,37 @@ namespace FreeMarketOne.Search
                 Writer.Flush(triggerMerge: true, applyAllDeletes: true);
                 return;
             }
+            
+            SellerAggregate sellerAggregate = null;
 
-            //transform seller pubkeys to sha hashes for simplified search use
-            var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
-            List<string> sellerPubKeyHashes = SearchHelper.GenerateSellerPubKeyHashes(sellerPubKeys);
+            if (currentSellerAggregate == null)
+            {
+                var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
+
+                sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain);
+                if (sellerAggregate == null)
+                {
+                    sellerAggregate = new SellerAggregate()
+                    {
+                        TotalXRCVolume = 0
+                    };
+                }
+            }
+            else
+            {
+                sellerAggregate = currentSellerAggregate;
+            }
 
             Document doc = new Document
             {
                 new StringField("ID", marketItem.Signature, Field.Store.YES),
-                new StringField("BlockHash", blockHash, Field.Store.NO),
+                new StringField("BlockHash", blockHash, Field.Store.YES),
                 new TextField("Title",marketItem.Title,Field.Store.NO),
                 new TextField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer,Field.Store.NO),
                 new TextField("Category",cat.ToString(),Field.Store.NO),
                 new TextField("Description",marketItem.Description,Field.Store.NO),
                 new FacetField("Category",cat.ToString()),
                 new FacetField("Shipping",marketItem.Shipping),
-                //new FacetField("DealType",dealTypeString),
                 new FacetField("Fineness",string.IsNullOrEmpty(marketItem.Fineness) ? "Unspecified":marketItem.Fineness),
                 new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
                 new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),
@@ -127,20 +155,75 @@ namespace FreeMarketOne.Search
                 new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),                
                 new DoubleDocValuesField("PricePerGram", pricePerGram),
                 new DoubleDocValuesField("Price", marketItem.Price),
-                new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem))
+                new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
+                new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
+                new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
+                new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
+                //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
             };
 
             //append all seller sha-hashes to a single multivalue field so that we can find by any.
             //this should support find all seller items usecase, provided we hash seller's keys for query
-            foreach (var sellerPubKeyHash in sellerPubKeyHashes)
+            foreach (var sellerPubKeyHash in sellerAggregate?.PublicKeyHashes)
             {
                 doc.Add(new StringField("SellerPubKeyHash", sellerPubKeyHash, Field.Store.NO));
             }
 
-            Writer.AddDocument(facetConfig.Build(taxoWriter, doc));
+            Writer.AddDocument(facetConfig.Build(_taxoWriter, doc));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
-            taxoWriter.Commit();
+            _taxoWriter.Commit();
+
+            if (updateAllSellerDocuments)
+            {
+                UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
+                //UpdateAllSellerDocumentsWithLatest(sellerAggregate);
+            }
+            
+        }
+
+        private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate)
+        {
+            foreach (var sellerPubKeyHash in sellerAggregate.PublicKeyHashes)
+            {
+                Writer.UpdateNumericDocValue(new Term("SellerPubKeyHash", sellerPubKeyHash), "XrcTotal", (long?)sellerAggregate?.TotalXRCVolume);
+                //add star rating update 
+            }
+            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
+        }
+
+        private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
+        {
+            //search all market items by seller pubkey hash
+            SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 50);
+            var query = engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
+            var searchResult = engine.Search(query, false);
+
+            int pages = searchResult.TotalHits / searchResult.PageSize;
+            
+            //increment to 1
+            pages++;
+
+            for (int i = 0; i < pages; i++)
+            {
+                //skip first (re-query) as it's built above
+                //on second page and up use the interal search result. the top one was needed to get number of pages
+                if (i > 1)
+                {
+                    searchResult = engine.Search(query, false, i+1);
+                }                
+
+                for (int y = 0; y < searchResult.Results.Count; y++)
+                {
+                    //items that have allready been indexed shall be skipped for efficiency
+                    if (!searchResult.Results[y].Signature.Equals(skipSignature) 
+                        && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
+                    {
+                        Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate);
+                    }
+                }
+            }           
         }
 
         /// <summary>
@@ -176,7 +259,7 @@ namespace FreeMarketOne.Search
             }
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
-            taxoWriter.Commit();
+            _taxoWriter.Commit();
         }
 
         public void DeleteMarketItemsByBlockHash(string blockHash)
@@ -189,27 +272,28 @@ namespace FreeMarketOne.Search
             Writer.DeleteDocuments(new Term(fieldName, fieldValue));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
-            taxoWriter.Commit();
+            _taxoWriter.Commit();
         }
 
         public void DeleteAll()
         {
             Writer.DeleteAll();
             Writer.Commit();
-            taxoWriter.Commit();
+            _taxoWriter.Commit();
         }
 
         public void Commit()
         {
             Writer.Commit();
-            taxoWriter.Commit();
+            _taxoWriter.Commit();
         }
 
         public void Dispose()
         {
             Writer.Commit();
             Writer.Dispose();
-            taxoWriter.Dispose();
+            _taxoWriter.Dispose();
         }
+
     }
 }

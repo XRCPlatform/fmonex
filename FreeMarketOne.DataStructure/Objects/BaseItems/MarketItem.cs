@@ -91,6 +91,12 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
 
         [JsonIgnore]
         public virtual bool IsInPool { get; set; }
+        
+        [JsonProperty("xr")]
+        public string XRCReceivingAddress { get; set; }
+        
+        [JsonProperty("xt")]
+        public string XRCTransactionHash { get; set; }
 
         public MarketItem()
         {
@@ -136,6 +142,8 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             }            
             content.Append(Size);
             content.Append(Manufacturer);
+            content.Append(XRCReceivingAddress);
+            content.Append(XRCTransactionHash);
             return shaProcessor.GetSHA256(content.ToString());
         }
 
@@ -160,6 +168,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             }
             content.Append(Size);
             content.Append(Manufacturer);
+            content.Append(XRCReceivingAddress);
             return Encoding.ASCII.GetBytes(content.ToString());
         }
     }

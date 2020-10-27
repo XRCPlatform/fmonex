@@ -12,6 +12,7 @@ using Lucene.Net.Util;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using FreeMarketOne.Markets;
+using Lucene.Net.Documents;
 
 namespace FreeMarketOne.Search
 {
@@ -148,6 +149,7 @@ namespace FreeMarketOne.Search
         public SearchResult Search(Query query, bool queryFacets = true, int page = 1)
         {
             List<MarketItemV1> list = new List<MarketItemV1>();
+            List<Document> documents = new List<Document>();
             TopScoreDocCollector collector = TopScoreDocCollector.Create(MAX_RESULTS, true);
             int startIndex = (page - 1) * PageSize;
 
@@ -165,6 +167,9 @@ namespace FreeMarketOne.Search
                 {
                     list.Add(marketItem);
                 }
+                
+                //adding raw document so that relevance could be better understood
+                documents.Add(searcher.Doc(item.Doc));
                 //var offer = marketManager.GetOfferBySignature(signature);
             }
             List<FacetResult> facets = new List<FacetResult>();
@@ -179,7 +184,8 @@ namespace FreeMarketOne.Search
                 TotalHits = docs.TotalHits,
                 CurrentPage = page,
                 PageSize = PageSize,
-                CurrentQuery = query
+                CurrentQuery = query,
+                Documents = documents
             };
             return searchResult;
         }

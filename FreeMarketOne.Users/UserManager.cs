@@ -450,6 +450,11 @@ namespace FreeMarketOne.Users
                     userPubKeys,
                     basePoolManager,
                     baseBlockChain);
+                
+                if (userData == null)
+                {
+                    return result;
+                }
 
                 var allUserDatas = GetChainUserData(
                     baseStorage, chainId, countOfIndex, userData, typesUser);
@@ -500,7 +505,7 @@ namespace FreeMarketOne.Users
         /// <returns></returns>
         public double GetUserReviewStars(List<ReviewUserDataV1> userReviews)
         {
-            if (userReviews.Any())
+            if (userReviews !=null && userReviews.Any())
             {
                 var arrayOfStars = userReviews.Select(a => (double)a.Stars).ToArray();
                 var medianOfStars = GetMedian<double>(arrayOfStars);
@@ -648,7 +653,7 @@ namespace FreeMarketOne.Users
                 var result = new List<UserDataV1>();
                 result.Add(userItem);
 
-                if (!string.IsNullOrEmpty(userItem.BaseSignature))
+                if (userItem != null && !string.IsNullOrEmpty(userItem.BaseSignature))
                 {
                     var lookingForSignature = userItem.BaseSignature;
 

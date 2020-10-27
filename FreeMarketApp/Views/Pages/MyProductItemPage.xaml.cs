@@ -145,7 +145,7 @@ namespace FreeMarketApp.Views.Pages
                 var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
                 var tbShipping = Instance.FindControl<TextBlock>("TBShipping");
                 var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
-                var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
+                //var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
                 var btEdit = Instance.FindControl<Button>("BTEdit");
                 var btRemove = Instance.FindControl<Button>("BTRemove");
 
@@ -155,6 +155,9 @@ namespace FreeMarketApp.Views.Pages
                 var tbWeightInGrams = this.FindControl<TextBlock>("TBWeightInGrams");
                 var tbCategory = this.FindControl<TextBlock>("TBCategory");
                 var tbDealType = this.FindControl<TextBlock>("TBDealType");
+                var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
+                var tbXRCReceivingTransactionHash = Instance.FindControl<TextBlock>("TBXRCReceivingTransactionHash");
+                
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
@@ -165,9 +168,10 @@ namespace FreeMarketApp.Views.Pages
                 tbWeightInGrams.Text = offer.WeightInGrams.ToString();
                 tbCategory.Text = SharedResources.ResourceManager.GetString("MarketCategory_Label_" + offer.Category.ToString());
                 tbDealType.Text = SharedResources.ResourceManager.GetString("MarketDealType_Label_" + offer.DealType.ToString());
-
+                tbXRCReceivingAddress.Text = offer.XRCReceivingAddress;
+                tbXRCReceivingTransactionHash.Text = offer.XRCTransactionHash;
                 tbPrice.Text = offer.Price.ToString();
-                tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)offer.PriceType).ToString();
+                //tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)offer.PriceType).ToString();
                 btEdit.Tag = signature;
                 btRemove.Tag = signature;
 

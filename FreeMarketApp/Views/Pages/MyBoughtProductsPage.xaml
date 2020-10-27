@@ -75,6 +75,15 @@
                           <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
                           <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
                         </StackPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                          <TextBlock Classes="H2" FontSize="12" Text="XRC Receiving Address: "></TextBlock>
+                          <TextBlock Classes="H2" FontSize="12" Text="{Binding XRCReceivingAddress}"></TextBlock>
+                        </StackPanel>
+                       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                         <TextBlock Classes="H2" FontSize="12" Text="XRC Transaction: "></TextBlock>
+                         <TextBlock Classes="H2" FontSize="12" Text="{Binding XRCTransactionHash}"></TextBlock>
+                       </StackPanel>
+                       <!--
 						            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                             <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
                             <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
@@ -88,7 +97,7 @@
                                </i:Interaction.Behaviors>
                             </TextBlock>
 						            </StackPanel>
-							
+							        -->
                           <!-- Propagation notification -->
                         <WrapPanel Name="TBIsInPool" VerticalAlignment="Bottom" IsVisible="{Binding IsInPool}" Orientation="Horizontal">
                             <Path Classes="H2" Data="M413.809,462.904v-51.088c0-60.171-46.494-96.158-91.179-131.268c-6.172-4.839-14.028-14.028-14.028-28.055

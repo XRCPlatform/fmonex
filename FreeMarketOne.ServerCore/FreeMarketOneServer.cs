@@ -12,6 +12,7 @@ using FreeMarketOne.Users;
 using Libplanet;
 using Libplanet.Blockchain;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using System;
@@ -127,12 +128,6 @@ namespace FreeMarketOne.ServerCore
                 SpinWait.SpinUntil(() => torInitialized, 10000);
                 if (torInitialized)
                 {
-                    //Search indexer
-                    SearchIndexer = new SearchIndexer(Markets, SearchHelper.GetDataFolder(Configuration));
-                    SearchIndexer.Initialize();
-
-                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
-
                     //Loading 
                     ServerPublicAddress.GetMyTorExitIP();
 
@@ -160,6 +155,13 @@ namespace FreeMarketOne.ServerCore
                         blockChainChanged: BaseBlockChainChangedEvent,
                         blockDownloaded:null);
                     BaseBlockChainManager.Start();
+
+                    //Search indexer
+                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
+                    SearchIndexer.Initialize();
+
+                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
                 }
                 else
                 {
@@ -217,6 +219,8 @@ namespace FreeMarketOne.ServerCore
                     clearedOlderBlocks: MarketBlockClearedOldersEvent,
                     blockDownloaded: MarketBlockDownloadedEvent);
                 MarketBlockChainManager.Start();
+
+ 
             }
             else
             {

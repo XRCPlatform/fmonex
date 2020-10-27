@@ -1,5 +1,7 @@
-﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+﻿using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Users;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Facet;
@@ -20,16 +22,39 @@ namespace FreeMarketOne.Search.Tests
     [TestClass()]
     public class SearchIndexerTests
     {
-    /*TODO: implement following 
-     * fields to consider:
-     * Seller rating stars: facet
-     * Seller number of reviews range facet
-     * Seller active since epoch (probaly x days, x months, x years) range facet
-     * Seller name search for convenience
-     * Seller reviews, text? 
-     * Seller number of closed transactions?
-     * on product details page "see more from of this seller"
-     */
+        private IXRCHelper xrcHelper;
+        private static IBaseConfiguration config;
+        private IUserManager userManager;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            string indexDir = "search";
+            config = Substitute.For<IBaseConfiguration>();
+            config.SearchEnginePath.Returns(indexDir);
+            config.FullBaseDirectory.Returns(Environment.CurrentDirectory);
+
+            xrcHelper = Substitute.For<IXRCHelper>();
+            xrcHelper.GetTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new XRCTransactionSummary()
+            {
+                Confirmations = 10,
+                Date = DateTimeOffset.UtcNow.AddMinutes(-50),
+                Total = new Random(int.MaxValue).Next()
+            });
+
+            userManager = Substitute.For<IUserManager>();
+
+        }
+        /*TODO: implement following 
+         * fields to consider:
+         * Seller rating stars: facet
+         * Seller number of reviews range facet
+         * Seller active since epoch (probaly x days, x months, x years) range facet
+         * Seller name search for convenience
+         * Seller reviews, text? 
+         * Seller number of closed transactions?
+         * on product details page "see more from of this seller"
+         */
         [TestMethod()]
         public void CorrectlyCountsFacetsOnTermQuery()
         {
@@ -45,12 +70,14 @@ namespace FreeMarketOne.Search.Tests
                 Title = "1 Kilogram Gold Cast Bar Baird & Co",
                 Shipping = "International"
             };
-            
-            string indexDir = "./search";
-            string taxoDir = indexDir + "/taxonomy/";
+
+
 
             var marketManager = Substitute.For<IMarketManager>();
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
+            var indexDir = SearchHelper.GetDataFolder(config);
+            var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
+
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
             search.DeleteAll();
             search.Commit();
 
@@ -136,11 +163,14 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "Europe"
             };
 
-            string indexDir = "./search";
-            string taxoDir = indexDir + "/taxonomy/";
-
+            
             var marketManager = Substitute.For<IMarketManager>();
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
+            
+            var indexDir = SearchHelper.GetDataFolder(config);
+            var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
+
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null); 
+
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");
@@ -237,11 +267,14 @@ namespace FreeMarketOne.Search.Tests
                 Shipping = "Europe"
             };
 
-            string indexDir = "./search";
+            
 
             var marketManager = Substitute.For<IMarketManager>();
 
-            SearchIndexer search = new SearchIndexer(marketManager, indexDir);
+            var indexDir = SearchHelper.GetDataFolder(config);
+
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
+
             search.DeleteAll();
             search.Commit();
             search.Index(marketItem, "block-hash");

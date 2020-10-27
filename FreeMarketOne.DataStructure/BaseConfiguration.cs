@@ -70,5 +70,9 @@ namespace FreeMarketOne.DataStructure
         public string SearchEnginePath { get; set; }
 
         public int MinimalPeerAmount { get; set; }
+        public string XRCDaemonUri { get; set; }
+        public bool XRCDaemonUriSsl { get; set; }
+        public string XRCDaemonUser { get; set; }
+        public string XRCDaemonPassword { get; set; }
     }
 }

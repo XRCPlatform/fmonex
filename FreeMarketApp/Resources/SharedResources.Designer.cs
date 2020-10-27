@@ -223,6 +223,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please provide XRC transaction hash..
+        /// </summary>
+        internal static string Dialog_Confirmation_PleaseProvideXRCTransactionHash {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_PleaseProvideXRCTransactionHash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure that you want to remove this product? Changes will be propagated in next block (&quot;approx {0} sec&quot;)..
         /// </summary>
         internal static string Dialog_Confirmation_RemoveProduct {

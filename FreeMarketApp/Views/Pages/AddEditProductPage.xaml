@@ -201,13 +201,15 @@
                 <TextBlock Text="Price" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <StackPanel Orientation="Horizontal" Margin="20 -5 0 0">
                     <TextBox Name="TBPrice" Classes="TextBoxBackground" MaxLength="10" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Margin="0 10 10 0" FontSize="16"/>
-
+                   <TextBlock Text="XRC" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Normal"/>
+                  <!--
                     <VirtualizingStackPanel>
                         <ComboBox Name="CBPriceType" Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" FontSize="16" Margin="0 10 50 0" Padding="10" Width="100" HorizontalAlignment="Left">
                             <ComboBoxItem Classes="DropDown" Tag="0" Padding="7" Content="XRC"/>
                             <ComboBoxItem Classes="DropDown" Tag="1" Padding="7" Content="USD"/>
                         </ComboBox>
                     </VirtualizingStackPanel>
+                    -->
                 </StackPanel>
 
               <TextBlock Text="Deal Type" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
@@ -227,8 +229,12 @@
                   <ComboBoxItem Classes="DropDown" Padding="7" Tag="11" Content="Pay 100% before 0% after"/>
                 </ComboBox>
               </VirtualizingStackPanel>
+
+              <TextBlock Text="XRC Receiving Address" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+              <TextBox Name="TBXRCReceivingAddress" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="35" HorizontalAlignment="Left" Padding="10" Watermark="RbWDj3rh9vYNdiZSWtEL8X3CaKuBCYWveJ" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
+
               
-                <DockPanel Margin="20 50 50 0">
+              <DockPanel Margin="20 50 50 0">
                     <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
                     <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" FontSize="16" Margin="0 30 10 0" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>
                 </DockPanel>

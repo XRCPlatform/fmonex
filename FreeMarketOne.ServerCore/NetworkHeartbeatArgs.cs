@@ -7,10 +7,12 @@
         public int PeerCount { get; set; }
         public bool IsTorUp { get; internal set; }
 
-        public int PoolBaseLocalItems { get; internal set; }
-        public int PoolBaseStagedItems { get; internal set; }
+        public long BaseHeight { get; internal set; }
+        public int PoolBaseLocalItemsCount { get; internal set; }
+        public int PoolBaseStagedItemsCount { get; internal set; }
 
-        public int PoolMarketLocalItems { get; internal set; }
-        public int PoolMarketStagedItems { get; internal set; }
+        public long MarketHeight { get; internal set; }
+        public int PoolMarketLocalItemsCount { get; internal set; }
+        public int PoolMarketStagedItemsCount { get; internal set; }
     }
 }

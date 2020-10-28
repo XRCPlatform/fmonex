@@ -70,20 +70,25 @@ namespace FreeMarketOne.ServerCore
 
                 periodicCheckLog.AppendLine("======Service Manager Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
 
+                //publishing info to GUI
+                var networkHeartbeatInfo = new NetworkHeartbeatArgs();
+
                 CheckOnionSeedManager(periodicCheckLog);
-                CheckTorManager(periodicCheckLog);
-                CheckBaseBlockChainManager(periodicCheckLog);
-                CheckBasePoolManager(periodicCheckLog);
-                CheckMarketBlockChainManager(periodicCheckLog);
-                CheckMarketPoolManager(periodicCheckLog);
+                CheckTorManager(periodicCheckLog, networkHeartbeatInfo);
+                CheckBaseBlockChainManager(periodicCheckLog, networkHeartbeatInfo);
+                CheckBasePoolManager(periodicCheckLog, networkHeartbeatInfo);
+                CheckMarketBlockChainManager(periodicCheckLog, networkHeartbeatInfo);
+                CheckMarketPoolManager(periodicCheckLog, networkHeartbeatInfo);
                 CheckChatManager(periodicCheckLog);
 
                 Console.WriteLine(periodicCheckLog.ToString());
 
+                _networkHeartbeatEvent.Invoke(this, networkHeartbeatInfo);
+
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
-            repeatEvery: TimeSpans.FifteenSeconds,
+            repeatEvery: TimeSpans.TenSeconds,
             startAfter: TimeSpans.FiveSeconds);
 
             //Network HeartBeat loop checker
@@ -121,30 +126,6 @@ namespace FreeMarketOne.ServerCore
             {
                 baseUp = false;
             }
-
-            //publishing info to GUI
-            var networkHeartbeat = new NetworkHeartbeatArgs()
-            {
-                IsMarketChainNetworkConnected = marketUp,
-                IsBaseChainNetworkConnected = baseUp,
-                PeerCount = FMONE.Current.MarketBlockChainManager.SwarmServer.Peers.Count(),
-                IsTorUp = FMONE.Current.TorProcessManager.IsTorRunningAsync().ConfigureAwait(false).GetAwaiter().GetResult()
-            };
-
-            var isPoolBaseRunning = FMONE.Current.BasePoolManager?.IsPoolManagerRunning();
-            if (isPoolBaseRunning.GetValueOrDefault(false))
-            {
-                networkHeartbeat.PoolBaseLocalItems = FMONE.Current.BasePoolManager.GetAllActionItemLocalCount();
-                networkHeartbeat.PoolBaseStagedItems = FMONE.Current.BasePoolManager.GetAllActionItemStagedCount();
-            }
-            var isPoolMarketRunning = FMONE.Current.MarketPoolManager?.IsPoolManagerRunning();
-            if (isPoolMarketRunning.GetValueOrDefault(false))
-            {
-                networkHeartbeat.PoolMarketLocalItems = FMONE.Current.MarketPoolManager.GetAllActionItemLocalCount();
-                networkHeartbeat.PoolMarketStagedItems = FMONE.Current.MarketPoolManager.GetAllActionItemStagedCount();
-            }
-
-            _networkHeartbeatEvent.Invoke(this, networkHeartbeat);
 
             _expectedMarketChainPulse = DateTimeOffset.UtcNow;
             _expectedBaseChainPulse = DateTimeOffset.UtcNow;
@@ -188,7 +169,7 @@ namespace FreeMarketOne.ServerCore
             return state;
         }
 
-        private bool CheckTorManager(StringBuilder periodicCheckLog = null)
+        private bool CheckTorManager(StringBuilder periodicCheckLog = null, NetworkHeartbeatArgs networkHeartbeatInfo = null)
         {
             var state = false;
             try
@@ -202,10 +183,12 @@ namespace FreeMarketOne.ServerCore
             }
             periodicCheckLog?.AppendLine("Tor Manager : " + (state ? "Active" : "Idle"));
 
+            if (networkHeartbeatInfo != null) networkHeartbeatInfo.IsTorUp = state;
+
             return state;
         }
 
-        private bool CheckBaseBlockChainManager(StringBuilder periodicCheckLog = null)
+        private bool CheckBaseBlockChainManager(StringBuilder periodicCheckLog = null, NetworkHeartbeatArgs networkHeartbeatInfo = null)
         {
             var state = false;
             var fullState = false;
@@ -244,6 +227,8 @@ namespace FreeMarketOne.ServerCore
                 {
                     index = FMONE.Current.BaseBlockChainManager?.Storage?.CountIndex(chainId.Value);
                     if (index.HasValue) state = true;
+
+                    if (networkHeartbeatInfo != null) networkHeartbeatInfo.BaseHeight = index.GetValueOrDefault(0);
                 }
             }
             catch
@@ -269,10 +254,12 @@ namespace FreeMarketOne.ServerCore
 
             periodicCheckLog?.AppendLine();
 
+            if (networkHeartbeatInfo != null) networkHeartbeatInfo.IsBaseChainNetworkConnected = fullState;
+
             return fullState;
         }
 
-        private bool CheckMarketBlockChainManager(StringBuilder periodicCheckLog = null)
+        private bool CheckMarketBlockChainManager(StringBuilder periodicCheckLog = null, NetworkHeartbeatArgs networkHeartbeatInfo = null)
         {
             var state = false;
             var fullState = false;
@@ -292,7 +279,13 @@ namespace FreeMarketOne.ServerCore
             try
             {
                 var isSwarpServerRunning = FMONE.Current.MarketBlockChainManager?.SwarmServer?.Running;
-                if (isSwarpServerRunning.GetValueOrDefault(false)) state = true;
+                if (isSwarpServerRunning.GetValueOrDefault(false))
+                {
+                    state = true;
+
+                    if (networkHeartbeatInfo != null) networkHeartbeatInfo.PeerCount 
+                            = FMONE.Current.MarketBlockChainManager.SwarmServer.Peers.Count();
+                }
             }
             catch
             {
@@ -311,6 +304,8 @@ namespace FreeMarketOne.ServerCore
                 {
                     index = FMONE.Current.MarketBlockChainManager?.Storage?.CountIndex(chainId.Value);
                     if (index.HasValue) state = true;
+
+                    if (networkHeartbeatInfo != null) networkHeartbeatInfo.MarketHeight = index.GetValueOrDefault(0);
                 }
             }
             catch
@@ -336,6 +331,8 @@ namespace FreeMarketOne.ServerCore
 
             periodicCheckLog?.AppendLine();
 
+            if (networkHeartbeatInfo != null) networkHeartbeatInfo.IsMarketChainNetworkConnected = fullState;
+
             return fullState;
         }
 
@@ -356,7 +353,7 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        private bool CheckBasePoolManager(StringBuilder periodicCheckLog = null)
+        private bool CheckBasePoolManager(StringBuilder periodicCheckLog = null, NetworkHeartbeatArgs networkHeartbeatInfo = null)
         {
             var state = false;
             var fullState = false;
@@ -368,6 +365,12 @@ namespace FreeMarketOne.ServerCore
                 {
                     state = true;
                     entries = FMONE.Current.BasePoolManager.GetTotalCount();
+
+                    if (networkHeartbeatInfo != null)
+                    {
+                        networkHeartbeatInfo.PoolBaseLocalItemsCount = FMONE.Current.BasePoolManager.GetAllActionItemLocalCount();
+                        networkHeartbeatInfo.PoolBaseStagedItemsCount = FMONE.Current.BasePoolManager.GetAllActionItemStagedCount();
+                    }
                 }
             }
             catch
@@ -393,7 +396,7 @@ namespace FreeMarketOne.ServerCore
             return fullState;
         }
 
-        private bool CheckMarketPoolManager(StringBuilder periodicCheckLog = null)
+        private bool CheckMarketPoolManager(StringBuilder periodicCheckLog = null, NetworkHeartbeatArgs networkHeartbeatInfo = null)
         {
             var state = false;
             var fullState = false;
@@ -405,6 +408,12 @@ namespace FreeMarketOne.ServerCore
                 {
                     state = true;
                     entries = FMONE.Current.MarketPoolManager.GetTotalCount();
+
+                    if (networkHeartbeatInfo != null)
+                    {
+                        networkHeartbeatInfo.PoolMarketLocalItemsCount = FMONE.Current.MarketPoolManager.GetAllActionItemLocalCount();
+                        networkHeartbeatInfo.PoolMarketStagedItemsCount = FMONE.Current.MarketPoolManager.GetAllActionItemStagedCount();
+                    }
                 }
             }
             catch

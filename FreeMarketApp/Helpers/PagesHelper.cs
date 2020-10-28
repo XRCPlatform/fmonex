@@ -148,9 +148,11 @@ namespace FreeMarketApp.Helpers
         internal static void SetServerData(Window mainWindow, 
             bool peersUp, 
             bool torUp, 
-            int peersCount, 
+            int peersCount,
+            long baseHeight,
             int poolBaseLocalItemsCount, 
-            int poolBaseStagedItemsCount, 
+            int poolBaseStagedItemsCount,
+            long marketHeight,
             int poolMarketLocalItemsCount, 
             int poolMarketStagedItemsCount)
         {
@@ -197,11 +199,15 @@ namespace FreeMarketApp.Helpers
 
                         //publishing Base Pool info
                         var tbBasePool = mainWindow.FindControl<TextBlock>("TBBasePool");
+                        var tbBaseHeight = mainWindow.FindControl<TextBlock>("TBBaseHeight");
                         tbBasePool.Text = string.Format("{0}/{1}", poolBaseLocalItemsCount, poolBaseStagedItemsCount);
+                        tbBaseHeight.Text = baseHeight.ToString();
 
                         //publishing Market Pool info
                         var tbMarketPools = mainWindow.FindControl<TextBlock>("TBMarketPools");
+                        var tbMarketHeight = mainWindow.FindControl<TextBlock>("TBMarketHeight");
                         tbMarketPools.Text = string.Format("{0}/{1}", poolMarketLocalItemsCount, poolMarketStagedItemsCount);
+                        tbMarketHeight.Text = marketHeight.ToString();
                     }
                 }
                 catch (Exception)

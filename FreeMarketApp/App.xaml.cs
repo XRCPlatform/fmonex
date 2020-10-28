@@ -87,10 +87,12 @@ namespace FreeMarketApp
                 e.IsBaseChainNetworkConnected && e.IsMarketChainNetworkConnected, 
                 e.IsTorUp, 
                 e.PeerCount,
-                e.PoolBaseLocalItems,
-                e.PoolBaseStagedItems,
-                e.PoolMarketLocalItems,
-                e.PoolMarketStagedItems);
+                e.BaseHeight,
+                e.PoolBaseLocalItemsCount,
+                e.PoolBaseStagedItemsCount,
+                e.MarketHeight,
+                e.PoolMarketLocalItemsCount,
+                e.PoolMarketStagedItemsCount);
         }
 
         private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)

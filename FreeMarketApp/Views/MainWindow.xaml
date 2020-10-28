@@ -158,13 +158,17 @@
 			 <!-- Pool Base Info -->
 			 <Path Classes="SideBarIcon" Data="m26.667969 298.667969h94.226562l-19.453125 183.914062c-.085937.554688-.109375 2.195313-.109375 2.75 0 14.699219 11.96875 26.667969 26.667969 26.667969 8.363281 0 16.339844-4.011719 21.632812-11.113281l186.367188-266.21875c3.433594-4.589844 5.332031-10.261719 5.332031-16 0-14.699219-11.964843-26.667969-26.664062-26.667969h-115.328125l19.199218-162.199219c.0625-.617187.105469-2.515625.105469-3.132812.023438-14.699219-11.945312-26.667969-26.644531-26.667969-8.363281 0-16.339844 4.011719-21.800781 11.328125l-164.867188 244.671875c-3.433593 4.585938-5.332031 10.261719-5.332031 16 0 14.699219 11.96875 26.667969 26.667969 26.667969zm0 0" 
 				   VerticalAlignment="Center" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="9" Margin="5 0 0 0"/>
-			<TextBlock Text="BasePool: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
+			<TextBlock Text="BaseChain Height: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
+      <TextBlock Name="TBBaseHeight" Text="0" Classes="StatusBarText" FontSize="12" Margin="0 0 0 0" VerticalAlignment="Center"/>
+      <TextBlock Text="Pool: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
 			<TextBlock Name="TBBasePool" Text="0/0" Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
 
 			<!-- Pool Market Info -->
 			 <Path Classes="SideBarIcon" Data="m26.667969 298.667969h94.226562l-19.453125 183.914062c-.085937.554688-.109375 2.195313-.109375 2.75 0 14.699219 11.96875 26.667969 26.667969 26.667969 8.363281 0 16.339844-4.011719 21.632812-11.113281l186.367188-266.21875c3.433594-4.589844 5.332031-10.261719 5.332031-16 0-14.699219-11.964843-26.667969-26.664062-26.667969h-115.328125l19.199218-162.199219c.0625-.617187.105469-2.515625.105469-3.132812.023438-14.699219-11.945312-26.667969-26.644531-26.667969-8.363281 0-16.339844 4.011719-21.800781 11.328125l-164.867188 244.671875c-3.433593 4.585938-5.332031 10.261719-5.332031 16 0 14.699219 11.96875 26.667969 26.667969 26.667969zm0 0" 
 				   VerticalAlignment="Center" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="9" Margin="5 0 0 0"/>
-			<TextBlock Text="MarketPool: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
+			<TextBlock Text="MarketChain Height: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
+        <TextBlock Name="TBMarketHeight" Text="0" Classes="StatusBarText" FontSize="12" Margin="0 0 0 0" VerticalAlignment="Center"/>
+        <TextBlock Text="Pool: " Classes="StatusBarText" FontSize="12" VerticalAlignment="Center" Margin="5 0 0 0"/>
 			<TextBlock Name="TBMarketPools" Text="0/0" Classes="StatusBarText" FontSize="12" Margin="0 0 15 0" VerticalAlignment="Center"/>
       </WrapPanel>
 	  </Border>

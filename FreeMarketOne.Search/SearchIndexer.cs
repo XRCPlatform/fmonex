@@ -32,6 +32,7 @@ namespace FreeMarketOne.Search
         private readonly IUserManager _userManager;
         private readonly BasePoolManager _basePoolManager;
         private readonly IBlockChainManager<BaseAction> _baseBlockChain;
+        private static object lockobject = new object();
 
         public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
         {
@@ -95,43 +96,48 @@ namespace FreeMarketOne.Search
         /// <param name="blockHash"></param>
         public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null)
         {
-            double pricePerGram = 0F;
-            MarketCategoryEnum cat = (MarketCategoryEnum)marketItem.Category;
-            //new DealType().TryGetValue(marketItem.DealType, out string dealTypeString);
-            
-            //if we are re-running the block and same hash comes again, delete and add it again
-            Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
-            //if market item has a baseSignature then it's previous version's signature
-            //to remove previous versions of document from search we delete by signature
-            if (!string.IsNullOrEmpty(marketItem.BaseSignature)) {
-                Writer.DeleteDocuments(new Term("ID", marketItem.BaseSignature));
-            }
-
-            if (marketItem.WeightInGrams > 0 && marketItem.Price>0) {
-                pricePerGram = marketItem.Price / marketItem.WeightInGrams;
-            }           
-            
-            SellerAggregate sellerAggregate = null;
-
-            if (currentSellerAggregate == null)
+            // this can only be running single threaded as transaction totals and sequencing matters.
+            lock (lockobject)
             {
-                var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
+                double pricePerGram = 0F;
+                MarketCategoryEnum cat = (MarketCategoryEnum)marketItem.Category;
+                //new DealType().TryGetValue(marketItem.DealType, out string dealTypeString);
 
-                sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain);
-                if (sellerAggregate == null)
+                //if we are re-running the block and same hash comes again, delete and add it again
+                Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
+                //if market item has a baseSignature then it's previous version's signature
+                //to remove previous versions of document from search we delete by signature
+                if (!string.IsNullOrEmpty(marketItem.BaseSignature))
                 {
-                    sellerAggregate = new SellerAggregate()
-                    {
-                        TotalXRCVolume = 0
-                    };
+                    Writer.DeleteDocuments(new Term("ID", marketItem.BaseSignature));
                 }
-            }
-            else
-            {
-                sellerAggregate = currentSellerAggregate;
-            }
 
-            Document doc = new Document
+                if (marketItem.WeightInGrams > 0 && marketItem.Price > 0)
+                {
+                    pricePerGram = marketItem.Price / marketItem.WeightInGrams;
+                }
+
+                SellerAggregate sellerAggregate = null;
+
+                if (currentSellerAggregate == null)
+                {
+                    var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
+
+                    sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain);
+                    if (sellerAggregate == null)
+                    {
+                        sellerAggregate = new SellerAggregate()
+                        {
+                            TotalXRCVolume = 0
+                        };
+                    }
+                }
+                else
+                {
+                    sellerAggregate = currentSellerAggregate;
+                }
+
+                Document doc = new Document
             {
                 new StringField("ID", marketItem.Signature, Field.Store.YES),
                 new StringField("BlockHash", blockHash, Field.Store.YES),
@@ -145,7 +151,7 @@ namespace FreeMarketOne.Search
                 new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
                 new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),
                 //new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
-                new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),                
+                new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),
                 new DoubleDocValuesField("PricePerGram", pricePerGram),
                 new DoubleDocValuesField("Price", marketItem.Price),
                 new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
@@ -155,29 +161,30 @@ namespace FreeMarketOne.Search
                 //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
             };
 
-            //append all seller sha-hashes to a single multivalue field so that we can find by any.
-            //this should support find all seller items usecase, provided we hash seller's keys for query
-            foreach (var sellerPubKeyHash in sellerAggregate?.PublicKeyHashes)
-            {
-                doc.Add(new StringField("SellerPubKeyHash", sellerPubKeyHash, Field.Store.NO));
-            }
+                //append all seller sha-hashes to a single multivalue field so that we can find by any.
+                //this should support find all seller items usecase, provided we hash seller's keys for query
+                foreach (var sellerPubKeyHash in sellerAggregate?.PublicKeyHashes)
+                {
+                    doc.Add(new StringField("SellerPubKeyHash", sellerPubKeyHash, Field.Store.NO));
+                }
 
-            Writer.AddDocument(facetConfig.Build(_taxoWriter, doc));
-            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
-            Writer.Commit();
-            _taxoWriter.Commit();
+                Writer.AddDocument(facetConfig.Build(_taxoWriter, doc));
+                Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+                Writer.Commit();
+                _taxoWriter.Commit();
 
-            //remove now after all the toltals calculations
-            if (marketItem.State == (int)ProductStateEnum.Removed || marketItem.State == (int)ProductStateEnum.Sold)
-            {
-                DeleteMarketItem(marketItem);
-            }
+                //remove now after all the toltals calculations
+                if (marketItem.State == (int)ProductStateEnum.Removed || marketItem.State == (int)ProductStateEnum.Sold)
+                {
+                    DeleteMarketItem(marketItem);
+                }
 
-            if (updateAllSellerDocuments)
-            {
-                UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
-                //UpdateAllSellerDocumentsWithLatest(sellerAggregate);
-            }
+                if (updateAllSellerDocuments)
+                {
+                    UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
+                    //UpdateAllSellerDocumentsWithLatest(sellerAggregate);
+                }
+            }          
             
         }
 

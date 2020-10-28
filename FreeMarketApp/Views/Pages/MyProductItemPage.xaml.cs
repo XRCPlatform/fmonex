@@ -92,8 +92,6 @@ namespace FreeMarketApp.Views.Pages
                     var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(offer);
                     if (resultPool == null)
                     {
-                        FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
-
                         MyProductsPage.Instance = null;
                         PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
                         ClearForm();

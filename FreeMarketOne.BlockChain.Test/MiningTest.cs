@@ -104,7 +104,7 @@ namespace FreeMarketOne.BlockChain.Test
 
             //complete tx and send it to network
             SpinWait.SpinUntil(() => _baseBlockChainManager.SwarmServer.Running);
-            _basePoolManager.PropagateAllActionItemLocal();
+            _basePoolManager.PropagateAllActionItemLocal(true);
 
             //now waiting for mining
             SpinWait.SpinUntil((() => _basePoolManager.GetAllActionItemLocal().Count == 0));

@@ -276,7 +276,7 @@ namespace FreeMarketOne.ServerCore
                     {
                         if (BasePoolManager.AcceptActionItem(Users.UserData) == null)
                         {
-                            BasePoolManager.PropagateAllActionItemLocal();
+                            BasePoolManager.PropagateAllActionItemLocal(true);
                         }
                     }
                     else

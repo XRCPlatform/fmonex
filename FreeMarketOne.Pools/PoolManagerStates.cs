@@ -36,7 +36,12 @@ namespace FreeMarketOne.Pools
             /// <summary>
             /// Unexpected error
             /// </summary>
-            Unexpected = 5
+            Unexpected = 5,
+
+            /// <summary>
+            /// Too much staged tx
+            /// </summary>
+            TooMuchStagedTx = 6
         }
     }
 }

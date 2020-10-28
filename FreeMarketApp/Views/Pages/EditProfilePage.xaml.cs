@@ -192,8 +192,6 @@ namespace FreeMarketApp.Views.Pages
                     var resultPool = FMONE.Current.BasePoolManager.AcceptActionItem(updatedUserData);
                     if (resultPool == null)
                     {
-                        FMONE.Current.BasePoolManager.PropagateAllActionItemLocal();
-
                         await MessageBox.Show(mainWindow,
                             string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
                             SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),

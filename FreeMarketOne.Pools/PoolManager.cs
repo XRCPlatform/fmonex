@@ -1,27 +1,20 @@
-﻿using FreeMarketOne.BlockChain;
-using FreeMarketOne.BlockChain.Policy;
-using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using Libplanet;
 using Libplanet.Blockchain;
-using Libplanet.Blockchain.Policies;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.Extensions.Helpers;
 using Libplanet.Net;
 using Libplanet.RocksDBStore;
-using Libplanet.Tx;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,6 +22,15 @@ namespace FreeMarketOne.Pools
 {
     public class PoolManager<T> : IPoolManager, IDisposable where T : IBaseAction, new()
     {
+        /// <summary>
+        /// Maximal limit of tx in network pool
+        /// </summary>
+        private const int MAX_STAGEDTXCOUNTINNETWORK = 30;
+
+        /// <summary>
+        /// Maximal limit of local items to be included in tx
+        /// </summary>
+        private const int MAX_COUNTOFLOCALITEMSFORPROPAGATION = 5;
 
         private ILogger _logger { get; set; }
 
@@ -116,10 +118,11 @@ namespace FreeMarketOne.Pools
             coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
 
             var miningDelayStart = DateTime.MinValue;
-            var oldActionStaged = 0;
-            var oldActionLocal = 0;
+            var oldMiningActionStagedCount = 0;
+            var oldMiningActionLocalCount = 0;
 
-            var periodicLogLoop = this._asyncLoopFactory.Run("Mining_" + typeof(T).Name, (cancellation) =>
+            //mining
+            var periodicMiningLoop = this._asyncLoopFactory.Run("Mining_" + typeof(T).Name, (cancellation) =>
             {
                 _logger.Information("Mining Loop Check");
 
@@ -131,15 +134,15 @@ namespace FreeMarketOne.Pools
                 {
                     if (Interlocked.Read(ref _running) == 4)
                     {
-                        if ((actionStaged.Count < oldActionStaged) || (actionLocal.Count < oldActionLocal))
+                        if ((actionStaged.Count < oldMiningActionStagedCount) || (actionLocal.Count < oldMiningActionLocalCount))
                         {
                             _logger.Information("Stopping Mining Loop Checker.");
                             Interlocked.Exchange(ref _running, 1);
 
                             coMiningRunner.Stop();
                             coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
-                            oldActionStaged = 0;
-                            oldActionLocal = 0;
+                            oldMiningActionStagedCount = 0;
+                            oldMiningActionLocalCount = 0;
                         }
 
                         if (!coMiningRunner.IsActive)
@@ -157,8 +160,8 @@ namespace FreeMarketOne.Pools
 
                         Interlocked.Exchange(ref _running, 4);
                         miningDelayStart = DateTime.UtcNow.Add(_blockPolicy.BlockInterval);
-                        oldActionLocal = actionLocal.Count;
-                        oldActionStaged = actionStaged.Count;
+                        oldMiningActionLocalCount = actionLocal.Count;
+                        oldMiningActionStagedCount = actionStaged.Count;
                     }
                 }
                 else
@@ -170,8 +173,8 @@ namespace FreeMarketOne.Pools
 
                         coMiningRunner.Stop();
                         coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
-                        oldActionStaged = 0;
-                        oldActionLocal = 0;
+                        oldMiningActionStagedCount = 0;
+                        oldMiningActionLocalCount = 0;
                     }
                 }
 
@@ -179,6 +182,39 @@ namespace FreeMarketOne.Pools
             },
             _cancellationToken.Token,
             repeatEvery: _blockPolicy.PoolCheckInterval);
+
+            DateTime? broadcastTxDelayStart = DateTime.MinValue;
+
+            //auto broadcast tx
+            var periodicBroadcastTx = this._asyncLoopFactory.Run("BroadcastTx_" + typeof(T).Name, (cancellation) =>
+            {
+                _logger.Information("Broadcast Tx Loop Check");
+
+                var actionLocal = GetAllActionItemLocal();
+                if (actionLocal.Count() > 0)
+                {
+                    if (broadcastTxDelayStart.HasValue && (broadcastTxDelayStart <= DateTime.UtcNow))
+                    {
+                        _logger.Information("Propagate Tx from Local pool");
+
+                        PropagateAllActionItemLocal();
+                        broadcastTxDelayStart = null;
+                    } 
+                    else
+                    {
+                        broadcastTxDelayStart = DateTime.UtcNow.Add(TimeSpans.TenSeconds);
+                    }
+                } 
+                else
+                {
+                    broadcastTxDelayStart = null;
+                }
+
+                return Task.CompletedTask;
+            },
+            _cancellationToken.Token,
+            repeatEvery: TimeSpans.FiveSeconds,
+            startAfter: TimeSpans.TenSeconds);
 
             return true;
         }
@@ -504,33 +540,42 @@ namespace FreeMarketOne.Pools
             }
         }
 
-        public PoolManagerStates.Errors? PropagateAllActionItemLocal()
+        public PoolManagerStates.Errors? PropagateAllActionItemLocal(bool forceIt = false)
         {
             var actions = new List<T>();
             var action = new T();
 
             if (_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount)
             {
-                try
+                var stagedTxCount = GetAllActionItemStagedCount();
+
+                if ((stagedTxCount > MAX_STAGEDTXCOUNTINNETWORK) && (!forceIt))
                 {
-                    action.BaseItems.AddRange(_actionItemsList);
-                    actions.Add(action);
-
-                    var tx = _blockChain.MakeTransaction(_privateKey, actions);
-
-                    _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
-
-                    _blockChain.StageTransaction(tx);
-
-                    _logger.Information("Clearing all item actions from local pool.");
-                    _actionItemsList.Clear();
-
-                    return null;
-                }
-                catch (Exception e)
+                    return PoolManagerStates.Errors.TooMuchStagedTx;
+                } 
+                else
                 {
-                    _logger.Error("Unexpected error suring propagation of transaction.", e);
-                    return PoolManagerStates.Errors.Unexpected;
+                    try
+                    {
+                        action.BaseItems.AddRange(_actionItemsList.Take(MAX_COUNTOFLOCALITEMSFORPROPAGATION));
+                        actions.Add(action);
+
+                        var tx = _blockChain.MakeTransaction(_privateKey, actions);
+
+                        _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
+
+                        _blockChain.StageTransaction(tx);
+
+                        _logger.Information("Clearing all item actions from local pool.");
+                        _actionItemsList.Clear();
+
+                        return null;
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error("Unexpected error suring propagation of transaction.", e);
+                        return PoolManagerStates.Errors.Unexpected;
+                    }
                 }
             }
             else

@@ -111,7 +111,7 @@ namespace FreeMarketOne.BlockChain.Test
 
             //complete tx and send it to network
             SpinWait.SpinUntil(() => _baseBlockChainManager.SwarmServer.Running);
-            _basePoolManager.PropagateAllActionItemLocal();
+            _basePoolManager.PropagateAllActionItemLocal(true);
 
         }
     }

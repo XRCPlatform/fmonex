@@ -120,8 +120,6 @@ namespace FreeMarketApp.Views.Pages
                     var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
                     if (resultPool == null)
                     {
-                        FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
-
                         //create a new chat
                         var newChat = FMONE.Current.Chats.CreateNewChat(_offer);
                         FMONE.Current.Chats.SaveChat(newChat);

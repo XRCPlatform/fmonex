@@ -557,7 +557,8 @@ namespace FreeMarketOne.Pools
                 {
                     try
                     {
-                        action.BaseItems.AddRange(_actionItemsList.Take(MAX_COUNTOFLOCALITEMSFORPROPAGATION));
+                        var items = _actionItemsList.Take(MAX_COUNTOFLOCALITEMSFORPROPAGATION);
+                        action.BaseItems.AddRange(items);
                         actions.Add(action);
 
                         var tx = _blockChain.MakeTransaction(_privateKey, actions);
@@ -567,7 +568,10 @@ namespace FreeMarketOne.Pools
                         _blockChain.StageTransaction(tx);
 
                         _logger.Information("Clearing all item actions from local pool.");
-                        _actionItemsList.Clear();
+                        foreach (var item in items)
+                        {
+                            _actionItemsList.Remove(item);
+                        }
 
                         return null;
                     }

@@ -170,9 +170,7 @@ namespace FreeMarketOne.Search
             //remove now after all the toltals calculations
             if (marketItem.State == (int)ProductStateEnum.Removed || marketItem.State == (int)ProductStateEnum.Sold)
             {
-                Writer.DeleteDocuments(new Term("ID", marketItem.Signature));
-                Writer.Flush(triggerMerge: true, applyAllDeletes: true);
-                return;
+                DeleteMarketItem(marketItem);
             }
 
             if (updateAllSellerDocuments)

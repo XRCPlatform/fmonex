@@ -251,7 +251,10 @@ namespace FreeMarketApp.Views.Pages
                     _offer.Manufacturer = tbManufacturer.Text;
                     _offer.Fineness = tbFineness.Text;
                     _offer.Size = tbSize.Text;
-                    _offer.WeightInGrams = long.Parse(tbWeightInGrams.Text);             
+                    if (!string.IsNullOrEmpty(tbWeightInGrams.Text))
+                    {
+                        _offer.WeightInGrams = long.Parse(tbWeightInGrams.Text);
+                    }                  
 
                     _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());

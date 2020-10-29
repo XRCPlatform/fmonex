@@ -179,7 +179,7 @@ namespace FreeMarketOne.Search
                     DeleteMarketItem(marketItem);
                 }
 
-                if (updateAllSellerDocuments)
+                if (marketItem.State == (int)ProductStateEnum.Sold && updateAllSellerDocuments)
                 {
                     UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
                     //UpdateAllSellerDocumentsWithLatest(sellerAggregate);

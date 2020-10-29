@@ -88,11 +88,29 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your Fineness is too short..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyFineness {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyFineness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have to fill all fields and add at least one photo..
         /// </summary>
         internal static string Dialog_AddEditProduct_EmptyForm {
             get {
                 return ResourceManager.GetString("Dialog_AddEditProduct_EmptyForm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your Manufactorer is too short..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyManufacturer {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyManufacturer", resourceCulture);
             }
         }
         
@@ -111,6 +129,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_AddEditProduct_EmptyPriceType {
             get {
                 return ResourceManager.GetString("Dialog_AddEditProduct_EmptyPriceType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your XRC Receiving Address is too short..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_EmptyTBXRCReceivingAddress {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_EmptyTBXRCReceivingAddress", resourceCulture);
             }
         }
         

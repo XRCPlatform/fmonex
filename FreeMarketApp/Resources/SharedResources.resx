@@ -339,4 +339,13 @@
   <data name="UnknownValue" xml:space="preserve">
     <value>N/A</value>
   </data>
+  <data name="Dialog_AddEditProduct_EmptyFineness" xml:space="preserve">
+    <value>Your Fineness is too short.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_EmptyManufacturer" xml:space="preserve">
+    <value>Your Manufactorer is too short.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_EmptyTBXRCReceivingAddress" xml:space="preserve">
+    <value>Your XRC Receiving Address is too short.</value>
+  </data>
 </root>

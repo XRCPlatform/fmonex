@@ -10,9 +10,11 @@ using FreeMarketOne.Markets;
 using FreeMarketOne.Pools;
 using FreeMarketOne.Skynet;
 using Serilog;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static FreeMarketOne.Markets.MarketManager;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
@@ -181,6 +183,13 @@ namespace FreeMarketApp.Views.Pages
                 var errorMessages = new StringBuilder();
                 var textHelper = new TextHelper();
 
+                var cbCategoryValue = cbCategory.SelectedItem as ComboBoxItem;
+                if (cbCategoryValue.Tag.ToString() == "0")
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyCategory"));
+                    errorCount++;
+                }
+
                 if (string.IsNullOrEmpty(tbTitle.Text) || (tbTitle.Text.Length < 10))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortTitle"));
@@ -213,32 +222,66 @@ namespace FreeMarketApp.Views.Pages
                     }
                 }
 
-                if (!string.IsNullOrEmpty(tbWeightInGrams.Text) && !textHelper.IsNumberValid(tbWeightInGrams.Text))
-                {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsWeightInGrams"));
-                    errorCount++;
-                }
-
-                var cbCategoryValue = cbCategory.SelectedItem as ComboBoxItem;
-                if (cbCategoryValue.Tag.ToString() == "0")
-                {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyCategory"));
-                    errorCount++;
-                }
                 var cbDealTypeValue = cbDealType.SelectedItem as ComboBoxItem;
                 if (cbDealTypeValue.Tag.ToString() == "0")
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyDealValue"));
                     errorCount++;
                 }
+
                 if (_offer.Photos.Count() == 0)
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyPhoto"));
                     errorCount++;
                 }
-                
-                _offer.XRCReceivingAddress = tbTBXRCReceivingAddress.Text;
 
+                if (string.IsNullOrEmpty(tbTBXRCReceivingAddress.Text) || (tbTBXRCReceivingAddress.Text.Length < 20))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyTBXRCReceivingAddress"));
+                    errorCount++;
+                }
+
+                //validation based on category type
+                var selectedCategory = (MarketCategoryEnum)Enum.Parse(typeof(MarketCategoryEnum), cbCategoryValue.Tag.ToString());
+                switch (selectedCategory)
+                {
+                    case MarketCategoryEnum.Copper:
+                    case MarketCategoryEnum.Gold:
+                    case MarketCategoryEnum.Jewelry:
+                    case MarketCategoryEnum.Palladium:
+                    case MarketCategoryEnum.Platinum:
+                    case MarketCategoryEnum.Rhodium:
+                    case MarketCategoryEnum.Silver:
+
+                        if (!string.IsNullOrEmpty(tbWeightInGrams.Text) && !textHelper.IsNumberValid(tbWeightInGrams.Text))
+                        {
+                            errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsWeightInGrams"));
+                            errorCount++;
+                        }
+
+                        if (string.IsNullOrEmpty(tbManufacturer.Text) || (tbManufacturer.Text.Length < 1))
+                        {
+                            errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyManufacturer"));
+                            errorCount++;
+                        }
+
+                        if (string.IsNullOrEmpty(tbFineness.Text) || (tbFineness.Text.Length < 1))
+                        {
+                            errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyFineness"));
+                            errorCount++;
+                        }
+
+                        if (string.IsNullOrEmpty(tbSize.Text) || (tbSize.Text.Length < 1))
+                        {
+                            errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptySize"));
+                            errorCount++;
+                        }
+
+                        break;
+                    default:
+                        break;
+                }
+                
                 if (errorCount == 0)
                 {
                     PagesHelper.Log(_logger, string.Format("Saving new data of product."));
@@ -251,16 +294,14 @@ namespace FreeMarketApp.Views.Pages
                     _offer.Manufacturer = tbManufacturer.Text;
                     _offer.Fineness = tbFineness.Text;
                     _offer.Size = tbSize.Text;
-                    if (!string.IsNullOrEmpty(tbWeightInGrams.Text))
-                    {
-                        _offer.WeightInGrams = long.Parse(tbWeightInGrams.Text);
-                    }                  
+                    if (!string.IsNullOrEmpty(tbWeightInGrams.Text)) _offer.WeightInGrams = long.Parse(tbWeightInGrams.Text);
 
                     _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
                     _offer.Price = float.Parse(tbPrice.Text.Trim());
                     //_offer.PriceType = (cbPriceType.Tag != null && cbPriceType.Tag.ToString() == "1" ? 1 : 0);
-                    _offer.State = (int)MarketManager.ProductStateEnum.Default;
+                    _offer.State = (int)ProductStateEnum.Default;
+                    _offer.XRCReceivingAddress = tbTBXRCReceivingAddress.Text;
 
                     //get time to next block
                     //upload to sia

@@ -222,6 +222,10 @@
 			<Setter Property="Foreground" Value="#000000" />
 		</Style>
 
+    <Style Selector="TextBlock.H1Red">
+      <Setter Property="Foreground" Value="#FF0000" />
+    </Style>
+  
 		<Style Selector="RadioButton.H1">
 			<Setter Property="Foreground" Value="#000000" />
 		</Style>

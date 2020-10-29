@@ -26,7 +26,11 @@
             <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
                 <TextBlock Name="TBPageName" Text="Add New Listing" Classes="H1" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
 
-                <TextBlock Text="Category" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="Category" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
+              
                 <VirtualizingStackPanel>
                     <ComboBox Name="CBCategory" Classes="TextBoxBackground" MaxDropDownHeight="450" Height="45" SelectedIndex="0" BorderThickness="0" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
                         <ComboBoxItem Classes="DropDown" Padding="7" Tag="0" Content=""/>
@@ -42,10 +46,16 @@
                     </ComboBox>
                 </VirtualizingStackPanel>
 
-                <TextBlock Text="Title" Classes="H1" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="Title" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
                 <TextBox Name="TBTitle" Classes="TextBoxBackground" MaxLength="64" AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
-                <TextBlock Text="Description" Classes="H1" Margin="20 40 0 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="Description" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
                 <TextBox Name="TBDescription" Classes="TextBoxBackground" MaxLength="512" AcceptsReturn="True" Watermark="Describe your listing" Height="200" BorderThickness="0" Padding="10" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Manufacturer" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
@@ -54,15 +64,16 @@
                 <TextBlock Text="Fineness" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <TextBox Name="TBFineness" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="'999 fine rhodium', '24 karat gold' etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
-
                 <TextBlock Text="Size" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <TextBox Name="TBSize" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="1 oz, 1 troy ounce (ozt), 1 kg etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Weight in grams (without decimals)" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <TextBox Name="TBWeightInGrams" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="31 not 31.1035 " Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
-
-                <TextBlock Text="Photos" Classes="H1" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="Photos" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
                 <WrapPanel Margin="15 0 0 0">
 
                     <!-- Uploaded photo with a button to remove it -->
@@ -195,10 +206,16 @@
 
                 </WrapPanel>
 
-                <TextBlock Text="Shipping" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="Shipping" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
                 <TextBox Name="TBShipping" Classes="TextBoxBackground" AcceptsReturn="True" MaxLength="512" HorizontalAlignment="Left" Padding="10" Watermark="USA shipping, International etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
-                <TextBlock Text="Price" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="Price" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
                 <StackPanel Orientation="Horizontal" Margin="20 -5 0 0">
                     <TextBox Name="TBPrice" Classes="TextBoxBackground" MaxLength="10" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Margin="0 10 10 0" FontSize="16"/>
                    <TextBlock Text="XRC" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Normal"/>
@@ -212,7 +229,10 @@
                     -->
                 </StackPanel>
 
-              <TextBlock Text="Deal Type" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="Deal Type" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
               <VirtualizingStackPanel>
                 <ComboBox Name="CBDealType" Classes="TextBoxBackground" MaxDropDownHeight="450" SelectedIndex="0" BorderThickness="0" Height="45" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
                   <ComboBoxItem Classes="DropDown" Padding="7" Tag="0" Content=""/>
@@ -230,7 +250,10 @@
                 </ComboBox>
               </VirtualizingStackPanel>
 
-              <TextBlock Text="XRC Receiving Address" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+              <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+                <TextBlock Text="XRC Receiving Address" Classes="H1" FontSize="16" FontWeight="Bold"/>
+                <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+              </WrapPanel>
               <TextBox Name="TBXRCReceivingAddress" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="35" HorizontalAlignment="Left" Padding="10" Watermark="RbWDj3rh9vYNdiZSWtEL8X3CaKuBCYWveJ" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
               

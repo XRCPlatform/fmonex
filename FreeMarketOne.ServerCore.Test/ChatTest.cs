@@ -12,9 +12,7 @@ using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using System;
-using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace FreeMarketOne.ServerCore.Test
 {

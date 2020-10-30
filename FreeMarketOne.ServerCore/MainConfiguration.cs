@@ -11,6 +11,7 @@ namespace FreeMarketOne.ServerCore
         private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(300);
         private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(32);
         private static readonly TimeSpan _validBlockInterval = TimeSpan.FromDays(120);
+        private static readonly TimeSpan _periodicBroadcastInterval = TimeSpan.FromSeconds(10);
         private static readonly long _difficulty = 100000;
 
         public MainConfiguration()
@@ -39,6 +40,9 @@ namespace FreeMarketOne.ServerCore
             this.SearchEnginePath = "data/searchindex";
             this.MinimalPeerAmount = 4;
             this.XRCDaemonUri = "https://tpool.bitcoinrh.org/rpc/";
+            this.PoolMaxStagedTxCountInNetwork = 30;
+            this.PoolMaxCountOfLocalItemsPropagation = 5;
+            this.PoolPeriodicBroadcastTxInterval = _periodicBroadcastInterval;
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

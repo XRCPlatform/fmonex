@@ -41,7 +41,12 @@ namespace FreeMarketOne.Pools
             /// <summary>
             /// Too much staged tx
             /// </summary>
-            TooMuchStagedTx = 6
+            TooMuchStagedTx = 6,
+
+            /// <summary>
+            /// No local action items for propagation
+            /// </summary>
+            NoLocalActionItems = 7
         }
     }
 }

@@ -3,15 +3,14 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FreeMarketOne.ServerCore.Test
 {
     internal class DebugConfiguration : BaseConfiguration
     {
-        private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(30);
-        private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(6);
+        private static readonly TimeSpan _periodicBroadcastInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan? _validBlockInterval = null;
         private static readonly long _difficulty = 100000;
 
@@ -35,6 +34,9 @@ namespace FreeMarketOne.ServerCore.Test
             this.ChatPath = "data/debug_chat";
             this.SearchEnginePath = "data/debug_searchindex";
             this.MinimalPeerAmount = 0;
+            this.PoolMaxStagedTxCountInNetwork = 1;
+            this.PoolMaxCountOfLocalItemsPropagation = 5;
+            this.PoolPeriodicBroadcastTxInterval = _periodicBroadcastInterval;
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

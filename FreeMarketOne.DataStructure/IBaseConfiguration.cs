@@ -2,6 +2,7 @@
 using Libplanet.Action;
 using System.Net;
 using Libplanet.Extensions;
+using System;
 
 namespace FreeMarketOne.DataStructure
 {
@@ -41,5 +42,21 @@ namespace FreeMarketOne.DataStructure
         bool XRCDaemonUriSsl { get; set; }
         string XRCDaemonUser { get; set; }
         string XRCDaemonPassword { get; set; }
+
+
+        /// <summary>
+        /// Maximal limit of tx in network pool
+        /// </summary>
+        int PoolMaxStagedTxCountInNetwork { get; set; }
+
+        /// <summary>
+        /// Maximal limit of local items to be included in tx
+        /// </summary>
+        int PoolMaxCountOfLocalItemsPropagation { get; set; }
+
+        /// <summary>
+        /// Interval for propagation next batch to network pool
+        /// </summary>
+        TimeSpan PoolPeriodicBroadcastTxInterval { get; set; }
     }
 }

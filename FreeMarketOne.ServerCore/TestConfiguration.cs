@@ -11,6 +11,7 @@ namespace FreeMarketOne.ServerCore
         private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan _validBlockInterval = TimeSpan.FromDays(15);
+        private static readonly TimeSpan _periodicBroadcastInterval = TimeSpan.FromSeconds(10);
         private static readonly long _difficulty = 100000;
 
         public TestConfiguration()
@@ -39,6 +40,9 @@ namespace FreeMarketOne.ServerCore
             this.XRCDaemonUriSsl = false;
             this.XRCDaemonUser = "fm1_xrc_testnet_user";
             this.XRCDaemonPassword = "fm1_xrc_testnet_password";
+            this.PoolMaxStagedTxCountInNetwork = 30;
+            this.PoolMaxCountOfLocalItemsPropagation = 5;
+            this.PoolPeriodicBroadcastTxInterval = _periodicBroadcastInterval;
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,

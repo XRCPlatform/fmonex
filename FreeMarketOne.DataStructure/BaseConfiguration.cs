@@ -1,6 +1,7 @@
 ﻿using Libplanet.Action;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Extensions;
+using System;
 using System.Net;
 using System.Reflection;
 
@@ -74,5 +75,15 @@ namespace FreeMarketOne.DataStructure
         public bool XRCDaemonUriSsl { get; set; }
         public string XRCDaemonUser { get; set; }
         public string XRCDaemonPassword { get; set; }
+
+
+        /// <inheritdoc/>
+        public int PoolMaxStagedTxCountInNetwork { get; set; }
+
+        /// <inheritdoc/>
+        public int PoolMaxCountOfLocalItemsPropagation { get; set; }
+
+        /// <inheritdoc/>
+        public TimeSpan PoolPeriodicBroadcastTxInterval { get; set; }
     }
 }

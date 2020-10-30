@@ -27,6 +27,7 @@ namespace FreeMarketOne.BlockChain.Test
         private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
         private IBlockChainManager<BaseAction> _baseBlockChainManager;
         private UserPrivateKey _userPrivateKey;
+        private bool _newBlock = false;
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
@@ -113,6 +114,100 @@ namespace FreeMarketOne.BlockChain.Test
             SpinWait.SpinUntil(() => _baseBlockChainManager.SwarmServer.Running);
             _basePoolManager.PropagateAllActionItemLocal(true);
 
+            Assert.AreEqual(0, _basePoolManager.GetAllActionItemLocalCount());
+        }
+
+        private void BaseBlockChainChanged(object sender, EventArgs e)
+        {
+            //we have a new block
+            _newBlock = true;
+        }
+
+        [TestMethod]
+        public void RunPoolManager12ItemsTest()
+        {
+            var debugEnvironment = new DebugEnvironmentHelper();
+            _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
+            _baseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
+
+            debugEnvironment.Initialize<MiningTest>(
+                ref _configuration,
+                ref _logger,
+                ref _onionSeedsManager,
+                ref _basePoolManager,
+                ref _baseBlockChainManager,
+                ref _userPrivateKey,
+                ref _baseBlockChainLoadedEvent,
+                ref _baseBlockChainChangedEvent);
+
+            SpinWait.SpinUntil(() => _baseBlockChainManager.IsBlockChainManagerRunning());
+            SpinWait.SpinUntil(() => _basePoolManager != null);
+
+            //start loop process
+            _basePoolManager.Start();
+           
+            //complete tx and send it to network
+            SpinWait.SpinUntil(() => _baseBlockChainManager.SwarmServer.Running);
+            SpinWait.SpinUntil(() => _basePoolManager.IsRunning);
+
+            //generate new test action
+            for (int i = 0; i < 12; i++)
+            {
+                var testActionItem1 = new CheckPointMarketDataV1();
+                var genesisBlock = BlockChain<MarketAction>.MakeGenesisBlock();
+                testActionItem1.Block = ByteUtil.Hex(genesisBlock.Serialize());
+                testActionItem1.Hash = testActionItem1.GenerateHash();
+
+                var testActionItem2 = new ReviewUserDataV1();
+                testActionItem2.ReviewDateTime = DateTime.UtcNow.AddMinutes(-1);
+                testActionItem2.Message = "This is a test message " + i;
+                testActionItem2.Hash = testActionItem2.GenerateHash();
+
+                Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem1));
+                Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem2));
+            }
+
+            Assert.AreEqual(24, _basePoolManager.GetAllActionItemLocalCount());
+
+            //now wait until we havent a new block
+            SpinWait.SpinUntil((() => _newBlock == true));
+            Assert.IsTrue(_newBlock);
+            _newBlock = false;
+
+            SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
+            Assert.AreEqual(1, _basePoolManager.GetAllActionItemStagedCount());
+
+            //now wait until we havent a new block
+            SpinWait.SpinUntil((() => _newBlock == true));
+            Assert.IsTrue(_newBlock);
+            _newBlock = false;
+
+            SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
+            Assert.AreEqual(1, _basePoolManager.GetAllActionItemStagedCount());
+
+            //now wait until we havent a new block
+            SpinWait.SpinUntil((() => _newBlock == true));
+            Assert.IsTrue(_newBlock);
+            _newBlock = false;
+
+            SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
+            Assert.AreEqual(1, _basePoolManager.GetAllActionItemStagedCount());
+
+            //now wait until we havent a new block
+            SpinWait.SpinUntil((() => _newBlock == true));
+            Assert.IsTrue(_newBlock);
+            _newBlock = false;
+
+            SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
+            Assert.AreEqual(1, _basePoolManager.GetAllActionItemStagedCount());
+
+            //now wait until we havent a new block
+            SpinWait.SpinUntil((() => _newBlock == true));
+            Assert.IsTrue(_newBlock);
+            _newBlock = false;
+
+            SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemLocalCount() == 0);
+            Assert.AreEqual(0, _basePoolManager.GetAllActionItemLocalCount());
         }
     }
 }

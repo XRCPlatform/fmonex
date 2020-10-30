@@ -31,7 +31,10 @@ namespace Libplanet.Extensions.Helpers
                 {
                     coroutines[i].Pop();
                     if (coroutines[i].Count == 0)
+                    {
+                        IsActive = false;
                         coroutines.RemoveAt(i);
+                    }
                     continue;
                 }
 

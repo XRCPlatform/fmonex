@@ -15,7 +15,7 @@
               <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
             </StackPanel>
           </Button>
-          <Button Classes="sidebar" Cursor="Hand">
+          <Button Classes="sidebarSelected" Cursor="Hand">
             <StackPanel Orientation="Horizontal">
               <Path Classes="SideBarIcon" Data="M511.676,498.752l-12.8-51.2c-6.073-24.838-24.485-44.813-48.747-52.885l-93.867-31.275
 										c-22.891-9.536-33.365-46.4-35.627-60.395c17.442-14.504,28.665-35.14,31.36-57.664c-0.385-3.847,0.523-7.713,2.581-10.987

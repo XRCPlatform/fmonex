@@ -18,7 +18,6 @@ using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,7 +69,7 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
         public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
         public event EventHandler FreeMarketOneServerLoadedEvent;
-
+        public event EventHandler<string> LoadingEvent;
         public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
             var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
@@ -115,13 +114,16 @@ namespace FreeMarketOne.ServerCore
             if (Users.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
             {
                 //Service manager
+                LoadingEvent?.Invoke(this, "Loading Service Manager...");
                 Services = new ServiceManager(Configuration, NetworkHeartbeatEvent);
                 Services.Start();
 
                 //Market Manager
+                LoadingEvent?.Invoke(this, "Loading Market Manager...");
                 Markets = new MarketManager(Configuration);
 
                 //Initialize Tor
+                LoadingEvent?.Invoke(this, "Loading Tor Manager...");
                 TorProcessManager = new TorProcessManager(Configuration);
                 var torInitialized = TorProcessManager.Start();
 
@@ -129,17 +131,21 @@ namespace FreeMarketOne.ServerCore
                 if (torInitialized)
                 {
                     //Loading 
+                    LoadingEvent?.Invoke(this, "Loading Tor Circles Info...");
                     ServerPublicAddress.GetMyTorExitIP();
 
                     //Chat Manager
+                    LoadingEvent?.Invoke(this, "Loading Chat Manager...");
                     Chats = new ChatManager(Configuration, Users.PrivateKey, Users, ServerPublicAddress.PublicIP);
                     Chats.Start();
 
                     //Initialize OnionSeeds
+                    LoadingEvent?.Invoke(this, "Loading Onion Seed Manager...");
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
                     OnionSeedsManager.Start();
 
                     //Initialize Base BlockChain Manager
+                    LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
                     BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
 
                     BaseBlockChainManager = new BlockChainManager<BaseAction>(
@@ -156,8 +162,8 @@ namespace FreeMarketOne.ServerCore
                         blockDownloaded:null);
                     BaseBlockChainManager.Start();
 
-
                     //Initialize Base Pool
+                    LoadingEvent?.Invoke(this, "Loading Base Pool Manager...");
                     BasePoolManager = new BasePoolManager(
                         Configuration,
                         Configuration.MemoryBasePoolPath,
@@ -169,6 +175,7 @@ namespace FreeMarketOne.ServerCore
                     BasePoolManager.Start();
 
                     //Search indexer
+                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
                     XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
                     SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
                     SearchIndexer.Initialize();
@@ -195,6 +202,7 @@ namespace FreeMarketOne.ServerCore
                 OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
 
                 //Initialize Market Blockchain Manager
+                LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
                 MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
                 MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(Current.MarketBlockChainChanged);
                 MarketBlockDownloadedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockDownloadedEventHandler);
@@ -242,6 +250,7 @@ namespace FreeMarketOne.ServerCore
             //Initialize Market Pool Manager
             if (MarketBlockChainManager.IsBlockChainManagerRunning())
             {
+                LoadingEvent?.Invoke(this, "Loading Market Pool Manager...");
                 //Add Swarm server to seed manager
                 OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
 

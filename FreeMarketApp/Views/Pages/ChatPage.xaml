@@ -103,7 +103,7 @@
         </ScrollViewer>
 
         <!-- Typing and sending -->
-        <Grid VerticalAlignment="Bottom" Height="80">
+        <Grid VerticalAlignment="Bottom" Margin="0 0 0 20" Height="80">
           <Border Classes="ReplyTextbox" HorizontalAlignment="Stretch" BorderThickness="1" Margin="20 10 60 10" Padding="10 4" VerticalAlignment="Center" CornerRadius="10">
             <TextBox Name="TBMessage" IsEnabled="false" Classes="ReplyTextbox" AcceptsReturn="True" TextWrapping="Wrap" Padding="5" Watermark ="Type a message" Cursor="IBeam" VerticalAlignment="Top" Height="50" FontSize="15" BorderThickness="0" />
           </Border>

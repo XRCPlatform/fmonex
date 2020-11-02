@@ -5,6 +5,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.Markets;
 using Serilog;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
@@ -15,6 +16,10 @@ namespace FreeMarketApp.Views.Pages
     {
         private static MyProductsPage _instance;
         private ILogger _logger;
+        private static int selectedPageSize = 20;
+        private bool _initialized = false;
+        private List<FreeMarketOne.Search.Selector> _appliedFilters = new List<FreeMarketOne.Search.Selector>();
+        private IEnumerable<FreeMarketOne.DataStructure.Objects.BaseItems.MarketItemV1> myOffersSold;
 
         public static MyProductsPage Instance
         {
@@ -50,27 +55,41 @@ namespace FreeMarketApp.Views.Pages
                 PagesHelper.Log(_logger, string.Format("Loading my market offers from chain."));
 
                 var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
-
+                List<byte[]> list = new List<byte[]>();
+                list.Add(userPubKey);
                 //my own offers or sells
-                var myOffers = FMONE.Current.Markets.GetAllSellerMarketItemsByPubKeys(
-                    userPubKey,
-                    FMONE.Current.MarketPoolManager,
-                    FMONE.Current.MarketBlockChainManager);
+                //var myOffers = FMONE.Current.Markets.GetAllSellerMarketItemsByPubKeys(
+                //    userPubKey,
+                //    FMONE.Current.MarketPoolManager,
+                //    FMONE.Current.MarketBlockChainManager);
+
+                var engine = FMONE.Current.SearchEngine;                
+                var result = engine.Search(engine.BuildQueryBySellerPubKeys(list), false, 1);
 
                 var skynetHelper = new SkynetHelper();
-                skynetHelper.PreloadTitlePhotos(myOffers, _logger);
+                skynetHelper.PreloadTitlePhotos(result.Results, _logger);
 
-                var myOffersActive = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Default);
-                var myOffersSold = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);
+                //var myOffersActive = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Default);
+                myOffersSold = result.Results.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);
                 if (myOffersSold.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
 
-                DataContext = new MyProductsPageViewModel(myOffersActive, myOffersSold);
-            }           
+                DataContext = new MyProductsPageViewModel(result, myOffersSold, _appliedFilters);
+            }
+            SetPageSizeOnControl(selectedPageSize);
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+            _initialized = true;
+        }
+
+        private void SetPageSizeOnControl(int pageSize)
+        {
+            if (!_initialized) return;
+
+            var cbPageSize = this.FindControl<ComboBox>("CBPageSize");
+            cbPageSize.SelectedItem = cbPageSize.Items.OfType<ComboBoxItem>().Single(t => t.Content.Equals(pageSize.ToString()));
         }
 
         public void ButtonBack_Click(object sender, RoutedEventArgs args)
@@ -129,6 +148,65 @@ namespace FreeMarketApp.Views.Pages
                 chatPage.LoadChatByProduct(signature);
 
                 PagesHelper.Switch(mainWindow, chatPage);
+            }
+        }
+
+        public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
+        {
+
+            int thisPageSize = selectedPageSize;
+
+            string selection = ((Avalonia.Controls.ContentControl)((Avalonia.Controls.Primitives.SelectingItemsControl)sender).SelectedItem).Content.ToString();
+            if (int.TryParse(selection, out thisPageSize) && !thisPageSize.Equals(selectedPageSize))
+            {
+                if (!_initialized) return;// this is just false signal by app setting to expected value.
+
+                var engine = FMONE.Current.SearchEngine;
+                engine.PageSize = thisPageSize;
+                selectedPageSize = thisPageSize;
+
+                var currentSearchResult = ((MyProductsPageViewModel)this.DataContext).Result;
+                var result = engine.Search(currentSearchResult.CurrentQuery, false, 1);
+
+                var skynetHelper = new SkynetHelper();
+                skynetHelper.PreloadTitlePhotos(result.Results, _logger);
+                DataContext = new MyProductsPageViewModel(result, myOffersSold, _appliedFilters);
+            }
+        }
+
+        public void ButtonNextPage_Click(object sender, RoutedEventArgs args)
+        {
+            var engine = FMONE.Current.SearchEngine;
+            var currentSearchResult = ((MyProductsPageViewModel)this.DataContext).Result;
+
+            if (currentSearchResult.CurrentPage * currentSearchResult.PageSize < (currentSearchResult.TotalHits))
+            {
+                //current query has currently applied filters embeded, but also has page position and other parameters.
+                var currentQuery = currentSearchResult.CurrentQuery;
+
+                var result = engine.Search(currentQuery, false, currentSearchResult.CurrentPage + 1);
+
+                var skynetHelper = new SkynetHelper();
+                skynetHelper.PreloadTitlePhotos(result.Results, _logger);
+                DataContext = new MyProductsPageViewModel(result, myOffersSold, _appliedFilters);
+            }
+
+        }
+
+        public void ButtonPreviousPage_Click(object sender, RoutedEventArgs args)
+        {
+            var engine = FMONE.Current.SearchEngine;
+            var currentSearchResult = ((MyProductsPageViewModel)this.DataContext).Result;
+
+            if (currentSearchResult.CurrentPage > 1)
+            {
+                //current query has currently applied filters embeded, but also has page position and other parameters.
+                var currentQuery = currentSearchResult.CurrentQuery;
+                var result = engine.Search(currentQuery, false, currentSearchResult.CurrentPage - 1);
+
+                var skynetHelper = new SkynetHelper();
+                skynetHelper.PreloadTitlePhotos(result.Results, _logger);
+                DataContext = new MyProductsPageViewModel(result, myOffersSold, _appliedFilters);
             }
         }
 

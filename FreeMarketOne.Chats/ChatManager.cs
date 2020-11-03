@@ -1,4 +1,5 @@
-﻿using FreeMarketOne.DataStructure;
+﻿using Avalonia.Remote.Protocol;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
@@ -158,9 +159,17 @@ namespace FreeMarketOne.Chats
                                     }
                                 }
                             }
-                        }
 
-                        if (anyChange) SaveChat(chat);
+                            if (anyChange)
+                            {
+                                var savedChat = GetChat(chat.MarketItem.Hash);
+                                for (int i = 0; i < chat.ChatItems.Count; i++)
+                                {
+                                    savedChat.ChatItems[i] = chat.ChatItems[i];
+                                }
+                                SaveChat(savedChat);
+                            }
+                        }
                     }
                 }
 
@@ -266,8 +275,15 @@ namespace FreeMarketOne.Chats
                     continue;
                 }
 
-                item.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
-                result.Add(item);
+                try
+                {
+                    item.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
+                    result.Add(item);
+                }
+                catch (Exception )
+                {
+
+                }
             }
 
             return result;
@@ -309,7 +325,10 @@ namespace FreeMarketOne.Chats
                             newChatItem.Propagated = true;
 
                             localChat.ChatItems.Add(newChatItem);
-                            localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
+                            if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
+                            {
+                                localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
+                            }
 
                             _logger.Information("Saving local chat with new data.");
 
@@ -512,6 +531,7 @@ namespace FreeMarketOne.Chats
                     newChatItem.Message = Convert.ToBase64String(aes.Encrypt(Encoding.UTF8.GetBytes(message)));
                     newChatItem.DateCreated = DateTime.UtcNow;
                     newChatItem.Type = (int)DetectWhoIm(chatData);
+                    newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
 
                     chatData.ChatItems.Add(newChatItem);
 

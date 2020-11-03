@@ -2,6 +2,7 @@ using FreeMarketOne.BlockChain;
 using FreeMarketOne.BlockChain.Test.Helpers;
 using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P;
@@ -12,7 +13,9 @@ using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using System;
+using System.Linq;
 using System.Threading;
+using static FreeMarketOne.Chats.ChatManager;
 
 namespace FreeMarketOne.ServerCore.Test
 {
@@ -72,10 +75,28 @@ namespace FreeMarketOne.ServerCore.Test
             var newChat = ChatManager.CreateNewSellerChat(marketDemoData);
             ChatManager.SaveChat(newChat);
 
-            Thread.Sleep((int)TimeSpans.HalfMinute.TotalMilliseconds);
+            Thread.Sleep((int)TimeSpans.TenSeconds.TotalMilliseconds);
+            SpinWait.SpinUntil(() => ChatManager.GetChat(newChat.MarketItem.Hash).ChatItems.Count > 1);
+            SpinWait.SpinUntil(() => ChatManager.GetChat(newChat.MarketItem.Hash).ChatItems.First().Propagated == true);
 
+            //item vas propagated to peer
             var syncedChat = ChatManager.GetChat(newChat.MarketItem.Hash);
-            Assert.IsTrue(syncedChat.ChatItems.Count > 0);
+            Assert.IsTrue(syncedChat.ChatItems.Count == 2);
+
+            //propagate new chat message
+            syncedChat = ChatManager.GetChat(newChat.MarketItem.Hash);
+            ChatManager.PrepaireMessageToWorker(syncedChat, "this is a test");
+
+            Thread.Sleep((int)TimeSpans.TenSeconds.TotalMilliseconds);
+            SpinWait.SpinUntil(() => ChatManager.GetChat(newChat.MarketItem.Hash).ChatItems.Count > 3);
+            SpinWait.SpinUntil(() => ChatManager.GetChat(newChat.MarketItem.Hash).ChatItems[2].Propagated == true);
+
+            //loading latest chat data
+            syncedChat = ChatManager.GetChat(newChat.MarketItem.Hash);
+            var decryptedChat = ChatManager.DecryptChatItems(syncedChat.ChatItems); 
+
+            //only two of them are correct because of it two
+            Assert.IsTrue(decryptedChat.Count == 2);
         }
     }
 }

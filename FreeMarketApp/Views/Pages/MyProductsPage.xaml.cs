@@ -57,11 +57,6 @@ namespace FreeMarketApp.Views.Pages
                 var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
                 List<byte[]> list = new List<byte[]>();
                 list.Add(userPubKey);
-                //my own offers or sells
-                //var myOffers = FMONE.Current.Markets.GetAllSellerMarketItemsByPubKeys(
-                //    userPubKey,
-                //    FMONE.Current.MarketPoolManager,
-                //    FMONE.Current.MarketBlockChainManager);
 
                 var engine = FMONE.Current.SearchEngine;                
                 var result = engine.Search(engine.BuildQueryBySellerPubKeys(list), false, 1);

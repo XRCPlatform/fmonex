@@ -10,6 +10,7 @@
     <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00011" />
     <PackageReference Include="Lucene.Net.Facet" Version="4.8.0-beta00011" />
     <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00011" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.5" />
   </ItemGroup>
 
   <ItemGroup>

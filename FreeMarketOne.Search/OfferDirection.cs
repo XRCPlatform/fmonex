@@ -3,6 +3,7 @@
     public enum OfferDirection
     {
         Sold,
-        Bought
+        Bought,
+        Undetermined
     }
 }

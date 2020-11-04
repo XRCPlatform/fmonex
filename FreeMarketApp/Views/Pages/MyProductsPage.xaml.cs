@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.Markets;
+using FreeMarketOne.Search;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace FreeMarketApp.Views.Pages
         private bool _initialized = false;
         private List<FreeMarketOne.Search.Selector> _appliedFilters = new List<FreeMarketOne.Search.Selector>();
         private IEnumerable<FreeMarketOne.DataStructure.Objects.BaseItems.MarketItemV1> myOffersSold;
-
+        
         public static MyProductsPage Instance
         {
             get
@@ -64,11 +65,14 @@ namespace FreeMarketApp.Views.Pages
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
 
-                //var myOffersActive = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Default);
-                myOffersSold = result.Results.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);
-                if (myOffersSold.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
+                var myOffersSold = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, 1);
+                var myOffersBought = engine.GetMyOffers(OfferDirection.Bought, selectedPageSize, 1);
 
-                DataContext = new MyProductsPageViewModel(result, myOffersSold, _appliedFilters);
+                //var myOffersActive = myOffers.Where(a => a.State == (int)MarketManager.ProductStateEnum.Default);
+                //myOffersSold = result.Results.Where(a => a.State == (int)MarketManager.ProductStateEnum.Sold);
+                if (myOffersSold.Results.Any()) this.FindControl<TextBlock>("TBSoldProducts").IsVisible = true;
+
+                DataContext = new MyProductsPageViewModel(result, myOffersSold.Results, _appliedFilters);
             }
             SetPageSizeOnControl(selectedPageSize);
         }

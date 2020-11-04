@@ -23,6 +23,7 @@ namespace FreeMarketOne.Search
         FacetsConfig facetConfig = null;
         IMarketManager? marketManager = null;
         private readonly int MAX_RESULTS = 1000;
+        private NormalizedStore _normalizedStore = null;
 
         public int PageSize { get; set; }
         public List<string> FacetFieldNames { get; set; }
@@ -40,6 +41,7 @@ namespace FreeMarketOne.Search
             marketManager = marketChainManager;
             FacetFieldNames = new List<string> { "Category", "Shipping", "Fineness", "Manufacturer", "Size", "WeightInGrams", "PricePerGram", "Price" };
             //facetConfig.SetHierarchical("Category", true);
+            _normalizedStore = new NormalizedStore(searchIndexBasePath);
 
         }
 
@@ -217,6 +219,10 @@ namespace FreeMarketOne.Search
             return new TermQuery(new Term("ID", signature));
         }
 
+        public SearchResult GetMyOffers(OfferDirection offerDirection, int pageSize, int page)
+        {
+            return _normalizedStore.GetMyOffers(offerDirection, pageSize, page);
+        }
 
         //TODO: Relevance ranks biased by Seller Reputation scores. Higher scored stars, more successful high value deals closed, staking deposits and etc could comprise seller reputation.
     }

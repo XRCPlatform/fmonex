@@ -33,6 +33,7 @@ namespace FreeMarketOne.Search
         private readonly BasePoolManager _basePoolManager;
         private readonly IBlockChainManager<BaseAction> _baseBlockChain;
         private static object lockobject = new object();
+        private NormalizedStore _normalizedStore;
 
         public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
         {
@@ -57,6 +58,8 @@ namespace FreeMarketOne.Search
             _userManager = userManager;
             _basePoolManager = basePoolManager;
             _baseBlockChain = baseBlockChain;
+
+            _normalizedStore = new NormalizedStore(indexLocation);
         }
         
         public bool Initialize()
@@ -94,8 +97,9 @@ namespace FreeMarketOne.Search
         /// </summary>
         /// <param name="marketItem"></param>
         /// <param name="blockHash"></param>
-        public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null)
+        public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null, bool isMyOffer = false, OfferDirection offerDirection = OfferDirection.Undetermined)
         {
+            
             // this can only be running single threaded as transaction totals and sequencing matters.
             lock (lockobject)
             {
@@ -181,8 +185,33 @@ namespace FreeMarketOne.Search
 
                 if (marketItem.State == (int)ProductStateEnum.Sold && updateAllSellerDocuments)
                 {
+                    var direction = offerDirection;
+                    if (offerDirection == OfferDirection.Undetermined)
+                    {
+                        var currentUserPubKey = _userManager.GetCurrentUserPublicKey();
+                        if (sellerAggregate.PublicKeys.Exists(x => x.SequenceEqual(currentUserPubKey)))
+                        {
+                            isMyOffer = true;
+                            direction = OfferDirection.Sold;
+                        }
+                        else
+                        {
+                            var buyerPubKeys = _marketManager.GetBuyerPubKeyFromMarketItem(marketItem);
+                            if (buyerPubKeys.Exists(x => x.SequenceEqual(currentUserPubKey)))
+                            {
+                                isMyOffer = true;
+                                direction = OfferDirection.Bought;
+                            }
+                        }
+                    }
+                   
+                    //only save here sold / bought items
+                    if (isMyOffer)
+                    {
+                        _normalizedStore.Save(marketItem, direction);
+                    }
+                    
                     UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
-                    //UpdateAllSellerDocumentsWithLatest(sellerAggregate);
                 }
             }          
             
@@ -226,7 +255,7 @@ namespace FreeMarketOne.Search
                     if (!searchResult.Results[y].Signature.Equals(skipSignature) 
                         && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
                     {
-                        Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate);
+                        Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate, true, OfferDirection.Sold);
                     }
                 }
             }           

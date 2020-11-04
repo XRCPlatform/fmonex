@@ -156,6 +156,7 @@
         <TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <TextBlock Classes="H1"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
+          <Button Name="BTCopyToClipboard" HorizontalAlignment="Left" FontSize="16" Cursor="Hand" Click="ButtonCopyToClipboard_Click">Copy</Button>
         </StackPanel>
         <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
         <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>

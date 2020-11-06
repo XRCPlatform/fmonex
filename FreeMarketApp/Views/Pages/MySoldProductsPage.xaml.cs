@@ -13,20 +13,21 @@ using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
 {
-    public class MyProductsPage : UserControl
+    public class MySoldProductsPage : UserControl
     {
-        private static MyProductsPage _instance;
+        private static MySoldProductsPage _instance;
         private ILogger _logger;
         private static int selectedPageSize = 20;
         private bool _initialized = false;
         private List<Selector> _appliedFilters = new List<Selector>();
+
         
-        public static MyProductsPage Instance
+        public static MySoldProductsPage Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new MyProductsPage();
+                    _instance = new MySoldProductsPage();
                 return _instance;
             }
             set
@@ -35,19 +36,24 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
-        public static MyProductsPage GetInstance()
+        public static MySoldProductsPage GetInstance()
         {
             return _instance;
         }
 
+        public MySoldProductsPage():this(true)
+        {
 
-        public MyProductsPage()
+        }
+
+        public MySoldProductsPage(bool fill = true)
         {
             if (FMONE.Current.Logger != null)
                 _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(MyProductsPage).Namespace, typeof(MyProductsPage).Name));
 
             this.InitializeComponent();
+
             if ((FMONE.Current.Markets != null) && (FMONE.Current.Users != null))
             {
                 SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
@@ -59,11 +65,10 @@ namespace FreeMarketApp.Views.Pages
                 list.Add(userPubKey);
 
                 var engine = FMONE.Current.SearchEngine;
-                var result = engine.Search(engine.BuildQueryBySellerPubKeys(list), false, 1);
+                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, 1);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
-
                 DataContext = new MyProductsPageViewModel(result, _appliedFilters);
             }
 
@@ -88,19 +93,11 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            PagesHelper.Switch(mainWindow, MainPage.Instance);
+            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
 
             ClearForm();
         }
 
-        public void ButtonAdd_Click(object sender, RoutedEventArgs args)
-        {
-            var mainWindow = PagesHelper.GetParentWindow(this);
-
-            PagesHelper.Switch(mainWindow, AddEditProductPage.Instance);
-
-            ClearForm();
-        }
 
         public void ButtonBoughtProducts_Click(object sender, RoutedEventArgs args)
         {
@@ -111,16 +108,7 @@ namespace FreeMarketApp.Views.Pages
             ClearForm();
         }
 
-        public void ButtonSoldProducts_Click(object sender, RoutedEventArgs args)
-        {
-            var mainWindow = PagesHelper.GetParentWindow(this);
-
-            PagesHelper.Switch(mainWindow, MySoldProductsPage.Instance);
-
-            ClearForm();
-        }
-
-        public void ButtonProduct_Click(object sender, RoutedEventArgs args)
+        public void ButtonSoldProduct_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
@@ -129,14 +117,13 @@ namespace FreeMarketApp.Views.Pages
             var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
             if ((marketItem != null) && (!marketItem.IsInPool))
             {
-                var myProductItemPage = MyProductItemPage.Instance;
-                myProductItemPage.LoadProduct(signature);
+                var chatPage = ChatPage.Instance;
+                chatPage.LoadChatByProduct(signature);
 
-                PagesHelper.Switch(mainWindow, myProductItemPage);
+                PagesHelper.Switch(mainWindow, chatPage);
             }
         }
 
-        
         public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
         {
 
@@ -152,7 +139,7 @@ namespace FreeMarketApp.Views.Pages
                 selectedPageSize = thisPageSize;
 
                 var currentSearchResult = ((MyProductsPageViewModel)this.DataContext).Result;
-                var result = engine.Search(currentSearchResult.CurrentQuery, false, 1);
+                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -167,10 +154,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (currentSearchResult.CurrentPage * currentSearchResult.PageSize < (currentSearchResult.TotalHits))
             {
-                //current query has currently applied filters embeded, but also has page position and other parameters.
-                var currentQuery = currentSearchResult.CurrentQuery;
-
-                var result = engine.Search(currentQuery, false, currentSearchResult.CurrentPage + 1);
+                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage + 1);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -186,10 +170,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (currentSearchResult.CurrentPage > 1)
             {
-                //current query has currently applied filters embeded, but also has page position and other parameters.
-                var currentQuery = currentSearchResult.CurrentQuery;
-                var result = engine.Search(currentQuery, false, currentSearchResult.CurrentPage - 1);
-
+                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage - 1);
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
                 DataContext = new MyProductsPageViewModel(result, _appliedFilters);
@@ -198,7 +179,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            //_instance = new MyProductsPage();
+            //_instance = new MySoldProductsPage(false);
         }
     }
 }

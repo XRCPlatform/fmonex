@@ -62,13 +62,11 @@ namespace FreeMarketOne.Search
         {
             long totalHits = 0;
             List<MarketItemV1> results = new List<MarketItemV1>();
-
-            if (page == 1)
+            int pageOffset = 0;
+            if (page > 1)
             {
-                page = 0;
+                pageOffset = page * pageSize;
             }
-            
-            int pageOffset = page * pageSize;
 
             var sqlCount = $"SELECT COUNT('') FROM Offer WHERE offerDirection = $offerDirection ";
             var sql = $"SELECT Data FROM Offer WHERE offerDirection = $offerDirection order by Id desc limit {pageSize} offset {pageOffset} ";

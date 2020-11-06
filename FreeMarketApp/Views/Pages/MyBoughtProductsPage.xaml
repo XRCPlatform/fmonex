@@ -43,12 +43,44 @@
                   <TextBlock Margin="7,0,0,0" Text="Bought products"/>
                 </StackPanel>
               </Button>
+
+              <Button Classes="sidebar" Click="ButtonSoldProducts_Click" Cursor="Hand">
+                <StackPanel Orientation="Horizontal">
+                  <Path Classes="SideBarIcon" Data="M479.823,495.711L463.782,14.5C463.512,6.415,456.88,0,448.791,0H63.19c-8.09,0-14.723,6.415-14.992,14.5l-16.066,482
+			c-0.135,4.063,1.385,8.007,4.211,10.929S43.06,512,47.124,512h417.733c0.009,0.001,0.015,0.001,0.021,0c8.283,0,15-6.716,15-15
+			C479.878,496.565,479.858,496.136,479.823,495.711z M255.99,222.8c-61.427,0-111.4-49.974-111.4-111.4c0-8.284,6.716-15,15-15
+			s15,6.716,15,15c0,44.885,36.517,81.4,81.4,81.4c44.884,0,81.4-36.516,81.4-81.4c0-8.284,6.716-15,15-15s15,6.716,15,15
+			C367.39,172.826,317.417,222.8,255.99,222.8z"
+            HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="14" />
+                  <TextBlock Margin="7,0,0,0" Text="Sold products"/>
+                </StackPanel>
+              </Button>
               
             </StackPanel>
         </ScrollViewer>
         <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
+    <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
+      <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
 
+      <!-- Number of search results -->
+      <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
+
+      <TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
+      <VirtualizingStackPanel>
+
+        <!-- Dropdown menu -->
+        <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
+          <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
+          <ComboBoxItem Classes="DropDown" Padding="7" Content="2"/>
+          <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
+          <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
+          <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
+          <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
+        </ComboBox>
+      </VirtualizingStackPanel>
+    </StackPanel>
+    
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch">
@@ -118,7 +150,28 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
+              <!-- Pagination of product list -->
+              <StackPanel Orientation="Horizontal" Margin="20 30 0 30">
+                <Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonPreviousPage_Click" IsVisible="{Binding ShowPreviousPage}" >
+                  <StackPanel Orientation="Horizontal">
+                    <Path Classes="BlueIcon" Data="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0 c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744	c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"
+                        HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+                    <TextBlock Text="Previous " Margin="5 0 0 0" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                    <!-- Bind sellected page size -->
+                    <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                  </StackPanel>
+                </Button>
 
+                <Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonNextPage_Click" IsVisible="{Binding ShowNextPage}">
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Next " HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                    <!-- Bind sellected page size -->
+                    <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
+                    <Path Classes="BlueIcon" Data="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284	c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"
+                        HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+                  </StackPanel>
+                </Button>
+              </StackPanel>
             </StackPanel>
         </ScrollViewer>
 </Grid>

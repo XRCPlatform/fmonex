@@ -10,11 +10,10 @@ namespace FreeMarketApp.ViewModels
 {
     public class MyProductsPageViewModel : ViewModelBase
     {
-        public MyProductsPageViewModel(SearchResult searchResult, IEnumerable<MarketItemV1> soldItems, List<Selector> appliedFilters)
+        public MyProductsPageViewModel(SearchResult searchResult, List<Selector> appliedFilters)
         {
             AppliedFilters = appliedFilters;
             Items = new ObservableCollection<MarketItemV1>((IEnumerable<MarketItemV1>)searchResult.Results);
-            SoldItems = new ObservableCollection<MarketItemV1>(soldItems);
             Facets = new ObservableCollection<FacetResult>((IEnumerable<FacetResult>)searchResult.Facets);
             Filters = new ObservableCollection<PresentableFacet>((IEnumerable<PresentableFacet>)JoinAppliedFilters(AppliedFilters, searchResult.Facets));
             Result = searchResult;
@@ -24,7 +23,6 @@ namespace FreeMarketApp.ViewModels
         public ObservableCollection<MarketItemV1> Items { get; set; }
         public ObservableCollection<FacetResult> Facets { get; }
         public ObservableCollection<PresentableFacet> Filters { get; private set; }
-        public ObservableCollection<MarketItemV1> SoldItems { get; set; }
 
         /// <summary>
         /// Search result sumary object providing search result counts, page size, current page and etc.

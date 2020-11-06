@@ -11,6 +11,7 @@ using Libplanet.Extensions;
 using Serilog;
 using System;
 using System.Linq;
+using TextCopy;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
@@ -176,6 +177,11 @@ namespace FreeMarketApp.Views.Pages
 
                 ClearForm();
             }
+        }
+
+        public async void ButtonCopyToClipboard_Click(object sender, RoutedEventArgs args)
+        {
+            await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
         }
 
         public void LoadProduct(string signature)

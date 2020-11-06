@@ -7,6 +7,7 @@ using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.Users;
 using Serilog;
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
@@ -16,6 +17,7 @@ namespace FreeMarketApp.Views.Pages
     public class LoginPage : UserControl
     {
         private static LoginPage _instance;
+        private static SplashWindowViewModel splashViewModel;
         private ILogger _logger;
 
         public static LoginPage Instance
@@ -79,14 +81,13 @@ namespace FreeMarketApp.Views.Pages
                 //reloading server with splash window
                 async void AppAsyncLoadingStart()
                 {
-                    var splashViewModel = new SplashWindowViewModel();
+                    splashViewModel = new SplashWindowViewModel();
                     splashViewModel.StartupProgressText = "Unlocking...";
                     var splashWindow = new SplashWindow { DataContext = splashViewModel };
                     splashWindow.Show();
                     await Task.Delay(10);
+                    await GetAppLoadingAsync(tbPassword.Text);
 
-                    FMONE.Current.Initialize(tbPassword.Text);
-                    
                     if (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
@@ -113,6 +114,22 @@ namespace FreeMarketApp.Views.Pages
                     SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
                     MessageBox.MessageBoxButtons.Ok);
             }
+        }
+
+        private static async Task<bool> GetAppLoadingAsync(string password)
+        {
+            await Task.Run(() =>
+            {
+                FMONE.Current.LoadingEvent += new EventHandler<string>(LoadingEvent);
+                FMONE.Current.Initialize(password);
+            }).ConfigureAwait(true);
+
+            return true;
+        }
+
+        private static void LoadingEvent(object sender, string message)
+        {
+            splashViewModel.StartupProgressText = message;
         }
     }
 }

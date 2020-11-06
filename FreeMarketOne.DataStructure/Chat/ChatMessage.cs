@@ -39,8 +39,8 @@ namespace FreeMarketOne.DataStructure.Chat
         {
             var message = new NetMQMessage();
 
-            message.Append(new NetMQFrame(Message));
-            message.Append(new NetMQFrame(ExtraMessage));
+            message.Append(new NetMQFrame(Message == null ? string.Empty : Message));
+            message.Append(new NetMQFrame(ExtraMessage == null ? string.Empty : ExtraMessage));
             message.Append(new NetMQFrame(DateCreated.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'", null)));
             message.Append(new NetMQFrame(Hash));
 

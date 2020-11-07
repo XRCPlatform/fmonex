@@ -60,33 +60,33 @@
         </ScrollViewer>
         <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
-    <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-      <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
-
-      <!-- Number of search results -->
-      <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
-
-      <TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
-      <VirtualizingStackPanel>
-
-        <!-- Dropdown menu -->
-        <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
-          <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
-          <ComboBoxItem Classes="DropDown" Padding="7" Content="2"/>
-          <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
-          <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
-          <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
-          <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
-        </ComboBox>
-      </VirtualizingStackPanel>
-    </StackPanel>
-    
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch">
                 <WrapPanel Orientation="Horizontal" Margin="20 20 20 10">
                     <TextBlock Classes="H1" Text="Bought Products" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
                 </WrapPanel>
+
+              <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
+                <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+
+                <!-- Number of search results -->
+                <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
+
+                <TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
+                <VirtualizingStackPanel>
+
+                  <!-- Dropdown menu -->
+                  <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="2"/>
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
+                  </ComboBox>
+                </VirtualizingStackPanel>
+              </StackPanel>
 
               <ItemsControl Items="{Binding Items}">
                 <ItemsControl.ItemTemplate>

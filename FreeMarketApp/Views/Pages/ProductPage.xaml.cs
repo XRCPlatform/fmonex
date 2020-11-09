@@ -12,6 +12,7 @@ using Serilog;
 using System;
 using System.Linq;
 using TextCopy;
+using static FreeMarketOne.Markets.MarketManager;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
@@ -227,7 +228,7 @@ namespace FreeMarketApp.Views.Pages
                 tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
 
                 btBuyButton.IsEnabled = true;
-                if (!String.IsNullOrEmpty(_offer.BaseSignature))
+                if (!String.IsNullOrEmpty(_offer.BuyerSignature) || _offer.State == (int)ProductStateEnum.Sold)
                 {
                     btBuyButton.IsEnabled = false;
                 }

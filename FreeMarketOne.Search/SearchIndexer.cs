@@ -16,6 +16,7 @@ using FreeMarketOne.Users;
 using FreeMarketOne.Pools;
 using FreeMarketOne.BlockChain;
 using static FreeMarketOne.Markets.MarketManager;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.Search
 {
@@ -210,8 +211,8 @@ namespace FreeMarketOne.Search
                     {
                         _normalizedStore.Save(marketItem, direction);
                     }
+                    Task.Run(() => UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash));
                     
-                    UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
                 }
             }          
             
@@ -231,7 +232,7 @@ namespace FreeMarketOne.Search
         private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
         {
             //search all market items by seller pubkey hash
-            SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 50);
+            SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 10);
             var query = engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
             var searchResult = engine.Search(query, false);
 

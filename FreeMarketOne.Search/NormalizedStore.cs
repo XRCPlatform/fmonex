@@ -160,15 +160,32 @@ namespace FreeMarketOne.Search
                                 command.ExecuteNonQuery();
                             }
 
+                            sql = "CREATE TABLE \"Party\" (" +
+                                  "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                                  "\"pubKey\"  TEXT NOT NULL UNIQUE, " +
+                                  "\"blockHash\"  TEXT NOT NULL, " +
+                                  "\"Data\" TEXT NULL " +
+                                  "); ";
+                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                            {
+                                command.ExecuteNonQuery();
+                            }
+
                             sql = "CREATE UNIQUE INDEX \"ix_Signature\" ON \"Offer\" (\"Signature\");";
 
                             using (var command = new SQLiteCommand(sql, dbConnection, transaction))
                             {
                                 command.ExecuteNonQuery();
-                            }                           
+                            }
 
+                            sql = "CREATE UNIQUE INDEX \"ix_pubKey\" ON \"Party\" (\"pubKey\");";
 
-                            transaction.Commit();
+                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                            {
+                                command.ExecuteNonQuery();
+                            }
+
+                        transaction.Commit();
                         }
                         catch (Exception e)
                         {
@@ -178,6 +195,60 @@ namespace FreeMarketOne.Search
                     }
                 }
             }
+
+        public bool Save(UserDataV1 item, string blockHash)
+        {
+            using (var dbConnection = new SQLiteConnection(this.connection))
+            {
+                dbConnection.Open();
+
+                using (var dbTransaction = dbConnection.BeginTransaction())
+                {
+                    var delete = "DELETE FROM Party WHERE pubKey = $pubKey";
+                    using (var deleteCommand = new SQLiteCommand(delete, dbConnection, dbTransaction))
+                    {
+                        deleteCommand.Parameters.AddWithValue("$pubKey", item.PublicKey);
+                        deleteCommand.ExecuteNonQuery();
+                    }
+
+                    var sql = "INSERT INTO Party ( pubKey, blockHash,  Data) VALUES ( $pubKey, $blockHash, $Data)";
+                    using (var insertCommand = new SQLiteCommand(sql, dbConnection, dbTransaction))
+                    {
+                        insertCommand.Parameters.AddWithValue("$pubKey", item.PublicKey);
+                        insertCommand.Parameters.AddWithValue("$blockHash", blockHash);
+                        insertCommand.Parameters.AddWithValue("$Data", JsonConvert.SerializeObject(item));
+                        insertCommand.ExecuteNonQuery();
+                    }
+
+                    dbTransaction.Commit();
+                }
+            }
+            return true;
         }
+
+
+        public UserDataV1 Get(string pubKey)
+        {
+            using (var dbConnection = new SQLiteConnection(this.connection))
+            {
+                dbConnection.Open();
+
+                var select = "SELECT data FROM Party WHERE pubKey = $pubKey";
+                using (var selectCommand = new SQLiteCommand(select, dbConnection))
+                {
+                    selectCommand.Parameters.AddWithValue("$pubKey", pubKey);
+                    using (var reader = selectCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            return JsonConvert.DeserializeObject<UserDataV1>(reader.GetString(0));
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+    }
     
 }

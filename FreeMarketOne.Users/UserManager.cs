@@ -249,33 +249,18 @@ namespace FreeMarketOne.Users
 
                     foreach (var itemPool in poolItems)
                     {
-                        var itemPoolBytes = itemPool.ToByteArrayForSign();
-                        var itemPubKeys = UserPublicKey.Recover(itemPoolBytes, itemPool.Signature);
-
-                        foreach (var itemPubKey in itemPubKeys)
+                        var userData = (UserDataV1)itemPool;
+                        if (userData.PublicKey != null)
                         {
+                            var publicKeyBytes = Convert.FromBase64String(userData.PublicKey);
+
                             foreach (var itemUserPubKey in userPubKeys)
                             {
-                                if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                if (publicKeyBytes.SequenceEqual(itemUserPubKey))
                                 {
                                     _logger.Information(string.Format("Found UserData in pool."));
 
-                                    var userData = (UserDataV1)itemPool;
-                                    if (!string.IsNullOrEmpty(userData.BaseSignature))
-                                    {
-                                        if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys, blockChainManager))
-                                        {
-                                            return userData;
-                                        }
-                                        else
-                                        {
-                                            _logger.Information(string.Format("UserData arent valid : {0}", userData.BaseSignature));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        return userData;
-                                    }
+                                    return userData;
                                 }
                             }
                         }
@@ -300,33 +285,16 @@ namespace FreeMarketOne.Users
                             {
                                 if (types.Contains(itemBase.GetType()))
                                 {
-                                    var itemBaseBytes = itemBase.ToByteArrayForSign();
-                                    var itemPubKeys = UserPublicKey.Recover(itemBaseBytes, itemBase.Signature);
-
-                                    foreach (var itemPubKey in itemPubKeys)
+                                    var userData = (UserDataV1)itemBase;
+                                    if (userData.PublicKey != null)
                                     {
+                                        var publicKeyBytes = Convert.FromBase64String(userData.PublicKey);
+
                                         foreach (var itemUserPubKey in userPubKeys)
                                         {
-                                            if (itemPubKey.SequenceEqual(itemUserPubKey))
+                                            if (publicKeyBytes.SequenceEqual(itemUserPubKey))
                                             {
                                                 _logger.Information(string.Format("Found UserData in chain."));
-
-                                                var userData = (UserDataV1)itemBase;
-                                                if (!string.IsNullOrEmpty(userData.BaseSignature))
-                                                {
-                                                    if (VerifyUserDataByBaseSignature(userData.BaseSignature, userData, itemPubKeys, blockChainManager))
-                                                    {
-                                                        return userData;
-                                                    }
-                                                    else
-                                                    {
-                                                        _logger.Information(string.Format("UserData arent valid : {0}.", userData.BaseSignature));
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    return userData;
-                                                }
 
                                                 return userData;
                                             }

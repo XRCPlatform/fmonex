@@ -181,7 +181,10 @@ namespace FreeMarketApp.Views.Pages
 
         public async void ButtonCopyToClipboard_Click(object sender, RoutedEventArgs args)
         {
-            await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+            if ((_offer != null) && (!string.IsNullOrEmpty(_offer.XRCReceivingAddress)))
+            {
+                await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+            }
         }
 
         public void LoadProduct(string signature)
@@ -227,7 +230,7 @@ namespace FreeMarketApp.Views.Pages
                 tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
 
                 btBuyButton.IsEnabled = true;
-                if (!String.IsNullOrEmpty(_offer.BaseSignature))
+                if (!string.IsNullOrEmpty(_offer.BuyerSignature))
                 {
                     btBuyButton.IsEnabled = false;
                 }

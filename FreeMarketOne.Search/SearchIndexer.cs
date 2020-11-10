@@ -284,6 +284,34 @@ namespace FreeMarketOne.Search
             }
         }
 
+
+        /// <summary>
+        /// Iterates over transactions in block and idexes marketItems.
+        /// </summary>
+        /// <param name="block"></param>
+        public void IndexBlock(Block<BaseAction> block)
+        {
+            Type[] types = new Type[] { typeof(UserDataV1) };
+            foreach (var itemTx in block.Transactions)
+            {
+                foreach (var itemAction in itemTx.Actions)
+                {
+                    foreach (var item in itemAction.BaseItems)
+                    {
+                        if (types.Contains(item.GetType()))
+                        {
+                            Index((UserDataV1)item, block.Hash.ToString());
+                        }
+                    }
+                }
+            }
+        }
+
+        private void Index(UserDataV1 item, string blockHash)
+        {
+            _normalizedStore.Save(item, blockHash);
+        }
+
         public void DeleteMarketItem(MarketItemV1 marketItem)
         {
             Writer.DeleteDocuments(new Term("ID", marketItem.Signature));

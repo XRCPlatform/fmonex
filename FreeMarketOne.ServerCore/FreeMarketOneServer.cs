@@ -141,7 +141,7 @@ namespace FreeMarketOne.ServerCore
 
                     //Initialize OnionSeeds
                     LoadingEvent?.Invoke(this, "Loading Onion Seed Manager...");
-                    OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager);
+                    OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
                     OnionSeedsManager.Start();
 
                     //Initialize Base BlockChain Manager

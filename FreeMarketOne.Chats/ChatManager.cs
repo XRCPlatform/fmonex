@@ -44,7 +44,6 @@ namespace FreeMarketOne.Chats
         private TimeSpan _startAfter { get; set; }
         private IPAddress _serverPublicAddress { get; set; }
 
-
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped, 4: Mining
         /// </summary>

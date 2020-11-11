@@ -37,11 +37,16 @@ namespace FreeMarketOne.P2P
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
         private TorProcessManager _torProcessManager { get; set; }
+        private IPAddress _serverPublicAddress { get; set; }
+        private string _serverOnionAddress { get; set; }
 
         public Swarm<BaseAction> BaseSwarm { get; set; }
         public Swarm<MarketAction> MarketSwarm { get; set; }
 
-        public OnionSeedsManager(IBaseConfiguration configuration, TorProcessManager torManager)
+        public OnionSeedsManager(
+            IBaseConfiguration configuration,
+            TorProcessManager torManager,
+            IPAddress serverPublicAddress)
         {
             _logger = Log.Logger.ForContext<OnionSeedsManager>();
             _logger.Information("Initializing Onion Seeds Manager");
@@ -51,10 +56,14 @@ namespace FreeMarketOne.P2P
             _appVersion = configuration.Version;
 
             _torProcessManager = torManager;
+            _serverPublicAddress = serverPublicAddress;
+            _serverOnionAddress = torManager.TorOnionEndPoint;
 
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
 
             _cancellationToken = new CancellationTokenSource();
+
+            OnionSeedPeers = new List<OnionSeedPeer>();
         }
 
         public bool IsOnionSeedsManagerRunning()
@@ -71,72 +80,8 @@ namespace FreeMarketOne.P2P
 
         public void Start()
         {
-            OnionSeedPeers = new List<OnionSeedPeer>();
+            _logger.Information(string.Format("Loading of: {0} by Tor Gate: {1}", _torOnionEndPoint, _torSocks5EndPoint));
 
-            _logger.Information(string.Format("Prepairing loading of: {0} by Tor Gate: {1}", _torOnionEndPoint, _torSocks5EndPoint));
-
-            try
-            {
-                var torHttpClient = new TorHttpClient(new Uri(_torOnionEndPoint), _torSocks5EndPoint);
-                var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
-
-                var onionsStreamData = response.Content.ReadAsStreamAsync().Result;
-
-                using (StreamReader sr = new StreamReader(onionsStreamData))
-                {
-                    while (sr.Peek() >= 0)
-                    {
-                        var onion = sr.ReadLine();
-
-                        _logger.Information(string.Format("Parsing: {0}", onion));
-
-                        if (IsOnionAddressValid(onion))
-                        {
-                            var parts = onion.Split(":");
-                            var newOnionSeed = new OnionSeedPeer();
-
-                            newOnionSeed.UrlTor = parts[0];
-                            newOnionSeed.PortTor = int.Parse(parts[1]);
-                            newOnionSeed.UrlBlockChain = parts[2];
-                            newOnionSeed.PortBlockChainBase = int.Parse(parts[3]);
-                            newOnionSeed.PortBlockChainMaster = int.Parse(parts[4]);
-                            newOnionSeed.SecretKeyHex = parts[5];
-
-                            OnionSeedPeers.Add(newOnionSeed);
-
-                            _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Error(string.Format("Unexpected Error: {0}", e.Message));
-            }
-
-            _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
-
-            Interlocked.Exchange(ref running, 1);
-
-            StartListener();
-            StartPeriodicCheck();
-        }
-
-        private static bool IsOnionAddressValid(string onionSeedPeer)
-        {
-            var result = true;
-
-            if (!onionSeedPeer.Contains(":")) result = false;
-            if (!onionSeedPeer.Contains("onion")) result = false;
-
-            var parts = onionSeedPeer.Split(":");
-            if (parts.Length < 3) result = false;
-
-            return result;
-        }
-
-        private void StartPeriodicCheck()
-        {
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
                 var dateTimeUtc = DateTime.UtcNow;
@@ -149,53 +94,64 @@ namespace FreeMarketOne.P2P
                 var isTorRunning = _torProcessManager.IsTorRunningAsync().Result;
                 if (isTorRunning)
                 {
-                    foreach (var itemSeed in OnionSeedPeers)
+                    var torHttpClient = new TorHttpClient(new Uri(_torOnionEndPoint), _torSocks5EndPoint);
+                    var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
+
+                    var onionsStreamData = response.Content.ReadAsStreamAsync().Result;
+
+                    using (StreamReader sr = new StreamReader(onionsStreamData))
                     {
-                        if (_torProcessManager.TorOnionEndPoint != itemSeed.UrlTor) //ignore me
+                        while (sr.Peek() >= 0)
                         {
-                            var resultLog = string.Format("Checking peer {0}:{1}", itemSeed.UrlTor, itemSeed.PortTor);
-                            _logger.Information(resultLog);
+                            var onion = sr.ReadLine();
 
-                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Offline;
+                            _logger.Information(string.Format("Parsing: {0}", onion));
 
-                            try
+                            if (IsOnionAddressValid(onion))
                             {
-                                var isOnionSeedRunning = _torProcessManager.IsOnionSeedRunningAsync(itemSeed.UrlTor, itemSeed.PortTor).Result;
-                                if (isOnionSeedRunning)
-                                {
-                                    itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+                                var parts = onion.Split(":");
+                                var newOnionSeed = new OnionSeedPeer();
 
-                                    Task.Run(async () =>
-                                    {
-                                        try
-                                        {
-                                            await AddSeedsToSwarmsAsPeer(itemSeed);
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            _logger.Error(string.Format("Cant add seed to swarm {0}", e));
-                                        }
-                                    });
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.Error(ex.Message);
-                            }
+                                newOnionSeed.UrlTor = parts[0];
+                                newOnionSeed.PortTor = int.Parse(parts[1]);
+                                newOnionSeed.UrlBlockChain = parts[2];
+                                newOnionSeed.PortBlockChainBase = int.Parse(parts[3]);
+                                newOnionSeed.PortBlockChainMaster = int.Parse(parts[4]);
+                                newOnionSeed.SecretKeyHex = parts[5];
 
-                            periodicCheckLog.AppendLine(string.Format("{0} {1}", resultLog, itemSeed.State));
-                        }
-                        else
-                        {
-                            itemSeed.State = OnionSeedPeer.OnionSeedStates.Online;
+                                if (!OnionSeedPeers.Exists(a => a.SecretKeyHex == newOnionSeed.SecretKeyHex))
+                                    OnionSeedPeers.Add(newOnionSeed);
+
+                                _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
+                            }
                         }
                     }
 
-                    if (BaseSwarm != null) 
+                    if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()))
+                    {
+                        foreach (var itemSeedPeer in OnionSeedPeers)
+                        {
+                            Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await AddSeedsToBaseSwarmAsPeer(itemSeedPeer);
+                                    await AddSeedsToMarketSwarmAsPeer(itemSeedPeer);
+                                }
+                                catch (Exception e)
+                                {
+                                    _logger.Error(string.Format("Cant add seed to swarm {0}", e));
+                                }
+                            });
+                        }
+                    }
+
+                    if (BaseSwarm != null)
                         periodicCheckLog.AppendLine(string.Format("Swarm Base Peers: {0}", BaseSwarm.Peers.Count()));
 
                     if (MarketSwarm != null)
                         periodicCheckLog.AppendLine(string.Format("Swarm Market Peers: {0}", MarketSwarm.Peers.Count()));
+                    
                 }
                 else
                 {
@@ -206,77 +162,76 @@ namespace FreeMarketOne.P2P
 
                 return Task.CompletedTask;
             },
-                _cancellationToken.Token,
-                repeatEvery: TimeSpans.Minute,
-                startAfter: TimeSpans.TenSeconds);
+            _cancellationToken.Token,
+            repeatEvery: TimeSpans.Minute,
+            startAfter: TimeSpans.Ms100);
+
+            _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
+
+            Interlocked.Exchange(ref running, 1);
+        }
+
+        private bool IsOnionAddressValid(string onionSeedPeer)
+        {
+            var result = true;
+
+            if (!onionSeedPeer.Contains(":")) result = false;
+            if (!onionSeedPeer.Contains("onion")) result = false;
+
+            var parts = onionSeedPeer.Split(":");
+            if (parts.Length < 3) result = false;
+
+            //ignore me
+            if ((!string.IsNullOrEmpty(_serverOnionAddress)) && (parts[0] == _serverOnionAddress)) result = false;
+            if ((_serverPublicAddress != null) && (parts[2] == _serverPublicAddress.ToString())) result = false;
+
+            return result;
         }
 
         /// <summary>
-        /// Adding peers to swarms
+        /// Adding peers to base swarms
         /// </summary>
         /// <param name="seed">Seed info</param>
         /// <returns></returns>
-        private async Task AddSeedsToSwarmsAsPeer(OnionSeedPeer seed)
+        private async Task AddSeedsToBaseSwarmAsPeer(OnionSeedPeer seed)
         {
-            var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
-            var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
-
-            _logger.Information(string.Format("Adding peer pubkey: {0}", boundPeer.ToString()));
-
-            if (BaseSwarm != null)
+            if ((BaseSwarm != null) && (BaseSwarm.Peers.Any()))
             {
-                if (BaseSwarm.Peers.Any())
-                {
-                    var exist = BaseSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
-                    if (exist == null)
-                        await BaseSwarm.AddPeersAsync(
-                            new[] { boundPeer },
-                            TimeSpan.FromMilliseconds(5000),
-                            _cancellationToken.Token);
-                }
-            }
+                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
 
-            if (MarketSwarm != null)
-            {
-                if (MarketSwarm.Peers.Any())
-                {
-                    var exist = MarketSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
-                    if (exist == null)
-                        await MarketSwarm.AddPeersAsync(
-                            new[] { boundPeer },
-                            TimeSpan.FromMilliseconds(5000),
-                            _cancellationToken.Token);
-                }
+                _logger.Information(string.Format("Adding base peer pubkey: {0}", boundPeer.ToString()));
+
+                var exist = BaseSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
+                if (exist == null)
+                    await BaseSwarm.AddPeersAsync(
+                        new[] { boundPeer },
+                        TimeSpan.FromMilliseconds(5000),
+                        _cancellationToken.Token);
             }
         }
 
         /// <summary>
-        /// Online listener for onion checking
+        /// Adding peers to market swarms
         /// </summary>
-        private void StartListener()
+        /// <param name="seed">Seed info</param>
+        /// <returns></returns>
+        private async Task AddSeedsToMarketSwarmAsPeer(OnionSeedPeer seed)
         {
-            Task.Run(() =>
+            if ((MarketSwarm != null) && (MarketSwarm.Peers.Any()))
             {
+                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
 
-                TcpListener listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 27272);
-                listener.Start();
+                _logger.Information(string.Format("Adding market peer pubkey: {0}", boundPeer.ToString()));
 
-                while (true)
-                {
-                    Socket client = listener.AcceptSocket();
-
-                    if (client.Connected)
-                    {
-                        byte[] b = new byte[65535];
-                        int k = client.Receive(b);
-
-                        ASCIIEncoding enc = new ASCIIEncoding();
-
-                        client.Send(enc.GetBytes("FM.ONE EndPoint - " + DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion));
-                        client.Close();
-                    }
-                }
-            });
+                var exist = MarketSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
+                if (exist == null)
+                    await MarketSwarm.AddPeersAsync(
+                        new[] { boundPeer },
+                        TimeSpan.FromMilliseconds(5000),
+                        _cancellationToken.Token);
+            }
         }
 
         public void Dispose()

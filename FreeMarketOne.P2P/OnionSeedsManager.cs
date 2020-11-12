@@ -82,6 +82,9 @@ namespace FreeMarketOne.P2P
         {
             _logger.Information(string.Format("Loading of: {0} by Tor Gate: {1}", _torOnionEndPoint, _torSocks5EndPoint));
 
+            //we have to load first onion seeds synchroniously
+            ProcessOnionSeeds();
+
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
                 ProcessOnionSeeds();
@@ -91,9 +94,6 @@ namespace FreeMarketOne.P2P
             _cancellationToken.Token,
             repeatEvery: TimeSpans.Minute,
             startAfter: TimeSpans.Minute);
-
-            //we have to load first onion seeds synchroniously
-            ProcessOnionSeeds();
 
             _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
 
@@ -145,7 +145,7 @@ namespace FreeMarketOne.P2P
                     }
                 }
 
-                if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()))
+                if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()) && (BaseSwarm != null) && (MarketSwarm != null))
                 {
                     foreach (var itemSeedPeer in OnionSeedPeers)
                     {
@@ -203,7 +203,7 @@ namespace FreeMarketOne.P2P
         /// <returns></returns>
         private async Task AddSeedsToBaseSwarmAsPeer(OnionSeedPeer seed)
         {
-            if ((BaseSwarm != null) && (BaseSwarm.Peers.Any()))
+            if (BaseSwarm.Peers.Any())
             {
                 var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
@@ -226,7 +226,7 @@ namespace FreeMarketOne.P2P
         /// <returns></returns>
         private async Task AddSeedsToMarketSwarmAsPeer(OnionSeedPeer seed)
         {
-            if ((MarketSwarm != null) && (MarketSwarm.Peers.Any()))
+            if (MarketSwarm.Peers.Any())
             {
                 var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));

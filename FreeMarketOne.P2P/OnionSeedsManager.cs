@@ -84,91 +84,99 @@ namespace FreeMarketOne.P2P
 
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
-                var dateTimeUtc = DateTime.UtcNow;
-
-                StringBuilder periodicCheckLog = new StringBuilder();
-
-                periodicCheckLog.AppendLine("======Onion Seed Status Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
-                periodicCheckLog.AppendLine("My Tor EndPoint " + _torProcessManager.TorOnionEndPoint);
-
-                var isTorRunning = _torProcessManager.IsTorRunningAsync().Result;
-                if (isTorRunning)
-                {
-                    var torHttpClient = new TorHttpClient(new Uri(_torOnionEndPoint), _torSocks5EndPoint);
-                    var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
-
-                    var onionsStreamData = response.Content.ReadAsStreamAsync().Result;
-
-                    using (StreamReader sr = new StreamReader(onionsStreamData))
-                    {
-                        while (sr.Peek() >= 0)
-                        {
-                            var onion = sr.ReadLine();
-
-                            _logger.Information(string.Format("Parsing: {0}", onion));
-
-                            if (IsOnionAddressValid(onion))
-                            {
-                                var parts = onion.Split(":");
-                                var newOnionSeed = new OnionSeedPeer();
-
-                                newOnionSeed.UrlTor = parts[0];
-                                newOnionSeed.PortTor = int.Parse(parts[1]);
-                                newOnionSeed.UrlBlockChain = parts[2];
-                                newOnionSeed.PortBlockChainBase = int.Parse(parts[3]);
-                                newOnionSeed.PortBlockChainMaster = int.Parse(parts[4]);
-                                newOnionSeed.SecretKeyHex = parts[5];
-
-                                if (!OnionSeedPeers.Exists(a => a.SecretKeyHex == newOnionSeed.SecretKeyHex))
-                                    OnionSeedPeers.Add(newOnionSeed);
-
-                                _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
-                            }
-                        }
-                    }
-
-                    if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()))
-                    {
-                        foreach (var itemSeedPeer in OnionSeedPeers)
-                        {
-                            Task.Run(async () =>
-                            {
-                                try
-                                {
-                                    await AddSeedsToBaseSwarmAsPeer(itemSeedPeer);
-                                    await AddSeedsToMarketSwarmAsPeer(itemSeedPeer);
-                                }
-                                catch (Exception e)
-                                {
-                                    _logger.Error(string.Format("Cant add seed to swarm {0}", e));
-                                }
-                            });
-                        }
-                    }
-
-                    if (BaseSwarm != null)
-                        periodicCheckLog.AppendLine(string.Format("Swarm Base Peers: {0}", BaseSwarm.Peers.Count()));
-
-                    if (MarketSwarm != null)
-                        periodicCheckLog.AppendLine(string.Format("Swarm Market Peers: {0}", MarketSwarm.Peers.Count()));
-                    
-                }
-                else
-                {
-                    periodicCheckLog.AppendLine("Tor is down!");
-                }
-
-                Console.WriteLine(periodicCheckLog.ToString());
+                ProcessOnionSeeds();
 
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
             repeatEvery: TimeSpans.Minute,
-            startAfter: TimeSpans.Ms100);
+            startAfter: TimeSpans.Minute);
+
+            //we have to load first onion seeds synchroniously
+            ProcessOnionSeeds();
 
             _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
 
             Interlocked.Exchange(ref running, 1);
+        }
+
+        private void ProcessOnionSeeds()
+        {
+            var dateTimeUtc = DateTime.UtcNow;
+
+            StringBuilder periodicCheckLog = new StringBuilder();
+
+            periodicCheckLog.AppendLine("======Onion Seed Status Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
+            periodicCheckLog.AppendLine("My Tor EndPoint " + _torProcessManager.TorOnionEndPoint);
+
+            var isTorRunning = _torProcessManager.IsTorRunningAsync().Result;
+            if (isTorRunning)
+            {
+                var torHttpClient = new TorHttpClient(new Uri(_torOnionEndPoint), _torSocks5EndPoint);
+                var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
+
+                var onionsStreamData = response.Content.ReadAsStreamAsync().Result;
+
+                using (StreamReader sr = new StreamReader(onionsStreamData))
+                {
+                    while (sr.Peek() >= 0)
+                    {
+                        var onion = sr.ReadLine();
+
+                        _logger.Information(string.Format("Parsing: {0}", onion));
+
+                        if (IsOnionAddressValid(onion))
+                        {
+                            var parts = onion.Split(":");
+                            var newOnionSeed = new OnionSeedPeer();
+
+                            newOnionSeed.UrlTor = parts[0];
+                            newOnionSeed.PortTor = int.Parse(parts[1]);
+                            newOnionSeed.UrlBlockChain = parts[2];
+                            newOnionSeed.PortBlockChainBase = int.Parse(parts[3]);
+                            newOnionSeed.PortBlockChainMaster = int.Parse(parts[4]);
+                            newOnionSeed.SecretKeyHex = parts[5];
+
+                            if (!OnionSeedPeers.Exists(a => a.SecretKeyHex == newOnionSeed.SecretKeyHex))
+                                OnionSeedPeers.Add(newOnionSeed);
+
+                            _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
+                        }
+                    }
+                }
+
+                if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()))
+                {
+                    foreach (var itemSeedPeer in OnionSeedPeers)
+                    {
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await AddSeedsToBaseSwarmAsPeer(itemSeedPeer);
+                                await AddSeedsToMarketSwarmAsPeer(itemSeedPeer);
+                            }
+                            catch (Exception e)
+                            {
+                                _logger.Error(string.Format("Cant add seed to swarm {0}", e));
+                            }
+                        });
+                    }
+                }
+
+                if (BaseSwarm != null)
+                    periodicCheckLog.AppendLine(string.Format("Swarm Base Peers: {0}", BaseSwarm.Peers.Count()));
+
+                if (MarketSwarm != null)
+                    periodicCheckLog.AppendLine(string.Format("Swarm Market Peers: {0}", MarketSwarm.Peers.Count()));
+
+            }
+            else
+            {
+                periodicCheckLog.AppendLine("Tor is down!");
+            }
+
+            Console.WriteLine(periodicCheckLog.ToString());
         }
 
         private bool IsOnionAddressValid(string onionSeedPeer)

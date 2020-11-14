@@ -182,7 +182,10 @@ namespace FreeMarketApp.Views.Pages
 
         public async void ButtonCopyToClipboard_Click(object sender, RoutedEventArgs args)
         {
-            await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+            if ((_offer != null) && (!string.IsNullOrEmpty(_offer.XRCReceivingAddress)))
+            {
+                await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+            }
         }
 
         public void LoadProduct(string signature)

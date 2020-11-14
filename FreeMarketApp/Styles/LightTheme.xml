@@ -341,7 +341,36 @@
 		</Style>
 
 	<Style Selector="Path.FirstRunLogo">
-		<Setter Property="Fill" Value="#07233d"/>
+		<Setter Property="Fill" Value="#020f1c"/>
 	</Style>
+
+	<Style Selector="Border.Main">
+			<Setter Property="Background" Value="#ffffff" />
+		</Style>
+	
+	
+	<!-- Review Section -->
+	<Style Selector="TextBox.TextBoxNoBackground">
+			<Setter Property="Background" Value="#ffffff" />
+			<Setter Property="Foreground" Value="#606060" />
+		</Style>
+		
+
+	<Style Selector="ToggleButton.ratingstar /template/ Path">
+		<Setter Property="Margin" Value="2"></Setter>
+	</Style>
+	
+	 <Style Selector="ToggleButton:checked.ratingstar /template/ Path">
+	   <Setter Property="Fill" Value="#ff9234"></Setter>
+	 </Style>
+
+	 <Style Selector="ToggleButton:unchecked.ratingstar /template/ Path">
+	   <Setter Property="Fill" Value="#e6e5ea"></Setter>
+	 </Style>
+	
+	<Style Selector="ToggleButton:pointerover.ratingstar /template/ Path">
+	   <Setter Property="Fill" Value="#ff9234"></Setter>
+	 </Style>
+	<!-- End of Review Section -->
 
 </Styles>

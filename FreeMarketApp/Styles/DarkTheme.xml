@@ -360,4 +360,32 @@
 			<Setter Property="Fill" Value="#fefefe"/>
 		</Style>
 
+		<Style Selector="Border.Main">
+			<Setter Property="Background" Value="#000000" />
+		</Style>
+	
+		<!-- Review Section -->
+		<Style Selector="TextBox.TextBoxNoBackground">
+				<Setter Property="Background" Value="#000000" />
+				<Setter Property="Foreground" Value="#dadae2" />
+			</Style>
+			
+	
+		<Style Selector="ToggleButton.ratingstar /template/ Path">
+			<Setter Property="Margin" Value="2"></Setter>
+		</Style>
+		
+		<Style Selector="ToggleButton:checked.ratingstar /template/ Path">
+		<Setter Property="Fill" Value="#ff9234"></Setter>
+		</Style>
+
+		<Style Selector="ToggleButton:unchecked.ratingstar /template/ Path">
+		<Setter Property="Fill" Value="#3a3a3c"></Setter>
+		</Style>
+		
+		<Style Selector="ToggleButton:pointerover.ratingstar /template/ Path">
+		<Setter Property="Fill" Value="#ff9234"></Setter>
+		</Style>
+		<!-- End of Review Section -->
+
 </Styles>

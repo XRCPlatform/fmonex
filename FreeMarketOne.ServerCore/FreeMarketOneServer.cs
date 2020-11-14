@@ -256,8 +256,9 @@ namespace FreeMarketOne.ServerCore
             {
                 var block = MarketBlockChainManager.Storage.GetBlock<MarketAction>(e.Hash);
                 _logger.Information($"SearchIndexing block {e.Hash}");
-                //async thread 
-                Task.Run(() => SearchIndexer.IndexBlock(block));               
+                //async thread //this is fast but has some issues with indexes being updated while searching and causing errors.
+                //Task.Run(() => SearchIndexer.IndexBlock(block));
+                SearchIndexer.IndexBlock(block);
             }
         }
 

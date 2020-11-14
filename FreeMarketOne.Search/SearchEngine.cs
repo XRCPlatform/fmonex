@@ -219,9 +219,26 @@ namespace FreeMarketOne.Search
             return new TermQuery(new Term("ID", signature));
         }
 
-        public SearchResult GetMyOffers(OfferDirection offerDirection, int pageSize, int page)
+        /// <summary>
+        /// GetMyOffers retruns My Offers Sold, or Bought. Open offers are returned as part of normal search.
+        /// </summary>
+        /// <param name="offerDirection"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public SearchResult GetMyCompletedOffers(OfferDirection offerDirection, int pageSize, int page)
         {
             return _normalizedStore.GetMyOffers(offerDirection, pageSize, page);
+        }
+
+        /// <summary>
+        /// Returns user object by pubkey;
+        /// </summary>
+        /// <param name="pubKey"></param>
+        /// <returns></returns>
+        public UserDataV1 GetUser(string pubKey)
+        {
+            return _normalizedStore.Get(pubKey);
         }
 
         //TODO: Relevance ranks biased by Seller Reputation scores. Higher scored stars, more successful high value deals closed, staking deposits and etc could comprise seller reputation.

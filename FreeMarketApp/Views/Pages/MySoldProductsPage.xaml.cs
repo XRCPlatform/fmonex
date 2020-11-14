@@ -65,7 +65,7 @@ namespace FreeMarketApp.Views.Pages
                 list.Add(userPubKey);
 
                 var engine = FMONE.Current.SearchEngine;
-                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, 1);
+                var result = engine.GetMyCompletedOffers(OfferDirection.Sold, selectedPageSize, 1);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -139,7 +139,7 @@ namespace FreeMarketApp.Views.Pages
                 selectedPageSize = thisPageSize;
 
                 var currentSearchResult = ((MyProductsPageViewModel)this.DataContext).Result;
-                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage);
+                var result = engine.GetMyCompletedOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -154,7 +154,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (currentSearchResult.CurrentPage * currentSearchResult.PageSize < (currentSearchResult.TotalHits))
             {
-                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage + 1);
+                var result = engine.GetMyCompletedOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage + 1);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -170,7 +170,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (currentSearchResult.CurrentPage > 1)
             {
-                var result = engine.GetMyOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage - 1);
+                var result = engine.GetMyCompletedOffers(OfferDirection.Sold, selectedPageSize, currentSearchResult.CurrentPage - 1);
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
                 DataContext = new MyProductsPageViewModel(result, _appliedFilters);

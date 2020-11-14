@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using FreeMarketOne.Markets;
 using Lucene.Net.Documents;
+using System;
 
 namespace FreeMarketOne.Search
 {
@@ -113,6 +114,7 @@ namespace FreeMarketOne.Search
             return bq;        
 
         }
+
 
         public DrillDownQuery BuildDrillDown(List<Selector> selectors, Query baseQuery)
         {
@@ -238,8 +240,41 @@ namespace FreeMarketOne.Search
         /// <returns></returns>
         public UserDataV1 GetUser(string pubKey)
         {
-            return _normalizedStore.Get(pubKey);
+            return _normalizedStore.GetUser(pubKey);
         }
+
+        public UserDataV1 GetUser(byte[] pubKey)
+        {
+            var publicKeyString = Convert.ToBase64String(pubKey);
+            return GetUser(publicKeyString);
+        }
+
+        public UserDataV1 GetUser(List<byte[]> pubKeys)
+        {
+            foreach (var pubKey in pubKeys)
+            {
+                var publicKeyString = Convert.ToBase64String(pubKey);
+                var user = GetUser(publicKeyString);
+                if (user != null)
+                {
+                    return user;
+                }
+            }
+            return null;
+        }
+
+
+        public List<ReviewUserDataV1>? GetAllReviewsForPubKey(byte[] pubKey)
+        {
+            var publicKeyString = Convert.ToBase64String(pubKey);
+            return GetAllReviewsForPubKey(publicKeyString);
+        }
+
+        public List<ReviewUserDataV1>? GetAllReviewsForPubKey(string pubKey)
+        {
+            return _normalizedStore.GetAllReviewsByPubKey(pubKey);
+        }
+
 
         //TODO: Relevance ranks biased by Seller Reputation scores. Higher scored stars, more successful high value deals closed, staking deposits and etc could comprise seller reputation.
     }

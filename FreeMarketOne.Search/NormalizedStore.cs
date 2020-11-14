@@ -255,8 +255,32 @@ namespace FreeMarketOne.Search
             return true;
         }
 
+        public List<ReviewUserDataV1> GetAllReviewsByPubKey(string pubKey)
+        {
+            List<ReviewUserDataV1> reviews = new List<ReviewUserDataV1>();
 
-        public UserDataV1 Get(string pubKey)
+            using (var dbConnection = new SQLiteConnection(this.connection))
+            {
+                dbConnection.Open();
+
+                var select = "SELECT data FROM PartyReview WHERE pubKey = $pubKey";
+                using (var selectCommand = new SQLiteCommand(select, dbConnection))
+                {
+                    selectCommand.Parameters.AddWithValue("$pubKey", pubKey);
+                    using (var reader = selectCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            reviews.Add(JsonConvert.DeserializeObject<ReviewUserDataV1>(reader.GetString(0)));
+                        }
+                    }
+                }
+            }
+
+            return reviews;
+        }
+
+        public UserDataV1 GetUser(string pubKey)
         {
             using (var dbConnection = new SQLiteConnection(this.connection))
             {

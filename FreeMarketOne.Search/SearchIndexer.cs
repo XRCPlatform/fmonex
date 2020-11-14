@@ -35,6 +35,7 @@ namespace FreeMarketOne.Search
         private readonly IBlockChainManager<BaseAction> _baseBlockChain;
         private static object lockobject = new object();
         private NormalizedStore _normalizedStore;
+        private SearchEngine _engine;
 
         public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
         {
@@ -59,7 +60,7 @@ namespace FreeMarketOne.Search
             _userManager = userManager;
             _basePoolManager = basePoolManager;
             _baseBlockChain = baseBlockChain;
-
+            _engine = new SearchEngine(_marketManager, _indexLocation, 10);
             _normalizedStore = new NormalizedStore(indexLocation);
         }
         
@@ -128,7 +129,7 @@ namespace FreeMarketOne.Search
                 {
                     var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
 
-                    sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain);
+                    sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain, _engine);
                     if (sellerAggregate == null)
                     {
                         sellerAggregate = new SellerAggregate()
@@ -259,9 +260,9 @@ namespace FreeMarketOne.Search
         private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
         {
             //search all market items by seller pubkey hash
-            SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 10);
-            var query = engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
-            var searchResult = engine.Search(query, false);
+
+            var query = _engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
+            var searchResult = _engine.Search(query, false);
 
             int pages = searchResult.TotalHits / searchResult.PageSize;
             
@@ -274,7 +275,7 @@ namespace FreeMarketOne.Search
                 //on second page and up use the interal search result. the top one was needed to get number of pages
                 if (i > 1)
                 {
-                    searchResult = engine.Search(query, false, i+1);
+                    searchResult = _engine.Search(query, false, i+1);
                 }                
 
                 for (int y = 0; y < searchResult.Results.Count; y++)

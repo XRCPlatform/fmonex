@@ -238,10 +238,11 @@ namespace FreeMarketApp.Views.Pages
 
                 //seller userdata loading
                 var userPubKey = FMONE.Current.Markets.GetSellerPubKeyFromMarketItem(_offer);
-                var userData = FMONE.Current.Users.GetUserDataByPublicKey(
-                    userPubKey,
-                    FMONE.Current.BasePoolManager,
-                    FMONE.Current.BaseBlockChainManager);
+                //var userData = FMONE.Current.Users.GetUserDataByPublicKey(
+                //    userPubKey,
+                //    FMONE.Current.BasePoolManager,
+                //    FMONE.Current.BaseBlockChainManager);
+                var userData = FMONE.Current.SearchEngine.GetUser(userPubKey);
 
                 if (userData != null)
                 {

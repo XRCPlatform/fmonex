@@ -171,14 +171,43 @@ namespace FreeMarketOne.Search
                                 command.ExecuteNonQuery();
                             }
 
-                            sql = "CREATE UNIQUE INDEX \"ix_Signature\" ON \"Offer\" (\"Signature\");";
+                            sql = "CREATE TABLE \"PartyReview\" (" +
+                                 "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                                 "\"Hash\"  TEXT NOT NULL UNIQUE, " +
+                                 "\"pubKey\"  TEXT NOT NULL , " +                             
+                                 "\"blockHash\"  TEXT NOT NULL, " +
+                                 "\"Data\" TEXT NULL " +
+                                 "); ";
+                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                            {
+                                command.ExecuteNonQuery();
+                            }
+
+
+                            sql = "CREATE UNIQUE INDEX \"ix_Offer_Signature\" ON \"Offer\" (\"Signature\");";
 
                             using (var command = new SQLiteCommand(sql, dbConnection, transaction))
                             {
                                 command.ExecuteNonQuery();
                             }
 
-                            sql = "CREATE UNIQUE INDEX \"ix_pubKey\" ON \"Party\" (\"pubKey\");";
+
+                            sql = "CREATE UNIQUE INDEX \"ix_Party_pubKey\" ON \"Party\" (\"pubKey\");";
+
+                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                            {
+                                command.ExecuteNonQuery();
+                            }
+
+
+                            sql = "CREATE UNIQUE INDEX \"ix_PartyReview_Hash\" ON \"PartyReview\" (\"Hash\");";
+
+                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                            {
+                                command.ExecuteNonQuery();
+                            }
+
+                            sql = "CREATE INDEX \"ix_PartyReview_pubKey\" ON \"PartyReview\" (\"pubKey\");";
 
                             using (var command = new SQLiteCommand(sql, dbConnection, transaction))
                             {
@@ -248,6 +277,37 @@ namespace FreeMarketOne.Search
             }
 
             return null;
+        }
+                                   
+        public bool Save(ReviewUserDataV1 item, string blockHash)
+        {
+            using (var dbConnection = new SQLiteConnection(this.connection))
+            {
+                dbConnection.Open();
+
+                using (var dbTransaction = dbConnection.BeginTransaction())
+                {
+                    var delete = "DELETE FROM PartyReview WHERE Hash = $Hash";
+                    using (var deleteCommand = new SQLiteCommand(delete, dbConnection, dbTransaction))
+                    {
+                        deleteCommand.Parameters.AddWithValue("$Hash", item.Hash);
+                        deleteCommand.ExecuteNonQuery();
+                    }
+
+                    var sql = "INSERT INTO PartyReview ( pubKey, Hash, blockHash,  Data) VALUES ( $pubKey, $Hash, $blockHash, $Data)";
+                    using (var insertCommand = new SQLiteCommand(sql, dbConnection, dbTransaction))
+                    {
+                        insertCommand.Parameters.AddWithValue("$Hash", item.Hash);
+                        insertCommand.Parameters.AddWithValue("$pubKey", item.RevieweePublicKey);
+                        insertCommand.Parameters.AddWithValue("$blockHash", blockHash);
+                        insertCommand.Parameters.AddWithValue("$Data", JsonConvert.SerializeObject(item));
+                        insertCommand.ExecuteNonQuery();
+                    }
+
+                    dbTransaction.Commit();
+                }
+            }
+            return true;
         }
     }
     

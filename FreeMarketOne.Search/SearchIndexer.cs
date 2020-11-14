@@ -211,8 +211,9 @@ namespace FreeMarketOne.Search
                     {
                         _normalizedStore.Save(marketItem, direction);
                     }
+                    //UpdateAllSellerDocumentsWithLatestFast(sellerAggregate);
                     Task.Run(() => UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash));
-                    
+
                 }
             }          
             
@@ -227,6 +228,32 @@ namespace FreeMarketOne.Search
             }
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);
             Writer.Commit();
+        }
+
+        private void UpdateAllSellerDocumentsWithLatestFast(SellerAggregate sellerAggregate)
+        {
+            foreach (var sellerPubKeyHash in sellerAggregate.PublicKeyHashes)
+            {
+                Writer.UpdateBinaryDocValue(new Term("SellerPubKeyHash", sellerPubKeyHash), "XrcTotal", ToBytes((long)sellerAggregate?.TotalXRCVolume));
+                //add star rating update 
+            }
+            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
+        }
+
+        // encodes a long into a BytesRef as VLong so that we get varying number of bytes when we update
+        internal static BytesRef ToBytes(long value)
+        {
+            //    long orig = value;
+            BytesRef bytes = new BytesRef(10); // negative longs may take 10 bytes
+            while ((value & ~0x7FL) != 0L)
+            {
+                bytes.Bytes[bytes.Length++] = unchecked((byte)((value & 0x7FL) | 0x80L));
+                value = (long)((ulong)value >> 7);
+            }
+            bytes.Bytes[bytes.Length++] = (byte)value;
+            //    System.err.println("[" + Thread.currentThread().getName() + "] value=" + orig + ", bytes=" + bytes);
+            return bytes;
         }
 
         private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
@@ -291,16 +318,20 @@ namespace FreeMarketOne.Search
         /// <param name="block"></param>
         public void IndexBlock(Block<BaseAction> block)
         {
-            Type[] types = new Type[] { typeof(UserDataV1) };
+            //Type[] types = new Type[] { typeof(UserDataV1) , typeof(ReviewUserDataV1)};
             foreach (var itemTx in block.Transactions)
             {
                 foreach (var itemAction in itemTx.Actions)
                 {
                     foreach (var item in itemAction.BaseItems)
                     {
-                        if (types.Contains(item.GetType()))
+                        if (item.GetType() == typeof(UserDataV1))
                         {
                             Index((UserDataV1)item, block.Hash.ToString());
+                        }
+                        if (item.GetType() == typeof(ReviewUserDataV1))
+                        {
+                            Index((ReviewUserDataV1)item, block.Hash.ToString());
                         }
                     }
                 }
@@ -308,6 +339,11 @@ namespace FreeMarketOne.Search
         }
 
         private void Index(UserDataV1 item, string blockHash)
+        {
+            _normalizedStore.Save(item, blockHash);
+        }
+
+        private void Index(ReviewUserDataV1 item, string blockHash)
         {
             _normalizedStore.Save(item, blockHash);
         }

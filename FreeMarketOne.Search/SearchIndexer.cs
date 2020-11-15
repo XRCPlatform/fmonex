@@ -259,35 +259,42 @@ namespace FreeMarketOne.Search
 
         private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
         {
-            //search all market items by seller pubkey hash
-
-            var query = _engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
-            var searchResult = _engine.Search(query, false);
-
-            int pages = searchResult.TotalHits / searchResult.PageSize;
-            
-            //increment to 1
-            pages++;
-
-            for (int i = 0; i < pages; i++)
+            try
             {
-                //skip first (re-query) as it's built above
-                //on second page and up use the interal search result. the top one was needed to get number of pages
-                if (i > 1)
-                {
-                    searchResult = _engine.Search(query, false, i+1);
-                }                
+                //search all market items by seller pubkey hash
 
-                for (int y = 0; y < searchResult.Results.Count; y++)
+                var query = _engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
+                var searchResult = _engine.Search(query, false);
+
+                int pages = searchResult.TotalHits / searchResult.PageSize;
+
+                //increment to 1
+                pages++;
+
+                for (int i = 0; i < pages; i++)
                 {
-                    //items that have allready been indexed shall be skipped for efficiency
-                    if (!searchResult.Results[y].Signature.Equals(skipSignature) 
-                        && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
+                    //skip first (re-query) as it's built above
+                    //on second page and up use the interal search result. the top one was needed to get number of pages
+                    if (i > 1)
                     {
-                        Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate, true, OfferDirection.Sold);
+                        searchResult = _engine.Search(query, false, i + 1);
+                    }
+
+                    for (int y = 0; y < searchResult.Results.Count; y++)
+                    {
+                        //items that have allready been indexed shall be skipped for efficiency
+                        if (!searchResult.Results[y].Signature.Equals(skipSignature)
+                            && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
+                        {
+                            Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate, true, OfferDirection.Sold);
+                        }
                     }
                 }
-            }           
+            }
+            catch (Exception)
+            {
+                //swallow 
+            }            
         }
 
         /// <summary>

@@ -238,10 +238,6 @@ namespace FreeMarketApp.Views.Pages
 
                 //seller userdata loading
                 var userPubKey = FMONE.Current.Markets.GetSellerPubKeyFromMarketItem(_offer);
-                //var userData = FMONE.Current.Users.GetUserDataByPublicKey(
-                //    userPubKey,
-                //    FMONE.Current.BasePoolManager,
-                //    FMONE.Current.BaseBlockChainManager);
                 var userData = FMONE.Current.SearchEngine.GetUser(userPubKey);
 
                 if (userData != null)
@@ -252,11 +248,8 @@ namespace FreeMarketApp.Views.Pages
                     btSeller.Tag = safeArrayHelper.GetString(
                             new[] { userData.Signature, userData.Hash }); 
 
-                    var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
-                        userPubKey,
-                        FMONE.Current.BasePoolManager,
-                        FMONE.Current.BaseBlockChainManager);
-
+                    
+                    var reviews = FMONE.Current.SearchEngine.GetAllReviewsForPubKey(userPubKey);
                     var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 

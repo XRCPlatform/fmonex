@@ -281,14 +281,23 @@ namespace FreeMarketOne.Search
             return null;
         }
 
+        public List<ReviewUserDataV1>? GetAllReviewsForPubKey(List<byte[]> pubKeys)
+        {
+            foreach (var pubKey in pubKeys)
+            {
+                var publicKeyString = Convert.ToBase64String(pubKey);
+                return GetAllReviewsForPubKey(publicKeyString);
+            }
+            return null;
+        }
 
-        public List<ReviewUserDataV1>? GetAllReviewsForPubKey(byte[] pubKey)
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(byte[] pubKey)
         {
             var publicKeyString = Convert.ToBase64String(pubKey);
             return GetAllReviewsForPubKey(publicKeyString);
         }
 
-        public List<ReviewUserDataV1>? GetAllReviewsForPubKey(string pubKey)
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(string pubKey)
         {
             return _normalizedStore.GetAllReviewsByPubKey(pubKey);
         }

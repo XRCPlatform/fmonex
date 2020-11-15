@@ -25,7 +25,7 @@ namespace FreeMarketOne.Search
         IMarketManager? marketManager = null;
         private readonly int MAX_RESULTS = 1000;
         private NormalizedStore _normalizedStore = null;
-
+        private DirectoryReader _indexReader;
         public int PageSize { get; set; }
         public List<string> FacetFieldNames { get; set; }
 
@@ -43,6 +43,11 @@ namespace FreeMarketOne.Search
             FacetFieldNames = new List<string> { "Category", "Shipping", "Fineness", "Manufacturer", "Size", "WeightInGrams", "PricePerGram", "Price" };
             //facetConfig.SetHierarchical("Category", true);
             _normalizedStore = new NormalizedStore(searchIndexBasePath);
+
+            //this could be buggy with index reading errors if it happens use local variable within each query
+            // it is very costly 3.5% of query time to open this so moved here to reuse
+            // however this is not ready if indexer is not primed.
+            //_indexReader = DirectoryReader.Open(fSDirectory);
 
         }
 
@@ -159,10 +164,24 @@ namespace FreeMarketOne.Search
 
             var indexReader = DirectoryReader.Open(fSDirectory);
             var searcher = new IndexSearcher(indexReader);
-            searcher.Search(query, collector);
+            TopDocs docs;
+            ScoreDoc[] hits;
+            try
+            {
 
-            TopDocs docs = collector.GetTopDocs(startIndex, PageSize);
-            ScoreDoc[] hits = docs.ScoreDocs;
+                searcher.Search(query, collector);
+                docs = collector.GetTopDocs(startIndex, PageSize);
+                hits = docs.ScoreDocs;
+            }
+            catch (Exception)
+            {
+                //rerun in case of indexing concurency exception
+                //important to allow intensive indexing of IBD and give better ux
+                searcher.Search(query, collector);
+                docs = collector.GetTopDocs(startIndex, PageSize);
+                hits = docs.ScoreDocs;
+            }
+           
 
             foreach (var item in hits)
             {
@@ -173,8 +192,7 @@ namespace FreeMarketOne.Search
                 }
                 
                 //adding raw document so that relevance could be better understood
-                documents.Add(searcher.Doc(item.Doc));
-                //var offer = marketManager.GetOfferBySignature(signature);
+                //documents.Add(searcher.Doc(item.Doc));
             }
             List<FacetResult> facets = new List<FacetResult>();
             if (queryFacets)

@@ -202,6 +202,7 @@ namespace FreeMarketOne.ServerCore
             if (BaseBlockChainManager.Storage.ContainsBlock(e.Hash))
             {
                 var block = BaseBlockChainManager.Storage.GetBlock<BaseAction>(e.Hash);
+                LoadingEvent?.Invoke(this, $"SearchIndexing block {e.Hash}");
                 _logger.Information($"SearchIndexing block {e.Hash}");
                 SearchIndexer.IndexBlock(block);
             }
@@ -255,10 +256,11 @@ namespace FreeMarketOne.ServerCore
             if (MarketBlockChainManager.Storage.ContainsBlock(e.Hash))
             {
                 var block = MarketBlockChainManager.Storage.GetBlock<MarketAction>(e.Hash);
+                LoadingEvent?.Invoke(this, $"SearchIndexing block {e.Hash}");
                 _logger.Information($"SearchIndexing block {e.Hash}");
                 //async thread //this is fast but has some issues with indexes being updated while searching and causing errors.
-                //Task.Run(() => SearchIndexer.IndexBlock(block));
-                SearchIndexer.IndexBlock(block);
+                Task.Run(() => SearchIndexer.IndexBlock(block));
+                //SearchIndexer.IndexBlock(block);
             }
         }
 

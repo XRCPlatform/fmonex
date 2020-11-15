@@ -22,7 +22,7 @@ namespace FreeMarketApp.Views.Pages
         private static MainPage _instance;
         private ILogger _logger;
         private static List<Selector> _appliedFilters = new List<Selector>();
-        private static int selectedPageSize = 20;
+        private static int selectedPageSize = 5;
         private bool _initialized = false;
         public ObservableCollection<MarketItemV1> Items { get; }
 
@@ -60,6 +60,7 @@ namespace FreeMarketApp.Views.Pages
                 PagesHelper.Log(_logger, string.Format("Loading market offers from chain."));
 
                 var engine = FMONE.Current.SearchEngine;
+                engine.PageSize = selectedPageSize;
 
                 var result = engine.Search("", true, 1);
 
@@ -130,11 +131,13 @@ namespace FreeMarketApp.Views.Pages
         private void FilterList()
         {
             var engine = FMONE.Current.SearchEngine;
+            engine.PageSize = selectedPageSize;
+
             var currentSearchResult = ((MainPageViewModel)this.DataContext).Result;
 
             Query newQuery = engine.BuildDrillDown(_appliedFilters, engine.ParseQuery(""));
 
-            var result = engine.Search(newQuery, true, currentSearchResult.CurrentPage);
+            var result = engine.Search(newQuery, false, currentSearchResult.CurrentPage);
 
             var skynetHelper = new SkynetHelper();
             skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -156,7 +159,7 @@ namespace FreeMarketApp.Views.Pages
                 selectedPageSize = thisPageSize;
 
                 var currentSearchResult = ((MainPageViewModel)this.DataContext).Result;
-                var result = engine.Search(currentSearchResult.CurrentQuery, true, 1);
+                var result = engine.Search(currentSearchResult.CurrentQuery, false, 1);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -174,7 +177,7 @@ namespace FreeMarketApp.Views.Pages
                 //current query has currently applied filters embeded, but also has page position and other parameters.
                 var currentQuery = currentSearchResult.CurrentQuery;
 
-                var result = engine.Search(currentQuery, true, currentSearchResult.CurrentPage + 1);
+                var result = engine.Search(currentQuery, false, currentSearchResult.CurrentPage + 1);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -192,7 +195,7 @@ namespace FreeMarketApp.Views.Pages
             {
                 //current query has currently applied filters embeded, but also has page position and other parameters.
                 var currentQuery = currentSearchResult.CurrentQuery;
-                var result = engine.Search(currentQuery, true, currentSearchResult.CurrentPage - 1);
+                var result = engine.Search(currentQuery, false, currentSearchResult.CurrentPage - 1);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);

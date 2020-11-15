@@ -79,6 +79,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Markets", "Fr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Users", "FreeMarketOne.Users\FreeMarketOne.Users.csproj", "{BF487161-24E5-4E41-BBD9-468A4234B007}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PPayloadGenerator", "P2PPayloadGenerator\P2PPayloadGenerator.csproj", "{89D1D431-1DBE-46F9-9859-7CDC9FE29903}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -349,6 +351,14 @@ Global
 		{BF487161-24E5-4E41-BBD9-468A4234B007}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF487161-24E5-4E41-BBD9-468A4234B007}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF487161-24E5-4E41-BBD9-468A4234B007}.Release|x86.Build.0 = Release|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Debug|x86.Build.0 = Debug|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Release|x86.ActiveCfg = Release|Any CPU
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -385,6 +395,7 @@ Global
 		{63A1B82C-ED4A-44EF-9233-3445AE424CB0} = {F60B456D-30AB-4150-82C2-36D8955887D3}
 		{CA228A95-B4AC-47F9-A941-2652F7714658} = {F60B456D-30AB-4150-82C2-36D8955887D3}
 		{BF487161-24E5-4E41-BBD9-468A4234B007} = {F60B456D-30AB-4150-82C2-36D8955887D3}
+		{89D1D431-1DBE-46F9-9859-7CDC9FE29903} = {A794BE5D-399B-4C5F-BB57-1F473B76F5C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

@@ -97,8 +97,8 @@ namespace FreeMarketApp
 
         private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
         {
-            var block = FMONE.Current.MarketBlockChainManager.BlockChain?.Tip;
-            FMONE.Current.SearchIndexer.IndexBlock(block);
+            //var block = FMONE.Current.MarketBlockChainManager.BlockChain?.Tip;
+            //FMONE.Current.SearchIndexer.IndexBlock(block);
         }
 
         private static void BaseBlockChainChanged(object sender, EventArgs e)

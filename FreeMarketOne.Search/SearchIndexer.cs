@@ -144,28 +144,28 @@ namespace FreeMarketOne.Search
                 }
 
                 Document doc = new Document
-            {
-                new StringField("ID", marketItem.Signature, Field.Store.YES),
-                new StringField("BlockHash", blockHash, Field.Store.YES),
-                new TextField("Title",marketItem.Title,Field.Store.NO),
-                new TextField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer,Field.Store.NO),
-                new TextField("Category",cat.ToString(),Field.Store.NO),
-                new TextField("Description",marketItem.Description,Field.Store.NO),
-                new FacetField("Category",cat.ToString()),
-                new FacetField("Shipping",marketItem.Shipping),
-                new FacetField("Fineness",string.IsNullOrEmpty(marketItem.Fineness) ? "Unspecified":marketItem.Fineness),
-                new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
-                new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),
-                //new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
-                new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),
-                new DoubleDocValuesField("PricePerGram", pricePerGram),
-                new DoubleDocValuesField("Price", marketItem.Price),
-                new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
-                new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
-                new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
-                new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
-                //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
-            };
+                {
+                    new StringField("ID", marketItem.Signature, Field.Store.YES),
+                    new StringField("BlockHash", blockHash, Field.Store.YES),
+                    new TextField("Title",marketItem.Title,Field.Store.NO),
+                    new TextField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer,Field.Store.NO),
+                    new TextField("Category",cat.ToString(),Field.Store.NO),
+                    new TextField("Description",marketItem.Description,Field.Store.NO),
+                    new FacetField("Category",cat.ToString()),
+                    new FacetField("Shipping",marketItem.Shipping),
+                    new FacetField("Fineness",string.IsNullOrEmpty(marketItem.Fineness) ? "Unspecified":marketItem.Fineness),
+                    new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
+                    new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),
+                    //new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
+                    new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),
+                    new DoubleDocValuesField("PricePerGram", pricePerGram),
+                    new DoubleDocValuesField("Price", marketItem.Price),
+                    new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
+                    new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
+                    new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
+                    new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
+                    //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
+                };
 
                 //append all seller sha-hashes to a single multivalue field so that we can find by any.
                 //this should support find all seller items usecase, provided we hash seller's keys for query
@@ -213,8 +213,8 @@ namespace FreeMarketOne.Search
                         _normalizedStore.Save(marketItem, direction);
                     }
                     //UpdateAllSellerDocumentsWithLatestFast(sellerAggregate);
-                    Task.Run(() => UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash));
-
+                    //Task.Run(() => UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash));
+                    UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
                 }
             }          
             

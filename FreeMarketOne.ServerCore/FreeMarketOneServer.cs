@@ -72,6 +72,8 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
         public event EventHandler FreeMarketOneServerLoadedEvent;
         public event EventHandler<string> LoadingEvent;
+        private BackgroundQueue backgroundQueue = new BackgroundQueue();
+
         public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
             var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
@@ -259,8 +261,8 @@ namespace FreeMarketOne.ServerCore
                 LoadingEvent?.Invoke(this, $"SearchIndexing block {e.Hash}");
                 _logger.Information($"SearchIndexing block {e.Hash}");
                 //async thread //this is fast but has some issues with indexes being updated while searching and causing errors.
-                Task.Run(() => SearchIndexer.IndexBlock(block));
-                //SearchIndexer.IndexBlock(block);
+                //message ordering is critical so although we like it to return to UI faster it has to be queued
+                backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(block));
             }
         }
 
@@ -335,6 +337,8 @@ namespace FreeMarketOne.ServerCore
             var block = marketBlockChain.GetBlock<MarketAction>(e.Hash);
 
             Current.Chats.ProcessNewBlock(block);
+            //not sure what is better have queue here and same in app.cs
+            backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(block));
         }
 
         /// <summary>

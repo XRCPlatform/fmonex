@@ -37,6 +37,7 @@ namespace FreeMarketOne.Users
         public PrivateKeyStates PrivateKeyState => _privateKeyState;
         public UserDataV1 UserData => _userData;
         public bool UsedDataForceToPropagate => _userDataForceToPropagate;
+        private SHAProcessor _shaProcessor;
 
         private readonly object _locked = new object();
 
@@ -47,6 +48,7 @@ namespace FreeMarketOne.Users
 
             _configuration = configuration;
             _privateKeyState = PrivateKeyStates.NoKey;
+            _shaProcessor = new SHAProcessor();
         }
 
         /// <summary>
@@ -68,8 +70,7 @@ namespace FreeMarketOne.Users
 
                     if (password != null)
                     {
-                        password = password.Substring(0, 16);
-                        var key = password + password; //expecting 32 chars
+                        string key = GenerateKey(password);
                         var aes = new SymmetricKey(Encoding.ASCII.GetBytes(key));
                         var decryptedPrivKey = aes.Decrypt(keyBytes);
 
@@ -139,15 +140,13 @@ namespace FreeMarketOne.Users
         /// Storing private key dat of user account
         /// </summary>
         /// <param name="seed">Expecting at least 200 chars.</param>
-        /// <param name="password">Expecting 16 chars.</param>
+        /// <param name="password">Expecting 16-32 chars.</param>
         public void SaveNewPrivKey(string seed, string password, string pathRoot, string pathFileKey)
         {
             _logger.Information(string.Format("Saving new private key."));
-
-            password = password.Substring(0, 16);
+            
             PrivateKey = new UserPrivateKey(seed);
-            var key = password + password; //expecting 32 chars
-
+            string key = GenerateKey(password);
             var aes = new SymmetricKey(Encoding.ASCII.GetBytes(key));
             var encryptedPrivKey = aes.Encrypt(PrivateKey.ByteArray);
 
@@ -157,6 +156,24 @@ namespace FreeMarketOne.Users
             Directory.CreateDirectory(directoryPath);
 
             File.WriteAllBytes(pathKey, encryptedPrivKey);
+        }
+
+        public string GenerateKey(string password)
+        {
+            int chopIndex = 32;
+            if (password.Length < chopIndex)
+            {
+                chopIndex = password.Length;
+            }
+            password = password.Substring(0, chopIndex);
+            string shaHash = _shaProcessor.GetSHA256(password);
+            char[] blender = shaHash.ToCharArray();
+            for (int i = 0; i < password.Length; i++)
+            {
+                blender[i] = password[i];
+            }
+            return new string(blender).Substring(0, 32); 
+            
         }
 
         /// <summary>

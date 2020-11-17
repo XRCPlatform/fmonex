@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using Libplanet.Action;
 using Libplanet.Blocks;
 using Libplanet.Tx;
@@ -14,7 +13,9 @@ namespace Libplanet.Blockchain.Policies
     public class BlockPolicy<T> : IBlockPolicy<T>
         where T : IAction, new()
     {
-        private readonly Predicate<Transaction<T>> _doesTransactionFollowPolicy;
+        private readonly int _maxBlockBytes;
+        private readonly int _maxGenesisBytes;
+        private readonly Func<Transaction<T>, BlockChain<T>, bool> _doesTransactionFollowPolicy;
 
         /// <summary>
         /// Creates a <see cref="BlockPolicy{T}"/> with configuring
@@ -32,6 +33,12 @@ namespace Libplanet.Blockchain.Policies
         /// <see cref="MinimumDifficulty"/>. 1024 by default.</param>
         /// <param name="difficultyBoundDivisor">Configures
         /// <see cref="DifficultyBoundDivisor"/>. 128 by default.</param>
+        /// <param name="maxTransactionsPerBlock">Configures <see cref="MaxTransactionsPerBlock"/>.
+        /// 100 by default.</param>
+        /// <param name="maxBlockBytes">Configures <see cref="GetMaxBlockBytes(long)"/> where
+        /// the block is not a genesis.  100 KiB by default.</param>
+        /// <param name="maxGenesisBytes">Configures <see cref="GetMaxBlockBytes(long)"/> where
+        /// the block is a genesis.  1 MiB by default.</param>
         /// <param name="doesTransactionFollowPolicy">
         /// A predicate that determines if the transaction follows the block policy.
         /// </param>
@@ -40,12 +47,18 @@ namespace Libplanet.Blockchain.Policies
             int blockIntervalMilliseconds = 5000,
             long minimumDifficulty = 1024,
             int difficultyBoundDivisor = 128,
-            Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
+            int maxTransactionsPerBlock = 100,
+            int maxBlockBytes = 100 * 1024,
+            int maxGenesisBytes = 1024 * 1024,
+            Func<Transaction<T>, BlockChain<T>, bool> doesTransactionFollowPolicy = null)
             : this(
                 blockAction,
                 TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
                 minimumDifficulty,
                 difficultyBoundDivisor,
+                maxTransactionsPerBlock,
+                maxBlockBytes,
+                maxGenesisBytes,
                 doesTransactionFollowPolicy)
         {
         }
@@ -63,6 +76,12 @@ namespace Libplanet.Blockchain.Policies
         /// <see cref="MinimumDifficulty"/>.</param>
         /// <param name="difficultyBoundDivisor">Configures
         /// <see cref="DifficultyBoundDivisor"/>.</param>
+        /// <param name="maxTransactionsPerBlock">Configures <see cref="MaxTransactionsPerBlock"/>.
+        /// </param>
+        /// <param name="maxBlockBytes">Configures <see cref="GetMaxBlockBytes(long)"/> where
+        /// the block is not a genesis.</param>
+        /// <param name="maxGenesisBytes">Configures <see cref="GetMaxBlockBytes(long)"/> where
+        /// the block is a genesis.</param>
         /// <param name="doesTransactionFollowPolicy">
         /// A predicate that determines if the transaction follows the block policy.
         /// </param>
@@ -71,7 +90,10 @@ namespace Libplanet.Blockchain.Policies
             TimeSpan blockInterval,
             long minimumDifficulty,
             int difficultyBoundDivisor,
-            Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
+            int maxTransactionsPerBlock,
+            int maxBlockBytes,
+            int maxGenesisBytes,
+            Func<Transaction<T>, BlockChain<T>, bool> doesTransactionFollowPolicy = null)
         {
             if (blockInterval < TimeSpan.Zero)
             {
@@ -102,11 +124,17 @@ namespace Libplanet.Blockchain.Policies
             BlockInterval = blockInterval;
             MinimumDifficulty = minimumDifficulty;
             DifficultyBoundDivisor = difficultyBoundDivisor;
-            _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? (_ => true);
+            MaxTransactionsPerBlock = maxTransactionsPerBlock;
+            _maxBlockBytes = maxBlockBytes;
+            _maxGenesisBytes = maxGenesisBytes;
+            _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? ((_, __) => true);
         }
 
         /// <inheritdoc/>
         public IAction BlockAction { get; }
+
+        /// <inheritdoc cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>
+        public int MaxTransactionsPerBlock { get; }
 
         /// <summary>
         /// An appropriate interval between consecutive <see cref="Block{T}"/>s.
@@ -122,67 +150,27 @@ namespace Libplanet.Blockchain.Policies
 
         private int DifficultyBoundDivisor { get; }
 
-        public bool DoesTransactionFollowsPolicy(Transaction<T> transaction)
+        /// <inheritdoc
+        /// cref="IBlockPolicy{T}.DoesTransactionFollowsPolicy(Transaction{T}, BlockChain{T})"/>
+        public virtual bool DoesTransactionFollowsPolicy(
+            Transaction<T> transaction,
+            BlockChain<T> blockChain)
         {
-            return _doesTransactionFollowPolicy(transaction);
+            return _doesTransactionFollowPolicy(transaction, blockChain);
         }
 
         /// <inheritdoc/>
-        public InvalidBlockException ValidateNextBlock(
+        /// <exception cref="InvalidBlockStateRootHashException">It will be thrown when the
+        /// given block has incorrect <see cref="Block{T}.StateRootHash"/>.</exception>
+        public virtual InvalidBlockException ValidateNextBlock(
             BlockChain<T> blocks,
             Block<T> nextBlock)
         {
-            long index = blocks.Count;
-            long difficulty = GetNextBlockDifficulty(blocks);
-
-            Block<T> lastBlock = index >= 1 ? blocks[index - 1] : null;
-            HashDigest<SHA256>? prevHash = lastBlock?.Hash;
-            DateTimeOffset? prevTimestamp = lastBlock?.Timestamp;
-
-            if (nextBlock.Index != index)
-            {
-                return new InvalidBlockIndexException(
-                    $"the expected block index is {index}, but its index" +
-                    $" is {nextBlock.Index}'");
-            }
-
-            if (nextBlock.Difficulty < difficulty)
-            {
-                return new InvalidBlockDifficultyException(
-                    $"the expected difficulty of the block #{index} " +
-                    $"is {difficulty}, but its difficulty is " +
-                    $"{nextBlock.Difficulty}'");
-            }
-
-            if (!nextBlock.PreviousHash.Equals(prevHash))
-            {
-                if (prevHash is null)
-                {
-                    return new InvalidBlockPreviousHashException(
-                        "the genesis block must have not previous block");
-                }
-
-                return new InvalidBlockPreviousHashException(
-                    $"the block #{index} is not continuous from the " +
-                    $"block #{index - 1}; while previous block's hash is " +
-                    $"{prevHash}, the block #{index}'s pointer to " +
-                    "the previous hash refers to " +
-                    (nextBlock.PreviousHash?.ToString() ?? "nothing"));
-            }
-
-            if (nextBlock.Timestamp < prevTimestamp)
-            {
-                return new InvalidBlockTimestampException(
-                    $"the block #{index}'s timestamp " +
-                    $"({nextBlock.Timestamp}) is earlier than" +
-                    $" the block #{index - 1}'s ({prevTimestamp})");
-            }
-
             return null;
         }
 
         /// <inheritdoc />
-        public long GetNextBlockDifficulty(BlockChain<T> blocks)
+        public virtual long GetNextBlockDifficulty(BlockChain<T> blocks)
         {
             long index = blocks.Count;
 
@@ -214,5 +202,7 @@ namespace Libplanet.Blockchain.Policies
 
             return Math.Max(nextDifficulty, MinimumDifficulty);
         }
+
+        public int GetMaxBlockBytes(long index) => index > 0 ? _maxBlockBytes : _maxGenesisBytes;
     }
 }

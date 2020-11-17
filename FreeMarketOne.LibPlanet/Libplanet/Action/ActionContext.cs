@@ -1,14 +1,25 @@
+#nullable enable
+using System.Diagnostics.Contracts;
+using System.Security.Cryptography;
+using Libplanet.Store.Trie;
+
 namespace Libplanet.Action
 {
     internal class ActionContext : IActionContext
     {
+        private readonly int _randomSeed;
+        private readonly ITrie? _previousBlockStatesTrie;
+
+        private HashDigest<SHA256>? _previousStateRootHash;
+
         public ActionContext(
             Address signer,
             Address miner,
             long blockIndex,
             IAccountStateDelta previousStates,
             int randomSeed,
-            bool rehearsal = false
+            bool rehearsal = false,
+            ITrie? previousBlockStatesTrie = null
         )
         {
             Signer = signer;
@@ -17,6 +28,8 @@ namespace Libplanet.Action
             Rehearsal = rehearsal;
             PreviousStates = previousStates;
             Random = new Random(randomSeed);
+            _randomSeed = randomSeed;
+            _previousBlockStatesTrie = previousBlockStatesTrie;
         }
 
         public Address Signer { get; }
@@ -30,5 +43,27 @@ namespace Libplanet.Action
         public IAccountStateDelta PreviousStates { get; }
 
         public IRandom Random { get; }
+
+        public HashDigest<SHA256>? PreviousStateRootHash
+        {
+            get
+            {
+                return _previousStateRootHash ??= _previousBlockStatesTrie?
+                    .Set(PreviousStates.GetUpdatedRawStates())
+                    .Commit()
+                    .Hash;
+            }
+        }
+
+        [Pure]
+        public IActionContext GetUnconsumedContext() =>
+            new ActionContext(
+                Signer,
+                Miner,
+                BlockIndex,
+                PreviousStates,
+                _randomSeed,
+                Rehearsal,
+                _previousBlockStatesTrie);
     }
 }

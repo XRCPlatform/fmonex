@@ -1,4 +1,4 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 <PropertyGroup>
   <PackageId>Libplanet.RocksDBStore</PackageId>
   <Title>Libplanet.RocksDBStore</Title>
@@ -12,6 +12,9 @@
   <RepositoryUrl>git://github.com/planetarium/libplanet.git</RepositoryUrl>
   <RepositoryType>git</RepositoryType>
   <PackageIcon>icon.png</PackageIcon>
+</PropertyGroup>
+
+<PropertyGroup>
   <LangVersion>8.0</LangVersion>
   <TargetFramework>netcoreapp3.1</TargetFramework>
   <RootNamespace>Libplanet.RocksDBStore</RootNamespace>
@@ -22,10 +25,14 @@
   <CodeAnalysisRuleSet>..\Libplanet.ruleset</CodeAnalysisRuleSet>
 </PropertyGroup>
 
+
+
 <ItemGroup>
+
   <PackageReference Include="Planetarium.RocksDbSharp" Version="6.2.2.3-planetarium" />
   <PackageReference Include="Serilog" Version="2.9.0" />
 </ItemGroup>
+
 
 <ItemGroup>
   <ProjectReference Include="..\Libplanet\Libplanet.csproj" />

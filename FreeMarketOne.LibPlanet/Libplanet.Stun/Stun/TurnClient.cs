@@ -17,6 +17,7 @@ namespace Libplanet.Stun
     {
         public const int TurnDefaultPort = 3478;
         private const int AllocateRetry = 5;
+        private const int StunMessageParseRetry = 3;
         private readonly string _host;
         private readonly int _port;
         private readonly IList<TcpClient> _relayedClients;
@@ -218,13 +219,45 @@ namespace Libplanet.Stun
             }
         }
 
+        public async Task BindProxies(
+            int listenPort,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var tcpClient = new TcpClient();
+#pragma warning disable PC001  // API not supported on all platforms
+                tcpClient.Connect(new IPEndPoint(IPAddress.Loopback, listenPort));
+#pragma warning restore PC001
+                NetworkStream localStream = tcpClient.GetStream();
+                NetworkStream turnStream = await AcceptRelayedStreamAsync(cancellationToken);
+#pragma warning disable CS4014
+
+                const int bufferSize = 8042;
+                Task.WhenAny(
+                    turnStream.CopyToAsync(localStream, bufferSize, cancellationToken),
+                    localStream.CopyToAsync(turnStream, bufferSize, cancellationToken)
+                ).ContinueWith(
+                    t =>
+                    {
+                        turnStream.Dispose();
+                        localStream.Dispose();
+                        tcpClient.Dispose();
+                    },
+                    cancellationToken
+                );
+#pragma warning restore CS4014
+            }
+        }
+
         private async Task SendMessageAsync(
             NetworkStream stream,
             StunMessage message,
             CancellationToken cancellationToken)
         {
-            _responses[message.TransactionId] =
-                new TaskCompletionSource<StunMessage>(cancellationToken);
+            var tcs = new TaskCompletionSource<StunMessage>();
+            cancellationToken.Register(() => tcs.TrySetCanceled());
+            _responses[message.TransactionId] = tcs;
             var asBytes = message.Encode(this);
             await stream.WriteAsync(
                 asBytes,
@@ -236,11 +269,35 @@ namespace Libplanet.Stun
         private async Task ProcessMessage()
         {
             NetworkStream stream = _control.GetStream();
+            int retry = 0;
+
             while (_control.Connected)
             {
                 try
                 {
-                    StunMessage message = await StunMessage.Parse(stream);
+                    StunMessage message;
+                    try
+                    {
+                        message = await StunMessage.Parse(stream);
+                    }
+                    catch (TurnClientException e)
+                    {
+                        if (retry < StunMessageParseRetry)
+                        {
+                            retry++;
+                            await Task.Delay(1000);
+                            continue;
+                        }
+
+                        Log.Error(e, "Failed to parse StunMessage. {e}", e);
+                        foreach (TaskCompletionSource<StunMessage> tcs in _responses.Values)
+                        {
+                            tcs.TrySetCanceled();
+                        }
+
+                        _responses.Clear();
+                        break;
+                    }
 
                     if (message is ConnectionAttempt attempt)
                     {
@@ -250,7 +307,8 @@ namespace Libplanet.Stun
                         message.TransactionId,
                         out TaskCompletionSource<StunMessage> tcs))
                     {
-                        tcs.SetResult(message);
+                        // tcs may be already canceled.
+                        tcs.TrySetResult(message);
                     }
                 }
                 catch (Exception e)

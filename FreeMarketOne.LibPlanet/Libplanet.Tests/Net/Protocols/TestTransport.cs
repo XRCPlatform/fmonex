@@ -76,10 +76,11 @@ namespace Libplanet.Tests.Net.Protocols
 
         public Peer AsPeer => new BoundPeer(
             _privateKey.PublicKey,
-            new DnsEndPoint("localhost", 1234),
-            AppProtocolVersion);
+            new DnsEndPoint("localhost", 1234));
 
         public IEnumerable<BoundPeer> Peers => Protocol.Peers;
+
+        public DateTimeOffset? LastMessageTimestamp { get; private set; }
 
         internal ConcurrentBag<Message> ReceivedMessages { get; }
 
@@ -206,11 +207,12 @@ namespace Libplanet.Tests.Net.Protocols
                 {
                     _logger.Debug("Different version encountered during AddPeersAsync().");
                 }
-                catch (TimeoutException)
+                catch (PingTimeoutException)
                 {
-                    _logger.Debug(
-                        $"Timeout occurred during {nameof(AddPeersAsync)}() after {timeout}.");
-                    throw;
+                    var msg =
+                        $"Timeout occurred during {nameof(AddPeersAsync)}() after {timeout}.";
+                    _logger.Debug(msg);
+                    throw new TimeoutException(msg);
                 }
                 catch (TaskCanceledException)
                 {
@@ -242,7 +244,7 @@ namespace Libplanet.Tests.Net.Protocols
 
             Task.Run(() =>
             {
-                (Protocol as KademliaProtocol).PingAsync(
+                _ = (Protocol as KademliaProtocol).PingAsync(
                     boundPeer,
                     timeSpan,
                     default(CancellationToken));
@@ -342,6 +344,7 @@ namespace Libplanet.Tests.Net.Protocols
                     "Received reply {Reply} of message with identity {identity}.",
                     reply,
                     message.Identity);
+                LastMessageTimestamp = DateTimeOffset.UtcNow;
                 ReceivedMessages.Add(reply);
                 Protocol.ReceiveMessage(reply);
                 MessageReceived.Set();
@@ -448,13 +451,14 @@ namespace Libplanet.Tests.Net.Protocols
 
             if (message is Ping)
             {
-                ReplyMessage(new Pong((long?)null)
+                ReplyMessage(new Pong
                 {
                     Identity = message.Identity,
                     Remote = AsPeer,
                 });
             }
 
+            LastMessageTimestamp = DateTimeOffset.UtcNow;
             ReceivedMessages.Add(message);
             Protocol.ReceiveMessage(message);
             MessageReceived.Set();

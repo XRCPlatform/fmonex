@@ -11,6 +11,8 @@ using System.Threading;
 using Bencodex;
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Assets;
+using Libplanet.Store.Trie;
 using Libplanet.Tx;
 
 namespace Libplanet.Blocks
@@ -19,10 +21,7 @@ namespace Libplanet.Blocks
     public class Block<T>
         where T : IAction, new()
     {
-        internal const string TimestampFormat = "yyyy-MM-ddTHH:mm:ss.ffffffZ";
-
-        private static readonly TimeSpan TimestampThreshold =
-            TimeSpan.FromSeconds(900);
+        private int _bytesLength;
 
         /// <summary>
         /// Creates a <see cref="Block{T}"/> instance by manually filling all field values.
@@ -32,6 +31,8 @@ namespace Libplanet.Blocks
         /// </param>
         /// <param name="difficulty">The mining difficulty that <paramref name="nonce"/> has to
         /// satisfy.  Goes to the <see cref="Difficulty"/>.</param>
+        /// <param name="totalDifficulty">The total mining difficulty until this block.
+        /// See also <see cref="Difficulty"/>.</param>
         /// <param name="nonce">The nonce which satisfy the given <paramref name="difficulty"/> with
         /// any other field values.  Goes to the <see cref="Nonce"/>.</param>
         /// <param name="miner">An optional address refers to who mines this block.
@@ -45,18 +46,27 @@ namespace Libplanet.Blocks
         /// Transactions become sorted in an unpredicted-before-mined order and then go to
         /// the <see cref="Transactions"/> property.
         /// </param>
+        /// <param name="preEvaluationHash">The hash derived from the block <em>except of</em>
+        /// <paramref name="stateRootHash"/> (i.e., without action evaluation).
+        /// Automatically determined if <c>null</c> is passed (which is default).</param>
+        /// <param name="stateRootHash">The <see cref="ITrie.Hash"/> of the states on the block.
+        /// </param>
         /// <seealso cref="Mine"/>
         public Block(
             long index,
             long difficulty,
+            BigInteger totalDifficulty,
             Nonce nonce,
             Address? miner,
             HashDigest<SHA256>? previousHash,
             DateTimeOffset timestamp,
-            IEnumerable<Transaction<T>> transactions)
+            IEnumerable<Transaction<T>> transactions,
+            HashDigest<SHA256>? preEvaluationHash = null,
+            HashDigest<SHA256>? stateRootHash = null)
         {
             Index = index;
             Difficulty = difficulty;
+            TotalDifficulty = totalDifficulty;
             Nonce = nonce;
             Miner = miner;
             PreviousHash = previousHash;
@@ -69,13 +79,15 @@ namespace Libplanet.Blocks
                         new Bencodex.Types.List(Transactions.Select(tx =>
                             (IValue)tx.ToBencodex(true)))))
                 : (HashDigest<SHA256>?)null;
+            PreEvaluationHash = preEvaluationHash ?? Hashcash.Hash(SerializeForHash());
+            StateRootHash = stateRootHash;
 
             // FIXME: This does not need to be computed every time?
-            Hash = Hashcash.Hash(SerializeForHash());
+            Hash = Hashcash.Hash(SerializeForHash(stateRootHash));
 
             // As the order of transactions should be unpredictable until a block is mined,
             // the sorter key should be derived from both a block hash and a txid.
-            var hashInteger = new BigInteger(Hash.ToByteArray());
+            var hashInteger = new BigInteger(PreEvaluationHash.ToByteArray());
 
             // If there are multiple transactions for the same signer these should be ordered by
             // their tx nonces.  So transactions of the same signer should have the same sort key.
@@ -119,33 +131,78 @@ namespace Libplanet.Blocks
         {
         }
 
+        public Block(
+            Block<T> block,
+            HashDigest<SHA256>? stateRootHash)
+            : this(
+                block.Index,
+                block.Difficulty,
+                block.TotalDifficulty,
+                block.Nonce,
+                block.Miner,
+                block.PreviousHash,
+                block.Timestamp,
+                block.Transactions,
+                block.PreEvaluationHash,
+                stateRootHash)
+        {
+        }
+
         private Block(RawBlock rb)
             : this(
                 rb.Header.Index,
                 rb.Header.Difficulty,
+                rb.Header.TotalDifficulty,
                 new Nonce(rb.Header.Nonce.ToArray()),
                 rb.Header.Miner.Any() ? new Address(rb.Header.Miner) : (Address?)null,
 #pragma warning disable MEN002 // Line is too long
-                rb.Header.PreviousHash.Any() ? new HashDigest<SHA256>(rb.Header.PreviousHash.ToArray()) : (HashDigest<SHA256>?)null,
+                rb.Header.PreviousHash.Any() ? new HashDigest<SHA256>(rb.Header.PreviousHash) : (HashDigest<SHA256>?)null,
 #pragma warning restore MEN002 // Line is too long
                 DateTimeOffset.ParseExact(
                     rb.Header.Timestamp,
-                    TimestampFormat,
+                    BlockHeader.TimestampFormat,
                     CultureInfo.InvariantCulture).ToUniversalTime(),
                 rb.Transactions
                     .Select(tx => Transaction<T>.Deserialize(tx.ToArray()))
-                    .ToList()
-            )
+                    .ToList(),
+#pragma warning disable MEN002 // Line is too long
+                rb.Header.PreEvaluationHash.Any() ? new HashDigest<SHA256>(rb.Header.PreEvaluationHash) : (HashDigest<SHA256>?)null,
+                rb.Header.StateRootHash.Any() ? new HashDigest<SHA256>(rb.Header.StateRootHash) : (HashDigest<SHA256>?)null)
+#pragma warning restore MEN002 // Line is too long
         {
         }
 
+        /// <summary>
+        /// <see cref="Hash"/> is derived from a serialized <see cref="Block{T}"/>
+        /// after <see cref="Transaction{T}.Actions"/> are evaluated.
+        /// </summary>
+        /// <seealso cref="PreEvaluationHash"/>
+        /// <seealso cref="StateRootHash"/>
         public HashDigest<SHA256> Hash { get; }
+
+        /// <summary>
+        /// The hash derived from the block <em>except of</em>
+        /// <see cref="StateRootHash"/> (i.e., without action evaluation).
+        /// Used for <see cref="BlockHeader.Validate"/> checking <see cref="Nonce"/>.
+        /// </summary>
+        /// <seealso cref="Nonce"/>
+        /// <seealso cref="BlockHeader.Validate"/>
+        public HashDigest<SHA256> PreEvaluationHash { get; }
+
+        /// <summary>
+        /// The <see cref="ITrie.Hash"/> of the states on the block.
+        /// </summary>
+        /// <seealso cref="ITrie.Hash"/>
+        public HashDigest<SHA256>? StateRootHash { get; }
 
         [IgnoreDuringEquals]
         public long Index { get; }
 
         [IgnoreDuringEquals]
         public long Difficulty { get; }
+
+        [IgnoreDuringEquals]
+        public BigInteger TotalDifficulty { get; }
 
         [IgnoreDuringEquals]
         public Nonce Nonce { get; }
@@ -165,6 +222,20 @@ namespace Libplanet.Blocks
         [IgnoreDuringEquals]
         public IEnumerable<Transaction<T>> Transactions { get; }
 
+        /// <summary>
+        /// The bytes length in its serialized format.
+        /// </summary>
+        [IgnoreDuringEquals]
+        public int BytesLength
+        {
+            get
+            {
+                // Note that Serialize() by itself caches _byteLength, so that this ByteLength
+                // property never invokes Serialize() more than once.
+                return _bytesLength > 0 ? _bytesLength : Serialize().Length;
+            }
+        }
+
         public static bool operator ==(Block<T> left, Block<T> right) =>
             Operator.Weave(left, right);
 
@@ -177,6 +248,8 @@ namespace Libplanet.Blocks
         /// <param name="index">Index of the block.</param>
         /// <param name="difficulty">Difficulty to find the <see cref="Block{T}"/>
         /// <see cref="Nonce"/>.</param>
+        /// <param name="previousTotalDifficulty">The total difficulty until the previous
+        /// <see cref="Block{T}"/>.</param>
         /// <param name="miner">The <see cref="Address"/> of miner that mined the block.</param>
         /// <param name="previousHash">
         /// The <see cref="HashDigest{SHA256}"/> of previous block.
@@ -191,6 +264,7 @@ namespace Libplanet.Blocks
         public static Block<T> Mine(
             long index,
             long difficulty,
+            BigInteger previousTotalDifficulty,
             Address miner,
             HashDigest<SHA256>? previousHash,
             DateTimeOffset timestamp,
@@ -201,6 +275,7 @@ namespace Libplanet.Blocks
             Block<T> MakeBlock(Nonce n) => new Block<T>(
                 index,
                 difficulty,
+                previousTotalDifficulty + difficulty,
                 n,
                 miner,
                 previousHash,
@@ -258,6 +333,7 @@ namespace Libplanet.Blocks
         /// representation of a <see cref="Block{T}"/>.</param>
         /// <returns>A decoded <see cref="Block{T}"/> object.</returns>
         /// <seealso cref="Serialize()"/>
+        [Pure]
         public static Block<T> Deserialize(byte[] bytes)
         {
             IValue value = new Codec().Decode(bytes);
@@ -268,13 +344,17 @@ namespace Libplanet.Blocks
                     $"{value.GetType()}");
             }
 
-            return new Block<T>(dict);
+            var block = new Block<T>(dict);
+            block._bytesLength = bytes.Length;
+            return block;
         }
 
         public byte[] Serialize()
         {
             var codec = new Codec();
-            return codec.Encode(ToBencodex());
+            byte[] serialized = codec.Encode(ToBencodex());
+            _bytesLength = serialized.Length;
+            return serialized;
         }
 
         public Bencodex.Types.Dictionary ToBencodex() => ToRawBlock().ToBencodex();
@@ -289,6 +369,12 @@ namespace Libplanet.Blocks
         /// delegate to get a previous state.
         /// A <c>null</c> value, which is default, means a constant function
         /// that returns <c>null</c>.</param>
+        /// <param name="accountBalanceGetter">An <see cref="AccountBalanceGetter"/> delegate to
+        /// get previous account balance.
+        /// A <c>null</c> value, which is default, means a constant function that returns zero.
+        /// </param>
+        /// <param name="previousBlockStatesTrie">The trie to contain states at previous block.
+        /// </param>
         /// <returns>Enumerates pair of a transaction, and
         /// <see cref="ActionEvaluation"/> for each action.
         /// The order of pairs are the same to
@@ -301,28 +387,38 @@ namespace Libplanet.Blocks
         /// </returns>
         [Pure]
         public
-        IEnumerable<Tuple<Transaction<T>, ActionEvaluation>>
-        EvaluateActionsPerTx(AccountStateGetter accountStateGetter = null)
+        IEnumerable<Tuple<Transaction<T>, ActionEvaluation>> EvaluateActionsPerTx(
+            AccountStateGetter accountStateGetter = null,
+            AccountBalanceGetter accountBalanceGetter = null,
+            ITrie previousBlockStatesTrie = null
+        )
         {
-            IAccountStateDelta delta =
-                new AccountStateDeltaImpl(
-                    accountStateGetter ?? (a => null)
-                );
+            accountStateGetter ??= a => null;
+            accountBalanceGetter ??= (a, c) => new FungibleAssetValue(c);
+
+            IAccountStateDelta delta;
             foreach (Transaction<T> tx in Transactions)
             {
+                delta = new AccountStateDeltaImpl(
+                    accountStateGetter,
+                    accountBalanceGetter,
+                    tx.Signer
+                );
                 IEnumerable<ActionEvaluation> evaluations =
                     tx.EvaluateActionsGradually(
-                        Hash,
+                        PreEvaluationHash,
                         Index,
                         delta,
-                        Miner.Value);
+                        Miner.Value,
+                        previousBlockStatesTrie: previousBlockStatesTrie);
                 foreach (var evaluation in evaluations)
                 {
                     yield return Tuple.Create(tx, evaluation);
                     delta = evaluation.OutputStates;
                 }
 
-                delta = new AccountStateDeltaImpl(delta.GetState);
+                accountStateGetter = delta.GetState;
+                accountBalanceGetter = delta.GetBalance;
             }
         }
 
@@ -338,8 +434,17 @@ namespace Libplanet.Blocks
         /// </summary>
         /// <param name="currentTime">The current time to validate
         /// time-wise conditions.</param>
-        /// <param name="accountStateGetter">The getter of previous states.
+        /// <param name="accountStateGetter">An <see cref="AccountStateGetter"/> delegate to get
+        /// a previous state.  A <c>null</c> value, which is default, means a constant function
+        /// that returns <c>null</c>.
         /// This affects the execution of <see cref="Transaction{T}.Actions"/>.
+        /// </param>
+        /// <param name="accountBalanceGetter">An <see cref="AccountBalanceGetter"/> delegate to
+        /// get previous account balance.
+        /// A <c>null</c> value, which is default, means a constant function that returns zero.
+        /// This affects the execution of <see cref="Transaction{T}.Actions"/>.
+        /// </param>
+        /// <param name="previousBlockStatesTrie">The trie to contain states at previous block.
         /// </param>
         /// <returns>An <see cref="ActionEvaluation"/> for each
         /// <see cref="IAction"/>.</returns>
@@ -371,12 +476,18 @@ namespace Libplanet.Blocks
         /// in <see cref="Transaction{T}.UpdatedAddresses"/>.</exception>
         public IEnumerable<ActionEvaluation> Evaluate(
             DateTimeOffset currentTime,
-            AccountStateGetter accountStateGetter
+            AccountStateGetter accountStateGetter = null,
+            AccountBalanceGetter accountBalanceGetter = null,
+            ITrie previousBlockStatesTrie = null
         )
         {
+            accountStateGetter ??= a => null;
+            accountBalanceGetter ??= (a, c) => new FungibleAssetValue(c);
+
             Validate(currentTime);
             Tuple<Transaction<T>, ActionEvaluation>[] txEvaluations =
-                EvaluateActionsPerTx(accountStateGetter).ToArray();
+                EvaluateActionsPerTx(
+                    accountStateGetter, accountBalanceGetter, previousBlockStatesTrie).ToArray();
 
             var txUpdatedAddressesPairs = txEvaluations
                     .GroupBy(tuple => tuple.Item1)
@@ -428,83 +539,34 @@ namespace Libplanet.Blocks
 
         internal BlockHeader GetBlockHeader()
         {
+            string timestampAsString = Timestamp.ToString(
+                BlockHeader.TimestampFormat,
+                CultureInfo.InvariantCulture
+            );
+            ImmutableArray<byte> previousHashAsArray =
+                PreviousHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty;
+            ImmutableArray<byte> stateRootHashAsArray =
+                StateRootHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty;
+
             // FIXME: When hash is not assigned, should throw an exception.
             return new BlockHeader(
                 index: Index,
-                timestamp: Timestamp.ToString(TimestampFormat, CultureInfo.InvariantCulture),
+                timestamp: timestampAsString,
                 nonce: Nonce.ToByteArray().ToImmutableArray(),
                 miner: Miner?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty,
                 difficulty: Difficulty,
-#pragma warning disable MEN002 // line is too long
-                previousHash: PreviousHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty,
-#pragma warning restore MEN002 // line is too long
+                totalDifficulty: TotalDifficulty,
+                previousHash: previousHashAsArray,
                 txHash: TxHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty,
-                hash: Hash.ToByteArray().ToImmutableArray()
+                hash: Hash.ToByteArray().ToImmutableArray(),
+                preEvaluationHash: PreEvaluationHash.ToByteArray().ToImmutableArray(),
+                stateRootHash: stateRootHashAsArray
             );
         }
 
         internal void Validate(DateTimeOffset currentTime)
         {
-            if (currentTime + TimestampThreshold < Timestamp)
-            {
-                throw new InvalidBlockTimestampException(
-                    $"The block #{Index}'s timestamp ({Timestamp}) is " +
-                    $"later than now ({currentTime}, " +
-                    $"threshold: {TimestampThreshold})."
-                );
-            }
-
-            if (Index < 0)
-            {
-                throw new InvalidBlockIndexException(
-                    $"index must be 0 or more, but its index is {Index}."
-                );
-            }
-
-            if (Index == 0)
-            {
-                if (Difficulty != 0)
-                {
-                    throw new InvalidBlockDifficultyException(
-                        "difficulty must be 0 for the genesis block, " +
-                        $"but its difficulty is {Difficulty}."
-                    );
-                }
-
-                if (PreviousHash != null)
-                {
-                    throw new InvalidBlockPreviousHashException(
-                        "previous hash must be empty for the genesis block."
-                    );
-                }
-            }
-            else
-            {
-                if (Difficulty < 1)
-                {
-                    throw new InvalidBlockDifficultyException(
-                        "difficulty must be more than 0 (except of " +
-                        "the genesis block), but its difficulty is " +
-                        $"{Difficulty}."
-                    );
-                }
-
-                if (PreviousHash == null)
-                {
-                    throw new InvalidBlockPreviousHashException(
-                        "previous hash must be present except of " +
-                        "the genesis block."
-                    );
-                }
-            }
-
-            if (!Hash.Satisfies(Difficulty))
-            {
-                throw new InvalidBlockNonceException(
-                    $"hash ({Hash}) with the nonce ({Nonce}) does not " +
-                    $"satisfy its difficulty level {Difficulty}."
-                );
-            }
+            GetBlockHeader().Validate(currentTime);
 
             foreach (Transaction<T> tx in Transactions)
             {
@@ -521,13 +583,13 @@ namespace Libplanet.Blocks
                     .Select(tx => tx.Serialize(true).ToImmutableArray()).ToImmutableArray());
         }
 
-        private byte[] SerializeForHash()
+        private byte[] SerializeForHash(HashDigest<SHA256>? stateRootHash = null)
         {
             var dict = Bencodex.Types.Dictionary.Empty
                 .Add("index", Index)
                 .Add(
                     "timestamp",
-                    Timestamp.ToString(TimestampFormat, CultureInfo.InvariantCulture))
+                    Timestamp.ToString(BlockHeader.TimestampFormat, CultureInfo.InvariantCulture))
                 .Add("difficulty", Difficulty)
                 .Add("nonce", Nonce.ToByteArray());
 
@@ -544,6 +606,11 @@ namespace Libplanet.Blocks
             if (!(TxHash is null))
             {
                 dict = dict.Add("transaction_fingerprint", TxHash.Value.ToByteArray());
+            }
+
+            if (!(stateRootHash is null))
+            {
+                dict = dict.Add("state_root_hash", stateRootHash.Value.ToByteArray());
             }
 
             return new Codec().Encode(dict);

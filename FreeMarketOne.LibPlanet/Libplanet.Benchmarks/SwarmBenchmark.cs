@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,7 +58,8 @@ namespace Libplanet.Benchmarks
             {
                 _keys[i] = _keys[i] ?? new PrivateKey();
                 _fxs[i] = new DefaultStoreFixture(memory: true);
-                _blockChains[i] = new BlockChain<DumbAction>(_policy, _fxs[i].Store, _blocks[0]);
+                _blockChains[i] = new BlockChain<DumbAction>(
+                    _policy, _fxs[i].Store, _fxs[i].StateStore, _blocks[0]);
                 _swarms[i] = new Swarm<DumbAction>(
                     _blockChains[i],
                     _keys[i],
@@ -120,11 +122,12 @@ namespace Libplanet.Benchmarks
 
         private async Task<Task> StartAsync<T>(
             Swarm<T> swarm,
+            IImmutableSet<Address> trustedStateValidators = null,
             CancellationToken cancellationToken = default
         )
             where T : IAction, new()
         {
-            Task task = swarm.StartAsync(200, 200, cancellationToken);
+            Task task = swarm.StartAsync(200, 200, trustedStateValidators, cancellationToken);
             await swarm.WaitForRunningAsync();
             return task;
         }

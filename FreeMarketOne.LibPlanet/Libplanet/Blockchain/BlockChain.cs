@@ -3,31 +3,38 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Bencodex;
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Assets;
 using Libplanet.Blockchain.Policies;
+using Libplanet.Blockchain.Renderers;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Store;
+using Libplanet.Store.Trie;
 using Libplanet.Tx;
 using Serilog;
+using static Libplanet.Blockchain.KeyConverters;
 
 namespace Libplanet.Blockchain
 {
     /// <summary>
     /// A class have <see cref="Block{T}"/>s, <see cref="Transaction{T}"/>s, and the chain
     /// information.
+    /// <para>In order to watch its state changes, implement <see cref="IRenderer{T}"/>
+    /// interface and pass it to the <see
+    /// cref="BlockChain{T}(IBlockPolicy{T},IStore,IStateStore,Block{T},IEnumerable{IRenderer{T}})"
+    /// /> constructor.</para>
     /// </summary>
     /// <remarks>This object is guaranteed that it has at least one block, since it takes a genesis
     /// block when it's instantiated.</remarks>
     /// <typeparam name="T">An <see cref="IAction"/> type.  It should match
     /// to <see cref="Block{T}"/>'s type parameter.</typeparam>
-    /// <seealso cref="IAction"/>
-    /// <seealso cref="Block{T}"/>
-    /// <seealso cref="Transaction{T}"/>
     public class BlockChain<T>
         where T : IAction, new()
     {
@@ -57,6 +64,11 @@ namespace Libplanet.Blockchain
         private IDictionary<TxId, Transaction<T>> _transactions;
 
         /// <summary>
+        /// Cached genesis block.
+        /// </summary>
+        private Block<T> _genesis;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="BlockChain{T}"/> class.
         /// </summary>
         /// <param name="policy"><see cref="IBlockPolicy{T}"/> to use in the
@@ -69,30 +81,46 @@ namespace Libplanet.Blockchain
         /// it checks if the existing genesis block and this argument is the same.
         /// If the <paramref name="store"/> has no genesis block yet this argument will
         /// be used for that.</param>
+        /// <param name="renderers">Listens state changes on the created chain.  Listens nothing
+        /// by default or if it is <c>null</c>.</param>
+        /// <param name="stateStore"><see cref="IStateStore"/> to store states.</param>
         /// <exception cref="InvalidGenesisBlockException">Thrown when the <paramref name="store"/>
         /// has a genesis block and it does not match to what the network expects
         /// (i.e., <paramref name="genesisBlock"/>).</exception>
         public BlockChain(
             IBlockPolicy<T> policy,
             IStore store,
-            Block<T> genesisBlock
+            IStateStore stateStore,
+            Block<T> genesisBlock,
+            IEnumerable<IRenderer<T>> renderers = null
             )
-            : this(policy, store, store.GetCanonicalChainId() ?? Guid.NewGuid(), genesisBlock)
+            : this(
+                policy,
+                store,
+                stateStore,
+                store.GetCanonicalChainId() ?? Guid.NewGuid(),
+                genesisBlock,
+                renderers
+            )
         {
         }
 
         internal BlockChain(
             IBlockPolicy<T> policy,
             IStore store,
+            IStateStore stateStore,
             Guid id,
-            Block<T> genesisBlock
+            Block<T> genesisBlock,
+            IEnumerable<IRenderer<T>> renderers
         )
             : this(
                 policy,
                 store,
+                stateStore,
                 id,
                 genesisBlock,
-                false
+                false,
+                renderers
             )
         {
         }
@@ -100,17 +128,30 @@ namespace Libplanet.Blockchain
         private BlockChain(
             IBlockPolicy<T> policy,
             IStore store,
+            IStateStore stateStore,
             Guid id,
             Block<T> genesisBlock,
-            bool inFork
+            bool inFork,
+            IEnumerable<IRenderer<T>> renderers
         )
         {
             Id = id;
             Policy = policy;
             Store = store;
 
+            // It expects store is DefaultStore or RocksDBStore.
+            StateStore = stateStore ?? store as IStateStore;
+            if (StateStore is null)
+            {
+                throw new ArgumentNullException(nameof(stateStore));
+            }
+
             _blocks = new BlockSet<T>(store);
             _transactions = new TransactionSet<T>(store);
+            Renderers = renderers is IEnumerable<IRenderer<T>> r
+                ? r.ToImmutableArray()
+                : ImmutableArray<IRenderer<T>>.Empty;
+            ActionRenderers = Renderers.OfType<IActionRenderer<T>>().ToImmutableArray();
             _rwlock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
             _txLock = new object();
 
@@ -121,12 +162,21 @@ namespace Libplanet.Blockchain
 
             _logger = Log.ForContext<BlockChain<T>>()
                 .ForContext("CanonicalChainId", Id);
+            Func<HashDigest<SHA256>, ITrie> trieGetter = StateStore is TrieStateStore trieStateStore
+                ? h => trieStateStore.GetTrie(h)
+                : (Func<HashDigest<SHA256>, ITrie>)null;
+            BlockEvaluator = new BlockEvaluator<T>(
+                policy.BlockAction,
+                GetState,
+                GetBalance,
+                trieGetter);
 
             if (Count == 0)
             {
                 Append(
                     genesisBlock,
                     currentTime: genesisBlock.Timestamp,
+                    renderBlocks: !inFork,
                     renderActions: !inFork,
                     evaluateActions: !inFork
                 );
@@ -155,7 +205,24 @@ namespace Libplanet.Blockchain
         /// <summary>
         /// An event which is invoked when <see cref="Tip"/> is changed.
         /// </summary>
-        public event EventHandler<TipChangedEventArgs> TipChanged;
+        public event EventHandler<(Block<T> OldTip, Block<T> NewTip)> TipChanged;
+
+        /// <summary>
+        /// The list of registered renderers listening the state changes.
+        /// </summary>
+        /// <remarks>
+        /// Since this value is immutable, renderers cannot be registered after once a <see
+        /// cref="BlockChain{T}"/> object is instantiated; use <c>renderers</c> option of <see cref=
+        /// "BlockChain{T}(IBlockPolicy{T},IStore,IStateStore,Block{T},IEnumerable{IRenderer{T}})"/>
+        /// constructor instead.
+        /// </remarks>
+        public IImmutableList<IRenderer<T>> Renderers { get; }
+
+        /// <summary>
+        /// A filtered list, from <see cref="Renderers"/>, which contains only <see
+        /// cref="IActionRenderer{T}"/> instances.
+        /// </summary>
+        public IImmutableList<IActionRenderer<T>> ActionRenderers { get; }
 
         public IBlockPolicy<T> Policy { get; }
 
@@ -181,7 +248,7 @@ namespace Libplanet.Blockchain
         /// <summary>
         /// The first <see cref="Block{T}"/> in the <see cref="BlockChain{T}"/>.
         /// </summary>
-        public Block<T> Genesis => this[0];
+        public Block<T> Genesis => _genesis ??= this[0];
 
         public Guid Id { get; private set; }
 
@@ -202,6 +269,10 @@ namespace Libplanet.Blockchain
         public long Count => Store.CountIndex(Id);
 
         internal IStore Store { get; }
+
+        internal IStateStore StateStore { get; }
+
+        internal BlockEvaluator<T> BlockEvaluator { get; }
 
         /// <summary>
         /// Gets the block corresponding to the <paramref name="index"/>.
@@ -279,22 +350,48 @@ namespace Libplanet.Blockchain
         /// If it's null, it will use new private key as default.</param>
         /// <param name="timestamp">The timestamp of the genesis block. If it's null, it will
         /// use <see cref="DateTimeOffset.UtcNow"/> as default.</param>
+        /// <param name="blockAction">A block action to execute and be rendered for every block.
+        /// It must match to <see cref="BlockPolicy{T}.BlockAction"/> of <see cref="Policy"/>.
+        /// </param>
         /// <returns>The genesis block mined with parameters.</returns>
         public static Block<T> MakeGenesisBlock(
             IEnumerable<T> actions = null,
             PrivateKey privateKey = null,
-            DateTimeOffset? timestamp = null)
+            DateTimeOffset? timestamp = null,
+            IAction blockAction = null)
         {
             privateKey = privateKey ?? new PrivateKey();
             actions = actions ?? ImmutableArray<T>.Empty;
+            IEnumerable<Transaction<T>> transactions = new[]
+            {
+                Transaction<T>.Create(0, privateKey, null, actions, timestamp: timestamp),
+            };
 
-            return Block<T>.Mine(
+            Block<T> block = Block<T>.Mine(
+                0,
                 0,
                 0,
                 privateKey.ToAddress(),
                 null,
                 timestamp ?? DateTimeOffset.UtcNow,
-                new[] { Transaction<T>.Create(0, privateKey, actions, timestamp: timestamp), });
+                transactions);
+
+            var blockEvaluator = new BlockEvaluator<T>(
+                blockAction,
+                (address, digest, stateCompleter) => null,
+                (address, currency, hash, fungibleAssetStateCompleter)
+                    => new FungibleAssetValue(currency),
+                null);
+            var actionEvaluationResult = blockEvaluator
+                .EvaluateActions(block, StateCompleterSet<T>.Reject)
+                .GetTotalDelta(ToStateKey, ToFungibleAssetKey);
+            ITrie trie = new MerkleTrie(new DefaultKeyValueStore(null));
+            trie = trie.Set(actionEvaluationResult);
+            var stateRootHash = trie.Commit(rehearsal: true).Hash;
+
+            return new Block<T>(
+                block,
+                stateRootHash);
         }
 
         /// <summary>
@@ -348,134 +445,89 @@ namespace Libplanet.Blockchain
         /// Gets the state of the given <paramref name="address"/> in the
         /// <see cref="BlockChain{T}"/> from <paramref name="offset"/>.
         /// </summary>
-        /// <param name="address">An <see cref="Address"/> to get
-        /// the states of.</param>
-        /// <param name="offset">The <see cref="HashDigest{T}"/> of the block to
-        /// start finding the state. It will be The tip of the
-        /// <see cref="BlockChain{T}"/> if it is <c>null</c>.</param>
-        /// <param name="completeStates">When the <see cref="BlockChain{T}"/>
-        /// instance does not contain states dirty of the block which lastly
-        /// updated states of a requested address, this option makes
-        /// the incomplete states calculated and filled on the fly.
-        /// If this option is turned off (which is default) this method throws
-        /// <see cref="IncompleteBlockStatesException"/> instead
-        /// for the same situation.
-        /// Just-in-time calculation of states could take a long time so that
-        /// the overall latency of an application may rise.</param>
+        /// <param name="address">An <see cref="Address"/> to get the states of.</param>
+        /// <param name="offset">The <see cref="HashDigest{T}"/> of the block to start finding
+        /// the state.  It will be The tip of the <see cref="BlockChain{T}"/> if it is <c>null</c>.
+        /// </param>
+        /// <param name="stateCompleter">When the <see cref="BlockChain{T}"/> instance does not
+        /// contain states dirty of the block which lastly updated states of a requested address,
+        /// this delegate is called and its return value is used instead.
+        /// <para><see cref="StateCompleters{T}.Recalculate"/> makes the incomplete states
+        /// recalculated and filled on the fly.</para>
+        /// <para><see cref="StateCompleters{T}.Reject"/> (which is default) makes the incomplete
+        /// states (if needed) to cause <see cref="IncompleteBlockStatesException"/> instead.</para>
+        /// </param>
         /// <returns>The current state of given <paramref name="address"/>.  This can be <c>null</c>
         /// if <paramref name="address"/> has no value.</returns>
-        /// <exception cref="IncompleteBlockStatesException">Thrown when
-        /// the <see cref="BlockChain{T}"/> instance does not contain
-        /// states dirty of the block which lastly updated states of a requested
-        /// address, because actions in the block have never been executed.
-        /// If <paramref name="completeStates"/> option is turned on
-        /// this exception is not thrown and incomplete states are calculated
-        /// and filled on the fly instead.
-        /// </exception>
         public IValue GetState(
             Address address,
             HashDigest<SHA256>? offset = null,
-            bool completeStates = false
+            StateCompleter<T> stateCompleter = null
+        ) =>
+            GetRawState(
+                ToStateKey(address),
+                offset,
+                StateCompleters<T>.ToRawStateCompleter(
+                    stateCompleter ?? StateCompleters<T>.Reject,
+                    address
+                )
+            );
+
+        /// <summary>
+        /// Queries <paramref name="address"/>'s balance of the <paramref name="currency"/> in the
+        /// <see cref="BlockChain{T}"/> from <paramref name="offset"/>.
+        /// </summary>
+        /// <param name="address">The owner <see cref="Address"/> to query.</param>
+        /// <param name="currency">The currency type to query.</param>
+        /// <param name="offset">The <see cref="HashDigest{T}"/> of the block to
+        /// start finding the state. It will be the tip of the
+        /// <see cref="BlockChain{T}"/> if it is <c>null</c>.</param>
+        /// <param name="stateCompleter">When the <see cref="BlockChain{T}"/> instance does not
+        /// contain states dirty of the block which lastly updated states of a requested address,
+        /// this delegate is called and its return value is used instead.
+        /// <para><see cref="FungibleAssetStateCompleters{T}.Recalculate"/> makes the incomplete
+        /// states recalculated and filled on the fly.</para>
+        /// <para><see cref="FungibleAssetStateCompleters{T}.Reject"/> (which is default) makes
+        /// the incomplete states (if needed) to cause <see cref="IncompleteBlockStatesException"/>
+        /// instead.</para></param>
+        /// <returns>The <paramref name="address"/>'s current balance (or balance as of the given
+        /// <paramref name="offset"/>) of the <paramref name="currency"/>.
+        /// </returns>
+        public FungibleAssetValue GetBalance(
+            Address address,
+            Currency currency,
+            HashDigest<SHA256>? offset = null,
+            FungibleAssetStateCompleter<T> stateCompleter = null
         )
         {
-            _rwlock.EnterReadLock();
-            try
-            {
-                if (offset == null)
-                {
-                    offset = Store.IndexBlockHash(Id, -1);
-                }
-            }
-            finally
-            {
-                _rwlock.ExitReadLock();
-            }
-
-            if (offset == null)
-            {
-                return null;
-            }
-
-            Block<T> block = this[offset.Value];
-            Tuple<HashDigest<SHA256>, long> stateReference;
-            string stateKey = address.ToHex().ToLowerInvariant();
-
-            _rwlock.EnterReadLock();
-            try
-            {
-                stateReference = Store.LookupStateReference(Id, stateKey, block);
-            }
-            finally
-            {
-                _rwlock.ExitReadLock();
-            }
-
-            if (stateReference is null)
-            {
-                return null;
-            }
-
-            HashDigest<SHA256> hashValue = stateReference.Item1;
-
-            IImmutableDictionary<string, IValue> blockStates = Store.GetBlockStates(hashValue);
-            if (blockStates is null)
-            {
-                if (completeStates)
-                {
-                    // Calculates and fills the incomplete states
-                    // on the fly.
-                    foreach (HashDigest<SHA256> hash in BlockHashes)
-                    {
-                        Block<T> b = this[hash];
-                        if (!(Store.GetBlockStates(b.Hash) is null))
-                        {
-                            continue;
-                        }
-
-                        IReadOnlyList<ActionEvaluation> evaluations = EvaluateActions(b);
-
-                        _rwlock.EnterWriteLock();
-
-                        try
-                        {
-                            SetStates(b, evaluations, buildStateReferences: false);
-                        }
-                        finally
-                        {
-                            _rwlock.ExitWriteLock();
-                        }
-                    }
-
-                    blockStates = Store.GetBlockStates(hashValue);
-                    if (blockStates is null)
-                    {
-                        throw new NullReferenceException();
-                    }
-                }
-                else
-                {
-                    throw new IncompleteBlockStatesException(hashValue);
-                }
-            }
-
-            if (blockStates.TryGetValue(stateKey, out IValue state))
-            {
-                return state;
-            }
-
-            return null;
+            stateCompleter ??= FungibleAssetStateCompleters<T>.Reject;
+            IValue v = GetRawState(
+                ToFungibleAssetKey(address, currency),
+                offset,
+                FungibleAssetStateCompleters<T>.ToRawStateCompleter(
+                    stateCompleter,
+                    address,
+                    currency
+                )
+            );
+            return FungibleAssetValue.FromRawValue(
+                currency,
+                v is Bencodex.Types.Integer i ? i.Value : 0
+            );
         }
 
         /// <summary>
         /// Adds a <paramref name="block"/> to the end of this chain.
-        /// <para>Note that <see cref="IAction.Render"/> methods of
-        /// all <see cref="IAction"/> objects that belong
-        /// to the <paramref name="block"/> are called right after
-        /// the <paramref name="block"/> is confirmed (and thus all states
-        /// reflect changes in the <paramref name="block"/>).</para>
+        /// <para>Note that <see cref="Renderers"/> receive events right after the <paramref
+        /// name="block"/> is confirmed (and thus all states reflect changes in the <paramref
+        /// name="block"/>).</para>
         /// </summary>
         /// <param name="block">A next <see cref="Block{T}"/>, which is mined,
         /// to add.</param>
+        /// <param name="stateCompleters">The strategy to complement incomplete block states which
+        /// are required for action execution and rendering.
+        /// <see cref="StateCompleterSet{T}.Recalculate"/> by default.
+        /// </param>
         /// <exception cref="InvalidBlockException">Thrown when the given
         /// <paramref name="block"/> is invalid, in itself or according to
         /// the <see cref="Policy"/>.</exception>
@@ -483,20 +535,25 @@ namespace Libplanet.Blockchain
         /// <see cref="Transaction{T}.Nonce"/> is different from
         /// <see cref="GetNextTxNonce"/> result of the
         /// <see cref="Transaction{T}.Signer"/>.</exception>
-        public void Append(Block<T> block) =>
-            Append(block, DateTimeOffset.UtcNow);
+        public void Append(Block<T> block, StateCompleterSet<T>? stateCompleters = null) =>
+            Append(block, DateTimeOffset.UtcNow, stateCompleters);
 
         /// <summary>
         /// Adds a <paramref name="block"/> to the end of this chain.
-        /// <para>Note that <see cref="IAction.Render"/> methods of
-        /// all <see cref="IAction"/> objects that belong
-        /// to the <paramref name="block"/> are called right after
-        /// the <paramref name="block"/> is confirmed (and thus all states
-        /// reflect changes in the <paramref name="block"/>).</para>
+        /// <para>Note that <see cref="Renderers"/> receive events right after the <paramref
+        /// name="block"/> is confirmed (and thus all states reflect changes in the <paramref
+        /// name="block"/>).</para>
         /// </summary>
         /// <param name="block">A next <see cref="Block{T}"/>, which is mined,
         /// to add.</param>
         /// <param name="currentTime">The current time.</param>
+        /// <param name="stateCompleters">The strategy to complement incomplete block states which
+        /// are required for action execution and rendering.
+        /// <see cref="StateCompleterSet{T}.Recalculate"/> by default.
+        /// </param>
+        /// <exception cref="InvalidBlockBytesLengthException">Thrown when the block to mine is
+        /// too long (according to <see cref="IBlockPolicy{T}.GetMaxBlockBytes(long)"/>) in bytes.
+        /// </exception>
         /// <exception cref="InvalidBlockException">Thrown when the given
         /// <paramref name="block"/> is invalid, in itself or according to
         /// the <see cref="Policy"/>.</exception>
@@ -504,8 +561,19 @@ namespace Libplanet.Blockchain
         /// <see cref="Transaction{T}.Nonce"/> is different from
         /// <see cref="GetNextTxNonce"/> result of the
         /// <see cref="Transaction{T}.Signer"/>.</exception>
-        public void Append(Block<T> block, DateTimeOffset currentTime) =>
-            Append(block, currentTime, evaluateActions: true, renderActions: true);
+        public void Append(
+            Block<T> block,
+            DateTimeOffset currentTime,
+            StateCompleterSet<T>? stateCompleters = null
+        ) =>
+            Append(
+                block,
+                currentTime,
+                evaluateActions: true,
+                renderBlocks: true,
+                renderActions: true,
+                stateCompleters: stateCompleters
+            );
 
         /// <summary>
         /// Adds a <paramref name="transaction"/> to the pending list so that
@@ -518,6 +586,17 @@ namespace Libplanet.Blockchain
         /// <paramref name="transaction"/> is invalid.</exception>
         public void StageTransaction(Transaction<T> transaction)
         {
+            if (!transaction.GenesisHash.Equals(Genesis.Hash))
+            {
+                var msg = "GenesisHash of the transaction is not compatible " +
+                          "with the BlockChain<T>.Genesis.Hash.";
+                throw new InvalidTxGenesisHashException(
+                    transaction.Id,
+                    Genesis.Hash,
+                    transaction.GenesisHash,
+                    msg);
+            }
+
             // FIXME it's global chain lock so using it in this method can cause degrading
             // parallelism of `BlockChain<T>`. we should re-organize locks in `BlockChain<T>`
             _rwlock.EnterWriteLock();
@@ -598,10 +677,21 @@ namespace Libplanet.Blockchain
         }
 
         /// <summary>
-        /// Mine a <see cref="Block{T}"/> using staged <see cref="Transaction{T}"/>s.
+        /// Mines a next <see cref="Block{T}"/> using staged <see cref="Transaction{T}"/>s,
+        /// and then <see cref="Append(Block{T}, StateCompleterSet{T}?)"/> it to the chain
+        /// (unless the <paramref name="append"/> option is turned off).
         /// </summary>
         /// <param name="miner">The <see cref="Address"/> of miner that mined the block.</param>
         /// <param name="currentTime">The <see cref="DateTimeOffset"/> when mining started.</param>
+        /// <param name="append">Whether to <see cref="Append(Block{T}, StateCompleterSet{T}?)"/>
+        /// the mined block.  Turned on by default.</param>
+        /// <param name="maxTransactions">The maximum number of transactions that a block can
+        /// accept.  This value must be greater than 0, and less than or equal to
+        /// <see cref="Policy"/>.<see cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>.
+        /// Zero and negative values are treated as 1. If it is omitted or more than
+        /// <see cref="Policy"/>.<see cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>, it will be
+        /// treated as <see cref="Policy"/>.<see cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>.
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this
         /// operation should be canceled.
@@ -612,40 +702,107 @@ namespace Libplanet.Blockchain
         public async Task<Block<T>> MineBlock(
             Address miner,
             DateTimeOffset currentTime,
+            bool append = true,
+            int? maxTransactions = null,
             CancellationToken cancellationToken = default(CancellationToken)
         )
         {
+            maxTransactions = Math.Max(
+                Math.Min(
+                    maxTransactions ?? Policy.MaxTransactionsPerBlock,
+                    Policy.MaxTransactionsPerBlock
+                ),
+                1
+            );
+
             long index = Store.CountIndex(Id);
             long difficulty = Policy.GetNextBlockDifficulty(this);
             HashDigest<SHA256>? prevHash = Store.IndexBlockHash(Id, index - 1);
-            IEnumerable<Transaction<T>> stagedTransactions = Store
+
+            Transaction<T>[] stagedTransactions = Store
                 .IterateStagedTransactionIds()
-                .Select(Store.GetTransaction<T>);
+                .Select(Store.GetTransaction<T>)
+                .GroupBy(tx => tx.Signer)
+                .SelectMany(grp => grp.Select((tx, idx) => (tx, idx)))
+                .OrderBy(t => t.Item2)
+                .Select(t => t.Item1)
+                .ToArray();
 
             var transactionsToMine = new List<Transaction<T>>();
 
+            // Makes an empty block to estimate the length of bytes without transactions.
+            var estimatedBytes = new Block<T>(
+                index: index,
+                difficulty: difficulty,
+                totalDifficulty: Tip.TotalDifficulty,
+                nonce: default,
+                miner: miner,
+                previousHash: prevHash,
+                timestamp: currentTime,
+                transactions: new Transaction<T>[0]
+            ).BytesLength;
+            int maxBlockBytes = Math.Max(Policy.GetMaxBlockBytes(index), 1);
+            var skippedSigners = new HashSet<Address>();
+
             foreach (Transaction<T> tx in stagedTransactions)
             {
-                if (!Policy.DoesTransactionFollowsPolicy(tx))
+                if (!Policy.DoesTransactionFollowsPolicy(tx, this))
                 {
                     UnstageTransaction(tx);
                 }
-                else if (Store.GetTxNonce(Id, tx.Signer) <= tx.Nonce
-                         && tx.Nonce < GetNextTxNonce(tx.Signer))
+                else if (!skippedSigners.Contains(tx.Signer) &&
+                         Store.GetTxNonce(Id, tx.Signer) <= tx.Nonce &&
+                         tx.Nonce < GetNextTxNonce(tx.Signer))
                 {
+                    if (transactionsToMine.Count >= maxTransactions)
+                    {
+                        _logger.Information(
+                            "Not all staged transactions will be included in a block #{Index} to " +
+                            "be mined by {Miner}, because it reaches the maximum number of " +
+                            "acceptable transactions: {MaxTransactions}",
+                            index,
+                            miner,
+                            maxTransactions
+                        );
+                        break;
+                    }
+
+                    if (estimatedBytes + tx.BytesLength > maxBlockBytes)
+                    {
+                        // Once someone's tx is excluded from a block, their later txs are also all
+                        // excluded in the block, because later nonces become invalid.
+                        skippedSigners.Add(tx.Signer);
+                        _logger.Information(
+                            "The {Signer}'s transactions after the nonce #{Nonce} will be " +
+                            "excluded in a block #{Index} to be mined by {Miner}, because it " +
+                            "takes too long bytes.",
+                            tx.Signer,
+                            tx.Nonce,
+                            index,
+                            miner
+                        );
+                        continue;
+                    }
+
                     transactionsToMine.Add(tx);
+                    estimatedBytes += tx.BytesLength;
                 }
             }
+
+            _logger.Verbose(
+                "A block #{Index} to be mined by {Miner} will include {Transactions} " +
+                "transactions out of {StagedTransactions} staged transactions.",
+                index,
+                miner,
+                transactionsToMine.Count,
+                stagedTransactions.Length
+            );
 
             CancellationTokenSource cts = new CancellationTokenSource();
             CancellationTokenSource cancellationTokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
 
-            void WatchTip(object target, TipChangedEventArgs args)
-            {
-                cts.Cancel();
-            }
-
+            void WatchTip(object target, (Block<T> OldTip, Block<T> NewTip) tip) => cts.Cancel();
             TipChanged += WatchTip;
 
             Block<T> block;
@@ -655,6 +812,7 @@ namespace Libplanet.Blockchain
                     () => Block<T>.Mine(
                         index: index,
                         difficulty: difficulty,
+                        previousTotalDifficulty: Tip.TotalDifficulty,
                         miner: miner,
                         previousHash: prevHash,
                         timestamp: currentTime,
@@ -673,21 +831,63 @@ namespace Libplanet.Blockchain
 
                 throw new OperationCanceledException(cancellationToken);
             }
+            finally
+            {
+                TipChanged -= WatchTip;
+                cancellationTokenSource.Dispose();
+                cts.Dispose();
+            }
 
-            TipChanged -= WatchTip;
-            cancellationTokenSource.Dispose();
-            cts.Dispose();
+            var actionEvaluations = BlockEvaluator.EvaluateActions(
+                block, StateCompleterSet<T>.Recalculate);
 
-            Append(block, currentTime);
+            if (StateStore is TrieStateStore trieStateStore)
+            {
+                SetStates(block, actionEvaluations, false);
+                block = new Block<T>(block, trieStateStore.GetRootHash(block.Hash));
+            }
+
+            if (append)
+            {
+                Append(block, currentTime);
+            }
 
             return block;
         }
 
-        public async Task<Block<T>> MineBlock(Address miner) =>
-            await MineBlock(miner, DateTimeOffset.UtcNow);
+        /// <summary>
+        /// Mines a next <see cref="Block{T}"/> using staged <see cref="Transaction{T}"/>s,
+        /// and then <see cref="Append(Block{T}, StateCompleterSet{T}?)"/> it to the chain
+        /// (unless the <paramref name="append"/> option is turned off).
+        /// </summary>
+        /// <param name="miner">The <see cref="Address"/> of miner that mined the block.</param>
+        /// <param name="append">Whether to <see cref="Append(Block{T}, StateCompleterSet{T}?)"/>
+        /// the mined block.  Turned on by default.</param>
+        /// <param name="maxTransactions">The maximum number of transactions that a block can
+        /// accept.  This value must be greater than 0, and less than or equal to
+        /// <see cref="Policy"/>.<see cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>.
+        /// Zero and negative values are treated as 1. If it is omitted or more than
+        /// <see cref="Policy"/>.<see cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>, it will be
+        /// treated as <see cref="Policy"/>.<see cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this
+        /// operation should be canceled.
+        /// </param>
+        /// <returns>An awaitable task with a <see cref="Block{T}"/> that is mined.</returns>
+        /// <exception cref="OperationCanceledException">Thrown when
+        /// <see cref="BlockChain{T}.Tip"/> is changed while mining.</exception>
+        public Task<Block<T>> MineBlock(
+            Address miner,
+            bool append = true,
+            int? maxTransactions = null,
+            CancellationToken cancellationToken = default
+        ) =>
+            MineBlock(miner, DateTimeOffset.UtcNow, append, maxTransactions, cancellationToken);
 
         /// <summary>
         /// Creates a new <see cref="Transaction{T}"/> and stage the transaction.
+        /// Cannot create new transaction if the genesis block does not exist.
         /// </summary>
         /// <param name="privateKey">A <see cref="PrivateKey"/> of the account who creates and
         /// signs a new transaction.</param>
@@ -709,9 +909,11 @@ namespace Libplanet.Blockchain
             timestamp = timestamp ?? DateTimeOffset.UtcNow;
             lock (_txLock)
             {
+                // FIXME: Exception should be documented when the genesis block does not exist.
                 Transaction<T> tx = Transaction<T>.Create(
                     GetNextTxNonce(privateKey.ToAddress()),
                     privateKey,
+                    Genesis.Hash,
                     actions,
                     updatedAddresses,
                     timestamp);
@@ -725,7 +927,9 @@ namespace Libplanet.Blockchain
             Block<T> block,
             DateTimeOffset currentTime,
             bool evaluateActions,
-            bool renderActions
+            bool renderBlocks,
+            bool renderActions,
+            StateCompleterSet<T>? stateCompleters = null
         )
         {
             if (!evaluateActions && renderActions)
@@ -737,14 +941,29 @@ namespace Libplanet.Blockchain
                 );
             }
 
+            renderActions = renderActions && renderBlocks && ActionRenderers.Any();
+
+            // Since rendering process requires every step's states, if required block states
+            // are incomplete they are complemented anyway:
+            stateCompleters ??= StateCompleterSet<T>.Recalculate;
+
             _logger.Debug("Trying to append block {blockIndex}: {block}", block?.Index, block);
+
+            if (block.BytesLength > Policy.GetMaxBlockBytes(block.Index))
+            {
+                throw new InvalidBlockBytesLengthException(
+                    block.BytesLength,
+                    Policy.GetMaxBlockBytes(block.Index),
+                    "The block to append is too long in bytes."
+                );
+            }
 
             IReadOnlyList<ActionEvaluation> evaluations = null;
             _rwlock.EnterUpgradeableReadLock();
+            Block<T> prevTip = Tip;
             try
             {
-                InvalidBlockException e =
-                    Policy.ValidateNextBlock(this, block);
+                InvalidBlockException e = ValidateNextBlock(block);
 
                 if (!(e is null))
                 {
@@ -758,7 +977,7 @@ namespace Libplanet.Blockchain
                 // the tx nounce order when the block was created
                 foreach (Transaction<T> tx1 in block.Transactions)
                 {
-                    if (!Policy.DoesTransactionFollowsPolicy(tx1))
+                    if (!Policy.DoesTransactionFollowsPolicy(tx1, this))
                     {
                         throw new TxViolatingBlockPolicyException(
                             tx1.Id,
@@ -792,7 +1011,6 @@ namespace Libplanet.Blockchain
                         evaluations = ExecuteActions(block);
                     }
 
-                    Block<T> prevTip = Tip;
                     _blocks[block.Hash] = block;
                     foreach (KeyValuePair<Address, long> pair in nonceDeltas)
                     {
@@ -800,13 +1018,6 @@ namespace Libplanet.Blockchain
                     }
 
                     Store.AppendIndex(Id, block.Hash);
-                    var tipChangedEventArgs = new TipChangedEventArgs
-                    {
-                        PreviousIndex = prevTip?.Index,
-                        PreviousHash = prevTip?.Hash,
-                        Index = block.Index,
-                        Hash = block.Hash,
-                    };
 
                     _logger.Debug("Unstaging transactions...");
 
@@ -828,22 +1039,38 @@ namespace Libplanet.Blockchain
                         .Select(tx => tx.Id)
                         .ToImmutableHashSet();
                     Store.UnstageTransactionIds(txIds);
-                    TipChanged?.Invoke(this, tipChangedEventArgs);
+                    TipChanged?.Invoke(this, (prevTip, block));
                     _logger.Debug("Block {blockIndex}: {block} is appended.", block?.Index, block);
                 }
                 finally
                 {
                     _rwlock.ExitWriteLock();
                 }
+
+                if (renderBlocks)
+                {
+                    foreach (IRenderer<T> renderer in Renderers)
+                    {
+                        renderer.RenderBlock(oldTip: prevTip ?? Genesis, newTip: block);
+                    }
+
+                    if (ActionRenderers.Any())
+                    {
+                        foreach (IActionRenderer<T> renderer in ActionRenderers)
+                        {
+                            if (renderActions)
+                            {
+                                RenderActions(evaluations, block, renderer, stateCompleters);
+                            }
+
+                            renderer.RenderBlockEnd(oldTip: prevTip ?? Genesis, newTip: block);
+                        }
+                    }
+                }
             }
             finally
             {
                 _rwlock.ExitUpgradeableReadLock();
-            }
-
-            if (renderActions)
-            {
-                RenderBlock(evaluations, block);
             }
         }
 
@@ -851,13 +1078,27 @@ namespace Libplanet.Blockchain
         /// Render actions from block index of <paramref name="offset"/>.
         /// </summary>
         /// <param name="offset">Index of the block to start rendering from.</param>
-        internal void RenderBlocks(long offset)
+        /// <param name="renderer">The renderer to render actions.</param>
+        /// <param name="stateCompleters">The strategy to complement incomplete block states.
+        /// <see cref="StateCompleterSet{T}.Recalculate"/> by default.</param>
+        /// <returns>The number of actions rendered.</returns>
+        internal int RenderActionsInBlocks(
+            long offset,
+            IActionRenderer<T> renderer,
+            StateCompleterSet<T>? stateCompleters = null)
         {
+            // Since rendering process requires every step's states, if required block states
+            // are incomplete they are complemented anyway:
+            stateCompleters ??= StateCompleterSet<T>.Recalculate;
+
             // FIXME: We should consider the case where block count is larger than int.MaxSize.
+            int cnt = 0;
             foreach (var block in IterateBlocks((int)offset))
             {
-                RenderBlock(null, block);
+                cnt += RenderActions(null, block, renderer, stateCompleters);
             }
+
+            return cnt;
         }
 
         /// <summary>
@@ -866,19 +1107,52 @@ namespace Libplanet.Blockchain
         /// <param name="evaluations"><see cref="ActionEvaluation"/>s of the block.  If it is
         /// <c>null</c>, evaluate actions of the <paramref name="block"/> again.</param>
         /// <param name="block"><see cref="Block{T}"/> to render actions.</param>
-        internal void RenderBlock(IReadOnlyList<ActionEvaluation> evaluations, Block<T> block)
+        /// <param name="renderer">The renderer to render actions.</param>
+        /// <param name="stateCompleters">The strategy to complement incomplete block states.
+        /// <see cref="StateCompleterSet{T}.Recalculate"/> by default.</param>
+        /// <returns>The number of actions rendered.</returns>
+        internal int RenderActions(
+            IReadOnlyList<ActionEvaluation> evaluations,
+            Block<T> block,
+            IActionRenderer<T> renderer,
+            StateCompleterSet<T>? stateCompleters = null
+        )
         {
             _logger.Debug("Render actions in block {blockIndex}: {block}", block?.Index, block);
 
+            // Since rendering process requires every step's states, if required block states
+            // are incomplete they are complemented anyway:
+            stateCompleters ??= StateCompleterSet<T>.Recalculate;
+
             if (evaluations is null)
             {
-                evaluations = EvaluateActions(block);
+                evaluations = BlockEvaluator.EvaluateActions(block, stateCompleters.Value);
             }
 
+            int cnt = 0;
             foreach (var evaluation in evaluations)
             {
-                evaluation.Action.Render(evaluation.InputContext, evaluation.OutputStates);
+                if (evaluation.Exception is null)
+                {
+                    renderer.RenderAction(
+                        evaluation.Action,
+                        evaluation.InputContext.GetUnconsumedContext(),
+                        evaluation.OutputStates
+                    );
+                }
+                else
+                {
+                    renderer.RenderActionError(
+                        evaluation.Action,
+                        evaluation.InputContext.GetUnconsumedContext(),
+                        evaluation.Exception
+                    );
+                }
+
+                cnt++;
             }
+
+            return cnt;
         }
 
         /// <summary>
@@ -886,16 +1160,29 @@ namespace Libplanet.Blockchain
         /// results.
         /// </summary>
         /// <param name="block">A block to execute.</param>
+        /// <param name="stateCompleters">The strategy to complement incomplete previous block
+        /// states.  <see cref="StateCompleterSet{T}.Recalculate"/> by default.
+        /// </param>
         /// <returns>The result of action evaluations of the given <paramref name="block"/>.
         /// </returns>
         /// <remarks>This method is idempotent (except for rendering).  If the given
         /// <paramref name="block"/> has executed before, it does not execute it nor mutate states.
         /// </remarks>
-        internal IReadOnlyList<ActionEvaluation> ExecuteActions(Block<T> block)
+        internal IReadOnlyList<ActionEvaluation> ExecuteActions(
+            Block<T> block,
+            StateCompleterSet<T>? stateCompleters = null
+        )
         {
-            _logger.Debug("Execute action in block {blockIndex}: {block}", block?.Index, block);
+            _logger.Debug(
+                "Execute actions in the block #{BlockIndex} {Block}.",
+                block.Index,
+                block
+            );
             IReadOnlyList<ActionEvaluation> evaluations = null;
-            evaluations = EvaluateActions(block);
+            evaluations = BlockEvaluator.EvaluateActions(
+                block,
+                stateCompleters ?? StateCompleterSet<T>.Recalculate
+            );
 
             _rwlock.EnterWriteLock();
             try
@@ -907,65 +1194,9 @@ namespace Libplanet.Blockchain
                 _rwlock.ExitWriteLock();
             }
 
+            ThrowIfStateRootHashInvalid(block);
+
             return evaluations;
-        }
-
-        internal IReadOnlyList<ActionEvaluation> EvaluateActions(Block<T> block)
-        {
-            AccountStateGetter stateGetter;
-            if (block.PreviousHash is null)
-            {
-                stateGetter = _ => null;
-            }
-            else
-            {
-                stateGetter = a => GetState(a, block.PreviousHash, true);
-            }
-
-            ImmutableList<ActionEvaluation> txEvaluations = block
-                .Evaluate(DateTimeOffset.UtcNow, stateGetter)
-                .ToImmutableList();
-            return Policy.BlockAction is null
-                ? txEvaluations
-                : txEvaluations.Add(EvaluateBlockAction(block, txEvaluations));
-        }
-
-        internal ActionEvaluation EvaluateBlockAction(
-            Block<T> block,
-            IReadOnlyList<ActionEvaluation> txActionEvaluations)
-        {
-            if (Policy.BlockAction is null)
-            {
-                var message = "To evaluate block action, Policy.BlockAction must not be null.";
-                throw new InvalidOperationException(message);
-            }
-
-            _logger.Debug(
-                "Evaluating block action in block {blockIndex}: {block}", block?.Index, block);
-
-            IAccountStateDelta lastStates = null;
-
-            if (!(txActionEvaluations is null) && txActionEvaluations.Count > 0)
-            {
-                lastStates = txActionEvaluations[txActionEvaluations.Count - 1].OutputStates;
-            }
-
-            Address miner = block.Miner.GetValueOrDefault();
-
-            if (lastStates is null)
-            {
-                lastStates = new AccountStateDeltaImpl(a => GetState(a, block.PreviousHash, true));
-            }
-
-            return ActionEvaluation.EvaluateActionsGradually(
-                block.Hash,
-                block.Index,
-                null,
-                lastStates,
-                miner,
-                miner,
-                Array.Empty<byte>(),
-                new[] { Policy.BlockAction }.ToImmutableList()).First();
         }
 
         /// <summary>
@@ -1064,7 +1295,7 @@ namespace Libplanet.Blockchain
             }
         }
 
-        internal BlockChain<T> Fork(HashDigest<SHA256> point)
+        internal BlockChain<T> Fork(HashDigest<SHA256> point, bool inheritRenderers = true)
         {
             if (!ContainsBlock(point))
             {
@@ -1082,7 +1313,11 @@ namespace Libplanet.Blockchain
                     nameof(point));
             }
 
-            var forked = new BlockChain<T>(Policy, Store, Guid.NewGuid(), Genesis, true);
+            IEnumerable<IRenderer<T>> renderers = inheritRenderers
+                ? Renderers
+                : Enumerable.Empty<IRenderer<T>>();
+            var forked = new BlockChain<T>(
+                Policy, Store, StateStore, Guid.NewGuid(), Genesis, true, renderers);
             Guid forkedId = forked.Id;
             _logger.Debug(
                 "Trying to fork chain at {branchPoint}" +
@@ -1117,7 +1352,7 @@ namespace Libplanet.Blockchain
                     }
                 }
 
-                Store.ForkStateReferences(Id, forked.Id, pointBlock);
+                StateStore.ForkStates(Id, forked.Id, pointBlock);
 
                 foreach (KeyValuePair<Address, long> pair in Store.ListTxNonces(Id))
                 {
@@ -1173,17 +1408,41 @@ namespace Libplanet.Blockchain
         // FIXME it's very dangerous because replacing Id means
         // ALL blocks (referenced by MineBlock(), etc.) will be changed.
         // we need to add a synchronization mechanism to handle this correctly.
-        internal void Swap(BlockChain<T> other, bool render)
+#pragma warning disable MEN003
+        internal void Swap(
+            BlockChain<T> other,
+            bool render,
+            StateCompleterSet<T>? stateCompleters = null
+        )
         {
-            if (other?.Tip is null)
+            if (other is null)
             {
-                throw new ArgumentException(
-                    $"The chain to be swapped is invalid. Id: {other?.Id}, Tip: {other?.Tip}",
-                    nameof(other));
+                throw new ArgumentNullException(nameof(other));
             }
 
-            _logger.Debug(
-                "Swapping block chain. (from: {fromChainId}) (to: {toChainId})", Id, other.Id);
+            // As render/unrender processing requires every step's states from the branchpoint
+            // to the new/stale tip, incomplete states need to be complemented anyway...
+            StateCompleterSet<T> completers = stateCompleters ?? StateCompleterSet<T>.Recalculate;
+
+            if (Tip.Equals(other.Tip))
+            {
+                // If it's swapped for a chain with the same tip, it means there is no state change.
+                // Hence render is unnecessary.
+                render = false;
+            }
+            else
+            {
+                _logger.Debug(
+                    "The blockchain was reorged from " +
+                    "{OldChainId} (#{OldTipIndex} {OldTipHash}) " +
+                    "to {NewChainId} (#{NewTipIndex} {NewTipHash}).",
+                    Id,
+                    Tip.Index,
+                    Tip.Hash,
+                    other.Id,
+                    other.Tip.Index,
+                    other.Tip.Hash);
+            }
 
             // Finds the branch point.
             Block<T> topmostCommon = null;
@@ -1214,87 +1473,159 @@ namespace Libplanet.Blockchain
                 }
             }
 
-            _logger.Debug(
-                "Branchpoint is {branchPoint} (at {index})", topmostCommon, topmostCommon?.Index);
-
-            if (render)
+            if (topmostCommon is null)
             {
-                _logger.Debug("Unrendering abandoned actions...");
+                const string msg =
+                    "A chain cannot be reorged into a heterogeneous chain which has " +
+                    "no common genesis at all.";
+                throw new InvalidGenesisBlockException(Genesis.Hash, other.Genesis.Hash, msg);
+            }
 
-                // Unrender stale actions.
-                for (
-                    Block<T> b = Tip;
-                    !(b is null) && b.Index > (topmostCommon?.Index ?? -1) &&
-                    b.PreviousHash is HashDigest<SHA256> ph;
-                    b = this[ph]
-                )
+            _logger.Debug(
+                "The branchpoint is #{BranchpointIndex} {BranchpointHash}.",
+                topmostCommon.Index,
+                topmostCommon
+            );
+
+            _rwlock.EnterUpgradeableReadLock();
+            try
+            {
+                bool reorged = !Tip.Equals(topmostCommon);
+                if (render && reorged)
                 {
-                    List<ActionEvaluation> evaluations = EvaluateActions(b).ToList();
-                    evaluations.Reverse();
-
-                    foreach (var evaluation in evaluations)
+                    foreach (IRenderer<T> renderer in Renderers)
                     {
-                        _logger.Debug("Unrender action {action}", evaluation.Action);
-                        evaluation.Action.Unrender(
-                            evaluation.InputContext,
-                            evaluation.OutputStates
-                        );
+                        renderer.RenderReorg(Tip, other.Tip, branchpoint: topmostCommon);
                     }
                 }
 
-                _logger.Debug($"Unrender for {nameof(Swap)}() is completed.");
-            }
-
-            IEnumerable<TxId> GetTxIdsWithRange(BlockChain<T> chain, Block<T> start, Block<T> end)
-                => Enumerable
-                    .Range((int)start.Index + 1, (int)(end.Index - start.Index))
-                    .SelectMany(x => chain[x].Transactions.Select(tx => tx.Id));
-
-            // It assumes reorg is small size. If it was big, this may be heavy task.
-            ImmutableHashSet<TxId> unstagedTxIds =
-                GetTxIdsWithRange(this, topmostCommon, Tip).ToImmutableHashSet();
-            ImmutableHashSet<TxId> stageTxIds =
-                GetTxIdsWithRange(other, topmostCommon, other.Tip).ToImmutableHashSet();
-            ImmutableHashSet<TxId> restageTxIds = unstagedTxIds.Except(stageTxIds);
-            Store.StageTransactionIds(restageTxIds);
-
-            try
-            {
-                _rwlock.EnterWriteLock();
-
-                var tipChangedEventArgs = new TipChangedEventArgs
+                if (render && ActionRenderers.Any())
                 {
-                    PreviousHash = Tip?.Hash,
-                    PreviousIndex = Tip?.Index,
-                    Hash = other.Tip.Hash,
-                    Index = other.Tip.Index,
-                };
-                Guid obsoleteId = Id;
-                Id = other.Id;
-                Store.SetCanonicalChainId(Id);
-                _blocks = new BlockSet<T>(Store);
-                TipChanged?.Invoke(this, tipChangedEventArgs);
-                _transactions = new TransactionSet<T>(Store);
-                Store.DeleteChainId(obsoleteId);
+                    // Unrender stale actions.
+                    _logger.Debug("Unrendering abandoned actions...");
+                    int cnt = 0;
+
+                    for (
+                        Block<T> b = Tip;
+                        !(b is null) && b.Index > (topmostCommon?.Index ?? -1) &&
+                        b.PreviousHash is HashDigest<SHA256> ph;
+                        b = this[ph]
+                    )
+                    {
+                        List<ActionEvaluation> evaluations =
+                            BlockEvaluator.EvaluateActions(b, completers).ToList();
+                        evaluations.Reverse();
+
+                        foreach (var evaluation in evaluations)
+                        {
+                            _logger.Debug("Unrender an action: {Action}.", evaluation.Action);
+                            if (evaluation.Exception is null)
+                            {
+                                foreach (IActionRenderer<T> renderer in ActionRenderers)
+                                {
+                                    renderer.UnrenderAction(
+                                        evaluation.Action,
+                                        evaluation.InputContext.GetUnconsumedContext(),
+                                        evaluation.OutputStates
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                foreach (IActionRenderer<T> renderer in ActionRenderers)
+                                {
+                                    renderer.UnrenderActionError(
+                                        evaluation.Action,
+                                        evaluation.InputContext.GetUnconsumedContext(),
+                                        evaluation.Exception
+                                    );
+                                }
+                            }
+
+                            cnt++;
+                        }
+                    }
+
+                    _logger.Debug(
+                        $"{nameof(Swap)}() completed unrendering {{Actions}} actions.",
+                        cnt);
+                }
+
+                Block<T> oldTip = Tip ?? Genesis, newTip = other.Tip ?? other.Genesis;
+
+                _rwlock.EnterWriteLock();
+                try
+                {
+                    IEnumerable<TxId>
+                        GetTxIdsWithRange(BlockChain<T> chain, Block<T> start, Block<T> end)
+                        => Enumerable
+                            .Range((int)start.Index + 1, (int)(end.Index - start.Index))
+                            .SelectMany(x => chain[x].Transactions.Select(tx => tx.Id));
+
+                    // It assumes reorg is small size. If it was big, this may be heavy task.
+                    ImmutableHashSet<TxId> unstagedTxIds =
+                        GetTxIdsWithRange(this, topmostCommon, Tip).ToImmutableHashSet();
+                    ImmutableHashSet<TxId> stageTxIds =
+                        GetTxIdsWithRange(other, topmostCommon, other.Tip).ToImmutableHashSet();
+                    ImmutableHashSet<TxId> restageTxIds = unstagedTxIds.Except(stageTxIds);
+                    Store.StageTransactionIds(restageTxIds);
+
+                    Guid obsoleteId = Id;
+                    Id = other.Id;
+                    Store.SetCanonicalChainId(Id);
+                    _blocks = new BlockSet<T>(Store);
+                    TipChanged?.Invoke(this, (oldTip, newTip));
+
+                    if (render)
+                    {
+                        foreach (IRenderer<T> renderer in Renderers)
+                        {
+                            renderer.RenderBlock(oldTip: oldTip, newTip: newTip);
+                        }
+                    }
+
+                    _transactions = new TransactionSet<T>(Store);
+                    Store.DeleteChainId(obsoleteId);
+                }
+                finally
+                {
+                    _rwlock.ExitWriteLock();
+                }
+
+                if (render && ActionRenderers.Any())
+                {
+                    _logger.Debug("Rendering actions in new chain.");
+
+                    // Render actions that had been behind.
+                    long startToRenderIndex = topmostCommon is Block<T> branchpoint
+                        ? branchpoint.Index + 1
+                        : 0;
+
+                    foreach (IActionRenderer<T> renderer in ActionRenderers)
+                    {
+                        int cnt = RenderActionsInBlocks(startToRenderIndex, renderer, completers);
+                        _logger.Debug(
+                            $"{nameof(Swap)}() completed rendering {{Count}} actions.",
+                            cnt);
+
+                        renderer.RenderBlockEnd(oldTip, newTip);
+                    }
+                }
+
+                if (render && reorged)
+                {
+                    foreach (IRenderer<T> renderer in Renderers)
+                    {
+                        renderer.RenderReorgEnd(oldTip, newTip, topmostCommon);
+                    }
+                }
             }
             finally
             {
-                _rwlock.ExitWriteLock();
-            }
-
-            if (render)
-            {
-                _logger.Debug("Rendering actions in new chain");
-
-                // Render actions that had been behind.
-                long startToRenderIndex = topmostCommon is Block<T> branchPoint
-                    ? branchPoint.Index + 1
-                    : 0;
-
-                RenderBlocks(startToRenderIndex);
-                _logger.Debug($"Render for {nameof(Swap)}() is completed.");
+                _rwlock.ExitUpgradeableReadLock();
             }
         }
+#pragma warning restore MEN003
 
         internal IImmutableSet<TxId> GetStagedTransactionIds()
         {
@@ -1316,32 +1647,30 @@ namespace Libplanet.Blockchain
             bool buildStateReferences
         )
         {
-            ImmutableHashSet<string> updatedAddresses =
-                actionEvaluations.Select(
-                    a => a.OutputStates.UpdatedAddresses.Select(ad => ad.ToHex().ToLowerInvariant())
-                ).Aggregate(
-                    ImmutableHashSet<string>.Empty,
-                    (a, b) => a.Union(b)
-                );
+            IImmutableSet<Address> stateUpdatedAddresses = actionEvaluations
+                .SelectMany(a => a.OutputStates.StateUpdatedAddresses)
+                .ToImmutableHashSet();
+            IImmutableSet<(Address, Currency)> updatedFungibleAssets = actionEvaluations
+                .SelectMany(a => a.OutputStates.UpdatedFungibleAssets
+                    .SelectMany(kv => kv.Value.Select(c => (kv.Key, c))))
+                .ToImmutableHashSet();
 
-            if (Store.GetBlockStates(block.Hash) is null)
+            if (!StateStore.ContainsBlockStates(block.Hash))
             {
-                HashDigest<SHA256> blockHash = block.Hash;
-                IAccountStateDelta lastStates = actionEvaluations.Count > 0
-                    ? actionEvaluations[actionEvaluations.Count - 1].OutputStates
-                    : null;
-                ImmutableDictionary<string, IValue> totalDelta =
-                    updatedAddresses.ToImmutableDictionary(
-                        a => a,
-                        a => lastStates?.GetState(new Address(a))
-                    );
-
-                Store.SetBlockStates(blockHash, totalDelta);
+                var totalDelta = actionEvaluations.GetTotalDelta(ToStateKey, ToFungibleAssetKey);
+                StateStore.SetStates(block, totalDelta);
             }
 
-            if (buildStateReferences)
+            if (buildStateReferences && StateStore is IBlockStatesStore blockStatesStore)
             {
-                Store.StoreStateReference(Id, updatedAddresses, block.Hash, block.Index);
+                IImmutableSet<string> stateUpdatedKeys = stateUpdatedAddresses
+                    .Select(ToStateKey)
+                    .ToImmutableHashSet();
+                IImmutableSet<string> assetUpdatedKeys = updatedFungibleAssets
+                    .Select(ToFungibleAssetKey)
+                    .ToImmutableHashSet();
+                IImmutableSet<string> updatedKeys = stateUpdatedKeys.Union(assetUpdatedKeys);
+                blockStatesStore.StoreStateReference(Id, updatedKeys, block.Hash, block.Index);
             }
         }
 
@@ -1385,32 +1714,205 @@ namespace Libplanet.Blockchain
             }
         }
 
-        /// <summary>
-        /// Provides data for the <see cref="TipChanged"/> event.
-        /// </summary>
-        public class TipChangedEventArgs : EventArgs
+        internal HashDigest<SHA256>? ActionEvaluationsToHash(
+            IEnumerable<ActionEvaluation> actionEvaluations)
         {
-            /// <summary>
-            /// The <see cref="Block{T}.Index"/> of <see cref="Tip"/> <em>before</em> changed.
-            /// Can be <c>null</c> if the blockchain was empty before.
-            /// </summary>
-            public long? PreviousIndex { get; set; }
+            ActionEvaluation actionEvaluation;
+            var evaluations = actionEvaluations.ToList();
+            if (evaluations.Any())
+            {
+                actionEvaluation = evaluations.Last();
+            }
+            else
+            {
+                return null;
+            }
 
-            /// <summary>
-            /// The <see cref="Block{T}.Hash"/> of <see cref="Tip"/> <em>before</em> changed.
-            /// Can be <c>null</c> if the blockchain was empty before.
-            /// </summary>
-            public HashDigest<SHA256>? PreviousHash { get; set; }
+            IImmutableSet<Address> updatedAddresses =
+                actionEvaluation.OutputStates.UpdatedAddresses;
+            var dict = Bencodex.Types.Dictionary.Empty;
+            foreach (Address address in updatedAddresses)
+            {
+                dict.Add(address.ToHex(), actionEvaluation.OutputStates.GetState(address));
+            }
 
-            /// <summary>
-            /// The <see cref="Block{T}.Index"/> of <see cref="Tip"/> <em>after</em> changed.
-            /// </summary>
-            public long Index { get; set; }
+            return Hashcash.Hash(new Codec().Encode(dict));
+        }
 
-            /// <summary>
-            /// The <see cref="Block{T}.Hash"/> of <see cref="Tip"/> <em>after</em> changed.
-            /// </summary>
-            public HashDigest<SHA256> Hash { get; set; }
+        /// <summary>
+        /// Calculates and complements a block's incomplete states on the fly.
+        /// </summary>
+        /// <param name="blockHash">The hash of a block which has incomplete states.</param>
+        internal void ComplementBlockStates(
+            HashDigest<SHA256> blockHash
+        )
+        {
+            _logger.Verbose("Recalculates the block {BlockHash}'s states...", blockHash);
+
+            // Prevent recursive trial to recalculate & complement incomplete block states by
+            // mistake; if the below code works as intended, these state completers must never
+            // be invoked.
+            StateCompleterSet<T> stateCompleters = StateCompleterSet<T>.Reject;
+
+            // Calculates and fills the incomplete states
+            // on the fly.
+            foreach (HashDigest<SHA256> hash in BlockHashes)
+            {
+                Block<T> block = this[hash];
+                if (StateStore.ContainsBlockStates(hash))
+                {
+                    continue;
+                }
+
+                IReadOnlyList<ActionEvaluation> evaluations = BlockEvaluator.EvaluateActions(
+                    block,
+                    stateCompleters
+                );
+
+                _rwlock.EnterWriteLock();
+
+                try
+                {
+                    SetStates(block, evaluations, buildStateReferences: false);
+                }
+                finally
+                {
+                    _rwlock.ExitWriteLock();
+                }
+            }
+        }
+
+        private InvalidBlockException ValidateNextBlock(Block<T> nextBlock)
+        {
+            InvalidBlockException e = Policy.ValidateNextBlock(this, nextBlock);
+
+            if (!(e is null))
+            {
+                return e;
+            }
+
+            long index = this.Count;
+            long difficulty = Policy.GetNextBlockDifficulty(this);
+            BigInteger totalDifficulty = index >= 1
+                    ? this[index - 1].TotalDifficulty + nextBlock.Difficulty
+                    : nextBlock.Difficulty;
+
+            Block<T> lastBlock = index >= 1 ? this[index - 1] : null;
+            HashDigest<SHA256>? prevHash = lastBlock?.Hash;
+            DateTimeOffset? prevTimestamp = lastBlock?.Timestamp;
+
+            if (nextBlock.Index != index)
+            {
+                return new InvalidBlockIndexException(
+                    $"The expected block index is #{index}, but its index " +
+                    $"is #{nextBlock.Index}.");
+            }
+
+            if (nextBlock.Difficulty < difficulty)
+            {
+                return new InvalidBlockDifficultyException(
+                    $"The expected difficulty of the block #{index} " +
+                    $"is {difficulty}, but its difficulty is " +
+                    $"{nextBlock.Difficulty}.");
+            }
+
+            if (nextBlock.TotalDifficulty != totalDifficulty)
+            {
+                var msg = $"The expected total difficulty of the block #{index} " +
+                          $"is {totalDifficulty}, but its difficulty is " +
+                          $"{nextBlock.TotalDifficulty}.";
+                return new InvalidBlockTotalDifficultyException(
+                    nextBlock.Difficulty,
+                    nextBlock.TotalDifficulty,
+                    msg);
+            }
+
+            if (!nextBlock.PreviousHash.Equals(prevHash))
+            {
+                if (prevHash is null)
+                {
+                    return new InvalidBlockPreviousHashException(
+                        "the genesis block must have not previous block");
+                }
+
+                return new InvalidBlockPreviousHashException(
+                    $"The block #{index} is not continuous from the " +
+                    $"block #{index - 1}; while previous block's hash is " +
+                    $"{prevHash}, the block #{index}'s pointer to " +
+                    "the previous hash refers to " +
+                    (nextBlock.PreviousHash?.ToString() ?? "nothing") + ".");
+            }
+
+            if (nextBlock.Timestamp < prevTimestamp)
+            {
+                return new InvalidBlockTimestampException(
+                    $"The block #{index}'s timestamp " +
+                    $"({nextBlock.Timestamp}) is earlier than" +
+                    $" the block #{index - 1}'s ({prevTimestamp}).");
+            }
+
+            return null;
+        }
+
+        private void ThrowIfStateRootHashInvalid(Block<T> block)
+        {
+            if (StateStore is TrieStateStore trieStateStore)
+            {
+                HashDigest<SHA256> rootHash =
+                    trieStateStore.GetRootHash(block.Hash);
+
+                if (!rootHash.Equals(block.StateRootHash))
+                {
+                    var message = $"The block #{block.Index}'s state root hash is " +
+                                    $"{block.StateRootHash?.ToString()}, but the execution " +
+                                    $"result is {rootHash.ToString()}.";
+                    throw new InvalidBlockStateRootHashException(
+                        block.StateRootHash,
+                        rootHash,
+                        message);
+                }
+            }
+        }
+
+        private IValue GetRawState(
+            string key,
+            HashDigest<SHA256>? offset,
+            Func<BlockChain<T>, HashDigest<SHA256>, IValue> rawStateCompleter
+        )
+        {
+            _rwlock.EnterUpgradeableReadLock();
+            try
+            {
+                if (offset is null && Tip is null)
+                {
+                    return null;
+                }
+
+                offset ??= Tip.Hash;
+
+                if (StateStore is IBlockStatesStore blockStatesStore)
+                {
+                    var stateRef = blockStatesStore.LookupStateReference(
+                        Id,
+                        key,
+                        this[offset.Value].Index);
+
+                    if (stateRef is null)
+                    {
+                        return null;
+                    }
+
+                    offset = stateRef.Item1;
+                }
+
+                return StateStore.ContainsBlockStates(offset.Value)
+                    ? StateStore.GetState(key, offset, Id)
+                    : rawStateCompleter(this, offset.Value);
+            }
+            finally
+            {
+                _rwlock.ExitUpgradeableReadLock();
+            }
         }
     }
 }

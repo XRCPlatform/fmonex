@@ -139,7 +139,9 @@ namespace FreeMarketApp.Helpers
                             PagesHelper.Log(logger, string.Format("Skynet Preloading Title File: {0}", offers[i].Photos[0]));
 
                             var skynetStream = DownloadFromSkynet(offers[i].Photos[0], logger);
-                            offers[i].PreTitlePhoto = new Bitmap(skynetStream);
+                            if (skynetStream !=null) {
+                                offers[i].PreTitlePhoto = new Bitmap(skynetStream);
+                            }                            
                         }
                     }
                 }

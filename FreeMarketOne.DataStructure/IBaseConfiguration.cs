@@ -58,5 +58,20 @@ namespace FreeMarketOne.DataStructure
         /// Interval for propagation next batch to network pool
         /// </summary>
         TimeSpan PoolPeriodicBroadcastTxInterval { get; set; }
+
+        /// <summary>
+        /// Maximal count of tx in block
+        /// </summary>
+        int BlockMaxTransactionsPerBlock { get; set; }
+
+        /// <summary>
+        /// Maximal block size in bytes
+        /// </summary>
+        int BlockMaxBlockBytes { get; set; }
+
+        /// <summary>
+        /// Maximal genesis block size
+        /// </summary>
+        int BlockMaxGenesisBytes { get; set; }
     }
 }

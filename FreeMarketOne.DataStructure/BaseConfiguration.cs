@@ -85,5 +85,14 @@ namespace FreeMarketOne.DataStructure
 
         /// <inheritdoc/>
         public TimeSpan PoolPeriodicBroadcastTxInterval { get; set; }
+
+        /// <inheritdoc/>
+        public int BlockMaxTransactionsPerBlock { get; set; }
+
+        /// <inheritdoc/>
+        public int BlockMaxBlockBytes { get; set; }
+
+        /// <inheritdoc/>
+        public int BlockMaxGenesisBytes { get; set; }
     }
 }

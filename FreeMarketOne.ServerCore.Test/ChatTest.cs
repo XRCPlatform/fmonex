@@ -9,6 +9,7 @@ using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
 using FreeMarketOne.Users;
 using Libplanet.Blockchain;
+using Libplanet.Blocks;
 using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
@@ -27,7 +28,7 @@ namespace FreeMarketOne.ServerCore.Test
         private IOnionSeedsManager _onionSeedsManager;
         private BasePoolManager _basePoolManager;
         private event EventHandler _baseBlockChainLoadedEvent;
-        private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
+        private event EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)> _baseBlockChainChangedEvent;
         private IBlockChainManager<BaseAction> _baseBlockChainManager;
         private ChatManager ChatManager;
         private UserPrivateKey _userPrivateKey;

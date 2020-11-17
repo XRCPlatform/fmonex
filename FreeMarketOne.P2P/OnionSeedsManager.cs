@@ -206,7 +206,7 @@ namespace FreeMarketOne.P2P
             if (BaseSwarm.Peers.Any())
             {
                 var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
 
                 _logger.Information(string.Format("Adding base peer pubkey: {0}", boundPeer.ToString()));
 
@@ -229,7 +229,7 @@ namespace FreeMarketOne.P2P
             if (MarketSwarm.Peers.Any())
             {
                 var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase), default(AppProtocolVersion));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
 
                 _logger.Information(string.Format("Adding market peer pubkey: {0}", boundPeer.ToString()));
 

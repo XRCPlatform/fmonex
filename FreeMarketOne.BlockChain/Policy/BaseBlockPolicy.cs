@@ -31,51 +31,9 @@ namespace FreeMarketOne.BlockChain.Policy
     public class BaseBlockPolicy<T> : IDefaultBlockPolicy<T>
         where T : IBaseAction, IAction, new()
     {
-        private readonly Predicate<Transaction<T>> _doesTransactionFollowPolicy;
-
-        /// <summary>
-        /// Creates a <see cref="BaseBlockPolicy{T}"/> with configuring
-        /// <see cref="BlockInterval"/> in milliseconds,
-        /// <see cref="MinimumDifficulty"/> and
-        /// <see cref="DifficultyBoundDivisor"/>.
-        /// </summary>
-        /// <param name="blockAction">A block action to execute and be rendered for every block.
-        /// </param>
-        /// <param name="blockIntervalMilliseconds">Configures
-        /// <see cref="BlockInterval"/> in milliseconds.
-        /// 5000 milliseconds by default.
-        /// </param>
-        /// <param name="minimumDifficulty">Configures
-        /// <see cref="MinimumDifficulty"/>. 1024 by default.</param>
-        /// <param name="poolCheckIntervalMilliseconds">Configures
-        /// <see cref="PoolCheckInterval"/> in milliseconds.
-        /// 5000 milliseconds by default.
-        /// </param>
-        /// <param name="validBlockInterval">Configures validity
-        /// <see cref="ValidBlockInterval"/> in milliseconds.
-        /// null by default.
-        /// </param>
-        /// <param name="doesTransactionFollowPolicy">
-        /// A predicate that determines if the transaction follows the block policy.
-        /// </param>
-        //public BaseBlockPolicy(
-        //    IAction blockAction = null,
-        //    int blockIntervalMilliseconds = 5000,
-        //    long minimumDifficulty = 1024,
-        //    int poolCheckIntervalMilliseconds = 5000,
-        //    int? validBlockInterval = null,
-        //    Type validTypeOfAction = null,
-        //    Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
-        //    : this(
-        //        blockAction,
-        //        TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
-        //        minimumDifficulty,
-        //        TimeSpan.FromMilliseconds(poolCheckIntervalMilliseconds),
-        //        (validBlockInterval.HasValue ? TimeSpan.FromMilliseconds(validBlockInterval.Value) : default(TimeSpan?)),
-        //        validTypeOfAction,
-        //        doesTransactionFollowPolicy)
-        //{
-        //}
+        private readonly int _maxBlockBytes;
+        private readonly int _maxGenesisBytes;
+        private readonly Func<Transaction<T>, BlockChain<T>, bool> _doesTransactionFollowPolicy;
 
         /// <summary>
         /// Creates a <see cref="BlockPolicy{T}"/> with configuring
@@ -88,11 +46,12 @@ namespace FreeMarketOne.BlockChain.Policy
         /// </param>
         /// <param name="minimumDifficulty">Configures
         /// <see cref="MinimumDifficulty"/>.</param>
-        /// <param name="poolCheckInterval">Configures <see cref="PoolCheckInterval"/>.
-        /// </param>        
-        /// <param name="validBlockInterval">Configures <see cref="ValidBlockInterval"/> validity default is null (no expiration)</param>
-        /// <param name="difficultyBoundDivisor">Configures
-        /// <see cref="DifficultyBoundDivisor"/>.</param>
+        /// <param name="maxTransactionsPerBlock">Configures <see cref="MaxTransactionsPerBlock"/>.
+        /// </param>
+        /// <param name="maxBlockBytes">Configures <see cref="GetMaxBlockBytes(long)"/> where
+        /// the block is not a genesis.</param>
+        /// <param name="maxGenesisBytes">Configures <see cref="GetMaxBlockBytes(long)"/> where
+        /// the block is a genesis.</param>
         /// <param name="doesTransactionFollowPolicy">
         /// A predicate that determines if the transaction follows the block policy.
         /// </param>
@@ -100,11 +59,14 @@ namespace FreeMarketOne.BlockChain.Policy
             IAction blockAction,
             TimeSpan blockInterval,
             long minimumDifficulty,
+            int maxTransactionsPerBlock,
+            int maxBlockBytes,
+            int maxGenesisBytes,
             TimeSpan poolCheckInterval,
             TimeSpan? validBlockInterval,
             Type validTypeOfAction,
             Type[] validTypesOfActionItems,
-            Predicate<Transaction<T>> doesTransactionFollowPolicy = null)
+            Func<Transaction<T>, BlockChain<T>, bool> doesTransactionFollowPolicy = null)
         {
             if (blockInterval < TimeSpan.Zero)
             {
@@ -123,15 +85,21 @@ namespace FreeMarketOne.BlockChain.Policy
             BlockAction = blockAction;
             BlockInterval = blockInterval;
             MinimumDifficulty = minimumDifficulty;
+            MaxTransactionsPerBlock = maxTransactionsPerBlock;
+            _maxBlockBytes = maxBlockBytes;
+            _maxGenesisBytes = maxGenesisBytes;
             PoolCheckInterval = poolCheckInterval;
             ValidBlockInterval = validBlockInterval;
             ValidTypeOfAction = validTypeOfAction;
             ValidTypesOfActionItems = validTypesOfActionItems;
-            _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? (_ => true);
+            _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? ((_, __) => true);
         }
 
         /// <inheritdoc/>
         public IAction BlockAction { get; }
+
+        /// <inheritdoc cref="IBlockPolicy{T}.MaxTransactionsPerBlock"/>
+        public int MaxTransactionsPerBlock { get; }
 
         /// <summary>
         /// An appropriate interval between consecutive <see cref="Block{T}"/>s.
@@ -155,7 +123,8 @@ namespace FreeMarketOne.BlockChain.Policy
 
         public Type[] ValidTypesOfActionItems { get; }
 
-        public bool DoesTransactionFollowsPolicy(Transaction<T> transaction)
+        public bool DoesTransactionFollowsPolicy(Transaction<T> transaction,
+            BlockChain<T> blockChain)
         {
             foreach (var itemAction in transaction.Actions)
             {
@@ -175,7 +144,7 @@ namespace FreeMarketOne.BlockChain.Policy
                 }
             }
 
-            return _doesTransactionFollowPolicy(transaction);
+            return _doesTransactionFollowPolicy(transaction, blockChain);
         }
 
         /// <inheritdoc/>
@@ -282,5 +251,7 @@ namespace FreeMarketOne.BlockChain.Policy
         {
             return BlockInterval + PoolCheckInterval;
         }
+
+        public int GetMaxBlockBytes(long index) => index > 0 ? _maxBlockBytes : _maxGenesisBytes;
     }
 }

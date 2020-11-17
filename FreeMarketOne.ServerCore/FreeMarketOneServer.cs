@@ -39,6 +39,7 @@ namespace FreeMarketOne.ServerCore
         }
 
         public static FreeMarketOneServer Current { get; private set; }
+        
 
         public Logger Logger;
         private ILogger _logger;
@@ -64,12 +65,15 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler MarketBlockChainLoadEndedEvent;
 
         public event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockChainChangedEvent;
+        public event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockLoadEndedEvent;
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockChainChangedEvent;
         public event EventHandler<BlockChain<MarketAction>.TipChangedEventArgs> MarketBlockDownloadedEvent;
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
         public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
         public event EventHandler FreeMarketOneServerLoadedEvent;
         public event EventHandler<string> LoadingEvent;
+        private BackgroundQueue backgroundQueue = new BackgroundQueue();
+
         public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
             var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
@@ -147,6 +151,7 @@ namespace FreeMarketOne.ServerCore
                     //Initialize Base BlockChain Manager
                     LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
                     BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+                    BaseBlockLoadEndedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockDownloadedEventHandler);
 
                     BaseBlockChainManager = new BlockChainManager<BaseAction>(
                         Configuration,
@@ -159,7 +164,7 @@ namespace FreeMarketOne.ServerCore
                         Users.PrivateKey,
                         preloadEnded: BaseBlockChainLoadEndedEvent,
                         blockChainChanged: BaseBlockChainChangedEvent,
-                        blockDownloaded:null);
+                        blockDownloaded: BaseBlockLoadEndedEvent);
                     BaseBlockChainManager.Start();
 
                     //Initialize Base Pool
@@ -192,6 +197,19 @@ namespace FreeMarketOne.ServerCore
                 _logger.Warning("No user account is necessary to create one.");
             }
         }
+
+        private void BaseBlockDownloadedEventHandler(object sender, BlockChain<BaseAction>.TipChangedEventArgs e)
+        {
+            _logger.Information($"Recieved block downloaded notification {e.Hash}");
+            if (BaseBlockChainManager.Storage.ContainsBlock(e.Hash))
+            {
+                var block = BaseBlockChainManager.Storage.GetBlock<BaseAction>(e.Hash);
+                LoadingEvent?.Invoke(this, $"SearchIndexing block {e.Hash}");
+                _logger.Information($"SearchIndexing block {e.Hash}");
+                SearchIndexer.IndexBlock(block);
+            }
+        }
+
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
             //Initialize Base Pool Manager
@@ -240,8 +258,11 @@ namespace FreeMarketOne.ServerCore
             if (MarketBlockChainManager.Storage.ContainsBlock(e.Hash))
             {
                 var block = MarketBlockChainManager.Storage.GetBlock<MarketAction>(e.Hash);
+                LoadingEvent?.Invoke(this, $"SearchIndexing block {e.Hash}");
                 _logger.Information($"SearchIndexing block {e.Hash}");
-                SearchIndexer.IndexBlock(block);
+                //async thread //this is fast but has some issues with indexes being updated while searching and causing errors.
+                //message ordering is critical so although we like it to return to UI faster it has to be queued
+                backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(block));
             }
         }
 
@@ -316,6 +337,8 @@ namespace FreeMarketOne.ServerCore
             var block = marketBlockChain.GetBlock<MarketAction>(e.Hash);
 
             Current.Chats.ProcessNewBlock(block);
+            //not sure what is better have queue here and same in app.cs
+            backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(block));
         }
 
         /// <summary>

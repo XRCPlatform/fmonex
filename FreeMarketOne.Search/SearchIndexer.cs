@@ -16,6 +16,7 @@ using FreeMarketOne.Users;
 using FreeMarketOne.Pools;
 using FreeMarketOne.BlockChain;
 using static FreeMarketOne.Markets.MarketManager;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.Search
 {
@@ -33,6 +34,8 @@ namespace FreeMarketOne.Search
         private readonly BasePoolManager _basePoolManager;
         private readonly IBlockChainManager<BaseAction> _baseBlockChain;
         private static object lockobject = new object();
+        private NormalizedStore _normalizedStore;
+        private SearchEngine _engine;
 
         public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
         {
@@ -57,6 +60,8 @@ namespace FreeMarketOne.Search
             _userManager = userManager;
             _basePoolManager = basePoolManager;
             _baseBlockChain = baseBlockChain;
+            _engine = new SearchEngine(_marketManager, _indexLocation, 10);
+            _normalizedStore = new NormalizedStore(indexLocation);
         }
         
         public bool Initialize()
@@ -94,8 +99,9 @@ namespace FreeMarketOne.Search
         /// </summary>
         /// <param name="marketItem"></param>
         /// <param name="blockHash"></param>
-        public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null)
+        public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null, bool isMyOffer = false, OfferDirection offerDirection = OfferDirection.Undetermined)
         {
+            
             // this can only be running single threaded as transaction totals and sequencing matters.
             lock (lockobject)
             {
@@ -123,7 +129,7 @@ namespace FreeMarketOne.Search
                 {
                     var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
 
-                    sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain);
+                    sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain, _engine);
                     if (sellerAggregate == null)
                     {
                         sellerAggregate = new SellerAggregate()
@@ -138,28 +144,28 @@ namespace FreeMarketOne.Search
                 }
 
                 Document doc = new Document
-            {
-                new StringField("ID", marketItem.Signature, Field.Store.YES),
-                new StringField("BlockHash", blockHash, Field.Store.YES),
-                new TextField("Title",marketItem.Title,Field.Store.NO),
-                new TextField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer,Field.Store.NO),
-                new TextField("Category",cat.ToString(),Field.Store.NO),
-                new TextField("Description",marketItem.Description,Field.Store.NO),
-                new FacetField("Category",cat.ToString()),
-                new FacetField("Shipping",marketItem.Shipping),
-                new FacetField("Fineness",string.IsNullOrEmpty(marketItem.Fineness) ? "Unspecified":marketItem.Fineness),
-                new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
-                new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),
-                //new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
-                new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),
-                new DoubleDocValuesField("PricePerGram", pricePerGram),
-                new DoubleDocValuesField("Price", marketItem.Price),
-                new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
-                new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
-                new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
-                new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
-                //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
-            };
+                {
+                    new StringField("ID", marketItem.Signature, Field.Store.YES),
+                    new StringField("BlockHash", blockHash, Field.Store.YES),
+                    new TextField("Title",marketItem.Title,Field.Store.NO),
+                    new TextField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer,Field.Store.NO),
+                    new TextField("Category",cat.ToString(),Field.Store.NO),
+                    new TextField("Description",marketItem.Description,Field.Store.NO),
+                    new FacetField("Category",cat.ToString()),
+                    new FacetField("Shipping",marketItem.Shipping),
+                    new FacetField("Fineness",string.IsNullOrEmpty(marketItem.Fineness) ? "Unspecified":marketItem.Fineness),
+                    new FacetField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer),
+                    new FacetField("Size",string.IsNullOrEmpty(marketItem.Size) ? "Unspecified":marketItem.Size),
+                    //new FacetField("Sold",string.IsNullOrEmpty(marketItem.BuyerSignature) ? "No": "Yes"),
+                    new NumericDocValuesField("WeightInGrams",marketItem.WeightInGrams),
+                    new DoubleDocValuesField("PricePerGram", pricePerGram),
+                    new DoubleDocValuesField("Price", marketItem.Price),
+                    new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
+                    new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
+                    new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
+                    new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
+                    //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
+                };
 
                 //append all seller sha-hashes to a single multivalue field so that we can find by any.
                 //this should support find all seller items usecase, provided we hash seller's keys for query
@@ -181,8 +187,34 @@ namespace FreeMarketOne.Search
 
                 if (marketItem.State == (int)ProductStateEnum.Sold && updateAllSellerDocuments)
                 {
+                    var direction = offerDirection;
+                    if (offerDirection == OfferDirection.Undetermined)
+                    {
+                        var currentUserPubKey = _userManager.GetCurrentUserPublicKey();
+                        if (sellerAggregate.PublicKeys.Exists(x => x.SequenceEqual(currentUserPubKey)))
+                        {
+                            isMyOffer = true;
+                            direction = OfferDirection.Sold;
+                        }
+                        else
+                        {
+                            var buyerPubKeys = _marketManager.GetBuyerPubKeyFromMarketItem(marketItem);
+                            if (buyerPubKeys.Exists(x => x.SequenceEqual(currentUserPubKey)))
+                            {
+                                isMyOffer = true;
+                                direction = OfferDirection.Bought;
+                            }
+                        }
+                    }
+                   
+                    //only save here sold / bought items
+                    if (isMyOffer)
+                    {
+                        _normalizedStore.Save(marketItem, direction);
+                    }
+                    //UpdateAllSellerDocumentsWithLatestFast(sellerAggregate);
+                    //Task.Run(() => UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash));
                     UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
-                    //UpdateAllSellerDocumentsWithLatest(sellerAggregate);
                 }
             }          
             
@@ -199,37 +231,70 @@ namespace FreeMarketOne.Search
             Writer.Commit();
         }
 
+        private void UpdateAllSellerDocumentsWithLatestFast(SellerAggregate sellerAggregate)
+        {
+            foreach (var sellerPubKeyHash in sellerAggregate.PublicKeyHashes)
+            {
+                Writer.UpdateBinaryDocValue(new Term("SellerPubKeyHash", sellerPubKeyHash), "XrcTotal", ToBytes((long)sellerAggregate?.TotalXRCVolume));
+                //add star rating update 
+            }
+            Writer.Flush(triggerMerge: true, applyAllDeletes: true);
+            Writer.Commit();
+        }
+
+        // encodes a long into a BytesRef as VLong so that we get varying number of bytes when we update
+        internal static BytesRef ToBytes(long value)
+        {
+            //    long orig = value;
+            BytesRef bytes = new BytesRef(10); // negative longs may take 10 bytes
+            while ((value & ~0x7FL) != 0L)
+            {
+                bytes.Bytes[bytes.Length++] = unchecked((byte)((value & 0x7FL) | 0x80L));
+                value = (long)((ulong)value >> 7);
+            }
+            bytes.Bytes[bytes.Length++] = (byte)value;
+            //    System.err.println("[" + Thread.currentThread().getName() + "] value=" + orig + ", bytes=" + bytes);
+            return bytes;
+        }
+
         private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate, string skipSignature, string blockHash)
         {
-            //search all market items by seller pubkey hash
-            SearchEngine engine = new SearchEngine(_marketManager, _indexLocation, 50);
-            var query = engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
-            var searchResult = engine.Search(query, false);
-
-            int pages = searchResult.TotalHits / searchResult.PageSize;
-            
-            //increment to 1
-            pages++;
-
-            for (int i = 0; i < pages; i++)
+            try
             {
-                //skip first (re-query) as it's built above
-                //on second page and up use the interal search result. the top one was needed to get number of pages
-                if (i > 1)
-                {
-                    searchResult = engine.Search(query, false, i+1);
-                }                
+                //search all market items by seller pubkey hash
 
-                for (int y = 0; y < searchResult.Results.Count; y++)
+                var query = _engine.BuildQueryBySellerPubKeys(sellerAggregate.PublicKeys);
+                var searchResult = _engine.Search(query, false);
+
+                int pages = searchResult.TotalHits / searchResult.PageSize;
+
+                //increment to 1
+                pages++;
+
+                for (int i = 0; i < pages; i++)
                 {
-                    //items that have allready been indexed shall be skipped for efficiency
-                    if (!searchResult.Results[y].Signature.Equals(skipSignature) 
-                        && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
+                    //skip first (re-query) as it's built above
+                    //on second page and up use the interal search result. the top one was needed to get number of pages
+                    if (i > 1)
                     {
-                        Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate);
+                        searchResult = _engine.Search(query, false, i + 1);
+                    }
+
+                    for (int y = 0; y < searchResult.Results.Count; y++)
+                    {
+                        //items that have allready been indexed shall be skipped for efficiency
+                        if (!searchResult.Results[y].Signature.Equals(skipSignature)
+                            && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
+                        {
+                            Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate, true, OfferDirection.Sold);
+                        }
                     }
                 }
-            }           
+            }
+            catch (Exception)
+            {
+                //swallow 
+            }            
         }
 
         /// <summary>
@@ -252,6 +317,43 @@ namespace FreeMarketOne.Search
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Iterates over transactions in block and idexes marketItems.
+        /// </summary>
+        /// <param name="block"></param>
+        public void IndexBlock(Block<BaseAction> block)
+        {
+            //Type[] types = new Type[] { typeof(UserDataV1) , typeof(ReviewUserDataV1)};
+            foreach (var itemTx in block.Transactions)
+            {
+                foreach (var itemAction in itemTx.Actions)
+                {
+                    foreach (var item in itemAction.BaseItems)
+                    {
+                        if (item.GetType() == typeof(UserDataV1))
+                        {
+                            Index((UserDataV1)item, block.Hash.ToString());
+                        }
+                        if (item.GetType() == typeof(ReviewUserDataV1))
+                        {
+                            Index((ReviewUserDataV1)item, block.Hash.ToString());
+                        }
+                    }
+                }
+            }
+        }
+
+        private void Index(UserDataV1 item, string blockHash)
+        {
+            _normalizedStore.Save(item, blockHash);
+        }
+
+        private void Index(ReviewUserDataV1 item, string blockHash)
+        {
+            _normalizedStore.Save(item, blockHash);
         }
 
         public void DeleteMarketItem(MarketItemV1 marketItem)

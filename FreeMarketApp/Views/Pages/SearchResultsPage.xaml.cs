@@ -19,7 +19,7 @@ namespace FreeMarketApp.Views.Pages
         private ILogger _logger;
         private static string _searchPhrase;
         private static List<Selector> _appliedFilters = new List<Selector>();
-        private static int selectedPageSize = 20;
+        private static int selectedPageSize = 5;
         private bool _initialized = false;
         private SkynetHelper _skynetHelper;
         public static SearchResultsPage Instance

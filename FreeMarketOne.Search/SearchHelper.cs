@@ -55,7 +55,7 @@ namespace FreeMarketOne.Search
             }
         }
 
-        public static SellerAggregate CalculateSellerXRCTotal(MarketItemV1 marketItem, IBaseConfiguration baseConfiguration, List<byte[]> sellerPubKeys, IXRCHelper xrcDataProvider, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> blockChainManager)
+        public static SellerAggregate CalculateSellerXRCTotal(MarketItemV1 marketItem, IBaseConfiguration baseConfiguration, List<byte[]> sellerPubKeys, IXRCHelper xrcDataProvider, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> blockChainManager, SearchEngine engine)
         {
             SellerAggregate seller = null;
             byte[] publicKey = null;
@@ -90,8 +90,10 @@ namespace FreeMarketOne.Search
                 {
                     List<byte[]> singleKey = new List<byte[]>();
                     singleKey.Add(key);
-                    user = userManager.GetUserDataByPublicKey(singleKey, basePoolManager, blockChainManager);
-                    reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
+                    user = engine.GetUser(key);
+                    reviews = engine.GetAllReviewsForPubKey(key);
+                    //user = userManager.GetUserDataByPublicKey(singleKey, basePoolManager, blockChainManager);
+                    //reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
                     if (user != null)
                     {
                         publicKey = key;

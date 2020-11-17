@@ -5,10 +5,10 @@
              xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="FreeMarketApp.Views.Pages.MyBoughtProductsPage">
+             x:Class="FreeMarketApp.Views.Pages.MySoldProductsPage">
   
   <Grid Margin="0" Classes="Main">
-          <!-- SIDEBAR -->
+         <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
             <StackPanel Name="SideBar" Orientation="Vertical">
                 <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,30" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
@@ -18,7 +18,7 @@
                     </StackPanel>
                 </Button>
 
-              <Button Classes="sidebar" Cursor="Hand" Click="ButtonMyProducts_Click">
+                <Button Classes="sidebar" Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                   <Path Classes="SideBarIcon" Data="M435.2,51.2H384V25.6C384,10.24,373.76,0,358.4,0c-15.36,0-25.6,10.24-25.6,25.6v25.6h-51.2V25.6
 			C281.6,10.24,271.36,0,256,0s-25.6,10.24-25.6,25.6v25.6h-51.2V25.6c0-15.36-10.24-25.6-25.6-25.6C138.24,0,128,10.24,128,25.6
@@ -31,8 +31,8 @@
                   <TextBlock Margin="7,0,0,0" Text="My products"/>
                 </StackPanel>
               </Button>
-
-              <Button Classes="sidebarSelected" Click="ButtonBoughtProduct_Click" Cursor="Hand">
+              
+              <Button Classes="sidebar" Click="ButtonBoughtProducts_Click" Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                   <Path Classes="SideBarIcon" Data="M479.823,495.711L463.782,14.5C463.512,6.415,456.88,0,448.791,0H63.19c-8.09,0-14.723,6.415-14.992,14.5l-16.066,482
 			c-0.135,4.063,1.385,8.007,4.211,10.929S43.06,512,47.124,512h417.733c0.009,0.001,0.015,0.001,0.021,0c8.283,0,15-6.716,15-15
@@ -44,7 +44,7 @@
                 </StackPanel>
               </Button>
 
-              <Button Classes="sidebar" Click="ButtonSoldProducts_Click" Cursor="Hand">
+              <Button Classes="sidebarSelected"  Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                   <Path Classes="SideBarIcon" Data="M479.823,495.711L463.782,14.5C463.512,6.415,456.88,0,448.791,0H63.19c-8.09,0-14.723,6.415-14.992,14.5l-16.066,482
 			c-0.135,4.063,1.385,8.007,4.211,10.929S43.06,512,47.124,512h417.733c0.009,0.001,0.015,0.001,0.021,0c8.283,0,15-6.716,15-15
@@ -60,11 +60,12 @@
         </ScrollViewer>
         <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
+
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch">
                 <WrapPanel Orientation="Horizontal" Margin="20 20 20 10">
-                    <TextBlock Classes="H1" Text="Bought Products" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
+                    <TextBlock Classes="H1" Text="Sold Products" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
                 </WrapPanel>
 
               <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
@@ -87,14 +88,14 @@
                   </ComboBox>
                 </VirtualizingStackPanel>
               </StackPanel>
-
+              
               <ItemsControl Items="{Binding Items}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                   
-                  <!-- Product card -->
-                  <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonBoughtProduct_Click">
-                     <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
+
+                    <!-- Product card -->
+                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonSoldProduct_Click">
+                      <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
                         <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="0">
                           <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}" Stretch="UniformToFill" >
                             <Image.Clip>
@@ -107,15 +108,6 @@
                           <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
                           <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
                         </StackPanel>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                          <TextBlock Classes="H2" FontSize="12" Text="XRC Receiving Address: "></TextBlock>
-                          <TextBlock Classes="H2" FontSize="12" Text="{Binding XRCReceivingAddress}"></TextBlock>
-                        </StackPanel>
-                       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                         <TextBlock Classes="H2" FontSize="12" Text="XRC Transaction: "></TextBlock>
-                         <TextBlock Classes="H2" FontSize="12" Text="{Binding XRCTransactionHash}"></TextBlock>
-                       </StackPanel>
-                       <!--
 						            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                             <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
                             <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
@@ -128,21 +120,7 @@
                                  </ia:DataTriggerBehavior>
                                </i:Interaction.Behaviors>
                             </TextBlock>
-						            </StackPanel>
-							        -->
-                          <!-- Propagation notification -->
-                        <WrapPanel Name="TBIsInPool" VerticalAlignment="Bottom" IsVisible="{Binding IsInPool}" Orientation="Horizontal">
-                            <Path Classes="H2" Data="M413.809,462.904v-51.088c0-60.171-46.494-96.158-91.179-131.268c-6.172-4.839-14.028-14.028-14.028-28.055
-                            s7.077-27.704,14.028-33.554c43.477-36.583,91.179-71.098,91.179-131.268V49.096h35.068V0H63.123v49.096h35.068v38.576
-                            c0,60.171,47.7,94.685,91.179,131.268c6.951,5.85,14.028,19.526,14.028,33.554c0,14.028-7.856,23.215-14.028,28.055
-                            c-44.684,35.111-91.179,71.098-91.179,131.268v51.088H63.123V512h385.753v-49.096H413.809z M167.438,133.26
-                            c-12.927-14.631-20.15-28.714-20.15-45.589V49.096h217.424v38.576c0,16.874-7.225,30.959-20.15,45.589H167.438z M364.712,449.221
-                            l-82.572-32.227c-14.378-5.611-37.895-5.611-52.273,0l-82.579,32.229v-37.404c0-34.045,27.059-57.035,71.217-91.725l1.171-0.918
-                            c16.762-13.144,27.634-31.449,31.324-51.621c3.303,0.736,6.698,0.736,10.001,0c3.675,20.165,14.56,38.471,31.301,51.6l1.192,0.939
-                            c44.158,34.688,71.217,57.672,71.217,91.724V449.221z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Stretch="Fill" Width="12" Margin="0 4 5 7"/>
-                            <TextBlock Classes="H2" FontSize="12" Text="Waiting for propagation" Margin="0 4 0 7"></TextBlock>       
-                        </WrapPanel>                   
-                                                              
+						            </StackPanel>                        
                       </DockPanel>
                     </Button>
                     <!-- End of product card -->
@@ -172,7 +150,7 @@
                   </StackPanel>
                 </Button>
               </StackPanel>
-            </StackPanel>
+            </StackPanel>         
         </ScrollViewer>
 </Grid>
 </UserControl>

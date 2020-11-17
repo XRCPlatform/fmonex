@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using FreeMarketOne.Markets;
 using Lucene.Net.Documents;
+using System;
 
 namespace FreeMarketOne.Search
 {
@@ -23,7 +24,8 @@ namespace FreeMarketOne.Search
         FacetsConfig facetConfig = null;
         IMarketManager? marketManager = null;
         private readonly int MAX_RESULTS = 1000;
-
+        private NormalizedStore _normalizedStore = null;
+        private DirectoryReader _indexReader;
         public int PageSize { get; set; }
         public List<string> FacetFieldNames { get; set; }
 
@@ -40,6 +42,12 @@ namespace FreeMarketOne.Search
             marketManager = marketChainManager;
             FacetFieldNames = new List<string> { "Category", "Shipping", "Fineness", "Manufacturer", "Size", "WeightInGrams", "PricePerGram", "Price" };
             //facetConfig.SetHierarchical("Category", true);
+            _normalizedStore = new NormalizedStore(searchIndexBasePath);
+
+            //this could be buggy with index reading errors if it happens use local variable within each query
+            // it is very costly 3.5% of query time to open this so moved here to reuse
+            // however this is not ready if indexer is not primed.
+            //_indexReader = DirectoryReader.Open(fSDirectory);
 
         }
 
@@ -112,6 +120,7 @@ namespace FreeMarketOne.Search
 
         }
 
+
         public DrillDownQuery BuildDrillDown(List<Selector> selectors, Query baseQuery)
         {
             DrillDownQuery drillDownQuery = new DrillDownQuery(facetConfig);
@@ -155,10 +164,24 @@ namespace FreeMarketOne.Search
 
             var indexReader = DirectoryReader.Open(fSDirectory);
             var searcher = new IndexSearcher(indexReader);
-            searcher.Search(query, collector);
+            TopDocs docs;
+            ScoreDoc[] hits;
+            try
+            {
 
-            TopDocs docs = collector.GetTopDocs(startIndex, PageSize);
-            ScoreDoc[] hits = docs.ScoreDocs;
+                searcher.Search(query, collector);
+                docs = collector.GetTopDocs(startIndex, PageSize);
+                hits = docs.ScoreDocs;
+            }
+            catch (Exception)
+            {
+                //rerun in case of indexing concurency exception
+                //important to allow intensive indexing of IBD and give better ux
+                searcher.Search(query, collector);
+                docs = collector.GetTopDocs(startIndex, PageSize);
+                hits = docs.ScoreDocs;
+            }
+           
 
             foreach (var item in hits)
             {
@@ -169,8 +192,7 @@ namespace FreeMarketOne.Search
                 }
                 
                 //adding raw document so that relevance could be better understood
-                documents.Add(searcher.Doc(item.Doc));
-                //var offer = marketManager.GetOfferBySignature(signature);
+                //documents.Add(searcher.Doc(item.Doc));
             }
             List<FacetResult> facets = new List<FacetResult>();
             if (queryFacets)
@@ -215,6 +237,69 @@ namespace FreeMarketOne.Search
         public Query BuildQueryBySignature(string signature)
         {
             return new TermQuery(new Term("ID", signature));
+        }
+
+        /// <summary>
+        /// GetMyOffers retruns My Offers Sold, or Bought. Open offers are returned as part of normal search.
+        /// </summary>
+        /// <param name="offerDirection"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public SearchResult GetMyCompletedOffers(OfferDirection offerDirection, int pageSize, int page)
+        {
+            return _normalizedStore.GetMyOffers(offerDirection, pageSize, page);
+        }
+
+        /// <summary>
+        /// Returns user object by pubkey;
+        /// </summary>
+        /// <param name="pubKey"></param>
+        /// <returns></returns>
+        public UserDataV1 GetUser(string pubKey)
+        {
+            return _normalizedStore.GetUser(pubKey);
+        }
+
+        public UserDataV1 GetUser(byte[] pubKey)
+        {
+            var publicKeyString = Convert.ToBase64String(pubKey);
+            return GetUser(publicKeyString);
+        }
+
+        public UserDataV1 GetUser(List<byte[]> pubKeys)
+        {
+            foreach (var pubKey in pubKeys)
+            {
+                var publicKeyString = Convert.ToBase64String(pubKey);
+                var user = GetUser(publicKeyString);
+                if (user != null)
+                {
+                    return user;
+                }
+            }
+            return null;
+        }
+
+        public List<ReviewUserDataV1>? GetAllReviewsForPubKey(List<byte[]> pubKeys)
+        {
+            foreach (var pubKey in pubKeys)
+            {
+                var publicKeyString = Convert.ToBase64String(pubKey);
+                return GetAllReviewsForPubKey(publicKeyString);
+            }
+            return null;
+        }
+
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(byte[] pubKey)
+        {
+            var publicKeyString = Convert.ToBase64String(pubKey);
+            return GetAllReviewsForPubKey(publicKeyString);
+        }
+
+        public List<ReviewUserDataV1> GetAllReviewsForPubKey(string pubKey)
+        {
+            return _normalizedStore.GetAllReviewsByPubKey(pubKey);
         }
 
 

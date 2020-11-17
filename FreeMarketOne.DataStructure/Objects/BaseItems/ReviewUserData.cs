@@ -15,13 +15,13 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         public DateTime ReviewDateTime { get; set; }
 
         /// <summary>
-        /// This value is equal to UserData Signature of revieved user
+        /// This value is equal to UserData Signature of reviever user
         /// </summary>
         [JsonProperty("u")]
         public string UserSignature { get; set; }
 
         /// <summary>
-        /// This value is equal to UserData Hash of revieved user
+        /// This value is equal to UserData Hash of reviever user
         /// </summary>
         [JsonProperty("r")]
         public string UserHash { get; set; }
@@ -31,6 +31,12 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         /// </summary>
         [JsonProperty("i")]
         public string MarketItemHash { get; set; }
+
+        /// <summary>
+        /// User who recieved a review public key
+        /// </summary>
+        [JsonProperty("k")]
+        public string RevieweePublicKey { get; set; }
 
         /// <summary>
         /// User stars
@@ -58,6 +64,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Stars);
             content.Append(ReviewDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+            content.Append(RevieweePublicKey);
 
             return shaProcessor.GetSHA256(content.ToString());
         }
@@ -73,6 +80,7 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
             content.Append(Stars);
             content.Append(ReviewDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
             content.Append(CreatedUtc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+            content.Append(RevieweePublicKey);
 
             return Encoding.ASCII.GetBytes(content.ToString());
         }

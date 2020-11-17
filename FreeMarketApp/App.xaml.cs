@@ -97,13 +97,14 @@ namespace FreeMarketApp
 
         private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
         {
-            var block = FMONE.Current.MarketBlockChainManager.BlockChain?.Tip;
-            FMONE.Current.SearchIndexer.IndexBlock(block);
+            //var block = FMONE.Current.MarketBlockChainManager.BlockChain?.Tip;
+            //FMONE.Current.SearchIndexer.IndexBlock(block);
         }
 
         private static void BaseBlockChainChanged(object sender, EventArgs e)
         {
-            //we have a new block
+            var block = FMONE.Current.BaseBlockChainManager.BlockChain?.Tip;
+            FMONE.Current.SearchIndexer.IndexBlock(block);
         }
 
         private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> deletedHashes)

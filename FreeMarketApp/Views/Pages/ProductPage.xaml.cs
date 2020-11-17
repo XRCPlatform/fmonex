@@ -12,6 +12,7 @@ using Serilog;
 using System;
 using System.Linq;
 using TextCopy;
+using static FreeMarketOne.Markets.MarketManager;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
@@ -230,17 +231,14 @@ namespace FreeMarketApp.Views.Pages
                 tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
 
                 btBuyButton.IsEnabled = true;
-                if (!string.IsNullOrEmpty(_offer.BuyerSignature))
+                if (!String.IsNullOrEmpty(_offer.BuyerSignature) || _offer.State == (int)ProductStateEnum.Sold)
                 {
                     btBuyButton.IsEnabled = false;
                 }
 
                 //seller userdata loading
                 var userPubKey = FMONE.Current.Markets.GetSellerPubKeyFromMarketItem(_offer);
-                var userData = FMONE.Current.Users.GetUserDataByPublicKey(
-                    userPubKey,
-                    FMONE.Current.BasePoolManager,
-                    FMONE.Current.BaseBlockChainManager);
+                var userData = FMONE.Current.SearchEngine.GetUser(userPubKey);
 
                 if (userData != null)
                 {
@@ -250,11 +248,8 @@ namespace FreeMarketApp.Views.Pages
                     btSeller.Tag = safeArrayHelper.GetString(
                             new[] { userData.Signature, userData.Hash }); 
 
-                    var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
-                        userPubKey,
-                        FMONE.Current.BasePoolManager,
-                        FMONE.Current.BaseBlockChainManager);
-
+                    
+                    var reviews = FMONE.Current.SearchEngine.GetAllReviewsForPubKey(userPubKey);
                     var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 

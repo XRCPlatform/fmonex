@@ -674,13 +674,14 @@ namespace FreeMarketOne.Search.Tests
                     WeightInGrams = 28,
                     Manufacturer = "Baird & Co",
                     XRCReceivingAddress = xrcAddress,
-                    XRCTransactionHash = xrcTransactionHash
+                    XRCTransactionHash = xrcTransactionHash                   
                 };
 
                 // assign every third offer new seller
                 if (i % 3 == 0)
                 {
                     generateSellerKeys = true;
+                    marketItem.State = (int)ProductStateEnum.Sold;
                 }
                 else
                 {
@@ -724,7 +725,7 @@ namespace FreeMarketOne.Search.Tests
             XRCTransactionScoreQuery msm = new XRCTransactionScoreQuery(engine.ParseQuery("rhodium"));
             var result = engine.Search(msm);
 
-            Assert.AreEqual(15, result.Results.Count);
+            Assert.AreEqual(10, result.Results.Count);
             Assert.IsTrue("13"==result.Results[0].Signature || "14" == result.Results[0].Signature || "12" == result.Results[0].Signature);
             Assert.AreEqual(result.Documents[0].Get("XrcTotal") , result.Documents[1].Get("XrcTotal"));
             Assert.AreEqual(result.Documents[1].Get("XrcTotal") , result.Documents[2].Get("XrcTotal"));

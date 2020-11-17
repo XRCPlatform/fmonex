@@ -37,7 +37,7 @@ namespace FreeMarketOne.SearchTests
 
         public List<byte[]> GetBuyerPubKeyFromMarketItem(MarketItemV1 itemMarket)
         {
-            throw new NotImplementedException();
+            return new List<byte[]>();
         }
 
         public MarketItemV1 GetOfferBySignature(string signature, MarketPoolManager marketPoolManager, IBlockChainManager<MarketAction> marketBlockChainManager)

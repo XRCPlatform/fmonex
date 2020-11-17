@@ -84,7 +84,6 @@ namespace FreeMarketOne.BlockChain
         /// <param name="preloadStarted"></param>
         /// <param name="preloadProcessed"></param>
         /// <param name="preloadEnded"></param>
-        /// <param name="blockChainChanged"></param>
         public BlockChainManager(
             IBaseConfiguration configuration,
             string blockChainBasePath,
@@ -101,8 +100,8 @@ namespace FreeMarketOne.BlockChain
             EventHandler<PreloadState> preloadProcessed = null,
             EventHandler preloadEnded = null,
             EventHandler<(Block<T> OldTip, Block<T> NewTip)> blockChainChanged = null,
-            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null,
-            EventHandler<Block<T>> blockDownloaded = null)
+            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null)
+            //TOREMOVE EventHandler<Block<T>> blockDownloaded = null)
         {
             _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));

@@ -51,7 +51,6 @@
     <None Remove="Views\MyItemWindow.xaml" />
     <None Remove="Views\MyReviewsWindow.xaml" />
     <None Remove="Views\Pages\MainPage.xaml" />
-    <None Remove="Views\Pages\MyProductsPage - Copy.xaml" />
     <None Remove="Views\Pages\MySoldProductsPage.xaml" />
     <None Remove="Views\Pages\ProductPage.xaml" />
     <None Remove="Views\PublicProfileWindow.xaml" />
@@ -116,9 +115,6 @@
     <AvaloniaResource Update="Views\Pages\MySoldProductsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaResource>
-    <AvaloniaResource Update="Views\Pages\MyProductsPage - Copy.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaResource>
     <AvaloniaResource Update="Views\PublicProfileWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaResource>
@@ -152,9 +148,6 @@
     </Compile>
     <Compile Update="Views\Pages\MyProductItemPage.xaml.cs">
       <DependentUpon>MyProductItemPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Pages\MyProductsPage - Copy.xaml.cs">
-      <DependentUpon>MyProductsPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pages\MyProductsPage.xaml.cs">
       <DependentUpon>MyProductsPage.xaml</DependentUpon>

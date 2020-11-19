@@ -184,7 +184,16 @@ namespace FreeMarketApp.Views.Pages
         {
             if ((_offer != null) && (!string.IsNullOrEmpty(_offer.XRCReceivingAddress)))
             {
-                await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+                try
+                {
+                    await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+                }
+                catch (Exception e)
+                {
+                    PagesHelper.Log(Instance._logger, 
+                        string.Format("Isn't possible to use clipboard {0}", e.Message), 
+                        Serilog.Events.LogEventLevel.Error);
+                }
             }
         }
 

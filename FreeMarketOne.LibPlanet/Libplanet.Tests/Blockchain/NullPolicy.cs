@@ -20,12 +20,19 @@ namespace Libplanet.Tests.Blockchain
 
         public IAction BlockAction => null;
 
-        public bool DoesTransactionFollowsPolicy(Transaction<T> transaction) => true;
+        public int MaxTransactionsPerBlock => int.MaxValue;
+
+        public bool DoesTransactionFollowsPolicy(
+            Transaction<T> transaction,
+            BlockChain<T> blockChain
+        ) => true;
 
         public long GetNextBlockDifficulty(BlockChain<T> blocks) =>
             blocks.Count == 0 ? 0 : _difficulty;
 
         public InvalidBlockException ValidateNextBlock(BlockChain<T> blocks, Block<T> nextBlock) =>
             _exceptionToThrow;
+
+        public int GetMaxBlockBytes(long index) => 1024 * 1024;
     }
 }

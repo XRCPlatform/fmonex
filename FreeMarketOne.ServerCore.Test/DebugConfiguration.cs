@@ -37,11 +37,17 @@ namespace FreeMarketOne.ServerCore.Test
             this.PoolMaxStagedTxCountInNetwork = 1;
             this.PoolMaxCountOfLocalItemsPropagation = 5;
             this.PoolPeriodicBroadcastTxInterval = _periodicBroadcastInterval;
+            this.BlockMaxTransactionsPerBlock = 1; //should be equal to PoolMaxStagedTxCountInNetwork
+            this.BlockMaxBlockBytes = 100 * 1024;
+            this.BlockMaxGenesisBytes = 100 * 1024;
 
             this.BlockChainBasePolicy = new BaseBlockPolicy<BaseAction>(
                     null,
                     _blockInterval,
                     _difficulty,
+                    this.BlockMaxTransactionsPerBlock,
+                    this.BlockMaxBlockBytes,
+                    this.BlockMaxGenesisBytes,
                     _poolCheckInterval,
                     null,
                     typeof(BaseAction),
@@ -55,6 +61,9 @@ namespace FreeMarketOne.ServerCore.Test
                     null,
                     _blockInterval,
                     _difficulty,
+                    this.BlockMaxTransactionsPerBlock,
+                    this.BlockMaxBlockBytes,
+                    this.BlockMaxGenesisBytes,
                     _poolCheckInterval,
                     _validBlockInterval,
                     typeof(MarketAction),

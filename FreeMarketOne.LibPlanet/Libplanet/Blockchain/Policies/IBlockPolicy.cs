@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using Libplanet.Action;
 using Libplanet.Blocks;
 using Libplanet.Tx;
@@ -20,12 +21,26 @@ namespace Libplanet.Blockchain.Policies
         IAction BlockAction { get; }
 
         /// <summary>
+        /// The maximum number of <see cref="Block{T}.Transactions"/> that a <see cref="Block{T}"/>
+        /// can accept.  This value must not be negative and must be deterministic (i.e., must not
+        /// change after an object is once instantiated).
+        /// </summary>
+        /// <remarks>If the value is less then 1, it's treated as 1.</remarks>
+        [Pure]
+        int MaxTransactionsPerBlock { get; }
+
+        /// <summary>
         /// A predicate that determines if the transaction follows the block policy.
         /// </summary>
         /// <param name="transaction">A <see cref="Transaction{T}"/> to determine.</param>
+        /// <param name="blockChain">A <see cref="BlockChain{T}" /> for given
+        /// <paramref name="transaction" />.</param>
         /// <returns><c>true</c> if <paramref name="transaction"/>is valid; otherwise, <c>false</c>.
         /// </returns>
-        bool DoesTransactionFollowsPolicy(Transaction<T> transaction);
+        bool DoesTransactionFollowsPolicy(
+            Transaction<T> transaction,
+            BlockChain<T> blockChain
+        );
 
         /// <summary>
         /// Checks if <paramref name="nextBlock"/> is invalid, and if that
@@ -54,5 +69,17 @@ namespace Libplanet.Blockchain.Policies
         /// <returns>A right <see cref="Block{T}.Difficulty"/>
         /// for a new <see cref="Block{T}"/> to be mined.</returns>
         long GetNextBlockDifficulty(BlockChain<T> blocks);
+
+        /// <summary>
+        /// Gets the maximum length of a <see cref="Block{T}"/> in bytes.  It can vary depending on
+        /// a given <paramref name="index"/>, but should be deterministic; for the same
+        /// <paramref name="index"/>, the same value must be returned.
+        /// </summary>
+        /// <param name="index">An <see cref="Block{T}.Index"/> of a block to mine or receive.
+        /// </param>
+        /// <returns>The maximum length of a <see cref="Block{T}"/> in bytes to accept.</returns>
+        /// <remarks>If it returns less then 1, it is treated as 1, because there is no block
+        /// taking 0 bytes or negative length of bytes.</remarks>
+        int GetMaxBlockBytes(long index);
     }
 }

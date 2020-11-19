@@ -5,6 +5,7 @@ using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
 using FreeMarketOne.ServerCore.Test;
 using Libplanet.Blockchain;
+using Libplanet.Blocks;
 using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
@@ -26,7 +27,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             ref IBlockChainManager<BaseAction> baseBlockChainManager,
             ref UserPrivateKey userPrivateKey,
             ref EventHandler _baseBlockChainLoadedEvent,
-            ref EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent)
+            ref EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)> _baseBlockChainChangedEvent)
         {
             configuration = new DebugConfiguration();
             configuration.FullBaseDirectory = InitializeFullBaseDirectory();

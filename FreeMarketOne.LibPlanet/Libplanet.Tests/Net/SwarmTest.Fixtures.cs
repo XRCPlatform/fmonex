@@ -19,13 +19,7 @@ namespace Libplanet.Tests.Net
     {
         private static Block<DumbAction>[] _fixtureBlocksForPreloadAsyncCancellationTest;
 
-        private readonly StoreFixture _fx1;
-        private readonly StoreFixture _fx2;
-        private readonly StoreFixture _fx3;
-        private readonly StoreFixture _fx4;
-
-        private readonly List<BlockChain<DumbAction>> _blockchains;
-        private readonly List<Swarm<DumbAction>> _swarms;
+        private readonly List<Func<Task>> _finalizers;
 
         private static async Task<(Address, Block<DumbAction>[])>
             MakeFixtureBlocksForPreloadAsyncCancellationTest()
@@ -72,6 +66,37 @@ namespace Libplanet.Tests.Net
             return (blocks[1].Transactions.First().Actions.First().TargetAddress, blocks);
         }
 
+        private Swarm<DumbAction> CreateSwarm(
+            PrivateKey privateKey = null,
+            AppProtocolVersion? appProtocolVersion = null,
+            int? tableSize = null,
+            int? bucketSize = null,
+            string host = null,
+            int? listenPort = null,
+            DateTimeOffset? createdAt = null,
+            IEnumerable<IceServer> iceServers = null,
+            DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
+            IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
+            SwarmOptions options = null)
+        {
+            var fx = new DefaultStoreFixture(memory: true);
+            var policy = new BlockPolicy<DumbAction>(new MinerReward(1));
+            var blockchain = TestUtils.MakeBlockChain(policy, fx.Store);
+            return CreateSwarm(
+                blockchain,
+                privateKey,
+                appProtocolVersion,
+                tableSize,
+                bucketSize,
+                host,
+                listenPort,
+                createdAt,
+                iceServers,
+                differentAppProtocolVersionEncountered,
+                trustedAppProtocolVersionSigners,
+                options);
+        }
+
         private Swarm<T> CreateSwarm<T>(
             BlockChain<T> blockChain,
             PrivateKey privateKey = null,
@@ -83,7 +108,8 @@ namespace Libplanet.Tests.Net
             DateTimeOffset? createdAt = null,
             IEnumerable<IceServer> iceServers = null,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
-            IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null
+            IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
+            SwarmOptions options = null
         )
             where T : IAction, new()
         {
@@ -92,7 +118,7 @@ namespace Libplanet.Tests.Net
                 host = IPAddress.Loopback.ToString();
             }
 
-            return new Swarm<T>(
+            var swarm = new Swarm<T>(
                 blockChain,
                 privateKey ?? new PrivateKey(),
                 appProtocolVersion ?? DefaultAppProtocolVersion,
@@ -104,7 +130,14 @@ namespace Libplanet.Tests.Net
                 createdAt,
                 iceServers,
                 differentAppProtocolVersionEncountered,
-                trustedAppProtocolVersionSigners);
+                trustedAppProtocolVersionSigners,
+                options);
+            _finalizers.Add(async () =>
+            {
+                await StopAsync(swarm);
+                swarm.Dispose();
+            });
+            return swarm;
         }
     }
 }

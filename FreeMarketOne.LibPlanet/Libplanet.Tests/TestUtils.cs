@@ -5,14 +5,21 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Bencodex;
 using Libplanet.Action;
+using Libplanet.Assets;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
+using Libplanet.Blockchain.Renderers;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Store;
+using Libplanet.Store.Trie;
+using Libplanet.Tests.Common;
 using Libplanet.Tx;
 using Xunit;
+using static Libplanet.Blockchain.KeyConverters;
+using Random = System.Random;
 
 namespace Libplanet.Tests
 {
@@ -97,6 +104,8 @@ namespace Libplanet.Tests
             }),
         };
 
+        private static readonly Random _random = new Random();
+
         public static void AssertBytesEqual(byte[] expected, byte[] actual)
         {
             string msg;
@@ -161,34 +170,58 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
 
         public static byte[] GetRandomBytes(int size)
         {
-            var random = new System.Random();
             var bytes = new byte[size];
-            random.NextBytes(bytes);
+            _random.NextBytes(bytes);
 
             return bytes;
         }
 
         public static Block<T> MineGenesis<T>(
             Address? miner = null,
-            IEnumerable<Transaction<T>> transactions = null
+            IEnumerable<Transaction<T>> transactions = null,
+            DateTimeOffset? timestamp = null,
+            IAction blockAction = null,
+            bool checkStateRootHash = false
         )
             where T : IAction, new()
         {
-            var timestamp = new DateTimeOffset(2018, 11, 29, 0, 0, 0, TimeSpan.Zero);
             if (transactions is null)
             {
                 transactions = new List<Transaction<T>>();
             }
 
-            return new Block<T>(
+            var block = new Block<T>(
                 index: 0,
                 difficulty: 0,
+                totalDifficulty: 0,
                 nonce: new Nonce(new byte[] { 0x01, 0x00, 0x00, 0x00 }),
                 miner: miner ?? GenesisMinerAddress,
                 previousHash: null,
-                timestamp: timestamp,
+                timestamp: timestamp ?? new DateTimeOffset(2018, 11, 29, 0, 0, 0, TimeSpan.Zero),
                 transactions: transactions
             );
+
+            if (checkStateRootHash)
+            {
+                var blockEvaluator = new BlockEvaluator<T>(
+                    blockAction,
+                    (address, digest, arg3) => null,
+                    (address, currency, arg3, arg4) => new FungibleAssetValue(currency),
+                    null);
+                var actionEvaluationResult = blockEvaluator
+                    .EvaluateActions(block, StateCompleterSet<T>.Reject)
+                    .GetTotalDelta(ToStateKey, ToFungibleAssetKey);
+                ITrie trie = new MerkleTrie(new DefaultKeyValueStore(null));
+                foreach (var pair in actionEvaluationResult)
+                {
+                    trie = trie.Set(Encoding.UTF8.GetBytes(pair.Key), pair.Value);
+                }
+
+                var stateRootHash = trie.Commit(rehearsal: true).Hash;
+                block = new Block<T>(block, stateRootHash);
+            }
+
+            return block;
         }
 
         public static Block<T> MineNext<T>(
@@ -209,13 +242,28 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             long index = previousBlock.Index + 1;
             HashDigest<SHA256> previousHash = previousBlock.Hash;
             DateTimeOffset timestamp =
-                previousBlock.Timestamp.Add(blockInterval ?? TimeSpan.FromDays(1));
+                previousBlock.Timestamp.Add(blockInterval ?? TimeSpan.FromSeconds(15));
 
+            Block<T> block;
             if (nonce == null)
             {
-                return Block<T>.Mine(
+                block = Block<T>.Mine(
                     index: index,
                     difficulty: difficulty,
+                    previousTotalDifficulty: previousBlock.TotalDifficulty,
+                    miner: miner ?? previousBlock.Miner.Value,
+                    previousHash: previousHash,
+                    timestamp: timestamp,
+                    transactions: txs
+                );
+            }
+            else
+            {
+                block = new Block<T>(
+                    index: index,
+                    difficulty: difficulty,
+                    totalDifficulty: previousBlock.TotalDifficulty + difficulty,
+                    nonce: new Nonce(nonce),
                     miner: miner ?? previousBlock.Miner.Value,
                     previousHash: previousHash,
                     timestamp: timestamp,
@@ -223,15 +271,9 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
                 );
             }
 
-            return new Block<T>(
-                index: index,
-                difficulty: difficulty,
-                nonce: new Nonce(nonce),
-                miner: miner ?? previousBlock.Miner.Value,
-                previousHash: previousHash,
-                timestamp: timestamp,
-                transactions: txs
-            );
+            block.Validate(DateTimeOffset.Now);
+
+            return block;
         }
 
         public static string ToString(BitArray bitArray)
@@ -246,7 +288,11 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             IStore store,
             IEnumerable<T> actions = null,
             PrivateKey privateKey = null,
-            DateTimeOffset? timestamp = null)
+            DateTimeOffset? timestamp = null,
+            IEnumerable<IRenderer<T>> renderers = null,
+            IStateStore stateStore = null,
+            Block<T> genesisBlock = null
+        )
             where T : IAction, new()
         {
             actions = actions ?? ImmutableArray<T>.Empty;
@@ -263,9 +309,11 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             var tx = Transaction<T>.Create(
                 0,
                 privateKey,
+                null,
                 actions,
                 timestamp: timestamp ?? DateTimeOffset.MinValue);
-            var genesisBlock = new Block<T>(
+            genesisBlock = genesisBlock ?? new Block<T>(
+                0,
                 0,
                 0,
                 new Nonce(new byte[] { 0x01, 0x00, 0x00, 0x00 }),
@@ -273,7 +321,38 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
                 null,
                 timestamp ?? DateTimeOffset.MinValue,
                 new[] { tx, });
-            return new BlockChain<T>(policy, store, genesisBlock);
+            return new BlockChain<T>(
+                policy,
+                store,
+                stateStore ?? store as IStateStore,
+                genesisBlock,
+                renderers: renderers ?? new[] { new ValidatingActionRenderer<T>() }
+            );
+        }
+
+        public static HashDigest<SHA256>? ActionEvaluationsToHash(
+            IEnumerable<ActionEvaluation> actionEvaluations)
+        {
+            ActionEvaluation actionEvaluation;
+            var evaluations = actionEvaluations.ToList();
+            if (evaluations.Any())
+            {
+                actionEvaluation = evaluations.Last();
+            }
+            else
+            {
+                return (HashDigest<SHA256>?)null;
+            }
+
+            IImmutableSet<Address> updatedAddresses =
+                actionEvaluation.OutputStates.UpdatedAddresses;
+            var dict = Bencodex.Types.Dictionary.Empty;
+            foreach (Address address in updatedAddresses)
+            {
+                dict.Add(address.ToHex(), actionEvaluation.OutputStates.GetState(address));
+            }
+
+            return Hashcash.Hash(new Codec().Encode(dict));
         }
     }
 }

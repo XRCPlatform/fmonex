@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
-using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Blocks;
 using Libplanet.Tx;
@@ -43,16 +42,6 @@ namespace Libplanet.Store
             HashDigest<SHA256> branchPoint);
 
         /// <inheritdoc />
-        public abstract IEnumerable<string> ListStateKeys(Guid chainId);
-
-        /// <inheritdoc/>
-        public abstract IImmutableDictionary<string, IImmutableList<HashDigest<SHA256>>>
-            ListAllStateReferences(
-                Guid chainId,
-                long lowestIndex = 0,
-                long highestIndex = long.MaxValue);
-
-        /// <inheritdoc />
         public abstract void StageTransactionIds(IImmutableSet<TxId> txids);
 
         public abstract void UnstageTransactionIds(
@@ -81,21 +70,31 @@ namespace Libplanet.Store
             if (GetBlockDigest(blockHash) is BlockDigest blockDigest)
             {
                 HashDigest<SHA256>? prevHash = blockDigest.Header.PreviousHash.Any()
-                    ? new HashDigest<SHA256>(blockDigest.Header.PreviousHash.ToArray())
+                    ? new HashDigest<SHA256>(blockDigest.Header.PreviousHash)
                     : (HashDigest<SHA256>?)null;
+                HashDigest<SHA256>? preEvaluationHash = blockDigest.Header.PreEvaluationHash.Any()
+                    ? new HashDigest<SHA256>(blockDigest.Header.PreEvaluationHash)
+                    : (HashDigest<SHA256>?)null;
+                HashDigest<SHA256>? stateRootHash = blockDigest.Header.StateRootHash.Any()
+                    ? new HashDigest<SHA256>(blockDigest.Header.StateRootHash)
+                    : (HashDigest<SHA256>?)null;
+
                 return new Block<T>(
                     index: blockDigest.Header.Index,
                     difficulty: blockDigest.Header.Difficulty,
+                    totalDifficulty: blockDigest.Header.TotalDifficulty,
                     nonce: new Nonce(blockDigest.Header.Nonce.ToArray()),
                     miner: new Address(blockDigest.Header.Miner),
                     previousHash: prevHash,
                     timestamp: DateTimeOffset.ParseExact(
                         blockDigest.Header.Timestamp,
-                        Block<T>.TimestampFormat,
+                        BlockHeader.TimestampFormat,
                         CultureInfo.InvariantCulture
                     ).ToUniversalTime(),
                     transactions: blockDigest.TxIds
-                        .Select(bytes => GetTransaction<T>(new TxId(bytes.ToArray())))
+                        .Select(bytes => GetTransaction<T>(new TxId(bytes.ToArray()))),
+                    preEvaluationHash: preEvaluationHash,
+                    stateRootHash: stateRootHash
                 );
             }
 
@@ -119,50 +118,6 @@ namespace Libplanet.Store
 
         /// <inheritdoc />
         public abstract bool ContainsBlock(HashDigest<SHA256> blockHash);
-
-        public abstract IImmutableDictionary<string, IValue> GetBlockStates(
-            HashDigest<SHA256> blockHash
-        );
-
-        /// <inheritdoc />
-        public abstract void SetBlockStates(
-            HashDigest<SHA256> blockHash,
-            IImmutableDictionary<string, IValue> states
-        );
-
-        /// <inheritdoc />
-        public abstract void PruneBlockStates<T>(
-            Guid chainId,
-            Block<T> until)
-            where T : IAction, new();
-
-        /// <inheritdoc />
-        public abstract Tuple<HashDigest<SHA256>, long> LookupStateReference<T>(
-            Guid chainId,
-            string key,
-            Block<T> lookupUntil)
-            where T : IAction, new();
-
-        /// <inheritdoc />
-        public abstract IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
-            Guid chainId,
-            string key,
-            long? highestIndex,
-            long? lowestIndex,
-            int? limit);
-
-        public abstract void StoreStateReference(
-            Guid chainId,
-            IImmutableSet<string> keys,
-            HashDigest<SHA256> blockHash,
-            long blockIndex);
-
-        /// <inheritdoc />
-        public abstract void ForkStateReferences<T>(
-            Guid sourceChainId,
-            Guid destinationChainId,
-            Block<T> branchPoint)
-            where T : IAction, new();
 
         /// <inheritdoc/>
         public abstract IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId);

@@ -274,7 +274,7 @@ namespace FreeMarketApp.Views.Pages
 
                     for (int i = 0; i < _offer.Photos.Count; i++)
                     {
-                        if (_offer.PrePhotos[i] != null)
+                        if (( _offer.PrePhotos != null) && (_offer.PrePhotos.Count > i))
                         {
                             var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
                             var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);

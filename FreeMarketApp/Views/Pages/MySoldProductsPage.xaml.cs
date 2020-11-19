@@ -93,7 +93,7 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+            PagesHelper.Switch(mainWindow, MainPage.Instance);
 
             ClearForm();
         }

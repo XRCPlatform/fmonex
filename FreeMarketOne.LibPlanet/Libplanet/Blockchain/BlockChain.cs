@@ -1574,7 +1574,12 @@ namespace Libplanet.Blockchain
                     Id = other.Id;
                     Store.SetCanonicalChainId(Id);
                     _blocks = new BlockSet<T>(Store);
-                    TipChanged?.Invoke(this, (oldTip, newTip));
+                    //WE NEED TO CALL ALL CHANGES TipChanged?.Invoke(this, (oldTip, newTip));
+
+                    for (long x = topmostCommon.Index; x <= other.Tip.Index; x++)
+                    {
+                        TipChanged?.Invoke(this, (null, other[x]));
+                    }
 
                     if (render)
                     {

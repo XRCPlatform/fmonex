@@ -274,11 +274,14 @@ namespace FreeMarketApp.Views.Pages
 
                     for (int i = 0; i < _offer.Photos.Count; i++)
                     {
-                        var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
-                        var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
+                        if (_offer.PrePhotos[i] != null)
+                        {
+                            var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
+                            var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
 
-                        spPhoto.IsVisible = true;
-                        iPhoto.Source = _offer.PrePhotos[i];
+                            spPhoto.IsVisible = true;
+                            iPhoto.Source = _offer.PrePhotos[i];
+                        }
                     }
                 }
             }

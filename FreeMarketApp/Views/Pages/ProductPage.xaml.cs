@@ -224,7 +224,7 @@ namespace FreeMarketApp.Views.Pages
                 var tbFineness = Instance.FindControl<TextBlock>("TBFineness");
                 var tbWeightInGrams = Instance.FindControl<TextBlock>("TBWeightInGrams");
                 var tbSize = Instance.FindControl<TextBlock>("TBSize");
-                var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
+                var tbXRCReceivingAddress = Instance.FindControl<TextBox>("TBXRCReceivingAddress");
                 
 
                 tbTitle.Text = _offer.Title;

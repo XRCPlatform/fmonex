@@ -142,7 +142,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            _instance = new MyReviewsPage();
+            _instance = null;
         }
     }
 }

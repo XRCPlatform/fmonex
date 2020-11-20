@@ -179,7 +179,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            //_instance = new MySoldProductsPage(false);
+            _instance = null;
         }
     }
 }

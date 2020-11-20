@@ -111,8 +111,8 @@ namespace FreeMarketApp.Views.Pages
                 if ((marketItem != null) && (!marketItem.IsInPool))
                 {
                     var chatPage = ChatPage.Instance;
+                    chatPage.SetBackPage(GetInstance());
                     chatPage.LoadChatByProduct(signature);
-                    chatPage.SetBackPage(MyBoughtProductsPage.Instance);
                     PagesHelper.Switch(mainWindow, chatPage);
                 }
             }            

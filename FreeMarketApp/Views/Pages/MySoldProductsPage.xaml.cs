@@ -98,6 +98,14 @@ namespace FreeMarketApp.Views.Pages
             ClearForm();
         }
 
+        public void ButtonMyProducts_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, MyProductsPage.Instance);
+
+            ClearForm();
+        }
 
         public void ButtonBoughtProducts_Click(object sender, RoutedEventArgs args)
         {
@@ -118,6 +126,7 @@ namespace FreeMarketApp.Views.Pages
             if ((marketItem != null) && (!marketItem.IsInPool))
             {
                 var chatPage = ChatPage.Instance;
+                chatPage.SetBackPage(GetInstance());
                 chatPage.LoadChatByProduct(signature);
 
                 PagesHelper.Switch(mainWindow, chatPage);

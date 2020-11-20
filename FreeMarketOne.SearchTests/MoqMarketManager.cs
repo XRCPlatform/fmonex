@@ -35,6 +35,16 @@ namespace FreeMarketOne.SearchTests
             throw new NotImplementedException();
         }
 
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeysFromPool(List<MarketItemV1> chainMarketItems, byte[] userPubKey, MarketPoolManager marketPoolManager)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeysFromPool(List<MarketItemV1> chainMarketItems, List<byte[]> userPubKeys, MarketPoolManager marketPoolManager)
+        {
+            throw new NotImplementedException();
+        }
+
         public List<byte[]> GetBuyerPubKeyFromMarketItem(MarketItemV1 itemMarket)
         {
             return new List<byte[]>();

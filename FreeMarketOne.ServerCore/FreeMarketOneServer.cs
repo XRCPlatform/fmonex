@@ -64,10 +64,8 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler BaseBlockChainLoadEndedEvent;
         public event EventHandler MarketBlockChainLoadEndedEvent;
 
-        //TOREMOVE public event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> BaseBlockLoadEndedEvent;
         public event EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)> BaseBlockChainChangedEvent;
         public event EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)> MarketBlockChainChangedEvent;
-        //TOREMOVE public event EventHandler<Block<MarketAction>> MarketBlockDownloadedEvent;
 
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
         public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
@@ -165,7 +163,6 @@ namespace FreeMarketOne.ServerCore
                         Users.PrivateKey,
                         preloadEnded: BaseBlockChainLoadEndedEvent,
                         blockChainChanged: BaseBlockChainChangedEvent);
-                       //TOREMOVE blockDownloaded: BaseBlockLoadEndedEvent);
                     BaseBlockChainManager.Start();
 
                     //Initialize Base Pool
@@ -199,19 +196,6 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        /// <summary>
-        /// Processing event Base BlockChain Changed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
-        {
-            _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
-
-            _logger.Information($"New block SearchIndexing");
-            SearchIndexer.IndexBlock(e.NewTip);
-        }
-
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
             //Initialize Base Pool Manager
@@ -225,7 +209,6 @@ namespace FreeMarketOne.ServerCore
                 LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
                 MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
                 MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(Current.MarketBlockChainChanged);
-                //TOREMOVE MarketBlockDownloadedEvent += new EventHandler<Block<MarketAction>>(MarketBlockPreDownloadedEventHandler);
 
                 var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
                 var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
@@ -244,7 +227,6 @@ namespace FreeMarketOne.ServerCore
                     preloadEnded: MarketBlockChainLoadEndedEvent,
                     blockChainChanged: MarketBlockChainChangedEvent,
                     clearedOlderBlocks: MarketBlockClearedOldersEvent);
-                    //TOREMOVE blockDownloaded: MarketBlockDownloadedEvent);
                 MarketBlockChainManager.Start();
             }
             else
@@ -254,19 +236,18 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        /*TOREMOVE private void MarketBlockDownloadedEventHandler(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
+        /// <summary>
+        /// Processing event Base BlockChain Changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
         {
-            _logger.Information($"Recieved block downloaded notification {e.Hash}");
-            if (MarketBlockChainManager.Storage.ContainsBlock(e.Hash))
-            {
-                var block = MarketBlockChainManager.Storage.GetBlock<MarketAction>(e.Hash);
-                LoadingEvent?.Invoke(this, $"SearchIndexing block {e.Hash}");
-                _logger.Information($"SearchIndexing block {e.Hash}");
-                //async thread //this is fast but has some issues with indexes being updated while searching and causing errors.
-                //message ordering is critical so although we like it to return to UI faster it has to be queued
-                backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(block));
-            }
-        } */
+            _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
+
+            _logger.Information($"New block SearchIndexing");
+            SearchIndexer.IndexBlock(e.NewTip);
+        }
 
         private void MarketBlockChainLoaded(object sender, EventArgs e)
         {
@@ -333,12 +314,12 @@ namespace FreeMarketOne.ServerCore
         /// <param name="e"></param>
         private void MarketBlockChainChanged(object sender, (Block<MarketAction> OldTip, Block<MarketAction> NewTip) e)
         {
+            _logger.Information($"New block SearchIndexing");
+            backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
+
             _logger.Information($"Recieved market block downloaded notification {e.NewTip.Hash}");
             _logger.Information("New block processing for chat - item hash");
             Current.Chats.ProcessNewBlock(e.NewTip);
-
-            _logger.Information($"New block SearchIndexing");
-            backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
         }
 
         /// <summary>

@@ -455,7 +455,7 @@ namespace FreeMarketOne.Markets
         /// <param name="signature"></param>
         /// <returns></returns>
         public MarketItemV1 GetOfferBySignature(
-            string signature, 
+            string signature,
             MarketPoolManager marketPoolManager,
             IBlockChainManager<MarketAction> marketBlockChainManager)
         {
@@ -543,7 +543,7 @@ namespace FreeMarketOne.Markets
         /// <param name="marketData"></param>
         /// <returns></returns>
         public MarketItemV1 SignBuyerMarketData(
-            MarketItemV1 marketData, 
+            MarketItemV1 marketData,
             IPAddress publicIP,
             UserPrivateKey privateKey)
         {
@@ -616,6 +616,109 @@ namespace FreeMarketOne.Markets
                 }
 
                 return result;
+            }
+        }
+
+        /// <summary>
+        /// Get new seller market items from pool
+        /// </summary>
+        /// <param name="pubKey"></param>
+        /// <param name="chainMarketItems"></param>
+        /// <param name="userPubKey"></param>
+        /// <param name="marketPoolManager"></param>
+        /// <returns></returns>
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            byte[] userPubKey,
+            MarketPoolManager marketPoolManager)
+        {
+            return GetAllSellerMarketItemsByPubKeysFromPool(chainMarketItems, new List<byte[]> { userPubKey }, marketPoolManager);
+        }
+
+        /// <summary>
+        /// Get new seller market items from pool
+        /// </summary>
+        /// <param name="chainMarketItems"></param>
+        /// <param name="userPubKeys"></param>
+        /// <param name="marketPoolManager"></param>
+        /// <returns></returns>
+        public List<MarketItemV1> GetAllSellerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            List<byte[]> userPubKeys,
+            MarketPoolManager marketPoolManager)
+        {
+            _logger.Information(string.Format("GetAllSellerMarketItemsByPubKeysFromPool."));
+
+            var result = new List<MarketItemV1>();
+            var types = new Type[] { typeof(MarketItemV1) };
+            var poolItems = marketPoolManager.GetAllActionItemByType(types);
+            
+            if (poolItems.Any())
+            {
+                _logger.Information(string.Format("Some offers found in pool. Loading them too."));
+                poolItems.Reverse();
+
+                foreach (var itemPool in poolItems)
+                {
+                    var marketData = (MarketItemV1)itemPool;
+                    var itemMarketBytes = marketData.ToByteArrayForSign();
+                    var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
+
+                    foreach (var itemPubKey in itemPubKeys)
+                    {
+                        foreach (var itemUserPubKey in userPubKeys)
+                        {
+                            if (itemPubKey.SequenceEqual(itemUserPubKey))
+                            {
+                                if (marketData.State != (int)ProductStateEnum.Removed)
+                                {
+                                    _logger.Information(string.Format("Found Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                    marketData.IsInPool = true;
+                                    result.Add(marketData);
+                                }
+                                else
+                                {
+                                    _logger.Information(string.Format("Found deleted Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                result = RemoveChainSignaturesFromChainList(chainMarketItems, result);
+            }
+
+            return result;
+        }
+
+        private List<MarketItemV1> RemoveChainSignaturesFromChainList(List<MarketItemV1> chainList, List<MarketItemV1> poolList)
+        {
+            if (poolList.Any())
+            {
+                var result = poolList;
+                var addIt = false;
+
+                foreach (var itemChain in chainList)
+                {
+                    addIt = true;
+
+                    foreach (var itemPool in poolList)
+                    {
+                        if (itemPool.BaseSignature == itemChain.Signature)
+                        {
+                            addIt = false;
+                            break;
+                        }
+                    }
+
+                    if (addIt) result.Add(itemChain);
+                }
+
+                return result;
+            } 
+            else
+            {
+                return chainList;
             }
         }
     }

@@ -661,24 +661,88 @@ namespace FreeMarketOne.Markets
                 foreach (var itemPool in poolItems)
                 {
                     var marketData = (MarketItemV1)itemPool;
-                    var itemMarketBytes = marketData.ToByteArrayForSign();
-                    var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
-
-                    foreach (var itemPubKey in itemPubKeys)
+                    if (marketData.State == (int)ProductStateEnum.Default)
                     {
-                        foreach (var itemUserPubKey in userPubKeys)
+                        var itemMarketBytes = marketData.ToByteArrayForSign();
+                        var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
+
+                        foreach (var itemPubKey in itemPubKeys)
                         {
-                            if (itemPubKey.SequenceEqual(itemUserPubKey))
+                            foreach (var itemUserPubKey in userPubKeys)
                             {
-                                if (marketData.State != (int)ProductStateEnum.Removed)
+                                if (itemPubKey.SequenceEqual(itemUserPubKey))
                                 {
                                     _logger.Information(string.Format("Found Pool MarketItem for seller - item hash {0}.", marketData.Hash));
                                     marketData.IsInPool = true;
                                     result.Add(marketData);
                                 }
-                                else
+                            }
+                        }
+                    }
+                }
+
+                result = RemoveChainSignaturesFromChainList(chainMarketItems, result);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get new buyer market items from pool
+        /// </summary>
+        /// <param name="pubKey"></param>
+        /// <param name="chainMarketItems"></param>
+        /// <param name="userPubKey"></param>
+        /// <param name="marketPoolManager"></param>
+        /// <returns></returns>
+        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            byte[] userPubKey,
+            MarketPoolManager marketPoolManager)
+        {
+            return GetAllBuyerMarketItemsByPubKeysFromPool(chainMarketItems, new List<byte[]> { userPubKey }, marketPoolManager);
+        }
+
+        /// <summary>
+        /// Get new buyer market items from pool
+        /// </summary>
+        /// <param name="chainMarketItems"></param>
+        /// <param name="userPubKeys"></param>
+        /// <param name="marketPoolManager"></param>
+        /// <returns></returns>
+        public List<MarketItemV1> GetAllBuyerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            List<byte[]> userPubKeys,
+            MarketPoolManager marketPoolManager)
+        {
+            _logger.Information(string.Format("GetAllSellerMarketItemsByPubKeysFromPool."));
+
+            var result = new List<MarketItemV1>();
+            var types = new Type[] { typeof(MarketItemV1) };
+            var poolItems = marketPoolManager.GetAllActionItemByType(types);
+
+            if (poolItems.Any())
+            {
+                _logger.Information(string.Format("Some offers found in pool. Loading them too."));
+                poolItems.Reverse();
+
+                foreach (var itemPool in poolItems)
+                {
+                    var marketData = (MarketItemV1)itemPool;
+                    if (marketData.State == (int)ProductStateEnum.Sold)
+                    {
+                        var itemMarketBytes = marketData.ToByteArrayForSign();
+                        var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
+
+                        foreach (var itemPubKey in itemPubKeys)
+                        {
+                            foreach (var itemUserPubKey in userPubKeys)
+                            {
+                                if (itemPubKey.SequenceEqual(itemUserPubKey))
                                 {
-                                    _logger.Information(string.Format("Found deleted Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                    _logger.Information(string.Format("Found Pool MarketItem for seller - item hash {0}.", marketData.Hash));
+                                    marketData.IsInPool = true;
+                                    result.Add(marketData);
                                 }
                             }
                         }

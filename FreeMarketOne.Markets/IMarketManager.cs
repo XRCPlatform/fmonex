@@ -40,5 +40,15 @@ namespace FreeMarketOne.Markets
                     List<MarketItemV1> chainMarketItems,
                     List<byte[]> userPubKeys,
                     MarketPoolManager marketPoolManager);
+
+        List<MarketItemV1> GetAllBuyerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            byte[] userPubKey,
+            MarketPoolManager marketPoolManager);
+
+        List<MarketItemV1> GetAllBuyerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            List<byte[]> userPubKeys,
+            MarketPoolManager marketPoolManager);
     }
 }

@@ -58,7 +58,7 @@ namespace FreeMarketOne.BlockChain
         private EventHandler<PreloadState> _preloadProcessed { get; set; }
         private EventHandler _preloadEnded { get; set; }
         private EventHandler<(Block<T> OldTip, Block<T> NewTip)> _blockChainChanged { get; set; }
-        //TOREMOVE private EventHandler<Block<T>> _blockDownloaded { get; set; }
+
         private EventHandler<List<HashDigest<SHA256>>> _clearedOlderBlocks { get; set; }
         private IBaseConfiguration _configuration { get; }
         private IDefaultBlockPolicy<T> _blockChainPolicy { get; }
@@ -101,7 +101,6 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadEnded = null,
             EventHandler<(Block<T> OldTip, Block<T> NewTip)> blockChainChanged = null,
             EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null)
-            //TOREMOVE EventHandler<Block<T>> blockDownloaded = null)
         {
             _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
@@ -132,7 +131,6 @@ namespace FreeMarketOne.BlockChain
             _preloadEnded = preloadEnded;
             _blockChainChanged = blockChainChanged;
             _clearedOlderBlocks = clearedOlderBlocks;
-            //TOREMOVE _blockDownloaded = blockDownloaded;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
         }
@@ -175,8 +173,6 @@ namespace FreeMarketOne.BlockChain
                     iceServers: null,
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
-
-                //TOREMOVE _swarmServer.BlockDownloaded += _blockDownloaded;
 
                 var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();

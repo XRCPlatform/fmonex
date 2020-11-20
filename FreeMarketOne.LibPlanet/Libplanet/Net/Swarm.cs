@@ -234,8 +234,6 @@ namespace Libplanet.Net
 
         internal SwarmOptions Options { get; }
 
-        //TOREMOVE public event EventHandler<Block<T>> BlockDownloaded;
-
         /// <summary>
         /// Waits until this <see cref="Swarm{T}"/> instance gets started to run.
         /// </summary>
@@ -1615,8 +1613,6 @@ namespace Libplanet.Net
                     ExecutedBlockCount = ++count,
                     ExecutedBlockHash = block.Hash,
                 });
-
-                //TOREMOVE: BlockDownloaded?.Invoke(this, block);
             }
 
             _logger.Debug("Finished to execute actions.");

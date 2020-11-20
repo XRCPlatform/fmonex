@@ -118,11 +118,11 @@ namespace FreeMarketOne.ServerCore
 
             var marketDiff = _expectedMarketChainPulse - FMONE.Current.MarketBlockChainManager.SwarmServer.LastMessageTimestamp;
             var baseDiff = _expectedBaseChainPulse - FMONE.Current.BaseBlockChainManager.SwarmServer.LastMessageTimestamp;
-            if (marketDiff.Value.TotalMinutes > 1)
+            if ((marketDiff.HasValue) && (marketDiff.Value.TotalMinutes > 1))
             {
                 marketUp = false;
             }
-            if (baseDiff.Value.TotalMinutes > 1)
+            if ((baseDiff.HasValue) && (baseDiff.Value.TotalMinutes > 1))
             {
                 baseUp = false;
             }

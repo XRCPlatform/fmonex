@@ -33,7 +33,7 @@ namespace FreeMarketOne.BlockChain.Test
         private UserPrivateKey _userPrivateKey;
 
         private event EventHandler _baseBlockChainLoadedEvent;
-        private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
+        private event EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)> _baseBlockChainChangedEvent;
         private IBlockChainManager<BaseAction> _baseBlockChainManager;
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
@@ -59,7 +59,7 @@ namespace FreeMarketOne.BlockChain.Test
             }
         }
 
-        private void BaseBlockChainChanged(object sender, EventArgs e)
+        private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
         {
             //we have a new block
             _newBlock = true;
@@ -70,7 +70,7 @@ namespace FreeMarketOne.BlockChain.Test
         {
             var debugEnvironment = new DebugEnvironmentHelper();
             _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
-            _baseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
+            _baseBlockChainChangedEvent += new EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)>(BaseBlockChainChanged);
 
             debugEnvironment.Initialize<MiningTest>(
                 ref _configuration,

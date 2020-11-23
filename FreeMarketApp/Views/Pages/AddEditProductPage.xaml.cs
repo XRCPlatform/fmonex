@@ -464,7 +464,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            _instance = new AddEditProductPage();
+            _instance = null;
         }
     }
 }

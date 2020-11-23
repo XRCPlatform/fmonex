@@ -30,5 +30,25 @@ namespace FreeMarketOne.Markets
             UserPrivateKey privateKey);
         MarketItemV1 SignMarketData(
             MarketItemV1 marketData, UserPrivateKey privateKey);
+
+        List<MarketItemV1> GetAllSellerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            byte[] userPubKey,
+            MarketPoolManager marketPoolManager);
+
+        List<MarketItemV1> GetAllSellerMarketItemsByPubKeysFromPool(
+                    List<MarketItemV1> chainMarketItems,
+                    List<byte[]> userPubKeys,
+                    MarketPoolManager marketPoolManager);
+
+        List<MarketItemV1> GetAllBuyerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            byte[] userPubKey,
+            MarketPoolManager marketPoolManager);
+
+        List<MarketItemV1> GetAllBuyerMarketItemsByPubKeysFromPool(
+            List<MarketItemV1> chainMarketItems,
+            List<byte[]> userPubKeys,
+            MarketPoolManager marketPoolManager);
     }
 }

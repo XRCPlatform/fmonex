@@ -33,7 +33,7 @@ namespace Libplanet.Extensions
             get
             {
                 ECDomainParameters ecParams = GetECParameters();
-                ECPoint q = ecParams.G.Multiply(this.keyParam.D);
+                ECPoint q = ecParams.G.Multiply(this.KeyParam.D);
                 var kp = new ECPublicKeyParameters("ECDSA", q, ecParams);
                 return new UserPublicKey(kp);
             }

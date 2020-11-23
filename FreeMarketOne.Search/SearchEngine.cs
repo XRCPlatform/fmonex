@@ -228,7 +228,6 @@ namespace FreeMarketOne.Search
             return bq;
         }
 
-
         /// <summary>
         /// Builds query to retrieve market item by Seller Signature (ID)
         /// </summary>

@@ -184,7 +184,16 @@ namespace FreeMarketApp.Views.Pages
         {
             if ((_offer != null) && (!string.IsNullOrEmpty(_offer.XRCReceivingAddress)))
             {
-                await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+                try
+                {
+                    await ClipboardService.SetTextAsync(_offer.XRCReceivingAddress);
+                }
+                catch (Exception e)
+                {
+                    PagesHelper.Log(Instance._logger, 
+                        string.Format("Isn't possible to use clipboard {0}", e.Message), 
+                        Serilog.Events.LogEventLevel.Error);
+                }
             }
         }
 
@@ -215,7 +224,7 @@ namespace FreeMarketApp.Views.Pages
                 var tbFineness = Instance.FindControl<TextBlock>("TBFineness");
                 var tbWeightInGrams = Instance.FindControl<TextBlock>("TBWeightInGrams");
                 var tbSize = Instance.FindControl<TextBlock>("TBSize");
-                var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
+                var tbXRCReceivingAddress = Instance.FindControl<TextBox>("TBXRCReceivingAddress");
                 
 
                 tbTitle.Text = _offer.Title;
@@ -265,11 +274,14 @@ namespace FreeMarketApp.Views.Pages
 
                     for (int i = 0; i < _offer.Photos.Count; i++)
                     {
-                        var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
-                        var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
+                        if (( _offer.PrePhotos != null) && (_offer.PrePhotos.Count > i))
+                        {
+                            var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
+                            var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
 
-                        spPhoto.IsVisible = true;
-                        iPhoto.Source = _offer.PrePhotos[i];
+                            spPhoto.IsVisible = true;
+                            iPhoto.Source = _offer.PrePhotos[i];
+                        }
                     }
                 }
             }
@@ -277,7 +289,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            _instance = new ProductPage();
+            _instance = null;
         }
     }
 }

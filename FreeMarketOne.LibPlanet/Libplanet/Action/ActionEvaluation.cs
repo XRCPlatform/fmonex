@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Blocks;
+using Libplanet.Store.Trie;
 using Libplanet.Tx;
 
 namespace Libplanet.Action
@@ -24,15 +25,19 @@ namespace Libplanet.Action
         /// evaluate <paramref name="action"/>.</param>
         /// <param name="outputStates">The result states that
         /// <paramref name="action"/> makes.</param>
+        /// <param name="exception">An exception that has risen during evaluating a given
+        /// <paramref name="action"/>.</param>
         public ActionEvaluation(
             IAction action,
             IActionContext inputContext,
-            IAccountStateDelta outputStates
+            IAccountStateDelta outputStates,
+            Exception exception = null
         )
         {
             Action = action;
             InputContext = inputContext;
             OutputStates = outputStates;
+            Exception = exception;
         }
 
         /// <summary>
@@ -52,6 +57,11 @@ namespace Libplanet.Action
         /// The result states that <see cref="Action"/> makes.
         /// </summary>
         public IAccountStateDelta OutputStates { get; }
+
+        /// <summary>
+        /// An exception that had risen during evaluation.
+        /// </summary>
+        public Exception Exception { get; }
 
         /// <summary>
         /// Executes the <paramref name="actions"/> step by step, and emits
@@ -75,16 +85,13 @@ namespace Libplanet.Action
         /// <param name="rehearsal">Pass <c>true</c> if it is intended
         /// to be dry-run (i.e., the returned result will be never used).
         /// The default value is <c>false</c>.</param>
+        /// <param name="previousBlockStatesTrie">The trie to contain states at previous block.
+        /// </param>
         /// <returns>Enumerates <see cref="ActionEvaluation"/>s for each one in
         /// <paramref name="actions"/>.  The order is the same to the <paramref name="actions"/>.
         /// Note that each <see cref="IActionContext.Random"/> object
         /// has a unconsumed state.
         /// </returns>
-        /// <exception cref="UnexpectedlyTerminatedActionException">
-        /// Thrown when one of <paramref name="actions"/> throws some exception.
-        /// The actual exception that an <see cref="IAction"/> threw
-        /// is stored in its <see cref="Exception.InnerException"/> property.
-        /// </exception>
         internal static IEnumerable<ActionEvaluation> EvaluateActionsGradually(
             HashDigest<SHA256> blockHash,
             long blockIndex,
@@ -94,7 +101,8 @@ namespace Libplanet.Action
             Address signer,
             byte[] signature,
             IImmutableList<IAction> actions,
-            bool rehearsal = false)
+            bool rehearsal = false,
+            ITrie previousBlockStatesTrie = null)
         {
             ActionContext CreateActionContext(
                 IAccountStateDelta prevStates,
@@ -106,7 +114,8 @@ namespace Libplanet.Action
                     blockIndex: blockIndex,
                     previousStates: prevStates,
                     randomSeed: randomSeed,
-                    rehearsal: rehearsal
+                    rehearsal: rehearsal,
+                    previousBlockStatesTrie: previousBlockStatesTrie
                 );
 
             byte[] hashedSignature;
@@ -120,52 +129,56 @@ namespace Libplanet.Action
                 (signature.Any() ? BitConverter.ToInt32(hashedSignature, 0) : 0);
 
             IAccountStateDelta states = previousStates;
+            Exception exc = null;
             foreach (IAction action in actions)
             {
-                ActionContext context =
-                    CreateActionContext(states, seed);
-                IAccountStateDelta nextStates;
+                ActionContext context = CreateActionContext(states, seed);
+                IAccountStateDelta nextStates = context.PreviousStates;
                 try
                 {
                     nextStates = action.Execute(context);
                 }
                 catch (Exception e)
                 {
-                    string msg;
-                    if (!rehearsal)
+                    if (rehearsal)
                     {
-                        msg = $"The action {action} (block #{blockIndex} {blockHash}, tx {txid}) " +
-                              "threw an exception during execution.  See also this exception's " +
-                              "InnerException property.";
-                        throw new UnexpectedlyTerminatedActionException(
-                            blockHash, blockIndex, txid, action, msg, e
+                        var msg =
+                            $"The action {action} threw an exception during its " +
+                            "rehearsal.  It is probably because the logic of the " +
+                            $"action {action} is not enough generic so that it " +
+                            "can cover every case including rehearsal mode.\n" +
+                            "The IActionContext.Rehearsal property also might be " +
+                            "useful to make the action can deal with the case of " +
+                            "rehearsal mode.\n" +
+                            "See also this exception's InnerException property.";
+                        exc = new UnexpectedlyTerminatedActionException(
+                            null, null, null, null, action, msg, e
                         );
                     }
-
-                    msg =
-                        $"The action {action} threw an exception during its " +
-                        "rehearsal.  It is probably because the logic of the " +
-                        $"action {action} is not enough generic so that it " +
-                        "can cover every case including rehearsal mode.\n" +
-                        "The IActionContext.Rehearsal property also might be " +
-                        "useful to make the action can deal with the case of " +
-                        "rehearsal mode.\n" +
-                        "See also this exception's InnerException property.";
-                    throw new UnexpectedlyTerminatedActionException(
-                        null, null, null, action, msg, e
-                    );
+                    else
+                    {
+                        var stateRootHash = context.PreviousStateRootHash;
+                        var msg =
+                            $"The action {action} (block #{blockIndex} {blockHash}, tx {txid}, " +
+                            $"state root hash {stateRootHash}) threw an exception " +
+                            "during execution.  See also this exception's InnerException property.";
+                        exc = new UnexpectedlyTerminatedActionException(
+                            blockHash, blockIndex, txid, stateRootHash, action, msg, e
+                        );
+                    }
                 }
 
                 // As IActionContext.Random is stateful, we cannot reuse
                 // the context which is once consumed by Execute().
-                ActionContext equivalentContext =
-                    CreateActionContext(states, seed);
+                ActionContext equivalentContext = CreateActionContext(states, seed);
 
                 yield return new ActionEvaluation(
                     action,
                     equivalentContext,
-                    nextStates
+                    nextStates,
+                    exc
                 );
+
                 states = nextStates;
                 unchecked
                 {

@@ -8,6 +8,7 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.ServerCore;
 using Libplanet;
 using Libplanet.Blockchain;
+using Libplanet.Blocks;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -66,10 +67,10 @@ namespace FreeMarketApp
         {
             await Task.Run(() =>
             {
-                FMONE.Current.BaseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
+                FMONE.Current.BaseBlockChainChangedEvent += new EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)>(BaseBlockChainChanged);
                 FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 FMONE.Current.MarketBlockClearedOldersEvent += new EventHandler<List<HashDigest<SHA256>>>(MarketBlockClearedOldersChanged);
-                FMONE.Current.MarketBlockChainChangedEvent += new EventHandler<BlockChain<MarketAction>.TipChangedEventArgs>(MarketBlockChainChangedEvent);
+                FMONE.Current.MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(MarketBlockChainChangedEvent);
                 FMONE.Current.NetworkHeartbeatEvent += new EventHandler<NetworkHeartbeatArgs>(NetworkHeartbeatEvent);
 
                 FMONE.Current.Initialize();
@@ -95,16 +96,14 @@ namespace FreeMarketApp
                 e.PoolMarketStagedItemsCount);
         }
 
-        private static void MarketBlockChainChangedEvent(object sender, BlockChain<MarketAction>.TipChangedEventArgs e)
+        private static void MarketBlockChainChangedEvent(object sender, (Block<MarketAction> OldTip, Block<MarketAction> NewTip) e)
         {
-            //var block = FMONE.Current.MarketBlockChainManager.BlockChain?.Tip;
-            //FMONE.Current.SearchIndexer.IndexBlock(block);
+            //we have a new block
         }
 
-        private static void BaseBlockChainChanged(object sender, EventArgs e)
+        private static void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
         {
-            var block = FMONE.Current.BaseBlockChainManager.BlockChain?.Tip;
-            FMONE.Current.SearchIndexer.IndexBlock(block);
+            //we have a new block
         }
 
         private static void MarketBlockClearedOldersChanged(object sender, List<HashDigest<SHA256>> deletedHashes)

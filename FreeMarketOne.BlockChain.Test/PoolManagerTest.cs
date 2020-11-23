@@ -5,6 +5,7 @@ using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
 using Libplanet;
 using Libplanet.Blockchain;
+using Libplanet.Blocks;
 using Libplanet.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
@@ -24,7 +25,7 @@ namespace FreeMarketOne.BlockChain.Test
         private IOnionSeedsManager _onionSeedsManager;
         private BasePoolManager _basePoolManager;
         private event EventHandler _baseBlockChainLoadedEvent;
-        private event EventHandler<BlockChain<BaseAction>.TipChangedEventArgs> _baseBlockChainChangedEvent;
+        private event EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)> _baseBlockChainChangedEvent;
         private IBlockChainManager<BaseAction> _baseBlockChainManager;
         private UserPrivateKey _userPrivateKey;
         private bool _newBlock = false;
@@ -117,7 +118,7 @@ namespace FreeMarketOne.BlockChain.Test
             Assert.AreEqual(0, _basePoolManager.GetAllActionItemLocalCount());
         }
 
-        private void BaseBlockChainChanged(object sender, EventArgs e)
+        private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
         {
             //we have a new block
             _newBlock = true;
@@ -128,7 +129,7 @@ namespace FreeMarketOne.BlockChain.Test
         {
             var debugEnvironment = new DebugEnvironmentHelper();
             _baseBlockChainLoadedEvent += new EventHandler(BaseBlockChainLoaded);
-            _baseBlockChainChangedEvent += new EventHandler<BlockChain<BaseAction>.TipChangedEventArgs>(BaseBlockChainChanged);
+            _baseBlockChainChangedEvent += new EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)>(BaseBlockChainChanged);
 
             debugEnvironment.Initialize<MiningTest>(
                 ref _configuration,

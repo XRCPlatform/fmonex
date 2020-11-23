@@ -64,7 +64,8 @@ namespace FreeMarketOne.Pools
 
                 var taskMiner = Task.Run(async () =>
                 {
-                    var block = await _blockChain.MineBlock(_address, DateTimeOffset.UtcNow, _cancellationToken.Token);
+                    var block = await _blockChain.MineBlock(_address, DateTimeOffset.UtcNow, 
+                        cancellationToken: _cancellationToken.Token);
 
                     if (_swarmServer?.Running ?? false)
                     {

@@ -57,8 +57,8 @@ namespace FreeMarketOne.BlockChain
         private EventHandler _preloadStarted { get; set; }
         private EventHandler<PreloadState> _preloadProcessed { get; set; }
         private EventHandler _preloadEnded { get; set; }
-        private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockChainChanged { get; set; }
-        private EventHandler<BlockChain<T>.TipChangedEventArgs> _blockDownloaded { get; set; }
+        private EventHandler<(Block<T> OldTip, Block<T> NewTip)> _blockChainChanged { get; set; }
+
         private EventHandler<List<HashDigest<SHA256>>> _clearedOlderBlocks { get; set; }
         private IBaseConfiguration _configuration { get; }
         private IDefaultBlockPolicy<T> _blockChainPolicy { get; }
@@ -84,7 +84,6 @@ namespace FreeMarketOne.BlockChain
         /// <param name="preloadStarted"></param>
         /// <param name="preloadProcessed"></param>
         /// <param name="preloadEnded"></param>
-        /// <param name="blockChainChanged"></param>
         public BlockChainManager(
             IBaseConfiguration configuration,
             string blockChainBasePath,
@@ -100,9 +99,8 @@ namespace FreeMarketOne.BlockChain
             EventHandler preloadStarted = null,
             EventHandler<PreloadState> preloadProcessed = null,
             EventHandler preloadEnded = null,
-            EventHandler<BlockChain<T>.TipChangedEventArgs> blockChainChanged = null,
-            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null,
-            EventHandler<BlockChain<T>.TipChangedEventArgs> blockDownloaded = null)
+            EventHandler<(Block<T> OldTip, Block<T> NewTip)> blockChainChanged = null,
+            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null)
         {
             _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
@@ -133,7 +131,6 @@ namespace FreeMarketOne.BlockChain
             _preloadEnded = preloadEnded;
             _blockChainChanged = blockChainChanged;
             _clearedOlderBlocks = clearedOlderBlocks;
-            _blockDownloaded = blockDownloaded;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
         }
@@ -157,6 +154,7 @@ namespace FreeMarketOne.BlockChain
             _blockChain = new BlockChain<T>(
                 _blockChainPolicy,
                 _storage,
+                _storage,
                 _genesisBlock
             );
 
@@ -175,8 +173,6 @@ namespace FreeMarketOne.BlockChain
                     iceServers: null,
                     differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
                     trustedAppProtocolVersionSigners: null);
-
-                _swarmServer.BlockDownloadedEvent += _blockDownloaded;
 
                 var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
@@ -230,7 +226,7 @@ namespace FreeMarketOne.BlockChain
                 if (typeOfT != typeof(BaseAction)) port = itemPeer.PortBlockChainMaster;
 
                 var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.UrlBlockChain, port), default(AppProtocolVersion));
+                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.UrlBlockChain, port));
                 peers.Add(boundPeer);
             }
 

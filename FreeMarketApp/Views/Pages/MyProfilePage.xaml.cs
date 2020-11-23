@@ -111,7 +111,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            _instance = new MyProfilePage();
+            _instance = null;
         }
     }
 }

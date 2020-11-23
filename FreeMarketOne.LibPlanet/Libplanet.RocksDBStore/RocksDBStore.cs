@@ -20,7 +20,7 @@ namespace Libplanet.RocksDBStore
     /// This stores data in the RocksDB.
     /// </summary>
     /// <seealso cref="IStore"/>
-    public class RocksDBStore : BaseStore
+    public class RocksDBStore : BaseBlockStatesStore
     {
         private const string BlockDbName = "block";
         private const string TxDbName = "tx";
@@ -102,18 +102,20 @@ namespace Libplanet.RocksDBStore
             _options = new DbOptions()
                 .SetCreateIfMissing();
 
-            _blockDb = OpenRocksDb(_options, BlockDbName);
-            _txDb = OpenRocksDb(_options, TxDbName);
-            _stateDb = OpenRocksDb(_options, StateDbName);
-            _stagedTxDb = OpenRocksDb(_options, StagedTxDbName);
+            _blockDb = RocksDBUtils.OpenRocksDb(_options, RocksDbPath(BlockDbName));
+            _txDb = RocksDBUtils.OpenRocksDb(_options, RocksDbPath(TxDbName));
+            _stateDb = RocksDBUtils.OpenRocksDb(_options, RocksDbPath(StateDbName));
+            _stagedTxDb = RocksDBUtils.OpenRocksDb(_options, RocksDbPath(StagedTxDbName));
 
             // When opening a DB in a read-write mode, you need to specify all Column Families that
             // currently exist in a DB. https://github.com/facebook/rocksdb/wiki/Column-Families
             var chainDbColumnFamilies = GetColumnFamilies(_options, ChainDbName);
-            _chainDb = OpenRocksDb(_options, ChainDbName, chainDbColumnFamilies);
+            _chainDb = RocksDBUtils.OpenRocksDb(
+                _options, RocksDbPath(ChainDbName), chainDbColumnFamilies);
 
             var stateRefDbColumnFamilies = GetColumnFamilies(_options, StateRefDbName);
-            _stateRefDb = OpenRocksDb(_options, StateRefDbName, stateRefDbColumnFamilies);
+            _stateRefDb = RocksDBUtils.OpenRocksDb(
+                _options, RocksDbPath(StateRefDbName), stateRefDbColumnFamilies);
         }
 
         /// <inheritdoc/>
@@ -141,18 +143,28 @@ namespace Libplanet.RocksDBStore
         /// <inheritdoc/>
         public override void DeleteChainId(Guid chainId)
         {
+            _logger.Debug($"Deleting chainID: {chainId}.");
+            _lastStateRefCaches.Remove(chainId);
+
+            var cfName = chainId.ToString();
             try
             {
-                _lastStateRefCaches.Remove(chainId);
-
-                var cfName = chainId.ToString();
                 _chainDb.DropColumnFamily(cfName);
+            }
+            catch (KeyNotFoundException)
+            {
+                // Do nothing according to the specification: DeleteChainId() should be idempotent.
+                _logger.Debug($"No such chain ID in _chainDb: {cfName}.", cfName);
+            }
+
+            try
+            {
                 _stateRefDb.DropColumnFamily(cfName);
             }
             catch (KeyNotFoundException)
             {
                 // Do nothing according to the specification: DeleteChainId() should be idempotent.
-                _logger.Debug("No such chain ID: {ChainId}.", chainId);
+                _logger.Debug($"No such chain ID in _stateRefDb: {cfName}.", cfName);
             }
         }
 
@@ -639,16 +651,11 @@ namespace Libplanet.RocksDBStore
             }
         }
 
-        public override Tuple<HashDigest<SHA256>, long> LookupStateReference<T>(
+        public override Tuple<HashDigest<SHA256>, long> LookupStateReference(
             Guid chainId,
             string key,
-            Block<T> lookupUntil)
+            long lookupUntilBlockIndex)
         {
-            if (lookupUntil is null)
-            {
-                throw new ArgumentNullException(nameof(lookupUntil));
-            }
-
             if (_lastStateRefCaches.TryGetValue(
                     chainId,
                     out LruCache<string, Tuple<HashDigest<SHA256>, long>> stateRefCache)
@@ -658,14 +665,14 @@ namespace Libplanet.RocksDBStore
             {
                 long cachedIndex = cache.Item2;
 
-                if (cachedIndex <= lookupUntil.Index)
+                if (cachedIndex <= lookupUntilBlockIndex)
                 {
                     return cache;
                 }
             }
 
             Tuple<HashDigest<SHA256>, long> stateRef =
-                IterateStateReferences(chainId, key, lookupUntil.Index, null, limit: 1)
+                IterateStateReferences(chainId, key, lookupUntilBlockIndex, null, limit: 1)
                 .FirstOrDefault();
 
             if (stateRef is null)
@@ -1021,15 +1028,7 @@ namespace Libplanet.RocksDBStore
             return columnFamilies;
         }
 
-        private RocksDb OpenRocksDb(
-            DbOptions options, string dbName, ColumnFamilies columnFamilies = null)
-        {
-            var dbPath = Path.Combine(_path, dbName);
-
-            return columnFamilies is null
-                ? RocksDb.Open(options, dbPath)
-                : RocksDb.Open(options, dbPath, columnFamilies);
-        }
+        private string RocksDbPath(string dbName) => Path.Combine(_path, dbName);
 
         private class StateRef
         {

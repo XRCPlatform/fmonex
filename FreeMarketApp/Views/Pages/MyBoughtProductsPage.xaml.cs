@@ -60,6 +60,9 @@ namespace FreeMarketApp.Views.Pages
                 var engine = FMONE.Current.SearchEngine;
                 var result = engine.GetMyCompletedOffers(OfferDirection.Bought, selectedPageSize, 1);
 
+                result.Results = FMONE.Current.Markets.GetAllBuyerMarketItemsByPubKeysFromPool(
+                    result.Results, userPubKey, FMONE.Current.MarketPoolManager);
+
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
 
@@ -111,8 +114,8 @@ namespace FreeMarketApp.Views.Pages
                 if ((marketItem != null) && (!marketItem.IsInPool))
                 {
                     var chatPage = ChatPage.Instance;
+                    chatPage.SetBackPage(GetInstance());
                     chatPage.LoadChatByProduct(signature);
-                    chatPage.SetBackPage(MyBoughtProductsPage.Instance);
                     PagesHelper.Switch(mainWindow, chatPage);
                 }
             }            
@@ -135,6 +138,10 @@ namespace FreeMarketApp.Views.Pages
 
                 var currentSearchResult = ((MyProductsPageViewModel)this.DataContext).Result;
                 var result = engine.GetMyCompletedOffers(OfferDirection.Bought, selectedPageSize, currentSearchResult.CurrentPage);
+
+                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
+                result.Results = FMONE.Current.Markets.GetAllBuyerMarketItemsByPubKeysFromPool(
+                    result.Results, userPubKey, FMONE.Current.MarketPoolManager);
 
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
@@ -166,6 +173,14 @@ namespace FreeMarketApp.Views.Pages
             if (currentSearchResult.CurrentPage > 1)
             {
                 var result = engine.GetMyCompletedOffers(OfferDirection.Bought, selectedPageSize, currentSearchResult.CurrentPage - 1);
+
+                if ((currentSearchResult.CurrentPage - 1) == 1)
+                {
+                    var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
+                    result.Results = FMONE.Current.Markets.GetAllBuyerMarketItemsByPubKeysFromPool(
+                        result.Results, userPubKey, FMONE.Current.MarketPoolManager);
+                }
+
                 var skynetHelper = new SkynetHelper();
                 skynetHelper.PreloadTitlePhotos(result.Results, _logger);
                 DataContext = new MyProductsPageViewModel(result, _appliedFilters);
@@ -176,7 +191,7 @@ namespace FreeMarketApp.Views.Pages
 
         private void ClearForm()
         {
-            //_instance = new MyBoughtProductsPage();
+            _instance = null;
         }
     }
 }

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Assets;
 using Boolean = Bencodex.Types.Boolean;
 
 namespace Libplanet.Tests.Common.Action
@@ -14,6 +16,8 @@ namespace Libplanet.Tests.Common.Action
     {
         public static readonly Address RandomRecordsAddress =
             new Address("7811C3fAa0f9Cc41F7971c3d9b031B1095b20AB2");
+
+        public static readonly Currency DumbCurrency = new Currency("DUMB", 0, minters: null);
 
         public DumbAction()
         {
@@ -24,7 +28,8 @@ namespace Libplanet.Tests.Common.Action
             string item,
             bool recordRehearsal = false,
             bool recordRandom = false,
-            bool idempotent = false
+            bool idempotent = false,
+            Tuple<Address, Address, BigInteger> transfer = null
         )
         {
             Idempotent = idempotent;
@@ -32,13 +37,29 @@ namespace Libplanet.Tests.Common.Action
             Item = item;
             RecordRehearsal = recordRehearsal;
             RecordRandom = recordRandom;
+            Transfer = transfer;
         }
 
-        public static EventHandler<IAction> RenderEventHandler { get; set; }
-
-        public static AsyncLocal<ImmutableList<RenderRecord>>
-            RenderRecords { get; } =
-                new AsyncLocal<ImmutableList<RenderRecord>>();
+        public DumbAction(
+            Address targetAddress,
+            string item,
+            Address transferFrom,
+            Address transferTo,
+            BigInteger transferAmount,
+            bool recordRehearsal = false,
+            bool recordRandom = false,
+            bool idempotent = false
+        )
+            : this(
+                targetAddress,
+                item,
+                recordRehearsal,
+                recordRandom,
+                idempotent,
+                Tuple.Create(transferFrom, transferTo, transferAmount)
+            )
+        {
+        }
 
         public static AsyncLocal<ImmutableList<ExecuteRecord>>
             ExecuteRecords { get; } = new AsyncLocal<ImmutableList<ExecuteRecord>>();
@@ -56,6 +77,8 @@ namespace Libplanet.Tests.Common.Action
         public bool RecordRandom { get; private set; }
 
         public bool Idempotent { get; private set; }
+
+        public Tuple<Address, Address, BigInteger> Transfer { get; private set; }
 
         public IValue PlainValue
         {
@@ -77,6 +100,14 @@ namespace Libplanet.Tests.Common.Action
                 if (Idempotent)
                 {
                     plainValue = plainValue.Add("idempotent", Idempotent);
+                }
+
+                if (!(Transfer is null))
+                {
+                    plainValue = plainValue
+                        .Add("transfer_from", Transfer.Item1.ToByteArray())
+                        .Add("transfer_to", Transfer.Item2.ToByteArray())
+                        .Add("transfer_amount", (IValue)new Bencodex.Types.Integer(Transfer.Item3));
                 }
 
                 return plainValue;
@@ -134,7 +165,22 @@ namespace Libplanet.Tests.Common.Action
                 );
             }
 
+            if (Item.Equals("D") && !context.Rehearsal)
+            {
+                Item = Item.ToUpperInvariant();
+            }
+
             IAccountStateDelta nextState = states.SetState(TargetAddress, (Text)items);
+
+            if (!(Transfer is null))
+            {
+                nextState = nextState.TransferAsset(
+                    sender: Transfer.Item1,
+                    recipient: Transfer.Item2,
+                    value: FungibleAssetValue.FromRawValue(DumbCurrency, Transfer.Item3),
+                    allowNegativeBalance: true
+                );
+            }
 
             if (ExecuteRecords.Value is null)
             {
@@ -151,44 +197,6 @@ namespace Libplanet.Tests.Common.Action
             return nextState;
         }
 
-        public void Render(
-            IActionContext context,
-            IAccountStateDelta nextStates)
-        {
-            if (RenderRecords.Value is null)
-            {
-                RenderRecords.Value = ImmutableList<RenderRecord>.Empty;
-            }
-
-            RenderRecords.Value = RenderRecords.Value.Add(new RenderRecord()
-            {
-                Render = true,
-                Action = this,
-                Context = context,
-                NextStates = nextStates,
-            });
-
-            RenderEventHandler?.Invoke(this, this);
-        }
-
-        public void Unrender(
-            IActionContext context,
-            IAccountStateDelta nextStates)
-        {
-            if (RenderRecords.Value is null)
-            {
-                RenderRecords.Value = ImmutableList<RenderRecord>.Empty;
-            }
-
-            RenderRecords.Value = RenderRecords.Value.Add(new RenderRecord()
-            {
-                Unrender = true,
-                Action = this,
-                Context = context,
-                NextStates = nextStates,
-            });
-        }
-
         public void LoadPlainValue(IValue plainValue)
         {
             LoadPlainValue((Bencodex.Types.Dictionary)plainValue);
@@ -202,13 +210,27 @@ namespace Libplanet.Tests.Common.Action
             TargetAddress = new Address(plainValue.GetValue<Binary>("target_address").Value);
             RecordRehearsal = plainValue.GetValue<Boolean>("record_rehearsal").Value;
             RecordRandom =
-                plainValue.ContainsKey((Text)"record_random") &&
+                plainValue.ContainsKey((IKey)(Text)"record_random") &&
                 plainValue["record_random"] is Boolean r &&
                 r.Value;
 
-            if (plainValue.ContainsKey((Text)"idempotent"))
+            if (plainValue.ContainsKey((IKey)(Text)"idempotent"))
             {
                 Idempotent = plainValue.GetValue<Boolean>("idempotent");
+            }
+
+            if (plainValue.TryGetValue((Text)"transfer_from", out IValue f) &&
+                f is Binary from &&
+                plainValue.TryGetValue((Text)"transfer_to", out IValue t) &&
+                t is Binary to &&
+                plainValue.TryGetValue((Text)"transfer_amount", out IValue a) &&
+                a is Integer amount)
+            {
+                Transfer = Tuple.Create(
+                    new Address(from.Value),
+                    new Address(to.Value),
+                    amount.Value
+                );
             }
         }
 

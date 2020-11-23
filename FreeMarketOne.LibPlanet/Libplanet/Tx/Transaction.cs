@@ -8,7 +8,9 @@ using System.Security.Cryptography;
 using Bencodex;
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Assets;
 using Libplanet.Crypto;
+using Libplanet.Store.Trie;
 
 namespace Libplanet.Tx
 {
@@ -25,12 +27,13 @@ namespace Libplanet.Tx
     /// </typeparam>
     /// <seealso cref="IAction"/>
     /// <seealso cref="PolymorphicAction{T}"/>
-    public class Transaction<T> : IEquatable<Transaction<T>>
+    public sealed class Transaction<T> : IEquatable<Transaction<T>>
         where T : IAction, new()
     {
         private const string TimestampFormat = "yyyy-MM-ddTHH:mm:ss.ffffffZ";
 
         private byte[] _signature;
+        private int _bytesLength;
 
         /// <summary>
         /// Creates a new <see cref="Transaction{T}"/>.
@@ -40,7 +43,7 @@ namespace Libplanet.Tx
         /// this constructor is only useful when all details of
         /// a <see cref="Transaction{T}"/> need to be manually adjusted.
         /// For the most cases, the fa&#xe7;ade factory <see
-        /// cref="Create(long, PrivateKey, IEnumerable{T},
+        /// cref="Create(long, PrivateKey, HashDigest{SHA256}?, IEnumerable{T},
         /// IImmutableSet{Address}, DateTimeOffset?)"/> is more useful.</para>
         /// </summary>
         /// <param name="nonce">The number of previous
@@ -56,6 +59,11 @@ namespace Libplanet.Tx
         /// name="signer"/> address <see cref="InvalidTxPublicKeyException"/>
         /// is thrown.  This cannot be <c>null</c>.  This goes to
         /// the <see cref="PublicKey"/> property.</param>
+        /// <param name="genesisHash">A <see cref="HashDigest{SHA256}"/> value
+        /// of the genesis which this <see cref="Transaction{T}"/> is made from.
+        /// This can be <c>null</c> iff the transaction is contained
+        /// in the genesis block.
+        /// </param>
         /// <param name="updatedAddresses"><see cref="Address"/>es whose
         /// states affected by <paramref name="actions"/>.  This goes to
         /// the <see cref="UpdatedAddresses"/> property.</param>
@@ -86,6 +94,7 @@ namespace Libplanet.Tx
             long nonce,
             Address signer,
             PublicKey publicKey,
+            HashDigest<SHA256>? genesisHash,
             IImmutableSet<Address> updatedAddresses,
             DateTimeOffset timestamp,
             IEnumerable<T> actions,
@@ -94,6 +103,7 @@ namespace Libplanet.Tx
                 nonce,
                 signer,
                 publicKey,
+                genesisHash,
                 updatedAddresses,
                 timestamp,
                 actions,
@@ -113,11 +123,15 @@ namespace Libplanet.Tx
         {
         }
 
+#pragma warning disable SA1118 // Parameter spans multiple line
         internal Transaction(RawTransaction rawTx)
             : this(
                 rawTx.Nonce,
                 new Address(rawTx.Signer),
                 new PublicKey(rawTx.PublicKey.ToArray()),
+                rawTx.GenesisHash != ImmutableArray<byte>.Empty
+                    ? new HashDigest<SHA256>(rawTx.GenesisHash.ToArray())
+                    : (HashDigest<SHA256>?)null,
                 rawTx.UpdatedAddresses.Select(
                     a => new Address(a)
                 ).ToImmutableHashSet(),
@@ -128,6 +142,7 @@ namespace Libplanet.Tx
                 rawTx.Actions.Select(ToAction).ToImmutableList(),
                 rawTx.Signature.ToArray(),
                 false)
+#pragma warning restore SA1118 // Parameter spans multiple line
         {
         }
 
@@ -135,6 +150,7 @@ namespace Libplanet.Tx
             long nonce,
             Address signer,
             PublicKey publicKey,
+            HashDigest<SHA256>? genesisHash,
             IImmutableSet<Address> updatedAddresses,
             DateTimeOffset timestamp,
             IEnumerable<T> actions,
@@ -143,6 +159,7 @@ namespace Libplanet.Tx
         {
             Nonce = nonce;
             Signer = signer;
+            GenesisHash = genesisHash;
             UpdatedAddresses = updatedAddresses ??
                     throw new ArgumentNullException(nameof(updatedAddresses));
             Signature = signature ??
@@ -167,6 +184,7 @@ namespace Libplanet.Tx
             long nonce,
             Address signer,
             PublicKey publicKey,
+            HashDigest<SHA256>? genesisHash,
             IImmutableSet<Address> updatedAddresses,
             DateTimeOffset timestamp,
             IEnumerable<T> actions)
@@ -174,6 +192,7 @@ namespace Libplanet.Tx
                 nonce,
                 signer,
                 publicKey,
+                genesisHash,
                 updatedAddresses,
                 timestamp,
                 actions.ToImmutableList(),
@@ -253,6 +272,27 @@ namespace Libplanet.Tx
         public PublicKey PublicKey { get; }
 
         /// <summary>
+        /// A <see cref="HashDigest{SHA256}"/> value of the genesis which this
+        /// <see cref="Transaction{T}"/> is made from.
+        /// This can be <c>null</c> iff the transaction is contained
+        /// in the genesis block.
+        /// </summary>
+        public HashDigest<SHA256>? GenesisHash { get; }
+
+        /// <summary>
+        /// The bytes length in its serialized format.
+        /// </summary>
+        public int BytesLength
+        {
+            get
+            {
+                // Note that Serialize() by itself caches _byteLength, so that this ByteLength
+                // property never invokes Serialize() more than once.
+                return _bytesLength > 0 ? _bytesLength : Serialize(true).Length;
+            }
+        }
+
+        /// <summary>
         /// Decodes a <see cref="Transaction{T}"/>'s
         /// <a href="https://bencodex.org/">Bencodex</a> representation.
         /// </summary>
@@ -270,12 +310,14 @@ namespace Libplanet.Tx
                     $"{value.GetType()}");
             }
 
-            return new Transaction<T>(dict);
+            var tx = new Transaction<T>(dict);
+            tx._bytesLength = bytes.Length;
+            return tx;
         }
 
         /// <summary>
         /// A fa&#xe7;ade factory to create a new <see cref="Transaction{T}"/>.
-        /// Unlike the <see cref="Transaction(long, Address, PublicKey,
+        /// Unlike the <see cref="Transaction(long, Address, PublicKey, HashDigest{SHA256}?,
         /// IImmutableSet{Address}, DateTimeOffset, IEnumerable{T}, byte[])"/>
         /// constructor, it automatically fills the following values from:
         /// <list type="table">
@@ -335,6 +377,11 @@ namespace Libplanet.Tx
         /// the <see cref="Signer"/>, <see cref="PublicKey"/>, and
         /// <see cref="Signature"/> properties, but this in itself is not
         /// included in the transaction.</param>
+        /// <param name="genesisHash">A <see cref="HashDigest{SHA256}"/> value
+        /// of the genesis which this <see cref="Transaction{T}"/> is made from.
+        /// This can be <c>null</c> iff the transaction is contained
+        /// in the genesis block.
+        /// </param>
         /// <param name="actions">A list of <see cref="IAction"/>s.  This
         /// can be empty, but cannot be <c>null</c>.  This goes to
         /// the <see cref="Actions"/> property, and <see cref="IAction"/>s
@@ -358,22 +405,10 @@ namespace Libplanet.Tx
         /// is passed to <paramref name="privateKey"/> or
         /// or <paramref name="actions"/>.
         /// </exception>
-        /// <exception cref="UnexpectedlyTerminatedActionException">
-        /// Thrown when one of <paramref name="actions"/> throws some
-        /// exception during their rehearsal.
-        /// <para>This exception is thrown probably because the logic of some of
-        /// the <paramref name="actions"/> is not enough generic so that
-        /// it can cover every case including &#x201c;rehearsal mode.&#x201d;
-        /// The <see cref="IActionContext.Rehearsal"/> property also might be
-        /// useful to make the <see cref="IAction"/> can deal with the case of
-        /// rehearsal mode.</para>
-        /// <para>The actual exception that an <see cref="IAction"/> threw
-        /// is stored in its <see cref="Exception.InnerException"/> property.
-        /// </para>
-        /// </exception>
         public static Transaction<T> Create(
             long nonce,
             PrivateKey privateKey,
+            HashDigest<SHA256>? genesisHash,
             IEnumerable<T> actions,
             IImmutableSet<Address> updatedAddresses = null,
             DateTimeOffset? timestamp = null
@@ -399,6 +434,7 @@ namespace Libplanet.Tx
                 nonce,
                 signer,
                 publicKey,
+                genesisHash,
                 updatedAddresses,
                 ts,
                 actionsArray
@@ -410,13 +446,18 @@ namespace Libplanet.Tx
                     nonce,
                     signer,
                     publicKey,
+                    genesisHash,
                     updatedAddresses,
                     ts,
                     actionsArray
                 ).EvaluateActions(
                     default(HashDigest<SHA256>),
                     0,
-                    new AccountStateDeltaImpl(_ => null),
+                    new AccountStateDeltaImpl(
+                        _ => null,
+                        (_, c) => new FungibleAssetValue(c),
+                        signer
+                    ),
                     signer,
                     rehearsal: true
                 );
@@ -428,6 +469,7 @@ namespace Libplanet.Tx
                         nonce,
                         signer,
                         publicKey,
+                        genesisHash,
                         updatedAddresses,
                         ts,
                         actionsArray
@@ -440,6 +482,7 @@ namespace Libplanet.Tx
                 nonce,
                 signer,
                 publicKey,
+                genesisHash,
                 updatedAddresses,
                 ts,
                 actionsArray,
@@ -457,7 +500,13 @@ namespace Libplanet.Tx
         public byte[] Serialize(bool sign)
         {
             var codec = new Codec();
-            return codec.Encode(ToBencodex(sign));
+            byte[] serialized = codec.Encode(ToBencodex(sign));
+            if (sign)
+            {
+                _bytesLength = serialized.Length;
+            }
+
+            return serialized;
         }
 
         /// <summary>
@@ -494,20 +543,14 @@ namespace Libplanet.Tx
         /// <param name="rehearsal">Pass <c>true</c> if it is intended
         /// to be dry-run (i.e., the returned result will be never used).
         /// The default value is <c>false</c>.</param>
+        /// <param name="previousBlockStatesTrie">The trie to contain states at previous block.
+        /// </param>
         /// <returns>Enumerates <see cref="ActionEvaluation"/>s for each one in
         /// <see cref="Actions"/>.
         /// The order is the same to the <see cref="Actions"/>.
         /// Note that each <see cref="IActionContext.Random"/> object has
         /// a unconsumed state.
         /// </returns>
-        /// <exception cref="UnexpectedlyTerminatedActionException">
-        /// Thrown when one of <see cref="Actions"/> throws some
-        /// exception during <paramref name="rehearsal"/> mode.
-        /// The actual exception that an <see cref="IAction"/> threw
-        /// is stored in its <see cref="Exception.InnerException"/> property.
-        /// It is never thrown if the <paramref name="rehearsal"/> option is
-        /// <c>false</c>.
-        /// </exception>
         [Pure]
         public IEnumerable<ActionEvaluation>
         EvaluateActionsGradually(
@@ -515,7 +558,8 @@ namespace Libplanet.Tx
             long blockIndex,
             IAccountStateDelta previousStates,
             Address minerAddress,
-            bool rehearsal = false
+            bool rehearsal = false,
+            ITrie previousBlockStatesTrie = null
         )
         {
             return ActionEvaluation.EvaluateActionsGradually(
@@ -527,7 +571,8 @@ namespace Libplanet.Tx
                 Signer,
                 Signature,
                 Actions.Cast<IAction>().ToImmutableList(),
-                rehearsal);
+                rehearsal,
+                previousBlockStatesTrie);
        }
 
         /// <summary>
@@ -553,14 +598,6 @@ namespace Libplanet.Tx
         /// being executed.  Note that it maintains
         /// <see cref="IAccountStateDelta.UpdatedAddresses"/> of the given
         /// <paramref name="previousStates"/> as well.</returns>
-        /// <exception cref="UnexpectedlyTerminatedActionException">
-        /// Thrown when one of <see cref="Actions"/> throws some
-        /// exception during <paramref name="rehearsal"/> mode.
-        /// The actual exception that an <see cref="IAction"/> threw
-        /// is stored in its <see cref="Exception.InnerException"/> property.
-        /// It is never thrown if the <paramref name="rehearsal"/> option is
-        /// <c>false</c>.
-        /// </exception>
         [Pure]
         public IAccountStateDelta EvaluateActions(
             HashDigest<SHA256> blockHash,
@@ -647,9 +684,12 @@ namespace Libplanet.Tx
 
         internal RawTransaction ToRawTransaction(bool includeSign)
         {
+            ImmutableArray<byte> genesisHash =
+                GenesisHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty;
             var rawTx = new RawTransaction(
                 nonce: Nonce,
                 signer: Signer.ByteArray,
+                genesisHash: genesisHash,
                 updatedAddresses: UpdatedAddresses.Select(a =>
                     a.ByteArray).ToImmutableArray(),
                 publicKey: PublicKey.Format(false).ToImmutableArray(),

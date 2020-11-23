@@ -43,7 +43,7 @@
 
 
       <!-- Review Section -->
-      <DockPanel IsVisible="false" LastChildFill="true">
+      <DockPanel IsVisible="true" LastChildFill="true">
         <Border DockPanel.Dock="Top" MinHeight="30" HorizontalAlignment="Left" Margin="15 0 0 -15" Classes="Main">
           <TextBlock Text="Your review" Foreground="#ff9234" Margin="5 0 10 0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"></TextBlock>
         </Border>

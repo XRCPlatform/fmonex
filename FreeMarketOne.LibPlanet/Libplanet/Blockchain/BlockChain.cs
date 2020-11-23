@@ -1544,6 +1544,9 @@ namespace Libplanet.Blockchain
 
                             cnt++;
                         }
+
+                        //FM.ONE IMPROVEMENT - WE NEED TO CALL THIS TO REMOVE ORPHANED BLOCKS;
+                        TipChanged?.Invoke(this, (b, null));
                     }
 
                     _logger.Debug(
@@ -1574,8 +1577,8 @@ namespace Libplanet.Blockchain
                     Id = other.Id;
                     Store.SetCanonicalChainId(Id);
                     _blocks = new BlockSet<T>(Store);
-                    //WE NEED TO CALL ALL CHANGES TipChanged?.Invoke(this, (oldTip, newTip));
-
+                    
+                    //FM.ONE IMPROVEMENT - WE NEED TO CALL ALL CHANGES TipChanged?.Invoke(this, (oldTip, newTip));
                     for (long x = topmostCommon.Index; x <= other.Tip.Index; x++)
                     {
                         TipChanged?.Invoke(this, (null, other[x]));

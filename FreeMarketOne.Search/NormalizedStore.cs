@@ -35,7 +35,7 @@ namespace FreeMarketOne.Search
                 dbConnection.Open();
 
                 using (var dbTransaction = dbConnection.BeginTransaction())
-                { 
+                {
                     var delete = "DELETE FROM Offer WHERE Signature = $Signature";
                     using (var deleteCommand = new SQLiteCommand(delete, dbConnection, dbTransaction))
                     {
@@ -50,6 +50,27 @@ namespace FreeMarketOne.Search
                         insertCommand.Parameters.AddWithValue("$OfferDirection", (int)offerDirection);
                         insertCommand.Parameters.AddWithValue("$Data", JsonConvert.SerializeObject(marketItem));
                         insertCommand.ExecuteNonQuery();
+                    }
+
+                    dbTransaction.Commit();
+                }
+            }
+            return true;
+        }
+
+        public bool Delete(MarketItemV1 marketItem)
+        {
+            using (var dbConnection = new SQLiteConnection(this.connection))
+            {
+                dbConnection.Open();
+
+                using (var dbTransaction = dbConnection.BeginTransaction())
+                {
+                    var delete = "DELETE FROM Offer WHERE Signature = $Signature";
+                    using (var deleteCommand = new SQLiteCommand(delete, dbConnection, dbTransaction))
+                    {
+                        deleteCommand.Parameters.AddWithValue("$Signature", marketItem.Signature);
+                        deleteCommand.ExecuteNonQuery();
                     }
 
                     dbTransaction.Commit();
@@ -91,7 +112,6 @@ namespace FreeMarketOne.Search
                     }
                 }
             }
-
 
             return new SearchResult()
             {
@@ -138,92 +158,91 @@ namespace FreeMarketOne.Search
             }
         }
 
-
-            private void CreateIt(string connection)
+        private void CreateIt(string connection)
+        {
+            using (var dbConnection = new SQLiteConnection(connection))
             {
-                using (var dbConnection = new SQLiteConnection(connection))
+                dbConnection.Open();
+
+                using (var transaction = dbConnection.BeginTransaction())
                 {
-                    dbConnection.Open();
-
-                    using (var transaction = dbConnection.BeginTransaction())
+                    try
                     {
-                        try
+                        var sql = "CREATE TABLE \"Offer\" (" +
+                                "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                                "\"Signature\"  TEXT NOT NULL UNIQUE, " +
+                                "\"OfferDirection\"  INTEGER NOT NULL, " +
+                                "\"Data\" TEXT NULL " +
+                                "); ";
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
                         {
-                            var sql = "CREATE TABLE \"Offer\" (" +
-                                    "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                                    "\"Signature\"  TEXT NOT NULL UNIQUE, " +
-                                    "\"OfferDirection\"  INTEGER NOT NULL, " +
-                                    "\"Data\" TEXT NULL " +                                    
-                                    "); ";
-                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
-                            {
-                                command.ExecuteNonQuery();
-                            }
+                            command.ExecuteNonQuery();
+                        }
 
-                            sql = "CREATE TABLE \"Party\" (" +
-                                  "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                                  "\"pubKey\"  TEXT NOT NULL UNIQUE, " +
-                                  "\"blockHash\"  TEXT NOT NULL, " +
-                                  "\"Data\" TEXT NULL " +
-                                  "); ";
-                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
-                            {
-                                command.ExecuteNonQuery();
-                            }
+                        sql = "CREATE TABLE \"Party\" (" +
+                              "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                              "\"pubKey\"  TEXT NOT NULL UNIQUE, " +
+                              "\"blockHash\"  TEXT NOT NULL, " +
+                              "\"Data\" TEXT NULL " +
+                              "); ";
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                        {
+                            command.ExecuteNonQuery();
+                        }
 
-                            sql = "CREATE TABLE \"PartyReview\" (" +
-                                 "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                                 "\"Hash\"  TEXT NOT NULL UNIQUE, " +
-                                 "\"pubKey\"  TEXT NOT NULL , " +                             
-                                 "\"blockHash\"  TEXT NOT NULL, " +
-                                 "\"Data\" TEXT NULL " +
-                                 "); ";
-                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
-                            {
-                                command.ExecuteNonQuery();
-                            }
+                        sql = "CREATE TABLE \"PartyReview\" (" +
+                             "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                             "\"Hash\"  TEXT NOT NULL UNIQUE, " +
+                             "\"pubKey\"  TEXT NOT NULL , " +
+                             "\"blockHash\"  TEXT NOT NULL, " +
+                             "\"Data\" TEXT NULL " +
+                             "); ";
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                        {
+                            command.ExecuteNonQuery();
+                        }
 
 
-                            sql = "CREATE UNIQUE INDEX \"ix_Offer_Signature\" ON \"Offer\" (\"Signature\");";
+                        sql = "CREATE UNIQUE INDEX \"ix_Offer_Signature\" ON \"Offer\" (\"Signature\");";
 
-                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
-                            {
-                                command.ExecuteNonQuery();
-                            }
-
-
-                            sql = "CREATE UNIQUE INDEX \"ix_Party_pubKey\" ON \"Party\" (\"pubKey\");";
-
-                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
-                            {
-                                command.ExecuteNonQuery();
-                            }
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                        {
+                            command.ExecuteNonQuery();
+                        }
 
 
-                            sql = "CREATE UNIQUE INDEX \"ix_PartyReview_Hash\" ON \"PartyReview\" (\"Hash\");";
+                        sql = "CREATE UNIQUE INDEX \"ix_Party_pubKey\" ON \"Party\" (\"pubKey\");";
 
-                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
-                            {
-                                command.ExecuteNonQuery();
-                            }
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                        {
+                            command.ExecuteNonQuery();
+                        }
 
-                            sql = "CREATE INDEX \"ix_PartyReview_pubKey\" ON \"PartyReview\" (\"pubKey\");";
 
-                            using (var command = new SQLiteCommand(sql, dbConnection, transaction))
-                            {
-                                command.ExecuteNonQuery();
-                            }
+                        sql = "CREATE UNIQUE INDEX \"ix_PartyReview_Hash\" ON \"PartyReview\" (\"Hash\");";
+
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+                        sql = "CREATE INDEX \"ix_PartyReview_pubKey\" ON \"PartyReview\" (\"pubKey\");";
+
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                        {
+                            command.ExecuteNonQuery();
+                        }
 
                         transaction.Commit();
-                        }
-                        catch (Exception e)
-                        {
-                            transaction.Rollback();
-                            throw e;
-                        }
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                        throw e;
                     }
                 }
             }
+        }
 
         public bool Save(UserDataV1 item, string blockHash)
         {
@@ -247,6 +266,27 @@ namespace FreeMarketOne.Search
                         insertCommand.Parameters.AddWithValue("$blockHash", blockHash);
                         insertCommand.Parameters.AddWithValue("$Data", JsonConvert.SerializeObject(item));
                         insertCommand.ExecuteNonQuery();
+                    }
+
+                    dbTransaction.Commit();
+                }
+            }
+            return true;
+        }
+
+        public bool Delete(UserDataV1 item)
+        {
+            using (var dbConnection = new SQLiteConnection(this.connection))
+            {
+                dbConnection.Open();
+
+                using (var dbTransaction = dbConnection.BeginTransaction())
+                {
+                    var delete = "DELETE FROM Party WHERE pubKey = $pubKey";
+                    using (var deleteCommand = new SQLiteCommand(delete, dbConnection, dbTransaction))
+                    {
+                        deleteCommand.Parameters.AddWithValue("$pubKey", item.PublicKey);
+                        deleteCommand.ExecuteNonQuery();
                     }
 
                     dbTransaction.Commit();
@@ -302,7 +342,7 @@ namespace FreeMarketOne.Search
 
             return null;
         }
-                                   
+
         public bool Save(ReviewUserDataV1 item, string blockHash)
         {
             using (var dbConnection = new SQLiteConnection(this.connection))
@@ -333,6 +373,26 @@ namespace FreeMarketOne.Search
             }
             return true;
         }
+
+        public bool Delete(ReviewUserDataV1 item)
+        {
+            using (var dbConnection = new SQLiteConnection(this.connection))
+            {
+                dbConnection.Open();
+
+                using (var dbTransaction = dbConnection.BeginTransaction())
+                {
+                    var delete = "DELETE FROM PartyReview WHERE Hash = $Hash";
+                    using (var deleteCommand = new SQLiteCommand(delete, dbConnection, dbTransaction))
+                    {
+                        deleteCommand.Parameters.AddWithValue("$Hash", item.Hash);
+                        deleteCommand.ExecuteNonQuery();
+                    }
+
+                    dbTransaction.Commit();
+                }
+            }
+            return true;
+        }
     }
-    
 }

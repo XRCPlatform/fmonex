@@ -682,6 +682,10 @@ namespace FreeMarketOne.Markets
                 }
 
                 result = RemoveChainSignaturesFromChainList(chainMarketItems, result);
+            } 
+            else
+            {
+                result = chainMarketItems;
             }
 
             return result;
@@ -750,6 +754,10 @@ namespace FreeMarketOne.Markets
                 }
 
                 result = RemoveChainSignaturesFromChainList(chainMarketItems, result);
+            }
+            else
+            {
+                result = chainMarketItems;
             }
 
             return result;

@@ -243,10 +243,20 @@ namespace FreeMarketOne.ServerCore
         /// <param name="e"></param>
         private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
         {
-            _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
+            if (e.NewTip != null)
+            {
+                _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
 
-            _logger.Information($"New block SearchIndexing");
-            SearchIndexer.IndexBlock(e.NewTip);
+                _logger.Information($"New block SearchIndexing");
+                SearchIndexer.IndexBlock(e.NewTip);
+            }
+            else if ((e.NewTip == null) && (e.OldTip != null))
+            {
+                _logger.Information($"Recieved base orphaned block notification {e.OldTip.Hash}");
+
+                _logger.Information($"Clearing block SearchIndexing");
+                SearchIndexer.UnIndexBlock(e.OldTip);
+            }
         }
 
         private void MarketBlockChainLoaded(object sender, EventArgs e)
@@ -314,12 +324,25 @@ namespace FreeMarketOne.ServerCore
         /// <param name="e"></param>
         private void MarketBlockChainChanged(object sender, (Block<MarketAction> OldTip, Block<MarketAction> NewTip) e)
         {
-            _logger.Information($"New block SearchIndexing");
-            backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
+            if (e.NewTip != null)
+            {
+                _logger.Information($"Recieved market block downloaded notification {e.NewTip.Hash}");
 
-            _logger.Information($"Recieved market block downloaded notification {e.NewTip.Hash}");
-            _logger.Information("New block processing for chat - item hash");
-            Current.Chats.ProcessNewBlock(e.NewTip);
+                _logger.Information($"New block SearchIndexing");
+                backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
+
+                _logger.Information("New block processing for chat - item hash");
+                Current.Chats.ProcessNewBlock(e.NewTip);
+            }
+            else if ((e.NewTip == null) && (e.OldTip != null))
+            {
+                _logger.Information($"Recieved market orphaned block notification {e.OldTip.Hash}");
+
+                _logger.Information($"Clearing block SearchIndexing");
+                SearchIndexer.UnIndexBlock(e.OldTip);
+
+                //TODO: CHAT?????
+            }
         }
 
         /// <summary>

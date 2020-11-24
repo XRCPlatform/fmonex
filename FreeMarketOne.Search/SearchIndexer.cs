@@ -43,7 +43,7 @@ namespace FreeMarketOne.Search
             string indexLocation = SearchHelper.GetDataFolder(baseConfiguration);
 
             var dir = FSDirectory.Open(indexLocation);
-            
+
             var dirTaxonomy = FSDirectory.Open(System.IO.Path.Combine(indexLocation, "taxonomy").ToString());
             SearchIndexPath = indexLocation;
             //create an analyzer to process the text
@@ -63,7 +63,7 @@ namespace FreeMarketOne.Search
             _engine = new SearchEngine(_marketManager, _indexLocation, 10);
             _normalizedStore = new NormalizedStore(indexLocation);
         }
-        
+
         public bool Initialize()
         {
             Document doc = new Document()
@@ -101,7 +101,7 @@ namespace FreeMarketOne.Search
         /// <param name="blockHash"></param>
         public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null, bool isMyOffer = false, OfferDirection offerDirection = OfferDirection.Undetermined)
         {
-            
+
             // this can only be running single threaded as transaction totals and sequencing matters.
             lock (lockobject)
             {
@@ -206,7 +206,7 @@ namespace FreeMarketOne.Search
                             }
                         }
                     }
-                   
+
                     //only save here sold / bought items
                     if (isMyOffer)
                     {
@@ -216,8 +216,8 @@ namespace FreeMarketOne.Search
                     //Task.Run(() => UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash));
                     UpdateAllSellerDocumentsWithLatest(sellerAggregate, marketItem.Signature, blockHash);
                 }
-            }          
-            
+            }
+
         }
 
         private void UpdateAllSellerDocumentsWithLatest(SellerAggregate sellerAggregate)
@@ -294,7 +294,7 @@ namespace FreeMarketOne.Search
             catch (Exception)
             {
                 //swallow 
-            }            
+            }
         }
 
         /// <summary>
@@ -302,6 +302,23 @@ namespace FreeMarketOne.Search
         /// </summary>
         /// <param name="block"></param>
         public void IndexBlock(Block<MarketAction> block)
+        {
+            IterateBlocks(block, (IBaseItem item) => Index((MarketItemV1)item, block.Hash.ToString()));
+        }
+
+        /// <summary>
+        /// Iterates over transactions in block and UNidexes marketItems.
+        /// </summary>
+        /// <param name="block"></param>
+        public void UnIndexBlock(Block<MarketAction> block)
+        {
+            IterateBlocks(block, (IBaseItem marketItem) => {
+                DeleteMarketItem((MarketItemV1)marketItem);
+                _normalizedStore.Delete((MarketItemV1)marketItem);
+            });
+        }
+
+        private void IterateBlocks(Block<MarketAction> block, Action<IBaseItem> doAction)
         {
             Type[] types = new Type[] { typeof(MarketItemV1) };
             foreach (var itemTx in block.Transactions)
@@ -312,34 +329,63 @@ namespace FreeMarketOne.Search
                     {
                         if (types.Contains(item.GetType()))
                         {
-                            Index((MarketItemV1)item, block.Hash.ToString());
+                            doAction(item);
                         }
                     }
                 }
             }
         }
 
-
         /// <summary>
-        /// Iterates over transactions in block and idexes marketItems.
+        /// Iterates over transactions in block and idexes baseItems.
         /// </summary>
         /// <param name="block"></param>
         public void IndexBlock(Block<BaseAction> block)
         {
-            //Type[] types = new Type[] { typeof(UserDataV1) , typeof(ReviewUserDataV1)};
+            IterateBlocks(block, (IBaseItem item) =>
+            {
+                if (item.GetType() == typeof(UserDataV1))
+                {
+                    Index((UserDataV1)item, block.Hash.ToString());
+                }
+                if (item.GetType() == typeof(ReviewUserDataV1))
+                {
+                    Index((ReviewUserDataV1)item, block.Hash.ToString());
+                }
+            });
+        }
+
+        /// <summary>
+        /// Iterates over transactions in block and UNidexes baseItems.
+        /// </summary>
+        /// <param name="block"></param>
+        public void UnIndexBlock(Block<BaseAction> block)
+        {
+            IterateBlocks(block, (IBaseItem item) =>
+            {
+                if (item.GetType() == typeof(UserDataV1))
+                {
+                    _normalizedStore.Delete((UserDataV1)item);
+                }
+                if (item.GetType() == typeof(ReviewUserDataV1))
+                {
+                    _normalizedStore.Delete((ReviewUserDataV1)item);
+                }
+            });
+        }
+
+        private void IterateBlocks(Block<BaseAction> block, Action<IBaseItem> doAction)
+        {
+            Type[] types = new Type[] { typeof(UserDataV1), typeof(ReviewUserDataV1) };
             foreach (var itemTx in block.Transactions)
             {
                 foreach (var itemAction in itemTx.Actions)
                 {
                     foreach (var item in itemAction.BaseItems)
                     {
-                        if (item.GetType() == typeof(UserDataV1))
+                        if (types.Contains(item.GetType()))
                         {
-                            Index((UserDataV1)item, block.Hash.ToString());
-                        }
-                        if (item.GetType() == typeof(ReviewUserDataV1))
-                        {
-                            Index((ReviewUserDataV1)item, block.Hash.ToString());
+                            doAction(item);
                         }
                     }
                 }
@@ -375,7 +421,7 @@ namespace FreeMarketOne.Search
             DeleteMarketItemByFieldNameValue("BlockHash", blockHash);
         }
 
-        private void DeleteMarketItemByFieldNameValue(string fieldName ,string fieldValue)
+        private void DeleteMarketItemByFieldNameValue(string fieldName, string fieldValue)
         {
             Writer.DeleteDocuments(new Term(fieldName, fieldValue));
             Writer.Flush(triggerMerge: true, applyAllDeletes: true);

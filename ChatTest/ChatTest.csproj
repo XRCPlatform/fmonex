@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Planetarium.NetMQ" Version="4.0.0.260-planetarium" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Extensions\FreeMarketOne.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

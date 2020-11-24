@@ -79,7 +79,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Markets", "Fr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Users", "FreeMarketOne.Users\FreeMarketOne.Users.csproj", "{BF487161-24E5-4E41-BBD9-468A4234B007}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PPayloadGenerator", "P2PPayloadGenerator\P2PPayloadGenerator.csproj", "{89D1D431-1DBE-46F9-9859-7CDC9FE29903}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "P2PPayloadGenerator", "P2PPayloadGenerator\P2PPayloadGenerator.csproj", "{89D1D431-1DBE-46F9-9859-7CDC9FE29903}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatTest", "ChatTest\ChatTest.csproj", "{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -359,6 +361,14 @@ Global
 		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Release|Any CPU.Build.0 = Release|Any CPU
 		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Release|x86.ActiveCfg = Release|Any CPU
 		{89D1D431-1DBE-46F9-9859-7CDC9FE29903}.Release|x86.Build.0 = Release|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Debug|x86.Build.0 = Debug|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Release|x86.ActiveCfg = Release|Any CPU
+		{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

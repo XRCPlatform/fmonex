@@ -324,30 +324,31 @@ namespace FreeMarketApp.Views.Pages
                         }
                     }
                     ////test snippet
-                    //for (int i = 0; i < 50; i++)
-                    //{
-                    //    MarketItemV1 newOffer = new MarketItemV1();
-                    //    newOffer.Category = _offer.Category;
-                    //    newOffer.DealType = _offer.DealType;
-                    //    newOffer.Description = _offer.Description;
-                    //    newOffer.Fineness = _offer.Fineness;
-                    //    newOffer.Manufacturer = _offer.Manufacturer;
-                    //    newOffer.Photos = _offer.Photos;
-                    //    newOffer.PrePhotos = _offer.PrePhotos;
-                    //    newOffer.PreTitlePhoto = _offer.PreTitlePhoto;
-                    //    newOffer.Price = _offer.Price;
-                    //    newOffer.PriceType = _offer.PriceType;
-                    //    newOffer.Shipping = _offer.Shipping;
-                    //    newOffer.Size = _offer.Size;
-                    //    newOffer.Title = _offer.Title + " " + i;
-                    //    newOffer.WeightInGrams = _offer.WeightInGrams;
-                    //    newOffer = FMONE.Current.Markets.SignMarketData(newOffer, FMONE.Current.Users.PrivateKey);
-                    //    var resultPool2 = FMONE.Current.MarketPoolManager.AcceptActionItem(newOffer);
-                    //    if (resultPool2 == null)
-                    //    {
-                    //        FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
-                    //    }
-                    //}
+                    for (int i = 0; i < 50; i++)
+                    {
+                        MarketItemV1 newOffer = new MarketItemV1();
+                        newOffer.Category = _offer.Category;
+                        newOffer.DealType = _offer.DealType;
+                        newOffer.Description = _offer.Description;
+                        newOffer.Fineness = _offer.Fineness;
+                        newOffer.Manufacturer = _offer.Manufacturer;
+                        newOffer.Photos = _offer.Photos;
+                        newOffer.PrePhotos = _offer.PrePhotos;
+                        newOffer.PreTitlePhoto = _offer.PreTitlePhoto;
+                        newOffer.Price = _offer.Price;
+                        newOffer.PriceType = _offer.PriceType;
+                        newOffer.Shipping = _offer.Shipping;
+                        newOffer.Size = _offer.Size;
+                        newOffer.Title = _offer.Title + " " + i;
+                        newOffer.WeightInGrams = _offer.WeightInGrams;
+                        newOffer.XRCReceivingAddress = _offer.XRCReceivingAddress;
+                        newOffer = FMONE.Current.Markets.SignMarketData(newOffer, FMONE.Current.Users.PrivateKey);
+                        var resultPool2 = FMONE.Current.MarketPoolManager.AcceptActionItem(newOffer);
+                        if (resultPool2 == null)
+                        {
+                            FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
+                        }
+                    }
 
                     //sign market data and generating chain connection
                     _offer = FMONE.Current.Markets.SignMarketData(_offer, FMONE.Current.Users.PrivateKey);

@@ -197,7 +197,16 @@ namespace FreeMarketOne.Search
             List<FacetResult> facets = new List<FacetResult>();
             if (queryFacets)
             {
-                facets = GetFacetsForQuery(query);
+                try
+                {
+                    facets = GetFacetsForQuery(query);
+                }
+                catch (Exception)
+                {
+                    //retry during agressive optimistic indexing sometimes we fail here as indexing is not fully atomic
+                    facets = GetFacetsForQuery(query);
+                }
+                
             }
             SearchResult searchResult = new SearchResult
             {

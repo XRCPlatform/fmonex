@@ -53,7 +53,15 @@ namespace FreeMarketOne.Search
 
         public List<FacetResult> GetFacetsForQuery(Query query)
         {
-            return GetFacetsForQuery(query, FacetFieldNames);
+            try
+            {
+                return GetFacetsForQuery(query, FacetFieldNames);
+            }
+            catch (Exception)
+            {
+
+                return GetFacetsForQuery(query, FacetFieldNames);
+            }
         }
 
         public List<FacetResult> GetFacetsForQuery(Query query, List<string> FacetFieldNames)

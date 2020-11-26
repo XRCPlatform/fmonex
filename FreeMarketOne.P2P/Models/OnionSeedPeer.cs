@@ -13,6 +13,6 @@ namespace FreeMarketOne.P2P.Models
         public int PortBlockChainBase { get; set; }
         public int PortBlockChainMaster { get; set; }
 
-        public string SecretKeyHex { get; set; }
+        public string PublicKeyHex { get; set; }
     }
 }

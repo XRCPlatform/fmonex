@@ -222,10 +222,10 @@ namespace FreeMarketOne.BlockChain
             {
                 var port = itemPeer.PortBlockChainBase;
 
-                if (itemPeer.SecretKeyHex == pubKey) continue;
+                if (itemPeer.PublicKeyHex == pubKey) continue;
                 if (typeOfT != typeof(BaseAction)) port = itemPeer.PortBlockChainMaster;
 
-                var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.SecretKeyHex));
+                var publicKey = new PublicKey(ByteUtil.ParseHex(itemPeer.PublicKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(itemPeer.UrlBlockChain, port));
                 peers.Add(boundPeer);
             }

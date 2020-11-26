@@ -76,7 +76,8 @@ namespace FreeMarketApp.Helpers
                 {
                     var httpClient = new HttpClient()
                     {
-                        BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
+                        BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL),
+                        Timeout = TimeSpan.FromSeconds(1)
                     };
 
                     httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue

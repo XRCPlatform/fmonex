@@ -137,9 +137,9 @@ namespace FreeMarketOne.P2P
                                 newOnionSeed.UrlBlockChain = parts[2];
                                 newOnionSeed.PortBlockChainBase = int.Parse(parts[3]);
                                 newOnionSeed.PortBlockChainMaster = int.Parse(parts[4]);
-                                newOnionSeed.SecretKeyHex = parts[5];
+                                newOnionSeed.PublicKeyHex = parts[5];
 
-                                if (!OnionSeedPeers.Exists(a => a.SecretKeyHex == newOnionSeed.SecretKeyHex))
+                                if (!OnionSeedPeers.Exists(a => a.PublicKeyHex == newOnionSeed.PublicKeyHex))
                                     OnionSeedPeers.Add(newOnionSeed);
 
                                 _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
@@ -211,7 +211,7 @@ namespace FreeMarketOne.P2P
         {
             if (BaseSwarm.Peers.Any())
             {
-                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
+                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.PublicKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
 
                 _logger.Information(string.Format("Adding base peer pubkey: {0}", boundPeer.ToString()));
@@ -234,7 +234,7 @@ namespace FreeMarketOne.P2P
         {
             if (MarketSwarm.Peers.Any())
             {
-                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.SecretKeyHex));
+                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.PublicKeyHex));
                 var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
 
                 _logger.Information(string.Format("Adding market peer pubkey: {0}", boundPeer.ToString()));

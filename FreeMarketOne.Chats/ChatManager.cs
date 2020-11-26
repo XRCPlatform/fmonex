@@ -575,7 +575,7 @@ namespace FreeMarketOne.Chats
 
             _logger.Information(string.Format("Processing a new block {0}.", block.Hash));
 
-            var userPubKey = _userPrivateKey.PublicKey.Format(false);
+            var userPubKey = _userPrivateKey.PublicKey.KeyParam.Q.GetEncoded();
 
             foreach (var itemTx in block.Transactions)
             {

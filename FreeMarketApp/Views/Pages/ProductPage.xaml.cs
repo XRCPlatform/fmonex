@@ -22,7 +22,7 @@ namespace FreeMarketApp.Views.Pages
         private static ProductPage _instance;
         private ILogger _logger;
         private MarketItemV1 _offer;
-
+        private UserControl _backPage;
         public static ProductPage Instance
         {
             get
@@ -59,10 +59,22 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonBack_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-
-            PagesHelper.Switch(mainWindow, MainPage.Instance);
+            if (_backPage != null)
+            {
+                PagesHelper.Switch(mainWindow, _backPage);
+            }
+            else
+            {
+                PagesHelper.Switch(mainWindow, MainPage.Instance);
+            }
+            
 
             ClearForm();
+        }
+        
+        public void SetBackPage(MyBoughtProductsPage myBoughtProductsPage)
+        {
+            _backPage = myBoughtProductsPage;
         }
 
         public async void ButtonBuy_Click(object sender, RoutedEventArgs args)
@@ -157,6 +169,7 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+      
         public void ButtonSeller_Click(object sender, RoutedEventArgs args)
         {
             var signatureAndHash = ((Button)sender).Tag.ToString();

@@ -68,12 +68,40 @@ namespace FreeMarketApp.Views.Pages
 
                 DataContext = new MyProductsPageViewModel(result, _appliedFilters);
             }
+
+            SetPageSizeOnControl(selectedPageSize);
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
             _initialized = true;
+        }
+
+        private void SetPageSizeOnControl(int pageSize)
+        {
+            if (!_initialized) return;
+
+            var cbPageSize = this.FindControl<ComboBox>("CBPageSize");
+            cbPageSize.SelectedItem = cbPageSize.Items.OfType<ComboBoxItem>().Single(t => t.Content.Equals(pageSize.ToString()));
+        }
+
+        public void ButtonReviewPage_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            var signature = ((Button)sender)?.Tag?.ToString();
+            if (signature != null)
+            {
+                var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
+                if ((marketItem != null) && (!marketItem.IsInPool))
+                {
+                    var productPage = ProductPage.Instance;
+                    productPage.SetBackPage(GetInstance());
+                    productPage.LoadProduct(signature);
+                    PagesHelper.Switch(mainWindow, productPage);
+                }
+            }
         }
 
         public void ButtonBack_Click(object sender, RoutedEventArgs args)

@@ -200,6 +200,26 @@
 			<Setter Property="Background" Value="#000e1d" />
 		</Style>
 
+		<!-- Orange Button -->
+		<Style Selector="Button.ButtonOrange">
+			<Setter Property="Background" Value="#241903" />
+			<Setter Property="BorderBrush" Value="#ff9234" />
+			<Setter Property="Foreground" Value="#ff9234" />
+			<Setter Property="Padding" Value="5 0" />
+		</Style>
+		<Style Selector="Button.ButtonOrange /template/ ContentPresenter">
+			<Setter Property="CornerRadius" Value="3"/>
+		</Style>
+		<Style Selector="Button:pointerover.ButtonOrange /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#ff9234" />
+			<Setter Property="Background" Value="#66470a" />
+		</Style>
+		<Style Selector="Button:pressed.ButtonOrange /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#ff9234" />
+			<Setter Property="Background" Value="#402c04" />
+		</Style>
+
+
 		<!-- ELEMENTS -->
 		<Style Selector="Grid.Main">
 			<Setter Property="Background" Value="#000000" />

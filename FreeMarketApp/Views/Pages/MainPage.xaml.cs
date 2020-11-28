@@ -109,7 +109,6 @@ namespace FreeMarketApp.Views.Pages
             
             FilterList();
 
-
             var sidebarPanel = this.FindControl<StackPanel>("SideBar");
             if (sidebarPanel != null) {
 
@@ -133,11 +132,9 @@ namespace FreeMarketApp.Views.Pages
             var engine = FMONE.Current.SearchEngine;
             engine.PageSize = selectedPageSize;
 
-            var currentSearchResult = ((MainPageViewModel)this.DataContext).Result;
-
             Query newQuery = engine.BuildDrillDown(_appliedFilters, engine.ParseQuery(""));
 
-            var result = engine.Search(newQuery, false, currentSearchResult.CurrentPage);
+            var result = engine.Search(newQuery, false, 1);
 
             var skynetHelper = new SkynetHelper();
             skynetHelper.PreloadTitlePhotos(result.Results, _logger);

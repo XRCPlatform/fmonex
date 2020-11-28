@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:FreeMarketApp.Views"
         xmlns:pages="clr-namespace:FreeMarketApp.Views.Pages"
         Icon="/Assets/freemarket.ico"
-        Title="Free Market One" WindowStartupLocation="CenterScreen">
+        Title="Free Market One - World precious metals marketplace" WindowStartupLocation="CenterScreen">
 
   <Grid Classes="Main" Margin="0">
         <!-- TOP NAVIGATION -->

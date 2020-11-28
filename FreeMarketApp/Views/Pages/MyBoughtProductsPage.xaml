@@ -82,7 +82,7 @@
                 </WrapPanel>
 
               <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-                <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+                <TextBlock Classes="H1" FontSize="14" Text="Items found: "></TextBlock>
 
                 <!-- Number of search results -->
                 <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
@@ -111,12 +111,8 @@
                      <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
                         
                         <!-- Photo -->
-                        <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="0">
-                          <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}" Stretch="UniformToFill" >
-                            <Image.Clip>
-                              <RectangleGeometry Rect="0,0,200,120" />
-                            </Image.Clip>
-                          </Image>
+                        <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
+                          <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"></Image>
                         </Border>
 
                         <!-- Title -->

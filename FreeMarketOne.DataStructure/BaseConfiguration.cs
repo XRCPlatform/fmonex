@@ -2,6 +2,7 @@
 using Libplanet.Blockchain.Policies;
 using Libplanet.Extensions;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 
@@ -11,8 +12,11 @@ namespace FreeMarketOne.DataStructure
     {
         public BaseConfiguration() {
 
+            var assembly = Assembly.GetExecutingAssembly();
+            var fileVersion = FileVersionInfo.GetVersionInfo(assembly.Location);
+
             this.Environment = (int)EnvironmentTypes.Test;
-            this.Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            this.Version = fileVersion.ProductVersion;
         }
 
         public enum EnvironmentTypes

@@ -64,6 +64,9 @@ namespace FreeMarketApp.Views
 
                     PagesHelper.UnlockTools(this, false);
                 }
+
+                var tbVersion = this.FindControl<TextBlock>("TBVersion");
+                tbVersion.Text = FMONE.Current.Configuration.Version;
             }
 
             this.FixWindowCenterPosition();

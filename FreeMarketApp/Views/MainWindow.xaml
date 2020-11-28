@@ -31,11 +31,7 @@
 				s-7.024,1.065-8.867,3.168c-2.119,2.416-1.935,5.346-1.883,5.864v4.667c-0.568,0.661-0.887,1.502-0.887,2.369v3.545
 				c0,1.101,0.494,2.128,1.34,2.821c0.81,3.173,2.477,5.575,3.093,6.389v2.894c0,0.816-0.445,1.566-1.162,1.958l-7.907,4.313
 				c-0.252,0.137-0.502,0.297-0.752,0.476C5.276,41.792,2,35.022,2,27.5z" HorizontalAlignment="Left" VerticalAlignment="Center" Height="38" Stretch="Fill" Width="38" Margin="22,0,0,0"/>
-            <Image Name="IPhoto" Margin="22 0 0 0" HorizontalAlignment="Left" Source="{Binding Avatar}" Width="38" Height="38" Stretch="UniformToFill" >
-				<Image.Clip>
-					<RectangleGeometry Rect="0,0,38,38" />
-				</Image.Clip>
-			</Image>
+            <Image Name="IPhoto" Margin="22 0 0 0" HorizontalAlignment="Left" Source="{Binding Avatar}" Width="38" Height="38" Stretch="UniformToFill" ></Image>
 			<Border Classes="ToolBar" Margin="11 0 0 0" HorizontalAlignment="Left" Width="60" Height="60" BorderThickness="11" CornerRadius="50" Background="Transparent"></Border>
 			<Button Name="BTMyProfile" Width="46" Height="46" HorizontalAlignment="Left" Background="Transparent" Margin="18 0 0 0" Classes="user" Click="ButtonMyProfile_Click" Cursor="Hand"></Button>
 

@@ -38,9 +38,6 @@
     <AvaloniaResource Remove="Views\Pages\ProductPage.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Assets\ico-search.png" />
-    <None Remove="Assets\ico-user.png" />
-    <None Remove="Assets\search-bar.png" />
     <None Remove="Assets\splash.png" />
     <None Remove="Styles\DarkStyle.xaml" />
     <None Remove="Views\AddEditProductWindow.xaml" />
@@ -69,9 +66,6 @@
     </AvaloniaXaml>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Assets\ico-search.png" />
-    <EmbeddedResource Include="Assets\ico-user.png" />
-    <EmbeddedResource Include="Assets\search-bar.png" />
     <EmbeddedResource Include="Assets\splash.png" />
   </ItemGroup>
   <ItemGroup>

@@ -103,7 +103,7 @@ namespace FreeMarketApp.Views.Pages
 
                     var skynetHelper = new SkynetHelper();
                     var skynetStream = skynetHelper.DownloadFromSkynet(_userData.Photo, _logger);
-                    iPhoto.Source = new Bitmap(skynetStream);
+                    if (skynetStream != null) iPhoto.Source = new Bitmap(skynetStream);
                 }
             }
         }

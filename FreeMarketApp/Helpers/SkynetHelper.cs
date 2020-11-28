@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Skynet;
 using Microsoft.Extensions.FileProviders;
@@ -142,18 +144,24 @@ namespace FreeMarketApp.Helpers
                             var skynetStream = DownloadFromSkynet(offers[i].Photos[0], logger);
                             if (skynetStream !=null) {
                                 offers[i].PreTitlePhoto = new Bitmap(skynetStream);
-                            }                            
+                            }
+                            else
+                            {
+                                var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                                var missingImage = assets.Open(new Uri("avares://FreeMarketApp/Assets/imagemissing.png"));
+                                offers[i].PreTitlePhoto = new Bitmap(missingImage);
+                            }
                         }
                     }
                 }
             }
         }
 
-        internal void PreloadPhotos(MarketItemV1 offers, ILogger logger)
+        internal void PreloadPhotos(MarketItemV1 offer, ILogger logger)
         {
-            if (offers != null)
+            if (offer != null)
             {
-                PreloadPhotos(new List<MarketItemV1>() { offers }, logger);
+                PreloadPhotos(new List<MarketItemV1>() { offer }, logger);
             }    
         }
 
@@ -177,7 +185,13 @@ namespace FreeMarketApp.Helpers
                                 if (skynetStream != null)
                                 {
                                     offers[i].PrePhotos.Add(new Bitmap(skynetStream));
-                                }                                
+                                } 
+                                else
+                                {
+                                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                                    var missingImage = assets.Open(new Uri("avares://FreeMarketApp/Assets/imagemissingbig.png"));
+                                    offers[i].PrePhotos.Add(new Bitmap(missingImage));
+                                }                               
                             }
                         }
                     }

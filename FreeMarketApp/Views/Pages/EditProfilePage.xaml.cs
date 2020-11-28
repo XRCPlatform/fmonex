@@ -11,6 +11,7 @@ using Serilog;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreeMarketOne.Extensions.Helpers;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
@@ -137,7 +138,7 @@ namespace FreeMarketApp.Views.Pages
                 } 
                 else
                 {
-                    if (!textHelper.IsTextValid(tbUserName.Text))
+                    if (!textHelper.IsCleanTextValid(tbUserName.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
                         errorCount++;
@@ -151,7 +152,7 @@ namespace FreeMarketApp.Views.Pages
                 } 
                 else
                 {
-                    if (!textHelper.IsTextValid(tbDescription.Text, true))
+                    if (!textHelper.IsTextNotDangerous(tbDescription.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
                         errorCount++;

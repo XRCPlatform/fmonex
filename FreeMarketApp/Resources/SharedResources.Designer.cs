@@ -151,6 +151,24 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your fineness contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsFineness {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsFineness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your manufacturer contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsManufacturer {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsManufacturer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your price can contains number only..
         /// </summary>
         internal static string Dialog_AddEditProduct_InvalidCharsPrice {
@@ -165,6 +183,51 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_AddEditProduct_InvalidCharsShipping {
             get {
                 return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your description contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsShortDescription {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your shipping contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsShortShipping {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortShipping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your title contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsShortTitle {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your size contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsSize {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your XRC receiving address contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress", resourceCulture);
             }
         }
         

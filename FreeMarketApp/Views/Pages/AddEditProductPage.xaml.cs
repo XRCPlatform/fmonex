@@ -6,6 +6,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
 using FreeMarketOne.Pools;
 using FreeMarketOne.Skynet;
@@ -195,11 +196,27 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortTitle"));
                     errorCount++;
                 }
-              
+                else
+                {
+                    if (!textHelper.IsCleanTextValid(tbTitle.Text, true))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortTitle"));
+                        errorCount++;
+                    }
+                }
+
                 if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortDescription"));
                     errorCount++;
+                }
+                else
+                {
+                    if (!textHelper.IsTextNotDangerous(tbDescription.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortDescription"));
+                        errorCount++;
+                    }
                 }
                 
                 if (string.IsNullOrEmpty(tbShipping.Text) || (tbShipping.Text.Length < 2))
@@ -207,7 +224,15 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortShipping"));
                     errorCount++;
                 }
-               
+                else
+                {
+                    if (!textHelper.IsCleanTextValid(tbShipping.Text, true))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortShipping"));
+                        errorCount++;
+                    }
+                }
+
                 if (string.IsNullOrEmpty(tbPrice.Text) || (tbPrice.Text.Length < 1))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_ShortPrice"));
@@ -240,6 +265,14 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyTBXRCReceivingAddress"));
                     errorCount++;
                 }
+                else
+                {
+                    if (!textHelper.IsCleanTextValid(tbTBXRCReceivingAddress.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress"));
+                        errorCount++;
+                    }
+                }
 
                 //validation based on category type
                 var selectedCategory = (MarketCategoryEnum)Enum.Parse(typeof(MarketCategoryEnum), cbCategoryValue.Tag.ToString());
@@ -253,7 +286,7 @@ namespace FreeMarketApp.Views.Pages
                     case MarketCategoryEnum.Rhodium:
                     case MarketCategoryEnum.Silver:
 
-                        if (!string.IsNullOrEmpty(tbWeightInGrams.Text) && !textHelper.IsNumberValid(tbWeightInGrams.Text))
+                        if (string.IsNullOrEmpty(tbWeightInGrams.Text) || !textHelper.IsNumberValid(tbWeightInGrams.Text))
                         {
                             errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsWeightInGrams"));
                             errorCount++;
@@ -264,17 +297,41 @@ namespace FreeMarketApp.Views.Pages
                             errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyManufacturer"));
                             errorCount++;
                         }
+                        else
+                        {
+                            if (!textHelper.IsCleanTextValid(tbManufacturer.Text, true))
+                            {
+                                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsManufacturer"));
+                                errorCount++;
+                            }
+                        }
 
                         if (string.IsNullOrEmpty(tbFineness.Text) || (tbFineness.Text.Length < 1))
                         {
                             errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyFineness"));
                             errorCount++;
                         }
+                        else
+                        {
+                            if (!textHelper.IsCleanTextValid(tbFineness.Text, true))
+                            {
+                                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsFineness"));
+                                errorCount++;
+                            }
+                        }
 
                         if (string.IsNullOrEmpty(tbSize.Text) || (tbSize.Text.Length < 1))
                         {
                             errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptySize"));
                             errorCount++;
+                        }
+                        else
+                        {
+                            if (!textHelper.IsCleanTextValid(tbSize.Text, true))
+                            {
+                                errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsSize"));
+                                errorCount++;
+                            }
                         }
 
                         break;
@@ -299,7 +356,6 @@ namespace FreeMarketApp.Views.Pages
                     _offer.Category = int.Parse(cbCategoryValue.Tag.ToString());
                     _offer.DealType = int.Parse(cbDealTypeValue.Tag.ToString());
                     _offer.Price = float.Parse(tbPrice.Text.Trim());
-                    //_offer.PriceType = (cbPriceType.Tag != null && cbPriceType.Tag.ToString() == "1" ? 1 : 0);
                     _offer.State = (int)ProductStateEnum.Default;
                     _offer.XRCReceivingAddress = tbTBXRCReceivingAddress.Text;
 
@@ -323,31 +379,6 @@ namespace FreeMarketApp.Views.Pages
                             }
                         }
                     }
-                    ////test snippet
-                    //for (int i = 0; i < 50; i++)
-                    //{
-                    //    MarketItemV1 newOffer = new MarketItemV1();
-                    //    newOffer.Category = _offer.Category;
-                    //    newOffer.DealType = _offer.DealType;
-                    //    newOffer.Description = _offer.Description;
-                    //    newOffer.Fineness = _offer.Fineness;
-                    //    newOffer.Manufacturer = _offer.Manufacturer;
-                    //    newOffer.Photos = _offer.Photos;
-                    //    newOffer.PrePhotos = _offer.PrePhotos;
-                    //    newOffer.PreTitlePhoto = _offer.PreTitlePhoto;
-                    //    newOffer.Price = _offer.Price;
-                    //    newOffer.PriceType = _offer.PriceType;
-                    //    newOffer.Shipping = _offer.Shipping;
-                    //    newOffer.Size = _offer.Size;
-                    //    newOffer.Title = _offer.Title + " " + i;
-                    //    newOffer.WeightInGrams = _offer.WeightInGrams;
-                    //    newOffer = FMONE.Current.Markets.SignMarketData(newOffer, FMONE.Current.Users.PrivateKey);
-                    //    var resultPool2 = FMONE.Current.MarketPoolManager.AcceptActionItem(newOffer);
-                    //    if (resultPool2 == null)
-                    //    {
-                    //        FMONE.Current.MarketPoolManager.PropagateAllActionItemLocal();
-                    //    }
-                    //}
 
                     //sign market data and generating chain connection
                     _offer = FMONE.Current.Markets.SignMarketData(_offer, FMONE.Current.Users.PrivateKey);
@@ -385,7 +416,7 @@ namespace FreeMarketApp.Views.Pages
                 } else {
 
                     await MessageBox.Show(mainWindow,
-                       SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_EmptyForm"),
+                       errorMessages.ToString(),
                         SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
                         MessageBox.MessageBoxButtons.Ok);
                 }

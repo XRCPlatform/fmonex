@@ -6,6 +6,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.Extensions.Helpers;
 using Serilog;
 using System;
 using System.Linq;
@@ -106,7 +107,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!textHelper.IsTextValid(tbMessage.Text, true))
+                if (!textHelper.IsTextNotDangerous(tbMessage.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_ChatPage_InvalidCharsMessage"));
                     errorCount++;

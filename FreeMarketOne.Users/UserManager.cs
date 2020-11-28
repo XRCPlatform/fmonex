@@ -125,12 +125,10 @@ namespace FreeMarketOne.Users
         {
             Random random = new Random();
 
-            var validchars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
-
             char[] chars = new char[length];
             for (int i = 0; i < length; i++)
             {
-                chars[i] = validchars[random.Next(0, validchars.Length)];
+                chars[i] = TextHelper.CHARS[random.Next(0, TextHelper.CHARS.Length)];
             }
 
             return new string(chars);

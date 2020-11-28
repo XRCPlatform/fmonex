@@ -1,10 +1,11 @@
 ﻿using System;
 
-namespace FreeMarketApp.Helpers
+namespace FreeMarketOne.Extensions.Helpers
 {
     public class TextHelper
     {
-        private const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+        public const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+        public const string CHARS_DANGEROUS = "'|\\";
 
         public bool IsNumberValid(string text)
         {
@@ -20,7 +21,7 @@ namespace FreeMarketApp.Helpers
             }
         }
 
-        public bool IsTextValid(string text, bool allowSpaceDotComma = false)
+        public bool IsCleanTextValid(string text, bool allowSpaceDotComma = false)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -43,6 +44,32 @@ namespace FreeMarketApp.Helpers
                         {
                             return false;
                         }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public bool IsTextNotDangerous(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return true;
+            }
+            else
+            {
+                if (text.Contains(Environment.NewLine))
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    var charTest = text.Substring(i, 1);
+                    if (CHARS_DANGEROUS.Contains(charTest))
+                    {
+                        return false;
                     }
                 }
             }

@@ -348,4 +348,25 @@
   <data name="Dialog_AddEditProduct_EmptyTBXRCReceivingAddress" xml:space="preserve">
     <value>Your XRC Receiving Address is too short.</value>
   </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsFineness" xml:space="preserve">
+    <value>Your fineness contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsManufacturer" xml:space="preserve">
+    <value>Your manufacturer contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsShortDescription" xml:space="preserve">
+    <value>Your description contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsShortShipping" xml:space="preserve">
+    <value>Your shipping contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsShortTitle" xml:space="preserve">
+    <value>Your title contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsSize" xml:space="preserve">
+    <value>Your size contains invalid chars.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress" xml:space="preserve">
+    <value>Your XRC receiving address contains invalid chars.</value>
+  </data>
 </root>

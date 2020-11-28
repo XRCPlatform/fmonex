@@ -5,6 +5,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Users;
 using Serilog;
 using System;
@@ -69,7 +70,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!textHelper.IsTextValid(tbPassword.Text, true))
+                if (!textHelper.IsTextNotDangerous(tbPassword.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_InvalidCharsPassword"));
                     errorCount++;

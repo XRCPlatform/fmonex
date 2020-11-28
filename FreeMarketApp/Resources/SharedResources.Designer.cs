@@ -70,6 +70,24 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your description contains banned words..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_BannedWordsShortDescription {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_BannedWordsShortDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your title contains banned words..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_BannedWordsShortTitle {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_BannedWordsShortTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have to choose right category..
         /// </summary>
         internal static string Dialog_AddEditProduct_EmptyCategory {
@@ -277,6 +295,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your description contains banned words..
+        /// </summary>
+        internal static string Dialog_ChatPage_BannedWordsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_ChatPage_BannedWordsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your message contains invalid chars..
         /// </summary>
         internal static string Dialog_ChatPage_InvalidCharsMessage {
@@ -435,6 +462,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_Error_WrontTypeOfContent {
             get {
                 return ResourceManager.GetString("Dialog_Error_WrontTypeOfContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your description contains banned words..
+        /// </summary>
+        internal static string Dialog_FirstRun_BannedWordsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_BannedWordsDescription", resourceCulture);
             }
         }
         

@@ -203,6 +203,12 @@ namespace FreeMarketApp.Views.Pages
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortTitle"));
                         errorCount++;
                     }
+
+                    if (!textHelper.IsWithoutBannedWords(tbTitle.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_BannedWordsShortTitle"));
+                        errorCount++;
+                    }
                 }
 
                 if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
@@ -215,6 +221,12 @@ namespace FreeMarketApp.Views.Pages
                     if (!textHelper.IsTextNotDangerous(tbDescription.Text))
                     {
                         errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortDescription"));
+                        errorCount++;
+                    }
+
+                    if (!textHelper.IsWithoutBannedWords(tbDescription.Text))
+                    {
+                        errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_AddEditProduct_BannedWordsShortDescription"));
                         errorCount++;
                     }
                 }

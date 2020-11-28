@@ -6,6 +6,7 @@ namespace FreeMarketOne.Extensions.Helpers
     {
         public const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
         public const string CHARS_DANGEROUS = "'|\\";
+        public const string WORDS_FILTER = "gun,woman,weapon,wife,female,pistol,handgun,fire,shot,shoot,narcotic,drug,dope,marijuana,hemp,narcotic,lsd,pills,cannabis,opium,cocaine,mdma,extasy,ketamine,weed,poppers,heroin,mushrooms";
 
         public bool IsNumberValid(string text)
         {
@@ -68,6 +69,29 @@ namespace FreeMarketOne.Extensions.Helpers
                 {
                     var charTest = text.Substring(i, 1);
                     if (CHARS_DANGEROUS.Contains(charTest))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public bool IsWithoutBannedWords(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return true;
+            }
+            else
+            {
+                var lowerText = text.ToLower();
+                var forCheckWords = WORDS_FILTER.Split(",");
+
+                foreach (var word in forCheckWords)
+                {
+                    if (lowerText.Contains(word))
                     {
                         return false;
                     }

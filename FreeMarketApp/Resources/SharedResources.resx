@@ -369,4 +369,16 @@
   <data name="Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress" xml:space="preserve">
     <value>Your XRC receiving address contains invalid chars.</value>
   </data>
+  <data name="Dialog_AddEditProduct_BannedWordsShortDescription" xml:space="preserve">
+    <value>Your description contains banned words.</value>
+  </data>
+  <data name="Dialog_AddEditProduct_BannedWordsShortTitle" xml:space="preserve">
+    <value>Your title contains banned words.</value>
+  </data>
+  <data name="Dialog_ChatPage_BannedWordsDescription" xml:space="preserve">
+    <value>Your description contains banned words.</value>
+  </data>
+  <data name="Dialog_FirstRun_BannedWordsDescription" xml:space="preserve">
+    <value>Your description contains banned words.</value>
+  </data>
 </root>

@@ -112,6 +112,12 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_ChatPage_InvalidCharsMessage"));
                     errorCount++;
                 }
+
+                if (!textHelper.IsWithoutBannedWords(tbMessage.Text))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_ChatPage_BannedWordsDescription"));
+                    errorCount++;
+                }
             }
 
             if (errorCount == 0)

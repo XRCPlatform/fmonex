@@ -94,6 +94,12 @@ namespace FreeMarketApp.Views.Pages
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
                     errorCount++;
                 }
+
+                if (!textHelper.IsWithoutBannedWords(tbDescription.Text))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_BannedWordsDescription"));
+                    errorCount++;
+                }
             }
 
             if (string.IsNullOrEmpty(tbPassword.Text) || string.IsNullOrEmpty(tbPasswordVerify.Text) || tbPassword.Text.Length < 16)

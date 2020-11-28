@@ -28,15 +28,12 @@
 
 
                 <DockPanel Margin="20 20 0 0">
-                    <Border Classes="PhotoPlaceholder" Width="60" Height="60" CornerRadius="35" VerticalAlignment="Top" HorizontalAlignment="Left"></Border>
-                        <!-- User avatar binding -->
-                        <Image Name="IPhoto" HorizontalAlignment="Left" Margin="-60 0 0 0" VerticalAlignment="Top" Width="60" Height="60" Stretch="UniformToFill" >
-                          <Image.Clip>
-                            <RectangleGeometry Rect="0,0,60,60" />
-                          </Image.Clip>
-                        </Image>
-                      
-                    <Border Classes="Main" Margin="-75 -15 -15 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Height="90" BorderThickness="15" CornerRadius="50" Background="Transparent"></Border>
+                    <Border Classes="PhotoPlaceholder" Width="70" Height="70" Margin="0 -18 0 0" CornerRadius="35" HorizontalAlignment="Left">
+					    <TextBlock Classes="H2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">No Photo</TextBlock>
+				    </Border>
+					<!-- User avatar binding -->
+				    <Image Name="IPhoto" HorizontalAlignment="Left" Source="{Binding Avatar}" Width="70" Height="70" Margin="-70 -18 0 0" Stretch="UniformToFill" ></Image>
+				    <Border Classes="Main" Margin="-88 -18 -15 0" HorizontalAlignment="Left" Width="106" Height="106" BorderThickness="18" CornerRadius="100" Background="Transparent"></Border>
                     
                     <StackPanel Orientation="Vertical">
                         <!-- User binding -->
@@ -48,7 +45,7 @@
 							  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 							  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
-								Height="15" Stretch="Fill" Width="16" Margin="0,1,5,0"/>
+								Height="15" Stretch="Fill" Fill="Aquamarine" Width="16" Margin="0,1,5,0"/>
                             <!-- Rating number binding -->
                             <TextBlock Classes="H1" Name="TBStars" Text="N/A" FontWeight="Bold" FontSize="16"/>
                             <TextBlock Classes="H2" Text=" out of 5" FontSize="16"/>
@@ -56,7 +53,7 @@
                     </StackPanel>
                 </DockPanel>
 
-                <TextBlock Classes="H1" Text="About" Margin="20 40 0 0" FontSize="18" FontWeight="Bold"/>
+                <TextBlock Classes="H1" Text="About" Margin="20 30 0 0" FontSize="18" FontWeight="Bold"/>
                 <!-- About user text binding -->
                 <TextBlock Classes="H1" Name="TBDescription" Text="N/A"
 							   TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>

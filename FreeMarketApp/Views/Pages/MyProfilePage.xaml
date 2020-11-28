@@ -61,18 +61,19 @@
               </Button>
             </WrapPanel>
 
-            <Border Classes="PhotoPlaceholder" Margin="18 10 0 0" Width="70" Height="70" CornerRadius="35" HorizontalAlignment="Left">
-              <!-- User avatar binding -->
-              <Image Name="IPhoto" HorizontalAlignment="Left" Width="70" Height="70" Stretch="UniformToFill" >
-                <Image.Clip>
-                  <RectangleGeometry Rect="0,0,70,70" />
-                </Image.Clip>
-              </Image>
-            </Border>
-            <Border Classes="Main" Margin="0 -88 0 0" HorizontalAlignment="Left" Width="106" Height="106" BorderThickness="18" CornerRadius="50" Background="Transparent"></Border>
+            <DockPanel Margin="20 0 0 0">
+				<Border Classes="PhotoPlaceholder" Width="70" Height="70" CornerRadius="35" HorizontalAlignment="Left">
+					<!-- User avatar binding -->
+					<TextBlock Classes="H2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">No Photo</TextBlock>
+				</Border>
+				<Image Name="IPhoto" HorizontalAlignment="Left" Source="{Binding Avatar}" Width="70" Height="70" Margin="-70 0 0 0" Stretch="UniformToFill" ></Image>
+				<Border Classes="Main" Margin="-88 0 -15 0" HorizontalAlignment="Left" Width="106" Height="106" BorderThickness="18" CornerRadius="100" Background="Transparent"></Border>
+            </DockPanel>
+
+          
                 
             <!-- User binding -->
-            <TextBlock Classes="H1" Text="UserName" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
+            <TextBlock Classes="H1" Text="UserName" Margin="20 10 0 0" FontSize="16" FontWeight="Bold"/>
             <TextBlock Classes="H1" Name="TBUserName" Text="N/A" Margin="20 0 0 0" FontSize="16"/>
             <TextBlock Classes="H1" Text="Rating" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
             <StackPanel Orientation="Horizontal" Margin="20 0 20 0">

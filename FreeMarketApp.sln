@@ -81,7 +81,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Users", "Free
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "P2PPayloadGenerator", "P2PPayloadGenerator\P2PPayloadGenerator.csproj", "{89D1D431-1DBE-46F9-9859-7CDC9FE29903}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatTest", "ChatTest\ChatTest.csproj", "{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatTest", "ChatTest\ChatTest.csproj", "{ABFBD50E-FF53-4AF7-86B4-66FB4F0AA18D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4C25E99-49F7-4D43-9E05-E508C33856FD}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

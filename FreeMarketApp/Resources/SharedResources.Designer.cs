@@ -70,6 +70,24 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your description contains banned words..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_BannedWordsShortDescription {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_BannedWordsShortDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your title contains banned words..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_BannedWordsShortTitle {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_BannedWordsShortTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have to choose right category..
         /// </summary>
         internal static string Dialog_AddEditProduct_EmptyCategory {
@@ -151,6 +169,24 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your fineness contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsFineness {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsFineness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your manufacturer contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsManufacturer {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsManufacturer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your price can contains number only..
         /// </summary>
         internal static string Dialog_AddEditProduct_InvalidCharsPrice {
@@ -165,6 +201,51 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_AddEditProduct_InvalidCharsShipping {
             get {
                 return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShipping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your description contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsShortDescription {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your shipping contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsShortShipping {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortShipping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your title contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsShortTitle {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsShortTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your size contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsSize {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your XRC receiving address contains invalid chars..
+        /// </summary>
+        internal static string Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress {
+            get {
+                return ResourceManager.GetString("Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress", resourceCulture);
             }
         }
         
@@ -210,6 +291,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_AddEditProduct_ShortTitle {
             get {
                 return ResourceManager.GetString("Dialog_AddEditProduct_ShortTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your description contains banned words..
+        /// </summary>
+        internal static string Dialog_ChatPage_BannedWordsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_ChatPage_BannedWordsDescription", resourceCulture);
             }
         }
         
@@ -372,6 +462,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_Error_WrontTypeOfContent {
             get {
                 return ResourceManager.GetString("Dialog_Error_WrontTypeOfContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your description contains banned words..
+        /// </summary>
+        internal static string Dialog_FirstRun_BannedWordsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_FirstRun_BannedWordsDescription", resourceCulture);
             }
         }
         

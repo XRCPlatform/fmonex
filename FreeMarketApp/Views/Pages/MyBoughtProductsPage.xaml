@@ -20,43 +20,52 @@
 
               <Button Classes="sidebar" Cursor="Hand" Click="ButtonMyProducts_Click">
                 <StackPanel Orientation="Horizontal">
-                  <Path Classes="SideBarIcon" Data="M435.2,51.2H384V25.6C384,10.24,373.76,0,358.4,0c-15.36,0-25.6,10.24-25.6,25.6v25.6h-51.2V25.6
-			C281.6,10.24,271.36,0,256,0s-25.6,10.24-25.6,25.6v25.6h-51.2V25.6c0-15.36-10.24-25.6-25.6-25.6C138.24,0,128,10.24,128,25.6
-			v25.6H76.8c-15.36,0-25.6,10.24-25.6,25.6v409.6c0,15.36,10.24,25.6,25.6,25.6h358.4c15.36,0,25.6-10.24,25.6-25.6V76.8
-			C460.8,61.44,450.56,51.2,435.2,51.2z M281.6,409.6H128c-15.36,0-25.6-10.24-25.6-25.6s10.24-25.6,25.6-25.6h153.6
-			c15.36,0,25.6,10.24,25.6,25.6S296.96,409.6,281.6,409.6z M384,307.2H128c-15.36,0-25.6-10.24-25.6-25.6
-			c0-15.36,10.24-25.6,25.6-25.6h256c15.36,0,25.6,10.24,25.6,25.6C409.6,296.96,399.36,307.2,384,307.2z M384,204.8H128
-			c-15.36,0-25.6-10.24-25.6-25.6s10.24-25.6,25.6-25.6h256c15.36,0,25.6,10.24,25.6,25.6S399.36,204.8,384,204.8z"
-            Margin="1 0 0 0" HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="13" />
+                  <Path Classes="SideBarIcon" Data="M136.979,20.393h-3.556c-1.395-5.368-6.224-9.354-12.032-9.354h-16.928C100.889,4.5,94.025,0,86.062,0
+                        C78.1,0,71.234,4.506,67.66,11.039H50.732c-5.812,0-10.638,3.985-12.035,9.354h-3.553c-6.884,0-12.471,5.59-12.471,12.47v126.789
+                        c0,6.887,5.587,12.471,12.471,12.471h101.835c6.881,0,12.471-5.584,12.471-12.471V32.863
+                        C149.449,25.967,143.871,20.393,136.979,20.393z M86.062,12.074c4.95,0,8.963,4.016,8.963,8.97c0,4.95-4.013,8.963-8.963,8.963
+                        c-4.951,0-8.967-4.019-8.967-8.963S81.11,12.074,86.062,12.074z M49.821,131.587c-3.449,0-6.235-2.789-6.235-6.236
+                        c0-3.446,2.786-6.234,6.235-6.234c3.456,0,6.235,2.788,6.235,6.234C56.057,128.798,53.265,131.587,49.821,131.587z M49.821,100.41
+                        c-3.449,0-6.235-2.789-6.235-6.235c0-3.447,2.786-6.235,6.235-6.235c3.456,0,6.235,2.788,6.235,6.235
+                        C56.057,97.621,53.265,100.41,49.821,100.41z M49.821,69.233c-3.449,0-6.235-2.792-6.235-6.235c0-3.446,2.786-6.235,6.235-6.235
+                        c3.456,0,6.235,2.789,6.235,6.235C56.057,66.441,53.265,69.233,49.821,69.233z M125.074,131.587H70.317
+                        c-3.456,0-6.235-2.789-6.235-6.236c0-3.446,2.78-6.234,6.235-6.234h54.757c3.453,0,6.235,2.788,6.235,6.234
+                        C131.31,128.798,128.527,131.587,125.074,131.587z M125.074,100.41H70.317c-3.456,0-6.235-2.789-6.235-6.235
+                        c0-3.447,2.78-6.235,6.235-6.235h54.757c3.453,0,6.235,2.788,6.235,6.235C131.31,97.621,128.527,100.41,125.074,100.41z
+                        M125.074,69.233H70.317c-3.456,0-6.235-2.792-6.235-6.235c0-3.446,2.78-6.235,6.235-6.235h54.757c3.453,0,6.235,2.789,6.235,6.235
+                        C131.31,66.441,128.527,69.233,125.074,69.233z"
+                        Margin="1 0 0 0" HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="13" />
                   <TextBlock Margin="7,0,0,0" Text="My products"/>
                 </StackPanel>
               </Button>
 
               <Button Classes="sidebarSelected" Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
-                  <Path Classes="SideBarIcon" Data="M479.823,495.711L463.782,14.5C463.512,6.415,456.88,0,448.791,0H63.19c-8.09,0-14.723,6.415-14.992,14.5l-16.066,482
-			c-0.135,4.063,1.385,8.007,4.211,10.929S43.06,512,47.124,512h417.733c0.009,0.001,0.015,0.001,0.021,0c8.283,0,15-6.716,15-15
-			C479.878,496.565,479.858,496.136,479.823,495.711z M255.99,222.8c-61.427,0-111.4-49.974-111.4-111.4c0-8.284,6.716-15,15-15
-			s15,6.716,15,15c0,44.885,36.517,81.4,81.4,81.4c44.884,0,81.4-36.516,81.4-81.4c0-8.284,6.716-15,15-15s15,6.716,15,15
-			C367.39,172.826,317.417,222.8,255.99,222.8z"
-            HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="14" />
-                  <TextBlock Margin="7,0,0,0" Text="Bought products"/>
+                  <Path Classes="SideBarIcon" Data="M421.621,116.048h-56.939v-3.735C364.682,50.383,314.299,0,252.369,0h-9.45c-61.93,0-112.313,50.384-112.313,112.313v3.735
+                      H73.049c-8.297,0-15.026,6.727-15.026,15.025v348.572c0,8.299,6.729,15.025,15.026,15.025h348.572
+                      c8.299,0,15.025-6.728,15.025-15.025V131.073C436.648,122.774,429.92,116.048,421.621,116.048z M166.073,112.313
+                      c0-42.372,34.473-76.846,76.846-76.846h9.45c42.373,0,76.695,34.474,76.695,76.846l-0.021,36.722
+                      c0,9.792-7.838,17.729-17.629,17.729c-9.793,0-17.729-7.938-17.729-17.729c0-0.041,0.008-0.082,0.008-0.123l-0.019-32.863h-92.147
+                      v32.863h-0.006c0,0.041,0.006,0.082,0.006,0.123c0,9.792-7.938,17.729-17.729,17.729c-9.792,0-17.729-7.938-17.729-17.729
+                      L166.073,112.313z"
+				              HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="13" />
+						      <TextBlock Margin="7,0,0,0" Text="Bought products"/>
                 </StackPanel>
               </Button>
 
               <Button Classes="sidebar" Click="ButtonSoldProducts_Click" Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                   <Path Classes="SideBarIcon" Data="M473.61,119.808c0-0.512,0-0.512,0-1.024c-0.512-1.024-0.512-2.048-1.024-3.072V115.2
-			c-0.512-1.024-1.536-2.048-2.048-2.56l-0.512-0.512c-0.512-0.512-1.536-1.024-2.048-1.536l-0.512-0.512h-0.512l-0.512-0.512
-			L248.842,1.536c-4.096-2.048-9.216-2.048-13.824,0l-73.216,36.352l218.624,112.128l0.512,0.512c0.512,0,0.512,0.512,1.024,0.512
-			c0.512,0.512,0.512,1.024,1.024,1.536c0,0.512,0,0.512,0,1.024v0.512v118.784c0,2.048-1.024,3.584-2.56,4.608l-44.032,23.04
-			c-2.56,1.536-5.632,0.512-7.168-2.048c-0.512-0.512-0.512-1.536-0.512-2.56V179.712L107.53,65.536l-0.512-0.512l-88.576,44.032
-			l-0.512,0.512h-0.512l-0.512,0.512c-0.512,0.512-1.536,1.024-2.048,1.536l-0.512,0.512c-1.024,1.024-1.536,2.048-2.56,3.072v0.512
-			c-0.512,1.024-1.024,2.048-1.024,3.072c0,0.512,0,0.512,0,1.024c0,1.024-0.512,1.536-0.512,2.56v0.512v238.592
-			c0,5.632,3.072,11.264,8.704,13.824l215.552,107.52c3.072,1.536,6.656,2.048,10.24,1.024l1.024-0.512
-			c1.024,0,1.536-0.512,2.56-1.024l217.088-107.52c5.12-2.56,8.704-7.68,8.704-13.824V122.88v-0.512
-			C473.61,121.344,473.61,120.832,473.61,119.808z"
-            HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="16" />
+                      c-0.512-1.024-1.536-2.048-2.048-2.56l-0.512-0.512c-0.512-0.512-1.536-1.024-2.048-1.536l-0.512-0.512h-0.512l-0.512-0.512
+                      L248.842,1.536c-4.096-2.048-9.216-2.048-13.824,0l-73.216,36.352l218.624,112.128l0.512,0.512c0.512,0,0.512,0.512,1.024,0.512
+                      c0.512,0.512,0.512,1.024,1.024,1.536c0,0.512,0,0.512,0,1.024v0.512v118.784c0,2.048-1.024,3.584-2.56,4.608l-44.032,23.04
+                      c-2.56,1.536-5.632,0.512-7.168-2.048c-0.512-0.512-0.512-1.536-0.512-2.56V179.712L107.53,65.536l-0.512-0.512l-88.576,44.032
+                      l-0.512,0.512h-0.512l-0.512,0.512c-0.512,0.512-1.536,1.024-2.048,1.536l-0.512,0.512c-1.024,1.024-1.536,2.048-2.56,3.072v0.512
+                      c-0.512,1.024-1.024,2.048-1.024,3.072c0,0.512,0,0.512,0,1.024c0,1.024-0.512,1.536-0.512,2.56v0.512v238.592
+                      c0,5.632,3.072,11.264,8.704,13.824l215.552,107.52c3.072,1.536,6.656,2.048,10.24,1.024l1.024-0.512
+                      c1.024,0,1.536-0.512,2.56-1.024l217.088-107.52c5.12-2.56,8.704-7.68,8.704-13.824V122.88v-0.512
+                      C473.61,121.344,473.61,120.832,473.61,119.808z"
+                      HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="15" />
                   <TextBlock Margin="7,0,0,0" Text="Sold products"/>
                 </StackPanel>
               </Button>
@@ -73,7 +82,7 @@
                 </WrapPanel>
 
               <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-                <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+                <TextBlock Classes="H1" FontSize="14" Text="Items found: "></TextBlock>
 
                 <!-- Number of search results -->
                 <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
@@ -84,9 +93,9 @@
                   <!-- Dropdown menu -->
                   <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="5" />
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="2"/>
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="20" />
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
                   </ComboBox>
@@ -98,81 +107,68 @@
                   <DataTemplate>
                    
                   <!-- Product card -->
-                  <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                       <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonBoughtProduct_Click">
-                         <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                          <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="0">
-                            <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}" Stretch="UniformToFill" >
-                              <Image.Clip>
-                                <RectangleGeometry Rect="0,0,200,120" />
-                              </Image.Clip>
-                            </Image>
-                          </Border>
-                          <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
-                          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                            <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
-                            <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
-                          </StackPanel>
-                          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                            <TextBlock Classes="H2" FontSize="12" Text="XRC Receiving Address: "></TextBlock>
-                            <TextBlock Classes="H2" FontSize="12" Text="{Binding XRCReceivingAddress}"></TextBlock>
-                          </StackPanel>
-                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                           <TextBlock Classes="H2" FontSize="12" Text="XRC Transaction: "></TextBlock>
-                           <TextBlock Classes="H2" FontSize="12" Text="{Binding XRCTransactionHash}"></TextBlock>
-                         </StackPanel>
-                         <!--
-						              <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                              <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                              <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
-                                 <i:Interaction.Behaviors>
-                                   <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                                     <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                                   </ia:DataTriggerBehavior>
-                                   <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                                     <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                                   </ia:DataTriggerBehavior>
-                                 </i:Interaction.Behaviors>
-                              </TextBlock>
-						              </StackPanel>
+                  <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonBoughtProduct_Click">
+                     <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
+                        
+                        <!-- Photo -->
+                        <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
+                          <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"></Image>
+                        </Border>
+
+                        <!-- Title -->
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
+
+                        <!-- XRC address -->
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                          <TextBlock Classes="H1" FontSize="12" Text="XRC Receiving Address: "></TextBlock>
+                          <TextBlock Classes="H2" FontSize="12" TextWrapping="NoWrap" Text="{Binding XRCReceivingAddress}"></TextBlock>
+                        </StackPanel>
+
+                        <!-- Transaction hash -->
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                          <TextBlock Classes="H1" FontSize="12" Text="XRC Transaction: "></TextBlock>
+                          <TextBlock Classes="H2" FontSize="12" TextWrapping="NoWrap" Text="{Binding XRCTransactionHash}"></TextBlock>
+                        </StackPanel>
+
+                        <!--
+						            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                            <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
+                            <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
+                               <i:Interaction.Behaviors>
+                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
+                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
+                                 </ia:DataTriggerBehavior>
+                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
+                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
+                                 </ia:DataTriggerBehavior>
+                               </i:Interaction.Behaviors>
+                            </TextBlock>
+						            </StackPanel>
 							          -->
-                          </DockPanel>
-                       </Button>
-                      <StackPanel Orientation="Vertical">
-                       <!-- Review notification -->
-                       <WrapPanel VerticalAlignment="Bottom" IsVisible="true" Orientation="Horizontal">
-                         <Path Data="M11.812,0C5.289,0,0,5.289,0,11.812s5.289,11.813,11.812,11.813s11.813-5.29,11.813-11.813
-                            S18.335,0,11.812,0z M14.271,18.307c-0.608,0.24-1.092,0.422-1.455,0.548c-0.362,0.126-0.783,0.189-1.262,0.189
-                            c-0.736,0-1.309-0.18-1.717-0.539s-0.611-0.814-0.611-1.367c0-0.215,0.015-0.435,0.045-0.659c0.031-0.224,0.08-0.476,0.147-0.759
-                            l0.761-2.688c0.067-0.258,0.125-0.503,0.171-0.731c0.046-0.23,0.068-0.441,0.068-0.633c0-0.342-0.071-0.582-0.212-0.717
-                            c-0.143-0.135-0.412-0.201-0.813-0.201c-0.196,0-0.398,0.029-0.605,0.09c-0.205,0.063-0.383,0.12-0.529,0.176l0.201-0.828
-                            c0.498-0.203,0.975-0.377,1.43-0.521c0.455-0.146,0.885-0.218,1.29-0.218c0.731,0,1.295,0.178,1.692,0.53
-                            c0.395,0.353,0.594,0.812,0.594,1.376c0,0.117-0.014,0.323-0.041,0.617c-0.027,0.295-0.078,0.564-0.152,0.811l-0.757,2.68
-                            c-0.062,0.215-0.117,0.461-0.167,0.736c-0.049,0.275-0.073,0.485-0.073,0.626c0,0.356,0.079,0.599,0.239,0.728
-                            c0.158,0.129,0.435,0.194,0.827,0.194c0.185,0,0.392-0.033,0.626-0.097c0.232-0.064,0.4-0.121,0.506-0.17L14.271,18.307z
-                            M14.137,7.429c-0.353,0.328-0.778,0.492-1.275,0.492c-0.496,0-0.924-0.164-1.28-0.492c-0.354-0.328-0.533-0.727-0.533-1.193
-                            c0-0.465,0.18-0.865,0.533-1.196c0.356-0.332,0.784-0.497,1.28-0.497c0.497,0,0.923,0.165,1.275,0.497
-                            c0.353,0.331,0.53,0.731,0.53,1.196C14.667,6.703,14.49,7.101,14.137,7.429z"
-                           HorizontalAlignment="Left" VerticalAlignment="Top" Fill="#ff9234" Height="17" Stretch="Fill" Width="17" Margin="0 4 5 7"/>
-                         <Button Cursor="Hand" Click="ButtonReviewPage_Click" Tag="{Binding Signature}" Background="Transparent" BorderBrush="Transparent" Margin="0 4 20 7">
-                           <TextBlock Foreground="#ff9234" FontSize="12" Text="Not reviewed" ></TextBlock>
-                         </Button>
-                       </WrapPanel>
-                       <!-- Propagation notification -->
-                        <WrapPanel Name="TBIsInPool" VerticalAlignment="Bottom" IsVisible="{Binding IsInPool}" Orientation="Horizontal">
-                            <Path Classes="H2" Data="M413.809,462.904v-51.088c0-60.171-46.494-96.158-91.179-131.268c-6.172-4.839-14.028-14.028-14.028-28.055
-                            s7.077-27.704,14.028-33.554c43.477-36.583,91.179-71.098,91.179-131.268V49.096h35.068V0H63.123v49.096h35.068v38.576
-                            c0,60.171,47.7,94.685,91.179,131.268c6.951,5.85,14.028,19.526,14.028,33.554c0,14.028-7.856,23.215-14.028,28.055
-                            c-44.684,35.111-91.179,71.098-91.179,131.268v51.088H63.123V512h385.753v-49.096H413.809z M167.438,133.26
-                            c-12.927-14.631-20.15-28.714-20.15-45.589V49.096h217.424v38.576c0,16.874-7.225,30.959-20.15,45.589H167.438z M364.712,449.221
-                            l-82.572-32.227c-14.378-5.611-37.895-5.611-52.273,0l-82.579,32.229v-37.404c0-34.045,27.059-57.035,71.217-91.725l1.171-0.918
-                            c16.762-13.144,27.634-31.449,31.324-51.621c3.303,0.736,6.698,0.736,10.001,0c3.675,20.165,14.56,38.471,31.301,51.6l1.192,0.939
-                            c44.158,34.688,71.217,57.672,71.217,91.724V449.221z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Stretch="Fill" Width="12" Margin="0 4 5 7"/>
-                            <TextBlock Classes="H2" FontSize="12" Text="Waiting for propagation" Margin="0 4 0 7"></TextBlock>       
-                        </WrapPanel>                   
-                        <!-- End of product card -->
-                      </StackPanel>
-                       </DockPanel>
+
+                        <!-- Satus panel -->
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" VerticalAlignment="Bottom" Height="28" Margin="0 0 0 5">
+                          
+                          <!-- Review button -->
+                          <Button Classes="ButtonOrange" VerticalContentAlignment="Center" Margin="0 0 15 0" Cursor="Hand">
+                            <WrapPanel Name="ReviewButton" VerticalAlignment="Bottom" IsVisible="True" Orientation="Horizontal">
+                              <Path Classes="StatusBarIconOrange" Data="M96.994,37.479c-0.236-0.725-0.862-1.253-1.617-1.361l-31.141-4.494L50.34,3.396c-0.336-0.684-1.032-1.117-1.794-1.117 c-0.762,0-1.458,0.433-1.794,1.116L32.855,31.623l-31.14,4.494c-0.754,0.108-1.381,0.637-1.617,1.361 c-0.235,0.725-0.039,1.521,0.508,2.052l22.551,21.939l-5.348,31.004c-0.13,0.75,0.179,1.51,0.795,1.957 c0.618,0.449,1.434,0.508,2.108,0.152l27.834-14.668L76.38,94.582c0.293,0.154,0.612,0.23,0.933,0.23 c0.415,0,0.827-0.129,1.176-0.383c0.616-0.447,0.926-1.207,0.795-1.957l-5.348-31.004l22.551-21.939 C97.031,38.999,97.229,38.203,96.994,37.479z M82.965,43.436L66.763,59.197l3.842,22.273c0.093,0.541-0.129,1.086-0.571,1.408 c-0.25,0.182-0.547,0.273-0.845,0.273c-0.229,0-0.459-0.055-0.67-0.165L48.521,72.449V16.671c0.547,0,1.046,0.311,1.289,0.802 l9.985,20.28l22.373,3.229c0.542,0.077,0.991,0.457,1.161,0.978C83.499,42.482,83.356,43.052,82.965,43.436z" 
+                                  HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="16" Margin="0 0 5 0"/>
+                              <TextBlock FontSize="12" Text="Review this item"></TextBlock>
+                            </WrapPanel>
+                          </Button>
+
+                          <!-- Propagation notification -->
+                          <WrapPanel Name="TBIsInPool" VerticalAlignment="Center" IsVisible="{Binding IsInPool}" Orientation="Horizontal">
+                            <Path Classes="H2" Data="M413.809,462.904v-51.088c0-60.171-46.494-96.158-91.179-131.268c-6.172-4.839-14.028-14.028-14.028-28.055 s7.077-27.704,14.028-33.554c43.477-36.583,91.179-71.098,91.179-131.268V49.096h35.068V0H63.123v49.096h35.068v38.576 c0,60.171,47.7,94.685,91.179,131.268c6.951,5.85,14.028,19.526,14.028,33.554c0,14.028-7.856,23.215-14.028,28.055 c-44.684,35.111-91.179,71.098-91.179,131.268v51.088H63.123V512h385.753v-49.096H413.809z M167.438,133.26 c-12.927-14.631-20.15-28.714-20.15-45.589V49.096h217.424v38.576c0,16.874-7.225,30.959-20.15,45.589H167.438z M364.712,449.221 l-82.572-32.227c-14.378-5.611-37.895-5.611-52.273,0l-82.579,32.229v-37.404c0-34.045,27.059-57.035,71.217-91.725l1.171-0.918 c16.762-13.144,27.634-31.449,31.324-51.621c3.303,0.736,6.698,0.736,10.001,0c3.675,20.165,14.56,38.471,31.301,51.6l1.192,0.93 c44.158,34.688,71.217,57.672,71.217,91.724V449.221z" 
+                                HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="12" Margin="0 0 5 0"/>
+                            <TextBlock Classes="H2" FontSize="12" VerticalAlignment="Center" Text="Waiting for propagation"></TextBlock>
+                          </WrapPanel>           
+                        </StackPanel>                                   
+                      </DockPanel>
+                    </Button>
+                    <!-- End of product card -->
+
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>

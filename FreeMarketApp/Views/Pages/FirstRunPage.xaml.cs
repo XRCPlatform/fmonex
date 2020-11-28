@@ -6,6 +6,7 @@ using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Helpers;
 using Serilog;
 using System;
 using System.Text;
@@ -74,7 +75,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!textHelper.IsTextValid(tbUserName.Text))
+                if (!textHelper.IsCleanTextValid(tbUserName.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsUserName"));
                     errorCount++;
@@ -88,9 +89,15 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!textHelper.IsTextValid(tbDescription.Text, true))
+                if (!textHelper.IsTextNotDangerous(tbDescription.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsDescription"));
+                    errorCount++;
+                }
+
+                if (!textHelper.IsWithoutBannedWords(tbDescription.Text))
+                {
+                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_BannedWordsDescription"));
                     errorCount++;
                 }
             }
@@ -102,7 +109,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!textHelper.IsTextValid(tbPassword.Text, true))
+                if (!textHelper.IsTextNotDangerous(tbPassword.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsPassword"));
                     errorCount++;
@@ -121,7 +128,7 @@ namespace FreeMarketApp.Views.Pages
             }
             else
             {
-                if (!textHelper.IsTextValid(tbSeed.Text))
+                if (!textHelper.IsCleanTextValid(tbSeed.Text))
                 {
                     errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_InvalidCharsSeed"));
                     errorCount++;

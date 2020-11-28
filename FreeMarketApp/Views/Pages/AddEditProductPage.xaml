@@ -62,7 +62,7 @@
                 <TextBox Name="TBManufacturer" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="Royal Mint, Metalor, umicore, etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Fineness" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox Name="TBFineness" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="'999 fine rhodium', '24 karat gold' etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBFineness" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="999 fine rhodium, 24 karat gold etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Size" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
                 <TextBox Name="TBSize" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="1 oz, 1 troy ounce (ozt), 1 kg etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
@@ -79,11 +79,7 @@
                     <!-- Uploaded photo with a button to remove it -->
                     <StackPanel Name="SPPhoto_0" IsVisible="False">
                         <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                             <Image Name="IPhoto_0" Stretch="UniformToFill" >
-                                <Image.Clip>
-                                    <RectangleGeometry Rect="0,0,168,100" />
-                                </Image.Clip>
-                            </Image>
+                             <Image Name="IPhoto_0" ></Image>
                         </Border>
                         <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="0" Name="BTRemovePhoto_0" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                             <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z" 
@@ -94,11 +90,7 @@
                   <!-- Uploaded photo with a button to remove it -->
                   <StackPanel Name="SPPhoto_1" IsVisible="false">
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                      <Image Name="IPhoto_1" Stretch="UniformToFill" >
-                        <Image.Clip>
-                          <RectangleGeometry Rect="0,0,168,100" />
-                        </Image.Clip>
-                      </Image>
+                      <Image Name="IPhoto_1"></Image>
                     </Border>
                     <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="1" Name="BTRemovePhoto_1" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
@@ -109,11 +101,7 @@
                   <!-- Uploaded photo with a button to remove it -->
                   <StackPanel Name="SPPhoto_2" IsVisible="false">
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                      <Image Name="IPhoto_2" Stretch="UniformToFill" >
-                        <Image.Clip>
-                          <RectangleGeometry Rect="0,0,168,100" />
-                        </Image.Clip>
-                      </Image>
+                      <Image Name="IPhoto_2"></Image>
                     </Border>
                     <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="2" Name="BTRemovePhoto_2" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
@@ -124,11 +112,7 @@
                   <!-- Uploaded photo with a button to remove it -->
                   <StackPanel Name="SPPhoto_3" IsVisible="false">
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                      <Image Name="IPhoto_3" Stretch="UniformToFill" >
-                        <Image.Clip>
-                          <RectangleGeometry Rect="0,0,168,100" />
-                        </Image.Clip>
-                      </Image>
+                      <Image Name="IPhoto_3"></Image>
                     </Border>
                     <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="3" Name="BTRemovePhoto_3" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
@@ -139,11 +123,7 @@
                   <!-- Uploaded photo with a button to remove it -->
                   <StackPanel Name="SPPhoto_4" IsVisible="false">
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                      <Image Name="IPhoto_4" Stretch="UniformToFill" >
-                        <Image.Clip>
-                          <RectangleGeometry Rect="0,0,168,100" />
-                        </Image.Clip>
-                      </Image>
+                      <Image Name="IPhoto_4"></Image>
                     </Border>
                     <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="4" Name="BTRemovePhoto_4" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
@@ -154,11 +134,7 @@
                   <!-- Uploaded photo with a button to remove it -->
                   <StackPanel Name="SPPhoto_5" IsVisible="false">
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                      <Image Name="IPhoto_5" Stretch="UniformToFill" >
-                        <Image.Clip>
-                          <RectangleGeometry Rect="0,0,168,100" />
-                        </Image.Clip>
-                      </Image>
+                      <Image Name="IPhoto_5"></Image>
                     </Border>
                     <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="5" Name="BTRemovePhoto_5" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
@@ -169,11 +145,7 @@
                   <!-- Uploaded photo with a button to remove it -->
                   <StackPanel Name="SPPhoto_6" IsVisible="false">
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                      <Image Name="IPhoto_6" Stretch="UniformToFill" >
-                        <Image.Clip>
-                          <RectangleGeometry Rect="0,0,168,100" />
-                        </Image.Clip>
-                      </Image>
+                      <Image Name="IPhoto_6"></Image>
                     </Border>
                     <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="6" Name="BTRemovePhoto_6" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
@@ -184,11 +156,7 @@
                   <!-- Uploaded photo with a button to remove it -->
                   <StackPanel Name="SPPhoto_7" IsVisible="false">
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
-                      <Image Name="IPhoto_7" Stretch="UniformToFill" >
-                        <Image.Clip>
-                          <RectangleGeometry Rect="0,0,168,100" />
-                        </Image.Clip>
-                      </Image>
+                      <Image Name="IPhoto_7"></Image>
                     </Border>
                     <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="7" Name="BTRemovePhoto_7" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
@@ -217,8 +185,8 @@
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
                 <StackPanel Orientation="Horizontal" Margin="20 -5 0 0">
-                    <TextBox Name="TBPrice" Classes="TextBoxBackground" MaxLength="10" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Margin="0 10 10 0" FontSize="16"/>
-                   <TextBlock Text="XRC" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Normal"/>
+                  <TextBox Name="TBPrice" Classes="TextBoxBackground" MaxLength="10" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Margin="0 10 10 0" FontSize="16"/>
+                  <TextBlock Text="XRC" Classes="H1" Margin="10 0 0 0" VerticalAlignment="Center" FontSize="16" FontWeight="Normal"/>
                   <!--
                     <VirtualizingStackPanel>
                         <ComboBox Name="CBPriceType" Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" FontSize="16" Margin="0 10 50 0" Padding="10" Width="100" HorizontalAlignment="Left">

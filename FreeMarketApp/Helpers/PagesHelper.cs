@@ -111,7 +111,7 @@ namespace FreeMarketApp.Helpers
 
                     var skynetHelper = new SkynetHelper();
                     var skynetStream = skynetHelper.DownloadFromSkynet(userManager.UserData.Photo, _logger);
-                    iPhoto.Source = new Bitmap(skynetStream);
+                    if (skynetStream != null) iPhoto.Source = new Bitmap(skynetStream);
                 }
             }
         }

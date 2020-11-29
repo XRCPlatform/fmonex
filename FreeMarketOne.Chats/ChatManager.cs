@@ -341,7 +341,7 @@ namespace FreeMarketOne.Chats
                             newChatItem.DateCreated = receivedChatItem.DateCreated;
                             newChatItem.Message = receivedChatItem.Message;
                             newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
-                            newChatItem.Type = (int)DetectWhoIm(localChat);
+                            newChatItem.Type = (int)DetectWhoIm(localChat, false);
                             newChatItem.Propagated = true;
 
                             _logger.Information("Add a new item to chat item.");
@@ -356,7 +356,7 @@ namespace FreeMarketOne.Chats
                             _logger.Information("Saving local chat with new data.");
 
                             SaveChat(localChat);
-                        }
+                        } 
 
                         _logger.Information("Returning data.");
                         response.SendMultipartMessage(clientMessage);
@@ -554,7 +554,7 @@ namespace FreeMarketOne.Chats
                     var newChatItem = new ChatItem();
                     newChatItem.Message = Convert.ToBase64String(aes.Encrypt(Encoding.UTF8.GetBytes(message)));
                     newChatItem.DateCreated = DateTime.UtcNow;
-                    newChatItem.Type = (int)DetectWhoIm(chatData);
+                    newChatItem.Type = (int)DetectWhoIm(chatData, true);
                     newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
 
                     chatData.ChatItems.Add(newChatItem);
@@ -569,29 +569,47 @@ namespace FreeMarketOne.Chats
         /// </summary>
         /// <param name="chatData"></param>
         /// <returns></returns>
-        private ChatItemTypeEnum DetectWhoIm(ChatDataV1 chatData)
+        private ChatItemTypeEnum DetectWhoIm(ChatDataV1 chatData, bool isMyMessage)
         {
             _logger.Information(string.Format("Detecting whoIm."));
 
-            var marketItem = chatData.MarketItem;
-
-            var userManager = _userManager;
-            var userPubKey = userManager.GetCurrentUserPublicKey();
-            var marketItemBytes = marketItem.ToByteArrayForSign();
-
-            var signaturePubKeys = UserPublicKey.Recover(marketItemBytes, marketItem.Signature);
-
-            foreach (var itemPubKey in signaturePubKeys)
+            if ((chatData.ChatItems != null) && (chatData.ChatItems.Any()))
             {
-                if (itemPubKey.SequenceEqual(userPubKey))
-                {
-                    _logger.Information(string.Format("Im Seller."));
-                    return ChatItemTypeEnum.Seller;
-                }
-            }
+                var firstItem = chatData.ChatItems.First();
 
-            _logger.Information(string.Format("Im Buyer."));
-            return ChatItemTypeEnum.Buyer;
+                if (isMyMessage)
+                {
+                    if (firstItem.Type == (int)ChatItemTypeEnum.Seller)
+                    {
+                        _logger.Information(string.Format("Im Seller {0}", isMyMessage));
+                        return ChatItemTypeEnum.Seller;
+                    } 
+                    else
+                    {
+                        _logger.Information(string.Format("Im Buyer. {0}", isMyMessage));
+                        return ChatItemTypeEnum.Buyer;
+                    }
+                } 
+                else
+                {
+                    if (firstItem.Type == (int)ChatItemTypeEnum.Seller)
+                    {
+                        _logger.Information(string.Format("Im Buyer. {0}", isMyMessage));
+                        return ChatItemTypeEnum.Buyer;
+                    }
+                    else
+                    {
+                        _logger.Information(string.Format("Im Seller {0}", isMyMessage));
+                        return ChatItemTypeEnum.Seller;
+                    }
+                }
+            } 
+            else
+            {
+                //case of first message (first is message from seller because of it we are buyer)
+                _logger.Information(string.Format("Im Buyer. {0}", isMyMessage));
+                return ChatItemTypeEnum.Buyer;
+            }
         }
 
         /// <summary>

@@ -45,9 +45,9 @@
 							  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 							  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
-								Height="15" Stretch="Fill" Fill="Aquamarine" Width="16" Margin="0,1,5,0"/>
+								Height="15" Stretch="Fill" Width="16" Margin="0,1,5,0"/>
                             <!-- Rating number binding -->
-                            <TextBlock Classes="H1" Name="TBStars" Text="N/A" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock Classes="H1" Name="TBStars" Text="0" FontWeight="Bold" FontSize="16"/>
                             <TextBlock Classes="H2" Text=" out of 5" FontSize="16"/>
                         </StackPanel>
                     </StackPanel>

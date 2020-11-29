@@ -146,6 +146,9 @@ namespace FreeMarketApp.Views.Pages
                         else
                         {
                             chatManager.PrepaireMessageToWorker(chatData, tbMessage.Text);
+
+                            LoadChatByProduct(signature);
+                            tbMessage.Text = string.Empty;
                         }
                     }
                 }

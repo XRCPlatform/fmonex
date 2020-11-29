@@ -155,7 +155,7 @@ namespace FreeMarketApp.Views.Pages
                 var tbDealType = this.FindControl<TextBlock>("TBDealType");
                 var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
                 var tbXRCReceivingTransactionHash = Instance.FindControl<TextBlock>("TBXRCReceivingTransactionHash");
-                
+                var tbXRCReceivingTransactionHashLabel = Instance.FindControl<TextBlock>("TBXRCReceivingTransactionHashLabel");
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
@@ -167,9 +167,19 @@ namespace FreeMarketApp.Views.Pages
                 tbCategory.Text = SharedResources.ResourceManager.GetString("MarketCategory_Label_" + offer.Category.ToString());
                 tbDealType.Text = SharedResources.ResourceManager.GetString("MarketDealType_Label_" + offer.DealType.ToString());
                 tbXRCReceivingAddress.Text = offer.XRCReceivingAddress;
-                tbXRCReceivingTransactionHash.Text = offer.XRCTransactionHash;
+
+                //we need to hide this value in case of active offer
+                if (!string.IsNullOrEmpty(offer.XRCTransactionHash))
+                {
+                    tbXRCReceivingTransactionHash.Text = offer.XRCTransactionHash;
+                } 
+                else
+                {
+                    tbXRCReceivingTransactionHash.IsVisible = false;
+                    tbXRCReceivingTransactionHashLabel.IsVisible = false;
+                }
+
                 tbPrice.Text = offer.Price.ToString();
-                //tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)offer.PriceType).ToString();
                 btEdit.Tag = signature;
                 btRemove.Tag = signature;
 

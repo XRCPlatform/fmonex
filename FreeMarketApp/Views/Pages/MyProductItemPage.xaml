@@ -161,7 +161,7 @@
                 <TextBlock Classes="H1"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
               
-              <TextBlock Classes="H1" Text="XRC Receiving Transaction hash" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <TextBlock Name="TBXRCReceivingTransactionHashLabel" Classes="H1" Text="XRC Receiving Transaction hash" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <TextBlock Classes="H1"  Name="TBXRCReceivingTransactionHash" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>

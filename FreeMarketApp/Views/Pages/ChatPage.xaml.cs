@@ -70,12 +70,16 @@ namespace FreeMarketApp.Views.Pages
                     if ((_activeChat != null) && (_activeChat.MarketItem != null))
                     {
                         var chatData = chatManager.GetChat(_activeChat.MarketItem.Hash);
-                        if (chatData.ChatItems.Count != _activeChat.ChatItems.Count)
+                        if (chatData.ChatItems != null)
                         {
-                            Dispatcher.UIThread.InvokeAsync(() =>
+                            if ((chatData.ChatItems.Count != _activeChat.ChatItems.Count) ||
+                                ((chatData.ChatItems.Count == 1) && chatManager.IsChatValid(chatData.ChatItems)))
                             {
-                                Instance.LoadChatByProduct(_activeChat.MarketItem.Hash);
-                            });
+                                Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    Instance.LoadChatByProduct(_activeChat.MarketItem.Hash);
+                                });
+                            }
                         }
                     } 
 
@@ -83,7 +87,7 @@ namespace FreeMarketApp.Views.Pages
                 },
                 _cancellationToken.Token,
                 repeatEvery: TimeSpans.FiveSeconds,
-                startAfter: TimeSpans.FiveSeconds);
+                startAfter: TimeSpans.TenSeconds);
             }
         }
 

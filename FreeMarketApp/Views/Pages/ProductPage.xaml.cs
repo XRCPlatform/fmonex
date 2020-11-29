@@ -175,8 +175,6 @@ namespace FreeMarketApp.Views.Pages
                 publicProfilePage.LoadUser(arrUserData[0], arrUserData[1]);
 
                 PagesHelper.Switch(mainWindow, publicProfilePage);
-
-                ClearForm();
             }
         }
 

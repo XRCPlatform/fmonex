@@ -52,7 +52,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
       <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
 		  <DockPanel>
-			<TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="Super nice gold bar" TextWrapping="Wrap" Margin="20" FontSize="28" FontWeight="Normal"/>
+			<TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="20" FontSize="28" FontWeight="Normal"/>
 			<ToggleButton Classes="bookmark" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top"/>
 		  </DockPanel>
 

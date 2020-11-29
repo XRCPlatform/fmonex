@@ -22,5 +22,6 @@ namespace FreeMarketOne.Chats
         List<ChatItem> DecryptChatItems(List<ChatItem> chatItems);
         void PrepaireMessageToWorker(ChatDataV1 chatData, string message);
         bool IsChatValid(List<ChatItem> chatItems);
+        ChatDataV1 GetChat(string hash);
     }
 }

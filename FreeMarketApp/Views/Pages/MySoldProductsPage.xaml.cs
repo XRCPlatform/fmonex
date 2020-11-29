@@ -120,14 +120,14 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            var signature = ((Button)sender).Tag.ToString();
+            var hash = ((Button)sender).Tag.ToString();
 
-            var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
+            var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Hash == hash);
             if ((marketItem != null) && (!marketItem.IsInPool))
             {
                 var chatPage = ChatPage.Instance;
                 chatPage.SetBackPage(GetInstance());
-                chatPage.LoadChatByProduct(signature);
+                chatPage.LoadChatByProduct(marketItem.Hash);
 
                 PagesHelper.Switch(mainWindow, chatPage);
             }

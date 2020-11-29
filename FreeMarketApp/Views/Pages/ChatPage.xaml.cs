@@ -80,9 +80,9 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonChat_Click(object sender, RoutedEventArgs args)
         {
-            var signature = ((Button)sender).Tag.ToString();
+            var hash = ((Button)sender).Tag.ToString();
 
-            LoadChatByProduct(signature);
+            LoadChatByProduct(hash);
         }
 
         public void SetBackPage(UserControl back)
@@ -93,7 +93,7 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonSendMessage_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var signature = ((Button)sender).Tag.ToString();
+            var hash = ((Button)sender).Tag.ToString();
 
             var errorCount = 0;
             var errorMessages = new StringBuilder();
@@ -122,7 +122,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Signature == signature);
+                var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Hash == hash);
                 if (chatData != null)
                 {
                     var chatManager = FMONE.Current.Chats;
@@ -147,7 +147,7 @@ namespace FreeMarketApp.Views.Pages
                         {
                             chatManager.PrepaireMessageToWorker(chatData, tbMessage.Text);
 
-                            LoadChatByProduct(signature);
+                            LoadChatByProduct(hash);
                             tbMessage.Text = string.Empty;
                         }
                     }
@@ -163,9 +163,10 @@ namespace FreeMarketApp.Views.Pages
         }
 
   
-        public void LoadChatByProduct(string signature)
+        public void LoadChatByProduct(string hash)
         {
-            var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Signature == signature);
+            var chatManager = FMONE.Current.Chats;
+            var chatData = chatManager.GetChat(hash);
 
             if (chatData != null)
             {
@@ -174,9 +175,8 @@ namespace FreeMarketApp.Views.Pages
                 var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
                 var tbMessage = Instance.FindControl<TextBox>("TBMessage");
                 var btWithoutMessage = Instance.FindControl<Border>("BIWithoutMessage");
-                var chatManager = FMONE.Current.Chats;
 
-                btSendMessage.Tag = chatData.MarketItem.Signature;
+                btSendMessage.Tag = chatData.MarketItem.Hash;
                 tbTitle.Text = chatData.MarketItem.Title;
                 srTitle.IsVisible = true;
 

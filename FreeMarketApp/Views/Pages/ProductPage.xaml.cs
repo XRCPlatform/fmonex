@@ -132,7 +132,7 @@ namespace FreeMarketApp.Views.Pages
                             MessageBox.MessageBoxButtons.Ok);
 
                         var chatPage = ChatPage.Instance;
-                        chatPage.LoadChatByProduct(_offer.Signature);
+                        chatPage.LoadChatByProduct(_offer.Hash);
 
                         PagesHelper.Switch(mainWindow, chatPage);
 

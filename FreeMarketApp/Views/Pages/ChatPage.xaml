@@ -58,7 +58,7 @@
       <DockPanel Margin="250 95 0 0">
 
         <!-- Scrollviewer should always scroll to the bottom, can be done with a code -->
-        <ScrollViewer DockPanel.Dock="Top" Margin="0 0 0 80" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Name="SVChat" DockPanel.Dock="Top" Margin="0 0 0 80" VerticalContentAlignment="Bottom" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel HorizontalAlignment="Stretch">
 
             <ItemsControl Items="{Binding ChatItems}">

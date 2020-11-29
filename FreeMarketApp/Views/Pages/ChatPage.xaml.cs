@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using DynamicData;
@@ -11,6 +12,7 @@ using Serilog;
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
@@ -161,7 +163,7 @@ namespace FreeMarketApp.Views.Pages
             }
         }
   
-        public void LoadChatByProduct(string hash)
+        public async void LoadChatByProduct(string hash)
         {
             var chatManager = FMONE.Current.Chats;
             var chatData = chatManager.GetChat(hash);
@@ -173,6 +175,7 @@ namespace FreeMarketApp.Views.Pages
                 var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
                 var tbMessage = Instance.FindControl<TextBox>("TBMessage");
                 var btWithoutMessage = Instance.FindControl<Border>("BIWithoutMessage");
+                var svChat = Instance.FindControl<ScrollViewer>("SVChat");
 
                 btSendMessage.Tag = chatData.MarketItem.Hash;
                 tbTitle.Text = chatData.MarketItem.Title;
@@ -193,6 +196,12 @@ namespace FreeMarketApp.Views.Pages
                     btSendMessage.IsEnabled = false;
                     tbMessage.IsEnabled = false;
                 }
+
+                await Task.Delay(TimeSpans.Ms100);
+                Console.WriteLine("X" + svChat.Offset.X);
+                Console.WriteLine("X1" + svChat.Extent.Height);
+                Console.WriteLine("X2" + svChat.Viewport.Height);
+                svChat.Offset = new Vector(svChat.Offset.X, svChat.Extent.Height - svChat.Viewport.Height);
             }
         }
 

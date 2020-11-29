@@ -121,10 +121,8 @@ namespace FreeMarketApp.Views.Pages
             }            
         }
 
-
         public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
         {
-
             int thisPageSize = selectedPageSize;
 
             string selection = ((Avalonia.Controls.ContentControl)((Avalonia.Controls.Primitives.SelectingItemsControl)sender).SelectedItem).Content.ToString();

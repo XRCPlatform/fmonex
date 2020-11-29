@@ -208,7 +208,7 @@ namespace FreeMarketOne.Chats
         /// <param name="args"></param>
         private static void ClientOnReceiveReady(object sender, NetMQSocketEventArgs args)
         {
-            //Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
+            Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
         }
 
         /// <summary>
@@ -313,6 +313,7 @@ namespace FreeMarketOne.Chats
 
                         var receivedChatItem = new ChatMessage(clientMessage);
 
+                        _logger.Information("Loading new chat message.");
                         var localChat = GetChat(receivedChatItem.Hash);
                         if (localChat != null)
                         {
@@ -323,7 +324,10 @@ namespace FreeMarketOne.Chats
                             newChatItem.Type = (int)DetectWhoIm(localChat);
                             newChatItem.Propagated = true;
 
+                            _logger.Information("Add a new item to chat item.");
+                            if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
                             localChat.ChatItems.Add(newChatItem);
+
                             if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
                             {
                                 localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
@@ -334,6 +338,7 @@ namespace FreeMarketOne.Chats
                             SaveChat(localChat);
                         }
 
+                        _logger.Information("Returning data.");
                         response.SendMultipartMessage(clientMessage);
                     }
                 }
@@ -546,6 +551,8 @@ namespace FreeMarketOne.Chats
         /// <returns></returns>
         private ChatItemTypeEnum DetectWhoIm(ChatDataV1 chatData)
         {
+            _logger.Information(string.Format("Detecting whoIm."));
+
             var marketItem = chatData.MarketItem;
 
             var userManager = _userManager;
@@ -558,10 +565,12 @@ namespace FreeMarketOne.Chats
             {
                 if (itemPubKey.SequenceEqual(userPubKey))
                 {
+                    _logger.Information(string.Format("Im Seller."));
                     return ChatItemTypeEnum.Seller;
                 }
             }
 
+            _logger.Information(string.Format("Im Buyer."));
             return ChatItemTypeEnum.Buyer;
         }
 

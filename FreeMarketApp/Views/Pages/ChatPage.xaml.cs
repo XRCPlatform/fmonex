@@ -122,11 +122,10 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                var chatData = ((ChatPageViewModel)DataContext).Items.FirstOrDefault(a => a.MarketItem.Hash == hash);
+                var chatManager = FMONE.Current.Chats;
+                var chatData = chatManager.GetChat(hash);
                 if (chatData != null)
                 {
-                    var chatManager = FMONE.Current.Chats;
-
                     if (string.IsNullOrEmpty(chatData.SellerEndPoint))
                     {
                         await MessageBox.Show(mainWindow,
@@ -161,7 +160,6 @@ namespace FreeMarketApp.Views.Pages
                     MessageBox.MessageBoxButtons.Ok);
             }
         }
-
   
         public void LoadChatByProduct(string hash)
         {

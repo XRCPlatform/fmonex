@@ -101,7 +101,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(tbXRCReceivingTransaction.Text) || (tbXRCReceivingTransaction.Text.Length == 64))
+                    if (string.IsNullOrEmpty(tbXRCReceivingTransaction.Text) || (tbXRCReceivingTransaction.Text.Length != 64))
                     {
                         await MessageBox.Show(mainWindow,
                               string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_PleaseProvideXRCTransactionHash")),

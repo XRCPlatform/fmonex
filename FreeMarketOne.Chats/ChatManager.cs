@@ -33,8 +33,6 @@ namespace FreeMarketOne.Chats
             Seller = 1
         }
 
-        private const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
-
         private IBaseConfiguration _configuration;
         private CancellationTokenSource _cancellationToken { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
@@ -276,8 +274,13 @@ namespace FreeMarketOne.Chats
 
                 try
                 {
-                    item.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
-                    result.Add(item);
+                    var processedItem = new ChatItem();
+                    processedItem.DateCreated = item.DateCreated;
+                    processedItem.ExtraMessage = item.ExtraMessage;
+                    processedItem.Propagated = item.Propagated;
+                    processedItem.Type = item.Type;
+                    processedItem.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
+                    result.Add(processedItem);
                 }
                 catch (Exception )
                 {
@@ -403,7 +406,7 @@ namespace FreeMarketOne.Chats
 
             for (int i = 0; i < stringChars.Length; i++)
             {
-                stringChars[i] = CHARS[random.Next(CHARS.Length)];
+                stringChars[i] = TextHelper.CHARS[random.Next(TextHelper.CHARS.Length)];
             }
 
             return new string(stringChars);

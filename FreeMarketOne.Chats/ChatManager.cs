@@ -289,6 +289,23 @@ namespace FreeMarketOne.Chats
         }
 
         /// <summary>
+        /// Checking if we can start with chat
+        /// </summary>
+        /// <param name="chatItems"></param>
+        /// <returns></returns>
+        public bool IsChatValid(List<ChatItem> chatItems)
+        {
+            if (chatItems.First().Propagated)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Load separate chat listener ovwe NetMQ
         /// </summary>
         private void StartMQListener()

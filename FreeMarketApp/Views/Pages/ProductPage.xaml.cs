@@ -69,7 +69,7 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
             var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
-            var TBXRCReceivingTransaction = Instance.FindControl<TextBox>("TBXRCReceivingTransaction");
+            var tbXRCReceivingTransaction = Instance.FindControl<TextBox>("TBXRCReceivingTransaction");
 
             var result = await MessageBox.Show(mainWindow,
                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_BuyProduct"), approxSpanToNewBlock.TotalSeconds),
@@ -101,7 +101,7 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    if (String.IsNullOrEmpty(TBXRCReceivingTransaction.Text))
+                    if (string.IsNullOrEmpty(tbXRCReceivingTransaction.Text) || (tbXRCReceivingTransaction.Text.Length == 64))
                     {
                         await MessageBox.Show(mainWindow,
                               string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_PleaseProvideXRCTransactionHash")),
@@ -110,7 +110,7 @@ namespace FreeMarketApp.Views.Pages
                         return;
                     }
 
-                    _offer.XRCTransactionHash = TBXRCReceivingTransaction.Text;
+                    _offer.XRCTransactionHash = tbXRCReceivingTransaction.Text;
                     //sign market data and generating chain connection
                     _offer = FMONE.Current.Markets.SignBuyerMarketData(
                         _offer,

@@ -120,25 +120,25 @@
                 <TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
               </StackPanel>
 
-              <TextBlock Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <TextBlock Name="TBFinenessLabel" Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--Manufacturer binding -->
                 <TextBlock Classes="H1" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
-              <TextBlock Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <TextBlock Name="TBManufacturerLabel" Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--Manufacturer binding -->
                 <TextBlock Classes="H1" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
-              <TextBlock Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <TextBlock Name="TBSizeLabel" Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--Size binding -->
                 <TextBlock Classes="H1" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
-              <TextBlock Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <TextBlock Name="TBWeightInGramsLabel" Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--TBWeightInGrams binding -->
                 <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>

@@ -218,24 +218,22 @@ namespace FreeMarketApp.Views.Pages
                 var tbSellerReviewsCount = Instance.FindControl<TextBlock>("TBSellerReviewsCount");
                 var btSeller = Instance.FindControl<Button>("BTSeller");
                 var btBuyButton = Instance.FindControl<Button>("BTBuyButton");
-                var tbManufacturer = Instance.FindControl<TextBlock>("TBManufacturer");
-                var tbFineness = Instance.FindControl<TextBlock>("TBFineness");
-                var tbWeightInGrams = Instance.FindControl<TextBlock>("TBWeightInGrams");
-                var tbSize = Instance.FindControl<TextBlock>("TBSize");
+
                 var tbXRCReceivingAddress = Instance.FindControl<TextBox>("TBXRCReceivingAddress");
                 
-
                 tbTitle.Text = _offer.Title;
                 tbDescription.Text = _offer.Description;
                 tbShipping.Text = _offer.Shipping;
                 tbPrice.Text = _offer.Price.ToString();
-                tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)_offer.PriceType).ToString();
+                tbPriceType.Text = ((ProductPriceTypeEnum)_offer.PriceType).ToString();
                 btBuyButton.Tag = _offer.Signature;            
-                tbManufacturer.Text = _offer.Manufacturer;
-                tbFineness.Text = _offer.Fineness;
-                tbWeightInGrams.Text = _offer.WeightInGrams.ToString();
-                tbSize.Text = _offer.Size;
                 tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
+
+                //we need to hide these value in case of some active offers
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBManufacturer", "TBManufacturerLabel", offer.Manufacturer);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBFineness", "TBFinenessLabel", offer.Fineness);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBSize", "TBSizeLabel", offer.Size);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBWeightInGrams", "TBWeightInGramsLabel", offer.WeightInGrams.ToString());
 
                 btBuyButton.IsEnabled = true;
                 if (!String.IsNullOrEmpty(_offer.BuyerSignature) || _offer.State == (int)ProductStateEnum.Sold)

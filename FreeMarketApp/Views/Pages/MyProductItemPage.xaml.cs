@@ -146,38 +146,23 @@ namespace FreeMarketApp.Views.Pages
                 //var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
                 var btEdit = Instance.FindControl<Button>("BTEdit");
                 var btRemove = Instance.FindControl<Button>("BTRemove");
-
-                var tbManufacturer = this.FindControl<TextBlock>("TBManufacturer");
-                var tbFineness = this.FindControl<TextBlock>("TBFineness");
-                var tbSize = this.FindControl<TextBlock>("TBSize");
-                var tbWeightInGrams = this.FindControl<TextBlock>("TBWeightInGrams");
                 var tbCategory = this.FindControl<TextBlock>("TBCategory");
                 var tbDealType = this.FindControl<TextBlock>("TBDealType");
                 var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
-                var tbXRCReceivingTransactionHash = Instance.FindControl<TextBlock>("TBXRCReceivingTransactionHash");
-                var tbXRCReceivingTransactionHashLabel = Instance.FindControl<TextBlock>("TBXRCReceivingTransactionHashLabel");
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
                 tbShipping.Text = offer.Shipping;
-                tbManufacturer.Text = offer.Manufacturer;
-                tbFineness.Text = offer.Fineness;
-                tbSize.Text = offer.Size;
-                tbWeightInGrams.Text = offer.WeightInGrams.ToString();
                 tbCategory.Text = SharedResources.ResourceManager.GetString("MarketCategory_Label_" + offer.Category.ToString());
                 tbDealType.Text = SharedResources.ResourceManager.GetString("MarketDealType_Label_" + offer.DealType.ToString());
                 tbXRCReceivingAddress.Text = offer.XRCReceivingAddress;
 
                 //we need to hide this value in case of active offer
-                if (!string.IsNullOrEmpty(offer.XRCTransactionHash))
-                {
-                    tbXRCReceivingTransactionHash.Text = offer.XRCTransactionHash;
-                } 
-                else
-                {
-                    tbXRCReceivingTransactionHash.IsVisible = false;
-                    tbXRCReceivingTransactionHashLabel.IsVisible = false;
-                }
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBXRCReceivingTransactionHash", "TBXRCReceivingTransactionHashLabel", offer.XRCTransactionHash);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBManufacturer", "TBManufacturerLabel", offer.Manufacturer);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBFineness", "TBFinenessLabel", offer.Fineness);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBSize", "TBSizeLabel", offer.Size);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBWeightInGrams", "TBWeightInGramsLabel", offer.WeightInGrams.ToString());
 
                 tbPrice.Text = offer.Price.ToString();
                 btEdit.Tag = signature;

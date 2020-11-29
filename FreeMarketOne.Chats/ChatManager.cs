@@ -55,8 +55,6 @@ namespace FreeMarketOne.Chats
 
         public bool IsRunning => Interlocked.Read(ref _running) == 1;
 
-        public event EventHandler<string> NewChatReceivedEvent;
-
         public ChatManager(IBaseConfiguration configuration,
             UserPrivateKey privateKey,
             IUserManager userManager,
@@ -362,16 +360,6 @@ namespace FreeMarketOne.Chats
 
                         _logger.Information("Returning data.");
                         response.SendMultipartMessage(clientMessage);
-
-                        //raise a event when new message chat arrive
-                        try
-                        {
-                            NewChatReceivedEvent?.Invoke(null, receivedChatItem.Hash);
-                        }
-                        catch (Exception)
-                        {
-                            //silence please
-                        }
                     }
                 }
             });

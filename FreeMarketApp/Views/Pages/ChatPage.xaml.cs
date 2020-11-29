@@ -2,16 +2,19 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using DynamicData;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.Extensions.Helpers;
 using Serilog;
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
@@ -22,7 +25,10 @@ namespace FreeMarketApp.Views.Pages
         private static ChatPage _instance;
         private ILogger _logger;
         private UserControl _backPage;
-        private string _activeChatHash;
+        private ChatDataV1 _activeChat;
+        private IAsyncLoopFactory _asyncLoopFactory { get; set; }
+        private CancellationTokenSource _cancellationToken { get; set; }
+
         public static ChatPage Instance
         {
             get
@@ -41,11 +47,6 @@ namespace FreeMarketApp.Views.Pages
             return _instance;
         }
 
-        public string GetActiveChatHash()
-        {
-            return _instance._activeChatHash;
-        }
-
         public ChatPage()
         {
             if (FMONE.Current.Logger != null)
@@ -61,8 +62,28 @@ namespace FreeMarketApp.Views.Pages
 
                 var chats = chatManager.GetAllChats();
                 DataContext = new ChatPageViewModel(chats);
+                _cancellationToken = new CancellationTokenSource();
 
-                FMONE.Current.Chats.NewChatReceivedEvent += new EventHandler<string>(NewChatReceivedEvent);
+                _asyncLoopFactory = new AsyncLoopFactory(_logger);
+                IAsyncLoop periodicLogLoop = _asyncLoopFactory.Run("ChatChecker", (cancellation) =>
+                {
+                    if ((_activeChat != null) && (_activeChat.MarketItem != null))
+                    {
+                        var chatData = chatManager.GetChat(_activeChat.MarketItem.Hash);
+                        if (chatData.ChatItems.Count != _activeChat.ChatItems.Count)
+                        {
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                Instance.LoadChatByProduct(_activeChat.MarketItem.Hash);
+                            });
+                        }
+                    } 
+
+                    return Task.CompletedTask;
+                },
+                _cancellationToken.Token,
+                repeatEvery: TimeSpans.FiveSeconds,
+                startAfter: TimeSpans.FiveSeconds);
             }
         }
 
@@ -170,19 +191,11 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
-        private void NewChatReceivedEvent(object sender, string hash)
-        {
-            if (_instance._activeChatHash == hash)
-            {
-                LoadChatByProduct(hash);
-            }
-        }
-
         public async void LoadChatByProduct(string hash)
         {
             var chatManager = FMONE.Current.Chats;
             var chatData = chatManager.GetChat(hash);
-            _instance._activeChatHash = hash;
+            _activeChat = chatData;
 
             if (chatData != null)
             {
@@ -221,6 +234,11 @@ namespace FreeMarketApp.Views.Pages
         private void ClearForm()
         {
             _instance = null;
+        }
+
+        public void Dispose()
+        {
+            _cancellationToken.Cancel();
         }
     }
 }

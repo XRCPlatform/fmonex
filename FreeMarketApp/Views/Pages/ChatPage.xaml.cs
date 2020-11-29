@@ -21,8 +21,8 @@ namespace FreeMarketApp.Views.Pages
     {
         private static ChatPage _instance;
         private ILogger _logger;
-        private UserControl backPage;
-
+        private UserControl _backPage;
+        private string _activeChatHash;
         public static ChatPage Instance
         {
             get
@@ -41,6 +41,11 @@ namespace FreeMarketApp.Views.Pages
             return _instance;
         }
 
+        public string GetActiveChatHash()
+        {
+            return _instance._activeChatHash;
+        }
+
         public ChatPage()
         {
             if (FMONE.Current.Logger != null)
@@ -56,6 +61,8 @@ namespace FreeMarketApp.Views.Pages
 
                 var chats = chatManager.GetAllChats();
                 DataContext = new ChatPageViewModel(chats);
+
+                FMONE.Current.Chats.NewChatReceivedEvent += new EventHandler<string>(NewChatReceivedEvent);
             }
         }
 
@@ -68,9 +75,9 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            if (backPage != null)
+            if (_backPage != null)
             {
-                PagesHelper.Switch(mainWindow, backPage);
+                PagesHelper.Switch(mainWindow, _backPage);
             }
             else
             {
@@ -89,7 +96,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void SetBackPage(UserControl back)
         {
-            backPage = back;
+            _backPage = back;
         }
 
         public async void ButtonSendMessage_Click(object sender, RoutedEventArgs args)
@@ -162,11 +169,20 @@ namespace FreeMarketApp.Views.Pages
                     MessageBox.MessageBoxButtons.Ok);
             }
         }
-  
+
+        private void NewChatReceivedEvent(object sender, string hash)
+        {
+            if (_instance._activeChatHash == hash)
+            {
+                LoadChatByProduct(hash);
+            }
+        }
+
         public async void LoadChatByProduct(string hash)
         {
             var chatManager = FMONE.Current.Chats;
             var chatData = chatManager.GetChat(hash);
+            _instance._activeChatHash = hash;
 
             if (chatData != null)
             {
@@ -198,9 +214,6 @@ namespace FreeMarketApp.Views.Pages
                 }
 
                 await Task.Delay(TimeSpans.Ms100);
-                Console.WriteLine("X" + svChat.Offset.X);
-                Console.WriteLine("X1" + svChat.Extent.Height);
-                Console.WriteLine("X2" + svChat.Viewport.Height);
                 svChat.Offset = new Vector(svChat.Offset.X, svChat.Extent.Height - svChat.Viewport.Height);
             }
         }

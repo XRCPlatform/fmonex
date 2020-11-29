@@ -23,5 +23,7 @@ namespace FreeMarketOne.Chats
         void PrepaireMessageToWorker(ChatDataV1 chatData, string message);
         bool IsChatValid(List<ChatItem> chatItems);
         ChatDataV1 GetChat(string hash);
+
+        event EventHandler<string> NewChatReceivedEvent;
     }
 }

@@ -146,30 +146,25 @@ namespace FreeMarketApp.Views.Pages
                 //var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
                 var btEdit = Instance.FindControl<Button>("BTEdit");
                 var btRemove = Instance.FindControl<Button>("BTRemove");
-
-                var tbManufacturer = this.FindControl<TextBlock>("TBManufacturer");
-                var tbFineness = this.FindControl<TextBlock>("TBFineness");
-                var tbSize = this.FindControl<TextBlock>("TBSize");
-                var tbWeightInGrams = this.FindControl<TextBlock>("TBWeightInGrams");
                 var tbCategory = this.FindControl<TextBlock>("TBCategory");
                 var tbDealType = this.FindControl<TextBlock>("TBDealType");
                 var tbXRCReceivingAddress = Instance.FindControl<TextBlock>("TBXRCReceivingAddress");
-                var tbXRCReceivingTransactionHash = Instance.FindControl<TextBlock>("TBXRCReceivingTransactionHash");
-                
 
                 tbTitle.Text = offer.Title;
                 tbDescription.Text = offer.Description;
                 tbShipping.Text = offer.Shipping;
-                tbManufacturer.Text = offer.Manufacturer;
-                tbFineness.Text = offer.Fineness;
-                tbSize.Text = offer.Size;
-                tbWeightInGrams.Text = offer.WeightInGrams.ToString();
                 tbCategory.Text = SharedResources.ResourceManager.GetString("MarketCategory_Label_" + offer.Category.ToString());
                 tbDealType.Text = SharedResources.ResourceManager.GetString("MarketDealType_Label_" + offer.DealType.ToString());
                 tbXRCReceivingAddress.Text = offer.XRCReceivingAddress;
-                tbXRCReceivingTransactionHash.Text = offer.XRCTransactionHash;
+
+                //we need to hide this value in case of active offer
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBXRCReceivingTransactionHash", "TBXRCReceivingTransactionHashLabel", offer.XRCTransactionHash);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBManufacturer", "TBManufacturerLabel", offer.Manufacturer);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBFineness", "TBFinenessLabel", offer.Fineness);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBSize", "TBSizeLabel", offer.Size);
+                PagesHelper.HideOrSetValueToTextBlock(Instance, "TBWeightInGrams", "TBWeightInGramsLabel", offer.WeightInGrams.ToString());
+
                 tbPrice.Text = offer.Price.ToString();
-                //tbPriceType.Text = ((MarketManager.ProductPriceTypeEnum)offer.PriceType).ToString();
                 btEdit.Tag = signature;
                 btRemove.Tag = signature;
 

@@ -171,16 +171,15 @@ namespace FreeMarketApp.Views.Pages
                 var tbTitle = Instance.FindControl<TextBlock>("TBTitle");
                 var tbMessage = Instance.FindControl<TextBox>("TBMessage");
                 var btWithoutMessage = Instance.FindControl<Border>("BIWithoutMessage");
+                var chatManager = FMONE.Current.Chats;
 
                 btSendMessage.Tag = chatData.MarketItem.Signature;
                 tbTitle.Text = chatData.MarketItem.Title;
                 srTitle.IsVisible = true;
 
                 ((ChatPageViewModel)DataContext).ChatItems.Clear();
-                if ((chatData.ChatItems != null) && chatData.ChatItems.Any() && (chatData.ChatItems.Count > 1))
+                if ((chatData.ChatItems != null) && chatData.ChatItems.Any() && chatManager.IsChatValid(chatData.ChatItems))
                 {
-                    var chatManager = FMONE.Current.Chats;
-
                     var decryptedChat = chatManager.DecryptChatItems(chatData.ChatItems);
                     ((ChatPageViewModel)DataContext).ChatItems.AddRange(decryptedChat);
                     btWithoutMessage.IsVisible = false;

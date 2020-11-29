@@ -88,6 +88,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void ButtonReviewPage_Click(object sender, RoutedEventArgs args)
         {
+            
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             var signature = ((Button)sender)?.Tag?.ToString();
@@ -99,9 +100,11 @@ namespace FreeMarketApp.Views.Pages
                     var productPage = ProductPage.Instance;
                     productPage.SetBackPage(GetInstance());
                     productPage.LoadProduct(signature);
+                    productPage.ShowReview();
                     PagesHelper.Switch(mainWindow, productPage);
                 }
             }
+            args.Handled = true;
         }
 
         public void ButtonBack_Click(object sender, RoutedEventArgs args)

@@ -671,5 +671,18 @@ namespace FreeMarketOne.Users
                 return result;
             }
         }
+
+        public ReviewUserDataV1 SignReviewData(ReviewUserDataV1 review, UserPrivateKey privateKey)
+        {
+            lock (_locked)
+            {
+                if (review == null) review = new ReviewUserDataV1();                
+                //review.PublicKey = Convert.ToBase64String(PrivateKey.PublicKey.KeyParam.Q.GetEncoded());
+                var bytesToSign = review.ToByteArrayForSign();
+                review.Signature = Convert.ToBase64String(PrivateKey.Sign(bytesToSign));
+                review.Hash = review.GenerateHash();
+                return review;
+            }
+        }
     }
 }

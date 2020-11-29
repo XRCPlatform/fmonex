@@ -35,6 +35,8 @@ namespace FreeMarketOne.Pools
         private List<IBaseItem> _actionItemsList { get; set; }
 
         private readonly object _pollLock;
+        private readonly int SOLD = 1;
+
         private string _memoryPoolFilePath { get; set; }
         private IBaseConfiguration _configuration { get; }
 
@@ -363,6 +365,12 @@ namespace FreeMarketOne.Pools
                     return PoolManagerStates.Errors.StateOfItemIsInProgress;
                 }
 
+                //Verification based on type
+                if (actionItem.GetType() == typeof(ReviewUserDataV1) && (!IsReviewDataValid(actionItem)))
+                {
+                    return PoolManagerStates.Errors.StateOfItemIsInProgress;
+                }
+
                 return null;
             }
             else
@@ -412,6 +420,168 @@ namespace FreeMarketOne.Pools
                         }
                     }
                 }
+            }
+
+            return true;
+        }
+
+        private bool IsReviewDataValid(IBaseItem actionItem)
+        {
+            //TODO: a review can be posted by buyer to seller or a seller to buyer on the same market (transaction basis) 
+
+            var reviewData = (ReviewUserDataV1)actionItem;
+            var reviewBytes = reviewData.ToByteArrayForSign();
+            var buyerPubKeys = UserPublicKey.Recover(reviewBytes, reviewData.Signature);
+
+            bool marketItemExists = false;
+            bool marketItemIsSold = false;
+            bool signedByBuyer = false;
+            //Checking existence of chain of identical items in pool
+            foreach (var itemLocalPoolItem in _actionItemsList)
+            {
+                if (itemLocalPoolItem.GetType() == typeof(ReviewUserDataV1))
+                {
+                    if (((ReviewUserDataV1)itemLocalPoolItem).Signature == reviewData.Signature)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            //Checking existence of chain in staged tx
+            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                if (itemAction.GetType() == typeof(ReviewUserDataV1))
+                                {
+                                    if (((ReviewUserDataV1)itemAction).Signature.Equals(reviewData.Signature))
+                                    {
+                                        return false;
+                                    }
+                                    //this market item has already been reviewed
+                                    if (((ReviewUserDataV1)itemAction).MarketItemHash.Equals(reviewData.MarketItemHash))
+                                    {
+                                        return false;
+                                    }
+                                }
+                                if (itemAction.GetType() == typeof(MarketItemV1))
+                                {
+                                    MarketItemV1 marketData = (MarketItemV1) itemAction;
+                                    if (marketData.Hash == reviewData.MarketItemHash)
+                                    {
+                                        marketItemExists = true;
+                                        if (marketData.State == SOLD)
+                                        {
+                                            marketItemIsSold = true;
+                                        }
+                                        //get buyer pub key and compare to pubkey on review
+                                        if (!string.IsNullOrEmpty(marketData.BuyerSignature))
+                                        {
+                                            var itemMarketBytes = marketData.ToByteArrayForSign();
+                                            var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
+
+                                            foreach (var itemPubKey in itemPubKeys)
+                                            {
+                                                foreach (var buyerPubKey in buyerPubKeys)
+                                                {
+                                                    if (itemPubKey.SequenceEqual(buyerPubKey))
+                                                    {
+                                                        signedByBuyer = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (signedByBuyer)
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Checking for items on chain
+            foreach (var itemTxId in _storage.IterateTransactionIds().ToImmutableHashSet())
+            {
+                var transaction = _storage.GetTransaction<T>(itemTxId);
+
+                if (transaction.Actions.Any())
+                {
+                    foreach (var action in transaction.Actions)
+                    {
+                        if (action.BaseItems.Any())
+                        {
+                            foreach (var itemAction in action.BaseItems)
+                            {
+                                if (itemAction.GetType() == typeof(ReviewUserDataV1))
+                                {
+                                    if (((ReviewUserDataV1)itemAction).Signature.Equals(reviewData.Signature))
+                                    {
+                                        return false;
+                                    }
+                                    //this market item has already been reviewed
+                                    if (((ReviewUserDataV1)itemAction).MarketItemHash.Equals(reviewData.MarketItemHash))
+                                    {
+                                        return false;
+                                    }
+                                }
+                                if (itemAction.GetType() == typeof(MarketItemV1))
+                                {
+                                    MarketItemV1 marketData = (MarketItemV1)itemAction;
+                                    if (marketData.Hash == reviewData.MarketItemHash)
+                                    {
+                                        marketItemExists = true;
+                                        if (marketData.State == SOLD)
+                                        {
+                                            marketItemIsSold = true;
+                                        }
+                                        //get buyer pub key and compare to pubkey on review
+                                        if (!string.IsNullOrEmpty(marketData.BuyerSignature))
+                                        {
+                                            var itemMarketBytes = marketData.ToByteArrayForSign();
+                                            var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
+
+                                            foreach (var itemPubKey in itemPubKeys)
+                                            {
+                                                foreach (var buyerPubKey in buyerPubKeys)
+                                                {
+                                                    if (itemPubKey.SequenceEqual(buyerPubKey))
+                                                    {
+                                                        signedByBuyer = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (signedByBuyer)
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //if any rules that did not return imidiately breached return false
+            if (!marketItemExists || !marketItemIsSold || !signedByBuyer)
+            {
+                return false;
             }
 
             return true;

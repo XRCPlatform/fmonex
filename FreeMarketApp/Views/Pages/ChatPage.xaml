@@ -16,7 +16,7 @@
         </StackPanel>
       </Button>
 
-      <ScrollViewer HorizontalAlignment="Left" Margin="0,90,0,0" Width="250">
+      <ScrollViewer HorizontalAlignment="Left" Margin="0,75,0,0" Width="250">
         <StackPanel Orientation="Vertical">
           <TextBlock Text="All Chats" Classes="H1" TextWrapping="Wrap" FontSize="28" Margin="25 10 0 10" FontWeight="Bold"/>
           
@@ -50,12 +50,12 @@
       <!-- CONTENT AREA -->
       <Grid Margin="250 0 0 0">
           <!-- bind an offer (titte of the conversation) -->
-          <TextBlock Name="TBTitle" Margin="30 18 100 0" Classes="H1" Text="" TextWrapping="NoWrap" FontSize="18" FontWeight="Bold" />
+          <TextBlock Name="TBTitle" Margin="20 25 20 0" Classes="H1" Text="" TextWrapping="NoWrap" FontSize="18" FontWeight="Bold" />
        </Grid>
-      <Separator IsVisible="False" Name="SRTitle" Classes="SideBarSeparator" DockPanel.Dock="Bottom" Height="1" VerticalAlignment="Top" Margin="260 65 20 0"></Separator>
+      <Separator IsVisible="False" Name="SRTitle" Classes="SideBarSeparator" DockPanel.Dock="Bottom" Height="1" VerticalAlignment="Top" Margin="270 60 20 0"></Separator>
 
       <!-- Message bubbles panel-->
-      <DockPanel Margin="250 95 0 0">
+      <DockPanel Margin="250 61 0 0">
 
         <!-- Scrollviewer should always scroll to the bottom, can be done with a code -->
         <ScrollViewer Name="SVChat" DockPanel.Dock="Top" Margin="0 0 0 80" VerticalContentAlignment="Bottom" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

@@ -427,10 +427,16 @@ namespace FreeMarketOne.Pools
 
         private bool IsReviewDataValid(IBaseItem actionItem)
         {
-            //TODO: a review can be posted by buyer to seller or a seller to buyer on the same market (transaction basis) 
+            //TODO: a review can be posted by buyer to seller or a seller to buyer on the same market (SOLD transaction basis) 
+            
 
             var reviewData = (ReviewUserDataV1)actionItem;
             var reviewBytes = reviewData.ToByteArrayForSign();
+
+            if (String.IsNullOrEmpty(reviewData.Signature)){
+                return false;
+            }
+            
             var buyerPubKeys = UserPublicKey.Recover(reviewBytes, reviewData.Signature);
 
             bool marketItemExists = false;
@@ -577,12 +583,14 @@ namespace FreeMarketOne.Pools
                     }
                 }
             }
-
+            //TODO: enforce stricter review validation 
+            //leaving this here to describe prototype ideas. They don't work at the moment as market chain is in another instance of PoolManager
+            //need to decide how to communicate between pool managers perhaps events pubsub between managers?? or IOC allowing to pull both instances? 
             //if any rules that did not return imidiately breached return false
-            if (!marketItemExists || !marketItemIsSold || !signedByBuyer)
-            {
-                return false;
-            }
+            //if (!marketItemExists || !marketItemIsSold || !signedByBuyer)
+            //{
+            //    return false;
+            //}
 
             return true;
         }

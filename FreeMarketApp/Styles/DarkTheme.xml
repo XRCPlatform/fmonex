@@ -425,4 +425,27 @@
 			<Setter Property="Fill" Value="#ff9234"></Setter>
 		</Style>
 
+
+	<!-- Changelly -->
+	<Style Selector="Button.changelly">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="#10d078" />
+		<Setter Property="Foreground" Value="#10d078" />
+	</Style>
+	<Style Selector="Button.changelly /template/ ContentPresenter">
+		<Setter Property="CornerRadius" Value="3"/>
+	</Style>
+	<Style Selector="Button:pointerover.changelly /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#10d078" />
+		<Setter Property="Background" Value="#233c31" />
+	</Style>
+	<Style Selector="Button:pressed.changelly /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#10d078" />
+		<Setter Property="Background" Value="Transparent" />
+	</Style>
+
+	<Style Selector="Border.ChangellyWidget">
+		<Setter Property="Background" Value="#3a3a3c" />
+	</Style>
+
 </Styles>

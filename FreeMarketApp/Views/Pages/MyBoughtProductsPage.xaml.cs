@@ -138,24 +138,22 @@ namespace FreeMarketApp.Views.Pages
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
 
-            var signature = ((Button)sender)?.Tag?.ToString();
-            if (signature != null)
+            var hash = ((Button)sender)?.Tag?.ToString();
+            if (hash != null)
             {
-                var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Signature == signature);
+                var marketItem = ((MyProductsPageViewModel)this.DataContext).Items.FirstOrDefault(a => a.Hash == hash);
                 if ((marketItem != null) && (!marketItem.IsInPool))
                 {
                     var chatPage = ChatPage.Instance;
                     chatPage.SetBackPage(GetInstance());
-                    chatPage.LoadChatByProduct(signature);
+                    chatPage.LoadChatByProduct(marketItem.Hash);
                     PagesHelper.Switch(mainWindow, chatPage);
                 }
             }            
         }
 
-
         public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
         {
-
             int thisPageSize = selectedPageSize;
 
             string selection = ((Avalonia.Controls.ContentControl)((Avalonia.Controls.Primitives.SelectingItemsControl)sender).SelectedItem).Content.ToString();

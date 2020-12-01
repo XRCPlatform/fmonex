@@ -390,6 +390,46 @@
 	<Style Selector="ToggleButton:pointerover.ratingstar /template/ Path">
 	   <Setter Property="Fill" Value="#ff9234"></Setter>
 	 </Style>
-	<!-- End of Review Section -->
+	
+	
+	<!-- Bookmark button -->
+	  <Style Selector="ToggleButton.bookmark /template/ Path">
+		  <Setter Property="Margin" Value="20 30"></Setter>
+	  </Style>
+
+	  <Style Selector="ToggleButton:checked.bookmark /template/ Path">
+		  <Setter Property="Fill" Value="#ff9234"></Setter>
+	  </Style>
+
+	  <Style Selector="ToggleButton:unchecked.bookmark /template/ Path">
+		  <Setter Property="Fill" Value="#4E5C6E"></Setter>
+	  </Style>
+
+	  <Style Selector="ToggleButton:pointerover.bookmark /template/ Path">
+		  <Setter Property="Fill" Value="#ff9234"></Setter>
+	  </Style>
+
+	
+	<!-- Changelly -->
+	<Style Selector="Button.changelly">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="#10d078" />
+		<Setter Property="Foreground" Value="#10d078" />
+	</Style>
+	<Style Selector="Button.changelly /template/ ContentPresenter">
+		<Setter Property="CornerRadius" Value="3"/>
+	</Style>
+	<Style Selector="Button:pointerover.changelly /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#10d078" />
+		<Setter Property="Background" Value="#d7ede3" />
+	</Style>
+	<Style Selector="Button:pressed.changelly /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#10d078" />
+		<Setter Property="Background" Value="Transparent" />
+	</Style>
+
+	<Style Selector="Border.ChangellyWidget">
+		<Setter Property="Background" Value="#f6f6f7" />
+	</Style>
 
 </Styles>

@@ -91,7 +91,7 @@ namespace FreeMarketApp.Views
 
             if (chatItems.Any())
             {
-                chatPage.LoadChatByProduct(chatItems.First().MarketItem.Signature);
+                chatPage.LoadChatByProduct(chatItems.First().MarketItem.Hash);
             }
 
             PagesHelper.Switch(this, chatPage);

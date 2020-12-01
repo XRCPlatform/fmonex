@@ -9,7 +9,7 @@
 
     <Grid Margin="0" Classes="Main">
        <!-- SIDEBAR -->
-        <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,40" Width="250">
+        <ScrollViewer HorizontalAlignment="Left" Margin="0 0 0 25" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
 
 			<TextBlock Classes="H1" Text="CATEGORIES" Margin="27 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>

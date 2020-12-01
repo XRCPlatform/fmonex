@@ -16,7 +16,7 @@
         </StackPanel>
       </Button>
 
-      <ScrollViewer HorizontalAlignment="Left" Margin="0,90,0,0" Width="250">
+      <ScrollViewer HorizontalAlignment="Left" Margin="0,75,0,0" Width="250">
         <StackPanel Orientation="Vertical">
           <TextBlock Text="All Chats" Classes="H1" TextWrapping="Wrap" FontSize="28" Margin="25 10 0 10" FontWeight="Bold"/>
           
@@ -25,7 +25,7 @@
               <DataTemplate>
 
                 <!-- Chat thread-->               
-                <Button Name="BTChat" Tag="{Binding MarketItem.Signature}" Classes="sidebar" Height="50" HorizontalContentAlignment="Stretch" Cursor="Hand" Click="ButtonChat_Click">
+                <Button Name="BTChat" Tag="{Binding MarketItem.Hash}" Classes="sidebar" Height="50" HorizontalContentAlignment="Stretch" Cursor="Hand" Click="ButtonChat_Click">
                   <StackPanel Orientation="Horizontal">
                     <Path Classes="SideBarIcon" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 										c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
@@ -50,15 +50,15 @@
       <!-- CONTENT AREA -->
       <Grid Margin="250 0 0 0">
           <!-- bind an offer (titte of the conversation) -->
-          <TextBlock Name="TBTitle" Margin="30 18 100 0" Classes="H1" Text="" TextWrapping="NoWrap" FontSize="18" FontWeight="Bold" />
+          <TextBlock Name="TBTitle" Margin="20 25 20 0" Classes="H1" Text="" TextWrapping="NoWrap" FontSize="18" FontWeight="Bold" />
        </Grid>
-      <Separator IsVisible="False" Name="SRTitle" Classes="SideBarSeparator" DockPanel.Dock="Bottom" Height="1" VerticalAlignment="Top" Margin="260 65 20 0"></Separator>
+      <Separator IsVisible="False" Name="SRTitle" Classes="SideBarSeparator" DockPanel.Dock="Bottom" Height="1" VerticalAlignment="Top" Margin="270 60 20 0"></Separator>
 
       <!-- Message bubbles panel-->
-      <DockPanel Margin="250 95 0 0">
+      <DockPanel Margin="250 61 0 0">
 
         <!-- Scrollviewer should always scroll to the bottom, can be done with a code -->
-        <ScrollViewer DockPanel.Dock="Top" Margin="0 0 0 80" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Name="SVChat" DockPanel.Dock="Top" Margin="0 0 0 80" VerticalContentAlignment="Bottom" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel HorizontalAlignment="Stretch">
 
             <ItemsControl Items="{Binding ChatItems}">
@@ -97,7 +97,7 @@
             </ItemsControl>
 
             <Border Name="BIWithoutMessage" Classes="IncomingChatMessage" IsVisible="False" HorizontalAlignment="Left" Margin="20 10 80 10" CornerRadius="10 10 10 0" MaxWidth="600">
-              <TextBlock Classes="H1" VerticalAlignment="Bottom" Margin="12 7" FontSize="15" TextWrapping="Wrap" Text="Wait for response from seller please."/>
+              <TextBlock Classes="H1" VerticalAlignment="Bottom" Margin="12 7" FontSize="15" TextWrapping="Wrap" Text="Wait for response please."/>
             </Border>
           </StackPanel>
         </ScrollViewer>

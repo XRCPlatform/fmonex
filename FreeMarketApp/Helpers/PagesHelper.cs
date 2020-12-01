@@ -245,5 +245,21 @@ namespace FreeMarketApp.Helpers
                 }
             }
         }
+
+        internal static void HideOrSetValueToTextBlock(UserControl pageInstance, string targetTextBlockId, string labelTextBlockId, string value)
+        {
+            var targetTextBlock = pageInstance.FindControl<TextBlock>(targetTextBlockId);
+            var labelTextBlock = pageInstance.FindControl<TextBlock>(labelTextBlockId);
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                targetTextBlock.Text = value;
+            }
+            else
+            {
+                labelTextBlock.IsVisible = false;
+                targetTextBlock.IsVisible = false;
+            }
+        }
     }
 }

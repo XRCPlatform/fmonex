@@ -33,8 +33,6 @@ namespace FreeMarketOne.Chats
             Seller = 1
         }
 
-        private const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
-
         private IBaseConfiguration _configuration;
         private CancellationTokenSource _cancellationToken { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
@@ -208,7 +206,7 @@ namespace FreeMarketOne.Chats
         /// <param name="args"></param>
         private static void ClientOnReceiveReady(object sender, NetMQSocketEventArgs args)
         {
-            //Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
+            Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
         }
 
         /// <summary>
@@ -276,8 +274,13 @@ namespace FreeMarketOne.Chats
 
                 try
                 {
-                    item.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
-                    result.Add(item);
+                    var processedItem = new ChatItem();
+                    processedItem.DateCreated = item.DateCreated;
+                    processedItem.ExtraMessage = item.ExtraMessage;
+                    processedItem.Propagated = item.Propagated;
+                    processedItem.Type = item.Type;
+                    processedItem.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
+                    result.Add(processedItem);
                 }
                 catch (Exception )
                 {
@@ -286,6 +289,23 @@ namespace FreeMarketOne.Chats
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Checking if we can start with chat
+        /// </summary>
+        /// <param name="chatItems"></param>
+        /// <returns></returns>
+        public bool IsChatValid(List<ChatItem> chatItems)
+        {
+            if (chatItems.First().Propagated)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -313,6 +333,7 @@ namespace FreeMarketOne.Chats
 
                         var receivedChatItem = new ChatMessage(clientMessage);
 
+                        _logger.Information("Loading new chat message.");
                         var localChat = GetChat(receivedChatItem.Hash);
                         if (localChat != null)
                         {
@@ -320,10 +341,13 @@ namespace FreeMarketOne.Chats
                             newChatItem.DateCreated = receivedChatItem.DateCreated;
                             newChatItem.Message = receivedChatItem.Message;
                             newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
-                            newChatItem.Type = (int)DetectWhoIm(localChat);
+                            newChatItem.Type = (int)DetectWhoIm(localChat, false);
                             newChatItem.Propagated = true;
 
+                            _logger.Information("Add a new item to chat item.");
+                            if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
                             localChat.ChatItems.Add(newChatItem);
+
                             if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
                             {
                                 localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
@@ -332,8 +356,9 @@ namespace FreeMarketOne.Chats
                             _logger.Information("Saving local chat with new data.");
 
                             SaveChat(localChat);
-                        }
+                        } 
 
+                        _logger.Information("Returning data.");
                         response.SendMultipartMessage(clientMessage);
                     }
                 }
@@ -381,7 +406,7 @@ namespace FreeMarketOne.Chats
 
             for (int i = 0; i < stringChars.Length; i++)
             {
-                stringChars[i] = CHARS[random.Next(CHARS.Length)];
+                stringChars[i] = TextHelper.CHARS[random.Next(TextHelper.CHARS.Length)];
             }
 
             return new string(stringChars);
@@ -529,7 +554,7 @@ namespace FreeMarketOne.Chats
                     var newChatItem = new ChatItem();
                     newChatItem.Message = Convert.ToBase64String(aes.Encrypt(Encoding.UTF8.GetBytes(message)));
                     newChatItem.DateCreated = DateTime.UtcNow;
-                    newChatItem.Type = (int)DetectWhoIm(chatData);
+                    newChatItem.Type = (int)DetectWhoIm(chatData, true);
                     newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
 
                     chatData.ChatItems.Add(newChatItem);
@@ -544,25 +569,47 @@ namespace FreeMarketOne.Chats
         /// </summary>
         /// <param name="chatData"></param>
         /// <returns></returns>
-        private ChatItemTypeEnum DetectWhoIm(ChatDataV1 chatData)
+        private ChatItemTypeEnum DetectWhoIm(ChatDataV1 chatData, bool isMyMessage)
         {
-            var marketItem = chatData.MarketItem;
+            _logger.Information(string.Format("Detecting whoIm."));
 
-            var userManager = _userManager;
-            var userPubKey = userManager.GetCurrentUserPublicKey();
-            var marketItemBytes = marketItem.ToByteArrayForSign();
-
-            var signaturePubKeys = UserPublicKey.Recover(marketItemBytes, marketItem.Signature);
-
-            foreach (var itemPubKey in signaturePubKeys)
+            if ((chatData.ChatItems != null) && (chatData.ChatItems.Any()))
             {
-                if (itemPubKey.SequenceEqual(userPubKey))
-                {
-                    return ChatItemTypeEnum.Seller;
-                }
-            }
+                var firstItem = chatData.ChatItems.First();
 
-            return ChatItemTypeEnum.Buyer;
+                if (isMyMessage)
+                {
+                    if (firstItem.Type == (int)ChatItemTypeEnum.Seller)
+                    {
+                        _logger.Information(string.Format("Im Seller {0}", isMyMessage));
+                        return ChatItemTypeEnum.Seller;
+                    } 
+                    else
+                    {
+                        _logger.Information(string.Format("Im Buyer. {0}", isMyMessage));
+                        return ChatItemTypeEnum.Buyer;
+                    }
+                } 
+                else
+                {
+                    if (firstItem.Type == (int)ChatItemTypeEnum.Seller)
+                    {
+                        _logger.Information(string.Format("Im Buyer. {0}", isMyMessage));
+                        return ChatItemTypeEnum.Buyer;
+                    }
+                    else
+                    {
+                        _logger.Information(string.Format("Im Seller {0}", isMyMessage));
+                        return ChatItemTypeEnum.Seller;
+                    }
+                }
+            } 
+            else
+            {
+                //case of first message (first is message from seller because of it we are buyer)
+                _logger.Information(string.Format("Im Buyer. {0}", isMyMessage));
+                return ChatItemTypeEnum.Buyer;
+            }
         }
 
         /// <summary>

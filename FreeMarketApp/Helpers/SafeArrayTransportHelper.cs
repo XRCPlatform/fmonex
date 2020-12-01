@@ -17,7 +17,12 @@ namespace FreeMarketApp.Helpers
                 {
                     var safeValue = Base64Encode(itemValue);
 
-                    output = output + string.Format("|{0}", safeValue);
+                    if (!string.IsNullOrEmpty(output))
+                    {
+                        output = output + "|";
+                    }
+
+                    output = output + safeValue;
                 }
             }
 

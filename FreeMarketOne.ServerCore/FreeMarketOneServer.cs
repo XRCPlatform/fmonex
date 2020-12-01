@@ -41,7 +41,7 @@ namespace FreeMarketOne.ServerCore
         public static FreeMarketOneServer Current { get; private set; }
         
 
-        public Logger Logger;
+        public Logger Logger => (Logger)_logger;
         private ILogger _logger;
 
         public ServiceManager Services;

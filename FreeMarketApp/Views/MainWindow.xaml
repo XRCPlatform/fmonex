@@ -106,7 +106,7 @@
             </StackPanel>
         </Grid>
 
-      <Panel Name="PCMainContent" Margin="0,60,0,25">
+      <Panel Name="PCMainContent" Margin="0 60 0 0">
 
       </Panel>
       

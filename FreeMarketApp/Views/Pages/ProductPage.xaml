@@ -2,229 +2,229 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" Width="800" d:DesignHeight="450"
-             x:Class="FreeMarketApp.Views.Pages.ProductPage">
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+  x:Class="FreeMarketApp.Views.Pages.ProductPage">
 
-  <UserControl.Styles>
-	  <Style Selector="ToggleButton.bookmark">
-		  <Setter Property="IsChecked" Value="false"/>
-		  <Setter Property="Template">
-			  <ControlTemplate>
-				  <Path Data="M75.75,0h-59c-2.209,0-4,1.791-4,4v84.5c0,1.672,1.04,3.168,2.607,3.75c1.571,0.582,3.332,0.127,4.424-1.141l26.469-30.73
+	<UserControl.Styles>
+		<Style Selector="ToggleButton.bookmark">
+			<Setter Property="IsChecked" Value="false"/>
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Path Data="M75.75,0h-59c-2.209,0-4,1.791-4,4v84.5c0,1.672,1.04,3.168,2.607,3.75c1.571,0.582,3.332,0.127,4.424-1.141l26.469-30.73
 							l26.469,30.73c0.775,0.9,1.891,1.391,3.032,1.391c0.466,0,0.938-0.082,1.392-0.25c1.567-0.582,2.607-2.078,2.607-3.75V4
 							C79.75,1.791,77.959,0,75.75,0z"
-				   Height="19" Stretch="Fill" Width="12"/>
-			  </ControlTemplate>
-		  </Setter>
-	  </Style>
+							 Height="19" Stretch="Fill" Width="12"/>
+				</ControlTemplate>
+			</Setter>
+		</Style>
 
-	  <Style Selector="ToggleButton.ratingstar">
-      <Setter Property="IsChecked" Value="false"/>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+		<Style Selector="ToggleButton.ratingstar">
+			<Setter Property="IsChecked" Value="false"/>
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Path Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 						  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 						  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 						  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 						  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 						  C511.56,208.649,513.033,202.688,511.267,197.258z"
-           Height="17" Stretch="Fill" Width="18"/>
-        </ControlTemplate>
-      </Setter>
-    </Style>
-  </UserControl.Styles>
+					 Height="17" Stretch="Fill" Width="18"/>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+	</UserControl.Styles>
 
-  <Grid Margin="0" Classes="Main">
-    <!-- SIDEBAR -->
-    <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
-      <StackPanel Name="SideBar" Orientation="Vertical">
-        <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
-          <StackPanel Orientation="Horizontal">
-            <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
-            <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
-          </StackPanel>
-        </Button>
-      </StackPanel>
-    </ScrollViewer>
-    <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
+	<Grid Margin="0" Classes="Main">
+		<!-- SIDEBAR -->
+		<ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
+			<StackPanel Name="SideBar" Orientation="Vertical">
+				<Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+					<StackPanel Orientation="Horizontal">
+						<Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
+						<TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
+					</StackPanel>
+				</Button>
+			</StackPanel>
+		</ScrollViewer>
+		<Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
-    <!-- PRODUCT AREA -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
-      <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
-		  <DockPanel>
-			<TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="20" FontSize="28" FontWeight="Normal"/>
-			<ToggleButton Classes="bookmark" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-		  </DockPanel>
+		<!-- PRODUCT AREA -->
+		<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
+			<StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
+				<DockPanel>
+					<TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="20" FontSize="28" FontWeight="Normal"/>
+					<ToggleButton Classes="bookmark" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+				</DockPanel>
 
-      <!-- Review Section -->
-      <DockPanel IsVisible="False" LastChildFill="true">
-        <Border DockPanel.Dock="Top" MinHeight="30" HorizontalAlignment="Left" Margin="15 0 0 -15" Classes="Main">
-          <TextBlock Text="Your review" Foreground="#ff9234" Margin="5 0 10 0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"></TextBlock>
-        </Border>
-        <Border ZIndex="-1" MinWidth="300" BorderThickness="1" BorderBrush="#ff9234" Margin="20 0 20 0" CornerRadius="10">
-          <DockPanel>
-            <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Rating:" Margin="20 20 0 0" FontSize="16"/>
-              <StackPanel DockPanel.Dock="Top" Margin="20 3 0 0" Orientation="Horizontal">
-                <ToggleButton Classes="ratingstar" Tag="1" />
-                <ToggleButton Classes="ratingstar" Tag="2" />
-                <ToggleButton Classes="ratingstar" Tag="3" />
-                <ToggleButton Classes="ratingstar" Tag="4" />
-                <ToggleButton Classes="ratingstar" Tag="5" />
-              </StackPanel>
-            <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Review:" Margin="20 15 0 0" FontSize="16"/>
-            <TextBox DockPanel.Dock="Top" Classes="TextBoxNoBackground" TextWrapping="Wrap" FontSize="14" Watermark="Share your opinion about the item or describe an experience you had with the seller/buyer" Cursor="Ibeam" BorderThickness="0" MinHeight="70" VerticalAlignment="Stretch" Margin="20 0 20 20"></TextBox>
-            <StackPanel DockPanel.Dock="Bottom" Margin="0 5 20 20" Orientation="Horizontal" HorizontalAlignment="Right">
-              <Button Cursor="Hand" Classes="pagination" Margin="0 0 10 0" Background="Transparent">Cancel</Button>
-              <Button Cursor="Hand" Classes="pagination">Save</Button>
-            </StackPanel>
-          </DockPanel>
-        </Border>
-      </DockPanel>
+				<!-- Review Section -->
+				<DockPanel IsVisible="False" LastChildFill="true">
+					<Border DockPanel.Dock="Top" MinHeight="30" HorizontalAlignment="Left" Margin="15 0 0 -15" Classes="Main">
+						<TextBlock Text="Your review" Foreground="#ff9234" Margin="5 0 10 0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"></TextBlock>
+					</Border>
+					<Border ZIndex="-1" MinWidth="300" BorderThickness="1" BorderBrush="#ff9234" Margin="20 0 20 0" CornerRadius="10">
+						<DockPanel>
+							<TextBlock DockPanel.Dock="Top" Classes="H1" Text="Rating:" Margin="20 20 0 0" FontSize="16"/>
+							<StackPanel DockPanel.Dock="Top" Margin="20 3 0 0" Orientation="Horizontal">
+								<ToggleButton Classes="ratingstar" Tag="1" />
+								<ToggleButton Classes="ratingstar" Tag="2" />
+								<ToggleButton Classes="ratingstar" Tag="3" />
+								<ToggleButton Classes="ratingstar" Tag="4" />
+								<ToggleButton Classes="ratingstar" Tag="5" />
+							</StackPanel>
+							<TextBlock DockPanel.Dock="Top" Classes="H1" Text="Review:" Margin="20 15 0 0" FontSize="16"/>
+							<TextBox DockPanel.Dock="Top" Classes="TextBoxNoBackground" TextWrapping="Wrap" FontSize="14" Watermark="Share your opinion about the item or describe an experience you had with the seller/buyer" Cursor="Ibeam" BorderThickness="0" MinHeight="70" VerticalAlignment="Stretch" Margin="20 0 20 20"></TextBox>
+							<StackPanel DockPanel.Dock="Bottom" Margin="0 5 20 20" Orientation="Horizontal" HorizontalAlignment="Right">
+								<Button Cursor="Hand" Classes="pagination" Margin="0 0 10 0" Background="Transparent">Cancel</Button>
+								<Button Cursor="Hand" Classes="pagination">Save</Button>
+							</StackPanel>
+						</DockPanel>
+					</Border>
+				</DockPanel>
 
-        <TextBlock Classes="H1" Text="Photos" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-       
-        <WrapPanel Margin="18 0 20 10">
+				<TextBlock Classes="H1" Text="Photos" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
 
-          <StackPanel Name="SPPhoto_0" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_0" >
-              </Image>
-            </Border>
-          </StackPanel>
+				<WrapPanel Margin="18 0 20 10">
 
-          <StackPanel Name="SPPhoto_1" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_1" >
-              </Image>
-            </Border>
-          </StackPanel>
+					<StackPanel Name="SPPhoto_0" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_0" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-          <StackPanel Name="SPPhoto_2" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_2" >
-              </Image>
-            </Border>
-          </StackPanel>
+					<StackPanel Name="SPPhoto_1" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_1" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-          <StackPanel Name="SPPhoto_3" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_3" >
-              </Image>
-            </Border>
-          </StackPanel>
+					<StackPanel Name="SPPhoto_2" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_2" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-          <StackPanel Name="SPPhoto_4" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_4" >
-              </Image>
-            </Border>
-          </StackPanel>
+					<StackPanel Name="SPPhoto_3" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_3" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-          <StackPanel Name="SPPhoto_5" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_5" >
-              </Image>
-            </Border>
-          </StackPanel>
+					<StackPanel Name="SPPhoto_4" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_4" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-          <StackPanel Name="SPPhoto_6" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_6" >
-              </Image>
-            </Border>
-          </StackPanel>
+					<StackPanel Name="SPPhoto_5" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_5" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-          <StackPanel Name="SPPhoto_7" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_7" >
-              </Image>
-            </Border>
-          </StackPanel>
-          
-        </WrapPanel>
-        
-        <TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
-        <!-- product description binding -->
-        <TextBlock Classes="H1" Name="TBDescription" Text=""
-               TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
-        <TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <Path Classes="StatusBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
-            Height="14" Stretch="Fill" Width="11" Margin="0,1,5,0"/>
-          <!-- product shipping binding -->
-          <TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
-        </StackPanel>
+					<StackPanel Name="SPPhoto_6" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_6" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-        <TextBlock Name="TBFinenessLabel" Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <!--Manufacturer binding -->
-          <TextBlock Classes="H1" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
-        </StackPanel>
+					<StackPanel Name="SPPhoto_7" IsVisible="false">
+						<Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
+							<Image Name="IPhoto_7" >
+							</Image>
+						</Border>
+					</StackPanel>
 
-        <TextBlock Name="TBManufacturerLabel" Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <!--Manufacturer binding -->
-          <TextBlock Classes="H1" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
-        </StackPanel>
+				</WrapPanel>
 
-        <TextBlock Name="TBSizeLabel" Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <!--Size binding -->
-          <TextBlock Classes="H1" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
-        </StackPanel>
+				<TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+				<!-- product description binding -->
+				<TextBlock Classes="H1" Name="TBDescription" Text=""
+					   TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
+				<TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+					<Path Classes="StatusBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
+					  Height="14" Stretch="Fill" Width="11" Margin="0,1,5,0"/>
+					<!-- product shipping binding -->
+					<TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
+				</StackPanel>
 
-        <TextBlock Name="TBWeightInGramsLabel" Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <!--TBWeightInGrams binding -->
-          <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
-        </StackPanel>
+				<TextBlock Name="TBFinenessLabel" Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+					<!--Manufacturer binding -->
+					<TextBlock Classes="H1" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
+				</StackPanel>
 
-        <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-       
-        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
-          <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
-        </StackPanel>
-        
-        <TextBlock Classes="H1" Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Vertical">
-          <!-- seller profile binding -->
-          <TextBlock Classes="H1" Name="TBSeller" Text="N/A" Margin="20 0 0 2" FontSize="20"/>
-          <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+				<TextBlock Name="TBManufacturerLabel" Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+					<!--Manufacturer binding -->
+					<TextBlock Classes="H1" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
+				</StackPanel>
+
+				<TextBlock Name="TBSizeLabel" Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+					<!--Size binding -->
+					<TextBlock Classes="H1" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
+				</StackPanel>
+
+				<TextBlock Name="TBWeightInGramsLabel" Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+					<!--TBWeightInGrams binding -->
+					<TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
+				</StackPanel>
+
+				<TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+
+				<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+					<TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
+					<TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
+				</StackPanel>
+
+				<TextBlock Classes="H1" Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Vertical">
+					<!-- seller profile binding -->
+					<TextBlock Classes="H1" Name="TBSeller" Text="N/A" Margin="20 0 0 2" FontSize="20"/>
+					<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+						<Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 							  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 							  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 							  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 							  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
-              Height="14" Stretch="Fill" Width="14" Margin="0,1,5,0"/>
-            <!-- seller rating binding -->
-            <TextBlock Classes="H1" Name="TBSellerStars" Text="N/A" FontSize="16"/>
-            <TextBlock Classes="H1" Text="Reviews" Margin="20 0 5 0" FontSize="16"/>
-            <Button Padding="10 0 10 0" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" Click="ButtonSeller_Click">
-              <!-- link to a seller's public profile and number of reviews binding -->
-              <TextBlock Name="TBSellerReviewsCount" FontWeight="Bold" Text="0"/>
-            </Button>
-          </StackPanel>
-        </StackPanel>
-        <TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16" BorderThickness="0" Padding="10" Width="300" />
-         
-          <Button Name="BTCopyToClipboard" Classes="pagination" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="10 0 0 0 " Cursor="Hand" Click="ButtonCopyToClipboard_Click">
-            <StackPanel Orientation="Horizontal">
-              <Path Classes="BlueIcon" Data="M480.7,11H130.4c-11.3,0-20.4,9.1-20.4,20.4v60.3H31.5c-11.3,0-20.4,9.1-20.4,20.4v368.5c0,11.3,9.1,20.4,20.4,20.4 h350.3c11.3,0,20.4-9.1,20.4-20.4v-60.3h78.5c11.3,0,20.4-9.1,20.4-20.4V31.4C501.1,20.1,491.9,11,480.7,11z M361.3,460.2H51.9     V132.5h309.4V460.2z M460.2,379.5h-58.1V112.1c0-11.3-9.1-20.4-20.4-20.4h-231V51.8h309.4V379.5z" 
-              HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="13" />
-              <TextBlock HorizontalAlignment="Center" Margin="7,0,0,0" FontSize="13" Text="Copy"/>
-            </StackPanel>
-          </Button>     
-        </StackPanel>
-        <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
+						  Height="14" Stretch="Fill" Width="14" Margin="0,1,5,0"/>
+						<!-- seller rating binding -->
+						<TextBlock Classes="H1" Name="TBSellerStars" Text="N/A" FontSize="16"/>
+						<TextBlock Classes="H1" Text="Reviews" Margin="20 0 5 0" FontSize="16"/>
+						<Button Padding="10 0 10 0" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" Click="ButtonSeller_Click">
+							<!-- link to a seller's public profile and number of reviews binding -->
+							<TextBlock Name="TBSellerReviewsCount" FontWeight="Bold" Text="0"/>
+						</Button>
+					</StackPanel>
+				</StackPanel>
+				<TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+					<TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16" BorderThickness="0" Padding="10" Width="300" />
+
+					<Button Name="BTCopyToClipboard" Classes="pagination" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="10 0 0 0 " Cursor="Hand" Click="ButtonCopyToClipboard_Click">
+						<StackPanel Orientation="Horizontal">
+							<Path Classes="BlueIcon" Data="M480.7,11H130.4c-11.3,0-20.4,9.1-20.4,20.4v60.3H31.5c-11.3,0-20.4,9.1-20.4,20.4v368.5c0,11.3,9.1,20.4,20.4,20.4 h350.3c11.3,0,20.4-9.1,20.4-20.4v-60.3h78.5c11.3,0,20.4-9.1,20.4-20.4V31.4C501.1,20.1,491.9,11,480.7,11z M361.3,460.2H51.9     V132.5h309.4V460.2z M460.2,379.5h-58.1V112.1c0-11.3-9.1-20.4-20.4-20.4h-231V51.8h309.4V379.5z"
+							HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="13" />
+							<TextBlock HorizontalAlignment="Center" Margin="7,0,0,0" FontSize="13" Text="Copy"/>
+						</StackPanel>
+					</Button>
+				</StackPanel>
+				<TextBlock Text="XRC Transaction" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
+				<TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
 
-        <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
-      </StackPanel>
-    </ScrollViewer>
-  </Grid>
+				<Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
 </UserControl>

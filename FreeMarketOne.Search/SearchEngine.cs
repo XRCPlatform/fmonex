@@ -299,12 +299,17 @@ namespace FreeMarketOne.Search
 
         public List<ReviewUserDataV1>? GetAllReviewsForPubKey(List<byte[]> pubKeys)
         {
+            List<ReviewUserDataV1>? list = new List<ReviewUserDataV1>();
             foreach (var pubKey in pubKeys)
             {
                 var publicKeyString = Convert.ToBase64String(pubKey);
-                return GetAllReviewsForPubKey(publicKeyString);
-            }
-            return null;
+                list = GetAllReviewsForPubKey(publicKeyString);
+                if (list != null  && list.Count>0)
+                {
+                    return list;
+                }
+            }          
+            return list;
         }
 
         public List<ReviewUserDataV1> GetAllReviewsForPubKey(byte[] pubKey)

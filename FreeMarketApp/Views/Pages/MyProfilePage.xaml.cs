@@ -66,10 +66,7 @@ namespace FreeMarketApp.Views.Pages
                 }
 
                 var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
-                var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
-                    userPubKey,
-                    FMONE.Current.BasePoolManager,
-                    FMONE.Current.BaseBlockChainManager);
+                var reviews = FMONE.Current.SearchEngine.GetAllReviewsForPubKey(userPubKey);
 
                 var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
                 var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);

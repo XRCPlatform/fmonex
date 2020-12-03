@@ -5,19 +5,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
   x:Class="FreeMarketApp.Views.Pages.ProductPage">
 
-  <UserControl.Styles>  
-    <Style Selector="ToggleButton.bookmark">
-      <Setter Property="IsChecked" Value="false"/>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Path Data="M75.75,0h-59c-2.209,0-4,1.791-4,4v84.5c0,1.672,1.04,3.168,2.607,3.75c1.571,0.582,3.332,0.127,4.424-1.141l26.469-30.73
-							l26.469,30.73c0.775,0.9,1.891,1.391,3.032,1.391c0.466,0,0.938-0.082,1.392-0.25c1.567-0.582,2.607-2.078,2.607-3.75V4
-							C79.75,1.791,77.959,0,75.75,0z"
-				   Height="19" Stretch="Fill" Width="12"/>
-        </ControlTemplate>
-      </Setter>
-    </Style>
-
+  <UserControl.Styles>
     <Style Selector="ToggleButton.ratingstar">
       <Setter Property="IsChecked" Value="false"/>
       <Setter Property="Template">
@@ -51,9 +39,18 @@
     <!-- PRODUCT AREA -->
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
       <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
-        <DockPanel>
-          <TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="20" FontSize="28" FontWeight="Normal"/>
-          <ToggleButton Classes="bookmark" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+        <DockPanel Margin="20">
+			<TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="0 0 20 0" FontSize="28" FontWeight="Medium"/>
+			<!-- Bookmark button (content of the button should change to "Remove from saved" after pressing -->
+			<Button Classes="pagination" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
+				<WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+					<Path Classes="BlueIcon" Data="M75.75,0h-59c-2.209,0-4,1.791-4,4v84.5c0,1.672,1.04,3.168,2.607,3.75c1.571,0.582,3.332,0.127,4.424-1.141l26.469-30.73
+							l26.469,30.73c0.775,0.9,1.891,1.391,3.032,1.391c0.466,0,0.938-0.082,1.392-0.25c1.567-0.582,2.607-2.078,2.607-3.75V4
+							C79.75,1.791,77.959,0,75.75,0z"
+							Height="13" Stretch="Fill" Width="9" Margin="0 2 5 0"/>
+					<TextBlock FontSize="13" Text="Save for later"/>
+				</WrapPanel>
+			</Button>
         </DockPanel>
 
         <!-- Review Section -->
@@ -74,8 +71,8 @@
               <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Review:" Margin="20 15 0 0" FontSize="16"/>
               <TextBox DockPanel.Dock="Top" Classes="TextBoxNoBackground" TextWrapping="Wrap" FontSize="14" Watermark="Share your opinion about the item or describe an experience you had with the seller/buyer" Cursor="Ibeam" BorderThickness="0" MinHeight="70" VerticalAlignment="Stretch" Margin="20 0 20 20"></TextBox>
               <StackPanel DockPanel.Dock="Bottom" Margin="0 5 20 20" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Cursor="Hand" Classes="pagination" Margin="0 0 10 0" Background="Transparent">Cancel</Button>
-                <Button Cursor="Hand" Classes="pagination">Save</Button>
+                <Button Cursor="Hand" FontSize="13" Classes="pagination" Margin="0 0 10 0" Background="Transparent">Cancel</Button>
+                <Button Cursor="Hand" FontSize="13" Classes="pagination">Save</Button>
               </StackPanel>
             </DockPanel>
           </Border>
@@ -232,10 +229,10 @@
         <TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 2 20 0">
           <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" FontSize="16" BorderThickness="0" Padding="10" Width="400" />
-          <Button Name="BTCopyToClipboard" Classes="pagination" HorizontalAlignment="Left" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="10 0 0 0 " Cursor="Hand" Click="ButtonCopyToClipboard_Click">
+          <Button Name="BTCopyToClipboard" Classes="pagination" HorizontalAlignment="Left" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="10 5 0 5 " Cursor="Hand" Click="ButtonCopyToClipboard_Click">
             <StackPanel Orientation="Horizontal">
-              <Path Classes="BlueIcon" Data="M480.7,11H130.4c-11.3,0-20.4,9.1-20.4,20.4v60.3H31.5c-11.3,0-20.4,9.1-20.4,20.4v368.5c0,11.3,9.1,20.4,20.4,20.4 h350.3c11.3,0,20.4-9.1,20.4-20.4v-60.3h78.5c11.3,0,20.4-9.1,20.4-20.4V31.4C501.1,20.1,491.9,11,480.7,11z M361.3,460.2H51.9     V132.5h309.4V460.2z M460.2,379.5h-58.1V112.1c0-11.3-9.1-20.4-20.4-20.4h-231V51.8h309.4V379.5z"
-              HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="14" />
+              <Path Classes="BlueIcon" Data="M549.26609,0a28.60338,28.60338,0,0,0-28.56,28.587V95.65217h26.087V28.587a2.48689,2.48689,0,0,1,2.473-2.5H770.38085a2.50915,2.50915,0,0,1,2.49915,2.5V249.6739a2.50859,2.50859,0,0,1-2.49915,2.5h-64.973v26.087h64.973a28.62512,28.62512,0,0,0,28.5861-28.587V28.587A28.62679,28.62679,0,0,0,770.38085,0ZM429.61956,121.73913a28.6253,28.6253,0,0,0-28.58695,28.58695V371.413A28.62585,28.62585,0,0,0,429.61956,400H650.7339a28.62586,28.62586,0,0,0,28.587-28.587V150.32608a28.62474,28.62474,0,0,0-28.587-28.58695Zm0,26.08695H650.7339a2.50875,2.50875,0,0,1,2.5,2.5V371.413a2.50988,2.50988,0,0,1-2.5,2.5H429.61956a2.50932,2.50932,0,0,1-2.5-2.5V150.32608A2.50876,2.50876,0,0,1,429.61956,147.82608Z"
+              HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="15" />
               <TextBlock HorizontalAlignment="Center" Margin="7,0,0,0" FontSize="13" Text="Copy"/>
             </StackPanel>
           </Button>

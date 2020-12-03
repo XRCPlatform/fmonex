@@ -392,24 +392,6 @@
 	 </Style>
 	
 	
-	<!-- Bookmark button -->
-	  <Style Selector="ToggleButton.bookmark /template/ Path">
-		  <Setter Property="Margin" Value="20 30"></Setter>
-	  </Style>
-
-	  <Style Selector="ToggleButton:checked.bookmark /template/ Path">
-		  <Setter Property="Fill" Value="#ff9234"></Setter>
-	  </Style>
-
-	  <Style Selector="ToggleButton:unchecked.bookmark /template/ Path">
-		  <Setter Property="Fill" Value="#4E5C6E"></Setter>
-	  </Style>
-
-	  <Style Selector="ToggleButton:pointerover.bookmark /template/ Path">
-		  <Setter Property="Fill" Value="#ff9234"></Setter>
-	  </Style>
-
-	
 	<!-- Changelly -->
 	<Style Selector="Button.changelly">
 		<Setter Property="Background" Value="Transparent" />

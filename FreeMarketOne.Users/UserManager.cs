@@ -482,7 +482,7 @@ namespace FreeMarketOne.Users
         }
 
         /// <summary>
-        /// Calculate stars based on median calculation
+        /// Calculate stars based average calculation
         /// </summary>
         /// <param name="userReviews"></param>
         /// <returns></returns>
@@ -490,10 +490,10 @@ namespace FreeMarketOne.Users
         {
             if (userReviews !=null && userReviews.Any())
             {
-                var arrayOfStars = userReviews.Select(a => (double)a.Stars).ToArray();
-                var medianOfStars = GetMedian<double>(arrayOfStars);
+                var listOfStars = userReviews.Select(a => (double)a.Stars);
+                var averageOfStars = listOfStars.Average();
 
-                return medianOfStars;
+                return averageOfStars;
             } 
             else
             {

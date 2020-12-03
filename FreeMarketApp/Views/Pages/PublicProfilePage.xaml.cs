@@ -87,6 +87,10 @@ namespace FreeMarketApp.Views.Pages
                     var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 
+                    for (int i = 0; i < reviewStartRounded; i++)
+                    {
+
+                    }
                     tbStars.Text = reviewStartRounded.ToString();
 
                     GetAllUserNames(reviews);

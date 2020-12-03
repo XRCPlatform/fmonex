@@ -117,7 +117,7 @@
                   <DataTemplate>
                    
                   <!-- Product card -->
-                  <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonBoughtProduct_Click">
+                  <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Hash}" Cursor="Hand" Click="ButtonBoughtProduct_Click">
                      <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
                         
                         <!-- Photo -->

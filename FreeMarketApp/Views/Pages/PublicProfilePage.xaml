@@ -69,7 +69,7 @@
                       <DockPanel  LastChildFill="true">
                         <StackPanel DockPanel.Dock="Top" Margin="10 0 0 0" Orientation="Horizontal">
                           <!-- Stars Binding -->
-                          <Path Name="TBStar1" IsVisible="False" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                          <Path Name="TBStar1" IsVisible="False"  Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
@@ -78,13 +78,16 @@
                 HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0">
                             <i:Interaction.Behaviors>
                               <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="1">
-                                <ia:ChangePropertyAction TargetObject="{Binding TBStar1}" PropertyName="IsVisible" Value="True"/>
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar1}" PropertyName="IsVisible" Value="True"/>
+                              </ia:DataTriggerBehavior>
+                            <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="LessThan" Value="1">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar1}" PropertyName="IsVisible" Value="False"/>
                               </ia:DataTriggerBehavior>
                             </i:Interaction.Behaviors>
                           </Path>
 
 
-                          <Path Name="TBStar2" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                          <Path Name="TBStar2" IsVisible="False" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
@@ -92,13 +95,16 @@
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
                 HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0">
                             <i:Interaction.Behaviors>
-                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="1">
-                                <ia:ChangePropertyAction TargetObject="{Binding TBStar2}" PropertyName="IsVisible" Value="True"/>
+                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="2">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar2}" PropertyName="IsVisible" Value="True"/>
+                              </ia:DataTriggerBehavior>
+                            <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="LessThan" Value="2">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar2}" PropertyName="IsVisible" Value="False"/>
                               </ia:DataTriggerBehavior>
                             </i:Interaction.Behaviors>
                           </Path>
 
-                          <Path Name="TBStar3" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                          <Path Name="TBStar3" IsVisible="False" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
@@ -106,13 +112,16 @@
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
                 HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0">
                             <i:Interaction.Behaviors>
-                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="1">
-                                <ia:ChangePropertyAction TargetObject="{Binding TBStar3}" PropertyName="IsVisible" Value="True"/>
+                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="3">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar3}" PropertyName="IsVisible" Value="True"/>
+                              </ia:DataTriggerBehavior>
+                             <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="LessThan" Value="3">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar3}" PropertyName="IsVisible" Value="False"/>
                               </ia:DataTriggerBehavior>
                             </i:Interaction.Behaviors>
                           </Path>
 
-                          <Path Name="TBStar4" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                          <Path Name="TBStar4" IsVisible="False"  Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
@@ -120,13 +129,16 @@
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
                 HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0">
                             <i:Interaction.Behaviors>
-                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="1">
-                                <ia:ChangePropertyAction TargetObject="{Binding TBStar4}" PropertyName="IsVisible" Value="True"/>
+                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="4">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar4}" PropertyName="IsVisible" Value="True"/>
+                              </ia:DataTriggerBehavior>
+                             <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="LessThan" Value="4">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar4}" PropertyName="IsVisible" Value="False"/>
                               </ia:DataTriggerBehavior>
                             </i:Interaction.Behaviors>
                           </Path>
 
-                          <Path Name="TBStar5" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
+                          <Path Name="TBStar5" IsVisible="False" Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 									  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 									  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 									  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
@@ -134,8 +146,11 @@
 									  C511.56,208.649,513.033,202.688,511.267,197.258z"
                 HorizontalAlignment="Left" VerticalAlignment="Center" Height="15" Stretch="Fill" Width="16" Margin="0,0,3,0">
                             <i:Interaction.Behaviors>
-                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="1">
-                                <ia:ChangePropertyAction TargetObject="{Binding TBStar5}" PropertyName="IsVisible" Value="True"/>
+                              <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="GreaterThanOrEqual" Value="5">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar5}" PropertyName="IsVisible" Value="True"/>
+                              </ia:DataTriggerBehavior>
+                            <ia:DataTriggerBehavior Binding="{Binding Stars}" ComparisonCondition="LessThan" Value="5">
+                                <ia:ChangePropertyAction TargetObject="{Binding #TBStar5}" PropertyName="IsVisible" Value="False"/>
                               </ia:DataTriggerBehavior>
                             </i:Interaction.Behaviors>
                           </Path>

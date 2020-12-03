@@ -45,7 +45,7 @@
                   </DockPanel>
                   
                   <TextBlock Classes="H1" Text="Seed *" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
-                  <TextBox Classes="TextBoxBackground" Name="TBSeed" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="60" Watermark="Create your own seed (at least 200 characters)" BorderThickness="0" Padding="10" TextWrapping="Wrap"/>
+                  <TextBox Classes="TextBoxBackground" HorizontalAlignment="Left" Name="TBSeed" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="80" Watermark="Create your own seed (at least 200 characters)" BorderThickness="0" Padding="10" TextWrapping="Wrap"/>
 
                 </StackPanel>
 

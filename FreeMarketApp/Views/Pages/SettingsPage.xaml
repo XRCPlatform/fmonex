@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.SettingsPage">
-
+	
   <Grid Margin="0" Classes="Main">
 
         <!-- SIDEBAR -->
@@ -24,11 +24,27 @@
 		<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
 			<StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
 				<TextBlock Classes="H1" Text="Settings" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
-
-				<TextBlock Classes="H1" Text="Appearance" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-				<StackPanel Orientation="Vertical" Margin="30 10 20 0">
-					<RadioButton Name="RBApperanceLight" Classes="H1" Content="Light" FontSize="16" Margin="0 0 0 10" Tag="Light"></RadioButton>
-					<RadioButton Name="RBApperanceDark" Classes="H1" Content="Dark" FontSize="16" Margin="0 0 0 10" Tag="Dark"></RadioButton>
+				
+				<!-- Appearance settings -->
+				<WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+				    <TextBlock Classes="H1" Text="Appearance" FontSize="16" FontWeight="Bold"/>
+					<TextBlock Classes="H2" Text=" (changes take effect after restart)" FontSize="16"/>
+				</WrapPanel>
+				<StackPanel Orientation="Vertical" Margin="40 20 20 0">
+					<RadioButton Name="RBApperanceLight" Margin="0 0 10 15" Tag="Light">
+						<WrapPanel Orientation="Horizontal">
+							<Path Classes="SideBarIcon" Data="M600,16.609a13.45544,13.45544,0,0,0-13.07961,13.48824V69.336a13.06924,13.06924,0,0,0,6.54,11.4444,12.8812,12.8812,0,0,0,13.0792,0,13.06924,13.06924,0,0,0,6.54-11.4444V30.09728a13.80552,13.80552,0,0,0-3.67881-9.80964A12.85137,12.85137,0,0,0,600,16.609ZM479.832,66.4748a13.3131,13.3131,0,0,0-12.262,8.1744,13.06952,13.06952,0,0,0,2.8612,14.306l27.794,27.794a13.00707,13.00707,0,0,0,12.6708,3.6784,13.19282,13.19282,0,0,0,9.4008-9.4008A13.00754,13.00754,0,0,0,516.618,98.356L489.2328,70.562A13.20534,13.20534,0,0,0,479.832,66.4748Zm240.336,0a13.21566,13.21566,0,0,0-8.992,4.0872L683.382,98.356a13.00759,13.00759,0,0,0-3.6788,12.6708,13.1934,13.1934,0,0,0,9.40121,9.4008,13.0079,13.0079,0,0,0,12.67081-3.6784l27.79358-27.794a12.78827,12.78827,0,0,0,2.8612-14.306A13.02681,13.02681,0,0,0,720.168,66.4748ZM600,108.5744a91.5566,91.5566,0,1,0,91.55679,91.5564A91.5564,91.5564,0,0,0,600,108.5744ZM429.96628,187.05161a12.70883,12.70883,0,0,0-11.44456,6.13079,13.64347,13.64347,0,0,0,0,13.48841,13.06971,13.06971,0,0,0,11.44456,6.53959H469.2048a13.06947,13.06947,0,0,0,11.4448-6.53959,13.64516,13.64516,0,0,0,0-13.48841,12.70943,12.70943,0,0,0-11.4448-6.13079Zm300.82892,0a12.70834,12.70834,0,0,0-11.4444,6.13079,13.64322,13.64322,0,0,0,0,13.48841,13.06869,13.06869,0,0,0,11.4444,6.53959h39.2384a13.069,13.069,0,0,0,11.44479-6.53959,13.64411,13.64411,0,0,0,0-13.48841,12.709,12.709,0,0,0-11.44479-6.13079Zm-223.578,91.96521a13.21553,13.21553,0,0,0-8.992,4.08718l-27.794,27.794a13.008,13.008,0,0,0-3.6788,12.67078,13.194,13.194,0,0,0,9.4008,9.40121,13.73952,13.73952,0,0,0,13.0796-3.6788l27.3852-27.794a12.92807,12.92807,0,0,0,3.27-14.3056A13.58332,13.58332,0,0,0,507.2172,279.01682Zm185.15679,0a12.95131,12.95131,0,0,0-8.992,22.48037l27.794,27.794A13.00844,13.00844,0,0,0,723.8468,332.97a13.19263,13.19263,0,0,0,9.40079-9.40121,13.00682,13.00682,0,0,0-3.6788-12.67078l-27.79358-27.794A13.26647,13.26647,0,0,0,692.374,279.01682ZM600,317.438a13.45538,13.45538,0,0,0-13.07961,13.488v39.2388a13.06923,13.06923,0,0,0,6.54,11.4444,12.88111,12.88111,0,0,0,13.0792,0,13.06923,13.06923,0,0,0,6.54-11.4444V330.926a13.80615,13.80615,0,0,0-3.67881-9.8096A12.85228,12.85228,0,0,0,600,317.438Z"
+								HorizontalAlignment="Left" Margin="13 0 4 0" Height="25" Stretch="Fill" Width="25" />
+						<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="16">Light</TextBlock>
+						</WrapPanel>
+					</RadioButton>	
+					<RadioButton Name="RBApperanceDark" FontSize="16" Margin="0 0 0 10" Tag="Dark">
+						<WrapPanel Orientation="Horizontal">
+							<Path Classes="SideBarIcon" Data="M716.37039,286.7984c-100.80879,0-182.54159-81.7328-182.54159-182.5416A181.4492,181.4492,0,0,1,553.604,21.93064C480.3592,45.6612,427.346,114.3728,427.346,195.5276c0,100.8088,81.73316,182.54161,182.54156,182.54161,71.1608,0,132.64679-40.798,162.76639-100.21521A182.14285,182.14285,0,0,1,716.37039,286.7984Z"
+								 HorizontalAlignment="Left" Margin="16 0 7 0" Height="19" Stretch="Fill" Width="19" />
+							<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="16">Dark</TextBlock>
+						</WrapPanel>
+					</RadioButton>
 				</StackPanel>
 
         <DockPanel Margin="20 50 50 0">

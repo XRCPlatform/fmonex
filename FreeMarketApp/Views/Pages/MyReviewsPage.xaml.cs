@@ -118,10 +118,7 @@ namespace FreeMarketApp.Views.Pages
                     var itemReviewBytes = itemReview.ToByteArrayForSign();
                     var reviewUserPubKeys = UserPublicKey.Recover(itemReviewBytes, itemReview.Signature);
 
-                    var reviewUserData = FMONE.Current.Users.GetUserDataByPublicKey(
-                        reviewUserPubKeys,
-                        FMONE.Current.BasePoolManager,
-                        FMONE.Current.BaseBlockChainManager);
+                    var reviewUserData = FMONE.Current.SearchEngine.GetUser(reviewUserPubKeys);
 
                     if (reviewUserData != null)
                     {

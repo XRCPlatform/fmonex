@@ -32,7 +32,7 @@ namespace FreeMarketOne.Search
         public SearchEngine(IMarketManager marketChainManager, string searchIndexBasePath, int hitsPerPage = 20)
         {
             string indexDir = searchIndexBasePath;
-            string taxoDir = System.IO.Path.Combine(indexDir,"taxonomy").ToString();
+            string taxoDir = System.IO.Path.Combine(indexDir, "taxonomy").ToString();
 
             //validate search
             fSDirectory = FSDirectory.Open(indexDir);
@@ -59,8 +59,15 @@ namespace FreeMarketOne.Search
             }
             catch (Exception)
             {
-
-                return GetFacetsForQuery(query, FacetFieldNames);
+                try
+                {
+                    //recurse but if we lost facets go without. Only relevant in IBD hight velocity writes.
+                    return GetFacetsForQuery(query);
+                }
+                catch (Exception )
+                {
+                    return null;
+                }
             }
         }
 
@@ -80,9 +87,10 @@ namespace FreeMarketOne.Search
             foreach (var facet in FacetFieldNames)
             {
                 var f = facets.GetTopChildren(10, facet);
-                if (f != null){
+                if (f != null)
+                {
                     results.Add(f);
-                }                
+                }
             }
 
             return results;
@@ -117,14 +125,14 @@ namespace FreeMarketOne.Search
             StandardAnalyzer analyzer = new StandardAnalyzer(version);
 
             BooleanQuery bq = new BooleanQuery();
-   
+
             bq.Add(new QueryParser(version, "Title", analyzer).Parse(phrase), Occur.SHOULD);
             bq.Add(new QueryParser(version, "Description", analyzer).Parse(phrase), Occur.SHOULD);
 
             bq.Add(new QueryParser(version, "Category", analyzer).Parse(phrase), Occur.SHOULD);
             bq.Add(new QueryParser(version, "Manufacturer", analyzer).Parse(phrase), Occur.SHOULD);
 
-            return bq;        
+            return bq;
 
         }
 
@@ -136,16 +144,16 @@ namespace FreeMarketOne.Search
             {
                 drillDownQuery = new DrillDownQuery(facetConfig, baseQuery);
             }
-            
+
             foreach (var selector in selectors)
             {
                 drillDownQuery.Add(selector.Name, selector.Value);
-            }            
+            }
             return drillDownQuery;
 
         }
 
-    
+
         /// <summary>
         /// This allows performing dimsearch too.
         /// </summary>
@@ -159,7 +167,7 @@ namespace FreeMarketOne.Search
             if (!string.IsNullOrEmpty(queryPhrase) || !string.IsNullOrWhiteSpace(queryPhrase))
             {
                 query = ParseQuery(queryPhrase);
-            }            
+            }
             return Search(query, queryFacets, page);
         }
 
@@ -189,7 +197,7 @@ namespace FreeMarketOne.Search
                 docs = collector.GetTopDocs(startIndex, PageSize);
                 hits = docs.ScoreDocs;
             }
-           
+
 
             foreach (var item in hits)
             {
@@ -198,7 +206,7 @@ namespace FreeMarketOne.Search
                 {
                     list.Add(marketItem);
                 }
-                
+
                 //adding raw document so that relevance could be better understood
                 //documents.Add(searcher.Doc(item.Doc));
             }
@@ -214,7 +222,7 @@ namespace FreeMarketOne.Search
                     //retry during agressive optimistic indexing sometimes we fail here as indexing is not fully atomic
                     facets = GetFacetsForQuery(query);
                 }
-                
+
             }
             SearchResult searchResult = new SearchResult
             {
@@ -234,7 +242,8 @@ namespace FreeMarketOne.Search
         /// </summary>
         /// <param name="sellerPubKeys"></param>
         /// <returns></returns>
-        public Query BuildQueryBySellerPubKeys(List<byte[]> sellerPubKeys) {
+        public Query BuildQueryBySellerPubKeys(List<byte[]> sellerPubKeys)
+        {
 
             BooleanQuery bq = new BooleanQuery();
             var sellerPubKeyHashes = SearchHelper.GenerateSellerPubKeyHashes(sellerPubKeys);
@@ -304,11 +313,11 @@ namespace FreeMarketOne.Search
             {
                 var publicKeyString = Convert.ToBase64String(pubKey);
                 list = GetAllReviewsForPubKey(publicKeyString);
-                if (list != null  && list.Count>0)
+                if (list != null && list.Count > 0)
                 {
                     return list;
                 }
-            }          
+            }
             return list;
         }
 

@@ -637,6 +637,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your review contains banned words..
+        /// </summary>
+        internal static string Dialog_Review_BannedWordsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_Review_BannedWordsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your profile.
         /// </summary>
         internal static string LoginPage_UserName_LoginName {

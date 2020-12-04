@@ -6,6 +6,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
 using FreeMarketOne.Pools;
 using Libplanet.Extensions;
@@ -80,6 +81,7 @@ namespace FreeMarketApp.Views.Pages
 
         public async void ButtonReview_Click(object sender, RoutedEventArgs args)
         {
+            var textHelper = new TextHelper();
             var mainWindow = PagesHelper.GetParentWindow(this);
             var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             string reviewText = String.Empty;
@@ -136,6 +138,14 @@ namespace FreeMarketApp.Views.Pages
                         break;
                     }
                 }
+                if (!textHelper.IsWithoutBannedWords(reviewText))
+                {
+                    await MessageBox.Show(mainWindow,
+                               string.Format(SharedResources.ResourceManager.GetString("Dialog_Review_BannedWordsDescription")),
+                               SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                               MessageBox.MessageBoxButtons.Ok);
+                    return;
+                }
 
                 if (isMine)
                 {
@@ -143,6 +153,7 @@ namespace FreeMarketApp.Views.Pages
                                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_YouCantBuyYourOffer")),
                                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
                                 MessageBox.MessageBoxButtons.Ok);
+                    return;
                 }
                 else
                 {

@@ -388,4 +388,7 @@
   <data name="Dialog_FirstRun_BannedWordsDescription" xml:space="preserve">
     <value>Your description contains banned words.</value>
   </data>
+  <data name="Dialog_Review_BannedWordsDescription" xml:space="preserve">
+    <value>Your review contains banned words.</value>
+  </data>
 </root>

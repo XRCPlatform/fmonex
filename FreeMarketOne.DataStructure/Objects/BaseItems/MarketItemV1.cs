@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace FreeMarketOne.DataStructure.Objects.BaseItems
 {
@@ -8,5 +9,8 @@ namespace FreeMarketOne.DataStructure.Objects.BaseItems
         {
             this.nametype = "MarketItemV1";
         }
+
+        [JsonIgnore]
+        public bool Reviewed { get; set; }
     }
 }

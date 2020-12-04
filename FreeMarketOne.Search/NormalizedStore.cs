@@ -87,7 +87,7 @@ namespace FreeMarketOne.Search
             int pageOffset = 0;
             if (page > 1)
             {
-                pageOffset = page * pageSize;
+                pageOffset = (page-1) * pageSize;
             }
 
             var sqlCount = $"SELECT COUNT('') FROM Offer WHERE offerDirection = $offerDirection ";

@@ -139,14 +139,14 @@
 
 		<!-- Version number and Popup -->
 		 <Grid>
-			  <Button Classes="StatusBarButton" x:Name="popbtn" Click="ButtonPopup_Click" Cursor="Hand" Height="20" FontSize="12" Padding="7 0">
+			  <Button Classes="StatusBarButton" Cursor="Hand" Height="20" FontSize="12" Padding="7 0">
 				  <StackPanel Orientation="Horizontal">
 					  <TextBlock Classes="StatusBarText" Text="FM.ONE "/>
 					  <TextBlock Name="TBVersion" Classes="StatusBarText" Text="1.0"/>
 				  </StackPanel> 
 			  </Button>
 			  
-			  <Popup PlacementMode="Top" StaysOpen="False" x:Name="popup">
+			  <Popup PlacementMode="Top" StaysOpen="False">
 				  <Border Background="#eaedf9" Margin="50 0 0 30" HorizontalAlignment="Left" VerticalAlignment="Bottom" CornerRadius="7" >
 						<WrapPanel Orientation="Vertical" Margin="7">
 							<Button Classes="popup" Cursor="Hand">

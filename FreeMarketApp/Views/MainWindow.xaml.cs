@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -188,13 +188,5 @@ namespace FreeMarketApp.Views
             PagesHelper.Switch(this, settingsPage);
         }
 
-        public void ButtonPopup_Click(object sender, RoutedEventArgs args)
-        {
-            var popbtn = sender as Button;
-            var popup = this.Popup;
-            if (popup.IsOpen) { popup.IsOpen = false; }
-            popup.PlacementTarget = popbtn;
-            popup.IsOpen = true;
-        }
     }
 }

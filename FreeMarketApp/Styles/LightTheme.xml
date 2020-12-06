@@ -414,4 +414,41 @@
 		<Setter Property="Background" Value="#f6f6f7" />
 	</Style>
 
+
+	<!-- Popup Button -->
+	<Style Selector="Button.popup">
+		<Setter Property="Background" Value="Transparent" />
+	</Style>
+	<Style Selector="Button.popup /template/ ContentPresenter">
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="CornerRadius" Value="3"/>
+		<Setter Property="Margin" Value="1"/>
+		<Setter Property="Padding" Value="8 7 20 7"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+	</Style>
+	<Style Selector="Button:pointerover.popup /template/ ContentPresenter">
+		<Setter Property="Background" Value="#d1d8f3" />
+	</Style>
+	<Style Selector="Button:pressed.popup /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#c3c1c9" />
+		<Setter Property="Background" Value="#c3c1c9" />
+	</Style>
+
+	<!-- Statusbar Button -->
+	<Style Selector="Button.StatusBarButton">
+		<Setter Property="Background" Value="#d1d8f3" />
+	</Style>
+	<Style Selector="Button.StatusBarButton /template/ ContentPresenter">
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="CornerRadius" Value="3"/>
+	</Style>
+	<Style Selector="Button:pointerover.StatusBarButton /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#cfced6" />
+		<Setter Property="Background" Value="#cfced6" />
+	</Style>
+	<Style Selector="Button:pressed.StatusBarButton /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#c3c1c9" />
+		<Setter Property="Background" Value="#c3c1c9" />
+	</Style>
+
 </Styles>

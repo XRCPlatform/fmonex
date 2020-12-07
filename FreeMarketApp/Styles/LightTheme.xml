@@ -219,6 +219,9 @@
 			<Setter Property="Background" Value="#fffaf0" />
 		</Style>	
 		
+	
+	
+	
 		<!-- ELEMENTS -->
 		<Style Selector="Grid.Main">
 			<Setter Property="Background" Value="#ffffff" />
@@ -235,6 +238,7 @@
 
 		<Style Selector="Border.ToolBar">
 			<Setter Property="BorderBrush" Value="#f4f3f8" />
+			<Setter Property="Background" Value="#f4f3f8" />
 		</Style>
 
 		<Style Selector="TextBlock.H1">
@@ -423,31 +427,33 @@
 		<Setter Property="BorderThickness" Value="0" />
 		<Setter Property="CornerRadius" Value="3"/>
 		<Setter Property="Margin" Value="1"/>
-		<Setter Property="Padding" Value="8 7 20 7"/>
+		<Setter Property="Padding" Value="8 7"/>
 		<Setter Property="HorizontalContentAlignment" Value="Left"/>
 	</Style>
 	<Style Selector="Button:pointerover.popup /template/ ContentPresenter">
-		<Setter Property="Background" Value="#d1d8f3" />
+		<Setter Property="Background" Value="#e6e5ea" />
 	</Style>
 	<Style Selector="Button:pressed.popup /template/ ContentPresenter">
-		<Setter Property="BorderBrush" Value="#c3c1c9" />
-		<Setter Property="Background" Value="#c3c1c9" />
+		<Setter Property="BorderBrush" Value="#f4f3f8" />
+		<Setter Property="Background" Value="#f4f3f8" />
+	</Style>
+
+	<Style Selector="Border.popup">
+		<Setter Property="Background" Value="#ffffff" />
 	</Style>
 
 	<!-- Statusbar Button -->
 	<Style Selector="Button.StatusBarButton">
-		<Setter Property="Background" Value="#d1d8f3" />
+		<Setter Property="Background" Value="#dfe3f5" />
 	</Style>
 	<Style Selector="Button.StatusBarButton /template/ ContentPresenter">
 		<Setter Property="BorderThickness" Value="0" />
 		<Setter Property="CornerRadius" Value="3"/>
 	</Style>
 	<Style Selector="Button:pointerover.StatusBarButton /template/ ContentPresenter">
-		<Setter Property="BorderBrush" Value="#cfced6" />
-		<Setter Property="Background" Value="#cfced6" />
+		<Setter Property="Background" Value="#d1d8f3" />
 	</Style>
 	<Style Selector="Button:pressed.StatusBarButton /template/ ContentPresenter">
-		<Setter Property="BorderBrush" Value="#c3c1c9" />
 		<Setter Property="Background" Value="#c3c1c9" />
 	</Style>
 

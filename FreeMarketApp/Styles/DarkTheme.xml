@@ -219,6 +219,9 @@
 			<Setter Property="Background" Value="#402c04" />
 		</Style>
 
+	
+	
+	
 
 		<!-- ELEMENTS -->
 		<Style Selector="Grid.Main">
@@ -236,6 +239,7 @@
 
 		<Style Selector="Border.ToolBar">
 			<Setter Property="BorderBrush" Value="#1c1c1e" />
+			<Setter Property="Background" Value="#1c1c1e" />
 		</Style>
 
 		<Style Selector="TextBlock.H1">
@@ -427,6 +431,46 @@
 	</Style>
 
 	<Style Selector="Border.ChangellyWidget">
+		<Setter Property="Background" Value="#3a3a3c" />
+	</Style>
+
+	<!-- Popup Button -->
+	<Style Selector="Button.popup">
+		<Setter Property="Background" Value="Transparent" />
+	</Style>
+	<Style Selector="Button.popup /template/ ContentPresenter">
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="CornerRadius" Value="3"/>
+		<Setter Property="Margin" Value="1"/>
+		<Setter Property="Padding" Value="8 7 20 7"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+	</Style>
+	<Style Selector="Button:pointerover.popup /template/ ContentPresenter">
+		<Setter Property="Background" Value="#3a3a3c" />
+	</Style>
+	<Style Selector="Button:pressed.popup /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#1c1c1e" />
+		<Setter Property="Background" Value="#1c1c1e" />
+	</Style>
+	
+	<Style Selector="Border.popup">
+		<Setter Property="Background" Value="#000000" />
+	</Style>
+
+	<!-- Statusbar Button -->
+	<Style Selector="Button.StatusBarButton">
+		<Setter Property="Background" Value="#545454" />
+	</Style>
+	<Style Selector="Button.StatusBarButton /template/ ContentPresenter">
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="CornerRadius" Value="3"/>
+	</Style>
+	<Style Selector="Button:pointerover.StatusBarButton /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#1c1c1e" />
+		<Setter Property="Background" Value="#1c1c1e" />
+	</Style>
+	<Style Selector="Button:pressed.StatusBarButton /template/ ContentPresenter">
+		<Setter Property="BorderBrush" Value="#3a3a3c" />
 		<Setter Property="Background" Value="#3a3a3c" />
 	</Style>
 

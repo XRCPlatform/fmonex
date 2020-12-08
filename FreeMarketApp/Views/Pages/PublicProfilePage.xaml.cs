@@ -80,16 +80,17 @@ namespace FreeMarketApp.Views.Pages
                 var userBytes = userData.ToByteArrayForSign();
                 var userPubKeys = UserPublicKey.Recover(userBytes, userData.Signature);
 
-                var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
-                    userPubKeys,
-                    FMONE.Current.BasePoolManager,
-                    FMONE.Current.BaseBlockChainManager);
+                var reviews = FMONE.Current.SearchEngine.GetAllReviewsForPubKey(userPubKeys);
 
                 if (reviews.Any())
                 {
                     var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 
+                    for (int i = 0; i < reviewStartRounded; i++)
+                    {
+
+                    }
                     tbStars.Text = reviewStartRounded.ToString();
 
                     GetAllUserNames(reviews);
@@ -118,11 +119,7 @@ namespace FreeMarketApp.Views.Pages
 
                     var itemReviewBytes = itemReview.ToByteArrayForSign();
                     var reviewUserPubKeys = UserPublicKey.Recover(itemReviewBytes, itemReview.Signature);
-
-                    var reviewUserData = FMONE.Current.Users.GetUserDataByPublicKey(
-                        reviewUserPubKeys,
-                        FMONE.Current.BasePoolManager,
-                        FMONE.Current.BaseBlockChainManager);
+                    var reviewUserData = FMONE.Current.SearchEngine.GetUser(reviewUserPubKeys);
 
                     if (reviewUserData != null)
                     {

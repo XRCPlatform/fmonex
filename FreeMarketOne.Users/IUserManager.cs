@@ -45,5 +45,6 @@ namespace FreeMarketOne.Users
             List<byte[]> userPubKeys,
             BasePoolManager basePoolManager,
             IBlockChainManager<BaseAction> blockChainManager);
+        ReviewUserDataV1 SignReviewData(ReviewUserDataV1 review, UserPrivateKey privateKey);
     }
 }

@@ -103,7 +103,7 @@
                   <!-- Dropdown menu -->
                   <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="2"/>
+                    <ComboBoxItem Classes="DropDown" Padding="7" Content="5"/>
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
@@ -160,7 +160,7 @@
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" VerticalAlignment="Bottom" Height="28" Margin="0 0 0 5">
                           
                           <!-- Review button -->
-                          <Button Classes="ButtonOrange" VerticalContentAlignment="Center" Margin="0 0 15 0" Cursor="Hand">
+                          <Button Classes="ButtonOrange" VerticalContentAlignment="Center" IsVisible="{Binding !Reviewed}" Margin="0 0 15 0" Cursor="Hand" Click="ButtonReviewPage_Click" Tag="{Binding Signature}" Name="GotToReview" >
                             <WrapPanel Name="ReviewButton" VerticalAlignment="Bottom" IsVisible="True" Orientation="Horizontal">
                               <Path Classes="StatusBarIconOrange" Data="M96.994,37.479c-0.236-0.725-0.862-1.253-1.617-1.361l-31.141-4.494L50.34,3.396c-0.336-0.684-1.032-1.117-1.794-1.117 c-0.762,0-1.458,0.433-1.794,1.116L32.855,31.623l-31.14,4.494c-0.754,0.108-1.381,0.637-1.617,1.361 c-0.235,0.725-0.039,1.521,0.508,2.052l22.551,21.939l-5.348,31.004c-0.13,0.75,0.179,1.51,0.795,1.957 c0.618,0.449,1.434,0.508,2.108,0.152l27.834-14.668L76.38,94.582c0.293,0.154,0.612,0.23,0.933,0.23 c0.415,0,0.827-0.129,1.176-0.383c0.616-0.447,0.926-1.207,0.795-1.957l-5.348-31.004l22.551-21.939 C97.031,38.999,97.229,38.203,96.994,37.479z M82.965,43.436L66.763,59.197l3.842,22.273c0.093,0.541-0.129,1.086-0.571,1.408 c-0.25,0.182-0.547,0.273-0.845,0.273c-0.229,0-0.459-0.055-0.67-0.165L48.521,72.449V16.671c0.547,0,1.046,0.311,1.289,0.802 l9.985,20.28l22.373,3.229c0.542,0.077,0.991,0.457,1.161,0.978C83.499,42.482,83.356,43.052,82.965,43.436z" 
                                   HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="16" Margin="0 0 5 0"/>

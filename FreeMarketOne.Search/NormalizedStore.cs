@@ -43,11 +43,12 @@ namespace FreeMarketOne.Search
                         deleteCommand.ExecuteNonQuery();
                     }
 
-                    var sql = "INSERT INTO Offer ( Signature, OfferDirection, Data) VALUES ( $Signature, $OfferDirection, $Data)";
+                    var sql = "INSERT INTO Offer ( Signature, OfferDirection, MarketItemHash,  Data) VALUES ( $Signature, $OfferDirection, $MarketItemHash, $Data)";
                     using (var insertCommand = new SQLiteCommand(sql, dbConnection, dbTransaction))
                     {
                         insertCommand.Parameters.AddWithValue("$Signature", marketItem.Signature);
                         insertCommand.Parameters.AddWithValue("$OfferDirection", (int)offerDirection);
+                        insertCommand.Parameters.AddWithValue("$MarketItemHash", marketItem.Hash);
                         insertCommand.Parameters.AddWithValue("$Data", JsonConvert.SerializeObject(marketItem));
                         insertCommand.ExecuteNonQuery();
                     }
@@ -86,11 +87,15 @@ namespace FreeMarketOne.Search
             int pageOffset = 0;
             if (page > 1)
             {
-                pageOffset = page * pageSize;
+                pageOffset = (page-1) * pageSize;
             }
 
             var sqlCount = $"SELECT COUNT('') FROM Offer WHERE offerDirection = $offerDirection ";
-            var sql = $"SELECT Data FROM Offer WHERE offerDirection = $offerDirection order by Id desc limit {pageSize} offset {pageOffset} ";
+            var sql = $"SELECT o.Data, " +
+                        $" CASE WHEN pr.marketItemHash IS NULL THEN 0 ELSE 1 END as Reviewed" +
+                        $" FROM Offer o " +
+                        $" LEFT OUTER JOIN PartyReview pr ON o.marketItemHash = pr.marketItemHash " +
+                        $"WHERE o.offerDirection = $offerDirection order by o.Id desc limit {pageSize} offset {pageOffset} ";
             using (var dbConnection = new SQLiteConnection(this.connection))
             {
                 dbConnection.Open();
@@ -107,7 +112,9 @@ namespace FreeMarketOne.Search
                     {
                         while (reader.Read())
                         {
-                            results.Add(JsonConvert.DeserializeObject<MarketItemV1>(reader.GetString(0)));
+                            var item = JsonConvert.DeserializeObject<MarketItemV1>(reader.GetString(0));
+                            item.Reviewed = reader.GetBoolean(1);
+                            results.Add(item);
                         }
                     }
                 }
@@ -170,6 +177,7 @@ namespace FreeMarketOne.Search
                     {
                         var sql = "CREATE TABLE \"Offer\" (" +
                                 "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                                "\"MarketItemHash\"  TEXT NOT NULL, " +
                                 "\"Signature\"  TEXT NOT NULL UNIQUE, " +
                                 "\"OfferDirection\"  INTEGER NOT NULL, " +
                                 "\"Data\" TEXT NULL " +
@@ -181,8 +189,8 @@ namespace FreeMarketOne.Search
 
                         sql = "CREATE TABLE \"Party\" (" +
                               "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                              "\"pubKey\"  TEXT NOT NULL UNIQUE, " +
-                              "\"blockHash\"  TEXT NOT NULL, " +
+                              "\"PubKey\"  TEXT NOT NULL UNIQUE, " +
+                              "\"BlockHash\"  TEXT NOT NULL, " +
                               "\"Data\" TEXT NULL " +
                               "); ";
                         using (var command = new SQLiteCommand(sql, dbConnection, transaction))
@@ -193,8 +201,9 @@ namespace FreeMarketOne.Search
                         sql = "CREATE TABLE \"PartyReview\" (" +
                              "\"Id\"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
                              "\"Hash\"  TEXT NOT NULL UNIQUE, " +
-                             "\"pubKey\"  TEXT NOT NULL , " +
-                             "\"blockHash\"  TEXT NOT NULL, " +
+                             "\"PubKey\"  TEXT NOT NULL , " +
+                             "\"BlockHash\"  TEXT NOT NULL, " +
+                             "\"MarketItemHash\"  TEXT NOT NULL, " +                             
                              "\"Data\" TEXT NULL " +
                              "); ";
                         using (var command = new SQLiteCommand(sql, dbConnection, transaction))
@@ -211,7 +220,7 @@ namespace FreeMarketOne.Search
                         }
 
 
-                        sql = "CREATE UNIQUE INDEX \"ix_Party_pubKey\" ON \"Party\" (\"pubKey\");";
+                        sql = "CREATE UNIQUE INDEX \"ix_Party_pubKey\" ON \"Party\" (\"PubKey\");";
 
                         using (var command = new SQLiteCommand(sql, dbConnection, transaction))
                         {
@@ -226,7 +235,15 @@ namespace FreeMarketOne.Search
                             command.ExecuteNonQuery();
                         }
 
-                        sql = "CREATE INDEX \"ix_PartyReview_pubKey\" ON \"PartyReview\" (\"pubKey\");";
+                        sql = "CREATE INDEX \"ix_PartyReview_pubKey\" ON \"PartyReview\" (\"PubKey\");";
+
+                        using (var command = new SQLiteCommand(sql, dbConnection, transaction))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+
+
+                        sql = "CREATE INDEX \"ix_PartyReview_marketItemHash\" ON \"PartyReview\" (\"MarketItemHash\");";
 
                         using (var command = new SQLiteCommand(sql, dbConnection, transaction))
                         {
@@ -358,11 +375,12 @@ namespace FreeMarketOne.Search
                         deleteCommand.ExecuteNonQuery();
                     }
 
-                    var sql = "INSERT INTO PartyReview ( pubKey, Hash, blockHash,  Data) VALUES ( $pubKey, $Hash, $blockHash, $Data)";
+                    var sql = "INSERT INTO PartyReview ( pubKey, Hash, blockHash, marketItemHash,  Data) VALUES ( $pubKey, $Hash, $blockHash, $marketItemHash, $Data)";
                     using (var insertCommand = new SQLiteCommand(sql, dbConnection, dbTransaction))
                     {
                         insertCommand.Parameters.AddWithValue("$Hash", item.Hash);
                         insertCommand.Parameters.AddWithValue("$pubKey", item.RevieweePublicKey);
+                        insertCommand.Parameters.AddWithValue("$marketItemHash", item.MarketItemHash);
                         insertCommand.Parameters.AddWithValue("$blockHash", blockHash);
                         insertCommand.Parameters.AddWithValue("$Data", JsonConvert.SerializeObject(item));
                         insertCommand.ExecuteNonQuery();

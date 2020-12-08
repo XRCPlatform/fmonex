@@ -340,6 +340,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please provide product and seller review text..
+        /// </summary>
+        internal static string Dialog_Confirmation_PleaseProvideReviewText {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_PleaseProvideReviewText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please provide XRC transaction hash..
         /// </summary>
         internal static string Dialog_Confirmation_PleaseProvideXRCTransactionHash {
@@ -354,6 +363,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_Confirmation_RemoveProduct {
             get {
                 return ResourceManager.GetString("Dialog_Confirmation_RemoveProduct", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posting a product seller/buyer review is ireversible. Are you sure you want to proceed?.
+        /// </summary>
+        internal static string Dialog_Confirmation_ReviewProduct {
+            get {
+                return ResourceManager.GetString("Dialog_Confirmation_ReviewProduct", resourceCulture);
             }
         }
         
@@ -615,6 +633,15 @@ namespace FreeMarketApp.Resources {
         internal static string Dialog_LoginPage_WatermarkWrongPassword {
             get {
                 return ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your review contains banned words..
+        /// </summary>
+        internal static string Dialog_Review_BannedWordsDescription {
+            get {
+                return ResourceManager.GetString("Dialog_Review_BannedWordsDescription", resourceCulture);
             }
         }
         

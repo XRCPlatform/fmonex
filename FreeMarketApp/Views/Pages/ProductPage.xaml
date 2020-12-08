@@ -54,25 +54,25 @@
         </DockPanel>
 
         <!-- Review Section -->
-        <DockPanel IsVisible="False" LastChildFill="true">
+      <DockPanel Name="ReviewForm" IsVisible="false" LastChildFill="true">
           <Border DockPanel.Dock="Top" MinHeight="30" HorizontalAlignment="Left" Margin="15 0 0 -15" Classes="Main">
             <TextBlock Text="Your review" Foreground="#ff9234" Margin="5 0 10 0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"></TextBlock>
           </Border>
           <Border ZIndex="-1" MinWidth="300" BorderThickness="1" BorderBrush="#ff9234" Margin="20 0 20 0" CornerRadius="10">
             <DockPanel>
               <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Rating:" Margin="20 20 0 0" FontSize="16"/>
-              <StackPanel DockPanel.Dock="Top" Margin="20 3 0 0" Orientation="Horizontal">
-                <ToggleButton Classes="ratingstar" Tag="1" />
-                <ToggleButton Classes="ratingstar" Tag="2" />
-                <ToggleButton Classes="ratingstar" Tag="3" />
-                <ToggleButton Classes="ratingstar" Tag="4" />
-                <ToggleButton Classes="ratingstar" Tag="5" />
+              <StackPanel DockPanel.Dock="Top" Margin="20 3 0 0" Orientation="Horizontal" Name="StarReviewToggleButtonArray">
+                <ToggleButton Classes="ratingstar" Tag="1" Click="ButtonStar_Click"/>
+                <ToggleButton Classes="ratingstar" Tag="2" Click="ButtonStar_Click"/>
+                <ToggleButton Classes="ratingstar" Tag="3" Click="ButtonStar_Click"/>
+                <ToggleButton Classes="ratingstar" Tag="4" Click="ButtonStar_Click"/>
+                <ToggleButton Classes="ratingstar" Tag="5" Click="ButtonStar_Click"/>
               </StackPanel>
               <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Review:" Margin="20 15 0 0" FontSize="16"/>
-              <TextBox DockPanel.Dock="Top" Classes="TextBoxNoBackground" TextWrapping="Wrap" FontSize="14" Watermark="Share your opinion about the item or describe an experience you had with the seller/buyer" Cursor="Ibeam" BorderThickness="0" MinHeight="70" VerticalAlignment="Stretch" Margin="20 0 20 20"></TextBox>
+            <TextBox Name="TBReviewText" DockPanel.Dock="Top" Classes="TextBoxNoBackground" TextWrapping="Wrap" FontSize="14" Watermark="Share your opinion about the item or describe an experience you had with the seller/buyer" Cursor="Ibeam" BorderThickness="0" MinHeight="70" VerticalAlignment="Stretch" Margin="20 0 20 20"></TextBox>
               <StackPanel DockPanel.Dock="Bottom" Margin="0 5 20 20" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Cursor="Hand" FontSize="13" Classes="pagination" Margin="0 0 10 0" Background="Transparent">Cancel</Button>
-                <Button Cursor="Hand" FontSize="13" Classes="pagination">Save</Button>
+              <Button Cursor="Hand" Classes="pagination" FontSize="13" Margin="0 0 10 0" Background="Transparent" Click="ButtonReviewReset_Click">Cancel</Button>
+              <Button Cursor="Hand" Classes="pagination" FontSize="13" Click="ButtonReview_Click">Save</Button>
               </StackPanel>
             </DockPanel>
           </Border>

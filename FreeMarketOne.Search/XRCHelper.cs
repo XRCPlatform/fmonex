@@ -24,11 +24,14 @@ namespace FreeMarketOne.Search
             decimal total = 0;
             foreach (var vout in xrcTransaction.VOut)
             {
-                foreach (var taddress in vout.ScriptPubKey.Addresses)
+                if (vout.ScriptPubKey.Addresses != null)
                 {
-                    if (taddress.Equals(address))
+                    foreach (var taddress in vout.ScriptPubKey.Addresses)
                     {
-                        total += vout.Value;
+                        if (taddress.Equals(address))
+                        {
+                            total += vout.Value;
+                        }
                     }
                 }                
             }

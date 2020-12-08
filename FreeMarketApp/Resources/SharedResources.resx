@@ -189,6 +189,13 @@
   <data name="Dialog_Confirmation_PleaseProvideXRCTransactionHash" xml:space="preserve">
     <value>Please provide XRC transaction hash.</value>
   </data>
+  <data name="Dialog_Confirmation_PleaseProvideReviewText" xml:space="preserve">
+    <value>Please provide product and seller review text.</value>
+  </data>
+  <data name="Dialog_Confirmation_ReviewProduct" xml:space="preserve">
+    <value>Posting a product seller/buyer review is ireversible. Are you sure you want to proceed?</value>
+  </data>
+  
   <data name="Dialog_Confirmation_YouCantBuyYourOffer" xml:space="preserve">
     <value>You can't buy your offer.</value>
   </data>
@@ -380,5 +387,8 @@
   </data>
   <data name="Dialog_FirstRun_BannedWordsDescription" xml:space="preserve">
     <value>Your description contains banned words.</value>
+  </data>
+  <data name="Dialog_Review_BannedWordsDescription" xml:space="preserve">
+    <value>Your review contains banned words.</value>
   </data>
 </root>

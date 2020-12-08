@@ -1,10 +1,12 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
 using FreeMarketOne.Pools;
 using Libplanet.Extensions;
@@ -22,7 +24,7 @@ namespace FreeMarketApp.Views.Pages
         private static ProductPage _instance;
         private ILogger _logger;
         private MarketItemV1 _offer;
-
+        private UserControl _backPage;
         public static ProductPage Instance
         {
             get
@@ -59,10 +61,184 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonBack_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
+            if (_backPage != null)
+            {
+                PagesHelper.Switch(mainWindow, _backPage);
+            }
+            else
+            {
+                PagesHelper.Switch(mainWindow, MainPage.Instance);
+            }
 
-            PagesHelper.Switch(mainWindow, MainPage.Instance);
 
             ClearForm();
+        }
+
+        public void SetBackPage(MyBoughtProductsPage myBoughtProductsPage)
+        {
+            _backPage = (UserControl)myBoughtProductsPage;
+        }
+
+        public async void ButtonReview_Click(object sender, RoutedEventArgs args)
+        {
+            var textHelper = new TextHelper();
+            var mainWindow = PagesHelper.GetParentWindow(this);
+            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            string reviewText = String.Empty;
+            int stars = 0;
+            
+            if (_offer == null)
+            {
+                return;
+            }
+
+            var TBReviewText = Instance.FindControl<TextBox>("TBReviewText");
+            var ReviewForm = Instance.FindControl<DockPanel>("ReviewForm");
+            var StarReviewToggleButtonArray = Instance.FindControl<StackPanel>("StarReviewToggleButtonArray");
+            foreach (var item in StarReviewToggleButtonArray.Children)
+            {
+                ToggleButton starButton = item as ToggleButton;
+                if (starButton != null)
+                {
+                    if ((bool)starButton.IsChecked)
+                    {
+                        int observedStars = int.Parse(starButton.Tag.ToString());
+                        if (observedStars > stars)
+                        {
+                            stars = observedStars;
+                        }
+                    }
+                }
+            }
+
+            reviewText = TBReviewText.Text;
+ 
+
+            var result = await MessageBox.Show(mainWindow,
+              string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_ReviewProduct"), approxSpanToNewBlock.TotalSeconds),
+              SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+              MessageBox.MessageBoxButtons.YesNo);
+
+            if (result == MessageBox.MessageBoxResult.Yes)
+            {
+                
+                //is it my offer?
+                var itemReviewBytes = _offer.ToByteArrayForSign();
+                var sellerPublicKeys = UserPublicKey.Recover(itemReviewBytes, _offer.Signature);
+                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
+                var sellerUserData = FMONE.Current.Users.GetUserDataByPublicKey(sellerPublicKeys, FMONE.Current.BasePoolManager, FMONE.Current.BaseBlockChainManager);
+
+                var isMine = false;
+
+                foreach (var itemUserPubKey in sellerPublicKeys)
+                {
+                    if (userPubKey.SequenceEqual(itemUserPubKey))
+                    {
+                        isMine = true;
+                        break;
+                    }
+                }
+                if (!textHelper.IsWithoutBannedWords(reviewText))
+                {
+                    await MessageBox.Show(mainWindow,
+                               string.Format(SharedResources.ResourceManager.GetString("Dialog_Review_BannedWordsDescription")),
+                               SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                               MessageBox.MessageBoxButtons.Ok);
+                    return;
+                }
+
+                if (isMine)
+                {
+                    await MessageBox.Show(mainWindow,
+                                string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_YouCantBuyYourOffer")),
+                                SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                                MessageBox.MessageBoxButtons.Ok);
+                    return;
+                }
+                else
+                {
+                    if (String.IsNullOrEmpty(reviewText))
+                    {
+                        await MessageBox.Show(mainWindow,
+                              string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_PleaseProvideReviewText")),
+                              SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                              MessageBox.MessageBoxButtons.Ok);
+                        return;
+                    }
+
+                    var review = new ReviewUserDataV1();
+                    review.ReviewDateTime = DateTime.UtcNow;
+                    review.Message = reviewText;
+                    review.Stars = stars;
+                    review.UserName = FMONE.Current.Users.UserData.UserName;
+                    review.MarketItemHash = _offer.Hash;
+                    review.RevieweePublicKey = sellerUserData.PublicKey;
+                    review.Hash = review.GenerateHash();
+
+                    ReviewUserDataV1 signedReview = FMONE.Current.Users.SignReviewData(review, FMONE.Current.Users.PrivateKey);
+
+                    PagesHelper.Log(_logger, string.Format("Propagate review information to chain."));
+
+                    var resultPool = FMONE.Current.BasePoolManager.AcceptActionItem(signedReview);
+                    if (resultPool != null)
+                    {
+                        await MessageBox.Show(mainWindow,
+                        string.Format(SharedResources.ResourceManager.GetString("Dialog_Error_" + resultPool.Value.ToString())),
+                        SharedResources.ResourceManager.GetString("Dialog_Error_Title"),
+                        MessageBox.MessageBoxButtons.Ok);
+
+                        //not allow change in case of another state is in process
+                        if (resultPool == PoolManagerStates.Errors.StateOfItemIsInProgress)
+                        {
+                            //TODO: not sure what todo here yet 
+                        }
+                    }
+                }
+            }
+            ReviewForm.IsVisible = false;
+        }
+
+        public void ButtonStar_Click(object sender, RoutedEventArgs args) {
+
+            int observedStars = int.Parse(((Button)sender).Tag.ToString());
+            var StarReviewToggleButtonArray = Instance.FindControl<StackPanel>("StarReviewToggleButtonArray");
+            foreach (var item in StarReviewToggleButtonArray.Children)
+            {
+                ToggleButton starButton = item as ToggleButton;
+                if (starButton != null)
+                {
+                    int iterableStars = int.Parse(starButton.Tag.ToString());
+                    if (iterableStars<= observedStars)
+                    {
+                        starButton.IsChecked = true;
+                    }
+                    else
+                    {
+                        starButton.IsChecked = false;
+                    }
+                }
+            }
+        }
+        
+        public void ButtonReviewReset_Click(object sender, RoutedEventArgs args)
+        {
+            var StarReviewToggleButtonArray = Instance.FindControl<StackPanel>("StarReviewToggleButtonArray");
+            foreach (var item in StarReviewToggleButtonArray.Children)
+            {
+                ToggleButton starButton = item as ToggleButton;
+                if (starButton != null)
+                {
+                    starButton.IsChecked = false;
+                }
+            }
+            var TBReviewText = Instance.FindControl<TextBox>("TBReviewText");
+            TBReviewText.Text = String.Empty;
+        }
+
+        public void ShowReview()
+        {
+            var ReviewForm = Instance.FindControl<DockPanel>("ReviewForm");
+            ReviewForm.IsVisible = true;
         }
 
         public async void ButtonBuy_Click(object sender, RoutedEventArgs args)
@@ -157,6 +333,7 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+      
         public void ButtonSeller_Click(object sender, RoutedEventArgs args)
         {
             var signatureAndHash = ((Button)sender).Tag.ToString();

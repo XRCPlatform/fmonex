@@ -646,6 +646,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was critical application error. Please restart the application to continue..
+        /// </summary>
+        internal static string Dialog_ThereWasCriticalError {
+            get {
+                return ResourceManager.GetString("Dialog_ThereWasCriticalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your profile.
         /// </summary>
         internal static string LoginPage_UserName_LoginName {

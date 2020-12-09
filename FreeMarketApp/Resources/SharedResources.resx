@@ -391,4 +391,7 @@
   <data name="Dialog_Review_BannedWordsDescription" xml:space="preserve">
     <value>Your review contains banned words.</value>
   </data>
+  <data name="Dialog_ThereWasCriticalError" xml:space="preserve">
+    <value>There was critical application error. Please restart the application to continue.</value>
+  </data>
 </root>

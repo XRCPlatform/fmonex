@@ -325,13 +325,33 @@
 			<Setter Property="Fill" Value="#ffffff" />
 		</Style>
 
+		<!-- TextBoxes and ComboBoxes -->
 		<Style Selector="TextBox.TextBoxBackground">
 			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="BorderBrush" Value="#f9f9f9" />
 		</Style>
-
+	
+		<Style Selector="TextBox:pointerover.TextBoxBackground /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
+		</Style>
+	
+		<Style Selector="TextBox:focus.TextBoxBackground /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
+		</Style>
+	
+		<Style Selector="TextBox:pointerover.TextBoxBackground /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
+		</Style>
+	
 		<Style Selector="ComboBox.TextBoxBackground">
 			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="BorderBrush" Value="#f9f9f9" />
 		</Style>
+	
+		<Style Selector="ComboBox:pointerover.TextBoxBackground /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
+		</Style>
+	
 		
 		<Style Selector="Border.PhotoPlaceholder">
 			<Setter Property="BorderBrush" Value="#e6e5ea" />

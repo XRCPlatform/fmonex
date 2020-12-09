@@ -8,10 +8,12 @@ using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
+using FreeMarketApp.Views.Controls;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.Users;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
@@ -189,10 +191,51 @@ namespace FreeMarketApp.Views
             PagesHelper.Switch(this, settingsPage);
         }
 
+
+        // Popup and Useful links
+
         public void Popup_Click(object sender, RoutedEventArgs e)
         {
             Popup VersionPopup = this.FindControl<Popup>("VersionPopup");
             VersionPopup.IsOpen = true;
-        }   
+        }
+
+        public void Gitlab_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "https://gitlab.com/bitcoinrh/fm.one/-/issues";
+            process.Start();
+        }
+
+        public void Discord_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "https://discord.gg/gMPBrsQ";
+            process.Start();
+        }
+
+        public void FM_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "https://www.freemarket.one/";
+            process.Start();
+        }
+
+        public void XRC_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "http://bitcoinrh.org/";
+            process.Start();
+        }
+
+
+
+
     }
 }
+       
+    

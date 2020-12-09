@@ -1,3 +1,4 @@
+
 <Styles xmlns = "https://github.com/avaloniaui"
         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys = "clr-namespace: System; assembly=netstandard">
@@ -326,16 +327,31 @@
 			<Setter Property="Fill" Value="#ffffff" />
 		</Style>
 
+	<!-- TextBoxes and ComboBoxes -->
 		<Style Selector="TextBox.TextBoxBackground">
 			<Setter Property="Background" Value="#3a3a3c" />
+			<Setter Property="BorderBrush" Value="#3a3a3c" />
 			<Setter Property="Foreground" Value="#dadae2" />
+		</Style>
+
+		<Style Selector="TextBox:pointerover.TextBoxBackground /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#0a84ff"/>
+		</Style>
+
+		<Style Selector="TextBox:focus.TextBoxBackground /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#0a84ff"/>
 		</Style>
 
 		<Style Selector="ComboBox.TextBoxBackground">
 			<Setter Property="Background" Value="#3a3a3c" />
+			<Setter Property="BorderBrush" Value="#3a3a3c" />
 			<Setter Property="Foreground" Value="#dadae2" />
 		</Style>
-		
+	
+		<Style Selector="ComboBoxItem:pointerover.TextBoxBackground /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#0a84ff"/>
+		</Style>
+	
 		<Style Selector="ComboBoxItem.DropDown">
 			<Setter Property="Background" Value="#535356" />
 			<Setter Property="Foreground" Value="#ffffff" />
@@ -344,6 +360,7 @@
 		<Style Selector="ComboBoxItem:pointerover.DropDown /template/ ContentPresenter">
 			<Setter Property="Background" Value="#3a3a3c" />
 		</Style>
+	
 
 		<Style Selector="Border.PhotoPlaceholder">
 			<Setter Property="BorderBrush" Value="#3a3a3c" />

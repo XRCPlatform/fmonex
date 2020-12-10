@@ -70,7 +70,7 @@
 		</Style>
 		<Style Selector="Button.search /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#3a3a3c" />
-			<Setter Property="CornerRadius" Value="4"/>
+			<Setter Property="CornerRadius" Value="3"/>
 		</Style>
 		<Style Selector="Button:pointerover.search /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#545454" />
@@ -267,6 +267,7 @@
 			<Setter Property="Fill" Value="#767680" />
 		</Style>
 
+		<!-- Search Bar -->
 		<Style Selector="Border.SearchBar">
 			<Setter Property="BorderBrush" Value="#3a3a3c" />
 			<Setter Property="Background" Value="#3a3a3c" />
@@ -275,6 +276,19 @@
 		<Style Selector="TextBox.SearchBar">
 			<Setter Property="Foreground" Value="#dadae2" />
 			<Setter Property="Background" Value="#3a3a3c" />
+		</Style>
+
+		<Style Selector="TextBox.SearchBar /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#3a3a3c"/>
+			<Setter Property="CornerRadius" Value="3"/>
+		</Style>
+
+		<Style Selector="TextBox:pointerover.SearchBar /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#0a84ff"/>
+		</Style>
+
+		<Style Selector="TextBox:focus.SearchBar /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#0a84ff"/>
 		</Style>
 
 		<!-- Status Bar -->

@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using Libplanet.Extensions;
+using Newtonsoft.Json;
 
 namespace P2PPayloadGenerator
 {
@@ -26,11 +27,20 @@ namespace P2PPayloadGenerator
            
             Current.Initialize(password);
 
+            //let events and service start up
+            Thread.Sleep(10000);
+
         }
 
         static void Main(string[] args)
         {
             Init(args[CommandCurrentUserPasswordArgIndex]);
+            //should load eventually but only wait limited time 100 seconds if it did not start it won't 
+            while (Current.MarketPoolManager == null && counter < 100)
+            {
+                Interlocked.Increment(ref counter);
+                Thread.Sleep(1000);
+            }
 
             Console.WriteLine("To generate Users run (ObjectType:UserDataV1, quantity:10, sleeptime:5 password:******) : Users 10 5 password");
             if (args[CommandSubjectArgIndex].Equals("UserDataV1",StringComparison.InvariantCultureIgnoreCase)
@@ -41,6 +51,26 @@ namespace P2PPayloadGenerator
             }
         }
 
+        private static int counter = 0;
+
+        private static void GenerateOffers(int numberOfExecutions, int sleepTime, UserPrivateKey privateKey)
+        {
+            string json = File.ReadAllText("../../../data/gold.json");
+            MarketItemV1 template = JsonConvert.DeserializeObject<MarketItemV1>(json) ;
+            for (int i = 0; i < numberOfExecutions; i++)
+            {
+                template.Title = template.Title + " [" + i +"]";
+                var _offer = Current.Markets.SignMarketData(template, privateKey);            
+
+                Current.MarketPoolManager.AcceptActionItem(_offer);
+                Current.MarketPoolManager.PropagateAllActionItemLocal(true);
+
+                Thread.Sleep(sleepTime);
+            }
+
+        }
+
+
         private static void GenerateUsers(int numberOfExecutions, int sleepTime)
         {
             for (int i = 0; i < numberOfExecutions; i++)
@@ -49,13 +79,16 @@ namespace P2PPayloadGenerator
                 {
                     UserName = "TestUser - " + i,
                     CreatedUtc = DateTime.UtcNow,
-                    Description = "“The European Union fully supports the development, implementation and use of strong encryption,” the report notes. “However, there are instances where encryption renders analysis of the content of communications in the framework of access to electronic evidence extremely challenging or practically impossible despite the fact that the access to such data would be lawful.”",
+                    Description = "The axis of rotation of the Solar System makes a large angle of about 60 degrees relative to the axis of rotation of the Milky Way. " +
+                    "That seems unusual - for example, most of the bodies within the Solar Sytem are better behaved than that. \n\r Do most stars or planetary systems " +
+                    " in the Milky Way rotate in close accord with the galactic rotation ? Or is there a large scatter, \n\r  so that, in fact, \r\n our Sun is not atypical ? "
 
                 };
                 
                 string seed = Current.Users.CreateRandomSeed();
-
-                var signedUserData = SignUserData(user, new UserPrivateKey(seed));
+                var privateKey = new UserPrivateKey(seed);
+                
+                var signedUserData = SignUserData(user, privateKey);
 
                 Console.WriteLine(signedUserData.UserName + "" + signedUserData.PublicKey);
 
@@ -63,7 +96,7 @@ namespace P2PPayloadGenerator
                 {
                     Current.BasePoolManager.PropagateAllActionItemLocal(true);
                 }
-
+                GenerateOffers(3, 10, privateKey);
                 Thread.Sleep(sleepTime);
             }
 

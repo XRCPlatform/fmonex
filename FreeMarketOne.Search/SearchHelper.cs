@@ -92,8 +92,14 @@ namespace FreeMarketOne.Search
                     singleKey.Add(key);
                     user = engine.GetUser(key);
                     reviews = engine.GetAllReviewsForPubKey(key);
-                    //user = userManager.GetUserDataByPublicKey(singleKey, basePoolManager, blockChainManager);
-                    //reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
+                    
+                    //not indexed yet? look at the chain
+                    if (user == null)
+                    {
+                        user = userManager.GetUserDataByPublicKey(singleKey, basePoolManager, blockChainManager);
+                        reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
+                    }
+
                     if (user != null)
                     {
                         publicKey = key;
@@ -121,7 +127,8 @@ namespace FreeMarketOne.Search
                 seller = new SellerAggregate()
                 {
                     PublicKeyHashes = sellerPubKeyHashes,
-                    PublicKeys = sellerPubKeys
+                    PublicKeys = sellerPubKeys,
+                    SellerName = "Not found"
                 };
             }
 

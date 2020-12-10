@@ -224,8 +224,12 @@
               </WrapPanel>
               <TextBox Name="TBXRCReceivingAddress" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="35" HorizontalAlignment="Left" Padding="10" Watermark="RbWDj3rh9vYNdiZSWtEL8X3CaKuBCYWveJ" Width="400" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
-              
-              <DockPanel Margin="20 50 50 0">
+				<WrapPanel Orientation="Horizontal" Margin="20 40 20 0">
+					<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+					<TextBlock Text=" required fields" Classes="H2" FontSize="16" FontStyle="Italic"/>
+				</WrapPanel>
+				
+              <DockPanel Margin="20 40 50 0">
                     <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
                     <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" FontSize="16" Margin="0 30 10 0" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>
                 </DockPanel>

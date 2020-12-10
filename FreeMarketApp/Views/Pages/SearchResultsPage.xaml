@@ -21,7 +21,7 @@
 				<!-- Filter By -->
 				<DockPanel HorizontalAlignment="Stretch"  Margin="20 36 0 5">
 					<TextBlock Classes="H1" Text="FILTER BY:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
-					<Button x:Name="ClearFilters" BorderThickness="0" Margin="0 0 20 0" Classes="pagination" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Click="ButtonResetAllFacets_Click" >
+					<Button x:Name="ClearFilters" Margin="0 0 20 0" Classes="pagination" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Background="Transparent" Click="ButtonResetAllFacets_Click" Cursor="Hand">
 						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
 					</Button>	
 				 </DockPanel>

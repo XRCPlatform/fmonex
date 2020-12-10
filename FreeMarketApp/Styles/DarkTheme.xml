@@ -3,6 +3,8 @@
         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys = "clr-namespace: System; assembly=netstandard">
 
+	<StyleInclude Source="resm:Avalonia.Themes.Default.Accents.BaseDark.xaml?assembly=Avalonia.Themes.Default"/>
+	
         <!-- Avatar Button -->
 		<Style Selector="Button.user /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="transparent" />
@@ -362,20 +364,11 @@
 			<Setter Property="Foreground" Value="#dadae2" />
 		</Style>
 	
-		<Style Selector="ComboBoxItem:pointerover.TextBoxBackground /template/ Border#border">
+		<Style Selector="ComboBox:pointerover.TextBoxBackground /template/ Border#border">
 			<Setter Property="BorderBrush" Value="#0a84ff"/>
 		</Style>
 	
-		<Style Selector="ComboBoxItem.DropDown">
-			<Setter Property="Background" Value="#535356" />
-			<Setter Property="Foreground" Value="#ffffff" />
-		</Style>
-		
-		<Style Selector="ComboBoxItem:pointerover.DropDown /template/ ContentPresenter">
-			<Setter Property="Background" Value="#3a3a3c" />
-		</Style>
 	
-
 		<Style Selector="Border.PhotoPlaceholder">
 			<Setter Property="BorderBrush" Value="#3a3a3c" />
 			<Setter Property="Background" Value="#3a3a3c" />

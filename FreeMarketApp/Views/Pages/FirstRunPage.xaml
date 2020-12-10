@@ -63,6 +63,11 @@
 					</WrapPanel>
                     <TextBox Classes="TextBoxBackground" Name="TBSeed" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="80" Watermark="Create your own seed (at least 200 characters)" Padding="10" TextWrapping="Wrap"/>
 
+					<WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+						<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+						<TextBlock Text=" required fields" Classes="H2" FontSize="16" FontStyle="Italic"/>
+					</WrapPanel>
+					
                 </StackPanel>
 
               <!-- Save/Cancel Buttons -->

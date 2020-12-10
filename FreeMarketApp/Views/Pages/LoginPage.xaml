@@ -26,7 +26,7 @@
                         <TextBlock Classes="H1" Text="Login" TextWrapping="Wrap" FontSize="28" Margin="0 0 30 0" FontWeight="Bold"/>
                     </WrapPanel>
 
-                  <TextBlock Classes="H1" Text="Password *" Margin="20 0 0 0" FontSize="16" FontWeight="Bold"/>
+                  <TextBlock Classes="H1" Text="Password" Margin="20 0 0 0" FontSize="16" FontWeight="Bold"/>
                   <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" Padding="10"/>
                 </StackPanel>
 

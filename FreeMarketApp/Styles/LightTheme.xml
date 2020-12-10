@@ -69,7 +69,7 @@
 		</Style>
 		<Style Selector="Button.search /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#e6e5ea" />
-			<Setter Property="CornerRadius" Value="4"/>
+			<Setter Property="CornerRadius" Value="3"/>
 		</Style>
 		<Style Selector="Button:pointerover.search /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#cfced6" />
@@ -245,9 +245,9 @@
 			<Setter Property="Foreground" Value="#000000" />
 		</Style>
 
-    <Style Selector="TextBlock.H1Red">
-      <Setter Property="Foreground" Value="#FF0000" />
-    </Style>
+		<Style Selector="TextBlock.H1Red">
+		  <Setter Property="Foreground" Value="#FF0000" />
+		</Style>
   
 		<Style Selector="RadioButton.H1">
 			<Setter Property="Foreground" Value="#000000" />
@@ -265,6 +265,7 @@
 			<Setter Property="Fill" Value="#FFECECEC" />
 		</Style>
 
+		<!-- Search Bar -->
 		<Style Selector="Border.SearchBar">
 			<Setter Property="BorderBrush" Value="#e6e5ea" />
 			<Setter Property="Background" Value="#e6e5ea" />
@@ -273,6 +274,19 @@
 		<Style Selector="TextBox.SearchBar">
 			<Setter Property="Foreground" Value="#606060" />
 			<Setter Property="Background" Value="#e6e5ea" />
+		</Style>
+	
+		<Style Selector="TextBox.SearchBar /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#e6e5ea"/>
+			<Setter Property="CornerRadius" Value="3"/>
+		</Style>
+	
+		<Style Selector="TextBox:pointerover.SearchBar /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
+		</Style>
+	
+		<Style Selector="TextBox:focus.SearchBar /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
 		</Style>
 
 		<!-- Status Bar -->
@@ -336,10 +350,6 @@
 		</Style>
 	
 		<Style Selector="TextBox:focus.TextBoxBackground /template/ Border#border">
-			<Setter Property="BorderBrush" Value="#167efb"/>
-		</Style>
-	
-		<Style Selector="TextBox:pointerover.TextBoxBackground /template/ Border#border">
 			<Setter Property="BorderBrush" Value="#167efb"/>
 		</Style>
 	

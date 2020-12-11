@@ -74,13 +74,13 @@ namespace FreeMarketOne.Search
                 if (SeekLocalSellerInfoBySellerHash(sellerDataFolder, tempPubKeyHash))
                 {
                     seller = ReadSellerInfoBySellerHash(sellerDataFolder, tempPubKeyHash);
-                    if (seller != null)
+                    if (seller != null && seller.SellerName != "Not found")
                     {
                         publicKey = key;
                         pubKeyHash = Hash(key);
                         break;
                     }
-                }               
+                }
             }
             
             //only run if cache miss
@@ -121,7 +121,7 @@ namespace FreeMarketOne.Search
                 }
             }
 
-            //should not happen 
+            //will happen in race conditions where market chain reached before base chain
             if (seller == null)
             {
                 seller = new SellerAggregate()

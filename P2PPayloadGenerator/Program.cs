@@ -53,17 +53,20 @@ namespace P2PPayloadGenerator
 
         private static int counter = 0;
 
-        private static void GenerateOffers(int numberOfExecutions, int sleepTime, UserPrivateKey privateKey)
+        private static void GenerateOffers(int numberOfExecutions, int sleepTime, UserPrivateKey privateKey, UserDataV1 user)
         {
             string json = File.ReadAllText("../../../data/gold.json");
-            MarketItemV1 template = JsonConvert.DeserializeObject<MarketItemV1>(json) ;
-            for (int i = 0; i < numberOfExecutions; i++)
+            
+            for (int i = 1; i < numberOfExecutions; i++)
             {
-                template.Title = template.Title + " [" + i +"]";
+                //deliberately create new object eevry time
+                MarketItemV1 template = JsonConvert.DeserializeObject<MarketItemV1>(json);
+                template.Title = template.Title + " from " + user.UserName  + " [" + i +"/"+ (numberOfExecutions-1)  + "]";
+                template.Manufacturer = user.UserName;
                 var _offer = Current.Markets.SignMarketData(template, privateKey);            
 
                 Current.MarketPoolManager.AcceptActionItem(_offer);
-                Current.MarketPoolManager.PropagateAllActionItemLocal(true);
+                Current.MarketPoolManager.PropagateAllActionItemLocal();
 
                 Thread.Sleep(sleepTime);
             }
@@ -94,9 +97,9 @@ namespace P2PPayloadGenerator
 
                 if (Current.BasePoolManager.AcceptActionItem(signedUserData) == null)
                 {
-                    Current.BasePoolManager.PropagateAllActionItemLocal(true);
+                    Current.BasePoolManager.PropagateAllActionItemLocal();
                 }
-                GenerateOffers(3, 10, privateKey);
+                GenerateOffers(6, 10, privateKey, user);
                 Thread.Sleep(sleepTime);
             }
 

@@ -26,6 +26,13 @@ namespace P2PPayloadGenerator
 
            
             Current.Initialize(password);
+            //should load eventually but only wait limited time 100 seconds if it did not start it won't 
+            while (Current.MarketPoolManager == null && counter < 100)
+            {
+                Interlocked.Increment(ref counter);
+                Thread.Sleep(1000);
+            }
+
 
             //let events and service start up
             Thread.Sleep(10000);
@@ -35,13 +42,7 @@ namespace P2PPayloadGenerator
         static void Main(string[] args)
         {
             Init(args[CommandCurrentUserPasswordArgIndex]);
-            //should load eventually but only wait limited time 100 seconds if it did not start it won't 
-            while (Current.MarketPoolManager == null && counter < 100)
-            {
-                Interlocked.Increment(ref counter);
-                Thread.Sleep(1000);
-            }
-
+           
             Console.WriteLine("To generate Users run (ObjectType:UserDataV1, quantity:10, sleeptime:5 password:******) : Users 10 5 password");
             if (args[CommandSubjectArgIndex].Equals("UserDataV1",StringComparison.InvariantCultureIgnoreCase)
                 || args[CommandSubjectArgIndex].Equals("user", StringComparison.InvariantCultureIgnoreCase))
@@ -65,8 +66,16 @@ namespace P2PPayloadGenerator
                 template.Manufacturer = user.UserName;
                 var _offer = Current.Markets.SignMarketData(template, privateKey);            
 
-                Current.MarketPoolManager.AcceptActionItem(_offer);
-                Current.MarketPoolManager.PropagateAllActionItemLocal();
+                var errors = Current.MarketPoolManager.AcceptActionItem(_offer);
+                if (!errors.HasValue)
+                {
+                    Current.MarketPoolManager.PropagateAllActionItemLocal();
+                }
+                else
+                {
+                    Console.WriteLine(errors.ToString());
+                }
+               
 
                 Thread.Sleep(sleepTime);
             }

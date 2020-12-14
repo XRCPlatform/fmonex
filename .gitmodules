@@ -1,0 +1,3 @@
+[submodule "netmq"]
+	path = netmq
+	url = git@gitlab.com:bitcoinrh/netmq.git

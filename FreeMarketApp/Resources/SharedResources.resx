@@ -127,7 +127,7 @@
     <value>You have to choose right deal type.</value>
   </data>
   <data name="Dialog_AddEditProduct_EmptyForm" xml:space="preserve">
-    <value>You have to fill all fields and add at least one photo.</value>
+    <value>You have to fill all the fields and add at least one photo.</value>
   </data>
   <data name="Dialog_AddEditProduct_EmptyPhoto" xml:space="preserve">
     <value>You have to add at least one photo.</value>
@@ -136,34 +136,34 @@
     <value>You have to choose right price type.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsDescription" xml:space="preserve">
-    <value>Your description contains invalid chars.</value>
+    <value>Description contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsPrice" xml:space="preserve">
-    <value>Your price can contains number only.</value>
+    <value>Price can contain numbers only.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsShipping" xml:space="preserve">
-    <value>Your shipping contains invalid chars.</value>
+    <value>Shipping info contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsTitle" xml:space="preserve">
-    <value>Your title contains invalid chars.</value>
+    <value>Title contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_ShortDescription" xml:space="preserve">
-    <value>Your title is too short. Minimum is 50 chars.</value>
+    <value>Title is too short. Minimum is 50 chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_ShortPrice" xml:space="preserve">
-    <value>Your price is too short. Minimum is 1 number and it can't be a zero.</value>
+    <value>Price is too short. Minimum is 1 number and it can't be a zero.</value>
   </data>
   <data name="Dialog_AddEditProduct_ShortShipping" xml:space="preserve">
-    <value>Your shipping is too short. Minimum is 10 chars.</value>
+    <value>Shipping info is too short. Minimum is 10 chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_ShortTitle" xml:space="preserve">
-    <value>Your title is too short. Minimum is 10 chars.</value>
+    <value>Title is too short. Minimum is 10 chars.</value>
   </data>
   <data name="Dialog_ChatPage_InvalidCharsMessage" xml:space="preserve">
-    <value>Your message contains invalid chars.</value>
+    <value>Message contains invalid chars.</value>
   </data>
   <data name="Dialog_ChatPage_ShortMessage" xml:space="preserve">
-    <value>Your message is too short.</value>
+    <value>Message is too short.</value>
   </data>
   <data name="Dialog_Confirmation_BuyProduct" xml:space="preserve">
     <value>Are you sure that you want to buy this product? This step is irreversible. Changes will be propagated in next block ("approx {0} sec").</value>
@@ -172,19 +172,19 @@
     <value>Are you sure that you want to leave this item?</value>
   </data>
   <data name="Dialog_Confirmation_RemoveProduct" xml:space="preserve">
-    <value>Are you sure that you want to remove this product? Changes will be propagated in next block ("approx {0} sec").</value>
+    <value>Are you sure that you want to remove this product? Changes will be propagated in the next block ("approx {0} sec").</value>
   </data>
   <data name="Dialog_Confirmation_SaveMyItem" xml:space="preserve">
-    <value>Are you sure that you want to save this item? Changes will be propagated in next block ("approx {0} sec").</value>
+    <value>Are you sure that you want to save this item? Changes will be propagated in the next block ("approx {0} sec").</value>
   </data>
   <data name="Dialog_Confirmation_SaveMyProfile" xml:space="preserve">
-    <value>Are you sure that you want to save profile? Changes will be propagated in next block ("approx {0} sec").</value>
+    <value>Are you sure that you want to save profile? Changes will be propagated in the next block ("approx {0} sec").</value>
   </data>
   <data name="Dialog_Confirmation_Title" xml:space="preserve">
     <value>Confirmation</value>
   </data>
   <data name="Dialog_Confirmation_Waiting" xml:space="preserve">
-    <value>Now wait for full propagation of this information to network.</value>
+    <value>Now wait for full propagation of this information to the network.</value>
   </data>
   <data name="Dialog_Confirmation_PleaseProvideXRCTransactionHash" xml:space="preserve">
     <value>Please provide XRC transaction hash.</value>
@@ -195,12 +195,11 @@
   <data name="Dialog_Confirmation_ReviewProduct" xml:space="preserve">
     <value>Posting a product seller/buyer review is ireversible. Are you sure you want to proceed?</value>
   </data>
-  
   <data name="Dialog_Confirmation_YouCantBuyYourOffer" xml:space="preserve">
-    <value>You can't buy your offer.</value>
+    <value>You can't buy your own offer.</value>
   </data>
   <data name="Dialog_Error_Duplication" xml:space="preserve">
-    <value>This item exist in pool.</value>
+    <value>This item exists in pool.</value>
   </data>
   <data name="Dialog_Error_NoMinimalPeer" xml:space="preserve">
     <value>You need to have at least one peer to propagate transaction.</value>
@@ -209,64 +208,64 @@
     <value>Content of this item isn't valid with actual hash.</value>
   </data>
   <data name="Dialog_Error_StateOfItemIsInProgress" xml:space="preserve">
-    <value>Change of this item is in the pool. Please wait for next block sychronization.</value>
+    <value>Item's changes are in the pool. Please wait for next block sychronization.</value>
   </data>
   <data name="Dialog_Error_Title" xml:space="preserve">
     <value>Error</value>
   </data>
   <data name="Dialog_Error_Unexpected" xml:space="preserve">
-    <value>Unexpected error during propagation of data. Please to read application log.</value>
+    <value>Unexpected error during propagation of data. Please read application log.</value>
   </data>
   <data name="Dialog_Error_WrontTypeOfContent" xml:space="preserve">
     <value>Content of action is wrong and can't be propagated.</value>
   </data>
   <data name="Dialog_FirstRun_InvalidCharsDescription" xml:space="preserve">
-    <value>Your description contains invalid chars.</value>
+    <value>Description contains invalid chars.</value>
   </data>
   <data name="Dialog_FirstRun_InvalidCharsPassword" xml:space="preserve">
-    <value>Your password contains invalid chars.</value>
+    <value>Password contains invalid chars.</value>
   </data>
   <data name="Dialog_FirstRun_InvalidCharsSeed" xml:space="preserve">
-    <value>Your seed contains invalid chars.</value>
+    <value>Seed contains invalid chars.</value>
   </data>
   <data name="Dialog_FirstRun_InvalidCharsUserName" xml:space="preserve">
-    <value>Your username contains invalid chars.</value>
+    <value>Username contains invalid chars.</value>
   </data>
   <data name="Dialog_FirstRun_PasswordNotIdentical" xml:space="preserve">
     <value>Passwords aren't identical.</value>
   </data>
   <data name="Dialog_FirstRun_ShortDescription" xml:space="preserve">
-    <value>Your description is too short. Minimum is 50 chars.</value>
+    <value>Description is too short. Minimum is 50 chars.</value>
   </data>
   <data name="Dialog_FirstRun_ShortPassword" xml:space="preserve">
-    <value>Your password is too short. Minimum is 16 chars.</value>
+    <value>Password is too short. Minimum is 16 chars.</value>
   </data>
   <data name="Dialog_FirstRun_ShortSeed" xml:space="preserve">
-    <value>Your seed is too short. Minimum is 200 chars.</value>
+    <value>Seed is too short. Minimum is 200 chars.</value>
   </data>
   <data name="Dialog_FirstRun_ShortUserName" xml:space="preserve">
-    <value>Your username is too short. Minimum is 10 chars.</value>
+    <value>Username is too short. Minimum is 10 chars.</value>
   </data>
   <data name="Dialog_Information_CantSendNextMessage" xml:space="preserve">
-    <value>You can send next message after 10 seconds.</value>
+    <value>You can send next message in 10 seconds.</value>
   </data>
   <data name="Dialog_Information_ChangeTheme" xml:space="preserve">
-    <value>You have to restart application to see changes.</value>
+    <value>Restart application to see changes.</value>
   </data>
   <data name="Dialog_Information_ChatWaitForAnswer" xml:space="preserve">
-    <value>You have to wait for answer from seller.</value>
+    <value>You have to wait for the seller's answer.</value>
   </data>
   <data name="Dialog_Information_Title" xml:space="preserve">
     <value>Information</value>
   </data>
   <data name="Dialog_LoginPage_InvalidCharsPassword" xml:space="preserve">
-    <value>Your password contains invalid chars.</value>
+    <value>Password contains invalid chars.</value>
   </data>
   <data name="Dialog_LoginPage_ShortPassword" xml:space="preserve">
-    <value>Your password is too short. Minimum is 16 chars.</value>
+    <value>Password is too short. Minimum is 16 chars.</value>
   </data>
   <data name="Dialog_LoginPage_WatermarkWrongPassword" xml:space="preserve">
-    <value>Your password was wrong. Try it again. Please.</value>
+    <value>Incorrect password. Please try again.</value>
   </data>
   <data name="LoginPage_UserName_LoginName" xml:space="preserve">
     <value>Your profile</value>
@@ -347,46 +346,46 @@
     <value>N/A</value>
   </data>
   <data name="Dialog_AddEditProduct_EmptyFineness" xml:space="preserve">
-    <value>Your Fineness is too short.</value>
+    <value>Fineness info is too short.</value>
   </data>
   <data name="Dialog_AddEditProduct_EmptyManufacturer" xml:space="preserve">
-    <value>Your Manufactorer is too short.</value>
+    <value>Manufacturer info is too short.</value>
   </data>
   <data name="Dialog_AddEditProduct_EmptyTBXRCReceivingAddress" xml:space="preserve">
-    <value>Your XRC Receiving Address is too short.</value>
+    <value>XRC Receiving Address is too short.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsFineness" xml:space="preserve">
-    <value>Your fineness contains invalid chars.</value>
+    <value>Fineness field contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsManufacturer" xml:space="preserve">
-    <value>Your manufacturer contains invalid chars.</value>
+    <value>Manufacturer field contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsShortDescription" xml:space="preserve">
-    <value>Your description contains invalid chars.</value>
+    <value>Description contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsShortShipping" xml:space="preserve">
-    <value>Your shipping contains invalid chars.</value>
+    <value>Shipping info contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsShortTitle" xml:space="preserve">
-    <value>Your title contains invalid chars.</value>
+    <value>Title contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsSize" xml:space="preserve">
-    <value>Your size contains invalid chars.</value>
+    <value>Size info contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_InvalidCharsTBXRCReceivingAddress" xml:space="preserve">
-    <value>Your XRC receiving address contains invalid chars.</value>
+    <value>XRC receiving address contains invalid chars.</value>
   </data>
   <data name="Dialog_AddEditProduct_BannedWordsShortDescription" xml:space="preserve">
-    <value>Your description contains banned words.</value>
+    <value>Description contains banned words.</value>
   </data>
   <data name="Dialog_AddEditProduct_BannedWordsShortTitle" xml:space="preserve">
-    <value>Your title contains banned words.</value>
+    <value>Title contains banned words.</value>
   </data>
   <data name="Dialog_ChatPage_BannedWordsDescription" xml:space="preserve">
-    <value>Your description contains banned words.</value>
+    <value>Description contains banned words.</value>
   </data>
   <data name="Dialog_FirstRun_BannedWordsDescription" xml:space="preserve">
-    <value>Your description contains banned words.</value>
+    <value>Description contains banned words.</value>
   </data>
   <data name="Dialog_Review_BannedWordsDescription" xml:space="preserve">
     <value>Your review contains banned words.</value>

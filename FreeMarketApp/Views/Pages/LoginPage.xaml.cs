@@ -58,6 +58,7 @@ namespace FreeMarketApp.Views.Pages
             var mainWindow = PagesHelper.GetParentWindow(this);
 
             var tbPassword = this.FindControl<TextBox>("TBPassword");
+            var tbError = this.FindControl<TextBlock>("TBError");
 
             var errorCount = 0;
             var errorMessages = new StringBuilder();
@@ -97,7 +98,7 @@ namespace FreeMarketApp.Views.Pages
                     else
                     {
                         tbPassword.Text = string.Empty;
-                        tbPassword.Watermark = SharedResources.ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword");
+                        tbError.Text = SharedResources.ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword");
                     }
                     
                     if (splashWindow != null)
@@ -119,13 +120,13 @@ namespace FreeMarketApp.Views.Pages
 
         private static async Task<bool> GetAppLoadingAsync(string password)
         {
-            await Task.Run(() =>
-            {
-                FMONE.Current.LoadingEvent += new EventHandler<string>(LoadingEvent);
-                FMONE.Current.Initialize(password);
-            }).ConfigureAwait(true);
+        await Task.Run(() =>
+        {
+            FMONE.Current.LoadingEvent += new EventHandler<string>(LoadingEvent);
+            FMONE.Current.Initialize(password);
+        }).ConfigureAwait(true);
 
-            return true;
+        return true;
         }
 
         private static void LoadingEvent(object sender, string message)

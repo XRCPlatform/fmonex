@@ -61,7 +61,7 @@ https://docs.libplanet.io/</Description>
     <PackageReference Include="LiteDB" Version="4.1.4" />
     <PackageReference Include="LruCacheNet" Version="1.2.0" />
     <PackageReference Include="Norgerman.Cryptography.Scrypt" Version="2.0.1" />
-    <PackageReference Include="Planetarium.NetMQ" Version="4.0.0.260-planetarium" />
+    <!-- <PackageReference Include="Planetarium.NetMQ" Version="4.0.0.260-planetarium" /> -->
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     <PackageReference Include="Serilog" Version="2.9.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.*" />
@@ -74,6 +74,7 @@ https://docs.libplanet.io/</Description>
   answer: https://stackoverflow.com/a/45004898/383405 (see #2). -->
   <ItemGroup>
     <ProjectReference Include="..\Libplanet.Stun\Libplanet.Stun.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\..\netmq\src\NetMQ\NetMQ.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

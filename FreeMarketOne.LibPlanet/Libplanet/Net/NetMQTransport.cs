@@ -217,15 +217,7 @@ namespace Libplanet.Net
 
             _router = new RouterSocket();
             _router.Options.RouterHandover = true;
-
-            if (_listenPort == null)
-            {
-                _listenPort = _router.BindRandomPort("tcp://*");
-            }
-            else
-            {
-                _router.Bind($"tcp://*:{_listenPort}");
-            }
+            _router.Bind($"tcp://127.0.0.1:{_listenPort}");
 
             _logger.Information($"Listen on {_listenPort}");
 
@@ -288,7 +280,7 @@ namespace Libplanet.Net
                 _broadcastQueue.ReceiveReady -= DoBroadcast;
                 _replyQueue.ReceiveReady -= DoReply;
                 _router.ReceiveReady -= ReceiveMessage;
-                _router.Unbind($"tcp://*:{_listenPort}");
+                _router.Unbind($"tcp:/127.0.0.1:{_listenPort}");
 
                 if (_routerPoller.IsRunning)
                 {
@@ -796,7 +788,6 @@ namespace Libplanet.Net
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
 
             using var dealer = new DealerSocket(ToNetMQAddress(req.Peer));
-
             _logger.Debug(
                 "Trying to send {Message} to {Peer}...",
                 req.Message,
@@ -873,7 +864,8 @@ namespace Libplanet.Net
 
         private string ToNetMQAddress(BoundPeer peer)
         {
-            return $"tcp://{peer.EndPoint.Host}:{peer.EndPoint.Port}";
+            // return $"tcp://{peer.EndPoint.Host}:{peer.EndPoint.Port}";
+            return $"socks5://127.0.0.1:9050;{peer.EndPoint.Host}:{peer.EndPoint.Port}";
         }
 
         private async Task CreatePermission(BoundPeer peer)

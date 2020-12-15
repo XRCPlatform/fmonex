@@ -9,7 +9,7 @@
         <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
             <StackPanel Name="SideBar" Orientation="Vertical">
-                <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,30" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+                <Button Name="BackButton" Classes="action" HorizontalAlignment="Stretch" Height="36" Margin="15 20 15 30" VerticalAlignment="Top" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
                         <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15"/>
                         <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
@@ -69,15 +69,20 @@
                     <TextBlock Classes="H1" Text="Username" FontSize="16" FontWeight="Bold"/>
                     <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
                   </WrapPanel>
-                    <TextBox Classes="TextBoxBackground" Name="TBUserName" MaxLength="25" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" AcceptsReturn="True" BorderThickness="0" Padding="10" />
+                    <TextBox Classes="TextBoxBackground" Name="TBUserName" MaxLength="25" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" AcceptsReturn="True" Padding="10" />
                 </StackPanel>
               
               <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
                 <TextBlock Classes="H1" Text="Description" FontSize="16" FontWeight="Bold"/>
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
-                <TextBox Classes="TextBoxBackground" Name="TBDescription" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="260" Margin="20 5 20 0" FontSize="16" Height="100" Watermark="Add public description" BorderThickness="0" Padding="10" />
+                <TextBox Classes="TextBoxBackground" Name="TBDescription" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="260" Margin="20 5 20 0" FontSize="16" Height="100" Watermark="Add public description" Padding="10" />
 
+				<WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
+					<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+					<TextBlock Text=" required fields" Classes="H2" FontSize="16" FontStyle="Italic"/>
+				</WrapPanel>
+				
                 <!-- Save/Cancel Buttons -->
                 <DockPanel Margin="20 20 20 0">
                     <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Width="110" Click="ButtonSave_Click" Cursor="Hand">Save</Button>

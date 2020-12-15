@@ -10,7 +10,7 @@
         <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
-                <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+                <Button x:Name="BackButton" Classes="action" HorizontalAlignment="Stretch" Height="36" Margin="15 20 15 0" VerticalAlignment="Top" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
                         <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15"/>
                         <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
@@ -32,7 +32,7 @@
               </WrapPanel>
               
                 <VirtualizingStackPanel>
-                    <ComboBox Name="CBCategory" Classes="TextBoxBackground" MaxDropDownHeight="450" Height="45" SelectedIndex="0" BorderThickness="0" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
+                    <ComboBox Name="CBCategory" Classes="TextBoxBackground" MaxDropDownHeight="450" Height="45" SelectedIndex="0" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
                         <ComboBoxItem Classes="DropDown" Padding="7" Tag="0" Content=""/>
                         <ComboBoxItem Classes="DropDown" Padding="7" Tag="1" Content="Gold"/>
                         <ComboBoxItem Classes="DropDown" Padding="7" Tag="2" Content="Silver"/>
@@ -50,25 +50,25 @@
                 <TextBlock Text="Title" Classes="H1" FontSize="16" FontWeight="Bold"/>
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
-                <TextBox Name="TBTitle" Classes="TextBoxBackground" MaxLength="64" AcceptsReturn="True" Watermark="What are you selling" BorderThickness="0" Padding="10" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBTitle" Classes="TextBoxBackground" MaxLength="64" AcceptsReturn="True" Watermark="What are you selling" Padding="10" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
               <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
                 <TextBlock Text="Description" Classes="H1" FontSize="16" FontWeight="Bold"/>
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
-                <TextBox Name="TBDescription" Classes="TextBoxBackground" MaxLength="512" AcceptsReturn="True" Watermark="Describe your listing" Height="200" BorderThickness="0" Padding="10" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBDescription" Classes="TextBoxBackground" MaxLength="512" AcceptsReturn="True" Watermark="Describe your listing" Height="200" Padding="10" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Manufacturer" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox Name="TBManufacturer" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="Royal Mint, Metalor, umicore, etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBManufacturer" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="Royal Mint, Metalor, umicore, etc." Width="300" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Fineness" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox Name="TBFineness" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="999 fine rhodium, 24 karat gold etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBFineness" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="999 fine rhodium, 24 karat gold etc." Width="300" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Size" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox Name="TBSize" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="1 oz, 1 troy ounce (ozt), 1 kg etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBSize" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="1 oz, 1 troy ounce (ozt), 1 kg etc." Width="300" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
                 <TextBlock Text="Weight in grams (without decimals)" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-                <TextBox Name="TBWeightInGrams" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="31 not 31.1035 " Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBWeightInGrams" Classes="TextBoxBackground" AcceptsReturn="false" MaxLength="100" HorizontalAlignment="Left" Padding="10" Watermark="31 not 31.1035 " Width="300" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
               <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
                 <TextBlock Text="Photos" Classes="H1" FontSize="16" FontWeight="Bold"/>
@@ -81,7 +81,7 @@
                         <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                              <Image Name="IPhoto_0" ></Image>
                         </Border>
-                        <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="0" Name="BTRemovePhoto_0" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                        <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="0" Name="BTRemovePhoto_0" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                             <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z" 
 								Width="12" Height="12" Stretch="Fill"/>
                         </Button>
@@ -92,7 +92,7 @@
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                       <Image Name="IPhoto_1"></Image>
                     </Border>
-                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="1" Name="BTRemovePhoto_1" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="1" Name="BTRemovePhoto_1" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
 						Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -103,7 +103,7 @@
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                       <Image Name="IPhoto_2"></Image>
                     </Border>
-                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="2" Name="BTRemovePhoto_2" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="2" Name="BTRemovePhoto_2" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
 							Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -114,7 +114,7 @@
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                       <Image Name="IPhoto_3"></Image>
                     </Border>
-                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="3" Name="BTRemovePhoto_3" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="3" Name="BTRemovePhoto_3" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
 							Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -125,7 +125,7 @@
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                       <Image Name="IPhoto_4"></Image>
                     </Border>
-                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="4" Name="BTRemovePhoto_4" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="4" Name="BTRemovePhoto_4" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
 							Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -136,7 +136,7 @@
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                       <Image Name="IPhoto_5"></Image>
                     </Border>
-                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="5" Name="BTRemovePhoto_5" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="5" Name="BTRemovePhoto_5" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
 						 Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -147,7 +147,7 @@
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                       <Image Name="IPhoto_6"></Image>
                     </Border>
-                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="6" Name="BTRemovePhoto_6" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="6" Name="BTRemovePhoto_6" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
 							 Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -158,7 +158,7 @@
                     <Border Classes="PhotoPlaceholder" Width="168" Height="100" Margin="5" BorderThickness="1">
                       <Image Name="IPhoto_7"></Image>
                     </Border>
-                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="7" Name="BTRemovePhoto_7" BorderThickness="0" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
+                    <Button Click="ButtonRemove_Click" Cursor="Hand" Tag="7" Name="BTRemovePhoto_7" Classes="RemovePhoto" BorderThickness="1" Width="25" Height="25" HorizontalAlignment="Right" Margin="0 -185 5 0">
                       <Path Classes="BlueIcon" Data="m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z"
 							Width="12" Height="12" Stretch="Fill"/>
                     </Button>
@@ -169,7 +169,7 @@
                         <Path Classes="BlueIcon" Data="M1.119,16.841c-0.619,0-1.111-0.508-1.111-1.127c0-0.619,0.492-1.111,1.111-1.111h13.475V1.127
 									C14.595,0.508,15.103,0,15.722,0c0.619,0,1.111,0.508,1.111,1.127v13.476h13.475c0.619,0,1.127,0.492,1.127,1.111
 									c0,0.619-0.508,1.127-1.127,1.127H16.833v13.476c0,0.619-0.492,1.127-1.111,1.127c-0.619,0-1.127-0.508-1.127-1.127V16.841H1.119z"
-							   Width="30" Height="30" Stretch="Fill"></Path>
+							   Width="35" Height="35" Stretch="Fill"></Path>
                     </Button>
 
                 </WrapPanel>
@@ -178,15 +178,15 @@
                 <TextBlock Text="Shipping" Classes="H1" FontSize="16" FontWeight="Bold"/>
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
-                <TextBox Name="TBShipping" Classes="TextBoxBackground" AcceptsReturn="True" MaxLength="512" HorizontalAlignment="Left" Padding="10" Watermark="USA shipping, International etc." Width="300" BorderThickness="0" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
+                <TextBox Name="TBShipping" Classes="TextBoxBackground" AcceptsReturn="True" MaxLength="512" HorizontalAlignment="Left" Padding="10" Watermark="USA shipping, International etc." Width="300" TextWrapping="Wrap" Margin="20 5 20 0" FontSize="16"/>
 
               <WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
                 <TextBlock Text="Price" Classes="H1" FontSize="16" FontWeight="Bold"/>
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
                 <StackPanel Orientation="Horizontal" Margin="20 -5 0 0">
-                  <TextBox Name="TBPrice" Classes="TextBoxBackground" MaxLength="10" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" BorderThickness="0" TextWrapping="Wrap" Margin="0 10 10 0" FontSize="16"/>
-                  <TextBlock Text="XRC" Classes="H1" Margin="10 0 0 0" VerticalAlignment="Center" FontSize="16" FontWeight="Normal"/>
+                  <TextBox Name="TBPrice" Classes="TextBoxBackground" MaxLength="10" AcceptsReturn="True" HorizontalAlignment="Left" Padding="10" Width="120" TextWrapping="Wrap" Margin="0 10 10 0" FontSize="16"/>
+                  <TextBlock Text="XRC" Classes="H1" Margin="0 10 0 0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"/>
                   <!--
                     <VirtualizingStackPanel>
                         <ComboBox Name="CBPriceType" Classes="TextBoxBackground" SelectedIndex="0" BorderThickness="0" FontSize="16" Margin="0 10 50 0" Padding="10" Width="100" HorizontalAlignment="Left">
@@ -202,7 +202,7 @@
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
               <VirtualizingStackPanel>
-                <ComboBox Name="CBDealType" Classes="TextBoxBackground" MaxDropDownHeight="450" SelectedIndex="0" BorderThickness="0" Height="45" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
+                <ComboBox Name="CBDealType" Classes="TextBoxBackground" MaxDropDownHeight="450" SelectedIndex="0" Height="45" FontSize="16" Margin="20 10 50 0" Padding="10" Width="300" HorizontalAlignment="Left">
                   <ComboBoxItem Classes="DropDown" Padding="7" Tag="0" Content=""/>
                   <ComboBoxItem Classes="DropDown" Padding="7" Tag="1" Content="Pay 0% before 100% after"/>
                   <ComboBoxItem Classes="DropDown" Padding="7" Tag="2" Content="Pay 10% before 90% after"/>
@@ -222,10 +222,14 @@
                 <TextBlock Text="XRC Receiving Address" Classes="H1" FontSize="16" FontWeight="Bold"/>
                 <TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
               </WrapPanel>
-              <TextBox Name="TBXRCReceivingAddress" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="35" HorizontalAlignment="Left" Padding="10" Watermark="RbWDj3rh9vYNdiZSWtEL8X3CaKuBCYWveJ" Width="300" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
+              <TextBox Name="TBXRCReceivingAddress" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="35" HorizontalAlignment="Left" Padding="10" Watermark="RbWDj3rh9vYNdiZSWtEL8X3CaKuBCYWveJ" Width="350" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
-              
-              <DockPanel Margin="20 50 50 0">
+				<WrapPanel Orientation="Horizontal" Margin="20 40 20 0">
+					<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
+					<TextBlock Text=" required fields" Classes="H2" FontSize="16" FontStyle="Italic"/>
+				</WrapPanel>
+				
+              <DockPanel Margin="20 40 50 0">
                     <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
                     <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" FontSize="16" Margin="0 30 10 0" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>
                 </DockPanel>

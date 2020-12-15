@@ -26,7 +26,7 @@
     <!-- SIDEBAR -->
     <ScrollViewer HorizontalAlignment="Left" Margin="0" Width="250">
       <StackPanel Name="SideBar" Orientation="Vertical">
-        <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+        <Button Name="BackButton" Classes="action" HorizontalAlignment="Stretch" Height="36" Margin="15 20 15 0" VerticalAlignment="Top" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
           <StackPanel Orientation="Horizontal">
             <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
             <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
@@ -142,45 +142,45 @@
 
         <TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
         <!-- product description binding -->
-        <TextBlock Classes="H1" Name="TBDescription" Text=""
+        <TextBlock Classes="H3" Name="TBDescription" Text=""
                TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
         <TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <Path Classes="StatusBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
             Height="14" Stretch="Fill" Width="11" Margin="0,1,5,0"/>
           <!-- product shipping binding -->
-          <TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
+          <TextBlock Classes="H3" Name="TBShipping" Text="" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Name="TBFinenessLabel" Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--Manufacturer binding -->
-          <TextBlock Classes="H1" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H3" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Name="TBManufacturerLabel" Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--Manufacturer binding -->
-          <TextBlock Classes="H1" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H3" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Name="TBSizeLabel" Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--Size binding -->
-          <TextBlock Classes="H1" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H3" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Name="TBWeightInGramsLabel" Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
           <!--TBWeightInGrams binding -->
-          <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
+          <TextBlock Classes="H3"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
         </StackPanel>
 
         <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
 
         <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-          <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
-          <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
+          <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="24"/>
+          <TextBlock Classes="H3" Name="TBPriceType" Text="" FontSize="24"/>
         </StackPanel>
 
 		<!--Changelly Widget -->
@@ -208,7 +208,7 @@
         <TextBlock Classes="H1" Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Vertical">
           <!-- seller profile binding -->
-          <TextBlock Classes="H1" Name="TBSeller" Text="N/A" Margin="20 0 0 2" FontSize="20"/>
+          <TextBlock Classes="H1" Name="TBSeller" Text="N/A" Margin="20 0 0 7" FontSize="24"/>
           <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
             <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 							  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
@@ -218,17 +218,17 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
               Height="14" Stretch="Fill" Width="14" Margin="0,1,5,0"/>
             <!-- seller rating binding -->
-            <TextBlock Classes="H1" Name="TBSellerStars" Text="N/A" FontSize="16"/>
-            <TextBlock Classes="H1" Text="Reviews" Margin="20 0 5 0" FontSize="16"/>
-            <Button Padding="10 0 10 0" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" Click="ButtonSeller_Click">
+            <TextBlock Classes="H1Orange" Name="TBSellerStars" Text="N/A" FontSize="16"/>
+            <TextBlock Classes="H3" Text="Reviews" Margin="20 0 5 0" FontSize="16"/>
+            <Button Padding="12 1 12 1" VerticalAlignment="Center" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" Click="ButtonSeller_Click">
               <!-- link to a seller's public profile and number of reviews binding -->
               <TextBlock Name="TBSellerReviewsCount" FontWeight="Bold" Text="0"/>
             </Button>
           </StackPanel>
         </StackPanel>
-        <TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 40 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 2 20 0">
-          <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" FontSize="16" BorderThickness="0" Padding="10" Width="400" />
+          <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" FontSize="16" BorderThickness="1" Padding="10" Width="400" />
           <Button Name="BTCopyToClipboard" Classes="pagination" HorizontalAlignment="Left" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="10 5 0 5 " Cursor="Hand" Click="ButtonCopyToClipboard_Click">
             <StackPanel Orientation="Horizontal">
               <Path Classes="BlueIcon" Data="M549.26609,0a28.60338,28.60338,0,0,0-28.56,28.587V95.65217h26.087V28.587a2.48689,2.48689,0,0,1,2.473-2.5H770.38085a2.50915,2.50915,0,0,1,2.49915,2.5V249.6739a2.50859,2.50859,0,0,1-2.49915,2.5h-64.973v26.087h64.973a28.62512,28.62512,0,0,0,28.5861-28.587V28.587A28.62679,28.62679,0,0,0,770.38085,0ZM429.61956,121.73913a28.6253,28.6253,0,0,0-28.58695,28.58695V371.413A28.62585,28.62585,0,0,0,429.61956,400H650.7339a28.62586,28.62586,0,0,0,28.587-28.587V150.32608a28.62474,28.62474,0,0,0-28.587-28.58695Zm0,26.08695H650.7339a2.50875,2.50875,0,0,1,2.5,2.5V371.413a2.50988,2.50988,0,0,1-2.5,2.5H429.61956a2.50932,2.50932,0,0,1-2.5-2.5V150.32608A2.50876,2.50876,0,0,1,429.61956,147.82608Z"
@@ -237,8 +237,8 @@
             </StackPanel>
           </Button>
         </StackPanel>
-        <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 30 20 0" FontSize="16" FontWeight="Bold"/>
-        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="400" BorderThickness="0" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
+        <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="400" BorderThickness="1" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
 
         <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>

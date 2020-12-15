@@ -154,13 +154,17 @@ namespace FreeMarketOne.Pools
 
                                 Interlocked.Exchange(ref _running, 1);
                             }
-                        } 
+                        }
                     }
                     else
                     {
+                        var random = new Random();
                         _logger.Information(string.Format("Found new actions in pools. Staged {0}.", actionStaged.Count));
 
-                        miningDelayStart = DateTime.UtcNow.Add(_blockPolicy.BlockInterval);
+                        miningDelayStart = DateTime.UtcNow
+                                            .Add(_blockPolicy.BlockInterval)
+                                            .AddMilliseconds(random.Next(100, 5000));
+
                         oldMiningActionStagedCount = actionStaged.Count;
 
                         Interlocked.Exchange(ref _running, 4);

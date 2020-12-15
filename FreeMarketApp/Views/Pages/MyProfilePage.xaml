@@ -7,9 +7,9 @@
 
     <Grid Margin="0" Classes="Main">
       <!-- SIDEBAR -->
-      <ScrollViewer HorizontalAlignment="Left" Margin="0,0,0,0" Width="250">
+      <ScrollViewer HorizontalAlignment="Left" Margin="0" Width="250">
         <StackPanel Name="SideBar" Orientation="Vertical">
-          <Button Name="BackButton" Classes="action" HorizontalAlignment="Left" Height="36" Margin="20,20,0,30" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+          <Button Name="BackButton" Classes="action" HorizontalAlignment="Stretch" Height="36" Margin="15 20 15 30" VerticalAlignment="Top" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
             <StackPanel Orientation="Horizontal">
               <Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15" />
               <TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
@@ -73,8 +73,8 @@
           
                 
             <!-- User binding -->
-            <TextBlock Classes="H1" Text="UserName" Margin="20 10 0 0" FontSize="16" FontWeight="Bold"/>
-            <TextBlock Classes="H1" Name="TBUserName" Text="N/A" Margin="20 0 0 0" FontSize="16"/>
+            <TextBlock Classes="H1" Text="Username" Margin="20 10 0 0" FontSize="16" FontWeight="Bold"/>
+            <TextBlock Classes="H3" Name="TBUserName" Text="N/A" Margin="20 0 0 0" FontSize="16"/>
             <TextBlock Classes="H1" Text="Rating" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
             <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
               <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
@@ -85,14 +85,14 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
       Height="16" Stretch="Fill" Width="17" Margin="0,1,5,0"/>
               <!-- Rating number binding -->
-              <TextBlock Classes="H1" Name="TBReviewStars" Text="N/A" FontWeight="Bold" FontSize="16"/>
-              <TextBlock Classes="H2" Text=" out of 5" FontSize="16"/>
+              <TextBlock Classes="H1Orange" Name="TBReviewStars" Text="N/A" FontWeight="Bold" FontSize="16"/>
+              <TextBlock Classes="H3" Text=" out of 5" FontSize="16"/>
             </StackPanel>
           </StackPanel>
 
           <TextBlock Classes="H1" Text="Description" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
           <!-- About user text binding -->
-          <TextBlock Classes="H1" Name="TBDescription" Text="N/A"
+          <TextBlock Classes="H3" Name="TBDescription" Text="N/A"
            TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
 
         </StackPanel>

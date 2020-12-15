@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -7,10 +8,12 @@ using Avalonia.Threading;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
+using FreeMarketApp.Views.Controls;
 using FreeMarketApp.Views.Pages;
 using FreeMarketOne.Users;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
@@ -138,7 +141,7 @@ namespace FreeMarketApp.Views
                 SearchResultsPage.SetSearchPhrase(searchText);
 
                 PagesHelper.Switch(this, SearchResultsPage.Instance);
-            }            
+            }
         }
 
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
@@ -150,7 +153,8 @@ namespace FreeMarketApp.Views
         {
             PagesHelper.Log(_logger, "ServerLoadedEvent on MainWindow was raised.");
 
-            Dispatcher.UIThread.InvokeAsync(() => { 
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
                 PagesHelper.SetUserData(_logger, this);
                 PagesHelper.SetServerData(_logger, this);
             });
@@ -159,21 +163,25 @@ namespace FreeMarketApp.Views
         public void ButtonSettings_Click(object sender, RoutedEventArgs args)
         {
             var settingsPage = SettingsPage.Instance;
-            
+
             Panel panel = this.FindControl<Panel>("PCMainContent");
-            if (panel.Children.Any()) {
+            if (panel.Children.Any())
+            {
 
                 var pageInstance = panel.Children.Last();
 
-                if (pageInstance.GetType() == typeof(AddEditProductPage)) {
+                if (pageInstance.GetType() == typeof(AddEditProductPage))
+                {
                     settingsPage.SetReturnTo(MyProductsPage.GetInstance());
-                } 
-                else if (pageInstance.GetType() == typeof(EditProfilePage)) {
+                }
+                else if (pageInstance.GetType() == typeof(EditProfilePage))
+                {
                     settingsPage.SetReturnTo(MyProfilePage.GetInstance());
                 }
-                else if (pageInstance.GetType() == typeof(SearchResultsPage)) {
+                else if (pageInstance.GetType() == typeof(SearchResultsPage))
+                {
                     settingsPage.SetReturnTo(MainPage.GetInstance());
-                } 
+                }
                 else
                 {
                     settingsPage.SetReturnTo((UserControl)panel.Children.Last());
@@ -182,5 +190,52 @@ namespace FreeMarketApp.Views
 
             PagesHelper.Switch(this, settingsPage);
         }
+
+
+        // Popup and Useful links
+
+        public void Popup_Click(object sender, RoutedEventArgs e)
+        {
+            Popup VersionPopup = this.FindControl<Popup>("VersionPopup");
+            VersionPopup.IsOpen = true;
+        }
+
+        public void Gitlab_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "https://gitlab.com/bitcoinrh/fm.one/-/issues";
+            process.Start();
+        }
+
+        public void Discord_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "https://discord.gg/gMPBrsQ";
+            process.Start();
+        }
+
+        public void FM_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "https://www.freemarket.one/";
+            process.Start();
+        }
+
+        public void XRC_Click(object sender, RoutedEventArgs args)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = "http://bitcoinrh.org/";
+            process.Start();
+        }
+
+
+
+
     }
 }
+       
+    

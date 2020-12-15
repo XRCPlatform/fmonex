@@ -3,11 +3,13 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Skynet;
 using Serilog;
 using System;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
+using FreeMarketApp.Resources;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -42,7 +44,14 @@ namespace FreeMarketApp.Views.Pages
                             string.Format("{0}.{1}", typeof(MyProfilePage).Namespace, typeof(MyProfilePage).Name));
 
             this.InitializeComponent();
-
+            if (FMONE.Current.Users.UserData == null)
+            {
+                
+                MessageBox.Show(null, SharedResources.ResourceManager.GetString("Dialog_ThereWasCriticalError"),
+                                               SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                                               MessageBox.MessageBoxButtons.Ok);
+                return;
+            }
             if (FMONE.Current.Users != null)
             {
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to profile page."));

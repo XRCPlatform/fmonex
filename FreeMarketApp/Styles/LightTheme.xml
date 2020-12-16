@@ -171,8 +171,8 @@
 		
 		<!-- Add Photo Button -->
 		<Style Selector="Button.AddPhoto">
-			<Setter Property="Background" Value="#efefef" />
-			<Setter Property="BorderBrush" Value="#efefef" />
+			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="BorderBrush" Value="#f9f9f9" />
 		</Style>
 	
 		<Style Selector="Button:pointerover.AddPhoto /template/ ContentPresenter">
@@ -181,8 +181,8 @@
 
 		<!-- Remove Photo Button -->
 		<Style Selector="Button.RemovePhoto">
-			<Setter Property="Background" Value="#efefef" />
-			<Setter Property="BorderBrush" Value="#efefef" />
+			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="BorderBrush" Value="#f9f9f9" />
 		</Style>
 
 		<Style Selector="Button:pointerover.RemovePhoto /template/ ContentPresenter">
@@ -355,8 +355,8 @@
 
 		<!-- TextBoxes and ComboBoxes -->
 		<Style Selector="TextBox.TextBoxBackground">
-			<Setter Property="Background" Value="#efefef" />
-			<Setter Property="BorderBrush" Value="#efefef" />
+			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="BorderBrush" Value="#f9f9f9" />
 		</Style>
 	
 		<Style Selector="TextBox:pointerover.TextBoxBackground /template/ Border#border">
@@ -368,8 +368,8 @@
 		</Style>
 	
 		<Style Selector="ComboBox.TextBoxBackground">
-			<Setter Property="Background" Value="#efefef" />
-			<Setter Property="BorderBrush" Value="#efefef" />
+			<Setter Property="Background" Value="#f9f9f9" />
+			<Setter Property="BorderBrush" Value="#f9f9f9" />
 		</Style>
 	
 		<Style Selector="ComboBox:pointerover.TextBoxBackground /template/ Border#border">

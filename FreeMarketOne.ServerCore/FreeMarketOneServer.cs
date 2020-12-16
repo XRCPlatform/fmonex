@@ -147,6 +147,13 @@ namespace FreeMarketOne.ServerCore
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
                     OnionSeedsManager.Start();
 
+                    //Search indexer
+                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
+                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
+                    SearchIndexer.Initialize();
+                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
+
                     //Initialize Base BlockChain Manager
                     LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
                     BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
@@ -177,12 +184,6 @@ namespace FreeMarketOne.ServerCore
                         Configuration.BlockChainBasePolicy);
                     BasePoolManager.Start();
 
-                      //Search indexer
-                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
-                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
-                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
-                    SearchIndexer.Initialize();
-                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
                 }
                 else
                 {

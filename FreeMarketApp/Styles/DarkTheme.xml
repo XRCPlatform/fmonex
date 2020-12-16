@@ -195,9 +195,9 @@
 		<!-- Pagination Button -->
 		<Style Selector="Button.pagination">
 			<Setter Property="Background" Value="#002244" />
-			<Setter Property="BorderBrush" Value="#002244" />
+			<Setter Property="BorderBrush" Value="Transparent" />
 			<Setter Property="Foreground" Value="#0a84ff" />
-			<Setter Property="Padding" Value="15 5" />
+			<Setter Property="Padding" Value="15 6" />
 		</Style>
 		<Style Selector="Button.pagination /template/ ContentPresenter">
 			<Setter Property="CornerRadius" Value="2"/>
@@ -381,7 +381,7 @@
 		<Style Selector="ComboBox:pointerover.TextBoxBackground /template/ Border#border">
 			<Setter Property="BorderBrush" Value="#0a84ff"/>
 		</Style>
-	
+		
 	
 		<Style Selector="Border.PhotoPlaceholder">
 			<Setter Property="BorderBrush" Value="#3a3a3c" />

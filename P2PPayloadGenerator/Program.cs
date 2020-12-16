@@ -18,6 +18,9 @@ namespace P2PPayloadGenerator
 
         private static object _locked = new object();
 
+        private static int counter = 0;
+        private static int counter1 = 0;
+
         public static FreeMarketOneServer Current { get; private set; }
 
         private static void Init(string password)
@@ -26,16 +29,25 @@ namespace P2PPayloadGenerator
 
            
             Current.Initialize(password);
+
+            //let events and service start up
+            Thread.Sleep(10000);
+
+            //should load eventually but only wait limited time 100 seconds if it did not start it won't 
+            while (Current.BasePoolManager == null && counter1 < 100)
+            {
+                Interlocked.Increment(ref counter1);
+                Thread.Sleep(1000);
+            }
+            
+
             //should load eventually but only wait limited time 100 seconds if it did not start it won't 
             while (Current.MarketPoolManager == null && counter < 100)
             {
                 Interlocked.Increment(ref counter);
                 Thread.Sleep(1000);
             }
-
-
-            //let events and service start up
-            Thread.Sleep(10000);
+                   
 
         }
 
@@ -52,7 +64,6 @@ namespace P2PPayloadGenerator
             }
         }
 
-        private static int counter = 0;
 
         private static void GenerateOffers(int numberOfExecutions, int sleepTime, UserPrivateKey privateKey, UserDataV1 user)
         {
@@ -89,11 +100,11 @@ namespace P2PPayloadGenerator
             {
                 UserDataV1 user = new UserDataV1()
                 {
-                    UserName = "TestUser - " + i,
+                    UserName = "TestUser - A[" + i +"]",
                     CreatedUtc = DateTime.UtcNow,
                     Description = "The axis of rotation of the Solar System makes a large angle of about 60 degrees relative to the axis of rotation of the Milky Way. " +
-                    "That seems unusual - for example, most of the bodies within the Solar Sytem are better behaved than that. \n\r Do most stars or planetary systems " +
-                    " in the Milky Way rotate in close accord with the galactic rotation ? Or is there a large scatter, \n\r  so that, in fact, \r\n our Sun is not atypical ? "
+                    "That seems unusual - for example, most of the bodies within the Solar Sytem are better behaved than that. Do most stars or planetary systems " +
+                    " in the Milky Way rotate in close accord with the galactic rotation ? Or is there a large scatter, so that, in fact, our Sun is not atypical ? "
 
                 };
                 

@@ -389,7 +389,6 @@ namespace FreeMarketApp.Views.Pages
                 var tbDescription = Instance.FindControl<TextBlock>("TBDescription");
                 var tbShipping = Instance.FindControl<TextBlock>("TBShipping");
                 var tbPrice = Instance.FindControl<TextBlock>("TBPrice");
-                var tbPriceType = Instance.FindControl<TextBlock>("TBPriceType");
                 var tbSeller = Instance.FindControl<TextBlock>("TBSeller");
                 var tbSellerStars = Instance.FindControl<TextBlock>("TBSellerStars");
                 var tbSellerReviewsCount = Instance.FindControl<TextBlock>("TBSellerReviewsCount");
@@ -402,7 +401,6 @@ namespace FreeMarketApp.Views.Pages
                 tbDescription.Text = _offer.Description;
                 tbShipping.Text = _offer.Shipping;
                 tbPrice.Text = _offer.Price.ToString();
-                tbPriceType.Text = ((ProductPriceTypeEnum)_offer.PriceType).ToString();
                 btBuyButton.Tag = _offer.Signature;            
                 tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
 

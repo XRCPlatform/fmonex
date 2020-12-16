@@ -6,7 +6,10 @@
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.MainPage">
-
+	
+	
+		
+		
     <Grid Margin="0" Classes="Main">
        <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0 0 0 25" Width="250">
@@ -104,86 +107,117 @@
 
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
-            <StackPanel HorizontalAlignment="Stretch">
-                <TextBlock Classes="H1" Text="Offers" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold"/>
-              <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-                <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
-
-                <!-- Number of search results -->
-                <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
-
-                <TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
-                <VirtualizingStackPanel>
-
-                  <!-- Dropdown menu -->
-                  <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="5"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
-                  </ComboBox>
-                </VirtualizingStackPanel>
-              </StackPanel>
-              <ItemsControl Items="{Binding Items}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-
-                    <!-- Product card -->
-                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
-                      <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                        <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
-                          <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"></Image>
-                        </Border>
-                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                          <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
-                          <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
-                        </StackPanel>
-						<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                        	<TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                            <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
-                               <i:Interaction.Behaviors>
-                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                                 </ia:DataTriggerBehavior>
-                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                                 </ia:DataTriggerBehavior>
-                               </i:Interaction.Behaviors>
-                            </TextBlock>
+           <StackPanel HorizontalAlignment="Stretch">
+			   
+                <TextBlock Classes="H1" Text="Offers" TextWrapping="Wrap" Margin="20 20 20 5" FontSize="28" FontWeight="Bold"/>
+					<DockPanel Margin="20 0 20 20" LastChildFill="True">
+						<StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+							<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="14" Text="Items found: "/>
+							<!-- Number of search results -->
+							<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="14" Text="{Binding Result.TotalHits} "/>
+							<TextBlock Classes="H1" VerticalAlignment="Center" Margin="30 0 5 0" FontSize="14" Text="Results per page "/>
+							<VirtualizingStackPanel VerticalAlignment="Center">
+								<!-- Dropdown menu -->
+								<ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 1 5 0" SelectionChanged="OnPageSize_Change">
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="5"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
+								</ComboBox>
+							</VirtualizingStackPanel>
 						</StackPanel>
-                      </DockPanel>
+						<!-- Layout view buttons -->
+						<Border Classes="SearchBar" CornerRadius="2" Padding="4">
+							<StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
+								<ToggleButton VerticalAlignment="Center">
+								<Path Fill="Blue" Data="M547.2973,0A47.23707,47.23707,0,0,0,500,47.2973V510.34592a47.23694,47.23694,0,0,0,47.2973,47.2973H3447.63515a47.41535,47.41535,0,0,0,47.50679-47.2973V47.2973A47.416,47.416,0,0,0,3447.63515,0Zm0,1221.28379A47.23694,47.23694,0,0,0,500,1268.58109v462.83784a47.237,47.237,0,0,0,47.2973,47.29729H3447.63515a47.41588,47.41588,0,0,0,47.50679-47.29729V1268.58109a47.41582,47.41582,0,0,0-47.50679-47.2973Zm1.90034,1221.07429a47.237,47.237,0,0,0-47.2973,47.2973v463.04733A47.237,47.237,0,0,0,549.19764,3000H3449.53383a47.41588,47.41588,0,0,0,47.5068-47.2973V2489.65538a47.41166,47.41166,0,0,0-47.5068-47.2973Z" 
+										HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="13"/>
+								</ToggleButton>
+								<ToggleButton VerticalAlignment="Center">
+									<Path Fill="Black" Data="M547.2973,0A47.287,47.287,0,0,0,500,47.2973v1222.973a47.28775,47.28775,0,0,0,47.2973,47.29729h1222.973a47.28855,47.28855,0,0,0,47.29729-47.29729V47.2973A47.28775,47.28775,0,0,0,1770.27028,0ZM2229.72974,0a47.28776,47.28776,0,0,0-47.2973,47.2973v1222.973a47.28855,47.28855,0,0,0,47.2973,47.29729h1222.973A47.28855,47.28855,0,0,0,3500,1270.27028V47.2973A47.28776,47.28776,0,0,0,3452.70271,0ZM547.2973,1682.43244A47.28776,47.28776,0,0,0,500,1729.72974v1222.973A47.28776,47.28776,0,0,0,547.2973,3000h1222.973a47.28855,47.28855,0,0,0,47.29729-47.2973v-1222.973a47.28855,47.28855,0,0,0-47.29729-47.2973Zm1682.43244,0a47.28855,47.28855,0,0,0-47.2973,47.2973v1222.973A47.28855,47.28855,0,0,0,2229.72974,3000h1222.973A47.28855,47.28855,0,0,0,3500,2952.70271v-1222.973a47.28855,47.28855,0,0,0-47.2973-47.2973Z" 
+										HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="12"/>
+								</ToggleButton>
+							</StackPanel>
+						</Border>
+					</DockPanel>
+			   
+			   
+				<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+				    <!-- Product card (gallery view) -->
+			        <ItemsControl IsVisible="False" Items="{Binding Items}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>			 
+                            <Button Margin="10 0 0 10" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" Width="280" Height="272" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
+                              <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                                <Border VerticalAlignment="Top" Classes="PhotoPlaceholder" Width="260" Height="156" Margin="5" BorderThickness="1">
+                                  <Image Source="{Binding PreTitlePhoto}"/>
+                                </Border>
+                                <TextBlock Classes="H1" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="45" FontWeight="Medium" FontSize="16" Margin="5 0 5 4" Text="{Binding Title}"/>
+                                <StackPanel Orientation="Horizontal" Margin="4 0 5 0">
+                                  <TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+                                  <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
+                                </StackPanel>
+						        <StackPanel Orientation="Horizontal">
+                        	        <TextBlock Classes="H1" Margin="4 4 0 0" FontSize="16" FontWeight="Medium" Text="{Binding Price}"/>
+                                    <TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="16" />
+						        </StackPanel>
+                              </StackPanel>
+                            </Button>
+							</DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+					</WrapPanel>
+					
+			          <!-- Product card (list view) -->
+                      <ItemsControl IsVisible="False" Items="{Binding Items}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
+                              <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
+                                <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
+                                  <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"/>
+                                </Border>
+                                <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"/>
+                                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                                  <TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+                                  <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
+                                </StackPanel>
+						        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                        	        <TextBlock Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"/>
+                                    <TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="18"/>
+						        </StackPanel>
+                              </DockPanel>
+                            </Button>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+            
+				
+                  <!-- Pagination of product list -->
+                  <StackPanel Orientation="Horizontal" Margin="20 30 0 60">
+                    <Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonPreviousPage_Click" IsVisible="{Binding ShowPreviousPage}" >
+                      <StackPanel Orientation="Horizontal">
+                        <Path Classes="BlueIcon" Data="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0 c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744	c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"
+                            HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+                        <TextBlock Text="Previous " Margin="5 0 0 0" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                        <!-- Bind sellected page size -->
+                        <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                      </StackPanel>
                     </Button>
-                    <!-- End of product card -->
-                    
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              
-              <!-- Pagination of product list -->
-              <StackPanel Orientation="Horizontal" Margin="20 30 0 60">
-                <Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonPreviousPage_Click" IsVisible="{Binding ShowPreviousPage}" >
-                  <StackPanel Orientation="Horizontal">
-                    <Path Classes="BlueIcon" Data="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0 c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744	c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"
-                        HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
-                    <TextBlock Text="Previous " Margin="5 0 0 0" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-                    <!-- Bind sellected page size -->
-                    <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-                  </StackPanel>
-                </Button>
 
-                <Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonNextPage_Click" IsVisible="{Binding ShowNextPage}">
-                  <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Next " HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-                    <!-- Bind sellected page size -->
-                    <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
-                    <Path Classes="BlueIcon" Data="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284	c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"
-                        HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+                    <Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonNextPage_Click" IsVisible="{Binding ShowNextPage}">
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Next " HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                        <!-- Bind sellected page size -->
+                        <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
+                        <Path Classes="BlueIcon" Data="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284	c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"
+                            HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+                      </StackPanel>
+                    </Button>
                   </StackPanel>
-                </Button>
-              </StackPanel>
+		   
             </StackPanel>
         </ScrollViewer>
 </Grid>

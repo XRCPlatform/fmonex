@@ -146,7 +146,7 @@
 			   
 				<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
 				    <!-- Product card (gallery view) -->
-			        <ItemsControl IsVisible="False" Items="{Binding Items}">
+			        <ItemsControl IsVisible="True" Items="{Binding Items}">
                         <ItemsControl.ItemTemplate>
                           <DataTemplate>			 
                             <Button Margin="10 0 0 10" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" Width="280" Height="272" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">

@@ -47,15 +47,15 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
 								Height="15" Stretch="Fill" Width="16" Margin="0,1,5,0"/>
                             <!-- Rating number binding -->
-                            <TextBlock Classes="H1" Name="TBStars" Text="0" FontWeight="Bold" FontSize="16"/>
-                            <TextBlock Classes="H2" Text=" out of 5" FontSize="16"/>
+                            <TextBlock Classes="H1Orange" Name="TBStars" Text="0" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock Classes="H3" Text=" out of 5" FontSize="16"/>
                         </StackPanel>
                     </StackPanel>
                 </DockPanel>
 
                 <TextBlock Classes="H1" Text="About" Margin="20 30 0 0" FontSize="18" FontWeight="Bold"/>
                 <!-- About user text binding -->
-                <TextBlock Classes="H1" Name="TBDescription" Text="N/A"
+                <TextBlock Classes="H3" Name="TBDescription" Text="N/A"
 							   TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
 
                 <TextBlock Classes="H1" Text="Reviews" Margin="20 30 0 0" FontSize="18" FontWeight="Bold"/>

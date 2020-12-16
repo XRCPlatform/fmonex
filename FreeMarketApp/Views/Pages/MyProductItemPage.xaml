@@ -106,36 +106,36 @@
               
               <TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
               <!-- product description binding -->
-              <TextBlock Classes="H1" Name="TBDescription" Text="" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
+              <TextBlock Classes="H3" Name="TBDescription" Text="" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
 
               <TextBlock Classes="H1" Text="Category" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
               <!-- product description binding -->
-              <TextBlock Classes="H1" Name="TBCategory" Text="" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
+              <TextBlock Classes="H3" Name="TBCategory" Text="" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
               
               <TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <Path Classes="StatusBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
                   Height="14" Stretch="Fill" Width="11" Margin="0,1,5,0"/>
                 <!-- product shipping binding -->
-                <TextBlock Classes="H1" Name="TBShipping" Text="" FontSize="16"/>
+                <TextBlock Classes="H3" Name="TBShipping" Text="" FontSize="16"/>
               </StackPanel>
 
               <TextBlock Name="TBFinenessLabel" Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--Manufacturer binding -->
-                <TextBlock Classes="H1" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
+                <TextBlock Classes="H3" Name="TBFineness"  Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
               <TextBlock Name="TBManufacturerLabel" Classes="H1" Text="Manufacturer" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--Manufacturer binding -->
-                <TextBlock Classes="H1" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
+                <TextBlock Classes="H3" Name="TBManufacturer" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
               <TextBlock Name="TBSizeLabel" Classes="H1" Text="Size" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--Size binding -->
-                <TextBlock Classes="H1" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
+                <TextBlock Classes="H3" Name="TBSize" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
               <TextBlock Name="TBWeightInGramsLabel" Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
@@ -148,22 +148,17 @@
               
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
-                <TextBlock Classes="H1" Name="TBPriceType" Text="" FontSize="20"/>
+                <TextBlock Classes="H3" Name="TBPriceType" Text="" FontSize="20"/>
               </StackPanel>
               
               <TextBlock Classes="H1" Text="Deal Type" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                <TextBlock Classes="H1"  Name="TBDealType" Text="" Margin="0 2 0 0" FontSize="16"/>
+                <TextBlock Classes="H3"  Name="TBDealType" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
               <TextBlock Classes="H1" Text="XRC Receiving Address" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                <TextBlock Classes="H1"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
-              </StackPanel>
-              
-              <TextBlock Name="TBXRCReceivingTransactionHashLabel" Classes="H1" Text="XRC Receiving Transaction hash" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                <TextBlock Classes="H1"  Name="TBXRCReceivingTransactionHash" Text="" Margin="0 2 0 0" FontSize="16"/>
+                <TextBlock Classes="H3"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
 

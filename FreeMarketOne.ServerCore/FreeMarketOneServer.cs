@@ -177,12 +177,11 @@ namespace FreeMarketOne.ServerCore
                         Configuration.BlockChainBasePolicy);
                     BasePoolManager.Start();
 
-                    //Search indexer
+                      //Search indexer
                     LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
                     XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
                     SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
                     SearchIndexer.Initialize();
-
                     SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
                 }
                 else

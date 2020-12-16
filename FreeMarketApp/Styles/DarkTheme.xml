@@ -262,13 +262,18 @@
 			<Setter Property="Foreground" Value="#9e9ea5" />
 		</Style>
 	
+		<Style Selector="TextBlock.H3">
+			<Setter Property="Foreground" Value="#a8a8ae" />
+		</Style>
+	
 		<Style Selector="TextBlock.H1Red">
 		  <Setter Property="Foreground" Value="#FF0000" />
 		</Style>
-  
-		<Style Selector="RadioButton.H1">
-			<Setter Property="Foreground" Value="#ffffff" />
+	
+		<Style Selector="TextBlock.H1Orange">
+			<Setter Property="Foreground" Value="#ff9234" />
 		</Style>
+  
 
 		<Style Selector="Path.H2">
 			<Setter Property="Fill" Value="#9e9ea5" />

@@ -28,7 +28,7 @@
 				<!-- Appearance settings -->
 				<WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
 				    <TextBlock Classes="H1" Text="Appearance" FontSize="16" FontWeight="Bold"/>
-					<TextBlock Classes="H2" Text=" (changes take effect after restart)" FontSize="16"/>
+					<TextBlock Classes="H3" Text=" (changes take effect after restart)" FontSize="16"/>
 				</WrapPanel>
 				<StackPanel Orientation="Vertical" Margin="40 20 20 0">
 					<RadioButton Name="RBApperanceLight" Margin="0 0 10 15" Tag="Light">

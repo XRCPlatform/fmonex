@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using Libplanet.Extensions;
+using Newtonsoft.Json;
 
 namespace P2PPayloadGenerator
 {
@@ -17,6 +18,9 @@ namespace P2PPayloadGenerator
 
         private static object _locked = new object();
 
+        private static int counter = 0;
+        private static int counter1 = 0;
+
         public static FreeMarketOneServer Current { get; private set; }
 
         private static void Init(string password)
@@ -26,12 +30,31 @@ namespace P2PPayloadGenerator
            
             Current.Initialize(password);
 
+            //let events and service start up
+            Thread.Sleep(10000);
+
+            //should load eventually but only wait limited time 100 seconds if it did not start it won't 
+            while (Current.BasePoolManager == null && counter1 < 100)
+            {
+                Interlocked.Increment(ref counter1);
+                Thread.Sleep(1000);
+            }
+            
+
+            //should load eventually but only wait limited time 100 seconds if it did not start it won't 
+            while (Current.MarketPoolManager == null && counter < 100)
+            {
+                Interlocked.Increment(ref counter);
+                Thread.Sleep(1000);
+            }
+                   
+
         }
 
         static void Main(string[] args)
         {
             Init(args[CommandCurrentUserPasswordArgIndex]);
-
+           
             Console.WriteLine("To generate Users run (ObjectType:UserDataV1, quantity:10, sleeptime:5 password:******) : Users 10 5 password");
             if (args[CommandSubjectArgIndex].Equals("UserDataV1",StringComparison.InvariantCultureIgnoreCase)
                 || args[CommandSubjectArgIndex].Equals("user", StringComparison.InvariantCultureIgnoreCase))
@@ -41,29 +64,62 @@ namespace P2PPayloadGenerator
             }
         }
 
+
+        private static void GenerateOffers(int numberOfExecutions, int sleepTime, UserPrivateKey privateKey, UserDataV1 user)
+        {
+            string json = File.ReadAllText("../../../data/gold.json");
+            
+            for (int i = 1; i < numberOfExecutions; i++)
+            {
+                //deliberately create new object eevry time
+                MarketItemV1 template = JsonConvert.DeserializeObject<MarketItemV1>(json);
+                template.Title = template.Title + " from " + user.UserName  + " [" + i +"/"+ (numberOfExecutions-1)  + "]";
+                template.Manufacturer = user.UserName;
+                var _offer = Current.Markets.SignMarketData(template, privateKey);            
+
+                var errors = Current.MarketPoolManager.AcceptActionItem(_offer);
+                if (!errors.HasValue)
+                {
+                    Current.MarketPoolManager.PropagateAllActionItemLocal();
+                }
+                else
+                {
+                    Console.WriteLine(errors.ToString());
+                }
+               
+
+                Thread.Sleep(sleepTime);
+            }
+
+        }
+
+
         private static void GenerateUsers(int numberOfExecutions, int sleepTime)
         {
             for (int i = 0; i < numberOfExecutions; i++)
             {
                 UserDataV1 user = new UserDataV1()
                 {
-                    UserName = "TestUser - " + i,
+                    UserName = "TestUser - A[" + i +"]",
                     CreatedUtc = DateTime.UtcNow,
-                    Description = "“The European Union fully supports the development, implementation and use of strong encryption,” the report notes. “However, there are instances where encryption renders analysis of the content of communications in the framework of access to electronic evidence extremely challenging or practically impossible despite the fact that the access to such data would be lawful.”",
+                    Description = "The axis of rotation of the Solar System makes a large angle of about 60 degrees relative to the axis of rotation of the Milky Way. " +
+                    "That seems unusual - for example, most of the bodies within the Solar Sytem are better behaved than that. Do most stars or planetary systems " +
+                    " in the Milky Way rotate in close accord with the galactic rotation ? Or is there a large scatter, so that, in fact, our Sun is not atypical ? "
 
                 };
                 
                 string seed = Current.Users.CreateRandomSeed();
-
-                var signedUserData = SignUserData(user, new UserPrivateKey(seed));
+                var privateKey = new UserPrivateKey(seed);
+                
+                var signedUserData = SignUserData(user, privateKey);
 
                 Console.WriteLine(signedUserData.UserName + "" + signedUserData.PublicKey);
 
                 if (Current.BasePoolManager.AcceptActionItem(signedUserData) == null)
                 {
-                    Current.BasePoolManager.PropagateAllActionItemLocal(true);
+                    Current.BasePoolManager.PropagateAllActionItemLocal();
                 }
-
+                GenerateOffers(6, 10, privateKey, user);
                 Thread.Sleep(sleepTime);
             }
 

@@ -74,13 +74,13 @@ namespace FreeMarketOne.Search
                 if (SeekLocalSellerInfoBySellerHash(sellerDataFolder, tempPubKeyHash))
                 {
                     seller = ReadSellerInfoBySellerHash(sellerDataFolder, tempPubKeyHash);
-                    if (seller != null)
+                    if (seller != null && seller.SellerName != "Not found")
                     {
                         publicKey = key;
                         pubKeyHash = Hash(key);
                         break;
                     }
-                }               
+                }
             }
             
             //only run if cache miss
@@ -92,8 +92,14 @@ namespace FreeMarketOne.Search
                     singleKey.Add(key);
                     user = engine.GetUser(key);
                     reviews = engine.GetAllReviewsForPubKey(key);
-                    //user = userManager.GetUserDataByPublicKey(singleKey, basePoolManager, blockChainManager);
-                    //reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
+                    
+                    //not indexed yet? look at the chain
+                    if (user == null)
+                    {
+                        user = userManager.GetUserDataByPublicKey(singleKey, basePoolManager, blockChainManager);
+                        reviews = userManager.GetAllReviewsForPubKey(singleKey, basePoolManager, blockChainManager);
+                    }
+
                     if (user != null)
                     {
                         publicKey = key;
@@ -115,13 +121,14 @@ namespace FreeMarketOne.Search
                 }
             }
 
-            //should not happen 
+            //will happen in race conditions where market chain reached before base chain
             if (seller == null)
             {
                 seller = new SellerAggregate()
                 {
                     PublicKeyHashes = sellerPubKeyHashes,
-                    PublicKeys = sellerPubKeys
+                    PublicKeys = sellerPubKeys,
+                    SellerName = "Not found"
                 };
             }
 

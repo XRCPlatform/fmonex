@@ -2,7 +2,7 @@
   "profiles": {
     "P2PPayloadGenerator": {
       "commandName": "Project",
-      "commandLineArgs": "user 30 5"
+      "commandLineArgs": "user 30 10000 ****"
     }
   }
 }

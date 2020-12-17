@@ -17,6 +17,7 @@ using FreeMarketOne.Pools;
 using FreeMarketOne.BlockChain;
 using static FreeMarketOne.Markets.MarketManager;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace FreeMarketOne.Search
 {
@@ -93,7 +94,7 @@ namespace FreeMarketOne.Search
         }
 
         public string SearchIndexPath { get; }
-
+        private int spins = 0;
         /// <summary>
         /// Indexes market item for search, includes block hash so that old blocks can be wiped after new genesis
         /// </summary>
@@ -101,10 +102,19 @@ namespace FreeMarketOne.Search
         /// <param name="blockHash"></param>
         public void Index(MarketItemV1 marketItem, string blockHash, bool updateAllSellerDocuments = true, SellerAggregate currentSellerAggregate = null, bool isMyOffer = false, OfferDirection offerDirection = OfferDirection.Undetermined)
         {
-
             // this can only be running single threaded as transaction totals and sequencing matters.
             lock (lockobject)
             {
+
+                if(_basePoolManager == null || _marketManager == null || _baseBlockChain == null || _userManager == null)
+                {
+                    while (_basePoolManager != null && _marketManager != null && _baseBlockChain != null && _userManager != null && spins < 100)
+                    {
+                        //this is background thread can sleep and wait for services to be initialized
+                        Thread.Sleep(1000);
+                    }
+                }
+
                 double pricePerGram = 0F;
                 MarketCategoryEnum cat = (MarketCategoryEnum)marketItem.Category;
                 //new DealType().TryGetValue(marketItem.DealType, out string dealTypeString);

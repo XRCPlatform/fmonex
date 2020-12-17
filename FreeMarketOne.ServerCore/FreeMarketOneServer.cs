@@ -147,13 +147,6 @@ namespace FreeMarketOne.ServerCore
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
                     OnionSeedsManager.Start();
 
-                    //Search indexer
-                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
-                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
-                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
-                    SearchIndexer.Initialize();
-                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
-
                     //Initialize Base BlockChain Manager
                     LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
                     BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
@@ -183,6 +176,14 @@ namespace FreeMarketOne.ServerCore
                         BaseBlockChainManager.BlockChain,
                         Configuration.BlockChainBasePolicy);
                     BasePoolManager.Start();
+
+
+                    //Search indexer
+                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
+                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
+                    SearchIndexer.Initialize();
+                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
 
                 }
                 else
@@ -247,15 +248,15 @@ namespace FreeMarketOne.ServerCore
             {
                 _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
 
-                _logger.Information($"New block SearchIndexing");
-                SearchIndexer.IndexBlock(e.NewTip);
+                _logger.Information($"New block SearchIndexing");                
+                backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
             }
             else if ((e.NewTip == null) && (e.OldTip != null))
             {
                 _logger.Information($"Recieved base orphaned block notification {e.OldTip.Hash}");
 
                 _logger.Information($"Clearing block SearchIndexing");
-                SearchIndexer.UnIndexBlock(e.OldTip);
+                backgroundQueue.QueueTask(() => SearchIndexer.UnIndexBlock(e.OldTip));
             }
         }
 
@@ -338,8 +339,8 @@ namespace FreeMarketOne.ServerCore
             {
                 _logger.Information($"Recieved market orphaned block notification {e.OldTip.Hash}");
 
-                _logger.Information($"Clearing block SearchIndexing");
-                SearchIndexer.UnIndexBlock(e.OldTip);
+                _logger.Information($"Queuing clear orhpan block SearchIndexing");
+                backgroundQueue.QueueTask(() => SearchIndexer.UnIndexBlock(e.OldTip));               
 
                 //TODO: CHAT?????
             }

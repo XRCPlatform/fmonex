@@ -214,31 +214,30 @@
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
               Height="16" Stretch="Fill" Width="16.5" Margin="0,-2,5,0"/>
             <!-- seller rating binding -->
-            <TextBlock Classes="H1Orange" Name="TBSellerStars" Text="N/A" FontWeight="Bold" FontSize="16"/>
+            <TextBlock Classes="H1Orange" Name="TBSellerStars" Text="N/A" FontSize="16"/>
             <TextBlock Classes="H1" Text="Reviews" Margin="20 0 7 0" FontSize="16"/>
             <Button Padding="12 0" VerticalAlignment="Center" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" FontSize="16" Click="ButtonSeller_Click">
               <!-- link to a seller's public profile and number of reviews binding -->
-              <TextBlock Name="TBSellerReviewsCount" FontWeight="Bold" Text="0"/>
+              <TextBlock Name="TBSellerReviewsCount" Text="0"/>
             </Button>
           </StackPanel>
         </StackPanel>
 		  
         <TextBlock Classes="H1" Text="Seller's XRC Receiving Address" Margin="20 50 20 0" FontSize="16" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal" Margin="20 2 20 0">
-          <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" FontSize="16" BorderThickness="1" Padding="10" Width="440" />
-          <Button Name="BTCopyToClipboard" Classes="pagination" HorizontalAlignment="Left" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="1" Margin="-85 5 0 5" Width="80" Cursor="Hand" Click="ButtonCopyToClipboard_Click">
+          <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" FontSize="16" BorderThickness="1" Padding="10" Width="380" />
+          <Button Name="BTCopyToClipboard" ToolTip.Tip="Copy Address" HorizontalAlignment="Left" VerticalContentAlignment="Center" BorderThickness="0" Width="50" Cursor="Hand" Click="ButtonCopyToClipboard_Click">
             <StackPanel Orientation="Horizontal">
               <Path Classes="BlueIcon" Data="M1415.05452,0V731.81817h238.35456V238.35272h1608.2364V1846.59089H2768.1818v238.35449H3500V0ZM500,915.05452V3000H2584.94538V915.05452H500Zm238.35272,238.35456H2346.59089v1608.2364H738.35272Z"
-              HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="17" />
-              <TextBlock HorizontalAlignment="Center" Margin="7,0,0,0" FontSize="14" Text="Copy"/>
+              HorizontalAlignment="Center" Height="18" Stretch="Fill" Width="18" />
             </StackPanel>
           </Button>
         </StackPanel>
         <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="440" BorderThickness="1" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
+        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="430" BorderThickness="1" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
 
-        <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 30 0 0" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
+        <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 50 20 10" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
       </StackPanel>
     </ScrollViewer>
   </Grid>

@@ -15,7 +15,7 @@
         <ScrollViewer HorizontalAlignment="Left" Margin="0 0 0 25" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
 
-			<TextBlock Classes="H1" Text="CATEGORIES" Margin="27 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>
+			<TextBlock Classes="H1" Text="CATEGORIES" Margin="15 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>
 
               <Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="0">
                 <DockPanel HorizontalAlignment="Stretch">
@@ -129,7 +129,7 @@
 							</VirtualizingStackPanel>
 						</StackPanel>
 						<!-- Layout view buttons -->
-						<Border Classes="SearchBar" CornerRadius="2" Padding="4">
+						<Border Classes="SearchBar" HorizontalAlignment="Right" CornerRadius="2" Padding="4">
 							<StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
 								<ToggleButton VerticalAlignment="Center">
 								<Path Fill="Blue" Data="M547.2973,0A47.23707,47.23707,0,0,0,500,47.2973V510.34592a47.23694,47.23694,0,0,0,47.2973,47.2973H3447.63515a47.41535,47.41535,0,0,0,47.50679-47.2973V47.2973A47.416,47.416,0,0,0,3447.63515,0Zm0,1221.28379A47.23694,47.23694,0,0,0,500,1268.58109v462.83784a47.237,47.237,0,0,0,47.2973,47.29729H3447.63515a47.41588,47.41588,0,0,0,47.50679-47.29729V1268.58109a47.41582,47.41582,0,0,0-47.50679-47.2973Zm1.90034,1221.07429a47.237,47.237,0,0,0-47.2973,47.2973v463.04733A47.237,47.237,0,0,0,549.19764,3000H3449.53383a47.41588,47.41588,0,0,0,47.5068-47.2973V2489.65538a47.41166,47.41166,0,0,0-47.5068-47.2973Z" 
@@ -143,56 +143,59 @@
 						</Border>
 					</DockPanel>
 			   
-			   
-				<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
 				    <!-- Product card (gallery view) -->
 			        <ItemsControl IsVisible="True" Items="{Binding Items}">
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate>			 
-                            <Button Margin="10 0 0 10" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" Width="280" Height="272" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
-                              <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                                <Border VerticalAlignment="Top" Classes="PhotoPlaceholder" Width="260" Height="156" Margin="5" BorderThickness="1">
-                                  <Image Source="{Binding PreTitlePhoto}"/>
-                                </Border>
-                                <TextBlock Classes="H1" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="45" FontWeight="Medium" FontSize="16" Margin="5 0 5 4" Text="{Binding Title}"/>
-                                <StackPanel Orientation="Horizontal" Margin="4 0 5 0">
-                                  <TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
-                                  <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
-                                </StackPanel>
-						        <StackPanel Orientation="Horizontal">
-                        	        <TextBlock Classes="H1" Margin="4 4 0 0" FontSize="16" FontWeight="Medium" Text="{Binding Price}"/>
-                                    <TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="16" />
-						        </StackPanel>
-                              </StackPanel>
-                            </Button>
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+						
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10 0 0 10" VerticalContentAlignment="Top" Width="280" Height="272" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
+									<StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+										<Border VerticalAlignment="Top" Classes="PhotoPlaceholder" Width="260" Height="156" Margin="5" BorderThickness="1">
+											<Image Source="{Binding PreTitlePhoto}"/>
+										</Border>
+										<TextBlock Classes="H1" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="45" FontWeight="Medium" FontSize="16" Margin="5 0 5 4" Text="{Binding Title}"/>
+										<StackPanel Orientation="Horizontal" Margin="4 0 5 0">
+											<TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+											<TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
+										</StackPanel>
+										<StackPanel Orientation="Horizontal">
+                        					<TextBlock Classes="H1" Margin="4 4 0 0" FontSize="16" FontWeight="Medium" Text="{Binding Price}"/>
+											<TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="16" />
+										</StackPanel>
+									</StackPanel>
+								</Button>
 							</DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
-					</WrapPanel>
-					
-			          <!-- Product card (list view) -->
-                      <ItemsControl IsVisible="False" Items="{Binding Items}">
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate>
-                            <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
-                              <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                                <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
-                                  <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"/>
-                                </Border>
-                                <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"/>
-                                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                                  <TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
-                                  <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
-                                </StackPanel>
-						        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                        	        <TextBlock Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"/>
-                                    <TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="18"/>
-						        </StackPanel>
-                              </DockPanel>
-                            </Button>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
+                       </ItemsControl.ItemTemplate>
+					</ItemsControl>
+
+			        <!-- Product card (list view) -->
+                    <ItemsControl IsVisible="False" Items="{Binding Items}">						  
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
+									<DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
+										<Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
+											<Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"/>
+										</Border>
+										<TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"/>
+										<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+											<TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+											<TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
+										</StackPanel>
+										<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                        					<TextBlock Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"/>
+											<TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="18"/>
+										</StackPanel>
+									</DockPanel>
+								</Button>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
             
 				
                   <!-- Pagination of product list -->

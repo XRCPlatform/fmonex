@@ -140,7 +140,7 @@
 			<Setter Property="Foreground" Value="#167efb" />
 		</Style>
 		<Style Selector="Button.action /template/ ContentPresenter">
-			<Setter Property="CornerRadius" Value="20"/>
+			<Setter Property="CornerRadius" Value="5"/>
 		</Style>
 		<Style Selector="Button:pointerover.action /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#167efb" />
@@ -151,20 +151,38 @@
 			<Setter Property="Background" Value="#e1e6f7" />
 		</Style>
 
-		<!-- Send Message Button -->
+		<!-- Big Blue Button -->
 		<Style Selector="Button.message">
 			<Setter Property="Background" Value="#167efb" />
 			<Setter Property="BorderBrush" Value="#ffffff" />
 			<Setter Property="Foreground" Value="#ffffff" />
 		</Style>
 		<Style Selector="Button.message /template/ ContentPresenter">
-			<Setter Property="CornerRadius" Value="25"/>
+			<Setter Property="CornerRadius" Value="4"/>
 		</Style>
 		<Style Selector="Button:pointerover.message /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#1176f1" />
 			<Setter Property="Background" Value="#1176f1" />
 		</Style>
 		<Style Selector="Button:pressed.message /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#0f70e6" />
+			<Setter Property="Background" Value="#0f70e6" />
+		</Style>
+
+		<!-- Blue Round Button -->
+		<Style Selector="Button.send">
+			<Setter Property="Background" Value="#167efb" />
+			<Setter Property="BorderBrush" Value="#ffffff" />
+			<Setter Property="Foreground" Value="#ffffff" />
+		</Style>
+		<Style Selector="Button.send /template/ ContentPresenter">
+			<Setter Property="CornerRadius" Value="30"/>
+		</Style>
+		<Style Selector="Button:pointerover.send /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#1176f1" />
+			<Setter Property="Background" Value="#1176f1" />
+		</Style>
+		<Style Selector="Button:pressed.send /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#0f70e6" />
 			<Setter Property="Background" Value="#0f70e6" />
 		</Style>

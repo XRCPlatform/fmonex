@@ -229,9 +229,9 @@
 					<TextBlock Text=" required fields" Classes="H2" FontSize="16" FontStyle="Italic"/>
 				</WrapPanel>
 				
-              <DockPanel Margin="20 40 50 0">
-                    <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Padding="50 0 50 0" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
-                    <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="120" FontSize="16" Margin="0 30 10 0" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>
+              <DockPanel Margin="20 40 20 0">
+                    <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Width="130" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
+                    <Button Classes="pagination" HorizontalAlignment="Right" Width="130" FontSize="16" Margin="0 30 10 0" Height="40" Click="ButtonCancel_Click" Cursor="Hand">Cancel</Button>
                 </DockPanel>
 
             </StackPanel>

@@ -164,7 +164,10 @@ namespace FreeMarketOne.ServerCore
                         Users.PrivateKey,
                         new BaseChainProtocolVersion(),
                         preloadEnded: BaseBlockChainLoadEndedEvent,
-                        blockChainChanged: BaseBlockChainChangedEvent); ;
+                        blockChainChanged: BaseBlockChainChangedEvent);
+
+                    LoadingEvent?.Invoke(this, "Starting BaseChain Initial Block Download...");
+                    BaseBlockChainManager.Start();
 
                     //Initialize Base Pool
                     LoadingEvent?.Invoke(this, "Loading Base Pool Manager...");
@@ -177,18 +180,15 @@ namespace FreeMarketOne.ServerCore
                         BaseBlockChainManager.BlockChain,
                         Configuration.BlockChainBasePolicy);
 
+                    LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
+                    BasePoolManager.Start();
+
                     //Search indexer
                     LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
                     XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
                     SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
                     SearchIndexer.Initialize();
                     SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
-
-                    LoadingEvent?.Invoke(this, "Starting BaseChain Initial Block Download...");
-                    BaseBlockChainManager.Start();
-
-                    LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
-                    BasePoolManager.Start();
                 }
                 else
                 {

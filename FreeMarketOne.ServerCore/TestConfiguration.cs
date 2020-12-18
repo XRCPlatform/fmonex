@@ -35,7 +35,7 @@ namespace FreeMarketOne.ServerCore
             this.ChatPath = "data/testnet_chat";
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://0.0.0.0:9115/");
             this.SearchEnginePath = "data/testnet_searchindex";
-            this.MinimalPeerAmount = 0;
+            this.MinimalPeerAmount = 1;
             this.XRCDaemonUri = "188.127.231.159:16661";
             this.XRCDaemonUriSsl = false;
             this.XRCDaemonUser = "fm1_xrc_testnet_user";

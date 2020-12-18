@@ -36,7 +36,7 @@ namespace FreeMarketOne.ServerCore.Helpers
                     genesisCheckPointAction = (CheckPointMarketDataV1)blockCheckPoints.First();
 
                 var genesisBlockBytes = ByteUtil.ParseHex(genesisCheckPointAction.Block);
-                var genesisBlock = Block<MarketAction>.Deserialize(genesisBlockBytes);
+                var genesisBlock = new Block<MarketAction>().Deserialize(genesisBlockBytes);
 
                 return genesisBlock;
             }

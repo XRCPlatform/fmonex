@@ -377,7 +377,7 @@ namespace Libplanet.Blockchain
                 Transaction<T>.Create(0, privateKey, null, actions, timestamp: timestamp),
             };
 
-            Block<T> block = Block<T>.Mine(
+            Block<T> block = new Block<T>().Mine(
                 0,
                 0,
                 0,
@@ -872,7 +872,7 @@ namespace Libplanet.Blockchain
             try
             {
                 block = await Task.Run(
-                    () => Block<T>.Mine(
+                    () => new Block<T>().Mine(
                         index: index,
                         difficulty: difficulty,
                         previousTotalDifficulty: Tip.TotalDifficulty,

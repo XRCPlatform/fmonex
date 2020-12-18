@@ -159,9 +159,9 @@ namespace FreeMarketOne.BlockChain.Test
                 testActionItem1.Block = ByteUtil.Hex(genesisBlock.Serialize());
                 testActionItem1.Hash = testActionItem1.GenerateHash();
 
-                var testActionItem2 = new ReviewUserDataV1();
-                testActionItem2.ReviewDateTime = DateTime.UtcNow.AddMinutes(-1);
-                testActionItem2.Message = "This is a test message " + i;
+                var testActionItem2 = new CheckPointMarketDataV1();
+                genesisBlock = BlockChain<MarketAction>.MakeGenesisBlock();
+                testActionItem2.Block = ByteUtil.Hex(genesisBlock.Serialize());
                 testActionItem2.Hash = testActionItem2.GenerateHash();
 
                 Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem1));

@@ -24,6 +24,14 @@ namespace Libplanet.Blocks
         private int _bytesLength;
 
         /// <summary>
+        /// HACK - Empty constructor to use Mine function and Deserialize without Static instance
+        /// </summary>
+        public Block()
+        {
+
+        }
+
+        /// <summary>
         /// Creates a <see cref="Block{T}"/> instance by manually filling all field values.
         /// For a more automated way, see also <see cref="Mine"/> method.
         /// </summary>
@@ -277,7 +285,7 @@ namespace Libplanet.Blocks
         /// A cancellation token used to propagate notification that this
         /// operation should be canceled.</param>
         /// <returns>A <see cref="Block{T}"/> that mined.</returns>
-        public static Block<T> Mine(
+        public Block<T> Mine(
             long index,
             long difficulty,
             BigInteger previousTotalDifficulty,
@@ -350,7 +358,7 @@ namespace Libplanet.Blocks
         /// <returns>A decoded <see cref="Block{T}"/> object.</returns>
         /// <seealso cref="Serialize()"/>
         [Pure]
-        public static Block<T> Deserialize(byte[] bytes)
+        public Block<T> Deserialize(byte[] bytes)
         {
             IValue value = new Codec().Decode(bytes);
             if (!(value is Bencodex.Types.Dictionary dict))

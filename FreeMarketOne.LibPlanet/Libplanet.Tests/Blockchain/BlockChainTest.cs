@@ -59,7 +59,7 @@ namespace Libplanet.Tests.Blockchain
             _renderer.ResetRecords();
 
             _emptyTransaction = new List<Transaction<DumbAction>>();
-            _validNext = Block<DumbAction>.Mine(
+            _validNext = new Block<DumbAction>().Mine(
                 1,
                 1024,
                 _fx.GenesisBlock.TotalDifficulty,

@@ -23,6 +23,7 @@ using Libplanet.Extensions.Helpers;
 using Libplanet.Extensions;
 using FreeMarketOne.GenesisBlock;
 using System.Security.Cryptography;
+using FreeMarketOne.DataStructure.ProtocolVersions;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -50,7 +51,7 @@ namespace FreeMarketOne.BlockChain
         private IImmutableSet<Address> _trustedPeers;
 
         private IOnionSeedsManager _onionSeedManager;
-
+        private IProtocolVersion _protocolVersion;
         private PeerBootstrapWorker<T> _peerBootstrapWorker { get; set; }
         private List<CheckPointMarketDataV1> _hashCheckPoints { get; set; }
         private EventHandler _bootstrapStarted { get; set; }
@@ -93,6 +94,7 @@ namespace FreeMarketOne.BlockChain
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
             UserPrivateKey userPrivateKey,
+            IProtocolVersion protocolVersion,
             List<IBaseItem> listHashCheckPoints = null,
             Block<T> genesisBlock = null,
             EventHandler bootstrapStarted = null,
@@ -131,16 +133,9 @@ namespace FreeMarketOne.BlockChain
             _preloadEnded = preloadEnded;
             _blockChainChanged = blockChainChanged;
             _clearedOlderBlocks = clearedOlderBlocks;
+            _protocolVersion = protocolVersion;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
-        }
-
-        private bool DifferentAppProtocolVersionEncountered(
-            Peer peer,
-            AppProtocolVersion peerVersion,
-            AppProtocolVersion localVersion)
-        {
-            return false;
         }
 
         public bool Start()
@@ -148,8 +143,6 @@ namespace FreeMarketOne.BlockChain
             _cancellationToken = new CancellationTokenSource();
             var host = _endPoint.GetHostOrDefault();
             int? port = _endPoint.GetPortOrDefault();
-
-            var appProtocolVersion = default(AppProtocolVersion);
 
             _blockChain = new BlockChain<T>(
                 _blockChainPolicy,
@@ -167,12 +160,12 @@ namespace FreeMarketOne.BlockChain
                 _swarmServer = new Swarm<T>(
                     _blockChain,
                     _privateKey,
-                    appProtocolVersion: appProtocolVersion,
+                    appProtocolVersion: _protocolVersion.GetProtocolVersion(),
                     host: host,
                     listenPort: port,
                     iceServers: null,
-                    differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
-                    trustedAppProtocolVersionSigners: null);
+                    differentAppProtocolVersionEncountered: _protocolVersion.DifferentAppProtocolVersionEncountered,
+                    trustedAppProtocolVersionSigners: _protocolVersion.GetProtocolSigners());
 
                 var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();

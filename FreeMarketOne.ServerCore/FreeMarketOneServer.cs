@@ -2,6 +2,7 @@
 using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.DataStructure.ProtocolVersions;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
@@ -147,13 +148,6 @@ namespace FreeMarketOne.ServerCore
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
                     OnionSeedsManager.Start();
 
-                    //Search indexer
-                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
-                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
-                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
-                    SearchIndexer.Initialize();
-                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
-
                     //Initialize Base BlockChain Manager
                     LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
                     BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
@@ -168,9 +162,9 @@ namespace FreeMarketOne.ServerCore
                         Configuration.ListenerBaseEndPoint,
                         OnionSeedsManager,
                         Users.PrivateKey,
+                        new BaseChainProtocolVersion(),
                         preloadEnded: BaseBlockChainLoadEndedEvent,
-                        blockChainChanged: BaseBlockChainChangedEvent);
-                    BaseBlockChainManager.Start();
+                        blockChainChanged: BaseBlockChainChangedEvent); ;
 
                     //Initialize Base Pool
                     LoadingEvent?.Invoke(this, "Loading Base Pool Manager...");
@@ -182,8 +176,19 @@ namespace FreeMarketOne.ServerCore
                         BaseBlockChainManager.PrivateKey,
                         BaseBlockChainManager.BlockChain,
                         Configuration.BlockChainBasePolicy);
-                    BasePoolManager.Start();
 
+                    //Search indexer
+                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
+                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
+                    SearchIndexer.Initialize();
+                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
+
+                    LoadingEvent?.Invoke(this, "Starting BaseChain Initial Block Download...");
+                    BaseBlockChainManager.Start();
+
+                    LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
+                    BasePoolManager.Start();
                 }
                 else
                 {
@@ -201,7 +206,6 @@ namespace FreeMarketOne.ServerCore
             //Initialize Base Pool Manager
             if (BaseBlockChainManager.IsBlockChainManagerRunning())
             {
-
                 //Add Swarm server to seed manager
                 OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
 
@@ -222,11 +226,14 @@ namespace FreeMarketOne.ServerCore
                     Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,
                     Users.PrivateKey,
+                    new MarketChainProtocolVersion(),
                     hashCheckPoints,
                     genesisBlock,
                     preloadEnded: MarketBlockChainLoadEndedEvent,
                     blockChainChanged: MarketBlockChainChangedEvent,
                     clearedOlderBlocks: MarketBlockClearedOldersEvent);
+
+                LoadingEvent?.Invoke(this, "Starting MarketChain Initial Block Download...");
                 MarketBlockChainManager.Start();
             }
             else
@@ -276,6 +283,8 @@ namespace FreeMarketOne.ServerCore
                     MarketBlockChainManager.PrivateKey,
                     MarketBlockChainManager.BlockChain,
                     Configuration.BlockChainMarketPolicy);
+
+                LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
                 MarketPoolManager.Start();
 
                 //Event that server is loaded

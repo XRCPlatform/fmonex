@@ -1,5 +1,6 @@
 ﻿using FreeMarketOne.BlockChain.Test.Mocks;
 using FreeMarketOne.DataStructure;
+using FreeMarketOne.DataStructure.ProtocolVersions;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
@@ -65,6 +66,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 configuration.ListenerBaseEndPoint,
                 onionSeedsManager,
                 userPrivateKey,
+                new DebugChainProtocolVersion(),
                 genesisBlock: genesis,
                 preloadEnded: _baseBlockChainLoadedEvent,
                 blockChainChanged: _baseBlockChainChangedEvent);

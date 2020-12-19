@@ -21,9 +21,9 @@
 
 				<!-- Filter By -->
 				<DockPanel HorizontalAlignment="Stretch"  Margin="15 36 0 5">
-					<TextBlock Classes="H1" Text="FILTER BY:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
-					<Button x:Name="ClearFilters" Margin="0 0 12 0" BorderThickness="0" Padding="5 3" Classes="pagination" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Background="Transparent" Click="ButtonResetAllFacets_Click" Cursor="Hand">
-						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+					<TextBlock Classes="H1" Text="FILTER BY:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13" />
+					<Button x:Name="ClearFilters" Margin="0 0 12 0" BorderThickness="0" Padding="3 2" Classes="pagination" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Background="Transparent" Click="ButtonResetAllFacets_Click" Cursor="Hand">
+						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontSize="13" />
 					</Button>	
 				 </DockPanel>
 				<Separator HorizontalAlignment="Stretch" Height="1" Margin="20 5" Classes="SideBarSeparator"></Separator>
@@ -67,24 +67,26 @@
 		<!-- CONTENT AREA -->
 		<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
 			<StackPanel HorizontalAlignment="Stretch">
-				<TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
-				<StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-					<TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+				<StackPanel Orientation="Horizontal" Margin="19 20 20 5" Height="35">
+					<TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" FontSize="28" FontWeight="Bold" />
+				</StackPanel>
+				<StackPanel Margin="20 0 0 20" Height="29" Orientation="Horizontal">
+					<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="14" Text="Items found: "></TextBlock>
 
 					<!-- Number of search results -->
-					<TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
+					<TextBlock VerticalAlignment="Center" Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
 
-					<TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
-          <VirtualizingStackPanel>
-						
-						<!-- Dropdown menu -->
-						<ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
+					<TextBlock VerticalAlignment="Center" Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
+          
+					<VirtualizingStackPanel VerticalAlignment="Center">
+					<!-- Dropdown menu -->
+						<ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 2 0 0" SelectionChanged="OnPageSize_Change">
 							<ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
 							<ComboBoxItem Classes="DropDown" Padding="7" Content="5"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
 						</ComboBox>
 					</VirtualizingStackPanel>
 			</StackPanel>

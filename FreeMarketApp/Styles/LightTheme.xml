@@ -518,5 +518,34 @@
 		<Style Selector="Button:pressed.StatusBarButton /template/ ContentPresenter">
 			<Setter Property="Background" Value="#c3c1c9" />
 		</Style>
+	
+		<!-- Custom RadioButton (View Switcher)-->
+		<Style Selector="RadioButton.List /template/ Border">
+			<Setter Property="Background" Value="#e6e5ea"/>
+		</Style>
+		<Style Selector="RadioButton:pointerover.List /template/ Border">
+			<Setter Property="Background" Value="#cfced6"/>
+		</Style>
+		<Style Selector="RadioButton:checked.List /template/ Border">
+			<Setter Property="Background" Value="#ffffff"/>
+		</Style>
+		<Style Selector="RadioButton.List /template/ Path">
+			<Setter Property="Fill" Value="#404040"></Setter>
+		</Style>
+	
+		<Style Selector="RadioButton.Grid /template/ Border">
+			<Setter Property="Background" Value="#e6e5ea"/>
+		</Style>
+		<Style Selector="RadioButton:pointerover.Grid /template/ Border">
+			<Setter Property="Background" Value="#cfced6"/>
+		</Style>
+		<Style Selector="RadioButton:checked.Grid /template/ Border">
+			<Setter Property="Background" Value="#ffffff"/>
+		</Style>
+		<Style Selector="RadioButton.Grid /template/ Path">
+			<Setter Property="Fill" Value="#404040"></Setter>
+		</Style>
+	
+		
 
 </Styles>

@@ -8,22 +8,51 @@
              x:Class="FreeMarketApp.Views.Pages.MainPage">
 	
 	
+	<UserControl.Styles>
+		<!-- View switcher -->
+		<Style Selector="RadioButton.List">
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Border CornerRadius="3" Width="37" Height="23">
+						<Path Data="M547.2973,0A47.23707,47.23707,0,0,0,500,47.2973V510.34592a47.23694,47.23694,0,0,0,47.2973,47.2973H3447.63515a47.41535,47.41535,0,0,0,47.50679-47.2973V47.2973A47.416,47.416,0,0,0,3447.63515,0Zm0,1221.28379A47.23694,47.23694,0,0,0,500,1268.58109v462.83784a47.237,47.237,0,0,0,47.2973,47.29729H3447.63515a47.41588,47.41588,0,0,0,47.50679-47.29729V1268.58109a47.41582,47.41582,0,0,0-47.50679-47.2973Zm1.90034,1221.07429a47.237,47.237,0,0,0-47.2973,47.2973v463.04733A47.237,47.237,0,0,0,549.19764,3000H3449.53383a47.41588,47.41588,0,0,0,47.5068-47.2973V2489.65538a47.41166,47.41166,0,0,0-47.5068-47.2973Z"
+						Height="13" Stretch="Fill" Width="13"/>
+					</Border>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+		
+		<Style Selector="RadioButton.Grid">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Width" Value="37"/>
+			<Setter Property="Height" Value="23"/>
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Border CornerRadius="3" Width="37" Height="23">
+						<Path VerticalAlignment="Center" Data="M547.2973,0A47.287,47.287,0,0,0,500,47.2973v1222.973a47.28775,47.28775,0,0,0,47.2973,47.29729h1222.973a47.28855,47.28855,0,0,0,47.29729-47.29729V47.2973A47.28775,47.28775,0,0,0,1770.27028,0ZM2229.72974,0a47.28776,47.28776,0,0,0-47.2973,47.2973v1222.973a47.28855,47.28855,0,0,0,47.2973,47.29729h1222.973A47.28855,47.28855,0,0,0,3500,1270.27028V47.2973A47.28776,47.28776,0,0,0,3452.70271,0ZM547.2973,1682.43244A47.28776,47.28776,0,0,0,500,1729.72974v1222.973A47.28776,47.28776,0,0,0,547.2973,3000h1222.973a47.28855,47.28855,0,0,0,47.29729-47.2973v-1222.973a47.28855,47.28855,0,0,0-47.29729-47.2973Zm1682.43244,0a47.28855,47.28855,0,0,0-47.2973,47.2973v1222.973A47.28855,47.28855,0,0,0,2229.72974,3000h1222.973A47.28855,47.28855,0,0,0,3500,2952.70271v-1222.973a47.28855,47.28855,0,0,0-47.2973-47.2973Z"
+						Height="13" Stretch="Fill" Width="13"/>
+					</Border>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+	</UserControl.Styles>
 		
 		
     <Grid Margin="0" Classes="Main">
        <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0 0 0 25" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
-
-			<TextBlock Classes="H1" Text="CATEGORIES" Margin="15 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>
-
-              <Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="0">
-                <DockPanel HorizontalAlignment="Stretch">
-                  <Path Classes="SideBarIcon" Data="m497 353.671875c-30.4375 0-59.023438-11.742187-80.5-33.066406-21.46875-21.3125-33.289062-49.699219-33.289062-79.929688 0-8.285156-6.71875-15-15-15-8.285157 0-15 6.714844-15 15 0 30.230469-11.824219 58.617188-33.292969 79.929688-21.476563 21.324219-50.0625 33.066406-80.5 33.066406-8.285157 0-15 6.714844-15 15s6.714843 15 15 15c62.742187 0 113.792969 50.839844 113.792969 113.328125 0 8.285156 6.714843 15 15 15 8.28125 0 15-6.714844 15-15 0-62.488281 51.046874-113.328125 113.789062-113.328125 8.285156 0 15-6.714844 15-15s-6.714844-15-15-15zm0 0"
-                        HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="15" Margin="-11 0 0 0"/>
-                  <TextBlock Text="All" Margin="6 0 0 0"/>
-                </DockPanel>
-              </Button>
+				<DockPanel Margin="15 20 15 10" Height="34">
+					<TextBlock Classes="H1" Text="CATEGORIES" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>
+					<Button Click="ButtonFilters_Click" Cursor="Hand" Classes="pagination" Content="Filters" FontSize="13" Margin="0 0 0 -2" Padding="3 2" Background="Transparent" HorizontalAlignment="Right" BorderThickness="0" VerticalAlignment="Bottom"/>
+				</DockPanel>
+				
+				  <Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="0">
+					<DockPanel HorizontalAlignment="Stretch">
+					  <Path Classes="SideBarIcon" Data="m497 353.671875c-30.4375 0-59.023438-11.742187-80.5-33.066406-21.46875-21.3125-33.289062-49.699219-33.289062-79.929688 0-8.285156-6.71875-15-15-15-8.285157 0-15 6.714844-15 15 0 30.230469-11.824219 58.617188-33.292969 79.929688-21.476563 21.324219-50.0625 33.066406-80.5 33.066406-8.285157 0-15 6.714844-15 15s6.714843 15 15 15c62.742187 0 113.792969 50.839844 113.792969 113.328125 0 8.285156 6.714843 15 15 15 8.28125 0 15-6.714844 15-15 0-62.488281 51.046874-113.328125 113.789062-113.328125 8.285156 0 15-6.714844 15-15s-6.714844-15-15-15zm0 0"
+							HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="15" Margin="-11 0 0 0"/>
+					  <TextBlock Text="All" Margin="6 0 0 0"/>
+					</DockPanel>
+				  </Button>
              
 					<Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="1">
 						<DockPanel HorizontalAlignment="Stretch">
@@ -96,8 +125,8 @@
 										C266.916,192.612,247.692,174.396,217.021,167.042z M109.535,95.321c18.126,0,75.132-5.767,75.14,32.064
 										c-0.008,36.269-56.996,32.032-75.14,32.032V95.321z M109.521,262.447l0.014-70.672c21.778-0.006,90.085-6.261,90.094,35.32
 										C199.638,266.971,131.313,262.431,109.521,262.447z" 
-										HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="13" Margin="-11 0 0 0"/>
-							<TextBlock Text="Cryptocurrency" Margin="6 0 0 0"/>
+										HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="12" Margin="-11 0 0 0"/>
+							<TextBlock Text="Cryptocurrency" Margin="7 0 0 0"/>
 						</DockPanel>
 					</Button>
 
@@ -107,9 +136,10 @@
 
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
-           <StackPanel HorizontalAlignment="Stretch">
-			   
-                <TextBlock Classes="H1" Text="Offers" TextWrapping="Wrap" Margin="20 20 20 5" FontSize="28" FontWeight="Bold"/>
+			<StackPanel HorizontalAlignment="Stretch">
+				<StackPanel Orientation="Horizontal" Margin="19 20 20 5" Height="35">
+						<TextBlock Classes="H1" Text="Offers" VerticalAlignment="Bottom" TextWrapping="Wrap" FontSize="28" FontWeight="Bold"/>
+				</StackPanel>
 					<DockPanel Margin="20 0 20 20" LastChildFill="True">
 						<StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
 							<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="14" Text="Items found: "/>
@@ -128,23 +158,18 @@
 								</ComboBox>
 							</VirtualizingStackPanel>
 						</StackPanel>
+						
 						<!-- Layout view buttons -->
-						<Border Classes="SearchBar" HorizontalAlignment="Right" CornerRadius="2" Padding="4">
+						<Border Classes="SearchBar" HorizontalAlignment="Right" CornerRadius="5" Padding="3">
 							<StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
-								<ToggleButton VerticalAlignment="Center">
-								<Path Fill="Blue" Data="M547.2973,0A47.23707,47.23707,0,0,0,500,47.2973V510.34592a47.23694,47.23694,0,0,0,47.2973,47.2973H3447.63515a47.41535,47.41535,0,0,0,47.50679-47.2973V47.2973A47.416,47.416,0,0,0,3447.63515,0Zm0,1221.28379A47.23694,47.23694,0,0,0,500,1268.58109v462.83784a47.237,47.237,0,0,0,47.2973,47.29729H3447.63515a47.41588,47.41588,0,0,0,47.50679-47.29729V1268.58109a47.41582,47.41582,0,0,0-47.50679-47.2973Zm1.90034,1221.07429a47.237,47.237,0,0,0-47.2973,47.2973v463.04733A47.237,47.237,0,0,0,549.19764,3000H3449.53383a47.41588,47.41588,0,0,0,47.5068-47.2973V2489.65538a47.41166,47.41166,0,0,0-47.5068-47.2973Z" 
-										HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="13"/>
-								</ToggleButton>
-								<ToggleButton VerticalAlignment="Center">
-									<Path Fill="Black" Data="M547.2973,0A47.287,47.287,0,0,0,500,47.2973v1222.973a47.28775,47.28775,0,0,0,47.2973,47.29729h1222.973a47.28855,47.28855,0,0,0,47.29729-47.29729V47.2973A47.28775,47.28775,0,0,0,1770.27028,0ZM2229.72974,0a47.28776,47.28776,0,0,0-47.2973,47.2973v1222.973a47.28855,47.28855,0,0,0,47.2973,47.29729h1222.973A47.28855,47.28855,0,0,0,3500,1270.27028V47.2973A47.28776,47.28776,0,0,0,3452.70271,0ZM547.2973,1682.43244A47.28776,47.28776,0,0,0,500,1729.72974v1222.973A47.28776,47.28776,0,0,0,547.2973,3000h1222.973a47.28855,47.28855,0,0,0,47.29729-47.2973v-1222.973a47.28855,47.28855,0,0,0-47.29729-47.2973Zm1682.43244,0a47.28855,47.28855,0,0,0-47.2973,47.2973v1222.973A47.28855,47.28855,0,0,0,2229.72974,3000h1222.973A47.28855,47.28855,0,0,0,3500,2952.70271v-1222.973a47.28855,47.28855,0,0,0-47.2973-47.2973Z" 
-										HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="12"/>
-								</ToggleButton>
+								<RadioButton Classes="List" IsChecked="True" Name="RBListView" Margin="0 0 3 0" ToolTip.Tip="List View"/>
+								<RadioButton Classes="Grid" Name="RBGridView" ToolTip.Tip="Grid View"/>
 							</StackPanel>
 						</Border>
 					</DockPanel>
 			   
-				    <!-- Product card (gallery view) -->
-			        <ItemsControl IsVisible="True" Items="{Binding Items}">
+				    <!-- Product card (grid view) -->
+			        <ItemsControl IsVisible="{Binding ElementName=RBGridView, Path=IsChecked}" Name="ICGridView" Items="{Binding Items}">
 						<ItemsControl.ItemsPanel>
 							<ItemsPanelTemplate>
 								<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
@@ -174,7 +199,7 @@
 					</ItemsControl>
 
 			        <!-- Product card (list view) -->
-                    <ItemsControl IsVisible="False" Items="{Binding Items}">						  
+                    <ItemsControl IsVisible="{Binding ElementName=RBListView, Path=IsChecked}" Name="ICListView" Items="{Binding Items}">						  
 						<ItemsControl.ItemTemplate>
 							<DataTemplate>
 								<Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">

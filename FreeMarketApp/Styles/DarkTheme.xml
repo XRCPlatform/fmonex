@@ -526,5 +526,33 @@
 			<Setter Property="BorderBrush" Value="#3a3a3c" />
 			<Setter Property="Background" Value="#3a3a3c" />
 		</Style>
+	
+		<!-- Custom RadioButton (View Switcher)-->
+		<Style Selector="RadioButton.List /template/ Border">
+			<Setter Property="Background" Value="#3a3a3c"/>
+		</Style>
+		<Style Selector="RadioButton:pointerover.List /template/ Border">
+			<Setter Property="Background" Value="#545359"/>
+		</Style>
+		<Style Selector="RadioButton:checked.List /template/ Border">
+			<Setter Property="Background" Value="#65646a"/>
+		</Style>
+		<Style Selector="RadioButton.List /template/ Path">
+			<Setter Property="Fill" Value="#ffffff"></Setter>
+		</Style>
+	
+		<Style Selector="RadioButton.Grid /template/ Border">
+			<Setter Property="Background" Value="#3a3a3c"/>
+		</Style>
+		<Style Selector="RadioButton:pointerover.Grid /template/ Border">
+			<Setter Property="Background" Value="#545359"/>
+		</Style>
+		<Style Selector="RadioButton:checked.Grid /template/ Border">
+			<Setter Property="Background" Value="#65646a"/>
+		</Style>
+		<Style Selector="RadioButton.Grid /template/ Path">
+			<Setter Property="Fill" Value="#ffffff"></Setter>
+		</Style>
+	
 
 </Styles>

@@ -152,6 +152,10 @@ namespace FreeMarketOne.ServerCore
                     LoadingEvent?.Invoke(this, "Loading XRC Daemon...");
                     XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
 
+                    //Initializing Search Indexer
+                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
+                    SearchIndexer = new SearchIndexer(MarketManager, Configuration, new XRCHelper(client), UserManager);
+
                     //Initialize Base BlockChain Manager
                     LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
                     BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
@@ -187,10 +191,9 @@ namespace FreeMarketOne.ServerCore
                     LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
                     BasePoolManager.Start();
 
-                    //Search indexer
+                    //Initializing Search Engine
                     LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
-                    SearchIndexer = new SearchIndexer(MarketManager, Configuration, new XRCHelper(client), UserManager, BasePoolManager, BaseBlockChainManager);
-                    SearchIndexer.Initialize();
+                    SearchIndexer.Initialize(BasePoolManager, BaseBlockChainManager);
                     SearchEngine = new SearchEngine(MarketManager, SearchHelper.GetDataFolder(Configuration));
                 }
                 else
@@ -243,29 +246,6 @@ namespace FreeMarketOne.ServerCore
             {
                 _logger.Error("Base Chain isnt loaded!");
                 Stop();
-            }
-        }
-
-        /// <summary>
-        /// Processing event Base BlockChain Changed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
-        {
-            if (e.NewTip != null)
-            {
-                _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
-
-                _logger.Information($"New block SearchIndexing");
-                SearchIndexer.IndexBlock(e.NewTip);
-            }
-            else if ((e.NewTip == null) && (e.OldTip != null))
-            {
-                _logger.Information($"Recieved base orphaned block notification {e.OldTip.Hash}");
-
-                _logger.Information($"Clearing block SearchIndexing");
-                SearchIndexer.UnIndexBlock(e.OldTip);
             }
         }
 
@@ -327,6 +307,29 @@ namespace FreeMarketOne.ServerCore
 
                 FreeMarketOneServerLoadedEvent?.Invoke(this, null);
             }).ConfigureAwait(true);
+        }
+
+        /// <summary>
+        /// Processing event Base BlockChain Changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
+        {
+            if (e.NewTip != null)
+            {
+                _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
+
+                _logger.Information($"New block SearchIndexing");
+                SearchIndexer.IndexBlock(e.NewTip);
+            }
+            else if ((e.NewTip == null) && (e.OldTip != null))
+            {
+                _logger.Information($"Recieved base orphaned block notification {e.OldTip.Hash}");
+
+                _logger.Information($"Clearing block SearchIndexing");
+                SearchIndexer.UnIndexBlock(e.OldTip);
+            }
         }
 
         /// <summary>

@@ -31,13 +31,14 @@ namespace FreeMarketOne.Search
         private readonly string _indexLocation;
         private readonly IBaseConfiguration _configuration;
         private readonly IUserManager _userManager;
-        private readonly BasePoolManager _basePoolManager;
-        private readonly IBlockChainManager<BaseAction> _baseBlockChain;
-        private static object lockobject = new object();
+        private BasePoolManager _basePoolManager;
+        private IBlockChainManager<BaseAction> _baseBlockChain;
         private NormalizedStore _normalizedStore;
         private SearchEngine _engine;
 
-        public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
+        private static object lockobject = new object();
+
+        public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager)
         {
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
             string indexLocation = SearchHelper.GetDataFolder(baseConfiguration);
@@ -58,13 +59,13 @@ namespace FreeMarketOne.Search
             _xrcCalculator = XRCHelper;
             _configuration = baseConfiguration;
             _userManager = userManager;
-            _basePoolManager = basePoolManager;
-            _baseBlockChain = baseBlockChain;
             _engine = new SearchEngine(_marketManager, _indexLocation, 10);
             _normalizedStore = new NormalizedStore(indexLocation);
+
+            InitStorage();
         }
 
-        public bool Initialize()
+        private bool InitStorage()
         {
             Document doc = new Document()
             {
@@ -82,6 +83,12 @@ namespace FreeMarketOne.Search
             _taxoWriter.Commit();
 
             return true;
+        }
+
+        public void Initialize(BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
+        {
+            _basePoolManager = basePoolManager;
+            _baseBlockChain = baseBlockChain;
         }
 
         private IndexWriter Writer
@@ -162,8 +169,8 @@ namespace FreeMarketOne.Search
                     new DoubleDocValuesField("Price", marketItem.Price),
                     new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
                     new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
-                    new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
-                    new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
+                    new TextField("SellerName", sellerAggregate?.SellerName, Field.Store.NO),
+                    new StoredField("SellerStarsRating", (double)sellerAggregate?.StarRating)
                     //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
                 };
 

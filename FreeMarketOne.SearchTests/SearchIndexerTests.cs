@@ -77,7 +77,7 @@ namespace FreeMarketOne.Search.Tests
             var indexDir = SearchHelper.GetDataFolder(config);
             var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
 
-            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager);
             search.DeleteAll();
             search.Commit();
 
@@ -169,7 +169,7 @@ namespace FreeMarketOne.Search.Tests
             var indexDir = SearchHelper.GetDataFolder(config);
             var taxoDir = System.IO.Path.Combine(indexDir, "taxonomy");
 
-            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null); 
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager); 
 
             search.DeleteAll();
             search.Commit();
@@ -273,7 +273,7 @@ namespace FreeMarketOne.Search.Tests
 
             var indexDir = SearchHelper.GetDataFolder(config);
 
-            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
+            SearchIndexer search = new SearchIndexer(marketManager, config, xrcHelper, userManager);
 
             search.DeleteAll();
             search.Commit();

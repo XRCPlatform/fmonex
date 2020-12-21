@@ -1,4 +1,3 @@
-
 <Styles xmlns = "https://github.com/avaloniaui"
         xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys = "clr-namespace: System; assembly=netstandard">
@@ -189,6 +188,7 @@
 			<Setter Property="BorderBrush" Value="#006bd6" />
 			<Setter Property="Background" Value="#006bd6" />
 		</Style>
+	
 		<!-- Add Photo Button -->
 		<Style Selector="Button.AddPhoto">
 			<Setter Property="Background" Value="#3a3a3c" />
@@ -217,7 +217,7 @@
 			<Setter Property="Padding" Value="15 6" />
 		</Style>
 		<Style Selector="Button.pagination /template/ ContentPresenter">
-			<Setter Property="CornerRadius" Value="2"/>
+			<Setter Property="CornerRadius" Value="3"/>
 		</Style>
 		<Style Selector="Button:pointerover.pagination /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#0a84ff" />
@@ -370,10 +370,6 @@
 			<Setter Property="Fill" Value="#0a84ff" />
 		</Style>
 
-		<Style Selector="Path.WhiteIcon">
-			<Setter Property="Fill" Value="#ffffff" />
-		</Style>
-
 	<!-- TextBoxes and ComboBoxes -->
 		<Style Selector="TextBox.TextBoxBackground">
 			<Setter Property="Background" Value="#3a3a3c" />
@@ -417,16 +413,26 @@
 			<Setter Property="Background" Value="#4a535a" />
 		</Style>
 
-		<Style Selector="Border.ReplyTextbox">
-			<Setter Property="BorderBrush" Value="#e8e8ed" />
-			<Setter Property="Background" Value="#000000" />
-		</Style>
-
+		
 		<Style Selector="TextBox.ReplyTextbox">
 			<Setter Property="Background" Value="#000000" />
 			<Setter Property="Foreground" Value="#e8e8ed" />
 		</Style>
 
+		<Style Selector="TextBox.ReplyTextbox /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#e8e8ed"/>
+			<Setter Property="CornerRadius" Value="10"/>
+		</Style>	
+
+		<Style Selector="TextBox:pointerover.ReplyTextbox /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#0a84ff"/>
+		</Style>
+
+		<Style Selector="TextBox:focus.ReplyTextbox /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#0a84ff"/>
+		</Style>
+
+	
 		<Style Selector="Path.SideBarIcon">
 			<Setter Property="Fill" Value="#9e9ea5" />
 		</Style>
@@ -493,21 +499,16 @@
 		</Style>
 		<Style Selector="Button.popup /template/ ContentPresenter">
 			<Setter Property="BorderThickness" Value="0" />
-			<Setter Property="CornerRadius" Value="3"/>
-			<Setter Property="Margin" Value="1"/>
+			<Setter Property="CornerRadius" Value="2"/>
 			<Setter Property="Padding" Value="8 7 20 7"/>
 			<Setter Property="HorizontalContentAlignment" Value="Left"/>
 		</Style>
 		<Style Selector="Button:pointerover.popup /template/ ContentPresenter">
-			<Setter Property="Background" Value="#3a3a3c" />
+			<Setter Property="Background" Value="#65646a" />
 		</Style>
 		<Style Selector="Button:pressed.popup /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#1c1c1e" />
 			<Setter Property="Background" Value="#1c1c1e" />
-		</Style>
-	
-		<Style Selector="Border.popup">
-			<Setter Property="Background" Value="#000000" />
 		</Style>
 
 		<!-- Statusbar Button -->

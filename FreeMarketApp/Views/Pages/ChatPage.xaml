@@ -6,45 +6,46 @@
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.ChatPage">
-
+	
      <Grid Margin="0" Classes="Main">
       <!-- SIDEBAR -->
 
       <ScrollViewer HorizontalAlignment="Left" Margin="0" Width="250">
         <StackPanel Orientation="Vertical">
-			<Button Classes="action" HorizontalAlignment="Stretch" Height="36" Margin="15 20 15 0" VerticalAlignment="Top" Width="210" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
+			<Button Classes="action" HorizontalAlignment="Stretch" Height="36" Margin="15 20 15 0" VerticalAlignment="Top" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
 				<StackPanel Orientation="Horizontal">
 					<Path Classes="BlueIcon" Data="M408,178.5H96.9L239.7,35.7L204,0L0,204l204,204l35.7-35.7L96.9,229.5H408V178.5z" HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="15"/>
 					<TextBlock HorizontalAlignment="Center" Margin="10,0,0,0" FontSize="14" Text="Go back"/>
 				</StackPanel>
 			</Button>
 			
-          <TextBlock Text="All Chats" Classes="H1" TextWrapping="Wrap" FontSize="28" Margin="25 10 0 10" FontWeight="Bold"/>
-          
-          <ItemsControl Items="{Binding Items}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
+		<TextBlock Text="All Chats" Classes="H1" TextWrapping="Wrap" FontSize="28" Margin="15 20 0 5" FontWeight="Bold"/>
 
-                <!-- Chat thread-->               
-                <Button Name="BTChat" Tag="{Binding MarketItem.Hash}" Classes="sidebar" Height="50" HorizontalContentAlignment="Stretch" Cursor="Hand" Click="ButtonChat_Click">
-                  <StackPanel Orientation="Horizontal">
-                    <Path Classes="SideBarIcon" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
-										c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
-										c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
-										c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
-										l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
-										C511.56,208.649,513.033,202.688,511.267,197.258z"
-            HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="17" />
-                    <TextBlock DockPanel.Dock="Left" Margin="7,0,0,0" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" MaxWidth="145" TextWrapping="NoWrap" Text="{Binding MarketItem.Title}"/>
-                </StackPanel>
+		<ItemsControl Items="{Binding Items}">
+			<ItemsControl.ItemTemplate>
+				<DataTemplate>
+				<!-- Chat thread-->               
+                <Button Name="BTChat" Tag="{Binding MarketItem.Hash}" Padding="5" MaxWidth="220" Classes="sidebar" Cursor="Hand" Click="ButtonChat_Click">
+					<DockPanel HorizontalAlignment="Stretch">
+						<Border DockPanel.Dock="Left" Classes="SearchBar" Width="30" Height="30" CornerRadius="30">
+							<Path Classes="SideBarIcon" Data="M3005.74416,424.31894H1856.32229c-118.84573,0-215.51952,96.50333-215.51952,215.13811V1500c0,118.62892,96.67379,215.13283,215.51952,215.13283h688.64053l266.30867,265.83982a71.84922,71.84922,0,0,0,122.63077-50.70108V1715.13283h71.836c118.85154,0,215.52533-96.50391,215.52533-215.13283V639.45705C3221.26359,520.82227,3124.5898,424.31894,3005.74416,424.31894ZM2000,711.16993h287.34952a71.71593,71.71593,0,1,1,0,143.43166H2000a71.71593,71.71593,0,1,1,0-143.43166Zm862.06645,717.11129H2000a71.713,71.713,0,1,1,0-143.42576h862.06645a71.713,71.713,0,1,1,0,143.42576Zm0-286.83982H2000a71.71593,71.71593,0,1,1,0-143.43166h862.06645a71.71593,71.71593,0,1,1,0,143.43166ZM1497.13087,1500V998.00974H994.25526c-118.84278,0-215.516,96.50391-215.516,215.13873v860.543c0,118.63482,96.67323,215.13873,215.516,215.13873h71.836v215.13265a71.84652,71.84652,0,0,0,122.62559,50.70127l266.30857-265.83392h688.64644c118.83992,0,215.51371-96.50391,215.51371-215.13873V1858.5586H1856.32229C1658.19922,1858.5586,1497.13087,1697.69526,1497.13087,1500Z"
+							Height="14" Stretch="Fill" Width="18" />
+						</Border>
+						<Ellipse Margin="-30 0 0 0" HorizontalAlignment="Left" Height="30" Width="30">
+							<Ellipse.Fill>
+								<!-- Seller's Avatar-->
+								<ImageBrush Source="{Binding SellerAvatar}"/>
+							</Ellipse.Fill>
+						</Ellipse>
+						<TextBlock DockPanel.Dock="Left" Margin="7,0,0,0" FontSize="13" MaxWidth="170" MaxHeight="36" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding MarketItem.Title}"/>
+					</DockPanel>
                 </Button>
-                <!-- End of chat thread-->
-
-              </DataTemplate>
+                <!-- End of chat thread-->   
+				</DataTemplate>
             </ItemsControl.ItemTemplate>
-          </ItemsControl>
-                    
-        </StackPanel>
+		</ItemsControl>
+
+		</StackPanel>
       </ScrollViewer>
       <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
@@ -105,15 +106,11 @@
 
         <!-- Typing and sending -->
         <Grid VerticalAlignment="Bottom" Margin="0 0 0 20" Height="80">
-          <Border Classes="ReplyTextbox" HorizontalAlignment="Stretch" BorderThickness="1" Margin="20 10 60 10" Padding="10 4" VerticalAlignment="Center" CornerRadius="10">
-            <TextBox Name="TBMessage" IsEnabled="false" Classes="ReplyTextbox" AcceptsReturn="True" TextWrapping="Wrap" Padding="5" Watermark ="Type a message" Cursor="IBeam" VerticalAlignment="Top" Height="50" FontSize="15" BorderThickness="0" />
-          </Border>
-          <Button Name="BTSendMessage" IsEnabled="false" Cursor="Hand" Click="ButtonSendMessage_Click" Classes="send" HorizontalAlignment="Right" VerticalAlignment="Top" Height="36" Width="36" Margin="0 10 20 0">
-            <Path Classes="WhiteIcon" Data="M437.2,178.7c12.8,12.8,12.8,33.4,0,46.2c-6.4,6.4-14.7,9.6-23.1,9.6s-16.7-3.2-23.1-9.6L277.7,111.5v345.8
-										c0,18-14.6,32.7-32.7,32.7s-32.7-14.6-32.7-32.7V111.5L99,224.9c-12.8,12.8-33.4,12.8-46.2,0s-12.8-33.4,0-46.2L221.9,9.6
-										C228,3.4,236.3,0,245,0c8.7,0,17,3.4,23.1,9.6L437.2,178.7z"
-            Width="13" Height="16" Stretch="Fill"></Path>
-          </Button>
+			<TextBox Name="TBMessage" Margin="20 10 60 0" IsEnabled="False" Classes="ReplyTextbox" AcceptsReturn="True" TextWrapping="Wrap" HorizontalAlignment="Stretch" Padding="10 5" Watermark ="Type a message" Cursor="IBeam" VerticalAlignment="Top" Height="60" FontSize="15" BorderThickness="1" />
+			<Button Name="BTSendMessage" IsEnabled="false" Cursor="Hand" Click="ButtonSendMessage_Click" Classes="send" HorizontalAlignment="Right" VerticalAlignment="Top" Height="36" Width="36" Margin="0 10 20 0">
+				<Path Fill="#ffffff" Data="M437.2,178.7c12.8,12.8,12.8,33.4,0,46.2c-6.4,6.4-14.7,9.6-23.1,9.6s-16.7-3.2-23.1-9.6L277.7,111.5v345.8	c0,18-14.6,32.7-32.7,32.7s-32.7-14.6-32.7-32.7V111.5L99,224.9c-12.8,12.8-33.4,12.8-46.2,0s-12.8-33.4,0-46.2L221.9,9.6 C228,3.4,236.3,0,245,0c8.7,0,17,3.4,23.1,9.6L437.2,178.7z"
+				 Width="13" Height="16" Stretch="Fill"></Path>
+			</Button>
         </Grid>
 
       </DockPanel>

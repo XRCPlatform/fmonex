@@ -77,9 +77,9 @@ namespace FreeMarketOne.BlockChain.Test
             var genesisBlock = BlockChain<MarketAction>.MakeGenesisBlock();
             testActionItem1.Block = ByteUtil.Hex(genesisBlock.Serialize());
 
-            var testActionItem2 = new ReviewUserDataV1();
-            testActionItem2.ReviewDateTime = DateTime.UtcNow.AddMinutes(-1);
-            testActionItem2.Message = "This is a test message";
+            var testActionItem2 = new UserDataV1();
+            testActionItem2.UserName = "LoginName";
+            testActionItem2.Description = "This is a test message";
             testActionItem2.Hash = testActionItem2.GenerateHash();
 
             Assert.IsNotNull(_basePoolManager.CheckActionItemInProcessing(testActionItem1));
@@ -159,9 +159,9 @@ namespace FreeMarketOne.BlockChain.Test
                 testActionItem1.Block = ByteUtil.Hex(genesisBlock.Serialize());
                 testActionItem1.Hash = testActionItem1.GenerateHash();
 
-                var testActionItem2 = new CheckPointMarketDataV1();
-                genesisBlock = BlockChain<MarketAction>.MakeGenesisBlock();
-                testActionItem2.Block = ByteUtil.Hex(genesisBlock.Serialize());
+                var testActionItem2 = new UserDataV1();
+                testActionItem2.Description = "This is description.";
+                testActionItem2.UserName = "LoginName";
                 testActionItem2.Hash = testActionItem2.GenerateHash();
 
                 Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem1));

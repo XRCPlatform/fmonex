@@ -9,7 +9,8 @@ namespace FreeMarketOne.DataStructure.ProtocolVersions
 {
     public class MarketChainProtocolVersion : IProtocolVersion
     {
-        private const string _privateKey = "837e81505ec81b456e04ed943c0bc7d3ee77254bf9cbe7add85a08d87e3d82d8";
+        private const string PROTOCOL_PRIVATEKEY = "837e81505ec81b456e04ed943c0bc7d3ee77254bf9cbe7add85a08d87e3d82d8";
+        private const int PROTOCOL_CURRENTVERSION = 1;
 
         public bool DifferentAppProtocolVersionEncountered(Peer peer, AppProtocolVersion peerVersion, AppProtocolVersion localVersion)
         {
@@ -19,7 +20,7 @@ namespace FreeMarketOne.DataStructure.ProtocolVersions
         public IEnumerable<PublicKey> GetProtocolSigners()
         {
             var signers = new List<PublicKey>();
-            var privateKey = new PrivateKey(ByteUtil.ParseHex(_privateKey));
+            var privateKey = new PrivateKey(ByteUtil.ParseHex(PROTOCOL_PRIVATEKEY));
 
             signers.Add(privateKey.PublicKey);
 
@@ -28,9 +29,9 @@ namespace FreeMarketOne.DataStructure.ProtocolVersions
 
         public AppProtocolVersion GetProtocolVersion()
         {
-            var privateKey = new PrivateKey(ByteUtil.ParseHex(_privateKey));
+            var privateKey = new PrivateKey(ByteUtil.ParseHex(PROTOCOL_PRIVATEKEY));
 
-            return AppProtocolVersion.Sign(privateKey, 1);
+            return AppProtocolVersion.Sign(privateKey, PROTOCOL_CURRENTVERSION);
         }
     }
 }

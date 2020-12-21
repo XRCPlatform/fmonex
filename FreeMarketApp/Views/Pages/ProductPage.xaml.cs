@@ -125,8 +125,8 @@ namespace FreeMarketApp.Views.Pages
                 //is it my offer?
                 var itemReviewBytes = _offer.ToByteArrayForSign();
                 var sellerPublicKeys = UserPublicKey.Recover(itemReviewBytes, _offer.Signature);
-                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
-                var sellerUserData = FMONE.Current.Users.GetUserDataByPublicKey(sellerPublicKeys, FMONE.Current.BasePoolManager, FMONE.Current.BaseBlockChainManager);
+                var userPubKey = FMONE.Current.UserManager.GetCurrentUserPublicKey();
+                var sellerUserData = FMONE.Current.UserManager.GetUserDataByPublicKey(sellerPublicKeys, FMONE.Current.BasePoolManager, FMONE.Current.BaseBlockChainManager);
 
                 var isMine = false;
 
@@ -170,12 +170,12 @@ namespace FreeMarketApp.Views.Pages
                     review.ReviewDateTime = DateTime.UtcNow;
                     review.Message = reviewText;
                     review.Stars = stars;
-                    review.UserName = FMONE.Current.Users.UserData.UserName;
+                    review.UserName = FMONE.Current.UserManager.UserData.UserName;
                     review.MarketItemHash = _offer.Hash;
                     review.RevieweePublicKey = sellerUserData.PublicKey;
                     review.Hash = review.GenerateHash();
 
-                    ReviewUserDataV1 signedReview = FMONE.Current.Users.SignReviewData(review, FMONE.Current.Users.PrivateKey);
+                    ReviewUserDataV1 signedReview = FMONE.Current.UserManager.SignReviewData(review, FMONE.Current.UserManager.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Propagate review information to chain."));
 
@@ -257,7 +257,7 @@ namespace FreeMarketApp.Views.Pages
                 //is it my offer?
                 var itemReviewBytes = _offer.ToByteArrayForSign();
                 var offerUserPubKeys = UserPublicKey.Recover(itemReviewBytes, _offer.Signature);
-                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
+                var userPubKey = FMONE.Current.UserManager.GetCurrentUserPublicKey();
                 var isMine = false;
 
                 foreach (var itemUserPubKey in offerUserPubKeys)
@@ -288,10 +288,10 @@ namespace FreeMarketApp.Views.Pages
 
                     _offer.XRCTransactionHash = tbXRCReceivingTransaction.Text;
                     //sign market data and generating chain connection
-                    _offer = FMONE.Current.Markets.SignBuyerMarketData(
+                    _offer = FMONE.Current.MarketManager.SignBuyerMarketData(
                         _offer,
                         FMONE.Current.ServerPublicAddress.PublicIP,
-                        FMONE.Current.Users.PrivateKey);
+                        FMONE.Current.UserManager.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));
 
@@ -299,8 +299,8 @@ namespace FreeMarketApp.Views.Pages
                     if (resultPool == null)
                     {
                         //create a new chat
-                        var newChat = FMONE.Current.Chats.CreateNewChat(_offer);
-                        FMONE.Current.Chats.SaveChat(newChat);
+                        var newChat = FMONE.Current.ChatManager.CreateNewChat(_offer);
+                        FMONE.Current.ChatManager.SaveChat(newChat);
 
                         await MessageBox.Show(mainWindow,
                             string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_Waiting")),
@@ -374,7 +374,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FMONE.Current.Markets.GetOfferBySignature(
+            var offer = FMONE.Current.MarketManager.GetOfferBySignature(
                 signature,
                 FMONE.Current.MarketPoolManager,
                 FMONE.Current.MarketBlockChainManager);
@@ -417,7 +417,7 @@ namespace FreeMarketApp.Views.Pages
                 }
 
                 //seller userdata loading
-                var userPubKey = FMONE.Current.Markets.GetSellerPubKeyFromMarketItem(_offer);
+                var userPubKey = FMONE.Current.MarketManager.GetSellerPubKeyFromMarketItem(_offer);
                 var userData = FMONE.Current.SearchEngine.GetUser(userPubKey);
 
                 if (userData != null)
@@ -430,7 +430,7 @@ namespace FreeMarketApp.Views.Pages
 
                     
                     var reviews = FMONE.Current.SearchEngine.GetAllReviewsForPubKey(userPubKey);
-                    var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
+                    var reviewStars = FMONE.Current.UserManager.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 
                     tbSellerStars.Text = reviewStartRounded.ToString();

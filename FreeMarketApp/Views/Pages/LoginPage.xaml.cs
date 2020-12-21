@@ -90,7 +90,7 @@ namespace FreeMarketApp.Views.Pages
                     await Task.Delay(10);
                     await GetAppLoadingAsync(tbPassword.Text);
 
-                    if (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
+                    if (FMONE.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
                         PagesHelper.SetUserData(_logger, mainWindow);

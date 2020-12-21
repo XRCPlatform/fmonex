@@ -45,10 +45,10 @@ namespace FreeMarketOne.ServerCore
         public Logger Logger => (Logger)_logger;
         private ILogger _logger;
 
-        public ServiceManager Services;
-        public IUserManager Users;
-        public IMarketManager Markets;
-        public IChatManager Chats;
+        public ServiceManager ServiceManager;
+        public IUserManager UserManager;
+        public IMarketManager MarketManager;
+        public IChatManager ChatManager;
         public IBaseConfiguration Configuration;
 
         public SearchIndexer SearchIndexer;
@@ -114,17 +114,17 @@ namespace FreeMarketOne.ServerCore
             _logger.Information("Application Start");
 
             //User manager
-            Users = new UserManager(Configuration);
-            if (Users.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
+            UserManager = new UserManager(Configuration);
+            if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
             {
                 //Service manager
                 LoadingEvent?.Invoke(this, "Loading Service Manager...");
-                Services = new ServiceManager(Configuration, NetworkHeartbeatEvent);
-                Services.Start();
+                ServiceManager = new ServiceManager(Configuration, NetworkHeartbeatEvent);
+                ServiceManager.Start();
 
                 //Market Manager
                 LoadingEvent?.Invoke(this, "Loading Market Manager...");
-                Markets = new MarketManager(Configuration);
+                MarketManager = new MarketManager(Configuration);
 
                 //Initialize Tor
                 LoadingEvent?.Invoke(this, "Loading Tor Manager...");
@@ -140,13 +140,17 @@ namespace FreeMarketOne.ServerCore
 
                     //Chat Manager
                     LoadingEvent?.Invoke(this, "Loading Chat Manager...");
-                    Chats = new ChatManager(Configuration, Users.PrivateKey, Users, ServerPublicAddress.PublicIP);
-                    Chats.Start();
+                    ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, ServerPublicAddress.PublicIP);
+                    ChatManager.Start();
 
                     //Initialize OnionSeeds
                     LoadingEvent?.Invoke(this, "Loading Onion Seed Manager...");
                     OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
                     OnionSeedsManager.Start();
+
+                    //Initialize XRC Daemon
+                    LoadingEvent?.Invoke(this, "Loading XRC Daemon...");
+                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
 
                     //Initialize Base BlockChain Manager
                     LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
@@ -161,7 +165,7 @@ namespace FreeMarketOne.ServerCore
                         Configuration.BlockChainBasePolicy,
                         Configuration.ListenerBaseEndPoint,
                         OnionSeedsManager,
-                        Users.PrivateKey,
+                        UserManager.PrivateKey,
                         new BaseChainProtocolVersion(),
                         preloadEnded: BaseBlockChainLoadEndedEvent,
                         blockChainChanged: BaseBlockChainChangedEvent);
@@ -185,10 +189,9 @@ namespace FreeMarketOne.ServerCore
 
                     //Search indexer
                     LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
-                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
-                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
+                    SearchIndexer = new SearchIndexer(MarketManager, Configuration, new XRCHelper(client), UserManager, BasePoolManager, BaseBlockChainManager);
                     SearchIndexer.Initialize();
-                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
+                    SearchEngine = new SearchEngine(MarketManager, SearchHelper.GetDataFolder(Configuration));
                 }
                 else
                 {
@@ -225,7 +228,7 @@ namespace FreeMarketOne.ServerCore
                     Configuration.BlockChainMarketPolicy,
                     Configuration.ListenerMarketEndPoint,
                     OnionSeedsManager,
-                    Users.PrivateKey,
+                    UserManager.PrivateKey,
                     new MarketChainProtocolVersion(),
                     hashCheckPoints,
                     genesisBlock,
@@ -302,11 +305,11 @@ namespace FreeMarketOne.ServerCore
             await Task.Delay(1000);
             await Task.Run(() =>
             {
-                if (Users != null)
+                if (UserManager != null)
                 {
-                    if (Users.UsedDataForceToPropagate && (Users.UserData != null))
+                    if (UserManager.UsedDataForceToPropagate && (UserManager.UserData != null))
                     {
-                        if (BasePoolManager.AcceptActionItem(Users.UserData) == null)
+                        if (BasePoolManager.AcceptActionItem(UserManager.UserData) == null)
                         {
                             BasePoolManager.PropagateAllActionItemLocal(true);
                         }
@@ -314,10 +317,10 @@ namespace FreeMarketOne.ServerCore
                     else
                     {
                         //loading actual user data from pool or blockchain
-                        var userData = Users.GetActualUserData(Current.BasePoolManager, Current.BaseBlockChainManager);
-                        if ((userData != null) && (userData != Users.UserData))
+                        var userData = UserManager.GetActualUserData(Current.BasePoolManager, Current.BaseBlockChainManager);
+                        if ((userData != null) && (userData != UserManager.UserData))
                         {
-                            Users.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
+                            UserManager.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
                         }
                     }
                 }
@@ -341,7 +344,7 @@ namespace FreeMarketOne.ServerCore
                 backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
 
                 _logger.Information("New block processing for chat - item hash");
-                Current.Chats.ProcessNewBlock(e.NewTip);
+                Current.ChatManager.ProcessNewBlock(e.NewTip);
             }
             else if ((e.NewTip == null) && (e.OldTip != null))
             {
@@ -360,20 +363,20 @@ namespace FreeMarketOne.ServerCore
         /// <returns></returns>
         public FreeMarketOneServerStates GetServerState()
         {
-            if (Services == null)
+            if (ServiceManager == null)
             {
                 return FreeMarketOneServerStates.NotReady;
             } 
             else
             {
-                return Services.GetServerState();
+                return ServiceManager.GetServerState();
             }
         }
 
         public void Stop()
         {
             _logger?.Information("Ending Service Manager...");
-            Services?.Dispose();
+            ServiceManager?.Dispose();
 
             _logger?.Information("Ending Base Pool Manager...");
             BasePoolManager?.Dispose();
@@ -395,13 +398,13 @@ namespace FreeMarketOne.ServerCore
             TorProcessManager?.Dispose();
 
             _logger?.Information("Ending Chat Manager...");
-            Chats?.Dispose();
+            ChatManager?.Dispose();
 
             _logger?.Information("Ending User Manager...");
-            Users = null;
+            UserManager = null;
 
             _logger?.Information("Ending Market Manager...");
-            Markets = null;
+            MarketManager = null;
 
             _logger?.Information("Application End");
         }

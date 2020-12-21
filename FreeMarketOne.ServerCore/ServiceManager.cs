@@ -445,7 +445,7 @@ namespace FreeMarketOne.ServerCore
 
             try
             {
-                var isChatManagerRunning = FMONE.Current.Chats?.IsChatManagerRunning();
+                var isChatManagerRunning = FMONE.Current.ChatManager?.IsChatManagerRunning();
                 if (isChatManagerRunning.GetValueOrDefault(false))
                 {
                     state = true;

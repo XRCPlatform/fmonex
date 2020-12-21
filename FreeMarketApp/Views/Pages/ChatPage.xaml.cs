@@ -55,9 +55,9 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FMONE.Current.Chats != null)
+            if (FMONE.Current.ChatManager != null)
             {
-                var chatManager = FMONE.Current.Chats;
+                var chatManager = FMONE.Current.ChatManager;
                 PagesHelper.Log(_logger, string.Format("Loading chats from data folder."));
 
                 var chats = chatManager.GetAllChats();
@@ -156,7 +156,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                var chatManager = FMONE.Current.Chats;
+                var chatManager = FMONE.Current.ChatManager;
                 var chatData = chatManager.GetChat(hash);
                 if (chatData != null)
                 {
@@ -197,7 +197,7 @@ namespace FreeMarketApp.Views.Pages
 
         public async void LoadChatByProduct(string hash)
         {
-            var chatManager = FMONE.Current.Chats;
+            var chatManager = FMONE.Current.ChatManager;
             var chatData = chatManager.GetChat(hash);
             _activeChat = chatData;
 

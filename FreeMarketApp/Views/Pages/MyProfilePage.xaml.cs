@@ -45,9 +45,9 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FMONE.Current.Users != null)
+            if (FMONE.Current.UserManager != null)
             {
-                if (FMONE.Current.Users.UserData == null)
+                if (FMONE.Current.UserManager.UserData == null)
                 {
 
                     MessageBox.Show(null, SharedResources.ResourceManager.GetString("Dialog_ThereWasCriticalError"),
@@ -58,7 +58,7 @@ namespace FreeMarketApp.Views.Pages
 
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to profile page."));
 
-                _userData = FMONE.Current.Users.UserData;
+                _userData = FMONE.Current.UserManager.UserData;
 
                 var tbUserName = this.FindControl<TextBlock>("TBUserName");
                 var tbDescription = this.FindControl<TextBlock>("TBDescription");
@@ -76,10 +76,10 @@ namespace FreeMarketApp.Views.Pages
                     if (skynetStream != null) iPhoto.Source = new Bitmap(skynetStream);
                 }
 
-                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
+                var userPubKey = FMONE.Current.UserManager.GetCurrentUserPublicKey();
                 var reviews = FMONE.Current.SearchEngine.GetAllReviewsForPubKey(userPubKey);
 
-                var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
+                var reviewStars = FMONE.Current.UserManager.GetUserReviewStars(reviews);
                 var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
                 tbReviewStars.Text = reviewStartRounded.ToString();
             }

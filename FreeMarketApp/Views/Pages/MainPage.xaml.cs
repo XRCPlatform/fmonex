@@ -53,7 +53,7 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FMONE.Current.Markets != null)
+            if (FMONE.Current.MarketManager != null)
             {
                 SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
 

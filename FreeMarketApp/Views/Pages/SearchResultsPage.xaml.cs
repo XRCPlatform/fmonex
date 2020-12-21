@@ -61,7 +61,7 @@ namespace FreeMarketApp.Views.Pages
                 _logger = FMONE.Current.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                             string.Format("{0}.{1}", typeof(SearchResultsPage).Namespace, typeof(SearchResultsPage).Name));
 
-            if ((FMONE.Current.Markets != null) && (FMONE.Current.Users != null))
+            if ((FMONE.Current.MarketManager != null) && (FMONE.Current.UserManager != null))
             {
                 SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
                 

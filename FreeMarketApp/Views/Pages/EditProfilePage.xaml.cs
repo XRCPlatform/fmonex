@@ -47,11 +47,11 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FMONE.Current.Users != null)
+            if (FMONE.Current.UserManager != null)
             {
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to edit profile page."));
 
-                _userData = FMONE.Current.Users.UserData;
+                _userData = FMONE.Current.UserManager.UserData;
 
                 var tbUserName = this.FindControl<TextBox>("TBUserName");
                 var tbDescription = this.FindControl<TextBox>("TBDescription");
@@ -186,9 +186,9 @@ namespace FreeMarketApp.Views.Pages
                         }
                     }
 
-                    var updatedUserData = FMONE.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text, _userData);
+                    var updatedUserData = FMONE.Current.UserManager.SignUserData(tbUserName.Text, tbDescription.Text, _userData);
 
-                    FMONE.Current.Users.SaveUserData(
+                    FMONE.Current.UserManager.SaveUserData(
                         updatedUserData,
                         FMONE.Current.Configuration.FullBaseDirectory,
                         FMONE.Current.Configuration.BlockChainUserPath);

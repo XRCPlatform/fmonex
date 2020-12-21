@@ -137,15 +137,15 @@ namespace FreeMarketApp.Views.Pages
 
             if (errorCount == 0)
             {
-                FMONE.Current.Users.SaveNewPrivKey(
+                FMONE.Current.UserManager.SaveNewPrivKey(
                     tbSeed.Text, 
                     tbPassword.Text,
                     FMONE.Current.Configuration.FullBaseDirectory,
                     FMONE.Current.Configuration.BlockChainSecretPath);
                 
-                var firstUserData = FMONE.Current.Users.SignUserData(tbUserName.Text, tbDescription.Text);
+                var firstUserData = FMONE.Current.UserManager.SignUserData(tbUserName.Text, tbDescription.Text);
 
-                FMONE.Current.Users.SaveUserData(
+                FMONE.Current.UserManager.SaveUserData(
                     firstUserData,
                     FMONE.Current.Configuration.FullBaseDirectory,
                     FMONE.Current.Configuration.BlockChainUserPath);
@@ -183,7 +183,7 @@ namespace FreeMarketApp.Views.Pages
         public void ButtonRandomSeed_Click(object sender, RoutedEventArgs args)
         {
             var tbSeed = this.FindControl<TextBox>("TBSeed");
-            tbSeed.Text = FMONE.Current.Users.CreateRandomSeed();
+            tbSeed.Text = FMONE.Current.UserManager.CreateRandomSeed();
         }
 
         private static async Task<bool> GetAppLoadingAsync(string password, UserDataV1 userData)

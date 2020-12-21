@@ -44,16 +44,18 @@ namespace FreeMarketApp.Views.Pages
                             string.Format("{0}.{1}", typeof(MyProfilePage).Namespace, typeof(MyProfilePage).Name));
 
             this.InitializeComponent();
-            if (FMONE.Current.Users.UserData == null)
-            {
-                
-                MessageBox.Show(null, SharedResources.ResourceManager.GetString("Dialog_ThereWasCriticalError"),
-                                               SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
-                                               MessageBox.MessageBoxButtons.Ok);
-                return;
-            }
+
             if (FMONE.Current.Users != null)
             {
+                if (FMONE.Current.Users.UserData == null)
+                {
+
+                    MessageBox.Show(null, SharedResources.ResourceManager.GetString("Dialog_ThereWasCriticalError"),
+                                                   SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
+                                                   MessageBox.MessageBoxButtons.Ok);
+                    return;
+                }
+
                 PagesHelper.Log(_logger, string.Format("Loading user data of current user to profile page."));
 
                 _userData = FMONE.Current.Users.UserData;

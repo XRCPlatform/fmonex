@@ -17,6 +17,8 @@ using FreeMarketOne.Pools;
 using FreeMarketOne.BlockChain;
 using static FreeMarketOne.Markets.MarketManager;
 using System.Threading.Tasks;
+using System.Threading;
+using Serilog;
 
 namespace FreeMarketOne.Search
 {
@@ -36,10 +38,20 @@ namespace FreeMarketOne.Search
         private NormalizedStore _normalizedStore;
         private SearchEngine _engine;
 
+        /// <summary>
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
+        /// </summary>
+        private long _running;
+        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        private ILogger _logger { get; set; }
+
         private static object lockobject = new object();
 
         public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager)
         {
+            _logger = Log.Logger.ForContext<MarketManager>();
+            _logger.Information("Initializing Search Indexer");
+
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
             string indexLocation = SearchHelper.GetDataFolder(baseConfiguration);
 
@@ -63,6 +75,10 @@ namespace FreeMarketOne.Search
             _normalizedStore = new NormalizedStore(indexLocation);
 
             InitStorage();
+
+            Interlocked.Exchange(ref _running, 1);
+
+            _logger.Information("Initialized Search Indexer Storage");
         }
 
         private bool InitStorage()
@@ -82,11 +98,27 @@ namespace FreeMarketOne.Search
             Writer.Commit();
             _taxoWriter.Commit();
 
+            Thread.Sleep(250);
+
             return true;
+        }
+
+        public bool IsSearchIndexerRunning()
+        {
+            if (Interlocked.Read(ref _running) == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void Initialize(BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
         {
+            _logger.Information("Initialized Search Indexer base pool and block manager.");
+
             _basePoolManager = basePoolManager;
             _baseBlockChain = baseBlockChain;
         }
@@ -451,9 +483,13 @@ namespace FreeMarketOne.Search
 
         public void Dispose()
         {
+            Interlocked.Exchange(ref _running, 2);
+
             Writer.Commit();
             Writer.Dispose();
             _taxoWriter.Dispose();
+
+            Interlocked.Exchange(ref _running, 3);
         }
 
     }

@@ -155,6 +155,7 @@ namespace FreeMarketOne.ServerCore
                     //Initializing Search Indexer
                     LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
                     SearchIndexer = new SearchIndexer(MarketManager, Configuration, new XRCHelper(client), UserManager);
+                    SpinWait.SpinUntil(() => SearchIndexer.IsSearchIndexerRunning());
 
                     //Initialize Base BlockChain Manager
                     LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");

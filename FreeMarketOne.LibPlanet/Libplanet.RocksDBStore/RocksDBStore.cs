@@ -991,15 +991,29 @@ namespace Libplanet.RocksDBStore
             }
 
             var cfName = chainId.ToString();
-
             ColumnFamilyHandle cf;
+
             try
             {
-                cf = db.GetColumnFamily(cfName);
+                try
+                {
+                    try
+                    {
+                        cf = db.GetColumnFamily(cfName);
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        cf = db.CreateColumnFamily(_options, cfName);
+                    }
+                }
+                catch (Exception)
+                {
+                    cf = db.GetColumnFamily(cfName);
+                }
             }
-            catch (KeyNotFoundException)
+            catch (Exception e)
             {
-                cf = db.CreateColumnFamily(_options, cfName);
+                throw e;
             }
 
             return cf;

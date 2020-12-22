@@ -139,14 +139,13 @@
               <TextBlock Name="TBWeightInGramsLabel" Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--TBWeightInGrams binding -->
-                <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
+                <TextBlock Classes="H3"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
               
               <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-              
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="16"/>
-                <TextBlock Classes="H1" Text=" XRC" FontSize="16"/>
+                <TextBlock Classes="H3" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="16"/>
+                <TextBlock Classes="H3" Text=" XRC" FontSize="16"/>
               </StackPanel>
               
               <TextBlock Classes="H1" Text="Deal Type" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>

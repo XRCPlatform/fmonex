@@ -19,6 +19,7 @@ using static FreeMarketOne.Markets.MarketManager;
 using System.Threading.Tasks;
 using System.Threading;
 using Serilog;
+using static FreeMarketOne.Extensions.Common.ServiceHelper;
 
 namespace FreeMarketOne.Search
 {
@@ -41,8 +42,8 @@ namespace FreeMarketOne.Search
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
-        private long _running;
-        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        private CommonStates _running;
+        public bool IsRunning => _running == CommonStates.Running;
         private ILogger _logger { get; set; }
 
         private static object lockobject = new object();
@@ -76,7 +77,7 @@ namespace FreeMarketOne.Search
 
             InitStorage();
 
-            Interlocked.Exchange(ref _running, 1);
+            _running = CommonStates.Running;
 
             _logger.Information("Initialized Search Indexer Storage");
         }
@@ -105,7 +106,7 @@ namespace FreeMarketOne.Search
 
         public bool IsSearchIndexerRunning()
         {
-            if (Interlocked.Read(ref _running) == 1)
+            if (_running == CommonStates.Running)
             {
                 return true;
             }
@@ -483,13 +484,13 @@ namespace FreeMarketOne.Search
 
         public void Dispose()
         {
-            Interlocked.Exchange(ref _running, 2);
+            _running = CommonStates.Stopping;
 
             Writer.Commit();
             Writer.Dispose();
             _taxoWriter.Dispose();
 
-            Interlocked.Exchange(ref _running, 3);
+            _running = CommonStates.Stopped;
         }
 
     }

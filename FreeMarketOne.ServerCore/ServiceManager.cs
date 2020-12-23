@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static FreeMarketOne.Extensions.Common.ServiceHelper;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketOne.ServerCore
@@ -16,9 +17,9 @@ namespace FreeMarketOne.ServerCore
         private ILogger _logger { get; set; }
 
         /// <summary>
-        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped, 4: Mining
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
-        private long _running;
+        private CommonStates _running;
         private IBaseConfiguration _configuration;
 
         private CancellationTokenSource _cancellationToken { get; set; }
@@ -44,11 +45,11 @@ namespace FreeMarketOne.ServerCore
             _networkHeartbeatEvent = networkHeartbeatEvent;
         }
 
-        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        public bool IsRunning => _running == CommonStates.Running;
 
         public bool IsServiceManagerRunning()
         {
-            if (Interlocked.Read(ref _running) == 1)
+            if (_running == CommonStates.Running)
             {
                 return true;
             }
@@ -60,7 +61,7 @@ namespace FreeMarketOne.ServerCore
 
         public void Start()
         {
-            Interlocked.Exchange(ref _running, 1);
+            _running = CommonStates.Running;
 
             //Service loop checker
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ServiceManagerChecker", (cancellation) =>
@@ -465,11 +466,11 @@ namespace FreeMarketOne.ServerCore
 
         public void Dispose()
         {
-            Interlocked.Exchange(ref _running, 2);
+            _running = CommonStates.Stopping;
 
             _cancellationToken.Cancel();
 
-            Interlocked.Exchange(ref _running, 3);
+            _running = CommonStates.Stopped;
         }
     }
 }

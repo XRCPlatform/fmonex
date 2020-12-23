@@ -24,12 +24,19 @@ namespace FreeMarketOne.Pools
     {
         private ILogger _logger { get; set; }
 
-        /// <summary>
-        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped, 4: Mining, 5: Mined
-        /// </summary>
-        private long _running;
+        public enum PoolStates
+        {
+            NotStarted = 0,
+            Running = 1,
+            Stopping = 2,
+            Stopped = 3,
+            Mining = 4,
+            Mined = 5
+        }
 
-        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        private PoolStates _running;
+
+        public bool IsRunning => _running == PoolStates.Running;
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private List<IBaseItem> _actionItemsList { get; set; }
@@ -96,14 +103,14 @@ namespace FreeMarketOne.Pools
 
             _logger.Information("Initializing Base Pool Manager");
 
-            Interlocked.Exchange(ref _running, 0);
+            _running = PoolStates.NotStarted;
 
             LoadActionItemsFromFile();
         }
 
         public bool Start()
         {
-            Interlocked.Exchange(ref _running, 1);
+            _running = PoolStates.Running;
             _logger.Information("Initializing Mining Loop Checker");
 
             var coMiningRunner = new CoroutineManager();
@@ -122,7 +129,7 @@ namespace FreeMarketOne.Pools
                 //check if mem pool have tx if yes then do mining
                 if (actionStaged.Count > 0)
                 {
-                    if ((Interlocked.Read(ref _running) == 4) || (Interlocked.Read(ref _running) == 5))
+                    if ((_running == PoolStates.Mining) || (_running == PoolStates.Mined))
                     {
                         if (actionStaged.Count < oldMiningActionStagedCount)
                         {
@@ -132,19 +139,19 @@ namespace FreeMarketOne.Pools
                             coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
                             oldMiningActionStagedCount = 0;
 
-                            Interlocked.Exchange(ref _running, 1);
+                            _running = PoolStates.Running;
                         }
 
                         if (!coMiningRunner.IsActive)
                         {
-                            if ((miningDelayStart <= DateTime.UtcNow) && (Interlocked.Read(ref _running) != 5))
+                            if ((miningDelayStart <= DateTime.UtcNow) && (_running == PoolStates.Mined))
                             {
                                 _logger.Information(string.Format("Starting mining after mining delay."));
                                 coMiningRunner.Start();
 
-                                Interlocked.Exchange(ref _running, 5);
+                                _running = PoolStates.Mined;
                             }
-                            else if (Interlocked.Read(ref _running) == 5)
+                            else if (_running == PoolStates.Mined)
                             {
                                 _logger.Information("Stopping Mining Loop Checker.");
 
@@ -152,7 +159,7 @@ namespace FreeMarketOne.Pools
                                 coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
                                 oldMiningActionStagedCount = 0;
 
-                                Interlocked.Exchange(ref _running, 1);
+                                _running = PoolStates.Running;
                             }
                         }
                     }
@@ -167,12 +174,12 @@ namespace FreeMarketOne.Pools
 
                         oldMiningActionStagedCount = actionStaged.Count;
 
-                        Interlocked.Exchange(ref _running, 4);
+                        _running = PoolStates.Mining;
                     }
                 }
                 else
                 {
-                    if ((coMiningRunner.IsActive) || (Interlocked.Read(ref _running) == 4) || (Interlocked.Read(ref _running) == 5))
+                    if ((coMiningRunner.IsActive) || (_running == PoolStates.Mining) || (_running == PoolStates.Mined))
                     {
                         _logger.Information("Stopping Mining Loop Checker.");
 
@@ -180,7 +187,7 @@ namespace FreeMarketOne.Pools
                         coMiningRunner.RegisterCoroutine(_miningWorker.GetEnumerator());
                         oldMiningActionStagedCount = 0;
 
-                        Interlocked.Exchange(ref _running, 1);
+                        _running = PoolStates.Running;
                     }
                 }
 
@@ -227,7 +234,7 @@ namespace FreeMarketOne.Pools
 
         public bool IsPoolManagerRunning()
         {
-            if ((Interlocked.Read(ref _running) == 1) || (Interlocked.Read(ref _running) == 4) || (Interlocked.Read(ref _running) == 5))
+            if ((_running == PoolStates.Running) || (_running == PoolStates.Mining) || (_running == PoolStates.Mined))
             {
                 return true;
             }
@@ -239,7 +246,7 @@ namespace FreeMarketOne.Pools
 
         public bool IsMiningWorkerRunning()
         {
-            if ((Interlocked.Read(ref _running) == 4) || (Interlocked.Read(ref _running) == 5))
+            if ((_running == PoolStates.Mining) || (_running == PoolStates.Mined))
             {
                 return true;
             }
@@ -251,7 +258,7 @@ namespace FreeMarketOne.Pools
 
         public void Stop()
         {
-            Interlocked.Exchange(ref _running, 2);
+            _running = PoolStates.Stopping;
 
             SaveActionItemsToFile();
 
@@ -264,7 +271,7 @@ namespace FreeMarketOne.Pools
 
         public void Dispose()
         {
-            Interlocked.Exchange(ref _running, 3);
+            _running = PoolStates.Stopped;
             Stop();
         }
 

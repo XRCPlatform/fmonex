@@ -24,6 +24,8 @@ using Libplanet.Extensions;
 using FreeMarketOne.GenesisBlock;
 using System.Security.Cryptography;
 using FreeMarketOne.DataStructure.ProtocolVersions;
+using FreeMarketOne.Extensions.Common;
+using static FreeMarketOne.Extensions.Common.ServiceHelper;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -34,9 +36,9 @@ namespace FreeMarketOne.BlockChain
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
-        private long _running;
+        private CommonStates _running;
 
-        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        public bool IsRunning => _running == CommonStates.Running;
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private string _blockChainFilePath { get; set; }
@@ -170,8 +172,8 @@ namespace FreeMarketOne.BlockChain
                 var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
                 _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
-                
-                Interlocked.Exchange(ref _running, 1);
+
+                _running = CommonStates.Running;
 
                 //init Peer Bootstrap Worker
                 _peerBootstrapWorker = new PeerBootstrapWorker<T>(
@@ -228,7 +230,7 @@ namespace FreeMarketOne.BlockChain
 
         public bool IsBlockChainManagerRunning()
         {
-            if (Interlocked.Read(ref _running) == 1)
+            if (_running == CommonStates.Running)
             {
                 return true;
             }
@@ -291,7 +293,7 @@ namespace FreeMarketOne.BlockChain
 
         public void Stop()
         {
-            Interlocked.Exchange(ref _running, 2);
+            _running = CommonStates.Stopping;
 
             _peerBootstrapWorker?.Dispose();
             _peerBootstrapWorker = null;
@@ -354,7 +356,7 @@ namespace FreeMarketOne.BlockChain
         {
             Stop();
 
-            Interlocked.Exchange(ref _running, 3);
+            _running = CommonStates.Stopped;
         }
 
         public async Task ReConnectAfterNetworkLossAsync()

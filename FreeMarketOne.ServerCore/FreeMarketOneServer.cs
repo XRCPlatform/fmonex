@@ -74,6 +74,11 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler<string> LoadingEvent;
         private BackgroundQueue backgroundQueue = new BackgroundQueue();
 
+        public async Task InitializeAsync(string password = null, UserDataV1 firstUseData = null)
+        {
+            await Task.Run(() => this.Initialize(password, firstUseData));
+        }
+
         public void Initialize(string password = null, UserDataV1 firstUserData = null)
         {
             var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();

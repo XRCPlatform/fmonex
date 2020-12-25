@@ -65,7 +65,7 @@ namespace FreeMarketApp
 
         private static async Task<MainWindow> GetAppLoadingAsync()
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 FMONE.Current.BaseBlockChainChangedEvent += new EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)>(BaseBlockChainChanged);
                 FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
@@ -73,7 +73,7 @@ namespace FreeMarketApp
                 FMONE.Current.MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(MarketBlockChainChangedEvent);
                 FMONE.Current.NetworkHeartbeatEvent += new EventHandler<NetworkHeartbeatArgs>(NetworkHeartbeatEvent);
 
-                FMONE.Current.Initialize();
+                await FMONE.Current.InitializeAsync();
             }).ConfigureAwait(true);
 
             mainWindow = new MainWindow { DataContext = new MainWindowViewModel() };

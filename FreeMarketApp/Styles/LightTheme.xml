@@ -245,6 +245,22 @@
 			<Setter Property="Background" Value="#fffaf0" />
 		</Style>	
 		
+		<!-- Zoom Button -->
+		<Style Selector="Button.PhotoZoom">
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+		<Style Selector="Button.PhotoZoom /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="Transparent" />
+		</Style>
+		<Style Selector="Button:pointerover.PhotoZoom /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#167efb" />
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+		<Style Selector="Button:pressed.PhotoZoom /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#167efb" />
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+	
 	
 	
 	
@@ -255,6 +271,10 @@
 
 		<Style Selector="Border.Main">
 			<Setter Property="BorderBrush" Value="#ffffff" />
+		</Style>
+
+		<Style Selector="Border.Blue">
+			<Setter Property="BorderBrush" Value="#167efb" />
 		</Style>
 
 		<!-- Main Toolbar -->

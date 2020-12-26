@@ -86,7 +86,7 @@ namespace FreeMarketApp.Views.Pages
             var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             string reviewText = String.Empty;
             int stars = 0;
-            
+
             if (_offer == null)
             {
                 return;
@@ -112,7 +112,7 @@ namespace FreeMarketApp.Views.Pages
             }
 
             reviewText = TBReviewText.Text;
- 
+
 
             var result = await MessageBox.Show(mainWindow,
               string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_ReviewProduct"), approxSpanToNewBlock.TotalSeconds),
@@ -121,7 +121,7 @@ namespace FreeMarketApp.Views.Pages
 
             if (result == MessageBox.MessageBoxResult.Yes)
             {
-                
+
                 //is it my offer?
                 var itemReviewBytes = _offer.ToByteArrayForSign();
                 var sellerPublicKeys = UserPublicKey.Recover(itemReviewBytes, _offer.Signature);
@@ -198,7 +198,8 @@ namespace FreeMarketApp.Views.Pages
             ReviewForm.IsVisible = false;
         }
 
-        public void ButtonStar_Click(object sender, RoutedEventArgs args) {
+        public void ButtonStar_Click(object sender, RoutedEventArgs args)
+        {
 
             int observedStars = int.Parse(((Button)sender).Tag.ToString());
             var StarReviewToggleButtonArray = Instance.FindControl<StackPanel>("StarReviewToggleButtonArray");
@@ -208,7 +209,7 @@ namespace FreeMarketApp.Views.Pages
                 if (starButton != null)
                 {
                     int iterableStars = int.Parse(starButton.Tag.ToString());
-                    if (iterableStars<= observedStars)
+                    if (iterableStars <= observedStars)
                     {
                         starButton.IsChecked = true;
                     }
@@ -219,7 +220,7 @@ namespace FreeMarketApp.Views.Pages
                 }
             }
         }
-        
+
         public void ButtonReviewReset_Click(object sender, RoutedEventArgs args)
         {
             var StarReviewToggleButtonArray = Instance.FindControl<StackPanel>("StarReviewToggleButtonArray");
@@ -269,7 +270,8 @@ namespace FreeMarketApp.Views.Pages
                     }
                 }
 
-                if (isMine) {
+                if (isMine)
+                {
                     await MessageBox.Show(mainWindow,
                                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_YouCantBuyYourOffer")),
                                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),
@@ -333,7 +335,7 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
-      
+
         public void ButtonSeller_Click(object sender, RoutedEventArgs args)
         {
             var signatureAndHash = ((Button)sender).Tag.ToString();
@@ -365,8 +367,8 @@ namespace FreeMarketApp.Views.Pages
                 }
                 catch (Exception e)
                 {
-                    PagesHelper.Log(Instance._logger, 
-                        string.Format("Isn't possible to use clipboard {0}", e.Message), 
+                    PagesHelper.Log(Instance._logger,
+                        string.Format("Isn't possible to use clipboard {0}", e.Message),
                         Serilog.Events.LogEventLevel.Error);
                 }
             }
@@ -396,12 +398,12 @@ namespace FreeMarketApp.Views.Pages
                 var btBuyButton = Instance.FindControl<Button>("BTBuyButton");
 
                 var tbXRCReceivingAddress = Instance.FindControl<TextBox>("TBXRCReceivingAddress");
-                
+
                 tbTitle.Text = _offer.Title;
                 tbDescription.Text = _offer.Description;
                 tbShipping.Text = _offer.Shipping;
                 tbPrice.Text = _offer.Price.ToString();
-                btBuyButton.Tag = _offer.Signature;            
+                btBuyButton.Tag = _offer.Signature;
                 tbXRCReceivingAddress.Text = _offer.XRCReceivingAddress;
 
                 //we need to hide these value in case of some active offers
@@ -426,9 +428,9 @@ namespace FreeMarketApp.Views.Pages
 
                     tbSeller.Text = userData.UserName;
                     btSeller.Tag = safeArrayHelper.GetString(
-                            new[] { userData.Signature, userData.Hash }); 
+                            new[] { userData.Signature, userData.Hash });
 
-                    
+
                     var reviews = FMONE.Current.SearchEngine.GetAllReviewsForPubKey(userPubKey);
                     var reviewStars = FMONE.Current.UserManager.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
@@ -445,22 +447,112 @@ namespace FreeMarketApp.Views.Pages
 
                     for (int i = 0; i < _offer.Photos.Count; i++)
                     {
-                        if (( _offer.PrePhotos != null) && (_offer.PrePhotos.Count > i))
+                        if ((_offer.PrePhotos != null) && (_offer.PrePhotos.Count > i))
                         {
                             var spPhoto = Instance.FindControl<StackPanel>("SPPhoto_" + i);
                             var iPhoto = Instance.FindControl<Image>("IPhoto_" + i);
+                            var zoomedPhoto = Instance.FindControl<Image>("ZoomedPhoto_" + i);
 
                             spPhoto.IsVisible = true;
                             iPhoto.Source = _offer.PrePhotos[i];
+                            zoomedPhoto.Source = _offer.PrePhotos[i];
                         }
                     }
                 }
             }
         }
-
         private void ClearForm()
         {
             _instance = null;
+        }
+
+        //photo zoom (maybe you could optimize the code below)
+        public void IPhoto_0_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_0 = this.FindControl<Popup>("Popup_0");
+            popup_0.IsOpen = true;
+        }
+        public void Close0_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_0 = this.FindControl<Popup>("Popup_0");
+            popup_0.IsOpen = false;
+        }
+
+        public void IPhoto_1_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_1 = this.FindControl<Popup>("Popup_1");
+            popup_1.IsOpen = true;
+        }
+        public void Close1_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_1 = this.FindControl<Popup>("Popup_1");
+            popup_1.IsOpen = false;
+        }
+
+        public void IPhoto_2_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_2 = this.FindControl<Popup>("Popup_2");
+            popup_2.IsOpen = true;
+        }
+        public void Close2_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_2 = this.FindControl<Popup>("Popup_2");
+            popup_2.IsOpen = false;
+        }
+
+        public void IPhoto_3_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_3 = this.FindControl<Popup>("Popup_3");
+            popup_3.IsOpen = true;
+        }
+        public void Close3_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_3 = this.FindControl<Popup>("Popup_3");
+            popup_3.IsOpen = false;
+        }
+
+        public void IPhoto_4_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_4 = this.FindControl<Popup>("Popup_4");
+            popup_4.IsOpen = true;
+        }
+        public void Close4_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_4 = this.FindControl<Popup>("Popup_4");
+            popup_4.IsOpen = false;
+        }
+
+        public void IPhoto_5_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_5 = this.FindControl<Popup>("Popup_5");
+            popup_5.IsOpen = true;
+        }
+        public void Close5_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_5 = this.FindControl<Popup>("Popup_5");
+            popup_5.IsOpen = false;
+        }
+
+        public void IPhoto_6_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_6 = this.FindControl<Popup>("Popup_6");
+            popup_6.IsOpen = true;
+        }
+        public void Close6_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_6 = this.FindControl<Popup>("Popup_6");
+            popup_6.IsOpen = false;
+        }
+
+        public void IPhoto_7_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_7 = this.FindControl<Popup>("Popup_7");
+            popup_7.IsOpen = true;
+        }
+        public void Close7_Click(object sender, RoutedEventArgs e)
+        {
+            Popup popup_7 = this.FindControl<Popup>("Popup_7");
+            popup_7.IsOpen = false;
         }
     }
 }

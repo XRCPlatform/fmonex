@@ -24,7 +24,7 @@
 
   <Grid Margin="0" Classes="Main">
     <!-- SIDEBAR -->
-    <ScrollViewer HorizontalAlignment="Left" Margin="0" Width="250">
+    <ScrollViewer Name="grid" HorizontalAlignment="Left" Margin="0" Width="250">
       <StackPanel Name="SideBar" Orientation="Vertical">
         <Button Name="BackButton" Classes="action" HorizontalAlignment="Stretch" Height="36" Margin="15 20 15 0" VerticalAlignment="Top" VerticalContentAlignment="Center" BorderThickness="1" Click="ButtonBack_Click" Cursor="Hand">
           <StackPanel Orientation="Horizontal">
@@ -38,107 +38,189 @@
 
     <!-- PRODUCT AREA -->
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
-      <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
-        <DockPanel Margin="20" LastChildFill="True" HorizontalAlignment="Stretch">
-			<TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="0 0 140 0" FontSize="28" FontWeight="Medium"/>
-			<!-- Bookmark button (content of the button should change to "Remove from saved" after pressing -->
-			<Button Classes="pagination" Width="130" Margin="0 5 0 0" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top">
-				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-					<Path Classes="BlueIcon" Data="M75.75,0h-59c-2.209,0-4,1.791-4,4v84.5c0,1.672,1.04,3.168,2.607,3.75c1.571,0.582,3.332,0.127,4.424-1.141l26.469-30.73
-							l26.469,30.73c0.775,0.9,1.891,1.391,3.032,1.391c0.466,0,0.938-0.082,1.392-0.25c1.567-0.582,2.607-2.078,2.607-3.75V4
-							C79.75,1.791,77.959,0,75.75,0z"
-							Height="13" Stretch="Fill" Width="9" Margin="0 2 5 0"/>
-					<TextBlock FontSize="14" Text="Save for later"/>
+      <StackPanel Name="Content" HorizontalAlignment="Stretch" Margin="0 0 0 100">
+			<DockPanel Margin="20" LastChildFill="True" HorizontalAlignment="Stretch">
+				<TextBlock Classes="H1" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Name="TBTitle" Text="" TextWrapping="Wrap" Margin="0 0 140 0" FontSize="28" FontWeight="Medium"/>
+				<!-- Bookmark button (content of the button should change to "Remove from saved" after pressing -->
+				<Button Classes="pagination" Width="130" Margin="0 5 0 0" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top">
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+						<Path Classes="BlueIcon" Data="M75.75,0h-59c-2.209,0-4,1.791-4,4v84.5c0,1.672,1.04,3.168,2.607,3.75c1.571,0.582,3.332,0.127,4.424-1.141l26.469-30.73
+								l26.469,30.73c0.775,0.9,1.891,1.391,3.032,1.391c0.466,0,0.938-0.082,1.392-0.25c1.567-0.582,2.607-2.078,2.607-3.75V4
+								C79.75,1.791,77.959,0,75.75,0z"
+								Height="13" Stretch="Fill" Width="9" Margin="0 2 5 0"/>
+						<TextBlock FontSize="14" Text="Save for later"/>
+					</StackPanel>
+				</Button>
+			</DockPanel>
+
+			  <!-- Review Section -->
+			  <DockPanel Name="ReviewForm" IsVisible="false" LastChildFill="true">
+				  <Border DockPanel.Dock="Top" MinHeight="30" HorizontalAlignment="Left" Margin="15 0 0 -15" Classes="Main">
+					<TextBlock Text="Your review" Foreground="#ff9234" Margin="5 0 10 0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"></TextBlock>
+				  </Border>
+				  <Border ZIndex="-1" MinWidth="300" BorderThickness="1" BorderBrush="#ff9234" Margin="20 0 20 0" CornerRadius="10">
+					<DockPanel>
+					  <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Rating:" Margin="20 20 0 0" FontSize="16"/>
+					  <StackPanel DockPanel.Dock="Top" Margin="20 3 0 0" Orientation="Horizontal" Name="StarReviewToggleButtonArray">
+						<ToggleButton Classes="ratingstar" Tag="1" Click="ButtonStar_Click"/>
+						<ToggleButton Classes="ratingstar" Tag="2" Click="ButtonStar_Click"/>
+						<ToggleButton Classes="ratingstar" Tag="3" Click="ButtonStar_Click"/>
+						<ToggleButton Classes="ratingstar" Tag="4" Click="ButtonStar_Click"/>
+						<ToggleButton Classes="ratingstar" Tag="5" Click="ButtonStar_Click"/>
+					  </StackPanel>
+					  <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Review:" Margin="20 15 0 0" FontSize="16"/>
+					<TextBox Name="TBReviewText" DockPanel.Dock="Top" Classes="TextBoxNoBackground" TextWrapping="Wrap" FontSize="14" Watermark="Share your opinion about the item or describe an experience you had with the seller/buyer" Cursor="Ibeam" BorderThickness="0" MinHeight="70" VerticalAlignment="Stretch" Margin="20 0 20 20"></TextBox>
+					  <StackPanel DockPanel.Dock="Bottom" Margin="0 5 20 20" Orientation="Horizontal" HorizontalAlignment="Right">
+					  <Button Cursor="Hand" Classes="pagination" FontSize="13" Margin="0 0 10 0" Background="Transparent" Click="ButtonReviewReset_Click">Cancel</Button>
+					  <Button Cursor="Hand" Classes="pagination" FontSize="13" Click="ButtonReview_Click">Save</Button>
+					  </StackPanel>
+					</DockPanel>
+				  </Border>
+				</DockPanel>
+
+			 <!-- Photos -->
+			<TextBlock Classes="H1" Text="Photos" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+			<WrapPanel Margin="18 0 20 10">
+
+				<StackPanel Name="SPPhoto_0" IsVisible="False">
+					<Button Click="IPhoto_0_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+						<Image Name="IPhoto_0" Height="200"/>
+					</Button>
+					<Popup Name="Popup_0" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+						<StackPanel Orientation="Horizontal">
+							<Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+   								<Image Name="ZoomedPhoto_0"/>
+							</Border>
+							<Button Cursor="Hand" Click="Close0_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+								<Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+							</Button>
+						</StackPanel>
+					</Popup>
 				</StackPanel>
-			</Button>
-        </DockPanel>
 
-        <!-- Review Section -->
-      <DockPanel Name="ReviewForm" IsVisible="false" LastChildFill="true">
-          <Border DockPanel.Dock="Top" MinHeight="30" HorizontalAlignment="Left" Margin="15 0 0 -15" Classes="Main">
-            <TextBlock Text="Your review" Foreground="#ff9234" Margin="5 0 10 0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"></TextBlock>
-          </Border>
-          <Border ZIndex="-1" MinWidth="300" BorderThickness="1" BorderBrush="#ff9234" Margin="20 0 20 0" CornerRadius="10">
-            <DockPanel>
-              <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Rating:" Margin="20 20 0 0" FontSize="16"/>
-              <StackPanel DockPanel.Dock="Top" Margin="20 3 0 0" Orientation="Horizontal" Name="StarReviewToggleButtonArray">
-                <ToggleButton Classes="ratingstar" Tag="1" Click="ButtonStar_Click"/>
-                <ToggleButton Classes="ratingstar" Tag="2" Click="ButtonStar_Click"/>
-                <ToggleButton Classes="ratingstar" Tag="3" Click="ButtonStar_Click"/>
-                <ToggleButton Classes="ratingstar" Tag="4" Click="ButtonStar_Click"/>
-                <ToggleButton Classes="ratingstar" Tag="5" Click="ButtonStar_Click"/>
-              </StackPanel>
-              <TextBlock DockPanel.Dock="Top" Classes="H1" Text="Review:" Margin="20 15 0 0" FontSize="16"/>
-            <TextBox Name="TBReviewText" DockPanel.Dock="Top" Classes="TextBoxNoBackground" TextWrapping="Wrap" FontSize="14" Watermark="Share your opinion about the item or describe an experience you had with the seller/buyer" Cursor="Ibeam" BorderThickness="0" MinHeight="70" VerticalAlignment="Stretch" Margin="20 0 20 20"></TextBox>
-              <StackPanel DockPanel.Dock="Bottom" Margin="0 5 20 20" Orientation="Horizontal" HorizontalAlignment="Right">
-              <Button Cursor="Hand" Classes="pagination" FontSize="13" Margin="0 0 10 0" Background="Transparent" Click="ButtonReviewReset_Click">Cancel</Button>
-              <Button Cursor="Hand" Classes="pagination" FontSize="13" Click="ButtonReview_Click">Save</Button>
-              </StackPanel>
-            </DockPanel>
-          </Border>
-        </DockPanel>
+				<StackPanel Name="SPPhoto_1" IsVisible="False">
+					<Button Click="IPhoto_1_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+						<Image Name="IPhoto_1" Height="200"/>
+					</Button>
+					<Popup Name="Popup_1" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+						<StackPanel Orientation="Horizontal">
+							<Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+								<Image Name="ZoomedPhoto_1"/>
+							</Border>
+							<Button Cursor="Hand" Click="Close1_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+								<Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+							</Button>
+						</StackPanel>
+					</Popup>
+				</StackPanel>
 
-        <TextBlock Classes="H1" Text="Photos" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
+				<StackPanel Name="SPPhoto_2" IsVisible="False">
+					<Button Click="IPhoto_2_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+						<Image Name="IPhoto_2" Height="200"/>
+					</Button>
+					<Popup Name="Popup_2" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+						<StackPanel Orientation="Horizontal">
+							<Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+								<Image Name="ZoomedPhoto_2"/>
+							</Border>
+							<Button Cursor="Hand" Click="Close2_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+								<Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+							</Button>
+						</StackPanel>
+					</Popup>
+				</StackPanel>
 
-        <WrapPanel Margin="18 0 20 10">
+				<StackPanel Name="SPPhoto_3" IsVisible="False">
+					<Button Click="IPhoto_3_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+						<Image Name="IPhoto_3" Height="200"/>
+					</Button>
+					<Popup Name="Popup_3" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+						<StackPanel Orientation="Horizontal">
+							<Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+								<Image Name="ZoomedPhoto_3"/>
+							</Border>
+							<Button Cursor="Hand" Click="Close3_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+								<Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+							</Button>
+						</StackPanel>
+					</Popup>
+				</StackPanel>
 
-          <StackPanel Name="SPPhoto_0" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_0" >
-              </Image>
-            </Border>
-          </StackPanel>
+			  <StackPanel Name="SPPhoto_4" IsVisible="False">
+				  <Button Click="IPhoto_4_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+					  <Image Name="IPhoto_4" Height="200"/>
+				  </Button>
+				  <Popup Name="Popup_4" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+					  <StackPanel Orientation="Horizontal">
+						  <Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+							  <Image Name="ZoomedPhoto_4"/>
+						  </Border>
+						  <Button Cursor="Hand" Click="Close4_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+							  <Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+						  </Button>
+					  </StackPanel>
+				  </Popup>
+			  </StackPanel>
 
-          <StackPanel Name="SPPhoto_1" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_1" >
-              </Image>
-            </Border>
-          </StackPanel>
+			  <StackPanel Name="SPPhoto_5" IsVisible="False">
+				  <Button Click="IPhoto_5_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+					  <Image Name="IPhoto_5" Height="200"/>
+				  </Button>
+				  <Popup Name="Popup_5" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+					  <StackPanel Orientation="Horizontal">
+						  <Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+							  <Image Name="ZoomedPhoto_5"/>
+						  </Border>
+						  <Button Cursor="Hand" Click="Close5_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+							  <Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+						  </Button>
+					  </StackPanel>
+				  </Popup>
+			  </StackPanel>
+ 
+				<StackPanel Name="SPPhoto_6" IsVisible="False">
+					<Button Click="IPhoto_6_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+						<Image Name="IPhoto_6" Height="200"/>
+					</Button>
+					<Popup Name="Popup_6" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+						<StackPanel Orientation="Horizontal">
+							<Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+								<Image Name="ZoomedPhoto_6"/>
+							</Border>
+							<Button Cursor="Hand" Click="Close6_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+								<Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+							</Button>
+						</StackPanel>
+					</Popup>
+				</StackPanel>
 
-          <StackPanel Name="SPPhoto_2" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_2" >
-              </Image>
-            </Border>
-          </StackPanel>
-
-          <StackPanel Name="SPPhoto_3" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_3" >
-              </Image>
-            </Border>
-          </StackPanel>
-
-          <StackPanel Name="SPPhoto_4" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_4" >
-              </Image>
-            </Border>
-          </StackPanel>
-
-          <StackPanel Name="SPPhoto_5" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_5" >
-              </Image>
-            </Border>
-          </StackPanel>
-
-          <StackPanel Name="SPPhoto_6" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_6" >
-              </Image>
-            </Border>
-          </StackPanel>
-
-          <StackPanel Name="SPPhoto_7" IsVisible="false">
-            <Border Classes="PhotoPlaceholder" Height="200" Margin="5" BorderThickness="0">
-              <Image Name="IPhoto_7" >
-              </Image>
-            </Border>
-          </StackPanel>
-
-        </WrapPanel>
+				<StackPanel Name="SPPhoto_7" IsVisible="False">
+					<Button Click="IPhoto_7_Click" Classes="PhotoZoom" Padding="1" Margin="4" Background="Transparent" BorderThickness="1">
+						<Image Name="IPhoto_7" Height="200"/>
+					</Button>
+					<Popup Name="Popup_7" StaysOpen="False" PlacementMode="Right" PlacementTarget="{Binding ElementName=grid}">
+						<StackPanel Orientation="Horizontal">
+							<Border Classes="Blue" BorderThickness="1" MaxWidth="{Binding #Content.Bounds.Width}" MaxHeight="{Binding #grid.Bounds.Height}">
+								<Image Name="ZoomedPhoto_7"/>
+							</Border>
+							<Button Cursor="Hand" Click="Close7_Click" VerticalAlignment="Top" Width="30" Height="30" Margin="-80 25 0 0" BorderThickness="0" Classes="send">
+								<Path Fill="#ffffff" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
+								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
+							</Button>
+						</StackPanel>
+					</Popup>
+				</StackPanel>
+				
+		</WrapPanel>
+		  
+		  
 
         <TextBlock Classes="H1" Text="Description" Margin="20 20 0 0" FontSize="16" FontWeight="Bold"/>
         <!-- product description binding -->
@@ -179,6 +261,7 @@
           <TextBlock Classes="H3" Text=" XRC" FontSize="16"/>
         </StackPanel>
 
+		  
 		<!--Changelly Widget -->
 			<Border IsVisible="False" Classes="ChangellyWidget" HorizontalAlignment="Left" Margin="20" CornerRadius="10" BorderThickness="2">
 				<WrapPanel Margin="20 12" Orientation="Vertical">
@@ -201,43 +284,39 @@
 				</WrapPanel>
 			</Border>
 		  
-        <TextBlock Classes="H1" Text="Seller" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Vertical">
-          <!-- seller profile binding -->
-          <TextBlock Classes="H1" Name="TBSeller" Text="N/A" Margin="20 0 0 5" FontSize="24"/>
-          <StackPanel Orientation="Horizontal" Margin="20 2 20 0">
-            <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
-							  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
-							  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
-							  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
-							  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
-							  C511.56,208.649,513.033,202.688,511.267,197.258z"
-              Height="16" Stretch="Fill" VerticalAlignment="Center" Width="17" Margin="0 -2 5 0"/>
-            <!-- seller rating binding -->
-            <TextBlock Classes="H1Orange" Name="TBSellerStars" Text="N/A" FontSize="16"/>
-            <TextBlock Classes="H1" Text="Reviews" Margin="20 0 7 0" FontSize="16"/>
-            <Button Padding="12 0" VerticalAlignment="Center" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" FontSize="16" Click="ButtonSeller_Click">
-              <!-- link to a seller's public profile and number of reviews binding -->
-              <TextBlock Name="TBSellerReviewsCount" Text="0"/>
-            </Button>
-          </StackPanel>
-        </StackPanel>
+		        <TextBlock Classes="H1" Text="Seller" ZIndex="10" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+					<!-- seller profile binding -->
+					<TextBlock Classes="H1" Name="TBSeller" Text="N/A" Margin="20 0 0 2" FontSize="24" FontWeight="Bold"/>
+					<StackPanel Orientation="Horizontal" Margin="20 2 0 0">
+						<Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157 c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065 c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671 c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638 141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955 C511.56,208.649,513.033,202.688,511.267,197.258z"
+						Height="16" Stretch="Fill" VerticalAlignment="Center" Width="17" Margin="0 -2 5 0"/>
+						<!-- seller rating binding -->
+						<TextBlock Classes="H1Orange" Name="TBSellerStars" Text="N/A" FontSize="16"/>
+						<TextBlock Classes="H1" Text="Reviews" Margin="20 0 7 0" FontSize="16"/>
+						<Button Padding="12 0" VerticalAlignment="Center" BorderThickness="1" Classes="pagination" Name="BTSeller" Tag="" Cursor="Hand" FontSize="16" Click="ButtonSeller_Click">
+							<!-- link to a seller's public profile and number of reviews binding -->
+							<TextBlock Name="TBSellerReviewsCount" Text="0"/>
+						</Button>
+					</StackPanel>
 		  
-        <TextBlock Classes="H1" Text="Seller's XRC Receiving Address" Margin="20 50 20 0" FontSize="16" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Margin="20 2 20 0">
-          <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" FontSize="16" BorderThickness="1" Padding="10" Width="380" />
-          <Button Name="BTCopyToClipboard" ToolTip.Tip="Copy Address" HorizontalAlignment="Left" VerticalContentAlignment="Center" BorderThickness="0" Width="50" Cursor="Hand" Click="ButtonCopyToClipboard_Click">
-            <StackPanel Orientation="Horizontal">
-              <Path Classes="BlueIcon" Data="M1415.05452,0V731.81817h238.35456V238.35272h1608.2364V1846.59089H2768.1818v238.35449H3500V0ZM500,915.05452V3000H2584.94538V915.05452H500Zm238.35272,238.35456H2346.59089v1608.2364H738.35272Z"
-              HorizontalAlignment="Center" Height="18" Stretch="Fill" Width="18" />
+            <!-- XRC Receiving Address -->
+            <TextBlock Classes="H1" Text="Seller's XRC Receiving Address" Margin="20 50 20 0" FontSize="16" FontWeight="Bold"/>
+            <StackPanel Orientation="Horizontal" Margin="20 2 20 0">
+              <TextBox Classes="TextBoxBackground" Name="TBXRCReceivingAddress" Text="" FontSize="16" BorderThickness="1" Padding="10" Width="380" />
+              <Button Name="BTCopyToClipboard" ToolTip.Tip="Copy Address" HorizontalAlignment="Left" VerticalContentAlignment="Center" BorderThickness="0" Width="50" Cursor="Hand" Click="ButtonCopyToClipboard_Click">
+                <StackPanel Orientation="Horizontal">
+                  <Path Classes="BlueIcon" Data="M1415.05452,0V731.81817h238.35456V238.35272h1608.2364V1846.59089H2768.1818v238.35449H3500V0ZM500,915.05452V3000H2584.94538V915.05452H500Zm238.35272,238.35456H2346.59089v1608.2364H738.35272Z"
+                  HorizontalAlignment="Center" Height="18" Stretch="Fill" Width="18" />
+                </StackPanel>
+              </Button>
             </StackPanel>
-          </Button>
-        </StackPanel>
-        <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-        <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="430" BorderThickness="1" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
+		  
+		    <!-- Transaction Hash -->
+            <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+            <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="430" BorderThickness="1" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
 
-        <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 50 20 10" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy Product</Button>
+        <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 50 20 10" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy this product</Button>
       </StackPanel>
     </ScrollViewer>
   </Grid>

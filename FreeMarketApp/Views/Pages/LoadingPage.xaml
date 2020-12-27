@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="FreeMarketApp.Views.Pages.LoadingPage">
+
+          <ScrollViewer HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0">
+            <StackPanel Orientation="Vertical">
+              <Image Source="resm:FreeMarketApp.Assets.splash.png" Grid.Row="0" Stretch="None" />
+              <TextBlock Name='LoadingStatus' Width="300" FontStyle="Oblique" Text="{Binding StartupProgressText, Mode=TwoWay }" VerticalAlignment="Center" HorizontalAlignment="Right" TextAlignment="Center" />
+            </StackPanel>
+        </ScrollViewer>
+
+</UserControl>

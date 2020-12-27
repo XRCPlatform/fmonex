@@ -47,20 +47,20 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if ((FMONE.Current.Markets != null) && (FMONE.Current.Users != null))
+            if ((FMONE.Current.MarketManager != null) && (FMONE.Current.UserManager != null))
             {
                 SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
 
                 PagesHelper.Log(_logger, string.Format("Loading my bought market offers from chain."));
 
-                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
+                var userPubKey = FMONE.Current.UserManager.GetCurrentUserPublicKey();
                 List<byte[]> list = new List<byte[]>();
                 list.Add(userPubKey);
 
                 var engine = FMONE.Current.SearchEngine;
                 var result = engine.GetMyCompletedOffers(OfferDirection.Bought, selectedPageSize, 1);
 
-                result.Results = FMONE.Current.Markets.GetAllBuyerMarketItemsByPubKeysFromPool(
+                result.Results = FMONE.Current.MarketManager.GetAllBuyerMarketItemsByPubKeysFromPool(
                     result.Results, userPubKey, FMONE.Current.MarketPoolManager);
 
                 var skynetHelper = new SkynetHelper();
@@ -168,8 +168,8 @@ namespace FreeMarketApp.Views.Pages
                 var currentSearchResult = ((MyProductsPageViewModel)this.DataContext).Result;
                 var result = engine.GetMyCompletedOffers(OfferDirection.Bought, selectedPageSize, currentSearchResult.CurrentPage);
 
-                var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
-                result.Results = FMONE.Current.Markets.GetAllBuyerMarketItemsByPubKeysFromPool(
+                var userPubKey = FMONE.Current.UserManager.GetCurrentUserPublicKey();
+                result.Results = FMONE.Current.MarketManager.GetAllBuyerMarketItemsByPubKeysFromPool(
                     result.Results, userPubKey, FMONE.Current.MarketPoolManager);
 
                 var skynetHelper = new SkynetHelper();
@@ -205,8 +205,8 @@ namespace FreeMarketApp.Views.Pages
 
                 if ((currentSearchResult.CurrentPage - 1) == 1)
                 {
-                    var userPubKey = FMONE.Current.Users.GetCurrentUserPublicKey();
-                    result.Results = FMONE.Current.Markets.GetAllBuyerMarketItemsByPubKeysFromPool(
+                    var userPubKey = FMONE.Current.UserManager.GetCurrentUserPublicKey();
+                    result.Results = FMONE.Current.MarketManager.GetAllBuyerMarketItemsByPubKeysFromPool(
                         result.Results, userPubKey, FMONE.Current.MarketPoolManager);
                 }
 

@@ -24,14 +24,14 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch" Margin="0 0 0 100">
                 <StackPanel Name="EditBar" Height="40" Margin="20 18 20 10" Orientation="Horizontal">
-                    <Button Name="BTEdit" Classes="pagination" BorderThickness="1" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0" Cursor="Hand" Click="ButtonEdit_Click">
+                    <Button Name="BTEdit" Classes="pagination" BorderThickness="1" VerticalAlignment="Center" Margin="0 0 15 0" Cursor="Hand" Click="ButtonEdit_Click">
                         <StackPanel Orientation="Horizontal">
                             <Path Classes="BlueIcon" Data="m114.6875 284.675781-73.800781-73.800781 178.5-178.5 73.800781 73.800781zm-80.699219-60.800781 67.699219 67.699219-101.5 33.800781zm281.898438-140.300781-12.800781 12.800781-73.898438-73.898438 12.800781-12.800781c12.894531-12.902343 33.804688-12.902343 46.699219 0l27.199219 27.199219c12.800781 12.9375 12.800781 33.765625 0 46.699219zm0 0"
 								  HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13"/>
                             <TextBlock Margin="7,0,0,0" Text="Edit listing" FontSize="14"/>
                         </StackPanel>
                     </Button>
-                    <Button Name="BTRemove" Classes="pagination" BorderThickness="1" Height="24" VerticalAlignment="Center" Margin="0 0 15 0" Padding="10 0 10 0"  Cursor="Hand" Click="ButtonRemove_Click">
+                    <Button Name="BTRemove" Classes="pagination" BorderThickness="1" VerticalAlignment="Center" Margin="0 0 15 0" Cursor="Hand" Click="ButtonRemove_Click">
                         <StackPanel Orientation="Horizontal">
                             <Path Classes="BlueIcon" Data="m415.402344 495.421875-159.40625-159.410156-159.40625 159.410156c-22.097656 22.09375-57.921875 22.09375-80.019532 0-22.09375-22.097656-22.09375-57.921875 0-80.019531l159.410157-159.40625-159.410157-159.40625c-22.09375-22.097656-22.09375-57.921875 0-80.019532 22.097657-22.09375 57.921876-22.09375 80.019532 0l159.40625 159.410157 159.40625-159.410157c22.097656-22.09375 57.921875-22.09375 80.019531 0 22.09375 22.097657 22.09375 57.921876 0 80.019532l-159.410156 159.40625 159.410156 159.40625c22.09375 22.097656 22.09375 57.921875 0 80.019531-22.097656 22.09375-57.921875 22.09375-80.019531 0zm0 0"
 								  HorizontalAlignment="Left" Height="11" Stretch="Fill" Width="11"/>
@@ -113,12 +113,10 @@
               <TextBlock Classes="H3" Name="TBCategory" Text="" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
               
               <TextBlock Classes="H1" Text="Shipping" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                <Path Classes="StatusBarIconOrange" Data="m406.478 62.747c-83.658-83.658-219.067-83.667-302.734 0-83.656 83.655-83.669 219.067 0 302.734l140.054 140.054c6.249 6.249 16.379 6.248 22.627 0l140.054-140.054c83.655-83.655 83.668-219.066-.001-302.734zm-83.7 219.033c-37.395 37.396-97.93 37.404-135.334 0-37.397-37.397-37.403-97.93 0-135.332 37.394-37.396 97.93-37.403 135.333 0 37.397 37.395 37.403 97.93.001 135.332z"
-                  Height="14" Stretch="Fill" Width="11" Margin="0,1,5,0"/>
+              
                 <!-- product shipping binding -->
-                <TextBlock Classes="H3" Name="TBShipping" Text="" FontSize="16"/>
-              </StackPanel>
+                <TextBlock Margin="20 0 20 0" Classes="H3" Name="TBShipping" Text="" FontSize="16"/>
+          
 
               <TextBlock Name="TBFinenessLabel" Classes="H1" Text="Fineness" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
@@ -141,14 +139,13 @@
               <TextBlock Name="TBWeightInGramsLabel" Classes="H1" Text="Weight in grams" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
                 <!--TBWeightInGrams binding -->
-                <TextBlock Classes="H1"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
+                <TextBlock Classes="H3"  Name="TBWeightInGrams" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
               
               <TextBlock Classes="H1" Text="Price" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
-              
               <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
-                <TextBlock Classes="H1" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="20"/>
-                <TextBlock Classes="H3" Name="TBPriceType" Text="" FontSize="20"/>
+                <TextBlock Classes="H3" Margin="0 0 3 0" Name="TBPrice" Text="" FontSize="16"/>
+                <TextBlock Classes="H3" Text=" XRC" FontSize="16"/>
               </StackPanel>
               
               <TextBlock Classes="H1" Text="Deal Type" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
@@ -161,6 +158,10 @@
                 <TextBlock Classes="H3"  Name="TBXRCReceivingAddress" Text="" Margin="0 2 0 0" FontSize="16"/>
               </StackPanel>
 
+              <TextBlock Name="TBXRCReceivingTransactionHashLabel" Classes="H1" Text="XRC Receiving Transaction hash" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
+              <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+                <TextBlock Classes="H1"  Name="TBXRCReceivingTransactionHash" Text="" Margin="0 2 0 0" FontSize="16"/>
+              </StackPanel>
 
             </StackPanel>
         </ScrollViewer>

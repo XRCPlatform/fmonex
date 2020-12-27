@@ -76,13 +76,13 @@ namespace FreeMarketApp.Helpers
 
         internal static void SetUserData(ILogger _logger, Window mainWindow)
         {
-            var userManager = FMONE.Current.Users;
+            var userManager = FMONE.Current.UserManager;
             if ((userManager != null) && (userManager.UserData != null))
             {
                 var tbUserName = mainWindow.FindControl<TextBlock>("TBUserName");
                 tbUserName.Text = userManager.UserData.UserName;
 
-                var reviews = FMONE.Current.Users.GetAllReviewsForPubKey(
+                var reviews = FMONE.Current.UserManager.GetAllReviewsForPubKey(
                     userManager.GetCurrentUserPublicKey(),
                     FMONE.Current.BasePoolManager,
                     FMONE.Current.BaseBlockChainManager);

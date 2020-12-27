@@ -53,7 +53,7 @@ namespace FreeMarketOne.Search.Tests
                 System.IO.Directory.Delete(SearchHelper.GetDataFolder(config), true);
             }
 
-            search = new SearchIndexer(marketManager, config, xrcHelper, userManager, null, null);
+            search = new SearchIndexer(marketManager, config, xrcHelper, userManager);
         }
 
         [TestMethod()]
@@ -455,7 +455,7 @@ namespace FreeMarketOne.Search.Tests
 
             var marketManager1 = Substitute.For<IMarketManager>();
 
-            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager, null, null);
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager);
 
             List<ValueTuple<MarketItem, List<byte[]>>> lst = new List<ValueTuple<MarketItem, List<byte[]>>>();
 
@@ -559,7 +559,7 @@ namespace FreeMarketOne.Search.Tests
             xrcHelper = Substitute.For<IXRCHelper>();
             config.SearchEnginePath.Returns("search2");
 
-            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager, null, null);
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager);
             bool generateSellerKeys = true;
             List<byte[]> pubKeys = new List<byte[]>();
 
@@ -641,7 +641,7 @@ namespace FreeMarketOne.Search.Tests
             config.SearchEnginePath.Returns("search2");
             
 
-            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager, null, null);
+            var search1 = new SearchIndexer(marketManager1, config, xrcHelper, userManager);
             bool generateSellerKeys = true;
             List<byte[]> pubKeys = new List<byte[]>();
 

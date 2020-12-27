@@ -140,7 +140,7 @@
 			<Setter Property="Foreground" Value="#167efb" />
 		</Style>
 		<Style Selector="Button.action /template/ ContentPresenter">
-			<Setter Property="CornerRadius" Value="20"/>
+			<Setter Property="CornerRadius" Value="5"/>
 		</Style>
 		<Style Selector="Button:pointerover.action /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#167efb" />
@@ -151,14 +151,14 @@
 			<Setter Property="Background" Value="#e1e6f7" />
 		</Style>
 
-		<!-- Send Message Button -->
+		<!-- Big Blue Button -->
 		<Style Selector="Button.message">
 			<Setter Property="Background" Value="#167efb" />
 			<Setter Property="BorderBrush" Value="#ffffff" />
 			<Setter Property="Foreground" Value="#ffffff" />
 		</Style>
 		<Style Selector="Button.message /template/ ContentPresenter">
-			<Setter Property="CornerRadius" Value="25"/>
+			<Setter Property="CornerRadius" Value="4"/>
 		</Style>
 		<Style Selector="Button:pointerover.message /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#1176f1" />
@@ -168,11 +168,29 @@
 			<Setter Property="BorderBrush" Value="#0f70e6" />
 			<Setter Property="Background" Value="#0f70e6" />
 		</Style>
+
+		<!-- Blue Round Button -->
+		<Style Selector="Button.send">
+			<Setter Property="Background" Value="#167efb" />
+			<Setter Property="BorderBrush" Value="#ffffff" />
+			<Setter Property="Foreground" Value="#ffffff" />
+		</Style>
+		<Style Selector="Button.send /template/ ContentPresenter">
+			<Setter Property="CornerRadius" Value="30"/>
+		</Style>
+		<Style Selector="Button:pointerover.send /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#1176f1" />
+			<Setter Property="Background" Value="#1176f1" />
+		</Style>
+		<Style Selector="Button:pressed.send /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#0f70e6" />
+			<Setter Property="Background" Value="#0f70e6" />
+		</Style>
 		
 		<!-- Add Photo Button -->
 		<Style Selector="Button.AddPhoto">
-			<Setter Property="Background" Value="#f9f9f9" />
-			<Setter Property="BorderBrush" Value="#f9f9f9" />
+			<Setter Property="Background" Value="#efefef" />
+			<Setter Property="BorderBrush" Value="#efefef" />
 		</Style>
 	
 		<Style Selector="Button:pointerover.AddPhoto /template/ ContentPresenter">
@@ -181,8 +199,8 @@
 
 		<!-- Remove Photo Button -->
 		<Style Selector="Button.RemovePhoto">
-			<Setter Property="Background" Value="#f9f9f9" />
-			<Setter Property="BorderBrush" Value="#f9f9f9" />
+			<Setter Property="Background" Value="#efefef" />
+			<Setter Property="BorderBrush" Value="#efefef" />
 		</Style>
 
 		<Style Selector="Button:pointerover.RemovePhoto /template/ ContentPresenter">
@@ -197,7 +215,7 @@
 			<Setter Property="Padding" Value="15 5" />
 		</Style>
 		<Style Selector="Button.pagination /template/ ContentPresenter">
-			<Setter Property="CornerRadius" Value="2"/>
+			<Setter Property="CornerRadius" Value="3"/>
 		</Style>
 		<Style Selector="Button:pointerover.pagination /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#167efb" />
@@ -227,6 +245,22 @@
 			<Setter Property="Background" Value="#fffaf0" />
 		</Style>	
 		
+		<!-- Zoom Button -->
+		<Style Selector="Button.PhotoZoom">
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+		<Style Selector="Button.PhotoZoom /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="Transparent" />
+		</Style>
+		<Style Selector="Button:pointerover.PhotoZoom /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#167efb" />
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+		<Style Selector="Button:pressed.PhotoZoom /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#167efb" />
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+	
 	
 	
 	
@@ -237,6 +271,10 @@
 
 		<Style Selector="Border.Main">
 			<Setter Property="BorderBrush" Value="#ffffff" />
+		</Style>
+
+		<Style Selector="Border.Blue">
+			<Setter Property="BorderBrush" Value="#167efb" />
 		</Style>
 
 		<!-- Main Toolbar -->
@@ -348,15 +386,11 @@
 		<Style Selector="Path.BlueIcon">
 			<Setter Property="Fill" Value="#167efb" />
 		</Style>
-		
-		<Style Selector="Path.WhiteIcon">
-			<Setter Property="Fill" Value="#ffffff" />
-		</Style>
 
 		<!-- TextBoxes and ComboBoxes -->
 		<Style Selector="TextBox.TextBoxBackground">
-			<Setter Property="Background" Value="#f9f9f9" />
-			<Setter Property="BorderBrush" Value="#f9f9f9" />
+			<Setter Property="Background" Value="#efefef" />
+			<Setter Property="BorderBrush" Value="#efefef" />
 		</Style>
 	
 		<Style Selector="TextBox:pointerover.TextBoxBackground /template/ Border#border">
@@ -368,8 +402,8 @@
 		</Style>
 	
 		<Style Selector="ComboBox.TextBoxBackground">
-			<Setter Property="Background" Value="#f9f9f9" />
-			<Setter Property="BorderBrush" Value="#f9f9f9" />
+			<Setter Property="Background" Value="#efefef" />
+			<Setter Property="BorderBrush" Value="#efefef" />
 		</Style>
 	
 		<Style Selector="ComboBox:pointerover.TextBoxBackground /template/ Border#border">
@@ -393,18 +427,33 @@
 		<Style Selector="Border.OutcomingChatMessage">
 			<Setter Property="Background" Value="#dee0d9" />
 		</Style>
-		
-		<Style Selector="Border.ReplyTextbox">
-			<Setter Property="BorderBrush" Value="#848d95" />
+
+
+		<Style Selector="TextBox.ReplyTextbox">
 			<Setter Property="Background" Value="#ffffff" />
+			<Setter Property="Foreground" Value="#000000" />
+		</Style>
+
+		<Style Selector="TextBox.ReplyTextbox /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#848d95"/>
+			<Setter Property="CornerRadius" Value="10"/>
 		</Style>
 		
+		<Style Selector="TextBox:pointerover.ReplyTextbox /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
+		</Style>
+
+		<Style Selector="TextBox:focus.ReplyTextbox /template/ Border#border">
+			<Setter Property="BorderBrush" Value="#167efb"/>
+		</Style>
+		
+	
 		<Style Selector="Path.SideBarIcon">
-			<Setter Property="Fill" Value="#4E5C6E" />
+			<Setter Property="Fill" Value="#3e4b5c" />
 		</Style>
 	  
 		<Style Selector="Border.SideBarIcon">
-			<Setter Property="Background" Value="#4E5C6E" />
+			<Setter Property="Background" Value="#3e4b5c" />
 		</Style>
 
 		<Style Selector="Path.FirstRunLogo">
@@ -412,17 +461,16 @@
 		</Style>
 
 		<Style Selector="Border.Main">
-				<Setter Property="Background" Value="#ffffff" />
-			</Style>
+			<Setter Property="Background" Value="#ffffff" />
+		</Style>
 	
 	
 		<!-- Review Section -->
 		<Style Selector="TextBox.TextBoxNoBackground">
-				<Setter Property="Background" Value="#ffffff" />
-				<Setter Property="Foreground" Value="#606060" />
-			</Style>
+			<Setter Property="Background" Value="#ffffff" />
+			<Setter Property="Foreground" Value="#606060" />
+		</Style>
 		
-
 		<Style Selector="ToggleButton.ratingstar /template/ Path">
 			<Setter Property="Margin" Value="2"></Setter>
 		</Style>
@@ -469,21 +517,16 @@
 		</Style>
 		<Style Selector="Button.popup /template/ ContentPresenter">
 			<Setter Property="BorderThickness" Value="0" />
-			<Setter Property="CornerRadius" Value="3"/>
-			<Setter Property="Margin" Value="1"/>
+			<Setter Property="CornerRadius" Value="2"/>
 			<Setter Property="Padding" Value="8 7"/>
 			<Setter Property="HorizontalContentAlignment" Value="Left"/>
 		</Style>
 		<Style Selector="Button:pointerover.popup /template/ ContentPresenter">
-			<Setter Property="Background" Value="#e6e5ea" />
+			<Setter Property="Background" Value="#cfced6" />
 		</Style>
 		<Style Selector="Button:pressed.popup /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#f4f3f8" />
 			<Setter Property="Background" Value="#f4f3f8" />
-		</Style>
-
-		<Style Selector="Border.popup">
-			<Setter Property="Background" Value="#ffffff" />
 		</Style>
 
 		<!-- Statusbar Button -->
@@ -500,5 +543,34 @@
 		<Style Selector="Button:pressed.StatusBarButton /template/ ContentPresenter">
 			<Setter Property="Background" Value="#c3c1c9" />
 		</Style>
+	
+		<!-- Custom RadioButton (View Switcher)-->
+		<Style Selector="RadioButton.List /template/ Border">
+			<Setter Property="Background" Value="#e6e5ea"/>
+		</Style>
+		<Style Selector="RadioButton:pointerover.List /template/ Border">
+			<Setter Property="Background" Value="#cfced6"/>
+		</Style>
+		<Style Selector="RadioButton:checked.List /template/ Border">
+			<Setter Property="Background" Value="#ffffff"/>
+		</Style>
+		<Style Selector="RadioButton.List /template/ Path">
+			<Setter Property="Fill" Value="#0c151c"></Setter>
+		</Style>
+	
+		<Style Selector="RadioButton.Grid /template/ Border">
+			<Setter Property="Background" Value="#e6e5ea"/>
+		</Style>
+		<Style Selector="RadioButton:pointerover.Grid /template/ Border">
+			<Setter Property="Background" Value="#cfced6"/>
+		</Style>
+		<Style Selector="RadioButton:checked.Grid /template/ Border">
+			<Setter Property="Background" Value="#ffffff"/>
+		</Style>
+		<Style Selector="RadioButton.Grid /template/ Path">
+			<Setter Property="Fill" Value="#0c151c"></Setter>
+		</Style>
+	
+		
 
 </Styles>

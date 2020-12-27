@@ -53,7 +53,7 @@ namespace FreeMarketApp.Views.Pages
 
             this.InitializeComponent();
 
-            if (FMONE.Current.Markets != null)
+            if (FMONE.Current.MarketManager != null)
             {
                 SpinWait.SpinUntil(() => FMONE.Current.GetServerState() == FMONE.FreeMarketOneServerStates.Online);
 
@@ -200,5 +200,11 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
+        public void ButtonFilters_Click(object sender, RoutedEventArgs args)
+        {
+            var mainWindow = PagesHelper.GetParentWindow(this);
+
+            PagesHelper.Switch(mainWindow, SearchResultsPage.Instance);
+        }
     }
 }

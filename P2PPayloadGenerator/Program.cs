@@ -75,7 +75,7 @@ namespace P2PPayloadGenerator
                 MarketItemV1 template = JsonConvert.DeserializeObject<MarketItemV1>(json);
                 template.Title = template.Title + " from " + user.UserName  + " [" + i +"/"+ (numberOfExecutions-1)  + "]";
                 template.Manufacturer = user.UserName;
-                var _offer = Current.Markets.SignMarketData(template, privateKey);            
+                var _offer = Current.MarketManager.SignMarketData(template, privateKey);            
 
                 var errors = Current.MarketPoolManager.AcceptActionItem(_offer);
                 if (!errors.HasValue)
@@ -108,7 +108,7 @@ namespace P2PPayloadGenerator
 
                 };
                 
-                string seed = Current.Users.CreateRandomSeed();
+                string seed = Current.UserManager.CreateRandomSeed();
                 var privateKey = new UserPrivateKey(seed);
                 
                 var signedUserData = SignUserData(user, privateKey);

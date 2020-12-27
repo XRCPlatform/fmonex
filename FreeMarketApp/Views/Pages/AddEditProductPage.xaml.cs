@@ -93,7 +93,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FMONE.Current.Markets.GetOfferBySignature(
+            var offer = FMONE.Current.MarketManager.GetOfferBySignature(
                 signature,
                 FMONE.Current.MarketPoolManager,
                 FMONE.Current.MarketBlockChainManager);
@@ -418,7 +418,7 @@ namespace FreeMarketApp.Views.Pages
                     //}
 
                     //sign market data and generating chain connection
-                    _offer = FMONE.Current.Markets.SignMarketData(_offer, FMONE.Current.Users.PrivateKey);
+                    _offer = FMONE.Current.MarketManager.SignMarketData(_offer, FMONE.Current.UserManager.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 

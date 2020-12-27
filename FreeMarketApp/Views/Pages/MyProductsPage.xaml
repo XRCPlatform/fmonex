@@ -28,9 +28,9 @@
               
               <Button Classes="sidebar" Click="ButtonBoughtProducts_Click" Cursor="Hand">
 				  <StackPanel Orientation="Horizontal">
-					  <Path Classes="SideBarIcon" Data="M1999.93947,0c-371.59108,0-672.79864,301.20377-672.791,672.79482v467.0758h158.37233V672.79482c0-284.15519,230.26352-514.42091,514.41868-514.42091s514.661,230.26572,514.661,514.42091v467.0758h158.13016V672.79482C2672.74561,301.20377,2371.53055,0,1999.93947,0ZM571.25659,1218.9357l281.00192,1519.825c26.658,150.00148,156.35732,259.89108,308.69966,261.35309H2839.15564c152.34986-1.462,282.04156-111.344,308.69967-261.35309l281.00376-1519.825Zm835.19166,364.09885a79.21263,79.21263,0,0,1,79.07254,79.30748v237.43741a79.18625,79.18625,0,0,1-158.37233,0V1662.342A79.40175,79.40175,0,0,1,1406.44825,1583.03455Zm1187.21726,0a79.20157,79.20157,0,0,1,79.06508,79.30748v237.43741a79.06508,79.06508,0,1,1-158.13016,0V1662.342A79.20142,79.20142,0,0,1,2593.66551,1583.03455Z"
-								  HorizontalAlignment="Left" Height="19" Stretch="Fill" Width="18" />
-					  <TextBlock Margin="9,0,0,0" Text="Bought products"/>
+					  <Path Classes="SideBarIcon" Data="M1973.13969,0c-375.58377,0-681.13294,305.55824-681.13294,681.13285v22.74243H943.09843A91.0292,91.0292,0,0,0,851.93887,794.845V2908.94537a91.02537,91.02537,0,0,0,91.15956,90.96973H3057.00768a91.02375,91.02375,0,0,0,91.15778-90.96973V794.845a91.0161,91.0161,0,0,0-91.15778-90.96974h-345.303V681.13285C2711.70468,305.55218,2406.14949,0,2030.56582,0Zm0,215.10582h57.42613c256.97729,0,465.07981,209.05876,465.07981,466.027v22.74243H1507.10774V681.13285C1507.10774,424.16458,1716.16231,215.10582,1973.13969,215.10582ZM1341.09408,1625.702h1317.921a73.90989,73.90989,0,0,1,73.91587,73.91587V2029.0012a73.90231,73.90231,0,0,1-73.91587,73.91588h-1317.921a73.89459,73.89459,0,0,1-73.916-73.91588V1699.61791A73.90216,73.90216,0,0,1,1341.09408,1625.702Z"
+								  Margin="1 0 0 0" HorizontalAlignment="Left" Height="19" Stretch="Fill" Width="15" />
+					  <TextBlock Margin="10,0,0,0" Text="Bought products"/>
 				  </StackPanel>
               </Button>
               
@@ -60,26 +60,26 @@
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
             <StackPanel HorizontalAlignment="Stretch">
-                <WrapPanel Orientation="Horizontal" Margin="20 20 20 10">
-                    <TextBlock Classes="H1" Text="My Products" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
-                    <Button Classes="pagination" BorderThickness="1" Height="24" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="10 0 10 0" Click="ButtonAdd_Click" Cursor="Hand">
+                <WrapPanel Orientation="Horizontal" Margin="20 19 20 10">
+                    <TextBlock VerticalAlignment="Center" Classes="H1" Text="My Products" TextWrapping="Wrap" FontSize="28" Margin="0 0 25 0" FontWeight="Bold" />
+                    <Button Classes="pagination" BorderThickness="1" VerticalAlignment="Center" VerticalContentAlignment="Center" Click="ButtonAdd_Click" Cursor="Hand">
                         <StackPanel Orientation="Horizontal">
-                            <Path Classes="BlueIcon" Data="m408 184h-136c-4.417969 0-8-3.582031-8-8v-136c0-22.089844-17.910156-40-40-40s-40 17.910156-40 40v136c0 4.417969-3.582031 8-8 8h-136c-22.089844 0-40 17.910156-40 40s17.910156 40 40 40h136c4.417969 0 8 3.582031 8 8v136c0 22.089844 17.910156 40 40 40s40-17.910156 40-40v-136c0-4.417969 3.582031-8 8-8h136c22.089844 0 40-17.910156 40-40s-17.910156-40-40-40zm0 0"
-								  HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13" />
-                            <TextBlock Margin="7,0,0,0" Text="Add new" FontSize="13"/>
+                            <Path Classes="BlueIcon" Data="M1865.48,423.846V1365.48H923.846V1634.52H1865.48V2576.1541H2134.52V1634.52H3076.1541V1365.48H2134.52V423.846Z"
+								  HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="14" />
+                            <TextBlock Margin="7,0,0,0" Text="Add new" FontSize="14"/>
                         </StackPanel>
                     </Button>
                 </WrapPanel>
 
               <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-                <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+                <TextBlock Classes="H1"  FontSize="14" Text="Items found: "/>
 
                 <!-- Number of search results -->
-                <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
+                <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "/>
 
-                <TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
-                <VirtualizingStackPanel>
-
+                <TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "/>
+                
+				  <VirtualizingStackPanel>
                   <!-- Dropdown menu -->
                   <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
                     <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
@@ -102,26 +102,15 @@
                         <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
                           <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"></Image>
                         </Border>
-                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
+                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"/>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                          <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
-                          <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
+                          <TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+                          <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
                         </StackPanel>
-						            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                            <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                          <!--
-                          <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
-                               <i:Interaction.Behaviors>
-                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                                 </ia:DataTriggerBehavior>
-                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                                 </ia:DataTriggerBehavior>
-                               </i:Interaction.Behaviors>
-                            </TextBlock>
-                            -->
-						            </StackPanel>
+						    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                                <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"/>
+                                <TextBlock DockPanel.Dock="Top" Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="18"/>
+						    </StackPanel>
 							
 
                         <!-- Review notification -->
@@ -139,7 +128,7 @@
                             c0-0.465,0.18-0.865,0.533-1.196c0.356-0.332,0.784-0.497,1.28-0.497c0.497,0,0.923,0.165,1.275,0.497
                             c0.353,0.331,0.53,0.731,0.53,1.196C14.667,6.703,14.49,7.101,14.137,7.429z" 
                             HorizontalAlignment="Left" VerticalAlignment="Top" Fill="#ff9234" Height="17" Stretch="Fill" Width="17" Margin="0 4 5 7"/>
-                          <TextBlock Foreground="#ff9234" FontSize="12" Text="Not reviewed" Margin="0 4 20 7"></TextBlock>
+                          <TextBlock Foreground="#ff9234" FontSize="12" Text="Not reviewed" Margin="0 4 20 7"/>
                         </WrapPanel>
 
                         <!-- Propagation notification -->
@@ -152,7 +141,7 @@
                             l-82.572-32.227c-14.378-5.611-37.895-5.611-52.273,0l-82.579,32.229v-37.404c0-34.045,27.059-57.035,71.217-91.725l1.171-0.918
                             c16.762-13.144,27.634-31.449,31.324-51.621c3.303,0.736,6.698,0.736,10.001,0c3.675,20.165,14.56,38.471,31.301,51.6l1.192,0.939
                             c44.158,34.688,71.217,57.672,71.217,91.724V449.221z" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Stretch="Fill" Width="12" Margin="0 4 5 7"/>
-                            <TextBlock Foreground="#af52de" FontSize="12" Text="Waiting for propagation" Margin="0 4 0 7"></TextBlock>       
+                            <TextBlock Foreground="#af52de" FontSize="12" Text="Waiting for propagation" Margin="0 4 0 7"/>      
                         </WrapPanel>                   
                                                               
                       </DockPanel>

@@ -2,6 +2,7 @@
 using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.DataStructure.ProtocolVersions;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
@@ -44,10 +45,10 @@ namespace FreeMarketOne.ServerCore
         public Logger Logger => (Logger)_logger;
         private ILogger _logger;
 
-        public ServiceManager Services;
-        public IUserManager Users;
-        public IMarketManager Markets;
-        public IChatManager Chats;
+        public ServiceManager ServiceManager;
+        public IUserManager UserManager;
+        public IMarketManager MarketManager;
+        public IChatManager ChatManager;
         public IBaseConfiguration Configuration;
 
         public SearchIndexer SearchIndexer;
@@ -112,127 +113,233 @@ namespace FreeMarketOne.ServerCore
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
             _logger.Information("Application Start");
 
-            //User manager
-            Users = new UserManager(Configuration);
-            if (Users.Initialize(password, firstUserData) == UserManager.PrivateKeyStates.Valid)
+            try
             {
-                //Service manager
-                LoadingEvent?.Invoke(this, "Loading Service Manager...");
-                Services = new ServiceManager(Configuration, NetworkHeartbeatEvent);
-                Services.Start();
-
-                //Market Manager
-                LoadingEvent?.Invoke(this, "Loading Market Manager...");
-                Markets = new MarketManager(Configuration);
-
-                //Initialize Tor
-                LoadingEvent?.Invoke(this, "Loading Tor Manager...");
-                TorProcessManager = new TorProcessManager(Configuration);
-                var torInitialized = TorProcessManager.Start();
-
-                SpinWait.SpinUntil(() => torInitialized, 10000);
-                if (torInitialized)
+                //User manager
+                UserManager = new UserManager(Configuration);
+                if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
                 {
-                    //Loading 
-                    LoadingEvent?.Invoke(this, "Loading Tor Circles Info...");
-                    ServerPublicAddress.GetMyTorExitIP();
+                    //Service manager
+                    LoadingEvent?.Invoke(this, "Loading Service Manager...");
+                    ServiceManager = new ServiceManager(Configuration, NetworkHeartbeatEvent);
+                    ServiceManager.Start();
 
-                    //Chat Manager
-                    LoadingEvent?.Invoke(this, "Loading Chat Manager...");
-                    Chats = new ChatManager(Configuration, Users.PrivateKey, Users, ServerPublicAddress.PublicIP);
-                    Chats.Start();
+                    //Market Manager
+                    LoadingEvent?.Invoke(this, "Loading Market Manager...");
+                    MarketManager = new MarketManager(Configuration);
 
-                    //Initialize OnionSeeds
-                    LoadingEvent?.Invoke(this, "Loading Onion Seed Manager...");
-                    OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
-                    OnionSeedsManager.Start();
+                    //Initialize Tor
+                    LoadingEvent?.Invoke(this, "Loading Tor Manager...");
+                    TorProcessManager = new TorProcessManager(Configuration);
+                    var torInitialized = TorProcessManager.Start();
 
-                    //Initialize Base BlockChain Manager
-                    LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
-                    BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
-                    BaseBlockChainChangedEvent += new EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)>(Current.BaseBlockChainChanged);
+                    SpinWait.SpinUntil(() => torInitialized, 10000);
+                    if (torInitialized)
+                    {
+                        //Loading 
+                        LoadingEvent?.Invoke(this, "Loading Tor Circles Info...");
+                        ServerPublicAddress.GetMyTorExitIP();
 
-                    BaseBlockChainManager = new BlockChainManager<BaseAction>(
-                        Configuration,
-                        Configuration.BlockChainBasePath,
-                        Configuration.BlockChainSecretPath,
-                        Configuration.BlockChainBaseGenesis,
-                        Configuration.BlockChainBasePolicy,
-                        Configuration.ListenerBaseEndPoint,
-                        OnionSeedsManager,
-                        Users.PrivateKey,
-                        preloadEnded: BaseBlockChainLoadEndedEvent,
-                        blockChainChanged: BaseBlockChainChangedEvent);
-                    BaseBlockChainManager.Start();
+                        //Chat Manager
+                        LoadingEvent?.Invoke(this, "Loading Chat Manager...");
+                        ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, ServerPublicAddress.PublicIP);
+                        ChatManager.Start();
 
-                    //Initialize Base Pool
-                    LoadingEvent?.Invoke(this, "Loading Base Pool Manager...");
-                    BasePoolManager = new BasePoolManager(
-                        Configuration,
-                        Configuration.MemoryBasePoolPath,
-                        BaseBlockChainManager.Storage,
-                        BaseBlockChainManager.SwarmServer,
-                        BaseBlockChainManager.PrivateKey,
-                        BaseBlockChainManager.BlockChain,
-                        Configuration.BlockChainBasePolicy);
-                    BasePoolManager.Start();
+                        //Initialize OnionSeeds
+                        LoadingEvent?.Invoke(this, "Loading Onion Seed Manager...");
+                        OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
+                        OnionSeedsManager.Start();
 
-                      //Search indexer
-                    LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
-                    XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
-                    SearchIndexer = new SearchIndexer(Markets, Configuration, new XRCHelper(client), Users, BasePoolManager, BaseBlockChainManager);
-                    SearchIndexer.Initialize();
-                    SearchEngine = new SearchEngine(Markets, SearchHelper.GetDataFolder(Configuration));
+                        //Initialize XRC Daemon
+                        LoadingEvent?.Invoke(this, "Loading XRC Daemon...");
+                        XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+
+                        //Initializing Search Indexer
+                        LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
+                        SearchIndexer = new SearchIndexer(MarketManager, Configuration, new XRCHelper(client), UserManager);
+                        SpinWait.SpinUntil(() => SearchIndexer.IsSearchIndexerRunning());
+
+                        //Initialize Base BlockChain Manager
+                        LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
+                        BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
+                        BaseBlockChainChangedEvent += new EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)>(Current.BaseBlockChainChanged);
+
+                        BaseBlockChainManager = new BlockChainManager<BaseAction>(
+                            Configuration,
+                            Configuration.BlockChainBasePath,
+                            Configuration.BlockChainSecretPath,
+                            Configuration.BlockChainBaseGenesis,
+                            Configuration.BlockChainBasePolicy,
+                            Configuration.ListenerBaseEndPoint,
+                            OnionSeedsManager,
+                            UserManager.PrivateKey,
+                            new BaseChainProtocolVersion(),
+                            preloadEnded: BaseBlockChainLoadEndedEvent,
+                            blockChainChanged: BaseBlockChainChangedEvent);
+
+                        LoadingEvent?.Invoke(this, "Starting BaseChain Initial Block Download...");
+                        BaseBlockChainManager.Start();
+
+                        //Initialize Base Pool
+                        LoadingEvent?.Invoke(this, "Loading Base Pool Manager...");
+                        BasePoolManager = new BasePoolManager(
+                            Configuration,
+                            Configuration.MemoryBasePoolPath,
+                            BaseBlockChainManager.Storage,
+                            BaseBlockChainManager.SwarmServer,
+                            BaseBlockChainManager.PrivateKey,
+                            BaseBlockChainManager.BlockChain,
+                            Configuration.BlockChainBasePolicy);
+
+                        LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
+                        BasePoolManager.Start();
+
+                        //Initializing Search Engine
+                        LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
+                        SearchIndexer.Initialize(BasePoolManager, BaseBlockChainManager);
+                        SearchEngine = new SearchEngine(MarketManager, SearchHelper.GetDataFolder(Configuration));
+                    }
+                    else
+                    {
+                        _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
+                    }
                 }
                 else
                 {
-                    _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
+                    _logger.Warning("No user account is necessary to create one.");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.Warning("No user account is necessary to create one.");
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
             }
         }
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
-            //Initialize Base Pool Manager
-            if (BaseBlockChainManager.IsBlockChainManagerRunning())
+            try
             {
+                //Initialize Base Pool Manager
+                if (BaseBlockChainManager.IsBlockChainManagerRunning())
+                {
+                    //Add Swarm server to seed manager
+                    OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
 
-                //Add Swarm server to seed manager
-                OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
+                    //Initialize Market Blockchain Manager
+                    LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
+                    MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
+                    MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(Current.MarketBlockChainChanged);
 
-                //Initialize Market Blockchain Manager
-                LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
-                MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
-                MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(Current.MarketBlockChainChanged);
+                    var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                    var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
 
-                var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
-                var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
+                    MarketBlockChainManager = new BlockChainManager<MarketAction>(
+                        Configuration,
+                        Configuration.BlockChainMarketPath,
+                        Configuration.BlockChainSecretPath,
+                        Configuration.BlockChainMarketGenesis,
+                        Configuration.BlockChainMarketPolicy,
+                        Configuration.ListenerMarketEndPoint,
+                        OnionSeedsManager,
+                        UserManager.PrivateKey,
+                        new MarketChainProtocolVersion(),
+                        hashCheckPoints,
+                        genesisBlock,
+                        preloadEnded: MarketBlockChainLoadEndedEvent,
+                        blockChainChanged: MarketBlockChainChangedEvent,
+                        clearedOlderBlocks: MarketBlockClearedOldersEvent);
 
-                MarketBlockChainManager = new BlockChainManager<MarketAction>(
-                    Configuration,
-                    Configuration.BlockChainMarketPath,
-                    Configuration.BlockChainSecretPath,
-                    Configuration.BlockChainMarketGenesis,
-                    Configuration.BlockChainMarketPolicy,
-                    Configuration.ListenerMarketEndPoint,
-                    OnionSeedsManager,
-                    Users.PrivateKey,
-                    hashCheckPoints,
-                    genesisBlock,
-                    preloadEnded: MarketBlockChainLoadEndedEvent,
-                    blockChainChanged: MarketBlockChainChangedEvent,
-                    clearedOlderBlocks: MarketBlockClearedOldersEvent);
-                MarketBlockChainManager.Start();
+                    LoadingEvent?.Invoke(this, "Starting MarketChain Initial Block Download...");
+                    MarketBlockChainManager.Start();
+                }
+                else
+                {
+                    _logger.Error("Base Chain isnt loaded!");
+                    Stop();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.Error("Base Chain isnt loaded!");
-                Stop();
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
             }
+        }
+
+        private void MarketBlockChainLoaded(object sender, EventArgs e)
+        {
+            try
+            {
+                //Initialize Market Pool Manager
+                if (MarketBlockChainManager.IsBlockChainManagerRunning())
+                {
+                    LoadingEvent?.Invoke(this, "Loading Market Pool Manager...");
+                    //Add Swarm server to seed manager
+                    OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
+
+                    MarketPoolManager = new MarketPoolManager(
+                        Configuration,
+                        Configuration.MemoryBasePoolPath,
+                        MarketBlockChainManager.Storage,
+                        MarketBlockChainManager.SwarmServer,
+                        MarketBlockChainManager.PrivateKey,
+                        MarketBlockChainManager.BlockChain,
+                        Configuration.BlockChainMarketPolicy);
+
+                    LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
+                    MarketPoolManager.Start();
+
+                    //Event that server is loaded
+                    RaiseAsyncServerLoadedEvent();
+                }
+                else
+                {
+                    _logger.Error("Market Chain isnt loaded!");
+                    Stop();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
+            }
+        }
+
+        async void RaiseAsyncServerLoadedEvent()
+        {
+            await Task.Delay(1000);
+            await Task.Run(() =>
+            {
+                try
+                {
+                    if (UserManager != null)
+                    {
+                        if (UserManager.UsedDataForceToPropagate && (UserManager.UserData != null))
+                        {
+                            if (BasePoolManager.AcceptActionItem(UserManager.UserData) == null)
+                            {
+                                BasePoolManager.PropagateAllActionItemLocal(true);
+                            }
+                        }
+                        else
+                        {
+                            //loading actual user data from pool or blockchain
+                            var userData = UserManager.GetActualUserData(Current.BasePoolManager, Current.BaseBlockChainManager);
+                            if ((userData != null) && (userData != UserManager.UserData))
+                            {
+                                UserManager.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
+                            }
+                        }
+                    }
+
+                    FreeMarketOneServerLoadedEvent?.Invoke(this, null);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message);
+                    _logger.Error(ex.StackTrace);
+                }
+            }).ConfigureAwait(true);
         }
 
         /// <summary>
@@ -242,78 +349,28 @@ namespace FreeMarketOne.ServerCore
         /// <param name="e"></param>
         private void BaseBlockChainChanged(object sender, (Block<BaseAction> OldTip, Block<BaseAction> NewTip) e)
         {
-            if (e.NewTip != null)
+            try
             {
-                _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
-
-                _logger.Information($"New block SearchIndexing");
-                SearchIndexer.IndexBlock(e.NewTip);
-            }
-            else if ((e.NewTip == null) && (e.OldTip != null))
-            {
-                _logger.Information($"Recieved base orphaned block notification {e.OldTip.Hash}");
-
-                _logger.Information($"Clearing block SearchIndexing");
-                SearchIndexer.UnIndexBlock(e.OldTip);
-            }
-        }
-
-        private void MarketBlockChainLoaded(object sender, EventArgs e)
-        {
-            //Initialize Market Pool Manager
-            if (MarketBlockChainManager.IsBlockChainManagerRunning())
-            {
-                LoadingEvent?.Invoke(this, "Loading Market Pool Manager...");
-                //Add Swarm server to seed manager
-                OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
-
-                MarketPoolManager = new MarketPoolManager(
-                    Configuration,
-                    Configuration.MemoryBasePoolPath,
-                    MarketBlockChainManager.Storage,
-                    MarketBlockChainManager.SwarmServer,
-                    MarketBlockChainManager.PrivateKey,
-                    MarketBlockChainManager.BlockChain,
-                    Configuration.BlockChainMarketPolicy);
-                MarketPoolManager.Start();
-
-                //Event that server is loaded
-                RaiseAsyncServerLoadedEvent();
-            }
-            else
-            {
-                _logger.Error("Market Chain isnt loaded!");
-                Stop();
-            }
-        }
-
-        async void RaiseAsyncServerLoadedEvent()
-        {
-            await Task.Delay(1000);
-            await Task.Run(() =>
-            {
-                if (Users != null)
+                if (e.NewTip != null)
                 {
-                    if (Users.UsedDataForceToPropagate && (Users.UserData != null))
-                    {
-                        if (BasePoolManager.AcceptActionItem(Users.UserData) == null)
-                        {
-                            BasePoolManager.PropagateAllActionItemLocal(true);
-                        }
-                    }
-                    else
-                    {
-                        //loading actual user data from pool or blockchain
-                        var userData = Users.GetActualUserData(Current.BasePoolManager, Current.BaseBlockChainManager);
-                        if ((userData != null) && (userData != Users.UserData))
-                        {
-                            Users.SaveUserData(userData, Configuration.FullBaseDirectory, Configuration.BlockChainUserPath);
-                        }
-                    }
-                }
+                    _logger.Information($"Recieved base block downloaded notification {e.NewTip.Hash}");
 
-                FreeMarketOneServerLoadedEvent?.Invoke(this, null);
-            }).ConfigureAwait(true);
+                    _logger.Information($"New block SearchIndexing");
+                    SearchIndexer.IndexBlock(e.NewTip);
+                }
+                else if ((e.NewTip == null) && (e.OldTip != null))
+                {
+                    _logger.Information($"Recieved base orphaned block notification {e.OldTip.Hash}");
+
+                    _logger.Information($"Clearing block SearchIndexing");
+                    SearchIndexer.UnIndexBlock(e.OldTip);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
+            }
         }
 
         /// <summary>
@@ -323,24 +380,32 @@ namespace FreeMarketOne.ServerCore
         /// <param name="e"></param>
         private void MarketBlockChainChanged(object sender, (Block<MarketAction> OldTip, Block<MarketAction> NewTip) e)
         {
-            if (e.NewTip != null)
+            try
             {
-                _logger.Information($"Recieved market block downloaded notification {e.NewTip.Hash}");
+                if (e.NewTip != null)
+                {
+                    _logger.Information($"Recieved market block downloaded notification {e.NewTip.Hash}");
 
-                _logger.Information($"New block SearchIndexing");
-                backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
+                    _logger.Information($"New block SearchIndexing");
+                    backgroundQueue.QueueTask(() => SearchIndexer.IndexBlock(e.NewTip));
 
-                _logger.Information("New block processing for chat - item hash");
-                Current.Chats.ProcessNewBlock(e.NewTip);
+                    _logger.Information("New block processing for chat - item hash");
+                    Current.ChatManager.ProcessNewBlock(e.NewTip);
+                }
+                else if ((e.NewTip == null) && (e.OldTip != null))
+                {
+                    _logger.Information($"Recieved market orphaned block notification {e.OldTip.Hash}");
+
+                    _logger.Information($"Clearing block SearchIndexing");
+                    SearchIndexer.UnIndexBlock(e.OldTip);
+
+                    //TODO: CHAT?????
+                }
             }
-            else if ((e.NewTip == null) && (e.OldTip != null))
+            catch (Exception ex)
             {
-                _logger.Information($"Recieved market orphaned block notification {e.OldTip.Hash}");
-
-                _logger.Information($"Clearing block SearchIndexing");
-                SearchIndexer.UnIndexBlock(e.OldTip);
-
-                //TODO: CHAT?????
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
             }
         }
 
@@ -350,20 +415,20 @@ namespace FreeMarketOne.ServerCore
         /// <returns></returns>
         public FreeMarketOneServerStates GetServerState()
         {
-            if (Services == null)
+            if (ServiceManager == null)
             {
                 return FreeMarketOneServerStates.NotReady;
             } 
             else
             {
-                return Services.GetServerState();
+                return ServiceManager.GetServerState();
             }
         }
 
         public void Stop()
         {
             _logger?.Information("Ending Service Manager...");
-            Services?.Dispose();
+            ServiceManager?.Dispose();
 
             _logger?.Information("Ending Base Pool Manager...");
             BasePoolManager?.Dispose();
@@ -385,13 +450,13 @@ namespace FreeMarketOne.ServerCore
             TorProcessManager?.Dispose();
 
             _logger?.Information("Ending Chat Manager...");
-            Chats?.Dispose();
+            ChatManager?.Dispose();
 
             _logger?.Information("Ending User Manager...");
-            Users = null;
+            UserManager = null;
 
             _logger?.Information("Ending Market Manager...");
-            Markets = null;
+            MarketManager = null;
 
             _logger?.Information("Application End");
         }

@@ -33,12 +33,12 @@ namespace FreeMarketApp.Views
 
             InitializeComponent();
 
-            if (FMONE.Current.Users != null)
+            if (FMONE.Current.UserManager != null)
             {
                 FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
-                if (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
+                if (FMONE.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid)
                 {
                     PagesHelper.Log(_logger, "Private Key is valid adding MainPage instance.");
 
@@ -52,8 +52,8 @@ namespace FreeMarketApp.Views
                 {
                     PagesHelper.Log(_logger, "Private Key is not valid. Showing fist or login page.");
 
-                    if ((FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
-                        || (FMONE.Current.Users.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
+                    if ((FMONE.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.NoPassword)
+                        || (FMONE.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.WrongPassword))
                     {
                         pcMainContent.Children.Add(LoginPage.Instance);
 

@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static FreeMarketOne.Extensions.Common.ServiceHelper;
 
 namespace FreeMarketOne.Tor
 {
@@ -34,9 +35,9 @@ namespace FreeMarketOne.Tor
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
-        private long running;
+        private CommonStates _running;
 
-        public bool IsRunning => Interlocked.Read(ref running) == 1;
+        public bool IsRunning => _running == CommonStates.Running;
 
         private CancellationTokenSource _stop { get; set; }
 
@@ -50,7 +51,7 @@ namespace FreeMarketOne.Tor
             _logger.Information("Initializing Tor Process Manager");
 
             _configuration = configuration;
-            Interlocked.Exchange(ref running, 0);
+            _running = CommonStates.NotStarted;
             _stop = new CancellationTokenSource();
 			_torProcess = null;
 		}
@@ -169,7 +170,7 @@ namespace FreeMarketOne.Tor
                 }
             //}).Start();
 
-            Interlocked.Exchange(ref running, 1);
+            _running = CommonStates.Running;
 
             return true;
         }
@@ -380,11 +381,11 @@ namespace FreeMarketOne.Tor
 
         public void Stop()
         {
-            Interlocked.CompareExchange(ref running, 2, 1); // If running, make it stopping.
+            _running = CommonStates.Stopping;
 
             if (_configuration.TorEndPoint is null)
             {
-                Interlocked.Exchange(ref running, 3);
+                _running = CommonStates.Stopped;
             }
 
             _stop?.Cancel();

@@ -22,6 +22,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static FreeMarketOne.Extensions.Common.ServiceHelper;
 
 namespace FreeMarketOne.Chats
 {
@@ -43,9 +44,9 @@ namespace FreeMarketOne.Chats
         private IPAddress _serverPublicAddress { get; set; }
 
         /// <summary>
-        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped, 4: Mining
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
-        private long _running;
+        private CommonStates _running;
 
         private ILogger _logger { get; set; }
 
@@ -53,7 +54,7 @@ namespace FreeMarketOne.Chats
 
         private const int RequestTimeout = 5000; // ms
 
-        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        public bool IsRunning => _running == CommonStates.Running;
 
         public ChatManager(IBaseConfiguration configuration,
             UserPrivateKey privateKey,
@@ -97,7 +98,7 @@ namespace FreeMarketOne.Chats
         /// <returns></returns>
         public bool IsChatManagerRunning()
         {
-            if (Interlocked.Read(ref _running) == 1)
+            if (_running == CommonStates.Running)
             {
                 return true;
             }
@@ -112,7 +113,7 @@ namespace FreeMarketOne.Chats
         /// </summary>
         public void Start()
         {
-            Interlocked.Exchange(ref _running, 1);
+            _running = CommonStates.Running;
 
             StartMQListener();
 
@@ -656,11 +657,11 @@ namespace FreeMarketOne.Chats
 
         public void Dispose()
         {
-            Interlocked.Exchange(ref _running, 2);
+            _running = CommonStates.Stopping;
 
             _cancellationToken.Cancel();
 
-            Interlocked.Exchange(ref _running, 3);
+            _running = CommonStates.Stopped;
         }
     }
 }

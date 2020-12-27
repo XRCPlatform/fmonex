@@ -16,7 +16,7 @@ namespace Libplanet.Tests.Blockchain
         [Fact]
         public void ValidateNextBlock()
         {
-            var validNextBlock = Block<DumbAction>.Mine(
+            var validNextBlock = new Block<DumbAction>().Mine(
                 1,
                 1024,
                 _fx.GenesisBlock.TotalDifficulty,
@@ -33,7 +33,7 @@ namespace Libplanet.Tests.Blockchain
         {
             _blockChain.Append(_validNext);
 
-            var invalidIndexBlock = Block<DumbAction>.Mine(
+            var invalidIndexBlock = new Block<DumbAction>().Mine(
                 1,
                 1,
                 _fx.GenesisBlock.TotalDifficulty,
@@ -50,7 +50,7 @@ namespace Libplanet.Tests.Blockchain
         {
             _blockChain.Append(_validNext);
 
-            var invalidDifficultyBlock = Block<DumbAction>.Mine(
+            var invalidDifficultyBlock = new Block<DumbAction>().Mine(
                 2,
                 1,
                 _validNext.TotalDifficulty,
@@ -67,7 +67,7 @@ namespace Libplanet.Tests.Blockchain
         {
             _blockChain.Append(_validNext);
 
-            var invalidTotalDifficultyBlock = Block<DumbAction>.Mine(
+            var invalidTotalDifficultyBlock = new Block<DumbAction>().Mine(
                 2,
                 _policy.GetNextBlockDifficulty(_blockChain),
                 _validNext.TotalDifficulty - 1,
@@ -84,7 +84,7 @@ namespace Libplanet.Tests.Blockchain
         {
             _blockChain.Append(_validNext);
 
-            var invalidPreviousHashBlock = Block<DumbAction>.Mine(
+            var invalidPreviousHashBlock = new Block<DumbAction>().Mine(
                 2,
                 1032,
                 _validNext.TotalDifficulty,
@@ -101,7 +101,7 @@ namespace Libplanet.Tests.Blockchain
         {
             _blockChain.Append(_validNext);
 
-            var invalidPreviousTimestamp = Block<DumbAction>.Mine(
+            var invalidPreviousTimestamp = new Block<DumbAction>().Mine(
                 2,
                 1032,
                 _validNext.TotalDifficulty,
@@ -133,7 +133,7 @@ namespace Libplanet.Tests.Blockchain
                 stateStore,
                 genesisBlock);
 
-            var validNext = Block<DumbAction>.Mine(
+            var validNext = new Block<DumbAction>().Mine(
                 1,
                 1024,
                 genesisBlock.TotalDifficulty,
@@ -149,7 +149,7 @@ namespace Libplanet.Tests.Blockchain
                 new Block<DumbAction>(validNext, stateStore.GetRootHash(validNext.Hash));
             chain.Append(validNext);
 
-            var invalidStateRootHash = Block<DumbAction>.Mine(
+            var invalidStateRootHash = new Block<DumbAction>().Mine(
                 2,
                 1032,
                 validNext.TotalDifficulty,

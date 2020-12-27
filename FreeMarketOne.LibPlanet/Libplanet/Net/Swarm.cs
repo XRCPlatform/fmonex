@@ -1092,7 +1092,7 @@ namespace Libplanet.Net
                     foreach (byte[] payload in payloads)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        Block<T> block = Block<T>.Deserialize(payload);
+                        Block<T> block = new Block<T>().Deserialize(payload);
 
                         yield return block;
                     }

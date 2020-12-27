@@ -195,7 +195,7 @@ namespace Libplanet.Tests.Blocks
             };
 
             Block<PolymorphicAction<BaseAction>> actual =
-                Block<PolymorphicAction<BaseAction>>.Deserialize(encoded);
+                new Block<PolymorphicAction<BaseAction>>().Deserialize(encoded);
             Assert.Equal(_fx.HasTx, actual);
             Assert.Equal(actual.BytesLength, encoded.Length);
             AssertBytesEqual(_fx.HasTx.Serialize(), encoded);
@@ -569,7 +569,7 @@ namespace Libplanet.Tests.Blocks
         public void CanDetectInvalidTimestamp()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            var block = Block<DumbAction>.Mine(
+            var block = new Block<DumbAction>().Mine(
                 _fx.Next.Index,
                 _fx.Next.Difficulty,
                 _fx.Genesis.TotalDifficulty,

@@ -247,7 +247,7 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             Block<T> block;
             if (nonce == null)
             {
-                block = Block<T>.Mine(
+                block = new Block<T>().Mine(
                     index: index,
                     difficulty: difficulty,
                     previousTotalDifficulty: previousBlock.TotalDifficulty,

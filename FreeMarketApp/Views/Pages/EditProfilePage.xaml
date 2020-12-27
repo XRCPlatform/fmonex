@@ -85,8 +85,8 @@
 				
                 <!-- Save/Cancel Buttons -->
                 <DockPanel Margin="20 20 20 0">
-                    <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Width="110" Click="ButtonSave_Click" Cursor="Hand">Save</Button>
-                    <Button Classes="action" BorderThickness="0" HorizontalAlignment="Right" Width="110" FontSize="16" Click="ButtonCancel_Click" Cursor="Hand" Margin="0 30 10 0">Cancel</Button>
+                    <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Width="130" Click="ButtonSave_Click" Cursor="Hand">Save</Button>
+                    <Button Classes="pagination" HorizontalAlignment="Right" Width="130" Height="40" FontSize="16" Click="ButtonCancel_Click" Cursor="Hand" Margin="0 30 10 0">Cancel</Button>
                 </DockPanel>
             </StackPanel>
         </ScrollViewer>

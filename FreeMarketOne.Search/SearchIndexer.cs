@@ -17,6 +17,9 @@ using FreeMarketOne.Pools;
 using FreeMarketOne.BlockChain;
 using static FreeMarketOne.Markets.MarketManager;
 using System.Threading.Tasks;
+using System.Threading;
+using Serilog;
+using static FreeMarketOne.Extensions.Common.ServiceHelper;
 
 namespace FreeMarketOne.Search
 {
@@ -31,14 +34,25 @@ namespace FreeMarketOne.Search
         private readonly string _indexLocation;
         private readonly IBaseConfiguration _configuration;
         private readonly IUserManager _userManager;
-        private readonly BasePoolManager _basePoolManager;
-        private readonly IBlockChainManager<BaseAction> _baseBlockChain;
-        private static object lockobject = new object();
+        private BasePoolManager _basePoolManager;
+        private IBlockChainManager<BaseAction> _baseBlockChain;
         private NormalizedStore _normalizedStore;
         private SearchEngine _engine;
 
-        public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager, BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
+        /// <summary>
+        /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
+        /// </summary>
+        private CommonStates _running;
+        public bool IsRunning => _running == CommonStates.Running;
+        private ILogger _logger { get; set; }
+
+        private static object lockobject = new object();
+
+        public SearchIndexer(IMarketManager marketManager, IBaseConfiguration baseConfiguration, IXRCHelper XRCHelper, IUserManager userManager)
         {
+            _logger = Log.Logger.ForContext<MarketManager>();
+            _logger.Information("Initializing Search Indexer");
+
             var AppLuceneVersion = LuceneVersion.LUCENE_48;
             string indexLocation = SearchHelper.GetDataFolder(baseConfiguration);
 
@@ -58,13 +72,17 @@ namespace FreeMarketOne.Search
             _xrcCalculator = XRCHelper;
             _configuration = baseConfiguration;
             _userManager = userManager;
-            _basePoolManager = basePoolManager;
-            _baseBlockChain = baseBlockChain;
             _engine = new SearchEngine(_marketManager, _indexLocation, 10);
             _normalizedStore = new NormalizedStore(indexLocation);
+
+            InitStorage();
+
+            _running = CommonStates.Running;
+
+            _logger.Information("Initialized Search Indexer Storage");
         }
 
-        public bool Initialize()
+        private bool InitStorage()
         {
             Document doc = new Document()
             {
@@ -81,7 +99,29 @@ namespace FreeMarketOne.Search
             Writer.Commit();
             _taxoWriter.Commit();
 
+            Thread.Sleep(250);
+
             return true;
+        }
+
+        public bool IsSearchIndexerRunning()
+        {
+            if (_running == CommonStates.Running)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Initialize(BasePoolManager basePoolManager, IBlockChainManager<BaseAction> baseBlockChain)
+        {
+            _logger.Information("Initialized Search Indexer base pool and block manager.");
+
+            _basePoolManager = basePoolManager;
+            _baseBlockChain = baseBlockChain;
         }
 
         private IndexWriter Writer
@@ -162,8 +202,8 @@ namespace FreeMarketOne.Search
                     new DoubleDocValuesField("Price", marketItem.Price),
                     new StoredField("MarketItem", JsonConvert.SerializeObject(marketItem)),
                     new StoredField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume),
-                    new TextField("SellerName",sellerAggregate?.SellerName,Field.Store.NO),
-                    new StoredField("SellerStarsRating",(double)sellerAggregate?.StarRating)
+                    new TextField("SellerName", sellerAggregate?.SellerName, Field.Store.NO),
+                    new StoredField("SellerStarsRating", (double)sellerAggregate?.StarRating)
                     //new NumericDocValuesField("XrcTotal", (long)sellerAggregate?.TotalXRCVolume)
                 };
 
@@ -444,9 +484,13 @@ namespace FreeMarketOne.Search
 
         public void Dispose()
         {
+            _running = CommonStates.Stopping;
+
             Writer.Commit();
             Writer.Dispose();
             _taxoWriter.Dispose();
+
+            _running = CommonStates.Stopped;
         }
 
     }

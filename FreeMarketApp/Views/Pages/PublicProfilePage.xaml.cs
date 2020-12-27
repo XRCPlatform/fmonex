@@ -61,7 +61,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadUser(string signature, string hash)
         {
-            var userData = FMONE.Current.Users.GetUserDataBySignatureAndHash(
+            var userData = FMONE.Current.UserManager.GetUserDataBySignatureAndHash(
                 signature, hash, FMONE.Current.BasePoolManager, FMONE.Current.BaseBlockChainManager);
 
             if (userData != null)
@@ -84,7 +84,7 @@ namespace FreeMarketApp.Views.Pages
 
                 if (reviews.Any())
                 {
-                    var reviewStars = FMONE.Current.Users.GetUserReviewStars(reviews);
+                    var reviewStars = FMONE.Current.UserManager.GetUserReviewStars(reviews);
                     var reviewStartRounded = Math.Round(reviewStars, 1, MidpointRounding.AwayFromZero);
 
                     for (int i = 0; i < reviewStartRounded; i++)

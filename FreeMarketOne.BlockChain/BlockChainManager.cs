@@ -23,6 +23,9 @@ using Libplanet.Extensions.Helpers;
 using Libplanet.Extensions;
 using FreeMarketOne.GenesisBlock;
 using System.Security.Cryptography;
+using FreeMarketOne.DataStructure.ProtocolVersions;
+using FreeMarketOne.Extensions.Common;
+using static FreeMarketOne.Extensions.Common.ServiceHelper;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -33,9 +36,9 @@ namespace FreeMarketOne.BlockChain
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
-        private long _running;
+        private CommonStates _running;
 
-        public bool IsRunning => Interlocked.Read(ref _running) == 1;
+        public bool IsRunning => _running == CommonStates.Running;
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private string _blockChainFilePath { get; set; }
@@ -50,7 +53,7 @@ namespace FreeMarketOne.BlockChain
         private IImmutableSet<Address> _trustedPeers;
 
         private IOnionSeedsManager _onionSeedManager;
-
+        private IProtocolVersion _protocolVersion;
         private PeerBootstrapWorker<T> _peerBootstrapWorker { get; set; }
         private List<CheckPointMarketDataV1> _hashCheckPoints { get; set; }
         private EventHandler _bootstrapStarted { get; set; }
@@ -93,6 +96,7 @@ namespace FreeMarketOne.BlockChain
             EndPoint endPoint,
             IOnionSeedsManager seedsManager,
             UserPrivateKey userPrivateKey,
+            IProtocolVersion protocolVersion,
             List<IBaseItem> listHashCheckPoints = null,
             Block<T> genesisBlock = null,
             EventHandler bootstrapStarted = null,
@@ -131,16 +135,9 @@ namespace FreeMarketOne.BlockChain
             _preloadEnded = preloadEnded;
             _blockChainChanged = blockChainChanged;
             _clearedOlderBlocks = clearedOlderBlocks;
+            _protocolVersion = protocolVersion;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
-        }
-
-        private bool DifferentAppProtocolVersionEncountered(
-            Peer peer,
-            AppProtocolVersion peerVersion,
-            AppProtocolVersion localVersion)
-        {
-            return false;
         }
 
         public bool Start()
@@ -148,8 +145,6 @@ namespace FreeMarketOne.BlockChain
             _cancellationToken = new CancellationTokenSource();
             var host = _endPoint.GetHostOrDefault();
             int? port = _endPoint.GetPortOrDefault();
-
-            var appProtocolVersion = default(AppProtocolVersion);
 
             _blockChain = new BlockChain<T>(
                 _blockChainPolicy,
@@ -167,18 +162,18 @@ namespace FreeMarketOne.BlockChain
                 _swarmServer = new Swarm<T>(
                     _blockChain,
                     _privateKey,
-                    appProtocolVersion: appProtocolVersion,
+                    appProtocolVersion: _protocolVersion.GetProtocolVersion(),
                     host: host,
                     listenPort: port,
                     iceServers: null,
-                    differentAppProtocolVersionEncountered: DifferentAppProtocolVersionEncountered,
-                    trustedAppProtocolVersionSigners: null);
+                    differentAppProtocolVersionEncountered: _protocolVersion.DifferentAppProtocolVersionEncountered,
+                    trustedAppProtocolVersionSigners: _protocolVersion.GetProtocolSigners());
 
                 var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
                 _trustedPeers = _seedPeers.Select(peer => peer.Address).ToImmutableHashSet();
-                
-                Interlocked.Exchange(ref _running, 1);
+
+                _running = CommonStates.Running;
 
                 //init Peer Bootstrap Worker
                 _peerBootstrapWorker = new PeerBootstrapWorker<T>(
@@ -235,7 +230,7 @@ namespace FreeMarketOne.BlockChain
 
         public bool IsBlockChainManagerRunning()
         {
-            if (Interlocked.Read(ref _running) == 1)
+            if (_running == CommonStates.Running)
             {
                 return true;
             }
@@ -293,12 +288,12 @@ namespace FreeMarketOne.BlockChain
             var genesisHelper = new GenesisHelper();
             var genesisBytes = genesisHelper.GetGenesis(_blockChainGenesisName);
 
-            return Block<T>.Deserialize(genesisBytes);
+            return new Block<T>().Deserialize(genesisBytes);
         }
 
         public void Stop()
         {
-            Interlocked.Exchange(ref _running, 2);
+            _running = CommonStates.Stopping;
 
             _peerBootstrapWorker?.Dispose();
             _peerBootstrapWorker = null;
@@ -361,7 +356,7 @@ namespace FreeMarketOne.BlockChain
         {
             Stop();
 
-            Interlocked.Exchange(ref _running, 3);
+            _running = CommonStates.Stopped;
         }
 
         public async Task ReConnectAfterNetworkLossAsync()

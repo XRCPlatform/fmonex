@@ -70,7 +70,7 @@ namespace FreeMarketApp.Views.Pages
             var signature = ((Button)sender).Tag.ToString();
             if (result == MessageBox.MessageBoxResult.Yes)
             {
-                var offer = FMONE.Current.Markets.GetOfferBySignature(
+                var offer = FMONE.Current.MarketManager.GetOfferBySignature(
                     signature,
                     FMONE.Current.MarketPoolManager,
                     FMONE.Current.MarketBlockChainManager);
@@ -80,7 +80,7 @@ namespace FreeMarketApp.Views.Pages
                     offer.State = (int)MarketManager.ProductStateEnum.Removed;
 
                     //sign market data and generating chain connection
-                    offer = FMONE.Current.Markets.SignMarketData(offer, FMONE.Current.Users.PrivateKey);
+                    offer = FMONE.Current.MarketManager.SignMarketData(offer, FMONE.Current.UserManager.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Saving remove of product to chain {0}.", signature));
 
@@ -130,7 +130,7 @@ namespace FreeMarketApp.Views.Pages
 
         public void LoadProduct(string signature)
         {
-            var offer = FMONE.Current.Markets.GetOfferBySignature(
+            var offer = FMONE.Current.MarketManager.GetOfferBySignature(
                 signature,
                 FMONE.Current.MarketPoolManager,
                 FMONE.Current.MarketBlockChainManager);

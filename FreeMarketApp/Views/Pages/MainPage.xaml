@@ -6,21 +6,60 @@
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.MainPage">
-
+	
+	
+	<UserControl.Styles>
+		<!-- View switcher -->
+		<Style Selector="RadioButton.List">
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Border CornerRadius="3" Width="37" Height="23">
+						<Path Data="M547.2973,0A47.23707,47.23707,0,0,0,500,47.2973V510.34592a47.23694,47.23694,0,0,0,47.2973,47.2973H3447.63515a47.41535,47.41535,0,0,0,47.50679-47.2973V47.2973A47.416,47.416,0,0,0,3447.63515,0Zm0,1221.28379A47.23694,47.23694,0,0,0,500,1268.58109v462.83784a47.237,47.237,0,0,0,47.2973,47.29729H3447.63515a47.41588,47.41588,0,0,0,47.50679-47.29729V1268.58109a47.41582,47.41582,0,0,0-47.50679-47.2973Zm1.90034,1221.07429a47.237,47.237,0,0,0-47.2973,47.2973v463.04733A47.237,47.237,0,0,0,549.19764,3000H3449.53383a47.41588,47.41588,0,0,0,47.5068-47.2973V2489.65538a47.41166,47.41166,0,0,0-47.5068-47.2973Z"
+						Height="13" Stretch="Fill" Width="13"/>
+					</Border>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+		
+		<Style Selector="RadioButton.Grid">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Width" Value="37"/>
+			<Setter Property="Height" Value="23"/>
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Border CornerRadius="3" Width="37" Height="23">
+						<Path VerticalAlignment="Center" Data="M547.2973,0A47.287,47.287,0,0,0,500,47.2973v1222.973a47.28775,47.28775,0,0,0,47.2973,47.29729h1222.973a47.28855,47.28855,0,0,0,47.29729-47.29729V47.2973A47.28775,47.28775,0,0,0,1770.27028,0ZM2229.72974,0a47.28776,47.28776,0,0,0-47.2973,47.2973v1222.973a47.28855,47.28855,0,0,0,47.2973,47.29729h1222.973A47.28855,47.28855,0,0,0,3500,1270.27028V47.2973A47.28776,47.28776,0,0,0,3452.70271,0ZM547.2973,1682.43244A47.28776,47.28776,0,0,0,500,1729.72974v1222.973A47.28776,47.28776,0,0,0,547.2973,3000h1222.973a47.28855,47.28855,0,0,0,47.29729-47.2973v-1222.973a47.28855,47.28855,0,0,0-47.29729-47.2973Zm1682.43244,0a47.28855,47.28855,0,0,0-47.2973,47.2973v1222.973A47.28855,47.28855,0,0,0,2229.72974,3000h1222.973A47.28855,47.28855,0,0,0,3500,2952.70271v-1222.973a47.28855,47.28855,0,0,0-47.2973-47.2973Z"
+						Height="13" Stretch="Fill" Width="13"/>
+					</Border>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+	</UserControl.Styles>
+		
+		
     <Grid Margin="0" Classes="Main">
        <!-- SIDEBAR -->
         <ScrollViewer HorizontalAlignment="Left" Margin="0 0 0 25" Width="250">
             <StackPanel x:Name="SideBar" Orientation="Vertical">
-
-			<TextBlock Classes="H1" Text="CATEGORIES" Margin="27 36 0 15" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>
-
-              <Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="0">
-                <DockPanel HorizontalAlignment="Stretch">
-                  <Path Classes="SideBarIcon" Data="m497 353.671875c-30.4375 0-59.023438-11.742187-80.5-33.066406-21.46875-21.3125-33.289062-49.699219-33.289062-79.929688 0-8.285156-6.71875-15-15-15-8.285157 0-15 6.714844-15 15 0 30.230469-11.824219 58.617188-33.292969 79.929688-21.476563 21.324219-50.0625 33.066406-80.5 33.066406-8.285157 0-15 6.714844-15 15s6.714843 15 15 15c62.742187 0 113.792969 50.839844 113.792969 113.328125 0 8.285156 6.714843 15 15 15 8.28125 0 15-6.714844 15-15 0-62.488281 51.046874-113.328125 113.789062-113.328125 8.285156 0 15-6.714844 15-15s-6.714844-15-15-15zm0 0"
-                        HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="15" Margin="-11 0 0 0"/>
-                  <TextBlock Text="All" Margin="6 0 0 0"/>
-                </DockPanel>
-              </Button>
+				<DockPanel Margin="15 20 15 10" Height="34">
+					<TextBlock Classes="H1" Text="CATEGORIES" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13"/>
+					<Button Click="ButtonFilters_Click" Cursor="Hand" Classes="pagination" FontSize="13" Margin="0 0 0 -2" Padding="3 2" Background="Transparent" HorizontalAlignment="Right" BorderThickness="0" VerticalAlignment="Bottom">
+						<StackPanel Orientation="Horizontal">
+							<Path Classes="BlueIcon" Data="M831.05469,633.36329c-90.66034,0-164.24532,73.40039-164.24532,164.06246-.00058,90.65625,73.585,164.24417,164.24532,164.24417H3168.94531c90.66206,0,164.24418-73.58792,164.24418-164.24417,0-90.66207-73.58212-164.06246-164.24418-164.06246Zm322.44725,702.39254c-90.65915,0-164.06133,73.582-164.06133,164.24417.00062,90.66206,73.40218,164.24417,164.06133,164.24417H2852.90241c90.66206,0,164.0625-73.58211,164.0625-164.24417.00572-90.66215-73.40044-164.24417-164.0625-164.24417Zm312.01177,702.57425c-90.66216,0-164.0625,73.58783-164.0625,164.24417a163.9986,163.9986,0,0,0,164.0625,164.0625H2512.14457a163.99488,163.99488,0,0,0,164.0625-164.0625c0-90.66206-73.40044-164.24417-164.0625-164.24417Z"
+								Height="9" Stretch="Fill" Width="12" Margin="0 1 3 0"/>
+							<TextBlock Text="Filters"/>
+					</StackPanel>
+						
+					</Button>
+				</DockPanel>
+				
+				  <Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="0">
+					<DockPanel HorizontalAlignment="Stretch">
+					  <Path Classes="SideBarIcon" Data="m497 353.671875c-30.4375 0-59.023438-11.742187-80.5-33.066406-21.46875-21.3125-33.289062-49.699219-33.289062-79.929688 0-8.285156-6.71875-15-15-15-8.285157 0-15 6.714844-15 15 0 30.230469-11.824219 58.617188-33.292969 79.929688-21.476563 21.324219-50.0625 33.066406-80.5 33.066406-8.285157 0-15 6.714844-15 15s6.714843 15 15 15c62.742187 0 113.792969 50.839844 113.792969 113.328125 0 8.285156 6.714843 15 15 15 8.28125 0 15-6.714844 15-15 0-62.488281 51.046874-113.328125 113.789062-113.328125 8.285156 0 15-6.714844 15-15s-6.714844-15-15-15zm0 0"
+							HorizontalAlignment="Left" Height="15" Stretch="Fill" Width="15" Margin="-11 0 0 0"/>
+					  <TextBlock Text="All" Margin="6 0 0 0"/>
+					</DockPanel>
+				  </Button>
              
 					<Button Classes="sidebar" Click="ButtonCategory_Click" Cursor="Hand" Tag="1">
 						<DockPanel HorizontalAlignment="Stretch">
@@ -93,8 +132,8 @@
 										C266.916,192.612,247.692,174.396,217.021,167.042z M109.535,95.321c18.126,0,75.132-5.767,75.14,32.064
 										c-0.008,36.269-56.996,32.032-75.14,32.032V95.321z M109.521,262.447l0.014-70.672c21.778-0.006,90.085-6.261,90.094,35.32
 										C199.638,266.971,131.313,262.431,109.521,262.447z" 
-										HorizontalAlignment="Left" Height="17" Stretch="Fill" Width="13" Margin="-11 0 0 0"/>
-							<TextBlock Text="Cryptocurrency" Margin="6 0 0 0"/>
+										HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="12" Margin="-11 0 0 0"/>
+							<TextBlock Text="Cryptocurrency" Margin="7 0 0 0"/>
 						</DockPanel>
 					</Button>
 
@@ -104,86 +143,116 @@
 
         <!-- CONTENT AREA -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
-            <StackPanel HorizontalAlignment="Stretch">
-                <TextBlock Classes="H1" Text="Offers" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold"/>
-              <StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-                <TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
-
-                <!-- Number of search results -->
-                <TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
-
-                <TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
-                <VirtualizingStackPanel>
-
-                  <!-- Dropdown menu -->
-                  <ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="5"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
-                    <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
-                  </ComboBox>
-                </VirtualizingStackPanel>
-              </StackPanel>
-              <ItemsControl Items="{Binding Items}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-
-                    <!-- Product card -->
-                    <Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
-                      <DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
-                        <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
-                          <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"></Image>
-                        </Border>
-                        <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                          <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
-                          <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
-                        </StackPanel>
-						<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                        	<TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                            <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
-                               <i:Interaction.Behaviors>
-                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                                 </ia:DataTriggerBehavior>
-                                 <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                                   <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                                 </ia:DataTriggerBehavior>
-                               </i:Interaction.Behaviors>
-                            </TextBlock>
+			<StackPanel HorizontalAlignment="Stretch">
+				<StackPanel Orientation="Horizontal" Margin="19 20 20 5" Height="35">
+						<TextBlock Classes="H1" Text="Offers" VerticalAlignment="Bottom" TextWrapping="Wrap" FontSize="28" FontWeight="Bold"/>
+				</StackPanel>
+					<DockPanel Margin="20 0 20 20" LastChildFill="True">
+						<StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+							<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="14" Text="Items found: "/>
+							<!-- Number of search results -->
+							<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="14" Text="{Binding Result.TotalHits} "/>
+							<TextBlock Classes="H1" VerticalAlignment="Center" Margin="30 0 5 0" FontSize="14" Text="Results per page "/>
+							<VirtualizingStackPanel VerticalAlignment="Center">
+								<!-- Dropdown menu -->
+								<ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 1 5 0" SelectionChanged="OnPageSize_Change">
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="5"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
+										<ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
+								</ComboBox>
+							</VirtualizingStackPanel>
 						</StackPanel>
-                      </DockPanel>
-                    </Button>
-                    <!-- End of product card -->
-                    
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              
-              <!-- Pagination of product list -->
-              <StackPanel Orientation="Horizontal" Margin="20 30 0 60">
-                <Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonPreviousPage_Click" IsVisible="{Binding ShowPreviousPage}" >
-                  <StackPanel Orientation="Horizontal">
-                    <Path Classes="BlueIcon" Data="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0 c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744	c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"
-                        HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
-                    <TextBlock Text="Previous " Margin="5 0 0 0" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-                    <!-- Bind sellected page size -->
-                    <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-                  </StackPanel>
-                </Button>
+						
+						<!-- Layout view buttons -->
+						<Border Classes="SearchBar" HorizontalAlignment="Right" CornerRadius="5" Padding="3">
+							<StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
+								<RadioButton Classes="List" IsChecked="True" Name="RBListView" Margin="0 0 3 0" ToolTip.Tip="List View"/>
+								<RadioButton Classes="Grid" Name="RBGridView" ToolTip.Tip="Grid View"/>
+							</StackPanel>
+						</Border>
+					</DockPanel>
+			   
+				    <!-- Product card (grid view) -->
+			        <ItemsControl IsVisible="{Binding ElementName=RBGridView, Path=IsChecked}" Name="ICGridView" Items="{Binding Items}">
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+						
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10 0 0 10" VerticalContentAlignment="Top" Width="280" Height="272" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
+									<StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+										<Border VerticalAlignment="Top" Classes="PhotoPlaceholder" Width="260" Height="156" Margin="5" BorderThickness="1">
+											<Image Source="{Binding PreTitlePhoto}"/>
+										</Border>
+										<TextBlock Classes="H1" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="45" FontWeight="Medium" FontSize="16" Margin="5 0 5 4" Text="{Binding Title}"/>
+										<StackPanel Orientation="Horizontal" Margin="4 0 5 0">
+											<TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+											<TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
+										</StackPanel>
+										<StackPanel Orientation="Horizontal">
+                        					<TextBlock Classes="H1" Margin="4 4 0 0" FontSize="16" FontWeight="Medium" Text="{Binding Price}"/>
+											<TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="16" />
+										</StackPanel>
+									</StackPanel>
+								</Button>
+							</DataTemplate>
+                       </ItemsControl.ItemTemplate>
+					</ItemsControl>
 
-                <Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonNextPage_Click" IsVisible="{Binding ShowNextPage}">
-                  <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Next " HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
-                    <!-- Bind sellected page size -->
-                    <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
-                    <Path Classes="BlueIcon" Data="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284	c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"
-                        HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+			        <!-- Product card (list view) -->
+                    <ItemsControl IsVisible="{Binding ElementName=RBListView, Path=IsChecked}" Name="ICListView" Items="{Binding Items}">						  
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button Margin="10 0 10 10" HorizontalContentAlignment="Left" Height="140" Classes="productcard" Tag="{Binding Signature}" Cursor="Hand" Click="ButtonProduct_Click">
+									<DockPanel HorizontalAlignment="Stretch" LastChildFill="true">
+										<Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
+											<Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"/>
+										</Border>
+										<TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"/>
+										<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+											<TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+											<TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
+										</StackPanel>
+										<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                        					<TextBlock Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"/>
+											<TextBlock Classes="H1" Text="XRC" FontWeight="Medium" Margin="3 4 0 0" FontSize="18"/>
+										</StackPanel>
+									</DockPanel>
+								</Button>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+            
+				
+                  <!-- Pagination of product list -->
+                  <StackPanel Orientation="Horizontal" Margin="20 30 0 60">
+                    <Button BorderThickness="1" Margin="0 0 5 0" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonPreviousPage_Click" IsVisible="{Binding ShowPreviousPage}" >
+                      <StackPanel Orientation="Horizontal">
+                        <Path Classes="BlueIcon" Data="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0 c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744	c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"
+                            HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+                        <TextBlock Text="Previous " Margin="5 0 0 0" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                        <!-- Bind sellected page size -->
+                        <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                      </StackPanel>
+                    </Button>
+
+                    <Button BorderThickness="1" Cursor="Hand" Classes="pagination" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="ButtonNextPage_Click" IsVisible="{Binding ShowNextPage}">
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Next " HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+                        <!-- Bind sellected page size -->
+                        <TextBlock Text="{Binding Result.PageSize}" HorizontalAlignment="Right" Margin="0 0 5 0" FontWeight="Bold" FontSize="12" />
+                        <Path Classes="BlueIcon" Data="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284	c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"
+                            HorizontalAlignment="Left" Height="12" Stretch="Fill" Width="7" />
+                      </StackPanel>
+                    </Button>
                   </StackPanel>
-                </Button>
-              </StackPanel>
+		   
             </StackPanel>
         </ScrollViewer>
 </Grid>

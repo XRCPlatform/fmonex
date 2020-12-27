@@ -20,13 +20,13 @@
 				</Button>
 
 				<!-- Filter By -->
-				<DockPanel HorizontalAlignment="Stretch"  Margin="20 36 0 5">
-					<TextBlock Classes="H1" Text="FILTER BY:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" />
-					<Button x:Name="ClearFilters" Margin="0 0 15 0" Classes="pagination" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Background="Transparent" Click="ButtonResetAllFacets_Click" Cursor="Hand">
-						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontWeight="Bold" FontSize="12" />
+				<DockPanel HorizontalAlignment="Stretch"  Margin="15 36 0 5">
+					<TextBlock Classes="H1" Text="FILTER BY:" VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold" FontSize="13" />
+					<Button x:Name="ClearFilters" Margin="0 0 12 0" BorderThickness="0" Padding="3 2" Classes="pagination" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Background="Transparent" Click="ButtonResetAllFacets_Click" Cursor="Hand">
+						<TextBlock Text="Clear all filters" HorizontalAlignment="Right" FontSize="13" />
 					</Button>	
 				 </DockPanel>
-				<Separator HorizontalAlignment="Stretch" Height="1" Margin="20 5" Classes="SideBarSeparator"></Separator>
+				<Separator HorizontalAlignment="Stretch" Height="1" Margin="15 5" Classes="SideBarSeparator"/>
 
 				<ItemsControl Items="{Binding Filters}">
 					<ItemsControl.ItemTemplate>
@@ -34,8 +34,8 @@
 							<!-- Facets -->
 							<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Margin="0 5 0 5" Tag="{Binding FacetResult.Dim}">
 								<DockPanel HorizontalAlignment="Stretch">
-									<TextBlock Classes="H1" Margin="20 5 0 0" FontWeight="Bold" Text="{Binding FacetResult.Dim}" DockPanel.Dock="Left"></TextBlock>
-									<Button BorderThickness="0" Classes="action" Width="22" Height="22" Margin="0 4 20 0" HorizontalAlignment="Right" HorizontalContentAlignment="Center" Tag="{Binding FacetResult.Dim}" IsVisible="{Binding IsSelected}" Click="ButtonResetFacet_Click">
+									<TextBlock Classes="H1" Margin="15 5 0 0" FontSize="13" FontWeight="Bold" Text="{Binding FacetResult.Dim}" DockPanel.Dock="Left"></TextBlock>
+									<Button BorderThickness="0" Classes="action" Width="22" Height="22" Margin="0 4 15 0" HorizontalAlignment="Right" HorizontalContentAlignment="Center" Tag="{Binding FacetResult.Dim}" IsVisible="{Binding IsSelected}" Click="ButtonResetFacet_Click">
 										<Path Classes="BlueIcon" Data="M300.188,246L484.14,62.04c5.06-5.064,7.852-11.82,7.86-19.024c0-7.208-2.792-13.972-7.86-19.028L468.02,7.872 c-5.068-5.076-11.824-7.856-19.036-7.856c-7.2,0-13.956,2.78-19.024,7.856L246.008,191.82L62.048,7.872 c-5.06-5.076-11.82-7.856-19.028-7.856c-7.2,0-13.96,2.78-19.02,7.856L7.872,23.988c-10.496,10.496-10.496,27.568,0,38.052 L191.828,246L7.872,429.952c-5.064,5.072-7.852,11.828-7.852,19.032c0,7.204,2.788,13.96,7.852,19.028l16.124,16.116 c5.06,5.072,11.824,7.856,19.02,7.856c7.208,0,13.968-2.784,19.028-7.856l183.96-183.952l183.952,183.952	c5.068,5.072,11.824,7.856,19.024,7.856h0.008c7.204,0,13.96-2.784,19.028-7.856l16.12-16.116 c5.06-5.064,7.852-11.824,7.852-19.028c0-7.204-2.792-13.96-7.852-19.028L300.188,246z" 
 											Height="10" Stretch="Fill" Width="10"/>
 									</Button>
@@ -44,16 +44,16 @@
 								<ItemsControl Items="{Binding FacetResult.LabelValues}">
 									<ItemsControl.ItemTemplate>
 										<DataTemplate>
-											<Button Classes="sidebar" MaxWidth="210"  Cursor="Hand" Padding="10 7 5 7" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" Tag="{Binding Label}"  Click="ButtonFacet_Click">
+											<Button Classes="sidebar" Cursor="Hand" Padding="10 7 5 7" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" Tag="{Binding Label}"  Click="ButtonFacet_Click">
 												<DockPanel HorizontalAlignment="Stretch">
-													<TextBlock Text="{Binding Label}" HorizontalAlignment="Left" MaxWidth="150" TextWrapping="Wrap" DockPanel.Dock="Left"></TextBlock>
+													<TextBlock Text="{Binding Label}" HorizontalAlignment="Left" MaxWidth="160" TextWrapping="Wrap" DockPanel.Dock="Left"></TextBlock>
 													<TextBlock Text="{Binding Value}" FontStyle="Italic" MaxWidth="40" HorizontalAlignment="Right"></TextBlock>		
 												</DockPanel>
 											</Button>
 										</DataTemplate>
 									</ItemsControl.ItemTemplate>
 								</ItemsControl>
-                <Separator HorizontalAlignment="Stretch" Height="1" Margin="20 5" Classes="SideBarSeparator"></Separator>
+                <Separator HorizontalAlignment="Stretch" Height="1" Margin="15 5" Classes="SideBarSeparator"/>
 							</StackPanel>
 							
 						</DataTemplate>
@@ -67,24 +67,26 @@
 		<!-- CONTENT AREA -->
 		<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
 			<StackPanel HorizontalAlignment="Stretch">
-				<TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" Margin="20 20 20 10" FontSize="28" FontWeight="Bold" />
-				<StackPanel Margin="20 0 0 20" Orientation="Horizontal">
-					<TextBlock Classes="H1"  FontSize="14" Text="Items found: "></TextBlock>
+				<StackPanel Orientation="Horizontal" Margin="19 20 20 5" Height="35">
+					<TextBlock Classes="H1" Text="Search results" TextWrapping="Wrap" FontSize="28" FontWeight="Bold" />
+				</StackPanel>
+				<StackPanel Margin="20 0 0 20" Height="29" Orientation="Horizontal">
+					<TextBlock Classes="H1" VerticalAlignment="Center" FontSize="14" Text="Items found: "></TextBlock>
 
 					<!-- Number of search results -->
-					<TextBlock Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
+					<TextBlock VerticalAlignment="Center" Classes="H1" FontSize="14" Text="{Binding Result.TotalHits} "></TextBlock>
 
-					<TextBlock Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
-          <VirtualizingStackPanel>
-						
-						<!-- Dropdown menu -->
-						<ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 -2 0 0" SelectionChanged="OnPageSize_Change">
+					<TextBlock VerticalAlignment="Center" Classes="H1" Margin="30 0 5 0" FontSize="14" Text="Results per page "></TextBlock>
+          
+					<VirtualizingStackPanel VerticalAlignment="Center">
+					<!-- Dropdown menu -->
+						<ComboBox Name="CBPageSize" Classes="TextBoxBackground" BorderThickness="0" Margin="0 2 0 0" SelectionChanged="OnPageSize_Change">
 							<ComboBoxItem Classes="DropDown" Padding="7" Content="1"/>
 							<ComboBoxItem Classes="DropDown" Padding="7" Content="5"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
-              <ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="10"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="20"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="50"/>
+							<ComboBoxItem Classes="DropDown" Padding="7" Content="100"/>
 						</ComboBox>
 					</VirtualizingStackPanel>
 			</StackPanel>
@@ -99,23 +101,14 @@
                     <Border Classes="PhotoPlaceholder" Width="200" Height="120" Margin="5 10 10 10" BorderThickness="1">
                       <Image DockPanel.Dock="Left" Source="{Binding PreTitlePhoto}"></Image>
                     </Border>
-                    <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"></TextBlock>
+                    <TextBlock Classes="H1" DockPanel.Dock="Top" TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxHeight="50" FontWeight="Medium" FontSize="18" Margin="0 5 10 4" Text="{Binding Title}"/>
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                      <TextBlock Classes="H2" FontSize="12" Text="Shipping: "></TextBlock>
-                      <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"></TextBlock>
+                      <TextBlock Classes="H2" FontSize="12" Text="Shipping: "/>
+                      <TextBlock Classes="H2" FontSize="12" Text="{Binding Shipping}"/>
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                      <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"></TextBlock>
-                      <TextBlock DockPanel.Dock="Top" Classes="H1" Name="TBPriceType" FontWeight="Medium" Margin="3 4 0 0" FontSize="18" >
-                        <i:Interaction.Behaviors>
-                          <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="0">
-                            <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="XRC"/>
-                          </ia:DataTriggerBehavior>
-                          <ia:DataTriggerBehavior Binding="{Binding PriceType}" ComparisonCondition="Equal" Value="1">
-                            <ia:ChangePropertyAction TargetObject="{Binding TBPriceType}" PropertyName="Text" Value="USD"/>
-                          </ia:DataTriggerBehavior>
-                        </i:Interaction.Behaviors>
-                      </TextBlock>
+                      <TextBlock DockPanel.Dock="Top" Classes="H1" Margin="0 4 0 0" FontSize="18" FontWeight="Medium" Text="{Binding Price}"/>
+                      <TextBlock DockPanel.Dock="Top" Classes="H1" FontWeight="Medium" Text="XRC" Margin="3 4 0 0" FontSize="18" />
                     </StackPanel>
 
                     <!-- Propagation notification -->

@@ -26,7 +26,7 @@
 										c2.711,22.588,13.999,43.271,31.531,57.771c-2.24,13.973-12.651,50.816-34.901,60.117l-94.699,31.445
 										c-24.243,8.071-42.643,28.026-48.725,52.843l-12.8,51.2c-1.449,5.71,2.005,11.514,7.715,12.963c0.853,0.217,1.73,0.327,2.61,0.328
 										h490.667c5.891-0.002,10.665-4.779,10.664-10.67C511.993,500.461,511.886,499.595,511.676,498.752z"
-        HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="17" />
+                                        HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="17" />
               <TextBlock Margin="7,0,0,0" Text="Profile"/>
             </StackPanel>
           </Button>
@@ -38,13 +38,13 @@
 										c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 										l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 										C511.56,208.649,513.033,202.688,511.267,197.258z"
-        HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="17" />
+                                        HorizontalAlignment="Left" Height="16" Stretch="Fill" Width="17" />
               <TextBlock Margin="7,0,0,0" Text="Reviews"/>
             </StackPanel>
           </Button>
         </StackPanel>
       </ScrollViewer>
-      <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left"	VerticalAlignment="Stretch"	Margin="250 0 0 0"/>
+      <Separator Classes="SideBarSeparator" Width="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Margin="250 0 0 0"/>
 
       <!-- CONTENT AREA -->
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="250 0 0 0">
@@ -52,10 +52,10 @@
           <StackPanel Orientation="Vertical">
             <WrapPanel Orientation="Horizontal" Margin="20 19 20 10">
               <TextBlock Classes="H1" Text="My Profile" TextWrapping="Wrap" FontSize="28" Margin="0 0 30 0" FontWeight="Bold" />
-              <Button Classes="pagination" Height="24" BorderThickness="1" VerticalAlignment="Center" Margin="5 0 15 0" Padding="15 0 15 0" Click="ButtonEdit_Click" Cursor="Hand">
+              <Button Classes="pagination" BorderThickness="1" VerticalAlignment="Center" Margin="5 0 15 0" Click="ButtonEdit_Click" Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                   <Path Classes="BlueIcon" Data="m114.6875 284.675781-73.800781-73.800781 178.5-178.5 73.800781 73.800781zm-80.699219-60.800781 67.699219 67.699219-101.5 33.800781zm281.898438-140.300781-12.800781 12.800781-73.898438-73.898438 12.800781-12.800781c12.894531-12.902343 33.804688-12.902343 46.699219 0l27.199219 27.199219c12.800781 12.9375 12.800781 33.765625 0 46.699219zm0 0"
-                        HorizontalAlignment="Left" Height="13" Stretch="Fill" Width="13" />
+                        HorizontalAlignment="Left" Height="14" Stretch="Fill" Width="14" />
                   <TextBlock Margin="7,0,0,0" Text="Edit" FontSize="14"/>
                 </StackPanel>                
               </Button>
@@ -64,36 +64,33 @@
             <DockPanel Margin="20 0 0 0">
 				<Border Classes="PhotoPlaceholder" Width="70" Height="70" CornerRadius="35" HorizontalAlignment="Left">
 					<!-- User avatar binding -->
-					<TextBlock Classes="H2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">No Photo</TextBlock>
+					<TextBlock Classes="H2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" Text="No Photo"/>
 				</Border>
-				<Image Name="IPhoto" HorizontalAlignment="Left" Source="{Binding Avatar}" Width="70" Height="70" Margin="-70 0 0 0" Stretch="UniformToFill" ></Image>
-				<Border Classes="Main" Margin="-88 0 -15 0" HorizontalAlignment="Left" Width="106" Height="106" BorderThickness="18" CornerRadius="100" Background="Transparent"></Border>
+				<Image Name="IPhoto" HorizontalAlignment="Left" Source="{Binding Avatar}" Width="70" Height="70" Margin="-70 0 0 0" Stretch="UniformToFill"/>
+				<Border Classes="Main" Margin="-88 0 -15 0" HorizontalAlignment="Left" Width="106" Height="106" BorderThickness="18" CornerRadius="100" Background="Transparent"/>
             </DockPanel>
-
-          
                 
             <!-- User binding -->
             <TextBlock Classes="H1" Text="Username" Margin="20 10 0 0" FontSize="16" FontWeight="Bold"/>
             <TextBlock Classes="H3" Name="TBUserName" Text="N/A" Margin="20 0 0 0" FontSize="16"/>
             <TextBlock Classes="H1" Text="Rating" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
-            <StackPanel Orientation="Horizontal" Margin="20 0 20 0">
+            <StackPanel Orientation="Horizontal" Margin="20 2 20 0">
               <Path Classes="StatusBarIconOrange" Data="M511.267,197.258c-1.764-5.431-6.457-9.389-12.107-10.209l-158.723-23.065L269.452,20.157    
 							  c-2.526-5.12-7.741-8.361-13.45-8.361c-5.71,0-10.924,3.241-13.451,8.361l-70.988,143.827l-158.72,23.065    
 							  c-5.649,0.82-10.344,4.778-12.108,10.208c-1.765,5.431-0.293,11.392,3.796,15.377l114.848,111.954L92.271,482.671    
 							  c-0.966,5.628,1.348,11.314,5.967,14.671c2.613,1.898,5.708,2.864,8.818,2.864c2.388,0,4.784-0.569,6.978-1.723l141.967-74.638    
 							  l141.961,74.637c5.055,2.657,11.178,2.215,15.797-1.141c4.619-3.356,6.934-9.044,5.969-14.672l-27.117-158.081l114.861-111.955    
 							  C511.56,208.649,513.033,202.688,511.267,197.258z"
-      Height="16" Stretch="Fill" Width="17" Margin="0,1,5,0"/>
+                                Height="16" Stretch="Fill" Width="17" Margin="0 0 5 0"/>
               <!-- Rating number binding -->
-              <TextBlock Classes="H1Orange" Name="TBReviewStars" Text="N/A" FontWeight="Bold" FontSize="16"/>
+              <TextBlock Classes="H1Orange" Name="TBReviewStars" Text="N/A" FontSize="16"/>
               <TextBlock Classes="H3" Text=" out of 5" FontSize="16"/>
             </StackPanel>
           </StackPanel>
 
           <TextBlock Classes="H1" Text="Description" Margin="20 30 0 0" FontSize="16" FontWeight="Bold"/>
           <!-- About user text binding -->
-          <TextBlock Classes="H3" Name="TBDescription" Text="N/A"
-           TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
+          <TextBlock Classes="H3" Name="TBDescription" Text="N/A" TextWrapping="Wrap" Margin="20 0 20 0" FontSize="16"/>
 
         </StackPanel>
       </ScrollViewer>

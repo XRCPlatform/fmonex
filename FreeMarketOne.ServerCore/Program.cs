@@ -8,6 +8,7 @@ namespace FreeMarketOne.ServerCore
     class Program
     {
         private static FreeMarketOneServer server;
+        private static CancellationTokenSource cancellationTokenSource;
 
         public class Options
         {
@@ -16,18 +17,18 @@ namespace FreeMarketOne.ServerCore
 
             [Option('p', "password", Required = false, HelpText="Password for user")]
             public string Password { get; set; }
-
-
         }
 
         static void Main(string[] args)
         {
+            cancellationTokenSource = new CancellationTokenSource();
             Start(args);
         }
 
         public static void Start(string[] args)
         {
             Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleShutdown);
+            var cancellationToken = cancellationTokenSource.Token;
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(o =>
                 {
@@ -44,7 +45,8 @@ namespace FreeMarketOne.ServerCore
 
                     FreeMarketOneServer.Current.Initialize(password, null, o.ConfigFile);
                     FreeMarketOneServer.Current.LoadingEvent += new EventHandler<string>(OnLoadingEvent);
-                    while (!FreeMarketOneServer.Current.IsShuttingDown) { Thread.Sleep(2000); }
+                    while (!cancellationToken.IsCancellationRequested)
+                        Thread.Sleep(2000);
                 });
         }
 
@@ -57,7 +59,9 @@ namespace FreeMarketOne.ServerCore
         {
             Console.WriteLine("Shutting down...");
             args.Cancel = true;
+            cancellationTokenSource.Cancel();
             FreeMarketOneServer.Current.Stop();
+
         }
     }
 }

@@ -120,6 +120,8 @@ namespace FreeMarketOne.ServerCore
                 UserManager = new UserManager(Configuration);
                 if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
                 {
+                    Console.WriteLine(ByteUtil.Hex(UserManager.GetCurrentUserPublicKey()));
+
                     //Service manager
                     LoadingEvent?.Invoke(this, "Loading Service Manager...");
                     ServiceManager = new ServiceManager(Configuration, NetworkHeartbeatEvent);
@@ -246,7 +248,7 @@ namespace FreeMarketOne.ServerCore
                         Configuration.BlockChainSecretPath,
                         Configuration.BlockChainMarketGenesis,
                         Configuration.BlockChainMarketPolicy,
-                        GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, Configuration.ListenerBaseEndPoint),
+                        GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, Configuration.ListenerMarketEndPoint),
                         OnionSeedsManager,
                         UserManager.PrivateKey,
                         new MarketChainProtocolVersion(),

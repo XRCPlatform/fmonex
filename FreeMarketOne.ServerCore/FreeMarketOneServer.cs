@@ -19,6 +19,7 @@ using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -170,7 +171,7 @@ namespace FreeMarketOne.ServerCore
                             Configuration.BlockChainSecretPath,
                             Configuration.BlockChainBaseGenesis,
                             Configuration.BlockChainBasePolicy,
-                            Configuration.ListenerBaseEndPoint,
+                            GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, Configuration.ListenerBaseEndPoint),
                             OnionSeedsManager,
                             UserManager.PrivateKey,
                             new BaseChainProtocolVersion(),
@@ -216,6 +217,11 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        private EndPoint GetPublicIpEndpoint(String torOnionAddress, int port)
+        {
+            return new DnsEndPoint(torOnionAddress, port);
+        }
+
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
             try
@@ -240,7 +246,7 @@ namespace FreeMarketOne.ServerCore
                         Configuration.BlockChainSecretPath,
                         Configuration.BlockChainMarketGenesis,
                         Configuration.BlockChainMarketPolicy,
-                        Configuration.ListenerMarketEndPoint,
+                        GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, Configuration.ListenerBaseEndPoint),
                         OnionSeedsManager,
                         UserManager.PrivateKey,
                         new MarketChainProtocolVersion(),

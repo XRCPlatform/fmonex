@@ -117,8 +117,8 @@ namespace FreeMarketOne.ServerCore.Helpers
             var marketEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerMarketEndPoint"];
             var chatEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["ListenerChatEndPoint"];
 
-            if (!string.IsNullOrEmpty(baseEndPoint)) configuration.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint(baseEndPoint);
-            if (!string.IsNullOrEmpty(marketEndPoint)) configuration.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint(marketEndPoint);
+            if (!string.IsNullOrEmpty(baseEndPoint)) configuration.ListenerBaseEndPoint = int.Parse(baseEndPoint);
+            if (!string.IsNullOrEmpty(marketEndPoint)) configuration.ListenerMarketEndPoint = int.Parse(marketEndPoint);
             if (!string.IsNullOrEmpty(chatEndPoint)) configuration.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint(chatEndPoint);
 
             //apply public IP address or force to use defined
@@ -129,8 +129,8 @@ namespace FreeMarketOne.ServerCore.Helpers
                     var publicIp = FMONE.Current.ServerPublicAddress.PublicIP;
                     if (publicIp != null)
                     {
-                        SetToPublicIp(configuration.ListenerBaseEndPoint, publicIp.MapToIPv4());
-                        SetToPublicIp(configuration.ListenerMarketEndPoint, publicIp.MapToIPv4());
+                        SetToPublicIp(new IPEndPoint(IPAddress.Any, configuration.ListenerBaseEndPoint), publicIp.MapToIPv4());
+                        SetToPublicIp(new IPEndPoint(IPAddress.Any, configuration.ListenerMarketEndPoint), publicIp.MapToIPv4());
                     }
                 } 
                 else
@@ -138,8 +138,8 @@ namespace FreeMarketOne.ServerCore.Helpers
                     IPAddress newIp;
                     if (IPAddress.TryParse(configuration.ListenersForceThisIp, out newIp))
                     {
-                        SetToPublicIp(configuration.ListenerBaseEndPoint, newIp);
-                        SetToPublicIp(configuration.ListenerMarketEndPoint, newIp);
+                        SetToPublicIp(new IPEndPoint(IPAddress.Any, configuration.ListenerBaseEndPoint), newIp);
+                        SetToPublicIp(new IPEndPoint(IPAddress.Any, configuration.ListenerMarketEndPoint), newIp);
                     }
                 }
             }

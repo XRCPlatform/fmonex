@@ -23,6 +23,10 @@ namespace FreeMarketOne.P2P
             {
                 PublicIP = GetIp();
             }
+            else
+            {
+                PublicIP = GetMyTorExitIP();
+            }
         }
 
         public IPAddress GetIp()

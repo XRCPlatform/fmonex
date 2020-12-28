@@ -51,9 +51,9 @@ namespace FreeMarketOne.DataStructure
 
         public string BlockChainUserPath { get; set; }
 
-        public IPEndPoint ListenerBaseEndPoint { get; set; }
+        public int ListenerBaseEndPoint { get; set; }
 
-        public IPEndPoint ListenerMarketEndPoint { get; set; }
+        public int ListenerMarketEndPoint { get; set; }
 
         public string ChangellyApiKey { get; set; }
 

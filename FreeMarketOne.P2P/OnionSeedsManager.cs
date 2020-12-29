@@ -220,7 +220,7 @@ namespace FreeMarketOne.P2P
                 if (exist == null)
                     await BaseSwarm.AddPeersAsync(
                         new[] { boundPeer },
-                        TimeSpan.FromMilliseconds(5000),
+                        TimeSpan.FromMilliseconds(30000),
                         _cancellationToken.Token);
             }
         }
@@ -243,7 +243,7 @@ namespace FreeMarketOne.P2P
                 if (exist == null)
                     await MarketSwarm.AddPeersAsync(
                         new[] { boundPeer },
-                        TimeSpan.FromMilliseconds(5000),
+                        TimeSpan.FromMilliseconds(30000),
                         _cancellationToken.Token);
             }
         }

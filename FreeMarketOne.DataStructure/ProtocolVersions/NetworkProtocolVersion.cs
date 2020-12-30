@@ -7,7 +7,7 @@ using System.Text;
 
 namespace FreeMarketOne.DataStructure.ProtocolVersions
 {
-    public class BaseChainProtocolVersion : IProtocolVersion
+    public class NetworkProtocolVersion : IProtocolVersion
     {
         private const string PROTOCOL_PRIVATEKEY = "5454cd24321bcc98e656b17c0c6cc0868e777502b69016e38b93d847e132cc16";
         private const int PROTOCOL_CURRENTVERSION = 1;

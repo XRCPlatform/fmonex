@@ -112,7 +112,7 @@ namespace Libplanet.Net
             AppProtocolVersion appProtocolVersion,
             int? tableSize,
             int? bucketSize,
-            int workers = 5,
+            int workers = 1,
             string host = null,
             int? listenPort = null,
             DateTimeOffset? createdAt = null,

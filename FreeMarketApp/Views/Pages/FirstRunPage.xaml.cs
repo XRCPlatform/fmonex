@@ -10,6 +10,7 @@ using FreeMarketOne.Extensions.Helpers;
 using Serilog;
 using System;
 using System.Text;
+using TextCopy;
 using System.Threading.Tasks;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
@@ -195,6 +196,24 @@ namespace FreeMarketApp.Views.Pages
             }).ConfigureAwait(true);
 
             return true;
+        }
+
+        public async void ButtonCopyToClipboard_Click(object sender, RoutedEventArgs args)
+        {
+            var tbSeed = this.FindControl<TextBox>("TBSeed");
+            if ((tbSeed != null) && (!string.IsNullOrEmpty(tbSeed.Text)))
+            {
+                try
+                {
+                    await ClipboardService.SetTextAsync(tbSeed.Text);
+                }
+                catch (Exception e)
+                {
+                    PagesHelper.Log(Instance._logger,
+                        string.Format("Isn't possible to use clipboard {0}", e.Message),
+                        Serilog.Events.LogEventLevel.Error);
+                }
+            }
         }
 
         private static void LoadingEvent(object sender, string message)

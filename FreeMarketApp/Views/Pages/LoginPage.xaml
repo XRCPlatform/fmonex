@@ -24,14 +24,12 @@
                 <StackPanel Orientation="Vertical" Height="200">
                     <TextBlock Classes="H1" Text="Login" TextWrapping="Wrap" FontSize="28" Margin="20 19 0 20" FontWeight="Bold"/>
                     <TextBlock Classes="H1" Text="Password" Margin="20 0 0 0" FontSize="16" FontWeight="Bold"/>
-                    <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" Padding="10" PasswordChar="&#x2022;" />
+                    <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" HorizontalAlignment="Stretch" Margin="20 5 20 0" FontSize="16" Padding="10" PasswordChar="&#x2022;" />
 				    <TextBlock Classes="H1Red" Name="TBError" ZIndex="10" IsVisible="{Binding ElementName=TBPassword, Path=Text, Converter={x:Static StringConverters.IsNullOrEmpty}}" Margin="20 0 0 0" FontSize="15"/>
                 </StackPanel>
 
               <!-- Login Button -->
-                <DockPanel Margin="20 20 20 0">
-                  <Button HorizontalAlignment="Right" Classes="message" FontSize="16" Margin="0 10 0 0" Height="40" Width="130" Click="ButtonLogin_Click" Cursor="Hand">Login</Button>
-                </DockPanel>
+              <Button HorizontalAlignment="Right" Classes="message" FontSize="16" Margin="0 10 20 0" Height="40" Width="200" Click="ButtonLogin_Click" Cursor="Hand">Login</Button>
             </StackPanel>
         </ScrollViewer>
     </Grid>

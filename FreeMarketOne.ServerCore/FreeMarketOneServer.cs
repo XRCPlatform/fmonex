@@ -71,6 +71,7 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
         public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
         public event EventHandler FreeMarketOneServerLoadedEvent;
+        public event EventHandler FreeMarketOneServerLoggedInEvent;
         public event EventHandler<string> LoadingEvent;
         private BackgroundQueue backgroundQueue = new BackgroundQueue();
 
@@ -119,6 +120,8 @@ namespace FreeMarketOne.ServerCore
                 UserManager = new UserManager(Configuration);
                 if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
                 {
+                    FreeMarketOneServerLoggedInEvent?.Invoke(this, null);
+
                     //Service manager
                     LoadingEvent?.Invoke(this, "Loading Service Manager...");
                     ServiceManager = new ServiceManager(Configuration, NetworkHeartbeatEvent);
@@ -288,6 +291,7 @@ namespace FreeMarketOne.ServerCore
 
                     LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
                     MarketPoolManager.Start();
+                    LoadingEvent?.Invoke(this, "");
 
                     //Event that server is loaded
                     RaiseAsyncServerLoadedEvent();

@@ -19,7 +19,7 @@ namespace FreeMarketApp.Views.Pages
     public class FirstRunPage : UserControl
     {
         private static FirstRunPage _instance;
-        private static SplashWindowViewModel splashViewModel;
+        private static MainWindowViewModel mainViewModel;
         private ILogger _logger;
 
         public static FirstRunPage Instance
@@ -154,20 +154,15 @@ namespace FreeMarketApp.Views.Pages
                 //reloading server with splash window
                 async void AppAsyncLoadingStart()
                 {
-                    splashViewModel = new SplashWindowViewModel();
-                    splashViewModel.StartupProgressText = "Reloading...";
-                    var splashWindow = new SplashWindow { DataContext = splashViewModel };
-                    splashWindow.Show();
+                    PagesHelper.Switch(mainWindow, LoadingPage.Instance);
+                    mainViewModel = new MainWindowViewModel();
+                    mainViewModel.StartupProgressText = "Reloading...";
+                    mainWindow.DataContext = mainViewModel;
                     await Task.Delay(10);
                     await GetAppLoadingAsync(tbPassword.Text, firstUserData);
 
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
                     PagesHelper.UnlockTools(mainWindow, true);
-
-                    if (splashWindow != null)
-                    {
-                        splashWindow.Close();
-                    }
                 }
 
                 AppAsyncLoadingStart();
@@ -218,7 +213,7 @@ namespace FreeMarketApp.Views.Pages
 
         private static void LoadingEvent(object sender, string message)
         {
-            splashViewModel.StartupProgressText = message;
+            mainViewModel.StartupProgressText = message;
         }
     }
 }

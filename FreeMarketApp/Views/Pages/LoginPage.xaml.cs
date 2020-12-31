@@ -18,7 +18,7 @@ namespace FreeMarketApp.Views.Pages
     public class LoginPage : UserControl
     {
         private static LoginPage _instance;
-        private static SplashWindowViewModel splashViewModel;
+        private static MainWindowViewModel mainViewModel;
         private ILogger _logger;
 
         public static LoginPage Instance
@@ -83,10 +83,10 @@ namespace FreeMarketApp.Views.Pages
                 //reloading server with splash window
                 async void AppAsyncLoadingStart()
                 {
-                    splashViewModel = new SplashWindowViewModel();
-                    splashViewModel.StartupProgressText = "Unlocking...";
-                    var splashWindow = new SplashWindow { DataContext = splashViewModel };
-                    splashWindow.Show();
+                    PagesHelper.Switch(mainWindow, LoadingPage.Instance);
+                    mainViewModel = new MainWindowViewModel();
+                    mainViewModel.StartupProgressText = "Unlocking...";
+                    mainWindow.DataContext = mainViewModel;
                     await Task.Delay(10);
                     await GetAppLoadingAsync(tbPassword.Text);
 
@@ -99,11 +99,6 @@ namespace FreeMarketApp.Views.Pages
                     {
                         tbPassword.Text = string.Empty;
                         tbError.Text = SharedResources.ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword");
-                    }
-                    
-                    if (splashWindow != null)
-                    {
-                        splashWindow.Close();
                     }
                 }
 
@@ -131,7 +126,7 @@ namespace FreeMarketApp.Views.Pages
 
         private static void LoadingEvent(object sender, string message)
         {
-            splashViewModel.StartupProgressText = message;
+            mainViewModel.StartupProgressText = message;
         }
     }
 }

@@ -21,7 +21,8 @@ namespace Libplanet.RocksDBStore
         public RocksDBKeyValueStore(string path)
         {
             var options = new DbOptions()
-                .SetCreateIfMissing();
+                .SetCreateIfMissing()
+                .SetErrorIfExists(false);
 
             _keyValueDb = RocksDBUtils.OpenRocksDb(options, path);
         }

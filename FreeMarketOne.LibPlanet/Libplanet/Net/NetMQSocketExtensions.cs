@@ -48,7 +48,7 @@ namespace Libplanet.Net
             TimeSpan? timeout = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             if (timeout is TimeSpan timeoutNotNull)
             {
                 cts.CancelAfter(timeoutNotNull);

@@ -5,10 +5,10 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="FreeMarketApp.Views.Pages.LoadingPage">
 
-          <ScrollViewer HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0">
+          <ScrollViewer HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-80,0,0">
             <StackPanel Orientation="Vertical">
               <Image Source="resm:FreeMarketApp.Assets.splash.png" Grid.Row="0" Stretch="None" />
-              <TextBlock Name='LoadingStatus' Width="300" FontStyle="Oblique" Text="{Binding StartupProgressText, Mode=TwoWay }" VerticalAlignment="Center" HorizontalAlignment="Right" TextAlignment="Center" />
+              <TextBlock Name='LoadingStatus' Width="300" FontWeight="Bold" Text="{Binding StartupProgressText, Mode=TwoWay }" VerticalAlignment="Center" HorizontalAlignment="Right" TextAlignment="Center" />
             </StackPanel>
         </ScrollViewer>
 

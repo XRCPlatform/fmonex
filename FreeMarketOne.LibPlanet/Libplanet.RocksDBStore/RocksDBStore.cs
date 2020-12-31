@@ -100,7 +100,8 @@ namespace Libplanet.RocksDBStore
 
             _path = path;
             _options = new DbOptions()
-                .SetCreateIfMissing();
+                .SetCreateIfMissing()
+                .SetErrorIfExists(false);
 
             _blockDb = RocksDBUtils.OpenRocksDb(_options, RocksDbPath(BlockDbName));
             _txDb = RocksDBUtils.OpenRocksDb(_options, RocksDbPath(TxDbName));

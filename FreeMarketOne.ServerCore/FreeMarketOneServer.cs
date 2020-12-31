@@ -3,6 +3,7 @@ using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.DataStructure.ProtocolVersions;
+using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
@@ -41,7 +42,6 @@ namespace FreeMarketOne.ServerCore
 
         public static FreeMarketOneServer Current { get; private set; }
         
-
         public Logger Logger => (Logger)_logger;
         private ILogger _logger;
 
@@ -71,6 +71,7 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
         public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
         public event EventHandler FreeMarketOneServerLoadedEvent;
+        public event EventHandler FreeMarketOneServerLoggedInEvent;
         public event EventHandler<string> LoadingEvent;
         private BackgroundQueue backgroundQueue = new BackgroundQueue();
         public bool IsShuttingDown = false;
@@ -133,6 +134,8 @@ namespace FreeMarketOne.ServerCore
                 UserManager = new UserManager(Configuration);
                 if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
                 {
+                    FreeMarketOneServerLoggedInEvent?.Invoke(this, null);
+
                     //Service manager
                     LoadingEvent?.Invoke(this, "Loading Service Manager...");
                     ServiceManager = new ServiceManager(Configuration, NetworkHeartbeatEvent);
@@ -187,7 +190,7 @@ namespace FreeMarketOne.ServerCore
                             Configuration.ListenerBaseEndPoint,
                             OnionSeedsManager,
                             UserManager.PrivateKey,
-                            new BaseChainProtocolVersion(),
+                            new NetworkProtocolVersion(),
                             preloadEnded: BaseBlockChainLoadEndedEvent,
                             blockChainChanged: BaseBlockChainChangedEvent);
 
@@ -257,7 +260,7 @@ namespace FreeMarketOne.ServerCore
                         Configuration.ListenerMarketEndPoint,
                         OnionSeedsManager,
                         UserManager.PrivateKey,
-                        new MarketChainProtocolVersion(),
+                        new NetworkProtocolVersion(),
                         hashCheckPoints,
                         genesisBlock,
                         preloadEnded: MarketBlockChainLoadEndedEvent,
@@ -302,6 +305,7 @@ namespace FreeMarketOne.ServerCore
 
                     LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
                     MarketPoolManager.Start();
+                    LoadingEvent?.Invoke(this, "");
 
                     //Event that server is loaded
                     RaiseAsyncServerLoadedEvent();

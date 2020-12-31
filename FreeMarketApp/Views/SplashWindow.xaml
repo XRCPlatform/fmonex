@@ -11,7 +11,7 @@
     
     <Grid ColumnDefinitions="*" RowDefinitions="250,*">
         <Image Source="resm:FreeMarketApp.Assets.splash.png" Grid.Row="0" Stretch="None" />
-      <TextBlock Name='button' Grid.Row="1" Text="{Binding StartupProgressText, Mode=TwoWay }" VerticalAlignment="Top" TextAlignment="Center"/>
+      <TextBlock Name='button' FontWeight="Bold" Grid.Row="1" Text="{Binding StartupProgressText, Mode=TwoWay }" VerticalAlignment="Top" TextAlignment="Center"/>
     </Grid>
 
 </Window>

@@ -32,36 +32,40 @@
 						<TextBlock Classes="H1" Text="Username" FontSize="16" FontWeight="Bold"/>
 						<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
 					</WrapPanel>
-                    <TextBox Classes="TextBoxBackground" Name="TBUserName" MaxLength="25" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" Padding="10"/>
+                    <TextBox Classes="TextBoxBackground" Name="TBUserName" MaxLength="25" HorizontalAlignment="Left" Margin="20 5 20 0" Width="400" FontSize="16" Padding="10" Watermark="Must be at least 16 characters." />
 
 					<WrapPanel Orientation="Horizontal" Margin="20 20 20 0">
 						<TextBlock Classes="H1" Text="Description" FontSize="16" FontWeight="Bold"/>
 						<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
 					</WrapPanel>
-                    <TextBox Classes="TextBoxBackground" Name="TBDescription" MaxLength="260" Margin="20 5 20 0" FontSize="16" Height="60" Watermark="Add public description" AcceptsReturn="True" Padding="10" TextWrapping="Wrap" />
+                    <TextBox Classes="TextBoxBackground" Name="TBDescription" MaxLength="260" Margin="20 5 20 0" FontSize="16" Height="60" Watermark="Add public description. Must be between 50-260 characters." AcceptsReturn="True" Padding="10" TextWrapping="Wrap" />
 
-				    <DockPanel Margin="0 0 0 0">
+				    <WrapPanel Margin="0 20 0 0">
                         <WrapPanel Orientation="Vertical" Margin="0 0 0 0">
 							<WrapPanel Orientation="Horizontal" Margin="20 20 20 0">
-								<TextBlock Classes="H1" Text="Password" FontSize="16" FontWeight="Bold"/>
+								<TextBlock Classes="H1" Text="Password" FontSize="16" FontWeight="Bold" />
 								<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
 							</WrapPanel>
-                            <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" Watermark="Must be at least 16 chars" HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" Padding="10"/>
+                            <TextBox Classes="TextBoxBackground" Name="TBPassword" MaxLength="30" Watermark="Must be at least 16 characters." HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" Padding="10" PasswordChar="&#x2022;" />
                         </WrapPanel>
-                        <WrapPanel Orientation="Vertical" Margin="0 0 0 0">
+                        <WrapPanel Orientation="Vertical" Margin="100 0 0 0">
                             <WrapPanel Orientation="Horizontal" Margin="20 20 20 0">
 								<TextBlock Classes="H1" Text="Password Verification" FontSize="16" FontWeight="Bold"/>
 								<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
 							</WrapPanel>
-                            <TextBox Classes="TextBoxBackground" Name="TBPasswordVerify" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" Padding="10"/>
+                            <TextBox Classes="TextBoxBackground" Name="TBPasswordVerify" MaxLength="30" HorizontalAlignment="Left" Margin="20 5 20 0" Width="200" FontSize="16" Padding="10" PasswordChar="&#x2022;" />
                         </WrapPanel>
-                    </DockPanel>
+                    </WrapPanel>
 
-					<WrapPanel Orientation="Horizontal" Margin="20 20 20 0">
+					<WrapPanel Orientation="Horizontal" Margin="20 -20 20 0">
 						<TextBlock Classes="H1" Text="Seed" FontSize="16" FontWeight="Bold"/>
 						<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
 					</WrapPanel>
-                    <TextBox Classes="TextBoxBackground" Name="TBSeed" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="80" Watermark="Create your own seed (at least 200 characters)" Padding="10" TextWrapping="Wrap"/>
+
+                    <WrapPanel>
+                        <TextBox Classes="TextBoxBackground" Name="TBSeed" Width="850" MaxLength="250" Margin="20 5 20 0" FontSize="16" Height="80" Watermark="Create your own seed (at least 200 characters)." Padding="10" TextWrapping="Wrap"/>
+                        <Button Classes="pagination" HorizontalAlignment="Right" Width="180" Height="40" FontSize="16" Click="ButtonRandomSeed_Click" Cursor="Hand" Margin="20 30 10 0">Get Random Seed</Button>
+                    </WrapPanel>
 
 					<WrapPanel Orientation="Horizontal" Margin="20 30 20 0">
 						<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
@@ -72,8 +76,7 @@
 
               <!-- Save/Cancel Buttons -->
                 <DockPanel Margin="20">
-                  <Button DockPanel.Dock="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Width="130" Click="ButtonSave_Click" Cursor="Hand">Save</Button>
-                  <Button Classes="pagination" HorizontalAlignment="Right" Width="180" Height="40" FontSize="16" Click="ButtonRandomSeed_Click" Cursor="Hand" Margin="0 30 10 0">Get Random Seed</Button>
+                  <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Classes="message" FontSize="16" Margin="0 30 0 0" Height="40" Width="130" Click="ButtonSave_Click" Cursor="Hand">Save</Button>
                 </DockPanel>
             </StackPanel>
         </ScrollViewer>

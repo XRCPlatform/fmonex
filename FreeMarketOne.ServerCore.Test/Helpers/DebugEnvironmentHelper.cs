@@ -66,7 +66,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 configuration.ListenerBaseEndPoint,
                 onionSeedsManager,
                 userPrivateKey,
-                new DebugChainProtocolVersion(),
+                new DebugNetworkProtocolVersion(),
                 genesisBlock: genesis,
                 preloadEnded: _baseBlockChainLoadedEvent,
                 blockChainChanged: _baseBlockChainChangedEvent);

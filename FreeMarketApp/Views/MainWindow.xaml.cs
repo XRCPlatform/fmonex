@@ -35,6 +35,7 @@ namespace FreeMarketApp.Views
 
             if (FMONE.Current.UserManager != null)
             {
+                FMONE.Current.FreeMarketOneServerLoggedInEvent += LoggedInEvent;
                 FMONE.Current.FreeMarketOneServerLoadedEvent += ServerLoadedEvent;
                 var pcMainContent = this.FindControl<Panel>("PCMainContent");
 
@@ -147,6 +148,11 @@ namespace FreeMarketApp.Views
         public void ButtonMyProfile_Click(object sender, RoutedEventArgs args)
         {
             PagesHelper.Switch(this, MyProfilePage.Instance);
+        }
+
+        private void LoggedInEvent(object sender, EventArgs e)
+        {
+            PagesHelper.Log(_logger, "LoggedInEvent on MainWindow was raised.");
         }
 
         private void ServerLoadedEvent(object sender, EventArgs e)

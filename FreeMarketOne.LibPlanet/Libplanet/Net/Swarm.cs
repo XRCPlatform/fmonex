@@ -303,8 +303,8 @@ namespace Libplanet.Net
         /// CancellationToken)"
         /// /> method too.</remarks>
         public async Task StartAsync(
-            int millisecondsDialTimeout = 15000,
-            int millisecondsBroadcastTxInterval = 5000,
+            int millisecondsDialTimeout = 60000,
+            int millisecondsBroadcastTxInterval = 60000,
             IImmutableSet<Address> trustedStateValidators = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {

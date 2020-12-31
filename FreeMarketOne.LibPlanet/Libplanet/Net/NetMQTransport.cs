@@ -110,8 +110,8 @@ namespace Libplanet.Net
             _logger = logger;
 
             _requests = new AsyncCollection<MessageRequest>();
-            _runtimeCancellationTokenSource = new CancellationTokenSource();
-            _turnCancellationTokenSource = new CancellationTokenSource();
+            _runtimeCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));            
+            _turnCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
             _requestCount = 0;
             _runtimeProcessor = Task.Factory.StartNew(
                 () =>
@@ -416,7 +416,7 @@ namespace Libplanet.Net
         public Task WaitForRunningAsync() => _runningEvent.Task;
 
         public Task SendMessageAsync(BoundPeer peer, Message message)
-            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(3), 0);
+            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(30), 0);
 
         public async Task<Message> SendMessageWithReplyAsync(
             BoundPeer peer,
@@ -637,7 +637,7 @@ namespace Libplanet.Net
                         _dealers[peer.Address] = dealer;
                     }
 
-                    if (!dealer.TrySendMultipartMessage(TimeSpan.FromSeconds(3), message))
+                    if (!dealer.TrySendMultipartMessage(TimeSpan.FromSeconds(60), message))
                     {
                         _logger.Warning(
                             "Broadcasting timed out. [Peer: {Peer}, Message: {Message}]",
@@ -667,7 +667,7 @@ namespace Libplanet.Net
 
             // FIXME The current timeout value(1 sec) is arbitrary.
             // We should make this configurable or fix it to an unneeded structure.
-            if (_router.TrySendMultipartMessage(TimeSpan.FromSeconds(1), msg))
+            if (_router.TrySendMultipartMessage(TimeSpan.FromSeconds(60), msg))
             {
                 _logger.Debug("A reply sent to {Identity}", identityHex);
             }

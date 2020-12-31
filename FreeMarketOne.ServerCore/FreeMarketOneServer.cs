@@ -3,6 +3,7 @@ using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.DataStructure.ProtocolVersions;
+using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
@@ -41,7 +42,6 @@ namespace FreeMarketOne.ServerCore
 
         public static FreeMarketOneServer Current { get; private set; }
         
-
         public Logger Logger => (Logger)_logger;
         private ILogger _logger;
 
@@ -176,7 +176,7 @@ namespace FreeMarketOne.ServerCore
                             Configuration.ListenerBaseEndPoint,
                             OnionSeedsManager,
                             UserManager.PrivateKey,
-                            new BaseChainProtocolVersion(),
+                            new NetworkProtocolVersion(),
                             preloadEnded: BaseBlockChainLoadEndedEvent,
                             blockChainChanged: BaseBlockChainChangedEvent);
 
@@ -246,7 +246,7 @@ namespace FreeMarketOne.ServerCore
                         Configuration.ListenerMarketEndPoint,
                         OnionSeedsManager,
                         UserManager.PrivateKey,
-                        new MarketChainProtocolVersion(),
+                        new NetworkProtocolVersion(),
                         hashCheckPoints,
                         genesisBlock,
                         preloadEnded: MarketBlockChainLoadEndedEvent,

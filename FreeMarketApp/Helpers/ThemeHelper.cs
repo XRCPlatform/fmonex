@@ -11,12 +11,12 @@ namespace FreeMarketApp.Helpers
     {
         internal static StyleInclude DarkTheme = new StyleInclude(new Uri("avares://FreeMarketApp/App.xaml"))
         {
-            Source = new Uri("avares://FreeMarketApp/Styles/DarkTheme.xml")
+            Source = new Uri("avares://FreeMarketApp/Styles/DarkTheme.xaml")
         };
 
         internal static StyleInclude LightTheme = new StyleInclude(new Uri("avares://FreeMarketApp/App.xaml"))
         {
-            Source = new Uri("avares://FreeMarketApp/Styles/LightTheme.xml")
+            Source = new Uri("avares://FreeMarketApp/Styles/LightTheme.xaml")
         };
 
         internal const string DARK_THEME = "Dark";

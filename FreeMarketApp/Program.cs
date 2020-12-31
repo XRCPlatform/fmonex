@@ -1,7 +1,6 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
 
 namespace FreeMarketApp
@@ -24,7 +23,7 @@ namespace FreeMarketApp
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToDebug()
+                .LogToTrace()
                 .UseReactiveUI();
     }
 }

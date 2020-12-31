@@ -144,7 +144,7 @@ namespace FreeMarketOne.Pools
 
                         if (!coMiningRunner.IsActive)
                         {
-                            if ((miningDelayStart <= DateTime.UtcNow) && (_running == PoolStates.Mined))
+                            if ((miningDelayStart <= DateTime.UtcNow) && (_running != PoolStates.Mined))
                             {
                                 _logger.Information(string.Format("Starting mining after mining delay."));
                                 coMiningRunner.Start();

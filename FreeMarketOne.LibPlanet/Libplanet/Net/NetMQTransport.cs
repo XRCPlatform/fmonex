@@ -110,8 +110,8 @@ namespace Libplanet.Net
             _logger = logger;
 
             _requests = new AsyncCollection<MessageRequest>();
-            _runtimeCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(2));            
-            _turnCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            _runtimeCancellationTokenSource = new CancellationTokenSource();            
+            _turnCancellationTokenSource = new CancellationTokenSource();
             _requestCount = 0;
             _runtimeProcessor = Task.Factory.StartNew(
                 () =>

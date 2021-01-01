@@ -37,7 +37,7 @@ namespace FreeMarketOne.ServerCore
         {
             NotReady = 0,
             Offline = 1,
-            Online = 2
+            Online = 2,
         }
 
         public static FreeMarketOneServer Current { get; private set; }
@@ -74,35 +74,49 @@ namespace FreeMarketOne.ServerCore
         public event EventHandler FreeMarketOneServerLoggedInEvent;
         public event EventHandler<string> LoadingEvent;
         private BackgroundQueue backgroundQueue = new BackgroundQueue();
+        public bool IsShuttingDown = false;
 
-        public void Initialize(string password = null, UserDataV1 firstUserData = null)
+        public IBaseConfiguration MakeConfiguration(string configFilePath)
         {
             var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
+            string configFileName = "appsettings.json";
+            if (configFilePath != null)
+            {
+                fullBaseDirectory = Path.GetFullPath(Path.GetDirectoryName(configFilePath));
+                configFileName = Path.GetFileName(configFilePath);
+            }
 
             //Configuration
             var builder = new ConfigurationBuilder()
                 .SetBasePath(fullBaseDirectory)
-                .AddJsonFile("appsettings.json", true, false);
+                .AddJsonFile(configFileName, true, false);
             var configFile = builder.Build();
 
-            //Environment
-            Configuration = InitConfigurationHelper.InitializeEnvironment(configFile);
+            var configuration = InitConfigurationHelper.InitializeEnvironment(configFile);
 
             //Config
-            Configuration.FullBaseDirectory = fullBaseDirectory;
-            InitConfigurationHelper.InitializeBaseOnionSeedsEndPoint(Configuration, configFile);
-            InitConfigurationHelper.InitializeBaseTorEndPoint(Configuration, configFile);
-            InitConfigurationHelper.InitializeLogFilePath(Configuration, configFile);
-            InitConfigurationHelper.InitializeMemoryPoolPaths(Configuration, configFile);
-            InitConfigurationHelper.InitializeBlockChainPaths(Configuration, configFile);
-            InitConfigurationHelper.InitializeTorUsage(Configuration, configFile);
-            InitConfigurationHelper.InitializeChatPaths(Configuration, configFile);
-            InitConfigurationHelper.InitializeSearchEnginePaths(Configuration, configFile);
-            InitConfigurationHelper.InitializeMinimalPeerAmount(Configuration, configFile);
+            configuration.FullBaseDirectory = fullBaseDirectory;
+            InitConfigurationHelper.InitializeBaseOnionSeedsEndPoint(configuration, configFile);
+            InitConfigurationHelper.InitializeBaseTorEndPoint(configuration, configFile);
+            InitConfigurationHelper.InitializeLogFilePath(configuration, configFile);
+            InitConfigurationHelper.InitializeMemoryPoolPaths(configuration, configFile);
+            InitConfigurationHelper.InitializeBlockChainPaths(configuration, configFile);
+            InitConfigurationHelper.InitializeTorUsage(configuration, configFile);
+            InitConfigurationHelper.InitializeChatPaths(configuration, configFile);
+            InitConfigurationHelper.InitializeSearchEnginePaths(configuration, configFile);
+            InitConfigurationHelper.InitializeMinimalPeerAmount(configuration, configFile);
 
             //IP Helper
-            ServerPublicAddress = new IpHelper(Configuration);
-            InitConfigurationHelper.InitializeListenerEndPoints(Configuration, configFile);
+            ServerPublicAddress = new IpHelper(configuration);
+            InitConfigurationHelper.InitializeListenerEndPoints(configuration, configFile);
+
+            return configuration;
+        }
+
+        public void Initialize(string password = null, UserDataV1 firstUserData = null, string configFilePath = null)
+        {
+            //Environment
+            Configuration = MakeConfiguration(configFilePath);
 
             //Initialize Logger
             Log.Logger = new LoggerConfiguration()
@@ -462,6 +476,7 @@ namespace FreeMarketOne.ServerCore
             _logger?.Information("Ending Market Manager...");
             MarketManager = null;
 
+            IsShuttingDown = true;
             _logger?.Information("Application End");
         }
     }

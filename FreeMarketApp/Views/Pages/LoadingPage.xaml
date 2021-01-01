@@ -7,8 +7,11 @@
 
           <ScrollViewer HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-80,0,0">
             <StackPanel Orientation="Vertical">
-              <Image Source="resm:FreeMarketApp.Assets.splash.png" Grid.Row="0" Stretch="None" />
-              <TextBlock Name='LoadingStatus' Width="300" FontWeight="Bold" Text="{Binding StartupProgressText, Mode=TwoWay }" VerticalAlignment="Center" HorizontalAlignment="Right" TextAlignment="Center" />
+				<Path Classes="FirstRunLogo" Data="M312.10991,234.6516c-2.9824-1.0992-3.06278-4.2968-4.668-7.55519-11.6792-23.72281-43.666-10.056-67.8852,6.34-.59159.40041-1.16919.8152-1.74479,1.2408-1.364-70.8276-100.6296-37.1664-120.9628-99.72,0,0-31.4236,59.38521,42.8092,100.0692,11.314,6.2016,20.002,18.5732,19.3124,31.81-2.92119,56.13479-119.2048,22.98281-130.574-69.07239C39.123,122.6756,100.65912,60.5524,178.35432,55.316a140.91428,140.91428,0,0,1,125.214,60.116A152.48573,152.48573,0,1,0,178.53112,337.93921c1.848-.12482,3.68239-.28882,5.50721-.48,23.8844-.66361,48.95079-7.4404,69.80679-26.6004,24.6028-22.59879,17.6956-48.032,40.572-63.5812,6.49878-4.41639,15.08078-8.436,29.81759-5.9616,0,0-2.73559-3.2024-12.12481-6.6644M233.07911,14.0742A187.73729,187.73729,0,0,1,356.06672,177.8416c6.97119,103.432-71.226,192.93159-174.6584,199.90279a187.96622,187.96622,0,0,1-49.21361-3.1424,187.04342,187.04342,0,0,0,76.91642,10.8924c103.4324-6.9708,181.6296-96.472,174.65878-199.904A187.77552,187.77552,0,0,0,233.07911,14.0742"
+					  HorizontalAlignment="Center" Height="200" Stretch="Fill" Width="199" Margin="0 30"/>
+				<Path Data="M181.72321,174.186c14.74319,4.3716,29.98719,8.89,41.6192,17.37079a48.45957,48.45957,0,0,1,19.85,31.8748,148.03309,148.03309,0,0,1,14.98521-8.09959c-8.13521-40.40359-76.40921-59.654-68.36-112.9528,0,0-32.872,23.4696-25.19,66.4608,5.51481,1.9104,11.26722,3.618,17.09562,5.346"
+				    Fill="#fdb414" HorizontalAlignment="Center" Height="67.4" Stretch="Fill" Width="49.14" Margin="11 -300 0 0"/>
+              <TextBlock Classes="H1" Name='LoadingStatus' Width="300" FontWeight="Bold" Text="{Binding StartupProgressText, Mode=TwoWay }" VerticalAlignment="Center" HorizontalAlignment="Right" TextAlignment="Center" />
             </StackPanel>
         </ScrollViewer>
 

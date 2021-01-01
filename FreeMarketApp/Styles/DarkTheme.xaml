@@ -460,7 +460,7 @@
 		</Style>
 
 		<Style Selector="Path.FirstRunLogo">
-			<Setter Property="Fill" Value="#fefefe"/>
+			<Setter Property="Fill" Value="#fefffe"/>
 		</Style>
 
 		<Style Selector="Border.Main">

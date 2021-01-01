@@ -457,7 +457,7 @@
 		</Style>
 
 		<Style Selector="Path.FirstRunLogo">
-			<Setter Property="Fill" Value="#020f1c"/>
+			<Setter Property="Fill" Value="#0f0e27"/>
 		</Style>
 
 		<Style Selector="Border.Main">

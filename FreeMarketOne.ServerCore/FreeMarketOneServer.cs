@@ -113,6 +113,11 @@ namespace FreeMarketOne.ServerCore
             return configuration;
         }
 
+        public async Task InitializeAsync(string password = null, UserDataV1 firstUseData = null)
+        {
+            await Task.Run(() => this.Initialize(password, firstUseData));
+        }
+		
         public void Initialize(string password = null, UserDataV1 firstUserData = null, string configFilePath = null)
         {
             //Environment

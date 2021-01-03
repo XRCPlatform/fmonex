@@ -184,10 +184,10 @@ namespace FreeMarketApp.Views.Pages
 
         private static async Task<bool> GetAppLoadingAsync(string password, UserDataV1 userData)
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 FMONE.Current.LoadingEvent += new EventHandler<string>(LoadingEvent);
-                FMONE.Current.Initialize(password, userData);
+                await FMONE.Current.InitializeAsync(password, userData);
             }).ConfigureAwait(true);
 
             return true;

@@ -20,7 +20,7 @@ namespace Libplanet.Net
 {
     internal class NetMQTransport : ITransport
     {
-        private const int MessageHistoryCapacity = 30;
+        private const int MessageHistoryCapacity = 3000;
 
         private static readonly TimeSpan TurnAllocationLifetime =
             TimeSpan.FromSeconds(777);
@@ -120,7 +120,7 @@ namespace Libplanet.Net
                     // tests
                     try
                     {
-                        using var runtime = new NetMQRuntime();
+                        var runtime = new NetMQRuntime();
                         var workerTasks = new Task[workers];
 
                         for (int i = 0; i < workers; i++)
@@ -258,7 +258,7 @@ namespace Libplanet.Net
 
             tasks.Add(
                 RefreshTableAsync(
-                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(100),
                     TimeSpan.FromSeconds(10),
                     _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
@@ -787,7 +787,12 @@ namespace Libplanet.Net
                 DateTimeOffset.UtcNow - req.RequestedTime);
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
 
-            using var dealer = new DealerSocket(ToNetMQAddress(req.Peer));
+            if (!_dealers.TryGetValue(req.Peer.Address, out DealerSocket dealer))
+            {
+                dealer = new DealerSocket(ToNetMQAddress(req.Peer));
+                _dealers[req.Peer.Address] = dealer;
+            }
+
             _logger.Debug(
                 "Trying to send {Message} to {Peer}...",
                 req.Message,

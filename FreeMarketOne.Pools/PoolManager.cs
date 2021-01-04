@@ -7,7 +7,7 @@ using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.Extensions.Helpers;
 using Libplanet.Net;
-using Libplanet.RocksDBStore;
+using Libplanet.Store;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -47,7 +47,7 @@ namespace FreeMarketOne.Pools
         private string _memoryPoolFilePath { get; set; }
         private IBaseConfiguration _configuration { get; }
 
-        private RocksDBStore _storage;
+        private DefaultStore _storage;
         private Swarm<T> _swarmServer;
         private PrivateKey _privateKey;
         private BlockChain<T> _blockChain;
@@ -69,7 +69,7 @@ namespace FreeMarketOne.Pools
         public PoolManager(
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
-            RocksDBStore storage,
+            DefaultStore storage,
             Swarm<T> swarmServer,
             PrivateKey privateKey,
             BlockChain<T> blockChain,

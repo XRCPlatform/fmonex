@@ -3,7 +3,7 @@ using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.Net;
-using Libplanet.RocksDBStore;
+using Libplanet.Store;
 
 namespace FreeMarketOne.Pools
 {
@@ -12,7 +12,7 @@ namespace FreeMarketOne.Pools
         public BasePoolManager(
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
-            RocksDBStore storage,
+            DefaultStore storage,
             Swarm<BaseAction> swarmServer,
             PrivateKey privateKey,
             BlockChain<BaseAction> blockChain,

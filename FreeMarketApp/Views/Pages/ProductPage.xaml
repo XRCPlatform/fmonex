@@ -315,8 +315,7 @@
             <TextBlock Text="XRC Transaction" Classes="H1" Margin="20 20 20 0" FontSize="16" FontWeight="Bold"/>
             <TextBox Name="TBXRCReceivingTransaction" Classes="TextBoxBackground" AcceptsReturn="False" MaxLength="64" HorizontalAlignment="Left" Padding="10" Watermark="An XRC transaction hash (id)" Width="430" BorderThickness="1" TextWrapping="NoWrap" Margin="20 5 20 0" FontSize="16"/>
 
-
-        <Button Name="BTBuyButton" HorizontalAlignment="Left" Width="300" Tag="" FontSize="16" Margin="20 50 20 10" Height="40" Padding="50 0 50 0" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy this product</Button>
+        <Button Name="BTBuyButton" HorizontalAlignment="Right" Width="200" Tag="" FontSize="16" Margin="20 50 20 10" Height="40" Classes="message" Cursor="Hand" Click="ButtonBuy_Click">Buy this product</Button>
       </StackPanel>
     </ScrollViewer>
   </Grid>

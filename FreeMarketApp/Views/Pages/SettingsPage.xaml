@@ -47,9 +47,7 @@
 					</RadioButton>
 				</StackPanel>
 
-        <DockPanel Margin="20 50 20 0">
-          <Button DockPanel.Dock="Right" Classes="message" HorizontalAlignment="Right" FontSize="16" Margin="0 30 0 0" Height="40" Width="130" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
-        </DockPanel>
+          <Button DockPanel.Dock="Right" Classes="message" HorizontalAlignment="Right" FontSize="16" Margin="20 50 20 40" Height="40" Width="200" Click="ButtonSave_Click" Cursor="Hand" >Save</Button>
         
 			</StackPanel>
 		</ScrollViewer>

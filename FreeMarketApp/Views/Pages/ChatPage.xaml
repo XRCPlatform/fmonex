@@ -28,8 +28,8 @@
                 <Button Name="BTChat" Tag="{Binding MarketItem.Hash}" Padding="5" MaxWidth="220" Classes="sidebar" Cursor="Hand" Click="ButtonChat_Click">
 					<DockPanel HorizontalAlignment="Stretch">
 						<Border DockPanel.Dock="Left" Classes="SearchBar" Width="30" Height="30" CornerRadius="30">
-							<Path Classes="SideBarIcon" Data="M3005.74416,424.31894H1856.32229c-118.84573,0-215.51952,96.50333-215.51952,215.13811V1500c0,118.62892,96.67379,215.13283,215.51952,215.13283h688.64053l266.30867,265.83982a71.84922,71.84922,0,0,0,122.63077-50.70108V1715.13283h71.836c118.85154,0,215.52533-96.50391,215.52533-215.13283V639.45705C3221.26359,520.82227,3124.5898,424.31894,3005.74416,424.31894ZM2000,711.16993h287.34952a71.71593,71.71593,0,1,1,0,143.43166H2000a71.71593,71.71593,0,1,1,0-143.43166Zm862.06645,717.11129H2000a71.713,71.713,0,1,1,0-143.42576h862.06645a71.713,71.713,0,1,1,0,143.42576Zm0-286.83982H2000a71.71593,71.71593,0,1,1,0-143.43166h862.06645a71.71593,71.71593,0,1,1,0,143.43166ZM1497.13087,1500V998.00974H994.25526c-118.84278,0-215.516,96.50391-215.516,215.13873v860.543c0,118.63482,96.67323,215.13873,215.516,215.13873h71.836v215.13265a71.84652,71.84652,0,0,0,122.62559,50.70127l266.30857-265.83392h688.64644c118.83992,0,215.51371-96.50391,215.51371-215.13873V1858.5586H1856.32229C1658.19922,1858.5586,1497.13087,1697.69526,1497.13087,1500Z"
-							Height="14" Stretch="Fill" Width="18" />
+							<Path Classes="SideBarIcon" Data="M256,0C114.844,0,0,114.844,0,256s114.844,256,256,256s256-114.844,256-256S397.156,0,256,0z M256,74.667 c67.635,0,122.667,55.031,122.667,122.667S323.635,320,256,320s-122.667-55.031-122.667-122.667S188.365,74.667,256,74.667z M256,469.333c-69.707,0-131.52-33.755-170.473-85.615c42.676-20.534,103.621-42.385,170.473-42.385	c66.857,0,127.807,21.854,170.474,42.383C387.521,435.577,325.708,469.333,256,469.333z"
+							Height="30" Stretch="Fill" Width="30" />
 						</Border>
 						<Ellipse Margin="-30 0 0 0" HorizontalAlignment="Left" Height="30" Width="30">
 							<Ellipse.Fill>
@@ -37,7 +37,7 @@
 								<ImageBrush Source="{Binding SellerAvatar}"/>
 							</Ellipse.Fill>
 						</Ellipse>
-						<TextBlock DockPanel.Dock="Left" Margin="7,0,0,0" FontSize="13" MaxWidth="170" MaxHeight="36" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding MarketItem.Title}"/>
+						<TextBlock DockPanel.Dock="Left" Margin="7,0,0,0" FontSize="14" MaxWidth="170" MaxHeight="38" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding MarketItem.Title}"/>
 					</DockPanel>
                 </Button>
                 <!-- End of chat thread-->   

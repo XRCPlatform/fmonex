@@ -10,6 +10,7 @@ using FreeMarketOne.Extensions.Helpers;
 using Serilog;
 using System;
 using System.Text;
+using TextCopy;
 using System.Threading.Tasks;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
@@ -18,7 +19,7 @@ namespace FreeMarketApp.Views.Pages
     public class FirstRunPage : UserControl
     {
         private static FirstRunPage _instance;
-        private static SplashWindowViewModel splashViewModel;
+        private static MainWindowViewModel mainViewModel;
         private ILogger _logger;
 
         public static FirstRunPage Instance
@@ -153,20 +154,15 @@ namespace FreeMarketApp.Views.Pages
                 //reloading server with splash window
                 async void AppAsyncLoadingStart()
                 {
-                    splashViewModel = new SplashWindowViewModel();
-                    splashViewModel.StartupProgressText = "Reloading...";
-                    var splashWindow = new SplashWindow { DataContext = splashViewModel };
-                    splashWindow.Show();
+                    PagesHelper.Switch(mainWindow, LoadingPage.Instance);
+                    mainViewModel = new MainWindowViewModel();
+                    mainViewModel.StartupProgressText = "Reloading...";
+                    mainWindow.DataContext = mainViewModel;
                     await Task.Delay(10);
                     await GetAppLoadingAsync(tbPassword.Text, firstUserData);
 
                     PagesHelper.Switch(mainWindow, MainPage.Instance);
                     PagesHelper.UnlockTools(mainWindow, true);
-
-                    if (splashWindow != null)
-                    {
-                        splashWindow.Close();
-                    }
                 }
 
                 AppAsyncLoadingStart();
@@ -188,18 +184,36 @@ namespace FreeMarketApp.Views.Pages
 
         private static async Task<bool> GetAppLoadingAsync(string password, UserDataV1 userData)
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 FMONE.Current.LoadingEvent += new EventHandler<string>(LoadingEvent);
-                FMONE.Current.Initialize(password, userData);
+                await FMONE.Current.InitializeAsync(password, userData);
             }).ConfigureAwait(true);
 
             return true;
         }
 
+        public async void ButtonCopyToClipboard_Click(object sender, RoutedEventArgs args)
+        {
+            var tbSeed = this.FindControl<TextBox>("TBSeed");
+            if ((tbSeed != null) && (!string.IsNullOrEmpty(tbSeed.Text)))
+            {
+                try
+                {
+                    await ClipboardService.SetTextAsync(tbSeed.Text);
+                }
+                catch (Exception e)
+                {
+                    PagesHelper.Log(Instance._logger,
+                        string.Format("Isn't possible to use clipboard {0}", e.Message),
+                        Serilog.Events.LogEventLevel.Error);
+                }
+            }
+        }
+
         private static void LoadingEvent(object sender, string message)
         {
-            splashViewModel.StartupProgressText = message;
+            mainViewModel.StartupProgressText = message;
         }
     }
 }

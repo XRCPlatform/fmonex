@@ -4,7 +4,7 @@ using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.Net;
-using Libplanet.RocksDBStore;
+using Libplanet.Store;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ namespace FreeMarketOne.BlockChain
     public interface IBlockChainManager<T> : IDisposable where T : IBaseAction, new()
     {
         BlockChain<T> BlockChain { get; }
-        RocksDBStore Storage { get; }
+        DefaultStore Storage { get; }
         Swarm<T> SwarmServer { get; }
         UserPrivateKey PrivateKey { get; }
 

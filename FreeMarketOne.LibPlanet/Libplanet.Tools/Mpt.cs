@@ -9,7 +9,6 @@ using System.Text.Json;
 using Bencodex;
 using Cocona;
 using Cocona.Help;
-using Libplanet.RocksDBStore;
 using Libplanet.Store.Trie;
 using Libplanet.Tools.Configuration;
 
@@ -36,7 +35,6 @@ namespace Libplanet.Tools
                 new Dictionary<string, Func<string, IKeyValueStore>>
                 {
                     ["default"] = kvStorePath => new DefaultKeyValueStore(kvStorePath),
-                    ["rocksdb"] = kvStorePath => new RocksDBKeyValueStore(kvStorePath),
                 }.ToImmutableSortedDictionary();
 
         [Command(Description = "Compare two trees via root hash.")]

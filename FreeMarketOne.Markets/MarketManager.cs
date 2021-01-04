@@ -3,7 +3,7 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Pools;
 using Libplanet.Extensions;
-using Libplanet.RocksDBStore;
+using Libplanet.Store;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -571,7 +571,7 @@ namespace FreeMarketOne.Markets
         /// <param name="types"></param>
         /// <returns></returns>
         private List<string> GetChainSignaturesForMarketItem(
-            RocksDBStore marketBlockChain,
+            DefaultStore marketBlockChain,
             Guid? chainId,
             long countOfIndex,
             MarketItemV1 itemMarket,

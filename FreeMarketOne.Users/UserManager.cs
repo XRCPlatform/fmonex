@@ -5,7 +5,7 @@ using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Pools;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
-using Libplanet.RocksDBStore;
+using Libplanet.Store;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -625,7 +625,7 @@ namespace FreeMarketOne.Users
         /// <param name="types"></param>
         /// <returns></returns>
         private List<UserDataV1> GetChainUserData(
-            RocksDBStore baseBlockChain,
+            DefaultStore baseBlockChain,
             Guid? chainId,
             long countOfIndex,
             UserDataV1 userItem,

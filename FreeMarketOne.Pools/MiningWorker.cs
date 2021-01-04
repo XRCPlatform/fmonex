@@ -2,7 +2,6 @@
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Net;
-using Libplanet.RocksDBStore;
 using Libplanet.Tx;
 using Serilog;
 using System;
@@ -15,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FreeMarketOne.DataStructure;
 using Libplanet.Extensions.Helpers;
+using Libplanet.Store;
 
 namespace FreeMarketOne.Pools
 {
@@ -24,7 +24,7 @@ namespace FreeMarketOne.Pools
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private PrivateKey _privateKey { get; set; }
-        private RocksDBStore _storage;
+        private DefaultStore _storage;
         private BlockChain<T> _blockChain;
         private Swarm<T> _swarmServer;
         private Address _address;
@@ -35,7 +35,7 @@ namespace FreeMarketOne.Pools
             Swarm<T> swarmServer,
             BlockChain<T> blockChain,
             Address address,
-            RocksDBStore storage,
+            DefaultStore storage,
             PrivateKey privateKey,
             CancellationTokenSource cancellationTokenSource,
             EventHandler eventNewBlock = null)

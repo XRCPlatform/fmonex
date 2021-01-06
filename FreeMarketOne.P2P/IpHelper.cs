@@ -1,15 +1,18 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.Tor;
+using MihaZupan;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace FreeMarketOne.P2P
 {
     public class IpHelper
     {
+        private static HttpClient _httpClient = null;
         private bool _useTor { get; set; }
         private EndPoint  _torEndPoint { get; set; }
 
@@ -58,6 +61,21 @@ namespace FreeMarketOne.P2P
             return null;
         }
 
+        private static HttpClient GetHttpClient(string uri)
+        {
+            if (_httpClient == null)
+            {
+                var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
+                var handler = new HttpClientHandler { Proxy = proxy };
+                HttpClient httpClient = new HttpClient(handler, true);
+                httpClient.BaseAddress = new Uri(uri);
+                httpClient.Timeout = TimeSpan.FromSeconds(3);
+                _httpClient = httpClient;
+            }
+
+            return _httpClient;
+        }
+
         public IPAddress GetMyTorExitIP()
         {
             if (_useTor)
@@ -71,8 +89,8 @@ namespace FreeMarketOne.P2P
                 {
                     try
                     {
-                        var torHttpClient = new TorHttpClient(new Uri(service), _torEndPoint);
-                        var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
+                        var httpClient = GetHttpClient(service);
+                        var response = httpClient.GetAsync("").ConfigureAwait(false).GetAwaiter().GetResult();
 
                         var html = response.Content.ReadAsStringAsync().Result;
 

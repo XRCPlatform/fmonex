@@ -74,6 +74,8 @@ HiddenServicePort 80 127.0.0.1:27272
 HiddenServicePort 9113 127.0.0.1:9113
 HiddenServicePort 9114 127.0.0.1:9114
 
+LongLivedPorts 9113 9114
+
 #HiddenServiceDir @LOCALSTATEDIR@/lib/tor/hidden_service/
 #HiddenServicePort 80 127.0.0.1:80
 

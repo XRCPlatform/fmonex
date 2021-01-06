@@ -6,6 +6,7 @@ using FreeMarketOne.Tor;
 using Libplanet;
 using Libplanet.Crypto;
 using Libplanet.Net;
+using MihaZupan;
 using Serilog;
 using Serilog.Core;
 using System;
@@ -15,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -28,6 +30,8 @@ namespace FreeMarketOne.P2P
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
         private long running;
+        private static HttpClient _httpClient = null;
+
         public bool IsRunning => Interlocked.Read(ref running) == 1;
         private ILogger _logger { get; set; }
         private EndPoint _torSocks5EndPoint { get; set; }
@@ -100,6 +104,25 @@ namespace FreeMarketOne.P2P
             Interlocked.Exchange(ref running, 1);
         }
 
+        private static HttpClient GetHttpClient(string uri)
+        {
+            if (_httpClient == null)
+            {
+                var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
+                var handler = new HttpClientHandler { Proxy = proxy };
+                HttpClient httpClient = new HttpClient(handler, true);
+                httpClient.BaseAddress = new Uri(uri);
+                httpClient.Timeout = TimeSpan.FromSeconds(3);
+                httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    Public = true
+                };
+                _httpClient = httpClient;
+            }
+
+            return _httpClient;
+        }
+
         private void ProcessOnionSeeds()
         {
             var dateTimeUtc = DateTime.UtcNow;
@@ -112,8 +135,8 @@ namespace FreeMarketOne.P2P
             var isTorRunning = _torProcessManager.IsTorRunningAsync().Result;
             if (isTorRunning)
             {
-                var torHttpClient = new TorHttpClient(new Uri(_torOnionEndPoint), _torSocks5EndPoint);
-                var response = torHttpClient.SendAsync(HttpMethod.Get, string.Empty).Result;
+                var httpClient = GetHttpClient(_torOnionEndPoint);
+                var response = httpClient.GetAsync("").ConfigureAwait(false).GetAwaiter().GetResult();
 
                 if (response.IsSuccessStatusCode)
                 {

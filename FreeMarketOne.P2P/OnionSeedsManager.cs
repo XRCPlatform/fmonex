@@ -21,6 +21,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using FreeMarketOne.Tor.Exceptions;
 
 namespace FreeMarketOne.P2P
 {
@@ -88,6 +90,11 @@ namespace FreeMarketOne.P2P
 
             //we have to load first onion seeds synchroniously
             ProcessOnionSeeds();
+
+            _logger.Information("Warming Tor onion service ...");
+            bool isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
+            var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
+            _logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
 
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
@@ -269,6 +276,74 @@ namespace FreeMarketOne.P2P
                         TimeSpan.FromMilliseconds(30000),
                         _cancellationToken.Token);
             }
+        }
+
+        private async Task<bool> WarmTorOnionServicetWithTcpServer(int port)
+        {
+            var duration = TimeSpan.FromSeconds(60);
+
+            _logger.Information($"Starting stream setup for {_torOnionEndPoint}:{port}");
+            // Server task
+            Task.Run(() =>
+            {
+                var server = new TcpListener(IPAddress.Parse("127.0.0.1"), port);
+                server.Start();
+
+                var bytes = new byte[] {0x1, 0x2};
+                _logger.Information($"Accepting warm up stream for {port}");
+                TcpClient client = server.AcceptTcpClient();
+                NetworkStream stream = client.GetStream();
+                _logger.Information($"Got warm up stream from Tor using {port}");
+                stream.Write(bytes, 0, 2);
+
+                client.Close();
+                server.Stop();
+
+                _logger.Information($"Closing warm up server on {port}");
+            });
+
+            var sleepDuration = TimeSpan.FromSeconds(10);
+            var stopwatch = Stopwatch.StartNew();
+            var connected = false;
+
+            do
+            {
+                TorSocks5Client client = new TorSocks5Client(_torSocks5EndPoint);
+
+                try
+                {
+                    await client.ConnectAsync().ConfigureAwait(false);
+                    _logger.Information($"Connected to Tor on {port}");
+                    await client.HandshakeAsync(true).ConfigureAwait(false);
+                    _logger.Information($"Handshake with Tor on {port}");
+                    await client.ConnectToDestinationAsync(_serverOnionAddress, port).ConfigureAwait(false);
+                    _logger.Information($"Warm up connected? {client.IsConnected}");
+                    if (client.IsConnected)
+                    {
+                        _logger.Information($"Warm up test for {port}");
+                        connected = true;
+                        var bytes = new byte[2];
+                        int i = client.Stream.Read(bytes, 0, 2);
+
+                        return i == 2 && bytes[0] == 0x1 && bytes[1] == 0x2;
+                    }
+                }
+                catch (TorSocks5FailureResponseException ex)
+                {
+
+                    Console.WriteLine(ex);
+                    if (duration - stopwatch.Elapsed > sleepDuration)
+                    {
+                        Thread.Sleep(sleepDuration);
+                    }
+                }
+                finally
+                {
+                    client.Dispose();
+                }
+            } while (!connected && stopwatch.Elapsed < duration);
+
+            return false;
         }
 
         public void Dispose()

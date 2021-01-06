@@ -56,7 +56,7 @@ namespace FreeMarketOne.Tor
 		#region ConstructorsAndInitializers
 
 		/// <param name="endPoint">Opt out Tor with null.</param>
-		internal TorSocks5Client(EndPoint endPoint)
+		public TorSocks5Client(EndPoint endPoint)
 		{
 			TorSocks5EndPoint = endPoint;
 			TcpClient = endPoint is null ? new TcpClient() : new TcpClient(endPoint.AddressFamily);
@@ -80,7 +80,7 @@ namespace FreeMarketOne.Tor
 			}
 		}
 
-		internal async Task ConnectAsync()
+		public async Task ConnectAsync()
 		{
 			if (TorSocks5EndPoint is null)
 			{
@@ -111,7 +111,7 @@ namespace FreeMarketOne.Tor
 		/// https://www.torproject.org/docs/tor-manual.html.en
 		/// https://gitweb.torproject.org/torspec.git/tree/socks-extensions.txt#n35
 		/// </summary>
-		internal async Task HandshakeAsync(bool isolateStream = true)
+		public async Task HandshakeAsync(bool isolateStream = true)
 		{
 			await HandshakeAsync(isolateStream ? RandomString.Generate(21) : "").ConfigureAwait(false);
 		}
@@ -122,7 +122,7 @@ namespace FreeMarketOne.Tor
 		/// https://gitweb.torproject.org/torspec.git/tree/socks-extensions.txt#n35
 		/// </summary>
 		/// <param name="identity">Isolates streams by identity. If identity is empty string, it won't isolate stream.</param>
-		internal async Task HandshakeAsync(string identity)
+		public async Task HandshakeAsync(string identity)
 		{
 			if (TorSocks5EndPoint is null)
 			{
@@ -196,7 +196,7 @@ namespace FreeMarketOne.Tor
 		}
 
 		/// <param name="host">IPv4 or domain</param>
-		internal async Task ConnectToDestinationAsync(string host, int port, bool isRecursiveCall = false)
+		public async Task ConnectToDestinationAsync(string host, int port, bool isRecursiveCall = false)
 		{
 			host = Guard.NotNullOrEmptyOrWhitespace(nameof(host), host, true);
 			Guard.MinimumAndNotNull(nameof(port), port, 0);

@@ -282,7 +282,6 @@ namespace FreeMarketOne.P2P
         {
             var duration = TimeSpan.FromSeconds(60);
 
-            _logger.Information($"Starting stream setup for {_torOnionEndPoint}:{port}");
             // Server task
             Task.Run(() =>
             {

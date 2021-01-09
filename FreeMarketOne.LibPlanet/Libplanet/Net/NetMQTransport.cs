@@ -872,9 +872,9 @@ namespace Libplanet.Net
 
         private string ToNetMQAddress(BoundPeer peer)
         {
-            return !string.IsNullOrEmpty(_socks5Proxy) ?
+            return string.IsNullOrEmpty(_socks5Proxy) ?
                 $"tcp://{peer.EndPoint.Host}:{peer.EndPoint.Port}" :
-                $"socks5://127.0.0.1:9050;{peer.EndPoint.Host}:{peer.EndPoint.Port}";
+                $"socks5://{_socks5Proxy};{peer.EndPoint.Host}:{peer.EndPoint.Port}";
         }
 
         private async Task CreatePermission(BoundPeer peer)

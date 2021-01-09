@@ -39,6 +39,9 @@ namespace FreeMarketOne.P2P
         private EndPoint _torSocks5EndPoint { get; set; }
         private string _torOnionEndPoint { get; set; }
         private string _appVersion { get; set; }
+
+        private bool _listenersUseTor;
+
         public List<OnionSeedPeer> OnionSeedPeers { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
@@ -60,6 +63,7 @@ namespace FreeMarketOne.P2P
             _torSocks5EndPoint = configuration.TorEndPoint;
             _torOnionEndPoint = configuration.OnionSeedsEndPoint;
             _appVersion = configuration.Version;
+            _listenersUseTor = configuration.ListenersUseTor;
 
             _torProcessManager = torManager;
             _serverPublicAddress = serverPublicAddress;
@@ -91,10 +95,13 @@ namespace FreeMarketOne.P2P
             //we have to load first onion seeds synchroniously
             ProcessOnionSeeds();
 
-            _logger.Information("Warming Tor onion service ...");
-            bool isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
-            var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
-            _logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
+            if (_listenersUseTor)
+            {
+                _logger.Information("Warming Tor onion service ...");
+                bool isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
+                var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
+                _logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
+            }
 
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {

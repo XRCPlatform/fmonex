@@ -157,7 +157,9 @@ namespace Libplanet.Net
                 iceServers,
                 differentAppProtocolVersionEncountered,
                 ProcessMessageHandler,
-                _logger);
+                _logger,
+                options.Socks5Proxy
+            );
 
             Options = options ?? new SwarmOptions();
         }

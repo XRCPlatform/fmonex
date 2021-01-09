@@ -37,7 +37,7 @@ namespace Libplanet.Net
         private readonly IList<IceServer> _iceServers;
         private readonly ILogger _logger;
         private readonly AsyncLock _turnClientMutex;
-
+        private string _socks5Proxy;
         private NetMQQueue<NetMQMessage> _replyQueue;
         private NetMQQueue<(Address?, Message)> _broadcastQueue;
 
@@ -80,7 +80,8 @@ namespace Libplanet.Net
             IEnumerable<IceServer> iceServers,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered,
             EventHandler<Message> processMessageHandler,
-            ILogger logger)
+            ILogger logger,
+            string socks5Proxy)
         {
             Running = false;
 
@@ -91,6 +92,7 @@ namespace Libplanet.Net
             _listenPort = listenPort;
             _differentAppProtocolVersionEncountered = differentAppProtocolVersionEncountered;
             _turnClientMutex = new AsyncLock();
+            _socks5Proxy = socks5Proxy ?? null;
             ProcessMessageHandler = processMessageHandler;
 
             if (_host != null && _listenPort is int listenPortAsInt)
@@ -110,7 +112,7 @@ namespace Libplanet.Net
             _logger = logger;
 
             _requests = new AsyncCollection<MessageRequest>();
-            _runtimeCancellationTokenSource = new CancellationTokenSource();            
+            _runtimeCancellationTokenSource = new CancellationTokenSource();
             _turnCancellationTokenSource = new CancellationTokenSource();
             _requestCount = 0;
             _runtimeProcessor = Task.Factory.StartNew(
@@ -217,7 +219,8 @@ namespace Libplanet.Net
 
             _router = new RouterSocket();
             _router.Options.RouterHandover = true;
-            _router.Bind($"tcp://127.0.0.1:{_listenPort}");
+
+            _router.Bind($"tcp://{(_host.Contains(".onion") ? "127.0.0.1" : _host)}:{_listenPort}");
 
             _logger.Information($"Listen on {_listenPort}");
 
@@ -869,8 +872,9 @@ namespace Libplanet.Net
 
         private string ToNetMQAddress(BoundPeer peer)
         {
-            // return $"tcp://{peer.EndPoint.Host}:{peer.EndPoint.Port}";
-            return $"socks5://127.0.0.1:9050;{peer.EndPoint.Host}:{peer.EndPoint.Port}";
+            return !string.IsNullOrEmpty(_socks5Proxy) ?
+                $"tcp://{peer.EndPoint.Host}:{peer.EndPoint.Port}" :
+                $"socks5://127.0.0.1:9050;{peer.EndPoint.Host}:{peer.EndPoint.Port}";
         }
 
         private async Task CreatePermission(BoundPeer peer)

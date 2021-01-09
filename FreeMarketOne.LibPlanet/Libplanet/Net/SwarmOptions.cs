@@ -36,5 +36,10 @@ namespace Libplanet.Net
         /// The timeout used to block download in preloading.
         /// </summary>
         public TimeSpan BlockDownloadTimeout { get; set; } = Timeout.InfiniteTimeSpan;
+
+        /// <summary>
+        /// Use this SOCKS5 proxy
+        /// </summary>
+        public string Socks5Proxy { get; set; }
     }
 }

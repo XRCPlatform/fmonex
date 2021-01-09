@@ -1,7 +1,10 @@
 ﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.Extensions.Helpers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Binder;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -54,6 +57,12 @@ namespace FreeMarketOne.ServerCore.Helpers
             var seedsEndPoint = configFile.GetSection("FreeMarketOneConfiguration")["OnionSeedsEndPoint"];
 
             if (!string.IsNullOrEmpty(seedsEndPoint)) configuration.OnionSeedsEndPoint = seedsEndPoint;
+        }
+
+        internal static void InitializeLocalOnionSeeds(IBaseConfiguration configuration, IConfigurationRoot configFile)
+        {
+            List<string> seeds = configFile.GetSection("FreeMarketOneConfiguration").GetSection("OnionSeeds").Get<List<string>>();
+            if (seeds != null) configuration.OnionSeeds = seeds;
         }
 
         internal static void InitializeMinimalPeerAmount(IBaseConfiguration configuration, IConfigurationRoot configFile)

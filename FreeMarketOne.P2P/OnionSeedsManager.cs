@@ -48,6 +48,7 @@ namespace FreeMarketOne.P2P
         private TorProcessManager _torProcessManager { get; set; }
         private IPAddress _serverPublicAddress { get; set; }
         private string _serverOnionAddress { get; set; }
+        private List<string> _onionSeeds { get; set; }
 
         public Swarm<BaseAction> BaseSwarm { get; set; }
         public Swarm<MarketAction> MarketSwarm { get; set; }
@@ -64,6 +65,7 @@ namespace FreeMarketOne.P2P
             _torOnionEndPoint = configuration.OnionSeedsEndPoint;
             _appVersion = configuration.Version;
             _listenersUseTor = configuration.ListenersUseTor;
+            _onionSeeds = configuration.OnionSeeds;
 
             _torProcessManager = torManager;
             _serverPublicAddress = serverPublicAddress;
@@ -137,15 +139,48 @@ namespace FreeMarketOne.P2P
             return _httpClient;
         }
 
+        private void AddOnionSeedString(string onion)
+        {
+            if (IsOnionAddressValid(onion))
+            {
+                var parts = onion.Split(":");
+                var newOnionSeed = new OnionSeedPeer
+                {
+                    UrlTor = parts[0],
+                    PortTor = int.Parse(parts[1]),
+                    UrlBlockChain = parts[2],
+                    PortBlockChainBase = int.Parse(parts[3]),
+                    PortBlockChainMaster = int.Parse(parts[4]),
+                    PublicKeyHex = parts[5]
+                };
+
+                if (!OnionSeedPeers.Exists(a => a.PublicKeyHex == newOnionSeed.PublicKeyHex))
+                    OnionSeedPeers.Add(newOnionSeed);
+
+                _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
+            }
+        }
+
         private void ProcessOnionSeeds()
         {
             var dateTimeUtc = DateTime.UtcNow;
 
             StringBuilder periodicCheckLog = new StringBuilder();
+            StringBuilder foundOnionSeeds = new StringBuilder();
 
             periodicCheckLog.AppendLine("======Onion Seed Status Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
             periodicCheckLog.AppendLine("My Tor EndPoint " + _torProcessManager.TorOnionEndPoint);
 
+            // Get local seeds
+            if (_onionSeeds != null)
+            {
+                foreach(string onionSeed in _onionSeeds)
+                {
+                    AddOnionSeedString(onionSeed);
+                }
+            }
+
+            // Get remote seeds
             var isTorRunning = _torProcessManager.IsTorRunningAsync().Result;
             if (isTorRunning)
             {
@@ -163,24 +198,8 @@ namespace FreeMarketOne.P2P
                             var onion = sr.ReadLine();
 
                             _logger.Information(string.Format("Parsing: {0}", onion));
+                            AddOnionSeedString(onion);
 
-                            if (IsOnionAddressValid(onion))
-                            {
-                                var parts = onion.Split(":");
-                                var newOnionSeed = new OnionSeedPeer();
-
-                                newOnionSeed.UrlTor = parts[0];
-                                newOnionSeed.PortTor = int.Parse(parts[1]);
-                                newOnionSeed.UrlBlockChain = parts[2];
-                                newOnionSeed.PortBlockChainBase = int.Parse(parts[3]);
-                                newOnionSeed.PortBlockChainMaster = int.Parse(parts[4]);
-                                newOnionSeed.PublicKeyHex = parts[5];
-
-                                if (!OnionSeedPeers.Exists(a => a.PublicKeyHex == newOnionSeed.PublicKeyHex))
-                                    OnionSeedPeers.Add(newOnionSeed);
-
-                                _logger.Information(string.Format("Valid source: {0} Port: {1}", newOnionSeed.UrlTor, newOnionSeed.PortTor));
-                            }
                         }
                     }
 
@@ -217,6 +236,12 @@ namespace FreeMarketOne.P2P
             else
             {
                 periodicCheckLog.AppendLine("Tor is down!");
+            }
+
+            periodicCheckLog.AppendLine($"Current Onion Seeds: ");
+            foreach (OnionSeedPeer peer in OnionSeedPeers)
+            {
+                _ = periodicCheckLog.AppendLine($"{peer.UrlTor}:{peer.PortTor}:{peer.UrlBlockChain}:{peer.PortBlockChainBase}:{peer.PortBlockChainMaster}:{peer.PublicKeyHex}");
             }
 
             Console.WriteLine(periodicCheckLog.ToString());
@@ -257,7 +282,7 @@ namespace FreeMarketOne.P2P
                 if (exist == null)
                     await BaseSwarm.AddPeersAsync(
                         new[] { boundPeer },
-                        TimeSpan.FromMilliseconds(30000),
+                        TimeSpan.FromMilliseconds(5000),
                         _cancellationToken.Token);
             }
         }

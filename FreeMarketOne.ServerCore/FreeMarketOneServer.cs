@@ -106,6 +106,7 @@ namespace FreeMarketOne.ServerCore
             InitConfigurationHelper.InitializeChatPaths(configuration, configFile);
             InitConfigurationHelper.InitializeSearchEnginePaths(configuration, configFile);
             InitConfigurationHelper.InitializeMinimalPeerAmount(configuration, configFile);
+            InitConfigurationHelper.InitializeLocalOnionSeeds(configuration, configFile);
 
             //IP Helper
             ServerPublicAddress = new IpHelper(configuration);

@@ -45,7 +45,7 @@ namespace FreeMarketApp.Helpers
 
                 PagesHelper.Log(logger, string.Format("Skynet Gateway: {0}", SkynetWebPortal.SKYNET_GATEURL));
 
-                HttpClient httpClient = GetHttpClient();
+                HttpClient httpClient = GetHttpClient(false);
 
                 var skynetWebPortal = new SkynetWebPortal(httpClient);
                 var fileInfo = provider.GetFileInfo(fileName);
@@ -76,7 +76,7 @@ namespace FreeMarketApp.Helpers
                 skylink = skylink.Replace(SkynetWebPortal.SKYNET_PREFIX, string.Empty);
                 if (!imageCache.Contains(skylink))
                 {
-                    HttpClient httpClient = GetHttpClient();
+                    HttpClient httpClient = GetHttpClient(false);
 
                     var skynetWebPortal = new SkynetWebPortal(httpClient);
 
@@ -120,9 +120,9 @@ namespace FreeMarketApp.Helpers
             }           
         }
 
-        private static HttpClient GetHttpClient()
+        private static HttpClient GetHttpClient(bool reuseHttpClient = true)
         {
-            if (_httpClient == null)
+            if (_httpClient == null || !reuseHttpClient)
             {
                 var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
                 var handler = new HttpClientHandler { Proxy = proxy };

@@ -320,23 +320,23 @@ namespace FreeMarketOne.P2P
             var duration = TimeSpan.FromSeconds(60);
 
             // Server task
-            Task.Run(() =>
-            {
-                var server = new TcpListener(IPAddress.Parse("127.0.0.1"), port);
-                server.Start();
+            await Task.Run(() =>
+             {
+                 var server = new TcpListener(IPAddress.Parse("127.0.0.1"), port);
+                 server.Start();
 
-                var bytes = new byte[] {0x1, 0x2};
-                _logger.Information($"Accepting warm up stream for {port}");
-                TcpClient client = server.AcceptTcpClient();
-                NetworkStream stream = client.GetStream();
-                _logger.Information($"Got warm up stream from Tor using {port}");
-                stream.Write(bytes, 0, 2);
+                 var bytes = new byte[] { 0x1, 0x2 };
+                 _logger.Information($"Accepting warm up stream for {port}");
+                 TcpClient client = server.AcceptTcpClient();
+                 NetworkStream stream = client.GetStream();
+                 _logger.Information($"Got warm up stream from Tor using {port}");
+                 stream.Write(bytes, 0, 2);
 
-                client.Close();
-                server.Stop();
+                 client.Close();
+                 server.Stop();
 
-                _logger.Information($"Closing warm up server on {port}");
-            });
+                 _logger.Information($"Closing warm up server on {port}");
+             });
 
             var sleepDuration = TimeSpan.FromSeconds(10);
             var stopwatch = Stopwatch.StartNew();

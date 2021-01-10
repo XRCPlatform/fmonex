@@ -3,6 +3,7 @@ using Libplanet.Action;
 using System.Net;
 using Libplanet.Extensions;
 using System;
+using System.Collections.Generic;
 
 namespace FreeMarketOne.DataStructure
 {
@@ -73,5 +74,6 @@ namespace FreeMarketOne.DataStructure
         /// Maximal genesis block size
         /// </summary>
         int BlockMaxGenesisBytes { get; set; }
+        List<string> OnionSeeds { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Libplanet.Blockchain.Policies;
 using Libplanet.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
@@ -98,5 +99,8 @@ namespace FreeMarketOne.DataStructure
 
         /// <inheritdoc/>
         public int BlockMaxGenesisBytes { get; set; }
+
+        /// <inheritdoc/>
+        public List<string> OnionSeeds { get; set; }
     }
 }

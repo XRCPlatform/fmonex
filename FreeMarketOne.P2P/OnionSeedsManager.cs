@@ -40,7 +40,7 @@ namespace FreeMarketOne.P2P
         private string _torOnionEndPoint { get; set; }
         private string _appVersion { get; set; }
 
-        private bool _listenersUseTor;
+        private static bool _listenersUseTor;
 
         public List<OnionSeedPeer> OnionSeedPeers { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
@@ -49,7 +49,7 @@ namespace FreeMarketOne.P2P
         private IPAddress _serverPublicAddress { get; set; }
         private string _serverOnionAddress { get; set; }
         private List<string> _onionSeeds { get; set; }
-
+        
         public Swarm<BaseAction> BaseSwarm { get; set; }
         public Swarm<MarketAction> MarketSwarm { get; set; }
 
@@ -124,8 +124,13 @@ namespace FreeMarketOne.P2P
         {
             if (_httpClient == null)
             {
-                var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
-                var handler = new HttpClientHandler { Proxy = proxy };
+                var handler = new HttpClientHandler {};
+                if (_listenersUseTor)
+                {
+                    var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
+                    handler = new HttpClientHandler { Proxy = proxy };
+                }
+
                 HttpClient httpClient = new HttpClient(handler, true);
                 httpClient.BaseAddress = new Uri(uri);
                 httpClient.Timeout = TimeSpan.FromSeconds(3);

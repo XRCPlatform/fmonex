@@ -13,7 +13,7 @@ namespace FreeMarketOne.P2P
     public class IpHelper
     {
         private static HttpClient _httpClient = null;
-        private bool _useTor { get; set; }
+        private static bool _useTor { get; set; }
         private EndPoint  _torEndPoint { get; set; }
 
         public IPAddress PublicIP { get; set; }
@@ -65,8 +65,13 @@ namespace FreeMarketOne.P2P
         {
             if (_httpClient == null)
             {
-                var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
-                var handler = new HttpClientHandler { Proxy = proxy };
+                var handler = new HttpClientHandler();
+                if (_useTor)
+                {
+                    var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
+                    handler = new HttpClientHandler { Proxy = proxy };
+                }
+
                 HttpClient httpClient = new HttpClient(handler, true);
                 httpClient.BaseAddress = new Uri(uri);
                 httpClient.Timeout = TimeSpan.FromSeconds(3);

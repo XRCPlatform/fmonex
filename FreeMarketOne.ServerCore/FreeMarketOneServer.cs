@@ -3,6 +3,7 @@ using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.DataStructure.ProtocolVersions;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
@@ -195,7 +196,7 @@ namespace FreeMarketOne.ServerCore
                             Configuration.BlockChainSecretPath,
                             Configuration.BlockChainBaseGenesis,
                             Configuration.BlockChainBasePolicy,
-                            GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, Configuration.ListenerBaseEndPoint),
+                            GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, ServerPublicAddress.PublicIP, Configuration.ListenerBaseEndPoint),
                             OnionSeedsManager,
                             UserManager.PrivateKey,
                             new NetworkProtocolVersion(),
@@ -241,9 +242,16 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
-        private EndPoint GetPublicIpEndpoint(String torOnionAddress, int port)
+        private EndPoint GetPublicIpEndpoint(String torOnionAddress, IPAddress  ipAddress,  int port)
         {
-            return new DnsEndPoint(torOnionAddress, port);
+            if (Configuration.ListenersUseTor)
+            {
+                return new DnsEndPoint(torOnionAddress, port);
+            }
+            else
+            {
+                return new IPEndPoint(EndPointHelper.ParseIPEndPoint("127.0.0.1").Address, port);
+            }
         }
 
         private void BaseBlockChainLoaded(object sender, EventArgs e)
@@ -270,7 +278,7 @@ namespace FreeMarketOne.ServerCore
                         Configuration.BlockChainSecretPath,
                         Configuration.BlockChainMarketGenesis,
                         Configuration.BlockChainMarketPolicy,
-                        GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, Configuration.ListenerMarketEndPoint),
+                        GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, ServerPublicAddress.PublicIP, Configuration.ListenerMarketEndPoint),
                         OnionSeedsManager,
                         UserManager.PrivateKey,
                         new NetworkProtocolVersion(),

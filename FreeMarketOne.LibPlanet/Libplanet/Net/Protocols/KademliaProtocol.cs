@@ -425,10 +425,13 @@ namespace Libplanet.Net.Protocols
             try
             {
                 _logger.Verbose("Trying to ping async to {Peer}.", target);
+                //timeout for ping should be smaller than other multipart messages, as ping is used to checks if peers are alive and around.
+                //if they have gone long timeout is detrimental.
+                //so instead of using passed timeout which is used widely and set to 60s.
                 Message reply = await _transport.SendMessageWithReplyAsync(
                     target,
                     new Ping(),
-                    timeout,
+                    TimeSpan.FromSeconds(20),
                     cancellationToken
                 );
                 if (!(reply is Pong pong))

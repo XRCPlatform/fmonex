@@ -647,9 +647,10 @@ namespace Libplanet.Net
                             peer,
                             msg
                         );
-
-                        dealer.Dispose();
-                        _dealers.TryRemove(peer.Address, out _);
+                        //disposing dealer sockets on the basis of mere timeout is detrimental
+                        //they will be removed elsewhere in rebuilding connections
+                        //dealer.Dispose();
+                        //_dealers.TryRemove(peer.Address, out _);
                     }
                 }
             }
@@ -999,7 +1000,10 @@ namespace Libplanet.Net
                         if (!peerAddresses.Contains(address) &&
                             _dealers.TryGetValue(address, out DealerSocket removed))
                         {
-                            removed.Dispose();
+                            //remove but not dispose it will be cleaned up by runtime later
+                            _dealers.TryRemove(address, out DealerSocket removed2);
+                            //dispose was causing errors down the line in concurent code
+                            //removed.Dispose();
                         }
                     }
                 }

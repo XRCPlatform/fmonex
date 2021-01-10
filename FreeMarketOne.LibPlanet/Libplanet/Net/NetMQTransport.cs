@@ -261,7 +261,7 @@ namespace Libplanet.Net
 
             tasks.Add(
                 RefreshTableAsync(
-                    TimeSpan.FromSeconds(100),
+                    TimeSpan.FromSeconds(10),
                     TimeSpan.FromSeconds(10),
                     _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));

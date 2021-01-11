@@ -42,6 +42,9 @@ namespace FreeMarketOne.Tor
         private CancellationTokenSource _stop { get; set; }
 
         private const string _toolsDir = "tools";
+        
+        private static readonly object _torsocksauthlock = new object();
+        private static TorSocks5Client client;
 
         /// <param name="serverLogger">Base server logger.</param>
         /// <param name="_configuration">Base _configuration.</param>
@@ -54,7 +57,11 @@ namespace FreeMarketOne.Tor
             _running = CommonStates.NotStarted;
             _stop = new CancellationTokenSource();
 			_torProcess = null;
-		}
+            if (_configuration.TorEndPoint !=  null)
+            {
+                client =  new TorSocks5Client(_configuration.TorEndPoint);
+            }
+        }
 
         public bool Start()
         {
@@ -62,17 +69,21 @@ namespace FreeMarketOne.Tor
             {
                 return false;
             }
+            if (client == null)
+            {
+                client = new TorSocks5Client(_configuration.TorEndPoint);
+            }           
 
             //new Thread(delegate () // Do not ask. This is the only way it worked on Win10/Ubuntu18.04/Manjuro(1 processor VM)/Fedora(1 processor VM)
             //{
-                try
+            try
                 {
                     try
                     {
                         var torPath = "";
                         var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
 
-                        if (IsTorRunningAsync(_configuration.TorEndPoint).GetAwaiter().GetResult())
+                        if (IsTorRunning(_configuration.TorEndPoint))
                         {
                             _logger.Warning("Tor is already running.");
                             GetOnionEndPoint();
@@ -144,7 +155,7 @@ namespace FreeMarketOne.Tor
                         //check if TOR is online
                         Task.Delay(3000).ConfigureAwait(false).GetAwaiter().GetResult(); // dotnet brainfart, ConfigureAwait(false) IS NEEDED HERE otherwise (only on) Manjuro Linux fails, WTF?!!
                         
-                        if (!IsTorRunningAsync(_configuration.TorEndPoint).GetAwaiter().GetResult())
+                        if (!IsTorRunning(_configuration.TorEndPoint))
                         {
                             
                             throw new TorException("Attempted to start Tor, but it is not running.");
@@ -241,69 +252,71 @@ namespace FreeMarketOne.Tor
             }
         }
 
+
         /// <param name="torSocks5EndPoint">Opt out Tor with null.</param>
-        public static async Task<bool> IsTorRunningAsync(EndPoint torSocks5EndPoint)
+        public static bool IsTorRunning(EndPoint torSocks5EndPoint)
         {
-            using (var client = new TorSocks5Client(torSocks5EndPoint))
+            if (client == null)
             {
-                try
-                {
-                    await client.ConnectAsync().ConfigureAwait(false);
-                    await client.HandshakeAsync().ConfigureAwait(false);
-                }
-                catch (ConnectionException)
-                {
-                    return false;
-                }
+                client = new TorSocks5Client(torSocks5EndPoint);
+            }
 
-                return true;
+            try
+            {
+                ConnectAndHandshake(client);
+            }
+            catch (ConnectionException)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static void ConnectAndHandshake(TorSocks5Client client)
+        {
+            lock (_torsocksauthlock)
+            {
+                if (!client.IsConnected)
+                {
+                    client.ConnectAndHandshake(true);
+                }
             }
         }
 
-        public async Task<bool> IsTorRunningAsync()
+
+
+        public bool IsTorRunning()
         {
             if (_configuration.TorEndPoint is null)
             {
                 return false;
             }
 
-            using (var client = new TorSocks5Client(_configuration.TorEndPoint))
-            {
-                try
-                {
-                    await client.ConnectAsync().ConfigureAwait(false);
-                    await client.HandshakeAsync().ConfigureAwait(false);
-                }
-                catch (ConnectionException)
-                {
-                    return false;
-                }
-                return true;
-            }
+            return IsTorRunning(_configuration.TorEndPoint);
+
         }
 
-        public async Task<bool> IsOnionSeedRunningAsync(string url, int port)
-        {
-            if (_configuration.TorEndPoint is null)
-            {
-                return false;
-            }
+        //public async Task<bool> IsOnionSeedRunningAsync(string url, int port)
+        //{
+        //    if (_configuration.TorEndPoint is null)
+        //    {
+        //        return false;
+        //    }
 
-            using (var client = new TorSocks5Client(_configuration.TorEndPoint))
-            {
-                try
-                {
-                    await client.ConnectAsync().ConfigureAwait(false);
-                    await client.HandshakeAsync().ConfigureAwait(false);
-                    await client.ConnectToDestinationAsync(url, port).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    return false;
-                }
-                return true;
-            }
-        }
+        //    var client = new TorSocks5Client(_configuration.TorEndPoint);
+        //    try
+        //    {
+        //        await client.ConnectAsync().ConfigureAwait(false);
+        //        await client.HandshakeAsync().ConfigureAwait(false);
+        //        await client.ConnectToDestinationAsync(url, port).ConfigureAwait(false);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return false;
+        //    }
+        //    return true;
+        //}
 
         //      public void StartMonitor(TimeSpan torMisbehaviorCheckPeriod, TimeSpan checkIfRunningAfterTorMisbehavedFor, string dataDirToStartWith, Uri fallBackTestRequestUri)
         //      {

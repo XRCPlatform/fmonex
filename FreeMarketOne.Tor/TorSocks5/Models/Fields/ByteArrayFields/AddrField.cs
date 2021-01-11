@@ -112,8 +112,9 @@ namespace FreeMarketOne.Tor.Models.TorSocks5.Fields.ByteArrayFields
 
 		public override void FromBytes(byte[] bytes)
 		{
+			string ascii = Encoding.ASCII.GetString(bytes);
 			Bytes = Guard.NotNullOrEmpty(nameof(bytes), bytes);
-
+			
 			AtypField atyp;
 			if (bytes.First() == bytes.Length - 1 && bytes.Length != 4)
 			{
@@ -125,7 +126,7 @@ namespace FreeMarketOne.Tor.Models.TorSocks5.Fields.ByteArrayFields
 			}
 			else
 			{
-				throw new FormatException($"Could not read IPv4 or domain name from {nameof(bytes)}. Value: {bytes}.");
+				throw new FormatException($"Could not read IPv4 or domain name from {nameof(bytes)}. Value: {bytes} ASCII {ascii}.");
 			}
 
 			Atyp = atyp;

@@ -175,7 +175,7 @@ namespace FreeMarketOne.ServerCore
             var state = false;
             try
             {
-                var isTorRunning = FMONE.Current.TorProcessManager?.IsTorRunningAsync().Result;
+                var isTorRunning = FMONE.Current.TorProcessManager?.IsTorRunning();
                 if (isTorRunning.GetValueOrDefault(false)) state = true;
             }
             catch

@@ -187,8 +187,8 @@ namespace FreeMarketOne.Tor
 			if (TorSocks5Client is null || !TorSocks5Client.IsConnected)
 			{
 				TorSocks5Client = new TorSocks5Client(TorSocks5EndPoint);
-				await TorSocks5Client.ConnectAsync().ConfigureAwait(false);
-				await TorSocks5Client.HandshakeAsync(IsolateStream).ConfigureAwait(false);
+				TorSocks5Client.ConnectAndHandshake();
+				
 				await TorSocks5Client.ConnectToDestinationAsync(host, request.RequestUri.Port).ConfigureAwait(false);
 
 				Stream stream = TorSocks5Client.TcpClient.GetStream();

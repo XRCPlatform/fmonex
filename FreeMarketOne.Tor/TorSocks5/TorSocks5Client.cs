@@ -33,6 +33,8 @@ namespace FreeMarketOne.Tor
 
 		private EndPoint remoteEndPoint { get; set; }
 
+		private static readonly object _torsocksauthlock = new object();
+
 		public bool IsConnected
 		{
 			get
@@ -80,11 +82,16 @@ namespace FreeMarketOne.Tor
 			}
 		}
 
-		public async Task ConnectAsync()
+		private async Task ConnectAsync()
 		{
 			if (TorSocks5EndPoint is null)
 			{
 				return;
+			}
+
+			if (TcpClient == null) 
+			{
+				TcpClient = TorSocks5EndPoint is null ? new TcpClient() : new TcpClient(TorSocks5EndPoint.AddressFamily);
 			}
 
 			using (await AsyncLock.LockAsync().ConfigureAwait(false))
@@ -93,7 +100,10 @@ namespace FreeMarketOne.Tor
 				int? port = TorSocks5EndPoint.GetPortOrDefault();
 				try
 				{
-					await TcpClient.ConnectAsync(host, port.Value).ConfigureAwait(false);
+					if (!TcpClient.Connected)
+                    {
+						await TcpClient.ConnectAsync(host, port.Value).ConfigureAwait(false);
+					}					
 				}
 				catch (Exception ex) when (IsConnectionRefused(ex))
 				{
@@ -106,12 +116,26 @@ namespace FreeMarketOne.Tor
 			}
 		}
 
+		public bool ConnectAndHandshake(bool isolateStream = true)
+		{
+            lock (_torsocksauthlock)
+            {
+				//if already connected skip 
+				if (!IsConnected)
+                {
+					ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+					HandshakeAsync(isolateStream).ConfigureAwait(false).GetAwaiter().GetResult();
+				}
+				return true;
+			}		
+		}
+
 		/// <summary>
 		/// IsolateSOCKSAuth must be on (on by default)
 		/// https://www.torproject.org/docs/tor-manual.html.en
 		/// https://gitweb.torproject.org/torspec.git/tree/socks-extensions.txt#n35
 		/// </summary>
-		public async Task HandshakeAsync(bool isolateStream = true)
+		private async Task HandshakeAsync(bool isolateStream = true)
 		{
 			await HandshakeAsync(isolateStream ? RandomString.Generate(21) : "").ConfigureAwait(false);
 		}
@@ -122,7 +146,7 @@ namespace FreeMarketOne.Tor
 		/// https://gitweb.torproject.org/torspec.git/tree/socks-extensions.txt#n35
 		/// </summary>
 		/// <param name="identity">Isolates streams by identity. If identity is empty string, it won't isolate stream.</param>
-		public async Task HandshakeAsync(string identity)
+		private async Task HandshakeAsync(string identity)
 		{
 			if (TorSocks5EndPoint is null)
 			{
@@ -201,18 +225,23 @@ namespace FreeMarketOne.Tor
 			host = Guard.NotNullOrEmptyOrWhitespace(nameof(host), host, true);
 			Guard.MinimumAndNotNull(nameof(port), port, 0);
 
-			if (TorSocks5EndPoint is null)
-			{
-				using (await AsyncLock.LockAsync().ConfigureAwait(false))
-				{
-					TcpClient?.Dispose();
-					TcpClient = IPAddress.TryParse(host, out IPAddress ip) ? new TcpClient(ip.AddressFamily) : new TcpClient();
-					await TcpClient.ConnectAsync(host, port).ConfigureAwait(false);
-					Stream = TcpClient.GetStream();
+            if (TorSocks5EndPoint is null)
+            {
+                using (await AsyncLock.LockAsync().ConfigureAwait(false))
+                {
+                    TcpClient?.Dispose();
+                    TcpClient = IPAddress.TryParse(host, out IPAddress ip) ? new TcpClient(ip.AddressFamily) : new TcpClient();
+                    await TcpClient.ConnectAsync(host, port).ConfigureAwait(false);
+                    Stream = TcpClient.GetStream();
                     remoteEndPoint = TcpClient.Client.RemoteEndPoint;
-				}
+                }
 
-				return;
+                return;
+            }
+
+            if (TcpClient!=null  && TcpClient.Connected)
+            {
+				ConnectAndHandshake();
 			}
 
 			var cmd = CmdField.Connect;
@@ -228,6 +257,7 @@ namespace FreeMarketOne.Tor
 
 			var receiveBuffer = await SendAsync(sendBuffer, isRecursiveCall: isRecursiveCall).ConfigureAwait(false);
 
+			
 			var connectionResponse = new TorSocks5Response();
 			connectionResponse.FromBytes(receiveBuffer);
 

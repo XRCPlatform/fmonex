@@ -544,13 +544,13 @@ namespace FreeMarketOne.Markets
         /// <returns></returns>
         public MarketItemV1 SignBuyerMarketData(
             MarketItemV1 marketData,
-            IPAddress publicIP,
+            string onionAddress,
             UserPrivateKey privateKey)
         {
             lock (_locked)
             {
                 marketData.State = (int)ProductStateEnum.Sold;
-                marketData.BuyerOnionEndpoint = publicIP.MapToIPv4().ToString();
+                marketData.BuyerOnionEndpoint = onionAddress;
 
                 var bytesToSign = marketData.ToByteArrayForSign();
                 marketData.BuyerSignature = Convert.ToBase64String(privateKey.Sign(bytesToSign));

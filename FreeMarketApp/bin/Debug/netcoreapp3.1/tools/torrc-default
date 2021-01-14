@@ -70,11 +70,12 @@ HashedControlPassword 16:6A424B4684217A9E606FCE355FB4AB6CE80B4A020BF31E44F52C6AF
 ## address y:z.
 
 HiddenServiceDir hidden_service
-HiddenServicePort 80 127.0.0.1:27272
+#HiddenServicePort 80 127.0.0.1:27272
 HiddenServicePort 9113 127.0.0.1:9113
 HiddenServicePort 9114 127.0.0.1:9114
+HiddenServicePort 9115 127.0.0.1:9115
 
-LongLivedPorts 9113 9114
+LongLivedPorts 9113 9114 9115
 
 #HiddenServiceDir @LOCALSTATEDIR@/lib/tor/hidden_service/
 #HiddenServicePort 80 127.0.0.1:80

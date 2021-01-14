@@ -168,7 +168,7 @@ namespace FreeMarketOne.ServerCore
 
                         //Chat Manager
                         LoadingEvent?.Invoke(this, "Loading Chat Manager...");
-                        ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, ServerPublicAddress.PublicIP);
+                        ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, TorProcessManager.TorOnionEndPoint, Configuration.ListenersUseTor ? "127.0.0.1:9050" : null);
                         ChatManager.Start();
 
                         //Initialize OnionSeeds

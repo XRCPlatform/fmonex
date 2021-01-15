@@ -419,7 +419,7 @@ namespace Libplanet.Net
         public Task WaitForRunningAsync() => _runningEvent.Task;
 
         public Task SendMessageAsync(BoundPeer peer, Message message)
-            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(30), 0);
+            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(240), 0);
 
         public async Task<Message> SendMessageWithReplyAsync(
             BoundPeer peer,

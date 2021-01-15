@@ -371,7 +371,7 @@ namespace FreeMarketOne.BlockChain
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
 
                 //blocking calls deliberately as we don't want to create a DDOS attack here when newtrok re-connected
-                _swarmServer.AddPeersAsync(_seedPeers, TimeSpans.HalfMinute).ConfigureAwait(false).GetAwaiter().GetResult();
+                _swarmServer.AddPeersAsync(_seedPeers, TimeSpans.FiveMinutes).ConfigureAwait(false).GetAwaiter().GetResult();
                 _swarmServer.CheckAllPeersAsync().ConfigureAwait(false).GetAwaiter().GetResult();
             }
         }

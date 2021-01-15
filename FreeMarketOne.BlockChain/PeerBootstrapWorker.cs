@@ -96,7 +96,7 @@ namespace FreeMarketOne.BlockChain
                         await _swarmServer.WaitForRunningAsync();
                         await _swarmServer.AddPeersAsync(
                             _seedPeers,
-                            TimeSpan.FromMilliseconds(SwarmDialTimeout),
+                            TimeSpan.FromMinutes(2),
                             _cancellationToken.Token);
                     }
                     catch (TimeoutException e)

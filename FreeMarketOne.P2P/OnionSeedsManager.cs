@@ -99,10 +99,10 @@ namespace FreeMarketOne.P2P
 
             if (_listenersUseTor)
             {
-                //_logger.Information("Warming Tor onion service ...");
-                //bool isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
-                //var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
-                //_logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
+                _logger.Information("Warming Tor onion service ...");
+                var isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
+                var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
+                _logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
             }
 
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
@@ -295,7 +295,7 @@ namespace FreeMarketOne.P2P
                 if (exist == null)
                     await BaseSwarm.AddPeersAsync(
                         new[] { boundPeer },
-                        TimeSpan.FromMilliseconds(5000),
+                        TimeSpan.FromMinutes(2),
                         _cancellationToken.Token);
             }
         }
@@ -318,7 +318,7 @@ namespace FreeMarketOne.P2P
                 if (exist == null)
                     await MarketSwarm.AddPeersAsync(
                         new[] { boundPeer },
-                        TimeSpan.FromMilliseconds(30000),
+                        TimeSpan.FromMinutes(2),
                         _cancellationToken.Token);
             }
         }

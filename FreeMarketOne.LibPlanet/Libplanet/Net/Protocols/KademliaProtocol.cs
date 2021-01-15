@@ -431,7 +431,7 @@ namespace Libplanet.Net.Protocols
                 Message reply = await _transport.SendMessageWithReplyAsync(
                     target,
                     new Ping(),
-                    TimeSpan.FromSeconds(20),
+                    TimeSpan.FromSeconds(120),
                     cancellationToken
                 );
                 if (!(reply is Pong pong))

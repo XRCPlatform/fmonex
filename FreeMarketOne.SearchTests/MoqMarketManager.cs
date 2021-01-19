@@ -75,6 +75,11 @@ namespace FreeMarketOne.SearchTests
             throw new NotImplementedException();
         }
 
+        public MarketItemV1 SignBuyerMarketData(MarketItemV1 marketData, string onionAddress, UserPrivateKey privateKey)
+        {
+            throw new NotImplementedException();
+        }
+
         public MarketItemV1 SignMarketData(MarketItemV1 marketData, UserPrivateKey privateKey)
         {
             throw new NotImplementedException();

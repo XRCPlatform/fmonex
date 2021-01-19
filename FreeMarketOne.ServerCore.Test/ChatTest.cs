@@ -58,8 +58,7 @@ namespace FreeMarketOne.ServerCore.Test
             _userManager.PrivateKey = _userPrivateKey;
 
             //Chat Manager
-            ChatManager = new ChatManager(_configuration, _userPrivateKey, _userManager, _configuration.ListenerChatEndPoint.Address,
-                TimeSpans.FiveSeconds, TimeSpans.TenSeconds);
+            ChatManager = new ChatManager(_configuration, _userPrivateKey, _userManager, _configuration.ListenerChatEndPoint.Address.ToString(), null,TimeSpans.FiveSeconds, TimeSpans.TenSeconds);
             ChatManager.Start();
 
             SpinWait.SpinUntil(() => ChatManager.IsChatManagerRunning());

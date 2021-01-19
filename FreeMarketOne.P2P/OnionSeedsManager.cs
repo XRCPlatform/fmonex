@@ -97,13 +97,13 @@ namespace FreeMarketOne.P2P
             //we have to load first onion seeds synchroniously
             ProcessOnionSeeds();
 
-            if (_listenersUseTor)
-            {
-                _logger.Information("Warming Tor onion service ...");
-                var isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
-                var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
-                _logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
-            }
+            //if (_listenersUseTor)
+            //{
+            //    //_logger.Information("Warming Tor onion service ...");
+            //    //var isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
+            //    //var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
+            //    //_logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
+            //}
 
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
@@ -112,7 +112,7 @@ namespace FreeMarketOne.P2P
                 return Task.CompletedTask;
             },
             _cancellationToken.Token,
-            repeatEvery: TimeSpans.Minute,
+            repeatEvery: TimeSpans.TenMinutes,
             startAfter: TimeSpans.Minute);
 
             _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
@@ -214,18 +214,16 @@ namespace FreeMarketOne.P2P
                         {
                             foreach (var itemSeedPeer in OnionSeedPeers)
                             {
-                                Task.Run(async () =>
+                                // no need to create paralell runs, these could be ticking in background without stresssing tor services
+                                try
                                 {
-                                    try
-                                    {
-                                        await AddSeedsToBaseSwarmAsPeer(itemSeedPeer);
-                                        await AddSeedsToMarketSwarmAsPeer(itemSeedPeer);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        _logger.Error(string.Format("Cant add seed to swarm {0}", e));
-                                    }
-                                });
+                                    AddSeedsToBaseSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
+                                    AddSeedsToMarketSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
+                                }
+                                catch (Exception e)
+                                {
+                                    _logger.Error(string.Format("Cant add seed to swarm {0}", e));
+                                }
                             }
                         }
 

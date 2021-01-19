@@ -1127,7 +1127,7 @@ namespace Libplanet.Net
 
             _logger.Debug("Required tx count: {Count}.", txCount);
 
-            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromSeconds(txCount);
+            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromMinutes(txCount);
             if (txRecvTimeout > Options.MaxTimeout)
             {
                 txRecvTimeout = Options.MaxTimeout;

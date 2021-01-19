@@ -20,7 +20,7 @@ namespace FreeMarketOne.BlockChain
         private ILogger _logger { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
 
-        private const int SwarmDialTimeout = 30000;
+        private const int SwarmDialTimeout = 300000;
 
         private PrivateKey _privateKey { get; set; }
         private BlockChain<T> _blockChain;

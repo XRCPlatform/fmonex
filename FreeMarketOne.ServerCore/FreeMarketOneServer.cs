@@ -138,6 +138,12 @@ namespace FreeMarketOne.ServerCore
 
             try
             {
+                
+                //Initialize Tor as soon as possible, will gain tor startup, circuit build time while user is loging in.
+                LoadingEvent?.Invoke(this, "Loading Tor Manager...");
+                TorProcessManager = new TorProcessManager(Configuration);
+                var torInitialized = TorProcessManager.Start();
+
                 //User manager
                 UserManager = new UserManager(Configuration);
                 if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
@@ -153,12 +159,7 @@ namespace FreeMarketOne.ServerCore
                     //Market Manager
                     LoadingEvent?.Invoke(this, "Loading Market Manager...");
                     MarketManager = new MarketManager(Configuration);
-
-                    //Initialize Tor
-                    LoadingEvent?.Invoke(this, "Loading Tor Manager...");
-                    TorProcessManager = new TorProcessManager(Configuration);
-                    var torInitialized = TorProcessManager.Start();
-
+                    
                     SpinWait.SpinUntil(() => torInitialized, 10000);
                     if (torInitialized)
                     {

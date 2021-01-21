@@ -439,7 +439,7 @@ namespace Libplanet.Net
 
             IEnumerable<BoundPeer> peers = seedPeers.OfType<BoundPeer>();
             
-            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address) && peer.EndPoint.Host != "127.0.0.1");
+            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address) && peer.EndPoint.Host != "127.0.0.1" && peer.EndPoint.Host != ((BoundPeer)AsPeer).EndPoint.Host );
 
             await Transport.BootstrapAsync(
                 peersExceptMe,

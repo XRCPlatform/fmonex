@@ -768,7 +768,7 @@ namespace FreeMarketOne.Pools
                         }
                         catch (Exception e)
                         {
-                            _logger.Error("Unexpected error suring propagation of transaction.", e);
+                            _logger.Error("Unexpected error during propagation of transaction.", e);
                             return PoolManagerStates.Errors.Unexpected;
                         }
                     }

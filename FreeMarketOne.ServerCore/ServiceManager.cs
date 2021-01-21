@@ -84,7 +84,7 @@ namespace FreeMarketOne.ServerCore
 
                 Console.WriteLine(periodicCheckLog.ToString());
 
-                _networkHeartbeatEvent.Invoke(this, networkHeartbeatInfo);
+                _networkHeartbeatEvent?.Invoke(this, networkHeartbeatInfo);
 
                 return Task.CompletedTask;
             },

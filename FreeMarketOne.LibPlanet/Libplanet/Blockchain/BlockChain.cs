@@ -840,6 +840,7 @@ namespace Libplanet.Blockchain
                         tx.Nonce,
                         tx.Signer
                     );
+                    throw new InvalidTxNonceException(tx.Id, storeNonce, tx.Nonce, "Invalid nonce, rebuild tx.");
                 }
 
                 if (timeout < DateTimeOffset.UtcNow)

@@ -129,7 +129,7 @@ namespace FreeMarketApp.Helpers
                 var handler = new HttpClientHandler { Proxy = proxy };
                 HttpClient httpClient = new HttpClient(handler, true);
                 httpClient.BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL);
-                httpClient.Timeout = TimeSpan.FromSeconds(3);
+                httpClient.Timeout = TimeSpan.FromSeconds(60);
                 httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     Public = true

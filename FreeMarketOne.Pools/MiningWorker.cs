@@ -75,47 +75,48 @@ namespace FreeMarketOne.Pools
                     return block;
                 });
 
-                yield return new WaitUntil(() => taskMiner.IsCompleted);
-
-                if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
+                try
                 {
-                    var block = taskMiner.Result;
-                    _logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
-                        block.Index,
-                        block.Difficulty));
+                    taskMiner.Wait();
+                    if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
+                    {
+                        var block = taskMiner.Result;
+                        _logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
+                            block.Index,
+                            block.Difficulty));
+                    }
                 }
-                else
+                catch (AggregateException ae)
                 {
                     var invalidTxs = txs;
                     var retryActions = new HashSet<IImmutableList<T>>();
-
-                    if (taskMiner.IsFaulted)
+                    foreach (var ex in ae.Flatten().InnerExceptions)
                     {
-                        foreach (var ex in taskMiner.Exception.InnerExceptions)
+                        if (ex is InvalidTxNonceException invalidTxNonceException)
                         {
-                            if (ex is InvalidTxNonceException invalidTxNonceException)
+                            var invalidNonceTx = _storage.GetTransaction<T>(invalidTxNonceException.TxId);
+
+                            if (invalidNonceTx.Signer == _address)
                             {
-                                var invalidNonceTx = _storage.GetTransaction<T>(invalidTxNonceException.TxId);
-
-                                if (invalidNonceTx.Signer == _address)
-                                {
-                                    _logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
-                                        invalidTxNonceException.TxId));
-                                    retryActions.Add(invalidNonceTx.Actions);
-                                }
+                                _logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
+                                    invalidTxNonceException.TxId));
+                                retryActions.Add(invalidNonceTx.Actions);
                             }
-
-                            if (ex is InvalidTxException invalidTxException)
-                            {
-                                _logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
-                                    invalidTxException.TxId));
-                                invalidTxs.Add(_storage.GetTransaction<T>(invalidTxException.TxId));
-                            }
-
-                            _logger.Error(ex.Message);
+                        } 
+                        else if (ex is InvalidTxException invalidTxException) 
+                        {
+                            _logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
+                                invalidTxException.TxId));
+                            invalidTxs.Add(_storage.GetTransaction<T>(invalidTxException.TxId));
                         }
-                    }
+                        else
+                        {
+                            throw;
+                        }
 
+                        _logger.Error(ex.Message);
+                    }
+   
                     foreach (var invalidTx in invalidTxs)
                     {
                         _blockChain.UnstageTransaction(invalidTx);
@@ -123,10 +124,14 @@ namespace FreeMarketOne.Pools
 
                     foreach (var retryAction in retryActions)
                     {
+                        //should we unstage original problem transaction here?
                         var actions = retryAction.ToArray();
                         _blockChain.MakeTransaction(_privateKey, actions);
+
                     }
                 }
+
+                yield return new WaitUntil(() => taskMiner.IsCompleted);
 
                 _eventNewBlock?.Invoke(this, EventArgs.Empty);
             //}

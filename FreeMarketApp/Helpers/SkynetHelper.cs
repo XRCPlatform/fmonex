@@ -46,6 +46,7 @@ namespace FreeMarketApp.Helpers
                 PagesHelper.Log(logger, string.Format("Skynet Gateway: {0}", SkynetWebPortal.SKYNET_GATEURL));
 
                 HttpClient httpClient = GetHttpClient(false);
+                httpClient.Timeout = TimeSpan.MaxValue;
 
                 var skynetWebPortal = new SkynetWebPortal(httpClient);
                 var fileInfo = provider.GetFileInfo(fileName);

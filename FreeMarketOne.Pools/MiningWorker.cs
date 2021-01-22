@@ -95,7 +95,11 @@ namespace FreeMarketOne.Pools
                         if (ex is InvalidTxNonceException invalidTxNonceException)
                         {
                             var invalidNonceTx = _storage.GetTransaction<T>(invalidTxNonceException.TxId);
-
+                            
+                            //unpoison
+                            _blockChain.UnstageTransaction(invalidNonceTx);
+                            
+                            //if created by my peer, will build new tx
                             if (invalidNonceTx.Signer == _address)
                             {
                                 _logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",

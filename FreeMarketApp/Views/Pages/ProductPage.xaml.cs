@@ -292,7 +292,7 @@ namespace FreeMarketApp.Views.Pages
                     //sign market data and generating chain connection
                     _offer = FMONE.Current.MarketManager.SignBuyerMarketData(
                         _offer,
-                        FMONE.Current.ServerPublicAddress.PublicIP,
+                        FMONE.Current.TorProcessManager.TorOnionEndPoint,
                         FMONE.Current.UserManager.PrivateKey);
 
                     PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));

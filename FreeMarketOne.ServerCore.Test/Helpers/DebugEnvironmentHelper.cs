@@ -13,6 +13,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -51,6 +52,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             
             //Initialize Mock OnionSeeds
             onionSeedsManager = new MockSeedManager();
+            string torOnionEndPoint = "my-fake-tor-onion-see-if-this-works";
 
             //Initialize genesis blocks
             var genesisHelper = new GenesisHelper();
@@ -63,7 +65,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 configuration.BlockChainSecretPath,
                 null,
                 configuration.BlockChainBasePolicy,
-                configuration.ListenerBaseEndPoint,
+                GetPublicIpEndpoint(torOnionEndPoint, configuration.ListenerBaseEndPoint),
                 onionSeedsManager,
                 userPrivateKey,
                 new DebugNetworkProtocolVersion(),
@@ -71,6 +73,11 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 preloadEnded: _baseBlockChainLoadedEvent,
                 blockChainChanged: _baseBlockChainChangedEvent);
             baseBlockChainManager.Start();
+        }
+
+        private EndPoint GetPublicIpEndpoint(string torOnionAddress, int port)
+        {
+            return new DnsEndPoint(torOnionAddress, port);
         }
 
         private string InitializeFullBaseDirectory()

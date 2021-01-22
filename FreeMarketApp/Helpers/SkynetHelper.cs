@@ -4,11 +4,13 @@ using Avalonia.Platform;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Skynet;
 using Microsoft.Extensions.FileProviders;
+using MihaZupan;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Caching;
@@ -19,6 +21,7 @@ namespace FreeMarketApp.Helpers
     {
         private static readonly MemoryCache imageCache;
         private static readonly CacheItemPolicy itemPolicy;
+        private static HttpClient _httpClient = null;
 
         static SkynetHelper()
         {
@@ -42,10 +45,8 @@ namespace FreeMarketApp.Helpers
 
                 PagesHelper.Log(logger, string.Format("Skynet Gateway: {0}", SkynetWebPortal.SKYNET_GATEURL));
 
-                var httpClient = new HttpClient()
-                {
-                    BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL)
-                };
+                HttpClient httpClient = GetHttpClient(false);
+                httpClient.Timeout = TimeSpan.FromMinutes(5);
 
                 var skynetWebPortal = new SkynetWebPortal(httpClient);
                 var fileInfo = provider.GetFileInfo(fileName);
@@ -76,16 +77,7 @@ namespace FreeMarketApp.Helpers
                 skylink = skylink.Replace(SkynetWebPortal.SKYNET_PREFIX, string.Empty);
                 if (!imageCache.Contains(skylink))
                 {
-                    var httpClient = new HttpClient()
-                    {
-                        BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL),
-                        Timeout = TimeSpan.FromSeconds(1)
-                    };
-
-                    httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
-                    {
-                        Public = true                        
-                    };                
+                    HttpClient httpClient = GetHttpClient(false);
 
                     var skynetWebPortal = new SkynetWebPortal(httpClient);
 
@@ -127,6 +119,25 @@ namespace FreeMarketApp.Helpers
             {
                 return null;
             }           
+        }
+
+        private static HttpClient GetHttpClient(bool reuseHttpClient = true)
+        {
+            if (_httpClient == null || !reuseHttpClient)
+            {
+                var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
+                var handler = new HttpClientHandler { Proxy = proxy };
+                HttpClient httpClient = new HttpClient(handler, true);
+                httpClient.BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL);
+                httpClient.Timeout = TimeSpan.FromSeconds(60);
+                httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    Public = true
+                };
+                _httpClient = httpClient;
+            }
+         
+            return _httpClient;
         }
 
         internal void PreloadTitlePhotos(List<MarketItemV1> offers, ILogger logger)

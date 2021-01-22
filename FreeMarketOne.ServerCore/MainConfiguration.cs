@@ -29,8 +29,8 @@ namespace FreeMarketOne.ServerCore
             this.BlockChainSecretPath = "data/key.data";
             this.BlockChainUserPath = "data/user.data";
             this.ListenersUseTor = false;
-            this.ListenerBaseEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9111/");
-            this.ListenerMarketEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9112/");
+            this.ListenerBaseEndPoint = 9111; //EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9111/");
+            this.ListenerMarketEndPoint = 9112; // EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9112/");
             this.ChangellyApiKey = "5fe8cbe95ade4e73bdb62db0897e3615";
             this.ChangellySecret = "2b8c94c3c7befcc751c932117a63b63e12c2f2c176ebf6553b5e375da2a8b656";
             this.ChangellyApiBaseUrl = "https://api.changelly.com";

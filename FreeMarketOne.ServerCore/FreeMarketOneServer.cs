@@ -3,6 +3,7 @@ using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.DataStructure.ProtocolVersions;
+using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
@@ -20,6 +21,7 @@ using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -105,6 +107,7 @@ namespace FreeMarketOne.ServerCore
             InitConfigurationHelper.InitializeChatPaths(configuration, configFile);
             InitConfigurationHelper.InitializeSearchEnginePaths(configuration, configFile);
             InitConfigurationHelper.InitializeMinimalPeerAmount(configuration, configFile);
+            InitConfigurationHelper.InitializeLocalOnionSeeds(configuration, configFile);
 
             //IP Helper
             ServerPublicAddress = new IpHelper(configuration);
@@ -135,11 +138,18 @@ namespace FreeMarketOne.ServerCore
 
             try
             {
+                
+                //Initialize Tor as soon as possible, will gain tor startup, circuit build time while user is loging in.
+                LoadingEvent?.Invoke(this, "Loading Tor Manager...");
+                TorProcessManager = new TorProcessManager(Configuration);
+                var torInitialized = TorProcessManager.Start();
+
                 //User manager
                 UserManager = new UserManager(Configuration);
                 if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
                 {
                     FreeMarketOneServerLoggedInEvent?.Invoke(this, null);
+                    Console.WriteLine(ByteUtil.Hex(UserManager.GetCurrentUserPublicKey()));
 
                     //Service manager
                     LoadingEvent?.Invoke(this, "Loading Service Manager...");
@@ -149,12 +159,7 @@ namespace FreeMarketOne.ServerCore
                     //Market Manager
                     LoadingEvent?.Invoke(this, "Loading Market Manager...");
                     MarketManager = new MarketManager(Configuration);
-
-                    //Initialize Tor
-                    LoadingEvent?.Invoke(this, "Loading Tor Manager...");
-                    TorProcessManager = new TorProcessManager(Configuration);
-                    var torInitialized = TorProcessManager.Start();
-
+                    
                     SpinWait.SpinUntil(() => torInitialized, 10000);
                     if (torInitialized)
                     {
@@ -164,7 +169,7 @@ namespace FreeMarketOne.ServerCore
 
                         //Chat Manager
                         LoadingEvent?.Invoke(this, "Loading Chat Manager...");
-                        ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, ServerPublicAddress.PublicIP);
+                        ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, TorProcessManager.TorOnionEndPoint, Configuration.ListenersUseTor ? "127.0.0.1:9050" : null);
                         ChatManager.Start();
 
                         //Initialize OnionSeeds
@@ -192,7 +197,7 @@ namespace FreeMarketOne.ServerCore
                             Configuration.BlockChainSecretPath,
                             Configuration.BlockChainBaseGenesis,
                             Configuration.BlockChainBasePolicy,
-                            Configuration.ListenerBaseEndPoint,
+                            GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, ServerPublicAddress.PublicIP, Configuration.ListenerBaseEndPoint),
                             OnionSeedsManager,
                             UserManager.PrivateKey,
                             new NetworkProtocolVersion(),
@@ -216,6 +221,60 @@ namespace FreeMarketOne.ServerCore
                         LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
                         BasePoolManager.Start();
 
+                        //Initialize Market Blockchain Manager
+                        LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
+                        //triggering market chain run without waiting base chain to complete
+                        MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
+                        MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(Current.MarketBlockChainChanged);
+
+                        var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
+                        var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
+
+                        MarketBlockChainManager = new BlockChainManager<MarketAction>(
+                            Configuration,
+                            Configuration.BlockChainMarketPath,
+                            Configuration.BlockChainSecretPath,
+                            Configuration.BlockChainMarketGenesis,
+                            Configuration.BlockChainMarketPolicy,
+                            GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, ServerPublicAddress.PublicIP, Configuration.ListenerMarketEndPoint),
+                            OnionSeedsManager,
+                            UserManager.PrivateKey,
+                            new NetworkProtocolVersion(),
+                            hashCheckPoints,
+                            genesisBlock,
+                            preloadEnded: MarketBlockChainLoadEndedEvent,
+                            blockChainChanged: MarketBlockChainChangedEvent,
+                            clearedOlderBlocks: MarketBlockClearedOldersEvent);
+                        LoadingEvent?.Invoke(this, "Starting MarketChain Initial Block Download...");
+                        MarketBlockChainManager.Start();
+
+                        //Initialize Market Pool Manager
+                        if (MarketBlockChainManager.IsBlockChainManagerRunning())
+                        {
+                            LoadingEvent?.Invoke(this, "Loading Market Pool Manager...");
+                            //Add Swarm server to seed manager
+                            OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
+
+                            MarketPoolManager = new MarketPoolManager(
+                                Configuration,
+                                Configuration.MemoryBasePoolPath,
+                                MarketBlockChainManager.Storage,
+                                MarketBlockChainManager.SwarmServer,
+                                MarketBlockChainManager.PrivateKey,
+                                MarketBlockChainManager.BlockChain,
+                                Configuration.BlockChainMarketPolicy);
+
+                            LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
+                            MarketPoolManager.Start();
+                            LoadingEvent?.Invoke(this, "");
+
+                        }
+                        else
+                        {
+                            _logger.Error("Market Chain isnt loaded!");
+                            Stop();
+                        }
+
                         //Initializing Search Engine
                         LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
                         SearchIndexer.Initialize(BasePoolManager, BaseBlockChainManager);
@@ -238,6 +297,18 @@ namespace FreeMarketOne.ServerCore
             }
         }
 
+        private EndPoint GetPublicIpEndpoint(String torOnionAddress, IPAddress  ipAddress,  int port)
+        {
+            if (Configuration.ListenersUseTor)
+            {
+                return new DnsEndPoint(torOnionAddress, port);
+            }
+            else
+            {
+                return new IPEndPoint(EndPointHelper.ParseIPEndPoint("127.0.0.1").Address, port);
+            }
+        }
+
         private void BaseBlockChainLoaded(object sender, EventArgs e)
         {
             try
@@ -248,32 +319,7 @@ namespace FreeMarketOne.ServerCore
                     //Add Swarm server to seed manager
                     OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
 
-                    //Initialize Market Blockchain Manager
-                    LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
-                    MarketBlockChainLoadEndedEvent += new EventHandler(Current.MarketBlockChainLoaded);
-                    MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(Current.MarketBlockChainChanged);
-
-                    var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
-                    var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
-
-                    MarketBlockChainManager = new BlockChainManager<MarketAction>(
-                        Configuration,
-                        Configuration.BlockChainMarketPath,
-                        Configuration.BlockChainSecretPath,
-                        Configuration.BlockChainMarketGenesis,
-                        Configuration.BlockChainMarketPolicy,
-                        Configuration.ListenerMarketEndPoint,
-                        OnionSeedsManager,
-                        UserManager.PrivateKey,
-                        new NetworkProtocolVersion(),
-                        hashCheckPoints,
-                        genesisBlock,
-                        preloadEnded: MarketBlockChainLoadEndedEvent,
-                        blockChainChanged: MarketBlockChainChangedEvent,
-                        clearedOlderBlocks: MarketBlockClearedOldersEvent);
-
-                    LoadingEvent?.Invoke(this, "Starting MarketChain Initial Block Download...");
-                    MarketBlockChainManager.Start();
+                   
                 }
                 else
                 {
@@ -290,6 +336,9 @@ namespace FreeMarketOne.ServerCore
 
         private void MarketBlockChainLoaded(object sender, EventArgs e)
         {
+            //Event that server is loaded
+            RaiseAsyncServerLoadedEvent();
+            return;
             try
             {
                 //Initialize Market Pool Manager

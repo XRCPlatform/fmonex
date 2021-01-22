@@ -167,7 +167,11 @@ namespace FreeMarketOne.BlockChain
                     listenPort: port,
                     iceServers: null,
                     differentAppProtocolVersionEncountered: _protocolVersion.DifferentAppProtocolVersionEncountered,
-                    trustedAppProtocolVersionSigners: _protocolVersion.GetProtocolSigners());
+                    trustedAppProtocolVersionSigners: _protocolVersion.GetProtocolSigners(),
+                    options: new SwarmOptions {
+                        Socks5Proxy = _configuration.ListenersUseTor ? "127.0.0.1:9050" : null
+                    }
+                );
 
                 var peers = GetPeersFromOnionManager(typeof(T));
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
@@ -367,7 +371,7 @@ namespace FreeMarketOne.BlockChain
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
 
                 //blocking calls deliberately as we don't want to create a DDOS attack here when newtrok re-connected
-                _swarmServer.AddPeersAsync(_seedPeers, TimeSpans.FiveSeconds).ConfigureAwait(false).GetAwaiter().GetResult();
+                _swarmServer.AddPeersAsync(_seedPeers, TimeSpans.FiveMinutes).ConfigureAwait(false).GetAwaiter().GetResult();
                 _swarmServer.CheckAllPeersAsync().ConfigureAwait(false).GetAwaiter().GetResult();
             }
         }

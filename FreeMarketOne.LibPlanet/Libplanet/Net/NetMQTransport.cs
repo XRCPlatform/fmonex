@@ -20,7 +20,7 @@ namespace Libplanet.Net
 {
     internal class NetMQTransport : ITransport
     {
-        private const int MessageHistoryCapacity = 30;
+        private const int MessageHistoryCapacity = 3000;
 
         private static readonly TimeSpan TurnAllocationLifetime =
             TimeSpan.FromSeconds(777);
@@ -37,7 +37,7 @@ namespace Libplanet.Net
         private readonly IList<IceServer> _iceServers;
         private readonly ILogger _logger;
         private readonly AsyncLock _turnClientMutex;
-
+        private string _socks5Proxy;
         private NetMQQueue<NetMQMessage> _replyQueue;
         private NetMQQueue<(Address?, Message)> _broadcastQueue;
 
@@ -80,7 +80,8 @@ namespace Libplanet.Net
             IEnumerable<IceServer> iceServers,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered,
             EventHandler<Message> processMessageHandler,
-            ILogger logger)
+            ILogger logger,
+            string socks5Proxy)
         {
             Running = false;
 
@@ -91,6 +92,7 @@ namespace Libplanet.Net
             _listenPort = listenPort;
             _differentAppProtocolVersionEncountered = differentAppProtocolVersionEncountered;
             _turnClientMutex = new AsyncLock();
+            _socks5Proxy = socks5Proxy ?? null;
             ProcessMessageHandler = processMessageHandler;
 
             if (_host != null && _listenPort is int listenPortAsInt)
@@ -120,7 +122,7 @@ namespace Libplanet.Net
                     // tests
                     try
                     {
-                        using var runtime = new NetMQRuntime();
+                        var runtime = new NetMQRuntime();
                         var workerTasks = new Task[workers];
 
                         for (int i = 0; i < workers; i++)
@@ -218,14 +220,7 @@ namespace Libplanet.Net
             _router = new RouterSocket();
             _router.Options.RouterHandover = true;
 
-            if (_listenPort == null)
-            {
-                _listenPort = _router.BindRandomPort("tcp://*");
-            }
-            else
-            {
-                _router.Bind($"tcp://*:{_listenPort}");
-            }
+            _router.Bind($"tcp://{(_host.Contains(".onion") ? "127.0.0.1" : _host)}:{_listenPort}");
 
             _logger.Information($"Listen on {_listenPort}");
 
@@ -266,8 +261,8 @@ namespace Libplanet.Net
 
             tasks.Add(
                 RefreshTableAsync(
-                    TimeSpan.FromSeconds(10),
-                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromMinutes(10),
+                    TimeSpan.FromMinutes(10),
                     _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
             tasks.Add(RunPoller(_routerPoller));
@@ -288,7 +283,7 @@ namespace Libplanet.Net
                 _broadcastQueue.ReceiveReady -= DoBroadcast;
                 _replyQueue.ReceiveReady -= DoReply;
                 _router.ReceiveReady -= ReceiveMessage;
-                _router.Unbind($"tcp://*:{_listenPort}");
+                _router.Unbind($"tcp:/127.0.0.1:{_listenPort}");
 
                 if (_routerPoller.IsRunning)
                 {
@@ -424,7 +419,7 @@ namespace Libplanet.Net
         public Task WaitForRunningAsync() => _runningEvent.Task;
 
         public Task SendMessageAsync(BoundPeer peer, Message message)
-            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(3), 0);
+            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(240), 0);
 
         public async Task<Message> SendMessageWithReplyAsync(
             BoundPeer peer,
@@ -570,7 +565,6 @@ namespace Libplanet.Net
                     {
                         return;
                     }
-
                     _logger.Verbose(
                         "A raw message [frame count: {0}] has received.",
                         raw.FrameCount
@@ -582,22 +576,30 @@ namespace Libplanet.Net
                         _trustedAppProtocolVersionSigners,
                         _differentAppProtocolVersionEncountered);
                     _logger.Debug("A message has parsed: {0}, from {1}", message, message.Remote);
-                    MessageHistory.Enqueue(message);
-                    LastMessageTimestamp = DateTimeOffset.UtcNow;
 
-                    try
-                    {
-                        Protocol.ReceiveMessage(message);
-                        ProcessMessageHandler?.Invoke(this, message);
+                    if (!message.Remote.ToString().EndsWith($":{_listenPort}.")) {
+                        _logger.Debug($"A message {message} arrived from a wrong swarm: expected swarm {_listenPort}, recieved from {message.Remote}");
+                        //can't redirect to anothe listener at this stage
                     }
-                    catch (Exception exc)
+                    else
                     {
-                        _logger.Error(
-                            exc,
-                            "Something went wrong during message parsing: {0}",
-                            exc);
-                        throw;
-                    }
+                        MessageHistory.Enqueue(message);
+                        LastMessageTimestamp = DateTimeOffset.UtcNow;
+
+                        try
+                        {
+                            Protocol.ReceiveMessage(message);
+                            ProcessMessageHandler?.Invoke(this, message);
+                        }
+                        catch (Exception exc)
+                        {
+                            _logger.Error(
+                                exc,
+                                "Something went wrong during message parsing: {0}",
+                                exc);
+                            throw;
+                        }
+                    }                   
                 }
                 catch (DifferentAppProtocolVersionException dapve)
                 {
@@ -639,23 +641,27 @@ namespace Libplanet.Net
 
                 foreach (BoundPeer peer in peers)
                 {
-                    if (!_dealers.TryGetValue(peer.Address, out DealerSocket dealer))
+                    if (peer.EndPoint.Port == _listenPort)
                     {
-                        dealer = new DealerSocket(ToNetMQAddress(peer));
-                        _dealers[peer.Address] = dealer;
-                    }
+                        if (!_dealers.TryGetValue(peer.Address, out DealerSocket dealer))
+                        {
+                            dealer = new DealerSocket(ToNetMQAddress(peer));
+                            _dealers[peer.Address] = dealer;
+                        }
 
-                    if (!dealer.TrySendMultipartMessage(TimeSpan.FromSeconds(3), message))
-                    {
-                        _logger.Warning(
-                            "Broadcasting timed out. [Peer: {Peer}, Message: {Message}]",
-                            peer,
-                            msg
-                        );
-
-                        dealer.Dispose();
-                        _dealers.TryRemove(peer.Address, out _);
-                    }
+                        if (!dealer.TrySendMultipartMessage(TimeSpan.FromSeconds(120), message))
+                        {
+                            _logger.Warning(
+                                "Broadcasting timed out. [Peer: {Peer}, Message: {Message}]",
+                                peer,
+                                msg
+                            );
+                            //disposing dealer sockets on the basis of mere timeout is detrimental
+                            //they will be removed elsewhere in rebuilding connections
+                            //dealer.Dispose();
+                            //_dealers.TryRemove(peer.Address, out _);
+                        }
+                    }                   
                 }
             }
             catch (Exception exc)
@@ -675,7 +681,7 @@ namespace Libplanet.Net
 
             // FIXME The current timeout value(1 sec) is arbitrary.
             // We should make this configurable or fix it to an unneeded structure.
-            if (_router.TrySendMultipartMessage(TimeSpan.FromSeconds(1), msg))
+            if (_router.TrySendMultipartMessage(TimeSpan.FromSeconds(120), msg))
             {
                 _logger.Debug("A reply sent to {Identity}", identityHex);
             }
@@ -753,7 +759,10 @@ namespace Libplanet.Net
 
                 try
                 {
-                    await ProcessRequest(req, cancellationToken);
+                    if (req.Peer.EndPoint.Port == _listenPort.Value)
+                    {
+                        await ProcessRequest(req, cancellationToken);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -794,8 +803,12 @@ namespace Libplanet.Net
                 req.Id,
                 DateTimeOffset.UtcNow - req.RequestedTime);
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
-
-            using var dealer = new DealerSocket(ToNetMQAddress(req.Peer));
+            
+            if (!_dealers.TryGetValue(req.Peer.Address, out DealerSocket dealer))
+            {
+                dealer = new DealerSocket(ToNetMQAddress(req.Peer));
+                _dealers[req.Peer.Address] = dealer;
+            }
 
             _logger.Debug(
                 "Trying to send {Message} to {Peer}...",
@@ -873,7 +886,9 @@ namespace Libplanet.Net
 
         private string ToNetMQAddress(BoundPeer peer)
         {
-            return $"tcp://{peer.EndPoint.Host}:{peer.EndPoint.Port}";
+            return string.IsNullOrEmpty(_socks5Proxy) ?
+                $"tcp://{peer.EndPoint.Host}:{peer.EndPoint.Port}" :
+                $"socks5://{_socks5Proxy};{peer.EndPoint.Host}:{peer.EndPoint.Port}";
         }
 
         private async Task CreatePermission(BoundPeer peer)
@@ -993,12 +1008,15 @@ namespace Libplanet.Net
 
                     ImmutableHashSet<Address> peerAddresses =
                         Peers.Select(p => p.Address).ToImmutableHashSet();
-                    foreach (Address address in _dealers.Keys)
+                    foreach (var address in _dealers.Keys)
                     {
                         if (!peerAddresses.Contains(address) &&
                             _dealers.TryGetValue(address, out DealerSocket removed))
                         {
-                            removed.Dispose();
+                            //remove but not dispose it will be cleaned up by runtime later
+                            _dealers.TryRemove(address, out DealerSocket removed2);
+                            //dispose was causing errors down the line in concurent code
+                            //removed.Dispose();
                         }
                     }
                 }

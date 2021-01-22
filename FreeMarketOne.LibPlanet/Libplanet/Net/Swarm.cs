@@ -157,7 +157,9 @@ namespace Libplanet.Net
                 iceServers,
                 differentAppProtocolVersionEncountered,
                 ProcessMessageHandler,
-                _logger);
+                _logger,
+                options.Socks5Proxy
+            );
 
             Options = options ?? new SwarmOptions();
         }
@@ -303,7 +305,7 @@ namespace Libplanet.Net
         /// CancellationToken)"
         /// /> method too.</remarks>
         public async Task StartAsync(
-            int millisecondsDialTimeout = 15000,
+            int millisecondsDialTimeout = 240000,
             int millisecondsBroadcastTxInterval = 5000,
             IImmutableSet<Address> trustedStateValidators = null,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -377,7 +379,7 @@ namespace Libplanet.Net
                 );
                 tasks.Add(ProcessFillTxs(_cancellationToken));
                 _logger.Debug("Swarm started.");
-
+                //what is meaning of 2 awaits?
                 await await Task.WhenAny(tasks);
             }
             catch (OperationCanceledException e)
@@ -436,9 +438,11 @@ namespace Libplanet.Net
             }
 
             IEnumerable<BoundPeer> peers = seedPeers.OfType<BoundPeer>();
+            
+            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address) && peer.EndPoint.Host != "127.0.0.1" && peer.EndPoint.Host != ((BoundPeer)AsPeer).EndPoint.Host );
 
             await Transport.BootstrapAsync(
-                peers,
+                peersExceptMe,
                 pingSeedTimeout,
                 findNeighborsTimeout,
                 depth,
@@ -989,7 +993,8 @@ namespace Libplanet.Net
                 cancellationToken = _cancellationToken;
             }
 
-            await ((NetMQTransport)Transport).AddPeersAsync(peers, timeout, cancellationToken);
+            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address));
+            await ((NetMQTransport)Transport).AddPeersAsync(peersExceptMe, timeout, cancellationToken);
         }
 
         // FIXME: This would be better if it's merged with GetDemandBlockHashes
@@ -1125,7 +1130,7 @@ namespace Libplanet.Net
 
             _logger.Debug("Required tx count: {Count}.", txCount);
 
-            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromSeconds(txCount);
+            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromMinutes(txCount);
             if (txRecvTimeout > Options.MaxTimeout)
             {
                 txRecvTimeout = Options.MaxTimeout;
@@ -1341,7 +1346,9 @@ namespace Libplanet.Net
         {
             // FIXME: It would be better if it returns IAsyncEnumerable<(BoundPeer, ChainStatus)>
             // instead.
-            IEnumerable<Task<(BoundPeer, ChainStatus)>> tasks = Peers.Select(
+            var peersExceptMe = Peers.Where(peer => !peer.Address.Equals(AsPeer.Address));
+
+            IEnumerable<Task<(BoundPeer, ChainStatus)>> tasks = peersExceptMe.Select(
                 peer => Transport.SendMessageWithReplyAsync(
                     peer, new GetChainStatus(), dialTimeout, cancellationToken
                 ).ContinueWith<(BoundPeer, ChainStatus)>(

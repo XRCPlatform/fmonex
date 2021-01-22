@@ -26,7 +26,7 @@ namespace FreeMarketOne.Markets
             IBlockChainManager<MarketAction> marketBlockChainManager);
         MarketItemV1 SignBuyerMarketData(
             MarketItemV1 marketData,
-            IPAddress publicIP,
+            string onionAddress,
             UserPrivateKey privateKey);
         MarketItemV1 SignMarketData(
             MarketItemV1 marketData, UserPrivateKey privateKey);

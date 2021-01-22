@@ -41,7 +41,9 @@ namespace FreeMarketOne.Chats
         private IUserManager _userManager { get; set; }
         private TimeSpan _repeatEvery { get; set; }
         private TimeSpan _startAfter { get; set; }
-        private IPAddress _serverPublicAddress { get; set; }
+        private string _serverOnionAddress { get; set; }
+
+        private string _socks5Proxy;
 
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
@@ -59,7 +61,8 @@ namespace FreeMarketOne.Chats
         public ChatManager(IBaseConfiguration configuration,
             UserPrivateKey privateKey,
             IUserManager userManager,
-            IPAddress serverPublicAddress,
+            string serverPublicAddress,
+            string socks5Proxy,
             TimeSpan? repeatEvery = null,
             TimeSpan? startAfter = null)
         {
@@ -71,8 +74,8 @@ namespace FreeMarketOne.Chats
             _cancellationToken = new CancellationTokenSource();
             _userPrivateKey = privateKey;
             _userManager = userManager;
-            _serverPublicAddress = serverPublicAddress;
-
+            _serverOnionAddress = serverPublicAddress;
+            _socks5Proxy = socks5Proxy ?? null;
             if (!repeatEvery.HasValue)
             {
                 _repeatEvery = TimeSpans.HalfMinute;
@@ -192,11 +195,9 @@ namespace FreeMarketOne.Chats
         /// </summary>
         /// <param name="peerIp"></param>
         /// <returns></returns>
-        private IPEndPoint GetChatPeerEndpoint(string peerIp)
+        private DnsEndPoint GetChatPeerEndpoint(string onionAddress)
         {
-            var endPoint = EndPointHelper.ParseIPEndPoint(peerIp);
-            endPoint.Port = _configuration.ListenerChatEndPoint.Port;
-
+            DnsEndPoint endPoint = new DnsEndPoint(onionAddress, _configuration.ListenerChatEndPoint.Port);
             return endPoint;
         }
 
@@ -216,11 +217,10 @@ namespace FreeMarketOne.Chats
         /// <param name="chatItem"></param>
         /// <param name="signature"></param>
         /// <returns></returns>
-        private bool SendNQMessage(ChatItem chatItem, string hash, IPEndPoint endPoint)
+        private bool SendNQMessage(ChatItem chatItem, string hash, DnsEndPoint endPoint)
         {
-            var connectionString = string.Format("tcp://{0}", endPoint.ToString());
-
-            using (var client = new RequestSocket())
+            var connectionString = ToNetMQAddress(endPoint.Host);
+            using (var client = new RequestSocket(connectionString))//should connection be passed here?
             {
                 try
                 {
@@ -237,7 +237,7 @@ namespace FreeMarketOne.Chats
                     bool pollResult = client.Poll(TimeSpan.FromMilliseconds(RequestTimeout));
                     client.ReceiveReady -= ClientOnReceiveReady;
                     client.Disconnect(connectionString);
-                    
+
                     return pollResult;
                 }
                 catch (Exception ex)
@@ -309,8 +309,15 @@ namespace FreeMarketOne.Chats
             }
         }
 
+        private string ToNetMQAddress(string onionAddress)
+        {
+            return string.IsNullOrEmpty(_socks5Proxy) ?
+                $"tcp://{onionAddress}:{_configuration.ListenerChatEndPoint.Port}" :
+                $"socks5://{_socks5Proxy};{onionAddress}:{_configuration.ListenerChatEndPoint.Port}";
+        }
+
         /// <summary>
-        /// Load separate chat listener ovwe NetMQ
+        /// Load separate chat listener over NetMQ
         /// </summary>
         private void StartMQListener()
         {
@@ -327,7 +334,7 @@ namespace FreeMarketOne.Chats
 
                     while (true)
                     {
-                        var clientMessage = response.ReceiveMultipartMessage(4);
+                        var clientMessage = response.ReceiveMultipartMessage(4);//why 4 frames?
 
                         Console.WriteLine("Receiving chat message from peer.");
                         _logger.Information("Receiving chat message from peer.");
@@ -387,7 +394,7 @@ namespace FreeMarketOne.Chats
         public ChatDataV1 CreateNewSellerChat(MarketItemV1 offer)
         {
             var result = CreateNewChat(offer);
-            result.SellerEndPoint = _serverPublicAddress.MapToIPv4().ToString();
+            result.SellerEndPoint = _serverOnionAddress;
             result.ChatItems = new List<ChatItem>();
 
             var newInitialMessage = new ChatItem();

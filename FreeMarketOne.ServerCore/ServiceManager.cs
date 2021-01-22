@@ -84,7 +84,7 @@ namespace FreeMarketOne.ServerCore
 
                 Console.WriteLine(periodicCheckLog.ToString());
 
-                _networkHeartbeatEvent.Invoke(this, networkHeartbeatInfo);
+                _networkHeartbeatEvent?.Invoke(this, networkHeartbeatInfo);
 
                 return Task.CompletedTask;
             },
@@ -175,7 +175,7 @@ namespace FreeMarketOne.ServerCore
             var state = false;
             try
             {
-                var isTorRunning = FMONE.Current.TorProcessManager?.IsTorRunningAsync().Result;
+                var isTorRunning = FMONE.Current.TorProcessManager?.IsTorRunning();
                 if (isTorRunning.GetValueOrDefault(false)) state = true;
             }
             catch

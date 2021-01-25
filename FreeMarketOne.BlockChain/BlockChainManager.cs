@@ -195,6 +195,7 @@ namespace FreeMarketOne.BlockChain
                 var coBoostrapRunner = new CoroutineManager();
                 coBoostrapRunner.RegisterCoroutine(_peerBootstrapWorker.GetEnumerator());
                 coBoostrapRunner.Start();
+
             }
             else
             {
@@ -373,7 +374,57 @@ namespace FreeMarketOne.BlockChain
                 //blocking calls deliberately as we don't want to create a DDOS attack here when newtrok re-connected
                 _swarmServer.AddPeersAsync(_seedPeers, TimeSpans.FiveMinutes).ConfigureAwait(false).GetAwaiter().GetResult();
                 _swarmServer.CheckAllPeersAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+
+                //same script is executed at service manager but this could kick in earlier than service manager poll period
+                var diff = ValidateChainAgainstNetwork().ConfigureAwait(false).GetAwaiter().GetResult();
+                if (diff.Any())
+                {
+                    PullRemoteChainDifferences().ConfigureAwait(false).GetAwaiter().GetResult();
+                }
             }
         }
+
+        public async Task<IEnumerable<PeerChainState>> ValidateChainAgainstNetwork()
+        {
+            var states = await _swarmServer.GetPeerChainStateAsync(TimeSpan.FromMinutes(10), new CancellationToken());            
+            return states.Where(peerToCheck => peerToCheck.TipIndex> BlockChain.Tip.Index && peerToCheck.TotalDifficulty > BlockChain.Tip.TotalDifficulty);
+        }
+
+        public async Task PullRemoteChainDifferences()
+        {
+            DateTimeOffset started = DateTimeOffset.UtcNow;
+            long existingBlocks = _blockChain?.Tip?.Index ?? 0;
+            _logger.Information("Preloading [resync] starts");
+
+            try
+            {
+                await _swarmServer.PreloadAsync(null,null, null, cancellationToken: _cancellationToken.Token );
+            }
+            catch (AggregateException e)
+            {
+                if (e.InnerException is InvalidGenesisBlockException)
+                {
+                    _logger.Error(string.Format("Preloading [resync] terminated with silence exception: {0}", e));
+                }
+                else
+                {
+                    _logger.Error(string.Format("Preloading [resync] terminated with an exception: {0}", e));
+                    throw e;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error(string.Format("Preloading [resync] terminated with an exception: {0}", e));
+                throw e;
+            }
+
+            DateTimeOffset ended = DateTimeOffset.UtcNow;
+            var index = _blockChain?.Tip?.Index ?? 0;
+            _logger.Information("Preloading [resync] finished; elapsed time: {0}; blocks: {1}",
+                ended - started,
+                index - existingBlocks
+            );
+        }
+
     }
 }

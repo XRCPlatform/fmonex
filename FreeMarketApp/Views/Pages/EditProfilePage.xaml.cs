@@ -263,6 +263,21 @@ namespace FreeMarketApp.Views.Pages
                 iPhoto.Source = new Bitmap(photoPath);
                 _userData.Photo = photoPath;
             }
+
+            await Task.Run(
+               () => {
+                   if (!_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX))
+                   {
+                       PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _userData.Photo));
+
+                       var skynetHelper = new SkynetHelper();
+                       var skynetUrl = skynetHelper.UploadToSkynet(_userData.Photo, _logger);
+                       if (skynetUrl != null)
+                       {
+                           _userData.Photo = skynetUrl;
+                       }
+                   }
+               });
         }
 
         private void ClearForm()

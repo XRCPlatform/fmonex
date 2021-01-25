@@ -77,7 +77,7 @@ namespace FreeMarketApp.Helpers
                 skylink = skylink.Replace(SkynetWebPortal.SKYNET_PREFIX, string.Empty);
                 if (!imageCache.Contains(skylink))
                 {
-                    HttpClient httpClient = GetHttpClient(false);
+                    HttpClient httpClient = GetHttpClient();
 
                     var skynetWebPortal = new SkynetWebPortal(httpClient);
 

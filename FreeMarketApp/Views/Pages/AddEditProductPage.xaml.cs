@@ -499,6 +499,24 @@ namespace FreeMarketApp.Views.Pages
                     btAddPhoto.IsVisible = false;
                 }
             }
+            await Task.Run(
+                () => {
+                    for (int i = _offer.Photos.Count(); i > 0; i--)
+                    {
+                        if (!_offer.Photos[i - 1].Contains(SkynetWebPortal.SKYNET_PREFIX))
+                        {
+                            PagesHelper.Log(_logger, string.Format("Uploading to Skynet {0}.", _offer.Photos[i - 1]));
+
+                            var skynetHelper = new SkynetHelper();
+                            var skynetUrl = skynetHelper.UploadToSkynet(_offer.Photos[i - 1], _logger);
+                            if (skynetUrl != null)
+                            {
+                                _offer.Photos[i - 1] = skynetUrl;
+                            }
+                        }
+                    }
+                });
+            
         }
 
         public void ButtonRemove_Click(object sender, RoutedEventArgs args)

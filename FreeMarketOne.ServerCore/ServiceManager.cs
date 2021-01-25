@@ -110,6 +110,22 @@ namespace FreeMarketOne.ServerCore
             _cancellationToken.Token,
             repeatEvery: TimeSpans.HalfMinute,
             startAfter: TimeSpans.TwentySeconds);
+
+            IAsyncLoop periodicEnsureRemoteNetworkChainLoop = this._asyncLoopFactory.Run("RemoteChainChecker", (cancellation) =>
+            {
+                var dateTimeUtc = DateTime.UtcNow;
+                StringBuilder periodicCheckLog = new StringBuilder();
+
+                periodicCheckLog.AppendLine("======Service RemoteChainChecker ====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
+                EnsureRemoteStateDownload(periodicCheckLog);
+                
+                Console.Write(periodicCheckLog.ToString());
+
+                return Task.CompletedTask;
+            },
+            _cancellationToken.Token,
+            repeatEvery: TimeSpans.FiveMinutes,
+            startAfter: TimeSpans.FiveMinutes);
         }
 
         private void ValidateNetworkHeartbeat()
@@ -462,6 +478,57 @@ namespace FreeMarketOne.ServerCore
             if (state) fullState = true;
 
             return fullState;
+        }
+
+        private bool EnsureRemoteStateDownload(StringBuilder periodicCheckLog = null)
+        {
+            var baseDiff = FMONE.Current.BaseBlockChainManager?.ValidateChainAgainstNetwork().ConfigureAwait(false).GetAwaiter().GetResult();
+            foreach (var peer in baseDiff)
+            {
+                AppendTextToBuilder(periodicCheckLog, peer);
+            }
+            if (baseDiff.Any())
+            {
+                FMONE.Current.BaseBlockChainManager?.PullRemoteChainDifferences().ConfigureAwait(false).GetAwaiter().GetResult();
+
+                var baseDiffAfter = FMONE.Current.BaseBlockChainManager?.ValidateChainAgainstNetwork().ConfigureAwait(false).GetAwaiter().GetResult();
+
+                foreach (var peer in baseDiffAfter)
+                {
+                    AppendTextToBuilder(periodicCheckLog, peer);
+                }
+            }
+           
+
+            var marketDiff = FMONE.Current.MarketBlockChainManager?.ValidateChainAgainstNetwork().ConfigureAwait(false).GetAwaiter().GetResult();
+
+            foreach (var peer in marketDiff)
+            {
+                AppendTextToBuilder(periodicCheckLog, peer);
+            }
+            if (marketDiff.Any())
+            {
+                FMONE.Current.MarketBlockChainManager?.PullRemoteChainDifferences().ConfigureAwait(false).GetAwaiter().GetResult();
+
+                var marketDiffAfter = FMONE.Current.MarketBlockChainManager?.ValidateChainAgainstNetwork().ConfigureAwait(false).GetAwaiter().GetResult();
+
+                foreach (var peer in marketDiffAfter)
+                {
+                    AppendTextToBuilder(periodicCheckLog, peer);
+                }
+            }            
+
+            return true;
+        }
+
+        private static void AppendTextToBuilder(StringBuilder periodicCheckLog, Libplanet.Net.PeerChainState peer)
+        {
+            periodicCheckLog?.Append(peer.Peer);
+            periodicCheckLog?.Append(" has height ");
+            periodicCheckLog?.Append(peer.TipIndex);
+            periodicCheckLog?.Append(" and TotalDifficulty ");
+            periodicCheckLog?.Append(peer.TotalDifficulty);
+            periodicCheckLog?.AppendLine();
         }
 
         public void Dispose()

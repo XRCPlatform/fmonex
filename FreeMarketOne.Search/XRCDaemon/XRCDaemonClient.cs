@@ -1,24 +1,17 @@
 ﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
-using System.Net.WebSockets;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.Search.XRCDaemon;
 using FreeMarketOne.Search.XRCDaemon.JsonRpc;
+using MihaZupan;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 
 namespace FreeMarketOne.Search
@@ -33,6 +26,7 @@ namespace FreeMarketOne.Search
         private readonly HttpClient httpClient;
         private readonly IBaseConfiguration configuration;
         private readonly ILogger logger;
+
         public XRCDaemonClient(JsonSerializerSettings serializerSettings, IBaseConfiguration config, ILogger logger)
         {
             this.serializerSettings = serializerSettings;
@@ -132,8 +126,10 @@ namespace FreeMarketOne.Search
 
         private HttpClient GetHttpClient(IBaseConfiguration config)
         {
+            var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
             var handler = new SocketsHttpHandler
             {
+                Proxy = proxy,
                 //Credentials = new NetworkCredential(endpoint.User, endpoint.Password),
                 //PreAuthenticate = true,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
@@ -149,6 +145,10 @@ namespace FreeMarketOne.Search
 
             var httpClient = new HttpClient(handler);
             httpClient.Timeout = TimeSpan.FromMinutes(10);
+            httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+            {
+                Public = true
+            };
             return httpClient;
         }
 

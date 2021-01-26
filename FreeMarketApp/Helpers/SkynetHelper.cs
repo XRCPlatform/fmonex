@@ -127,7 +127,7 @@ namespace FreeMarketApp.Helpers
             {
                 var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
                 var handler = new HttpClientHandler { Proxy = proxy };
-                HttpClient httpClient = new HttpClient(handler, true);
+                HttpClient httpClient = new HttpClient(handler);
                 httpClient.BaseAddress = new Uri(SkynetWebPortal.SKYNET_GATEURL);
                 httpClient.Timeout = TimeSpan.FromSeconds(60);
                 httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue

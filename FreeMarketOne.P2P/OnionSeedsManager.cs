@@ -131,7 +131,7 @@ namespace FreeMarketOne.P2P
                     handler = new HttpClientHandler { Proxy = proxy };
                 }
 
-                HttpClient httpClient = new HttpClient(handler, true);
+                HttpClient httpClient = new HttpClient(handler);
                 httpClient.BaseAddress = new Uri(uri);
                 httpClient.Timeout = TimeSpan.FromSeconds(60);
                 httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue

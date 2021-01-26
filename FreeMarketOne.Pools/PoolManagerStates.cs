@@ -46,7 +46,12 @@ namespace FreeMarketOne.Pools
             /// <summary>
             /// No local action items for propagation
             /// </summary>
-            NoLocalActionItems = 7
+            NoLocalActionItems = 7,
+
+            /// <summary>
+            /// Item signature is invalid
+            /// </summary>
+            InvalidSignature = 8
         }
     }
 }

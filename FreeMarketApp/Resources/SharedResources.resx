@@ -205,7 +205,10 @@
     <value>You need to have at least one peer to propagate transaction.</value>
   </data>
   <data name="Dialog_Error_NoValidContentHash" xml:space="preserve">
-    <value>Content of this item isn't valid with actual hash.</value>
+    <value>Content of this item does not produce expected hash.</value>
+  </data>
+  <data name="Dialog_Error_InvalidSignature" xml:space="preserve">
+    <value>Content of this item does not produce expected signature.</value>
   </data>
   <data name="Dialog_Error_StateOfItemIsInProgress" xml:space="preserve">
     <value>Item's changes are in the pool. Please wait for next block sychronization.</value>

@@ -168,6 +168,12 @@ namespace FreeMarketOne.Search
                 if (currentSellerAggregate == null)
                 {
                     var sellerPubKeys = _marketManager.GetSellerPubKeyFromMarketItem(marketItem);
+                    //if market offer has corrupted keys exlude from listings as it 
+                    //will not be possible for seller to support that transaction
+                    if (!sellerPubKeys.Any())
+                    {
+                        return;
+                    }
 
                     sellerAggregate = SearchHelper.CalculateSellerXRCTotal(marketItem, _configuration, sellerPubKeys, _xrcCalculator, _userManager, _basePoolManager, _baseBlockChain, _engine);
                     if (sellerAggregate == null)

@@ -1,5 +1,4 @@
 ﻿using FreeMarketOne.DataStructure;
-using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.P2P.Models;
 using FreeMarketOne.Tor;
@@ -8,7 +7,6 @@ using Libplanet.Crypto;
 using Libplanet.Net;
 using MihaZupan;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -17,12 +15,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using FreeMarketOne.Tor.Exceptions;
 
 namespace FreeMarketOne.P2P
 {
@@ -33,23 +28,19 @@ namespace FreeMarketOne.P2P
         /// </summary>
         private long running;
         private static HttpClient _httpClient = null;
-
         public bool IsRunning => Interlocked.Read(ref running) == 1;
         private ILogger _logger { get; set; }
         private EndPoint _torSocks5EndPoint { get; set; }
         private string _torOnionEndPoint { get; set; }
         private string _appVersion { get; set; }
-
         private static bool _listenersUseTor;
-
         public List<OnionSeedPeer> OnionSeedPeers { get; set; }
         private IAsyncLoopFactory _asyncLoopFactory { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
         private TorProcessManager _torProcessManager { get; set; }
         private IPAddress _serverPublicAddress { get; set; }
         private string _serverOnionAddress { get; set; }
-        private List<string> _onionSeeds { get; set; }
-        
+        private List<string> _onionSeeds { get; set; }        
         public Swarm<BaseAction> BaseSwarm { get; set; }
         public Swarm<MarketAction> MarketSwarm { get; set; }
 
@@ -97,14 +88,6 @@ namespace FreeMarketOne.P2P
             //we have to load first onion seeds synchroniously
             ProcessOnionSeeds();
 
-            //if (_listenersUseTor)
-            //{
-            //    //_logger.Information("Warming Tor onion service ...");
-            //    //var isOk3 = WarmTorOnionServicetWithTcpServer(9113).GetAwaiter().GetResult();
-            //    //var isOk4 = WarmTorOnionServicetWithTcpServer(9114).GetAwaiter().GetResult();
-            //    //_logger.Information($"Warmed Tor circuit: {isOk3} && {isOk4}");
-            //}
-
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
                 ProcessOnionSeeds();
@@ -133,7 +116,7 @@ namespace FreeMarketOne.P2P
 
                 HttpClient httpClient = new HttpClient(handler);
                 httpClient.BaseAddress = new Uri(uri);
-                httpClient.Timeout = TimeSpan.FromSeconds(60);
+                httpClient.Timeout = TimeSpan.FromSeconds(5);
                 httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     Public = true
@@ -171,7 +154,6 @@ namespace FreeMarketOne.P2P
             var dateTimeUtc = DateTime.UtcNow;
 
             StringBuilder periodicCheckLog = new StringBuilder();
-            StringBuilder foundOnionSeeds = new StringBuilder();
 
             periodicCheckLog.AppendLine("======Onion Seed Status Check====== " + dateTimeUtc.ToString(CultureInfo.InvariantCulture) + " agent " + _appVersion);
             periodicCheckLog.AppendLine("My Tor EndPoint " + _torProcessManager.TorOnionEndPoint);
@@ -186,9 +168,11 @@ namespace FreeMarketOne.P2P
             }
 
             var isTorRunning = _torProcessManager.IsTorRunning();
-            // Get remote seeds
+
             if (isTorRunning)
             {
+                //remote seeds are optional, subject to potential DDOS attacks, single point of failures 
+                //however offer some way if distributing new seeds when needed and possible
                 try
                 {
                     var httpClient = GetHttpClient(_torOnionEndPoint);
@@ -208,30 +192,7 @@ namespace FreeMarketOne.P2P
                                 AddOnionSeedString(onion);
 
                             }
-                        }
-
-                        if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()) && (BaseSwarm != null) && (MarketSwarm != null))
-                        {
-                            foreach (var itemSeedPeer in OnionSeedPeers)
-                            {
-                                // no need to create paralell runs, these could be ticking in background without stresssing tor services
-                                try
-                                {
-                                    AddSeedsToBaseSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
-                                    AddSeedsToMarketSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
-                                }
-                                catch (Exception e)
-                                {
-                                    _logger.Error(string.Format("Cant add seed to swarm {0}", e));
-                                }
-                            }
-                        }
-
-                        if (BaseSwarm != null)
-                            periodicCheckLog.AppendLine(string.Format("Swarm Base Peers: {0}", BaseSwarm.Peers.Count()));
-
-                        if (MarketSwarm != null)
-                            periodicCheckLog.AppendLine(string.Format("Swarm Market Peers: {0}", MarketSwarm.Peers.Count()));
+                        }                        
                     }
                     else
                     {
@@ -242,7 +203,34 @@ namespace FreeMarketOne.P2P
                 {
                     periodicCheckLog.AppendLine(string.Format("OnionSeed request exception:", e.ToString()));
                 }
-                
+
+                if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()) && (BaseSwarm != null) && (MarketSwarm != null))
+                {
+                    foreach (var itemSeedPeer in OnionSeedPeers)
+                    {
+                        // no need to create paralell runs, these could be ticking in background without stresssing tor services
+                        try
+                        {
+                            AddSeedsToBaseSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
+                            AddSeedsToMarketSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error(string.Format("Cant add seed to swarm {0}", e));
+                        }
+                    }
+                }
+
+                if (BaseSwarm != null)
+                {
+                    periodicCheckLog.AppendLine(string.Format("Swarm Base Peers: {0}", BaseSwarm.Peers.Count()));
+                }
+
+                if (MarketSwarm != null)
+                {
+                    periodicCheckLog.AppendLine(string.Format("Swarm Market Peers: {0}", MarketSwarm.Peers.Count()));
+                }                    
+
             }
             else
             {
@@ -320,87 +308,10 @@ namespace FreeMarketOne.P2P
                         _cancellationToken.Token);
             }
         }
-        private TorSocks5Client client;
-        private async Task<bool> WarmTorOnionServicetWithTcpServer(int port)
-        {
-            var duration = TimeSpan.FromSeconds(60);
 
-            //Server task
-            //Task.Run(() =>
-            // {
-                 //var server = new TcpListener(IPAddress.Parse("127.0.0.1"), port);
-            
-                 //server.Start();
-
-                 //var bytes2 = new byte[] { 0x1, 0x2 };
-                 //_logger.Information($"Accepting warm up stream for {port}");
-                 //TcpClient client2 = server.AcceptTcpClient();
-                 //client2.ReceiveTimeout = 100;
-                 //NetworkStream stream = client2.GetStream();
-                 //_logger.Information($"Got warm up stream from Tor using {port}");
-                 //stream.Write(bytes2, 0, 2);                
-
-
-             //});
-
-            var sleepDuration = TimeSpan.FromSeconds(10);
-            var stopwatch = Stopwatch.StartNew();
-            var connected = false;
-
-            do
-            {
-                if (client == null)
-                {
-                    client = new TorSocks5Client(_torSocks5EndPoint);
-                }                
-
-                try
-                {
-                    _logger.Information($"Connecting to Tor on {port}");
-                    client.ConnectAndHandshake();
-                    _logger.Information($"IsConnected = {client.IsConnected} to Tor on {port}");                    
-                    await client.ConnectToDestinationAsync(_serverOnionAddress, port).ConfigureAwait(false);
-                    _logger.Information($"Warm up connected? {client.IsConnected}");
-                    if (client.IsConnected)
-                    {
-                        _logger.Information($"Warm up test for {port}");
-                        connected = true;
-                        var bytes = new byte[2];
-                        int i = client.Stream.Read(bytes, 0, 2);
-
-                        return i == 2 && bytes[0] == 0x1 && bytes[1] == 0x2;
-                    }
-                }
-                catch (TorSocks5FailureResponseException ex)
-                {
-
-                    Console.WriteLine(ex);
-                    if (duration - stopwatch.Elapsed > sleepDuration)
-                    {
-                        Thread.Sleep(sleepDuration);
-                    }
-                }
-                finally
-                {
-                    //_logger.Information($"Closing warm up server on {port}");
-                    //client2.Close();
-                    //server.Stop();
-                    //this client probably need not to be disposed
-                    client.Dispose();
-                    client = null;
-                }
-            } while (!connected && stopwatch.Elapsed < duration);
-
-            return false;
-        }
-
+       
         public void Dispose()
         {
-            if (client != null)
-            {
-                client.Dispose();
-            }
-
             Interlocked.Exchange(ref running, 2);
 
             _cancellationToken.Cancel();

@@ -1,6 +1,7 @@
 ﻿using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Common;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Pools;
 using Libplanet.Crypto;
@@ -513,19 +514,19 @@ namespace FreeMarketOne.Users
             lock (_locked)
             {
                 if (userData == null) userData = new UserDataV1();
+                var clone = userData.Clone<UserDataV1>();
+                clone.UserName = userName;
+                clone.Description = description;
+                clone.BaseSignature = clone.Signature;
+                clone.PublicKey = Convert.ToBase64String(PrivateKey.PublicKey.KeyParam.Q.GetEncoded());
 
-                userData.UserName = userName;
-                userData.Description = description;
-                userData.BaseSignature = userData.Signature;
-                userData.PublicKey = Convert.ToBase64String(PrivateKey.PublicKey.KeyParam.Q.GetEncoded());
+                var bytesToSign = clone.ToByteArrayForSign();
 
-                var bytesToSign = userData.ToByteArrayForSign();
+                clone.Signature = Convert.ToBase64String(PrivateKey.Sign(bytesToSign));
 
-                userData.Signature = Convert.ToBase64String(PrivateKey.Sign(bytesToSign));
+                clone.Hash = clone.GenerateHash();
 
-                userData.Hash = userData.GenerateHash();
-
-                return userData;
+                return clone;
             }
         }
 
@@ -676,11 +677,12 @@ namespace FreeMarketOne.Users
         {
             lock (_locked)
             {
-                if (review == null) review = new ReviewUserDataV1();                
+                if (review == null) review = new ReviewUserDataV1();
                 //review.PublicKey = Convert.ToBase64String(PrivateKey.PublicKey.KeyParam.Q.GetEncoded());
-                var bytesToSign = review.ToByteArrayForSign();
-                review.Signature = Convert.ToBase64String(PrivateKey.Sign(bytesToSign));
-                review.Hash = review.GenerateHash();
+                var clone = review.Clone<ReviewUserDataV1>();
+                var bytesToSign = clone.ToByteArrayForSign();
+                clone.Signature = Convert.ToBase64String(PrivateKey.Sign(bytesToSign));
+                clone.Hash = clone.GenerateHash();
                 return review;
             }
         }

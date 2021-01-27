@@ -1,6 +1,7 @@
 ﻿using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Common;
 using FreeMarketOne.Pools;
 using Libplanet.Extensions;
 using Libplanet.Store;
@@ -526,14 +527,17 @@ namespace FreeMarketOne.Markets
         {
             lock (_locked)
             {
-                marketData.BaseSignature = marketData.Signature;
+                //deep cloning so that all the refernce types are disconected, modifying ref will invalidate signature
+                var clone = marketData.Clone<MarketItemV1>();
 
-                var bytesToSign = marketData.ToByteArrayForSign();
-                marketData.Signature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
+                clone.BaseSignature = clone.Signature;
 
-                marketData.Hash = marketData.GenerateHash();
+                var bytesToSign = clone.ToByteArrayForSign();
+                clone.Signature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
 
-                return marketData;
+                clone.Hash = clone.GenerateHash();
+
+                return clone;
             }
         }
 
@@ -549,15 +553,18 @@ namespace FreeMarketOne.Markets
         {
             lock (_locked)
             {
-                marketData.State = (int)ProductStateEnum.Sold;
-                marketData.BuyerOnionEndpoint = onionAddress;
+                //deep cloning so that all the refernce types are disconected, modifying ref will invalidate signature
+                var clone = marketData.Clone<MarketItemV1>();
 
-                var bytesToSign = marketData.ToByteArrayForSign();
-                marketData.BuyerSignature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
+                clone.State = (int)ProductStateEnum.Sold;
+                clone.BuyerOnionEndpoint = onionAddress;
 
-                marketData.Hash = marketData.GenerateHash();
+                var bytesToSign = clone.ToByteArrayForSign();
+                clone.BuyerSignature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
 
-                return marketData;
+                clone.Hash = marketData.GenerateHash();
+
+                return clone;
             }
         }
 

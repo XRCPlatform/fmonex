@@ -280,6 +280,11 @@ namespace FreeMarketOne.Pools
             if (_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount)
             {
                 var isValid = CheckActionItemInProcessing(actionItem);
+                bool validSignature = ValidateSignature(actionItem);
+                if (!validSignature)
+                {
+                    return PoolManagerStates.Errors.InvalidSignature;
+                }
 
                 if (isValid == null) _actionItemsList.Add(actionItem);
 
@@ -289,6 +294,12 @@ namespace FreeMarketOne.Pools
             {
                 return PoolManagerStates.Errors.NoMinimalPeer;
             }
+        }
+
+        private bool ValidateSignature(IBaseItem actionItem)
+        {
+            var buyerPubKeys = UserPublicKey.Recover(actionItem.ToByteArrayForSign(), actionItem.Signature);
+            return buyerPubKeys.Any();
         }
 
         public bool SaveActionItemsToFile()

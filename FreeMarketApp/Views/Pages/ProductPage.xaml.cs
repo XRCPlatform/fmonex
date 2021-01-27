@@ -438,6 +438,11 @@ namespace FreeMarketApp.Views.Pages
                     tbSellerStars.Text = reviewStartRounded.ToString();
                     tbSellerReviewsCount.Text = reviews.Count().ToString();
                 }
+                else
+                {
+                    //if seller info could not be located, it's due to corrupted keys
+                    btBuyButton.IsEnabled = false;
+                }
 
                 //photos loading
                 if ((_offer.Photos != null) && (_offer.Photos.Any()))

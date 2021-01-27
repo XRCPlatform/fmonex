@@ -23,5 +23,7 @@ namespace FreeMarketOne.BlockChain
         void Stop();
         List<IBaseItem> GetActionItemsByType(Type type);
         Task ReConnectAfterNetworkLossAsync();
+        Task<IEnumerable<PeerChainState>> ValidateChainAgainstNetwork();
+        Task PullRemoteChainDifferences();
     }
 }

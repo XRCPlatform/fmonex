@@ -178,7 +178,7 @@ namespace FreeMarketApp.Views.Pages
                         var skynetUrl = skynetHelper.UploadToSkynet(_userData.Photo, _logger);
                         if (skynetUrl == null)
                         {
-                            _userData.Photo = null;;
+                            _userData.Photo = null;
                         }
                         else
                         {
@@ -272,7 +272,7 @@ namespace FreeMarketApp.Views.Pages
 
                        var skynetHelper = new SkynetHelper();
                        var skynetUrl = skynetHelper.UploadToSkynet(_userData.Photo, _logger);
-                       if (skynetUrl != null)
+                       if (skynetUrl != null && !_userData.Photo.Contains(SkynetWebPortal.SKYNET_PREFIX))//do not modify if already was set by another thread
                        {
                            _userData.Photo = skynetUrl;
                        }

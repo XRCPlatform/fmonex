@@ -6,6 +6,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Common;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
 using FreeMarketOne.Pools;
@@ -418,11 +419,15 @@ namespace FreeMarketApp.Views.Pages
                     //}
 
                     //sign market data and generating chain connection
-                    _offer = FMONE.Current.MarketManager.SignMarketData(_offer, FMONE.Current.UserManager.PrivateKey);
-
+                    var signedOffer = FMONE.Current.MarketManager.SignMarketData(_offer, FMONE.Current.UserManager.PrivateKey);
+                    ////things like photos could be accidentaly mutated on different thread
+                    //reference types could mutate, but we signed binary values. Must send disconected copy to network, 
+                    //and initialize locally from clone to prevent mutations
+                    _offer = signedOffer.Clone<MarketItemV1>();
+                   
                     PagesHelper.Log(_logger, string.Format("Propagate new product to chain."));
 
-                    var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
+                    var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(signedOffer);
                     if (resultPool == null)
                     {
                         await MessageBox.Show(mainWindow,
@@ -509,7 +514,7 @@ namespace FreeMarketApp.Views.Pages
 
                             var skynetHelper = new SkynetHelper();
                             var skynetUrl = skynetHelper.UploadToSkynet(_offer.Photos[i - 1], _logger);
-                            if (skynetUrl != null)
+                            if (skynetUrl != null && !_offer.Photos[i - 1].Contains(SkynetWebPortal.SKYNET_PREFIX)) //do not modify if data was set
                             {
                                 _offer.Photos[i - 1] = skynetUrl;
                             }

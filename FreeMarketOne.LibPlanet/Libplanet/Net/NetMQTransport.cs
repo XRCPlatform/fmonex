@@ -261,8 +261,8 @@ namespace Libplanet.Net
 
             tasks.Add(
                 RefreshTableAsync(
-                    TimeSpan.FromMinutes(10),
-                    TimeSpan.FromMinutes(10),
+                    TimeSpan.FromMinutes(1),
+                    TimeSpan.FromMinutes(1),
                     _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
             tasks.Add(RunPoller(_routerPoller));
@@ -655,7 +655,7 @@ namespace Libplanet.Net
                             _dealers[peer.Address] = dealer;
                         }
 
-                        if (!dealer.TrySendMultipartMessage(TimeSpan.FromSeconds(120), message))
+                        if (!dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(5), message))
                         {
                             _logger.Warning(
                                 "Broadcasting timed out. [Peer: {Peer}, Message: {Message}]",
@@ -687,7 +687,7 @@ namespace Libplanet.Net
 
             // FIXME The current timeout value(1 sec) is arbitrary.
             // We should make this configurable or fix it to an unneeded structure.
-            if (_router.TrySendMultipartMessage(TimeSpan.FromSeconds(120), msg))
+            if (_router.TrySendMultipartMessage(TimeSpan.FromMinutes(5), msg))
             {
                 _logger.Debug("A reply sent to {Identity}", identityHex);
             }

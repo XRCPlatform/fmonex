@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using Libplanet.Extensions;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace P2PPayloadGenerator
 {
@@ -47,9 +48,40 @@ namespace P2PPayloadGenerator
                 Interlocked.Increment(ref counter);
                 Thread.Sleep(1000);
             }
-                   
 
-        }
+            while (Current.MarketBlockChainManager.SwarmServer.Peers.Count() < 1 || Current.BaseBlockChainManager.SwarmServer.Peers.Count() < 1 && counter < 1000)
+            {
+                if (counter == 1)
+                {
+                    //Current.OnionSeedsManager.Start();
+                    Current.OnionSeedsManager.MarketSwarm = Current.MarketBlockChainManager.SwarmServer;
+                    Current.OnionSeedsManager.BaseSwarm = Current.BaseBlockChainManager.SwarmServer;
+                    Current.OnionSeedsManager.Start();
+                    //Current.OnionSeedsManager.MarketSwarm.BootstrapAsync(Current.OnionSeedsManager.OnionSeedPeers.,1000000, 10000, 1, null).ConfigureAwait(false).GetAwaiter().GetResult();
+
+
+                }
+      
+                Console.WriteLine($"Waiting for peers base {Current.BaseBlockChainManager.SwarmServer.Peers.Count()} market {Current.MarketBlockChainManager.SwarmServer.Peers.Count()}");
+                Interlocked.Increment(ref counter);
+                Thread.Sleep(10000);
+            }
+
+            foreach (var boundPeer in Current.BaseBlockChainManager.SwarmServer.Peers)
+            {
+                Console.WriteLine(boundPeer.ToString());
+            }
+
+            foreach (var boundPeer in Current.MarketBlockChainManager.SwarmServer.Peers)
+            {
+                Console.WriteLine(boundPeer.ToString());
+            }
+
+            while (Current.MarketBlockChainManager.BlockChain.Tip.Index <10 & Current.BaseBlockChainManager.BlockChain.Tip.Index <10)
+            {
+                Thread.Sleep(10000);
+            }
+         }
 
         static void Main(string[] args)
         {

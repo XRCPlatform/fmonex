@@ -442,97 +442,103 @@ namespace Libplanet.Net
             CancellationToken cancellationToken = default(CancellationToken)
         )
         {
+
             if (_behindNAT)
             {
                 await CreatePermission(peer);
             }
-
-            Guid reqId = Guid.NewGuid();
-            try
+            //creating only one exclusive open channel until message is recieved to avoid unexcpected messages recieved.
+            //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
+            lock (string.Intern(peer.ToString()))
             {
-                DateTimeOffset now = DateTimeOffset.UtcNow;
-                _logger.Verbose(
-                    "Enqueue a request {RequestId} to {PeerAddress}: {Message}.",
-                    reqId,
-                    peer.Address,
-                    message
-                );
-                var tcs = new TaskCompletionSource<IEnumerable<Message>>();
-                Interlocked.Increment(ref _requestCount);
-
-                // FIXME should we also cancel tcs sender side too?
-                cancellationToken.Register(() => tcs.TrySetCanceled());
-                await _requests.AddAsync(
-                    new MessageRequest(reqId, message, peer, now, timeout, expectedResponses, tcs),
-                    cancellationToken
-                );
-                _logger.Verbose(
-                    "Enqueued a request {RequestId} to {PeerAddress}: {Message}; " +
-                    "{LeftRequests} left.",
-                    reqId,
-                    peer.Address,
-                    message,
-                    Interlocked.Read(ref _requestCount)
-                );
-
-                if (expectedResponses > 0)
+                Guid reqId = Guid.NewGuid();
+                try
                 {
-                    var reply = (await tcs.Task).ToList();
-                    foreach (var msg in reply)
+                
+                    DateTimeOffset now = DateTimeOffset.UtcNow;
+                    _logger.Verbose(
+                        "Enqueue a request {RequestId} to {PeerAddress}: {Message}.",
+                        reqId,
+                        peer.Address,
+                        message
+                    );
+                    var tcs = new TaskCompletionSource<IEnumerable<Message>>();
+                    Interlocked.Increment(ref _requestCount);
+
+                    // FIXME should we also cancel tcs sender side too?
+                    cancellationToken.Register(() => tcs.TrySetCanceled());
+                    _requests.AddAsync(
+                        new MessageRequest(reqId, message, peer, now, timeout, expectedResponses, tcs),
+                        cancellationToken
+                    ).ConfigureAwait(false).GetAwaiter().GetResult();
+                    _logger.Verbose(
+                        "Enqueued a request {RequestId} to {PeerAddress}: {Message}; " +
+                        "{LeftRequests} left.",
+                        reqId,
+                        peer.Address,
+                        message,
+                        Interlocked.Read(ref _requestCount)
+                    );
+
+                    if (expectedResponses > 0)
                     {
-                        MessageHistory.Enqueue(msg);
+                        var reply = (tcs.Task.ConfigureAwait(false).GetAwaiter().GetResult()).ToList();
+                        foreach (var msg in reply)
+                        {
+                            MessageHistory.Enqueue(msg);
+                        }
+
+                        const string logMsg =
+                            "Received {ReplyMessageCount} reply messages to {RequestId} " +
+                            "from {PeerAddress}: {ReplyMessages}.";
+                        _logger.Debug(logMsg, reply.Count, reqId, peer.Address, reply);
+
+                        return reply;
                     }
-
-                    const string logMsg =
-                        "Received {ReplyMessageCount} reply messages to {RequestId} " +
-                        "from {PeerAddress}: {ReplyMessages}.";
-                    _logger.Debug(logMsg, reply.Count, reqId, peer.Address, reply);
-
-                    return reply;
+                    else
+                    {
+                        return new Message[0];
+                    }
                 }
-                else
+                catch (DifferentAppProtocolVersionException e)
                 {
-                    return new Message[0];
+                    const string logMsg =
+                        "{PeerAddress} sent a reply to {RequestId} with " +
+                        "a different app protocol version; " +
+                        "expected: {ExpectedVersion}; actual: {ActualVersion}.";
+                    _logger.Error(e, logMsg, peer.Address, reqId, e.ExpectedVersion, e.ActualVersion);
+                    throw;
                 }
-            }
-            catch (DifferentAppProtocolVersionException e)
-            {
-                const string logMsg =
-                    "{PeerAddress} sent a reply to {RequestId} with " +
-                    "a different app protocol version; " +
-                    "expected: {ExpectedVersion}; actual: {ActualVersion}.";
-                _logger.Error(e, logMsg, peer.Address, reqId, e.ExpectedVersion, e.ActualVersion);
-                throw;
-            }
-            catch (TimeoutException)
-            {
-                _logger.Debug(
-                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() timed out " +
-                    "after {Timeout} of waiting a reply to {RequestId} from {PeerAddress}.",
-                    timeout,
-                    reqId,
-                    peer.Address
-                );
-                throw;
-            }
-            catch (TaskCanceledException)
-            {
-                _logger.Debug(
-                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() was " +
-                    "cancelled to  wait a reply to {RequestId} from {PeerAddress}.",
-                    reqId,
-                    peer.Address
-                );
-                throw;
-            }
-            catch (Exception e)
-            {
-                var msg =
-                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() encountered " +
-                    "an unexpected exception during sending a request {RequestId} to " +
-                    "{PeerAddress} and waiting a reply to it: {Exception}.";
-                _logger.Error(e, msg, reqId, peer.Address, e);
-                throw;
+                catch (TimeoutException)
+                {
+                    _logger.Debug(
+                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() timed out " +
+                        "after {Timeout} of waiting a reply to {RequestId} from {PeerAddress}.",
+                        timeout,
+                        reqId,
+                        peer.Address
+                    );
+                    throw;
+                }
+                catch (TaskCanceledException)
+                {
+                    _logger.Debug(
+                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() was " +
+                        "cancelled to  wait a reply to {RequestId} from {PeerAddress}.",
+                        reqId,
+                        peer.Address
+                    );
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    var msg =
+                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() encountered " +
+                        "an unexpected exception during sending a request {RequestId} to " +
+                        "{PeerAddress} and waiting a reply to it: {Exception}.";
+                    _logger.Error(e, msg, reqId, peer.Address, e);
+                    throw;
+                }
             }
         }
 

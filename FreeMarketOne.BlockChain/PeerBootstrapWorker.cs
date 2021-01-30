@@ -20,7 +20,7 @@ namespace FreeMarketOne.BlockChain
         private ILogger _logger { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
 
-        private const int SwarmDialTimeout = 300000;
+        private const int SwarmDialTimeout = 30000;
 
         private PrivateKey _privateKey { get; set; }
         private BlockChain<T> _blockChain;
@@ -96,7 +96,7 @@ namespace FreeMarketOne.BlockChain
                         await _swarmServer.WaitForRunningAsync();
                         await _swarmServer.AddPeersAsync(
                             _seedPeers,
-                            TimeSpan.FromMinutes(2),
+                            TimeSpan.FromMinutes(5),
                             _cancellationToken.Token);
                     }
                     catch (TimeoutException e)

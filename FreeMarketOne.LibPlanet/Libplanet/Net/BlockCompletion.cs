@@ -41,7 +41,7 @@ namespace Libplanet.Net
             _demandEnqueued = new SemaphoreSlim(0);
         }
 
-        public delegate IAsyncEnumerable<Block<TAction>> BlockFetcher(
+        public delegate IEnumerable<Block<TAction>> BlockFetcher(
             TPeer peer,
             IEnumerable<HashDigest<SHA256>> blockHashes,
             CancellationToken cancellationToken
@@ -351,10 +351,8 @@ namespace Libplanet.Net
 
                     try
                     {
-                        ConfiguredCancelableAsyncEnumerable<Block<TAction>> blocks =
-                            blockFetcher(peer, hashDigests, timeoutToken)
-                                .WithCancellation(timeoutToken);
-                        await foreach (Block<TAction> block in blocks)
+                        IEnumerable<Block<TAction>> blocks = blockFetcher(peer, hashDigests, timeoutToken);
+                        foreach (Block<TAction> block in blocks)
                         {
                             _logger.Debug(
                                 "Downloaded a block #{BlockIndex} {BlockHash} " +

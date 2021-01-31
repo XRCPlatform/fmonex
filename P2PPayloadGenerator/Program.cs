@@ -7,6 +7,7 @@ using System.Threading;
 using Libplanet.Extensions;
 using Newtonsoft.Json;
 using System.Linq;
+using FreeMarketOne.Extensions.Common;
 
 namespace P2PPayloadGenerator
 {
@@ -163,7 +164,7 @@ namespace P2PPayloadGenerator
             Console.ReadKey();
         }
 
-        public static UserDataV1 SignUserData(UserDataV1 userData, UserPrivateKey privateKey)
+        public static UserDataV1 SignUserData_(UserDataV1 userData, UserPrivateKey privateKey)
         {
             lock (_locked)
             {
@@ -177,6 +178,26 @@ namespace P2PPayloadGenerator
                 userData.Hash = userData.GenerateHash();
 
                 return userData;
+            }
+        }
+
+        public static UserDataV1 SignUserData(UserDataV1 userData = null, UserPrivateKey privateKey)
+        {
+            lock (_locked)
+            {
+                var clone = userData.Clone<UserDataV1>();
+                clone.UserName = userData.UserName;
+                clone.Description = userData.Description;
+                clone.BaseSignature = clone.Signature;
+                clone.PublicKey = Convert.ToBase64String(privateKey.PublicKey.KeyParam.Q.GetEncoded());
+
+                var bytesToSign = clone.ToByteArrayForSign();
+
+                clone.Signature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
+
+                clone.Hash = clone.GenerateHash();
+
+                return clone;
             }
         }
     }

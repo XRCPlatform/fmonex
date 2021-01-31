@@ -94,6 +94,14 @@ namespace P2PPayloadGenerator
                 Console.WriteLine($"Matched generate users command with {args[CommandNumberOfExecutionsArgIndex]} and {args[CommandSleepTimeArgIndex]}");
                 GenerateUsers(int.Parse(args[CommandNumberOfExecutionsArgIndex]), int.Parse(args[CommandSleepTimeArgIndex]));
             }
+
+            while (true)
+            {
+                Thread.Sleep(10000);
+                if (Console.ReadLine().Equals("quit", StringComparison.InvariantCultureIgnoreCase)) {
+                    break;
+                }
+            }
         }
 
 
@@ -110,15 +118,11 @@ namespace P2PPayloadGenerator
                 var _offer = Current.MarketManager.SignMarketData(template, privateKey);            
 
                 var errors = Current.MarketPoolManager.AcceptActionItem(_offer);
-                if (!errors.HasValue)
-                {
-                    Current.MarketPoolManager.PropagateAllActionItemLocal();
-                }
-                else
+                if (errors.HasValue)
                 {
                     Console.WriteLine(errors.ToString());
                 }
-               
+                               
 
                 Thread.Sleep(sleepTime);
             }
@@ -147,9 +151,10 @@ namespace P2PPayloadGenerator
 
                 Console.WriteLine(signedUserData.UserName + "" + signedUserData.PublicKey);
 
-                if (Current.BasePoolManager.AcceptActionItem(signedUserData) == null)
+                var result = Current.BasePoolManager.AcceptActionItem(signedUserData);
+                if (result != null)
                 {
-                    Current.BasePoolManager.PropagateAllActionItemLocal();
+                    Console.WriteLine("result:" + result.ToString());
                 }
                 GenerateOffers(6, 10, privateKey, user);
                 Thread.Sleep(sleepTime);

@@ -92,7 +92,7 @@ namespace FreeMarketOne.P2P
                 return ProcessOnionSeedsAsync();
             },
             _cancellationToken.Token,
-            repeatEvery: TimeSpans.FiveMinutes,
+            repeatEvery: TimeSpans.Minute,
             startAfter: TimeSpans.Minute);
 
             _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
@@ -272,7 +272,7 @@ namespace FreeMarketOne.P2P
             if (BaseSwarm.Peers.Any())
             {
                 var exist = BaseSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
-                if (exist == null)
+                if (exist != null)
                 {
                     return;
                 }
@@ -301,7 +301,7 @@ namespace FreeMarketOne.P2P
             if (MarketSwarm.Peers.Any())
             {
                 var exist = MarketSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
-                if (exist == null)
+                if (exist != null)
                 {
                     return;
                 }

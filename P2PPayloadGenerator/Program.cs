@@ -181,7 +181,7 @@ namespace P2PPayloadGenerator
             }
         }
 
-        public static UserDataV1 SignUserData(UserDataV1 userData = null, UserPrivateKey privateKey)
+        public static UserDataV1 SignUserData(UserDataV1 userData, UserPrivateKey privateKey)
         {
             lock (_locked)
             {

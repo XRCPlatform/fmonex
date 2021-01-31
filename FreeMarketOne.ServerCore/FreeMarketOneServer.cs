@@ -221,6 +221,9 @@ namespace FreeMarketOne.ServerCore
                         LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
                         BasePoolManager.Start();
 
+                        //Add Swarm server to seed manager
+                        OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
+
                         //Initialize Market Blockchain Manager
                         LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
                         //triggering market chain run without waiting base chain to complete

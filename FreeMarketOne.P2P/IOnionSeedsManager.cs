@@ -4,6 +4,7 @@ using Libplanet.Net;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.P2P
 {
@@ -16,6 +17,6 @@ namespace FreeMarketOne.P2P
 
         bool IsOnionSeedsManagerRunning();
 
-        void Start();
+        Task Start();
     }
 }

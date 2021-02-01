@@ -1961,49 +1961,47 @@ namespace Libplanet.Net
 
                 BoundPeer peer = _demandBlockHash.Value.Peer;
                 var hash = new HashDigest<SHA256>(_demandBlockHash.Value.Header.Hash.ToArray());
-                lock (string.Intern(peer.ToString()))
-                {
-                    try
-                    {
-                        SyncPreviousBlocksAsync(
-                            BlockChain,
-                            peer,
-                            hash,
-                            null,
-                            trustedStateValidators,
-                            dialTimeout,
-                            0,
-                            cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
-                        // FIXME: Clean up events
-                        BlockReceived.Set();
-                        BlockAppended.Set();
-                        BroadcastBlock(peer.Address, BlockChain.Tip);
-                    }
-                    catch (TimeoutException)
+                try
+                {
+                    await SyncPreviousBlocksAsync(
+                        BlockChain,
+                        peer,
+                        hash,
+                        null,
+                        trustedStateValidators,
+                        dialTimeout,
+                        0,
+                        cancellationToken);
+
+                    // FIXME: Clean up events
+                    BlockReceived.Set();
+                    BlockAppended.Set();
+                    BroadcastBlock(peer.Address, BlockChain.Tip);
+                }
+                catch (TimeoutException)
+                {
+                    _logger.Debug($"Timeout occurred during {nameof(ProcessFillBlocks)}");
+                }
+                catch (InvalidBlockIndexException ibie)
+                {
+                    _logger.Warning(
+                        $"{nameof(InvalidBlockIndexException)} occurred during " +
+                        $"{nameof(ProcessFillBlocks)}: " +
+                        "{ibie}", ibie);
+                }
+                catch (Exception e)
+                {
+                    var msg =
+                        $"Unexpected exception occurred during" +
+                        $" {nameof(ProcessFillBlocks)}: {{e}}";
+                    _logger.Error(e, msg, e);
+                }
+                finally
+                {
+                    using (await _blockSyncMutex.LockAsync(cancellationToken))
                     {
-                        _logger.Debug($"Timeout occurred during {nameof(ProcessFillBlocks)}");
-                    }
-                    catch (InvalidBlockIndexException ibie)
-                    {
-                        _logger.Warning(
-                            $"{nameof(InvalidBlockIndexException)} occurred during " +
-                            $"{nameof(ProcessFillBlocks)}: " +
-                            "{ibie}", ibie);
-                    }
-                    catch (Exception e)
-                    {
-                        var msg =
-                            $"Unexpected exception occurred during" +
-                            $" {nameof(ProcessFillBlocks)}: {{e}}";
-                        _logger.Error(e, msg, e);
-                    }
-                    finally
-                    {
-                        using (_blockSyncMutex.Lock(cancellationToken))
-                        {
-                            _demandBlockHash = null;
-                        }
+                        _demandBlockHash = null;
                     }
                 }
             }

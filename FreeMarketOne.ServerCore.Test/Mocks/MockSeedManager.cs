@@ -5,6 +5,7 @@ using Libplanet.Net;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.BlockChain.Test.Mocks
 {
@@ -29,9 +30,9 @@ namespace FreeMarketOne.BlockChain.Test.Mocks
             return true;
         }
 
-        public void Start()
+        public Task Start()
         {
-            
+            throw new NotImplementedException();
         }
     }
 }

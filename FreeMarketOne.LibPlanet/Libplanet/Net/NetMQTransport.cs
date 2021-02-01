@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -418,9 +419,6 @@ namespace Libplanet.Net
 
         public Task WaitForRunningAsync() => _runningEvent.Task;
 
-        public Task SendMessageAsync(BoundPeer peer, Message message)
-            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(240), 0);
-
         public async Task<Message> SendMessageWithReplyAsync(
             BoundPeer peer,
             Message message,
@@ -449,6 +447,9 @@ namespace Libplanet.Net
             }
             //creating only one exclusive open channel until message is recieved to avoid unexcpected messages recieved.
             //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
+            _logger.Debug($"Blocing further calls to {peer} while SendMessageWithReplyAsync {message}");
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             lock (string.Intern(peer.ToString()))
             {
                 Guid reqId = Guid.NewGuid();
@@ -467,10 +468,12 @@ namespace Libplanet.Net
 
                     // FIXME should we also cancel tcs sender side too?
                     cancellationToken.Register(() => tcs.TrySetCanceled());
+
                     _requests.AddAsync(
                         new MessageRequest(reqId, message, peer, now, timeout, expectedResponses, tcs),
                         cancellationToken
-                    ).ConfigureAwait(false).GetAwaiter().GetResult();
+                    ).GetAwaiter().GetResult();
+
                     _logger.Verbose(
                         "Enqueued a request {RequestId} to {PeerAddress}: {Message}; " +
                         "{LeftRequests} left.",
@@ -493,6 +496,8 @@ namespace Libplanet.Net
                             "from {PeerAddress}: {ReplyMessages}.";
                         _logger.Debug(logMsg, reply.Count, reqId, peer.Address, reply);
 
+                        sw.Stop();
+                        _logger.Debug($"EndOfBlocing further calls to {peer} while SendMessageWithReplyAsync {message} elapsed ms: {sw.ElapsedMilliseconds}");
                         return reply;
                     }
                     else

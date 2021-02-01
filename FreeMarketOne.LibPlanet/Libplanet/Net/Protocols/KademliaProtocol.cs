@@ -433,6 +433,7 @@ namespace Libplanet.Net.Protocols
                 );
                 if (!(reply is Pong pong))
                 {
+                    _logger.Error($"PingAsync recieved {reply} {reply.GetType()} from {reply.Remote} as reply raising exception.");
                     throw new InvalidMessageException("Received pong is invalid.", reply);
                 }
 

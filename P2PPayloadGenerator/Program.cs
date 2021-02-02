@@ -57,7 +57,7 @@ namespace P2PPayloadGenerator
                     //Current.OnionSeedsManager.Start();
                     Current.OnionSeedsManager.MarketSwarm = Current.MarketBlockChainManager.SwarmServer;
                     Current.OnionSeedsManager.BaseSwarm = Current.BaseBlockChainManager.SwarmServer;
-                    //Current.OnionSeedsManager.Start();
+                    Current.OnionSeedsManager.Start();
                     //Current.OnionSeedsManager.MarketSwarm.BootstrapAsync(Current.OnionSeedsManager.OnionSeedPeers.,1000000, 10000, 1, null).ConfigureAwait(false).GetAwaiter().GetResult();
 
 
@@ -78,11 +78,11 @@ namespace P2PPayloadGenerator
                 Console.WriteLine(boundPeer.ToString());
             }
 
-            while (Current.MarketBlockChainManager.BlockChain.Tip.Index <10 & Current.BaseBlockChainManager.BlockChain.Tip.Index <10)
+            while (Current.MarketBlockChainManager.BlockChain.Tip.Index < 10 & Current.BaseBlockChainManager.BlockChain.Tip.Index < 10)
             {
                 Thread.Sleep(10000);
             }
-         }
+        }
 
         static void Main(string[] args)
         {

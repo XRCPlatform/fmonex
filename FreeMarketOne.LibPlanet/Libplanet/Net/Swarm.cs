@@ -379,8 +379,8 @@ namespace Libplanet.Net
                 );
                 tasks.Add(ProcessFillTxs(_cancellationToken));
                 _logger.Debug("Swarm started.");
-                //what is meaning of 2 awaits?
-                await await Task.WhenAny(tasks);
+
+                await Task.WhenAll(tasks);
             }
             catch (OperationCanceledException e)
             {
@@ -1693,9 +1693,13 @@ namespace Libplanet.Net
 
         private bool IsDemandNeeded(BlockHeader target)
         {
-            return target.TotalDifficulty > BlockChain.Tip.TotalDifficulty &&
+            var result = target.TotalDifficulty > BlockChain.Tip.TotalDifficulty &&
                    (_demandBlockHash is null ||
                     _demandBlockHash.Value.Header.TotalDifficulty < target.TotalDifficulty);
+            
+            _logger.Debug($"IsDemandNeeded for {target.Hash} total difficulty {target.TotalDifficulty} which is less than {BlockChain.Tip.TotalDifficulty} and _demandBlockHash is null ={_demandBlockHash is null}");
+
+            return result;
         }
 
         private async Task SyncPreviousBlocksAsync(
@@ -2055,10 +2059,12 @@ namespace Libplanet.Net
                 {
                     await tasks.WhenAll();
                 }
-                catch (Exception)
+                catch (AggregateException ae)
                 {
-                    _logger.Information(
-                        $"Some tasks faulted during {nameof(GetTxsAsync)}().");
+                    foreach (var e in ae.InnerExceptions)
+                    {
+                        _logger.Information($"Some tasks faulted during {nameof(GetTxsAsync)}(). Error: {e} ");
+                    }                    
                 }
 
                 foreach (Task<List<Transaction<T>>> task in tasks)

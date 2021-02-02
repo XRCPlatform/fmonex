@@ -130,7 +130,7 @@ namespace FreeMarketOne.ServerCore
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(Configuration.FullBaseDirectory, Configuration.LogFilePath),
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
+                    outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{Exception}{NewLine}",
                     rollingInterval: RollingInterval.Day, shared: true)
                 .CreateLogger();
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();

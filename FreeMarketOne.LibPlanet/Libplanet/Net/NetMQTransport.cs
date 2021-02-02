@@ -418,7 +418,7 @@ namespace Libplanet.Net
         }
 
         public Task WaitForRunningAsync() => _runningEvent.Task;
-        
+
         public async Task<Message> SendMessageWithReplyAsync(
            BoundPeer peer,
            Message message,
@@ -455,7 +455,7 @@ namespace Libplanet.Net
                 else
                 {
                     throw e;
-                }                
+                }
             }
         }
 
@@ -474,7 +474,7 @@ namespace Libplanet.Net
             BoundPeer peer,
             Message message,
             TimeSpan? timeout,
-            int expectedResponses,           
+            int expectedResponses,
             CancellationToken cancellationToken = default(CancellationToken),
             int retry = 0
         )
@@ -512,17 +512,21 @@ namespace Libplanet.Net
             {
                 await CreatePermission(peer);
             }
-            //creating only one exclusive open channel until message is recieved to avoid unexcpected messages recieved.
-            //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
-            _logger.Debug($"Blocing further calls to {peer} while SendMessageWithReplyAsync {message}");
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
+            //creating only one exclusive open channel until message is recieved to avoid unexcpected messages recieved.
+            //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
+            _logger.Debug($"About to start blocking calls to {peer} while SendMessageWithReplyAsync {message}");
+
             lock (string.Intern(peer.ToString()))
             {
+
+                _logger.Debug($"Blocking further calls to {peer} while SendMessageWithReplyAsync {message} time waiting to aquire lock in ms:{sw.ElapsedMilliseconds}");
                 Guid reqId = Guid.NewGuid();
                 try
                 {
-                
+
                     DateTimeOffset now = DateTimeOffset.UtcNow;
                     _logger.Verbose(
                         "Enqueue a request {RequestId} to {PeerAddress}: {Message}.",
@@ -655,7 +659,8 @@ namespace Libplanet.Net
                         _differentAppProtocolVersionEncountered);
                     _logger.Debug("A message has parsed: {0}, from {1}", message, message.Remote);
 
-                    if (!message.Remote.ToString().EndsWith($":{_listenPort}.")) {
+                    if (!message.Remote.ToString().EndsWith($":{_listenPort}."))
+                    {
                         _logger.Debug($"A message {message} arrived from a wrong swarm: expected swarm {_listenPort}, recieved from {message.Remote}");
                         //can't redirect to another listener at this stage
                     }
@@ -677,7 +682,7 @@ namespace Libplanet.Net
                                 exc);
                             throw;
                         }
-                    }                   
+                    }
                 }
                 catch (DifferentAppProtocolVersionException dapve)
                 {
@@ -716,7 +721,8 @@ namespace Libplanet.Net
                 _logger.Debug("Peers to broadcast: {PeersCount}", peers.Count);
 
                 NetMQMessage message = msg.ToNetMQMessage(_privateKey, AsPeer, _appProtocolVersion);
-
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 foreach (BoundPeer peer in peers)
                 {
                     if (peer.EndPoint.Port == _listenPort)
@@ -726,28 +732,28 @@ namespace Libplanet.Net
                             dealer = new DealerSocket(ToNetMQAddress(peer));
                             _dealers[peer.Address] = dealer;
                         }
+                        _logger.Debug($"About to broadcast {message} to : {peer}");
+                        int retryCount = 1;
+                        bool success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(5), message);
 
-                        if (!dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(5), message))
+                        while (!success && retryCount < 5)
                         {
-                            _logger.Warning(
-                                "Broadcasting timed out. [Peer: {Peer}, Message: {Message}]",
-                                peer,
-                                msg
-                            );
-                            //disposing dealer sockets on the basis of mere timeout is detrimental
-                            //they will be removed elsewhere in rebuilding connections
-                            //dealer.Dispose();
-                            //_dealers.TryRemove(peer.Address, out _);
+                            _logger.Debug($"Broadcasting try # {retryCount} failed. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
+                            retryCount++;
+                            success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(5), message);
                         }
-                    }                   
+
+                        if (success)
+                        {
+                            sw.Stop();
+                            _logger.Debug($"Broadcasting try # {retryCount} succeeded. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
+                        }
+                    }
                 }
             }
             catch (Exception exc)
             {
-                _logger.Error(
-                    exc,
-                    $"Unexpected error occurred during {nameof(DoBroadcast)}(). {{error}}",
-                    exc);
+                _logger.Error(exc, $"Unexpected error occurred during {nameof(DoBroadcast)}(). {exc}");
                 throw;
             }
         }
@@ -759,13 +765,22 @@ namespace Libplanet.Net
 
             // FIXME The current timeout value(1 sec) is arbitrary.
             // We should make this configurable or fix it to an unneeded structure.
-            if (_router.TrySendMultipartMessage(TimeSpan.FromMinutes(5), msg))
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            int tryCount = 1;
+            bool success = _router.TrySendMultipartMessage(TimeSpan.FromMinutes(5), msg);
+
+            while (!success && tryCount < 5)
             {
-                _logger.Debug("A reply sent to {Identity}", identityHex);
+                _logger.Debug($"Failed to reply to {identityHex} on try# {tryCount} duration ms: {sw.ElapsedMilliseconds}");
+                tryCount++;
+                success = _router.TrySendMultipartMessage(TimeSpan.FromMinutes(5), msg);
             }
-            else
+
+            if (success)
             {
-                _logger.Debug("Failed to reply to {Identity}", identityHex);
+                sw.Stop();
+                _logger.Debug($"A reply sent to {identityHex} on try# {tryCount} duration ms: {sw.ElapsedMilliseconds}");
             }
         }
 
@@ -881,7 +896,7 @@ namespace Libplanet.Net
                 req.Id,
                 DateTimeOffset.UtcNow - req.RequestedTime);
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
-            
+
             if (!_dealers.TryGetValue(req.Peer.Address, out DealerSocket dealer))
             {
                 dealer = new DealerSocket(ToNetMQAddress(req.Peer));

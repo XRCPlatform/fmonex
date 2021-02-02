@@ -203,17 +203,23 @@ namespace FreeMarketOne.P2P
 
                 if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()) && (BaseSwarm != null) && (MarketSwarm != null))
                 {
+                    List<Task> tasks = new List<Task>();
                     foreach (var itemSeedPeer in OnionSeedPeers)
                     {
-                        try
+                        tasks.Add(AddSeedsToBaseSwarmAsPeer(itemSeedPeer));
+                        tasks.Add(AddSeedsToMarketSwarmAsPeer(itemSeedPeer));
+                    }
+                    try
+                    {
+                        Task.WaitAll(tasks.ToArray());
+                    }
+                    catch (AggregateException ae)
+                    {
+                        foreach (var e in ae.Flatten().InnerExceptions)
                         {
-                            await AddSeedsToBaseSwarmAsPeer(itemSeedPeer);
-                            await AddSeedsToMarketSwarmAsPeer(itemSeedPeer);
+                            _logger.Error($"Error adding seeds to swarm {e.Message}");
                         }
-                        catch (Exception e)
-                        {
-                            _logger.Error(string.Format("Cant add seed to swarm {0}", e));
-                        }
+                        
                     }
                 }
 

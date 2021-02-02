@@ -157,7 +157,7 @@ namespace FreeMarketOne.BlockChain
             try
             {
                 await _swarmServer.PreloadAsync(
-                    TimeSpan.FromMilliseconds(SwarmDialTimeout),
+                    null,
                     new Progress<PreloadState>(state =>
                         _preloadProcessed?.Invoke(this, state)
                     ),

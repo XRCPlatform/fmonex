@@ -1010,7 +1010,7 @@ namespace Libplanet.Net
             Message parsedMessage = await Transport.SendMessageWithReplyAsync(
                 peer,
                 request,
-                timeout: Options.BlockHashRecvTimeout,
+                null,
                 cancellationToken: cancellationToken
             );
 
@@ -1069,7 +1069,7 @@ namespace Libplanet.Net
             }
 
             TimeSpan blockRecvTimeout = Options.BlockRecvTimeout
-                                        + TimeSpan.FromSeconds(hashCount);
+                                        + TimeSpan.FromMinutes(hashCount);
             if (blockRecvTimeout > Options.MaxTimeout)
             {
                 blockRecvTimeout = Options.MaxTimeout;
@@ -1078,7 +1078,7 @@ namespace Libplanet.Net
             IEnumerable<Message> replies = await Transport.SendMessageWithReplyAsync(
                 peer,
                 request,
-                blockRecvTimeout,
+                null,
                 ((hashCount - 1) / request.ChunkSize) + 1,
                 cancellationToken
             );
@@ -1139,7 +1139,7 @@ namespace Libplanet.Net
             IEnumerable<Message> replies = await Transport.SendMessageWithReplyAsync(
                 peer,
                 request,
-                txRecvTimeout,
+                null,
                 txCount,
                 cancellationToken
             );
@@ -1350,7 +1350,7 @@ namespace Libplanet.Net
 
             IEnumerable<Task<(BoundPeer, ChainStatus)>> tasks = peersExceptMe.Select(
                 peer => Transport.SendMessageWithReplyAsync(
-                    peer, new GetChainStatus(), dialTimeout, cancellationToken
+                    peer, new GetChainStatus(), null, cancellationToken
                 ).ContinueWith<(BoundPeer, ChainStatus)>(
                     t =>
                     {
@@ -1411,7 +1411,7 @@ namespace Libplanet.Net
             TimeSpan? dialTimeout,
             CancellationToken cancellationToken)
         {
-            var peersWithHeightAndDiff = (await DialToExistingPeers(dialTimeout, cancellationToken))
+            var peersWithHeightAndDiff = (await DialToExistingPeers(null, cancellationToken))
                 .Where(pp =>
                     BlockChain.Genesis.Hash.Equals(pp.ChainStatus?.GenesisHash) &&
                     pp.ChainStatus?.TotalDifficulty > initialTip?.TotalDifficulty)
@@ -1456,7 +1456,7 @@ namespace Libplanet.Net
                         reply = await Transport.SendMessageWithReplyAsync(
                             peer,
                             request,
-                            timeout: Options.RecentStateRecvTimeout,
+                            timeout: null,
                             cancellationToken: cancellationToken
                         );
 
@@ -1708,7 +1708,7 @@ namespace Libplanet.Net
             HashDigest<SHA256>? stop,
             IProgress<BlockDownloadState> progress,
             IImmutableSet<Address> trustedStateValidators,
-            TimeSpan dialTimeout,
+            TimeSpan? dialTimeout,
             long totalBlockCount,
             CancellationToken cancellationToken
         )
@@ -1974,7 +1974,7 @@ namespace Libplanet.Net
                         hash,
                         null,
                         trustedStateValidators,
-                        dialTimeout,
+                        null,
                         0,
                         cancellationToken);
 

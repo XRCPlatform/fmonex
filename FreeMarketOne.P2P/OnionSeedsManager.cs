@@ -92,7 +92,7 @@ namespace FreeMarketOne.P2P
                 return ProcessOnionSeedsAsync();
             },
             _cancellationToken.Token,
-            repeatEvery: TimeSpans.Minute,
+            repeatEvery: TimeSpans.TenMinutes,
             startAfter: TimeSpans.Minute);
 
             _logger.Information(string.Format("Done: {0}", OnionSeedPeers.Count));
@@ -288,7 +288,7 @@ namespace FreeMarketOne.P2P
 
             await BaseSwarm.AddPeersAsync(
                     new[] { boundPeer },
-                    TimeSpan.FromMinutes(2),
+                    TimeSpan.FromSeconds(10),
                     _cancellationToken.Token).ConfigureAwait(false);
 
         }
@@ -316,7 +316,7 @@ namespace FreeMarketOne.P2P
             _logger.Information(string.Format("Adding market peer pubkey: {0}", boundPeer.ToString()));
             await MarketSwarm.AddPeersAsync(
                     new[] { boundPeer },
-                    TimeSpan.FromMinutes(2),
+                    TimeSpan.FromSeconds(10),
                     _cancellationToken.Token).ConfigureAwait(false);
 
         }

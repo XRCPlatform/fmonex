@@ -517,12 +517,12 @@ namespace Libplanet.Net
             sw.Start();
             //creating only one exclusive open channel until message is recieved to avoid unexcpected messages recieved.
             //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
-            _logger.Debug($"About to start blocking calls to {peer} while SendMessageWithReplyAsync {message}");
+            _logger.Debug($"About to start blocking calls to {peer} for {message}, timeout {timeout}");
 
             lock (string.Intern(peer.ToString()))
             {
 
-                _logger.Debug($"Blocking further calls to {peer} while SendMessageWithReplyAsync {message} time waiting to aquire lock in ms:{sw.ElapsedMilliseconds}");
+                _logger.Debug($"Blocking calls to {peer} for {message}, timeout {timeout}, time to aquire lock ms:{sw.ElapsedMilliseconds}");
                 Guid reqId = Guid.NewGuid();
                 try
                 {
@@ -568,7 +568,7 @@ namespace Libplanet.Net
                         _logger.Debug(logMsg, reply.Count, reqId, peer.Address, reply);
 
                         sw.Stop();
-                        _logger.Debug($"EndOfBlocing further calls to {peer} while SendMessageWithReplyAsync {message} elapsed ms: {sw.ElapsedMilliseconds}");
+                        _logger.Debug($"EndOfBlocking calls to {peer} for {message} elapsed ms: {sw.ElapsedMilliseconds}");
                         return reply;
                     }
                     else

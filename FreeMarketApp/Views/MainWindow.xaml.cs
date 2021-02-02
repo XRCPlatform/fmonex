@@ -234,7 +234,7 @@ namespace FreeMarketApp.Views
         {
             Process process = new Process();
             process.StartInfo.UseShellExecute = true;
-            process.StartInfo.FileName = "http://bitcoinrh.org/";
+            process.StartInfo.FileName = "https://xrhodium.org/";
             process.Start();
         }
 

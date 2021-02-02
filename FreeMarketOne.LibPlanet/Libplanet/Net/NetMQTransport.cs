@@ -269,7 +269,7 @@ namespace Libplanet.Net
             tasks.Add(RunPoller(_routerPoller));
             tasks.Add(RunPoller(_broadcastPoller));
 
-            await await Task.WhenAny(tasks);
+            await Task.WhenAll(tasks);
         }
 
         public async Task StopAsync(
@@ -418,21 +418,88 @@ namespace Libplanet.Net
         }
 
         public Task WaitForRunningAsync() => _runningEvent.Task;
-
+        
         public async Task<Message> SendMessageWithReplyAsync(
+           BoundPeer peer,
+           Message message,
+           TimeSpan? timeout,
+           CancellationToken cancellationToken
+           )
+        {
+            return await SendMessageWithReplyAsync(peer, message, timeout, cancellationToken, 0);
+        }
+
+        private async Task<Message> SendMessageWithReplyAsync(
             BoundPeer peer,
             Message message,
             TimeSpan? timeout,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            int retry = 0
+            )
         {
-            IEnumerable<Message> replies =
-                await SendMessageWithReplyAsync(peer, message, timeout, 1, cancellationToken);
-            Message reply = replies.First();
-
-            return reply;
+            try
+            {
+                IEnumerable<Message> replies =
+                await SendMessageWithReply(peer, message, timeout, 1, cancellationToken);
+                Message reply = replies.First();
+                return reply;
+            }
+            catch (Exception e)
+            {
+                _logger.Debug($"Error while processing SendMessageWithReplyAsync {message} to {peer} retry# {retry}");
+                if (retry < 5)
+                {
+                    retry++;
+                    return await SendMessageWithReplyAsync(peer, message, timeout, cancellationToken, retry);
+                }
+                else
+                {
+                    throw e;
+                }                
+            }
         }
 
         public async Task<IEnumerable<Message>> SendMessageWithReplyAsync(
+            BoundPeer peer,
+            Message message,
+            TimeSpan? timeout,
+            int expectedResponses,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
+        {
+            return await SendMessageWithReplyAsync(peer, message, timeout, expectedResponses, cancellationToken, 0);
+        }
+
+        private async Task<IEnumerable<Message>> SendMessageWithReplyAsync(
+            BoundPeer peer,
+            Message message,
+            TimeSpan? timeout,
+            int expectedResponses,           
+            CancellationToken cancellationToken = default(CancellationToken),
+            int retry = 0
+        )
+        {
+            try
+            {
+                return await SendMessageWithReply(peer, message, timeout, expectedResponses, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.Debug($"Error while processing SendMessageWithReplyAsync {message} to {peer} retry# {retry}");
+                if (retry < 5)
+                {
+                    retry++;
+                    return await SendMessageWithReplyAsync(peer, message, timeout, expectedResponses, cancellationToken, retry);
+                }
+                else
+                {
+                    throw e;
+                }
+            }
+
+        }
+
+        private async Task<IEnumerable<Message>> SendMessageWithReply(
             BoundPeer peer,
             Message message,
             TimeSpan? timeout,
@@ -517,7 +584,7 @@ namespace Libplanet.Net
                 catch (TimeoutException)
                 {
                     _logger.Debug(
-                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() timed out " +
+                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReply)}() timed out " +
                         "after {Timeout} of waiting a reply to {RequestId} from {PeerAddress}.",
                         timeout,
                         reqId,
@@ -528,7 +595,7 @@ namespace Libplanet.Net
                 catch (TaskCanceledException)
                 {
                     _logger.Debug(
-                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() was " +
+                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReply)}() was " +
                         "cancelled to  wait a reply to {RequestId} from {PeerAddress}.",
                         reqId,
                         peer.Address
@@ -538,7 +605,7 @@ namespace Libplanet.Net
                 catch (Exception e)
                 {
                     var msg =
-                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() encountered " +
+                        $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReply)}() encountered " +
                         "an unexpected exception during sending a request {RequestId} to " +
                         "{PeerAddress} and waiting a reply to it: {Exception}.";
                     _logger.Error(e, msg, reqId, peer.Address, e);
@@ -590,7 +657,7 @@ namespace Libplanet.Net
 
                     if (!message.Remote.ToString().EndsWith($":{_listenPort}.")) {
                         _logger.Debug($"A message {message} arrived from a wrong swarm: expected swarm {_listenPort}, recieved from {message.Remote}");
-                        //can't redirect to anothe listener at this stage
+                        //can't redirect to another listener at this stage
                     }
                     else
                     {

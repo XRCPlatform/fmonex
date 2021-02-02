@@ -562,7 +562,7 @@ namespace FreeMarketOne.Markets
                 var bytesToSign = clone.ToByteArrayForSign();
                 clone.BuyerSignature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
 
-                clone.Hash = marketData.GenerateHash();
+                clone.Hash = clone.GenerateHash();
 
                 return clone;
             }

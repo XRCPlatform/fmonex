@@ -372,21 +372,21 @@ namespace FreeMarketOne.BlockChain
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
 
                 //blocking calls deliberately as we don't want to create a DDOS attack here when newtrok re-connected
-                _swarmServer.AddPeersAsync(_seedPeers, TimeSpan.FromSeconds(30)).ConfigureAwait(false).GetAwaiter().GetResult();
-                _swarmServer.CheckAllPeersAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                await _swarmServer.AddPeersAsync(_seedPeers, TimeSpan.FromSeconds(30));
+                await _swarmServer.CheckAllPeersAsync();
 
                 //same script is executed at service manager but this could kick in earlier than service manager poll period
-                var diff = ValidateChainAgainstNetwork().ConfigureAwait(false).GetAwaiter().GetResult();
+                var diff = await ValidateChainAgainstNetwork();
                 if (diff.Any())
                 {
-                    PullRemoteChainDifferences().ConfigureAwait(false).GetAwaiter().GetResult();
+                    await PullRemoteChainDifferences();
                 }
             }
         }
 
         public async Task<IEnumerable<PeerChainState>> ValidateChainAgainstNetwork()
         {
-            var states = await _swarmServer.GetPeerChainStateAsync(TimeSpan.FromMinutes(10), new CancellationToken());            
+            var states = await _swarmServer.GetPeerChainStateAsync(TimeSpan.FromMinutes(2), new CancellationToken());            
             return states.Where(peerToCheck => peerToCheck.TipIndex> BlockChain.Tip.Index && peerToCheck.TotalDifficulty > BlockChain.Tip.TotalDifficulty);
         }
 

@@ -263,13 +263,13 @@ namespace Libplanet.Net
             tasks.Add(
                 RefreshTableAsync(
                     TimeSpan.FromMinutes(1),
-                    TimeSpan.FromMinutes(1),
+                    TimeSpan.FromMinutes(10),
                     _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
             tasks.Add(RunPoller(_routerPoller));
             tasks.Add(RunPoller(_broadcastPoller));
 
-            await Task.WhenAll(tasks);
+            await await Task.WhenAny(tasks);
         }
 
         public async Task StopAsync(

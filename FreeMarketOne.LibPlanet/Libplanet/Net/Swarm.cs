@@ -372,15 +372,13 @@ namespace Libplanet.Net
 
             try
             {
-                tasks.Add(Transport.RunAsync(_cancellationToken));
-                tasks.Add(BroadcastTxAsync(broadcastTxInterval, _cancellationToken));
-                tasks.Add(
-                    ProcessFillBlocks(dialTimeout, trustedStateValidators, _cancellationToken)
-                );
-                tasks.Add(ProcessFillTxs(_cancellationToken));
+                tasks.Add(Task.Run(() => Transport.RunAsync(_cancellationToken)));
+                tasks.Add(Task.Run(() => BroadcastTxAsync(broadcastTxInterval, _cancellationToken)));
+                tasks.Add(Task.Run(() => ProcessFillBlocks(dialTimeout, trustedStateValidators, _cancellationToken)));
+                tasks.Add(Task.Run(() => ProcessFillTxs(_cancellationToken)));
                 _logger.Debug("Swarm started.");
 
-                await Task.WhenAll(tasks);
+                await await Task.WhenAny(tasks);
             }
             catch (OperationCanceledException e)
             {
@@ -1697,7 +1695,7 @@ namespace Libplanet.Net
                    (_demandBlockHash is null ||
                     _demandBlockHash.Value.Header.TotalDifficulty < target.TotalDifficulty);
             
-            _logger.Debug($"IsDemandNeeded for {target.Hash} total difficulty {target.TotalDifficulty} which is less than {BlockChain.Tip.TotalDifficulty} and _demandBlockHash is null ={_demandBlockHash is null}");
+            _logger.Debug($"IsDemandNeeded = {result} for {target} total difficulty {target.TotalDifficulty} which is greater than {BlockChain.Tip.TotalDifficulty} and _demandBlockHash is ={_demandBlockHash is null}");
 
             return result;
         }

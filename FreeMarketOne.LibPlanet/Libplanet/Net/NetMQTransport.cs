@@ -732,7 +732,7 @@ namespace Libplanet.Net
                             dealer = new DealerSocket(ToNetMQAddress(peer));
                             _dealers[peer.Address] = dealer;
                         }
-                        _logger.Debug($"About to broadcast {message} to : {peer}");
+                        _logger.Debug($"About to broadcast {msg} to : {peer}");
                         int retryCount = 1;
                         bool success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(5), message);
 

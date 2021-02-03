@@ -78,10 +78,12 @@ namespace P2PPayloadGenerator
                 Console.WriteLine(boundPeer.ToString());
             }
 
-            while (Current.MarketBlockChainManager.BlockChain.Tip.Index < 10 & Current.BaseBlockChainManager.BlockChain.Tip.Index < 10)
+            while (Current.MarketBlockChainManager.BlockChain.Tip.Index <= 2 & Current.BaseBlockChainManager.BlockChain.Tip.Index <= 2)
             {
                 Thread.Sleep(10000);
             }
+            Console.WriteLine("Ready to start generating. Press any key to confirm.");
+            Console.ReadKey();
         }
 
         static void Main(string[] args)

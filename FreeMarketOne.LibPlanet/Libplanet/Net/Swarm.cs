@@ -1348,7 +1348,7 @@ namespace Libplanet.Net
 
             IEnumerable<Task<(BoundPeer, ChainStatus)>> tasks = peersExceptMe.Select(
                 peer => Transport.SendMessageWithReplyAsync(
-                    peer, new GetChainStatus(), null, cancellationToken
+                    peer, new GetChainStatus(), dialTimeout, cancellationToken
                 ).ContinueWith<(BoundPeer, ChainStatus)>(
                     t =>
                     {
@@ -1409,7 +1409,7 @@ namespace Libplanet.Net
             TimeSpan? dialTimeout,
             CancellationToken cancellationToken)
         {
-            var peersWithHeightAndDiff = (await DialToExistingPeers(null, cancellationToken))
+            var peersWithHeightAndDiff = (await DialToExistingPeers(dialTimeout, cancellationToken))
                 .Where(pp =>
                     BlockChain.Genesis.Hash.Equals(pp.ChainStatus?.GenesisHash) &&
                     pp.ChainStatus?.TotalDifficulty > initialTip?.TotalDifficulty)

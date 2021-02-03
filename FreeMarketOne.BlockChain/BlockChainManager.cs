@@ -386,7 +386,7 @@ namespace FreeMarketOne.BlockChain
 
         public async Task<IEnumerable<PeerChainState>> ValidateChainAgainstNetwork()
         {
-            var states = await _swarmServer.GetPeerChainStateAsync(TimeSpan.FromMinutes(2), new CancellationToken());            
+            var states = await _swarmServer.GetPeerChainStateAsync(TimeSpan.FromMinutes(1), new CancellationToken());            
             return states.Where(peerToCheck => peerToCheck.TipIndex> BlockChain.Tip.Index && peerToCheck.TotalDifficulty > BlockChain.Tip.TotalDifficulty);
         }
 

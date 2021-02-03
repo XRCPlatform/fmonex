@@ -515,9 +515,12 @@ namespace Libplanet.Net
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
+
+            string timeoutStr = timeout == null ? "null" : timeout.ToString();
+
             //creating only one exclusive open channel until message is recieved to avoid unexcpected messages recieved.
             //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
-            _logger.Debug($"About to start blocking calls to {peer} for {message}, timeout {timeout}");
+            _logger.Debug($"About to start blocking calls to {peer} for {message}, timeout [{timeoutStr}]");
 
             lock (string.Intern(peer.ToString()))
             {

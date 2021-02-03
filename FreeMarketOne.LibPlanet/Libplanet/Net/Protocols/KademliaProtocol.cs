@@ -474,6 +474,15 @@ namespace Libplanet.Net.Protocols
             TimeSpan timeout,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+           await ValidateAsync(peer, timeout, 0, cancellationToken);
+        }
+
+        private async Task ValidateAsync(
+           BoundPeer peer,
+           TimeSpan timeout,
+           int retryCount,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
             try
             {
                 _logger.Verbose("Start to validate a peer: {Peer}", peer);
@@ -483,9 +492,16 @@ namespace Libplanet.Net.Protocols
             }
             catch (PingTimeoutException)
             {
-                _logger.Verbose("Peer {Peer} is invalid, removing...", peer);
-                RemovePeer(peer);
-                throw;
+                if (retryCount < 3)
+                {
+                    await ValidateAsync(peer, timeout, retryCount++, cancellationToken);
+                }
+                else
+                {
+                    _logger.Verbose("Peer {Peer} is invalid, removing...", peer);
+                    RemovePeer(peer);
+                    throw;
+                }                
             }
         }
 

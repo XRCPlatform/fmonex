@@ -1008,7 +1008,7 @@ namespace Libplanet.Net
             Message parsedMessage = await Transport.SendMessageWithReplyAsync(
                 peer,
                 request,
-                null,
+                TimeSpan.FromMinutes(1),
                 cancellationToken: cancellationToken
             );
 
@@ -1067,7 +1067,7 @@ namespace Libplanet.Net
             }
 
             TimeSpan blockRecvTimeout = Options.BlockRecvTimeout
-                                        + TimeSpan.FromMinutes(hashCount);
+                                        + TimeSpan.FromSeconds(hashCount * 10);
             if (blockRecvTimeout > Options.MaxTimeout)
             {
                 blockRecvTimeout = Options.MaxTimeout;
@@ -1076,7 +1076,7 @@ namespace Libplanet.Net
             IEnumerable<Message> replies = await Transport.SendMessageWithReplyAsync(
                 peer,
                 request,
-                null,
+                blockRecvTimeout,
                 ((hashCount - 1) / request.ChunkSize) + 1,
                 cancellationToken
             );
@@ -1128,7 +1128,7 @@ namespace Libplanet.Net
 
             _logger.Debug("Required tx count: {Count}.", txCount);
 
-            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromMinutes(txCount);
+            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromSeconds(txCount * 10);
             if (txRecvTimeout > Options.MaxTimeout)
             {
                 txRecvTimeout = Options.MaxTimeout;
@@ -1137,7 +1137,7 @@ namespace Libplanet.Net
             IEnumerable<Message> replies = await Transport.SendMessageWithReplyAsync(
                 peer,
                 request,
-                null,
+                txRecvTimeout,
                 txCount,
                 cancellationToken
             );
@@ -1963,7 +1963,7 @@ namespace Libplanet.Net
 
                 BoundPeer peer = _demandBlockHash.Value.Peer;
                 var hash = new HashDigest<SHA256>(_demandBlockHash.Value.Header.Hash.ToArray());
-
+                _logger.Debug($"Found open _demandBlockHash  for peer:{_demandBlockHash.Value.Peer} hash:{hash}");
                 try
                 {
                     await SyncPreviousBlocksAsync(
@@ -1972,7 +1972,7 @@ namespace Libplanet.Net
                         hash,
                         null,
                         trustedStateValidators,
-                        null,
+                        dialTimeout,
                         0,
                         cancellationToken);
 
@@ -2004,6 +2004,7 @@ namespace Libplanet.Net
                     using (await _blockSyncMutex.LockAsync(cancellationToken))
                     {
                         _demandBlockHash = null;
+                        _logger.Debug($"Closed _demandBlockHash for peer:{_demandBlockHash.Value.Peer} hash:{hash}");
                     }
                 }
             }

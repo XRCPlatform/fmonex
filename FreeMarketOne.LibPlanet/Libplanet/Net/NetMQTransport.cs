@@ -631,6 +631,7 @@ namespace Libplanet.Net
             string identityHex = ByteUtil.Hex(message.Identity);
             _logger.Debug("Reply {Message} to {Identity}...", message, identityHex);
             _replyQueue.Enqueue(message.ToNetMQMessage(_privateKey, AsPeer, _appProtocolVersion));
+            _logger.Debug($"Reply queue length {_replyQueue.LongCount()}"); 
         }
 
         public async Task CheckAllPeersAsync(CancellationToken cancellationToken, TimeSpan? timeout)

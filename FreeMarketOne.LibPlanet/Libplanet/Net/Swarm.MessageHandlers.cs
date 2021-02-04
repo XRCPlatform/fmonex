@@ -207,6 +207,7 @@ namespace Libplanet.Net
 
             foreach (Transaction<T> tx in txs)
             {
+                _logger.Debug($"Responding to GetTxs {tx.Id}");
                 Message response = new Messages.Tx(tx.Serialize(true))
                 {
                     Identity = getTxs.Identity,

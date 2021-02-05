@@ -738,19 +738,35 @@ namespace Libplanet.Net
                         }
                         _logger.Debug($"About to broadcast {msg} to : {peer}");
                         int retryCount = 1;
-                        bool success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(5), message);
+                        bool success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(1), message);
 
                         while (!success && retryCount < 5)
                         {
                             _logger.Debug($"Broadcasting try # {retryCount} failed. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
                             retryCount++;
-                            success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(5), message);
+                            success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(1), message);
                         }
 
                         if (success)
                         {
                             sw.Stop();
                             _logger.Debug($"Broadcasting try # {retryCount} succeeded. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
+                        }
+                        else
+                        {
+                            try
+                            {
+                                _logger.Debug($"Disposing dealer socket for peer {peer} after 5 consecutive failures ms: {sw.ElapsedMilliseconds}");
+                                dealer.Disconnect(ToNetMQAddress(peer));
+                                dealer.Close();
+                                dealer.Dispose();
+                                _dealers.TryRemove(peer.Address, out _);
+                            }
+                            catch (Exception)
+                            {
+                                //swallow
+                            }
+                           
                         }
                     }
                 }
@@ -1110,10 +1126,21 @@ namespace Libplanet.Net
                         if (!peerAddresses.Contains(address) &&
                             _dealers.TryGetValue(address, out DealerSocket removed))
                         {
-                            //remove but not dispose it will be cleaned up by runtime later
-                            _dealers.TryRemove(address, out DealerSocket removed2);
-                            //dispose was causing errors down the line in concurent code
-                            //removed.Dispose();
+                            try
+                            {
+                                var peer = Peers.Where(p => p.Address == address).FirstOrDefault();
+                                if (peer != null)
+                                {
+                                    removed.Disconnect(ToNetMQAddress(peer));
+                                }                                
+                                removed.Close();
+                                removed.Dispose();
+                            }
+                            catch (Exception)
+                            {
+
+                                //swallow
+                            }                            
                         }
                     }
                 }
@@ -1139,8 +1166,8 @@ namespace Libplanet.Net
             {
                 try
                 {
-                    await Protocol.RebuildConnectionAsync(cancellationToken);
                     await Task.Delay(period, cancellationToken);
+                    await Protocol.RebuildConnectionAsync(cancellationToken);
                 }
                 catch (OperationCanceledException e)
                 {

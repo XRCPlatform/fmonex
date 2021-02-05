@@ -2003,8 +2003,8 @@ namespace Libplanet.Net
                 {
                     using (await _blockSyncMutex.LockAsync(cancellationToken))
                     {
-                        _demandBlockHash = null;
                         _logger.Debug($"Closed _demandBlockHash for peer:{_demandBlockHash.Value.Peer} hash:{hash}");
+                        _demandBlockHash = null;                        
                     }
                 }
             }

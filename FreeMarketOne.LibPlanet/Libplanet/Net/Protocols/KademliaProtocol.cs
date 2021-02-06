@@ -220,8 +220,21 @@ namespace Libplanet.Net.Protocols
             {
                 await Task.WhenAll(tasks);
             }
-            catch (TimeoutException)
+            catch (AggregateException ae)
             {
+                foreach (var e in ae.InnerExceptions)
+                {
+                    // Handle the custom exception.
+                    if (e is TimeoutException)
+                    {
+                        _logger.Verbose($"FindPeerAsync() timed out. {e}");
+                    }
+                    // Rethrow any other exception.
+                    else
+                    {
+                        throw e;
+                    }
+                }
             }
         }
 

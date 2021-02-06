@@ -579,6 +579,15 @@ namespace Libplanet.Net
                         return new Message[0];
                     }
                 }
+                catch (AggregateException ae)
+                {
+                    foreach (var e in ae.InnerExceptions)
+                    {
+                        _logger.Error($"Error in SendMessageWithReply {e}");
+                        throw e;
+                    }
+                    throw;
+                }
                 catch (DifferentAppProtocolVersionException e)
                 {
                     const string logMsg =
@@ -756,10 +765,11 @@ namespace Libplanet.Net
                         {
                             try
                             {
-                                _logger.Debug($"Disposing dealer socket for peer {peer} after 5 consecutive failures ms: {sw.ElapsedMilliseconds}");
-                                dealer.Disconnect(ToNetMQAddress(peer));
-                                dealer.Close();
-                                dealer.Dispose();
+                                _logger.Debug($"Removing dealer socket for peer {peer} after 5 consecutive failures ms: {sw.ElapsedMilliseconds}");
+                                //dealer.Disconnect(ToNetMQAddress(peer));
+                                //dealer.Close();
+                                //netmq poller.remove gets upset if disposed here
+                                //dealer.Dispose();
                                 _dealers.TryRemove(peer.Address, out _);
                             }
                             catch (Exception)
@@ -1126,21 +1136,10 @@ namespace Libplanet.Net
                         if (!peerAddresses.Contains(address) &&
                             _dealers.TryGetValue(address, out DealerSocket removed))
                         {
-                            try
-                            {
-                                var peer = Peers.Where(p => p.Address == address).FirstOrDefault();
-                                if (peer != null)
-                                {
-                                    removed.Disconnect(ToNetMQAddress(peer));
-                                }                                
-                                removed.Close();
-                                removed.Dispose();
-                            }
-                            catch (Exception)
-                            {
-
-                                //swallow
-                            }                            
+                            _dealers.TryRemove(address, out DealerSocket _);
+                            //removed.Close();
+                            //if disposed netmq pooler isunhappy
+                            //removed.Dispose();                 
                         }
                     }
                 }

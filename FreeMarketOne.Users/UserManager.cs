@@ -683,7 +683,7 @@ namespace FreeMarketOne.Users
                 var bytesToSign = clone.ToByteArrayForSign();
                 clone.Signature = Convert.ToBase64String(PrivateKey.Sign(bytesToSign));
                 clone.Hash = clone.GenerateHash();
-                return review;
+                return clone;
             }
         }
     }

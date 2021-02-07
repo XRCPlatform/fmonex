@@ -300,6 +300,10 @@ namespace FreeMarketOne.Pools
 
         private bool ValidateSignature(IBaseItem actionItem)
         {
+            if (actionItem.Signature == null)
+            {
+                return false;
+            }
             var buyerPubKeys = UserPublicKey.Recover(actionItem.ToByteArrayForSign(), actionItem.Signature);
             return buyerPubKeys.Any();
         }

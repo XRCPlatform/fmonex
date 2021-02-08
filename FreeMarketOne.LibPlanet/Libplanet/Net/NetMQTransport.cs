@@ -747,13 +747,13 @@ namespace Libplanet.Net
                         }
                         _logger.Debug($"About to broadcast {msg} to : {peer}");
                         int retryCount = 1;
-                        bool success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(1), message);
+                        bool success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
 
                         while (!success && retryCount < 5)
                         {
                             _logger.Debug($"Broadcasting try # {retryCount} failed. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
                             retryCount++;
-                            success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(1), message);
+                            success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
                         }
 
                         if (success)

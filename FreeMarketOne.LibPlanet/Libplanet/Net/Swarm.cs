@@ -374,7 +374,7 @@ namespace Libplanet.Net
             {
                 tasks.Add(Transport.RunAsync(_cancellationToken));
                 tasks.Add(BroadcastTxAsync(broadcastTxInterval, _cancellationToken));
-                tasks.Add(ProcessFillBlocks(dialTimeout, trustedStateValidators, _cancellationToken));
+                tasks.Add(ProcessFillBlocks(TimeSpan.FromMinutes(10), trustedStateValidators, _cancellationToken));
                 tasks.Add(ProcessFillTxs(_cancellationToken));
                 _logger.Debug("Swarm started.");
 
@@ -1008,7 +1008,7 @@ namespace Libplanet.Net
             Message parsedMessage = await Transport.SendMessageWithReplyAsync(
                 peer,
                 request,
-                TimeSpan.FromMinutes(1),
+                TimeSpan.FromMinutes(10),
                 cancellationToken: cancellationToken
             );
 
@@ -1067,7 +1067,7 @@ namespace Libplanet.Net
             }
 
             TimeSpan blockRecvTimeout = Options.BlockRecvTimeout
-                                        + TimeSpan.FromSeconds(hashCount * 10);
+                                        + TimeSpan.FromSeconds(hashCount * 30);
             if (blockRecvTimeout > Options.MaxTimeout)
             {
                 blockRecvTimeout = Options.MaxTimeout;
@@ -1128,7 +1128,7 @@ namespace Libplanet.Net
 
             _logger.Debug("Required tx count: {Count}.", txCount);
 
-            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromSeconds(txCount * 10);
+            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromSeconds(txCount * 30);
             if (txRecvTimeout > Options.MaxTimeout)
             {
                 txRecvTimeout = Options.MaxTimeout;

@@ -1348,7 +1348,7 @@ namespace Libplanet.Net
 
             IEnumerable<Task<(BoundPeer, ChainStatus)>> tasks = peersExceptMe.Select(
                 peer => Transport.SendMessageWithReplyAsync(
-                    peer, new GetChainStatus(), dialTimeout, cancellationToken
+                    peer, new GetChainStatus(), TimeSpan.FromMinutes(5), cancellationToken
                 ).ContinueWith<(BoundPeer, ChainStatus)>(
                     t =>
                     {

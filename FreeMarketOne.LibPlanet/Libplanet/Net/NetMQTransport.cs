@@ -123,7 +123,7 @@ namespace Libplanet.Net
                     // tests
                     try
                     {
-                        var runtime = new NetMQRuntime();
+                        using var runtime = new NetMQRuntime();
                         var workerTasks = new Task[workers];
 
                         for (int i = 0; i < workers; i++)
@@ -522,8 +522,8 @@ namespace Libplanet.Net
             //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
             _logger.Debug($"About to start blocking calls to {peer} for {message}, timeout [{timeoutStr}]");
 
-            lock (string.Intern(peer.ToString()))
-            {
+            //lock (string.Intern(peer.ToString()))
+           // {
 
                 _logger.Debug($"Blocking calls to {peer} for {message}, timeout {timeout}, time to aquire lock ms:{sw.ElapsedMilliseconds}");
                 Guid reqId = Guid.NewGuid();
@@ -543,10 +543,10 @@ namespace Libplanet.Net
                     // FIXME should we also cancel tcs sender side too?
                     cancellationToken.Register(() => tcs.TrySetCanceled());
 
-                    _requests.AddAsync(
+                    await _requests.AddAsync(
                         new MessageRequest(reqId, message, peer, now, timeout, expectedResponses, tcs),
                         cancellationToken
-                    ).GetAwaiter().GetResult();
+                    );
 
                     _logger.Verbose(
                         "Enqueued a request {RequestId} to {PeerAddress}: {Message}; " +
@@ -559,7 +559,7 @@ namespace Libplanet.Net
 
                     if (expectedResponses > 0)
                     {
-                        var reply = (tcs.Task.ConfigureAwait(false).GetAwaiter().GetResult()).ToList();
+                        var reply = (await tcs.Task).ToList();
                         foreach (var msg in reply)
                         {
                             MessageHistory.Enqueue(msg);
@@ -627,7 +627,7 @@ namespace Libplanet.Net
                     _logger.Error(e, msg, reqId, peer.Address, e);
                     throw;
                 }
-            }
+            //}
         }
 
         public void BroadcastMessage(Address? except, Message message)
@@ -927,11 +927,7 @@ namespace Libplanet.Net
                 DateTimeOffset.UtcNow - req.RequestedTime);
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
 
-            if (!_dealers.TryGetValue(req.Peer.Address, out DealerSocket dealer))
-            {
-                dealer = new DealerSocket(ToNetMQAddress(req.Peer));
-                _dealers[req.Peer.Address] = dealer;
-            }
+            using var dealer = new DealerSocket(ToNetMQAddress(req.Peer));
 
             _logger.Debug(
                 "Trying to send {Message} to {Peer}...",

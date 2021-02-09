@@ -1320,7 +1320,10 @@ namespace Libplanet.Net
         private void BroadcastBlock(Address? except, Block<T> block)
         {
             _logger.Debug("Trying to broadcast blocks...");
-            var message = new BlockHeaderMessage(BlockChain.Genesis.Hash, block.GetBlockHeader());
+            //var message = new BlockHeaderMessage(BlockChain.Genesis.Hash, block.GetBlockHeader());
+            var enumerable = new List<byte[]>();
+            enumerable.Add(block.Serialize());
+            var message = new Messages.Blocks(enumerable, BlockChain.Genesis.Hash);
             BroadcastMessage(except, message);
             _logger.Debug("Block broadcasting complete.");
         }
@@ -1685,8 +1688,6 @@ namespace Libplanet.Net
 
         private void BroadcastTxIds(Address? except, IEnumerable<TxId> txIds)
         {
-            //var message = new TxIds(Address, txIds);
-
             IEnumerable<Transaction<T>> txs = txIds
                .Where(txId => _store.ContainsTransaction(txId))
                .Select(BlockChain.GetTransaction);
@@ -1696,9 +1697,6 @@ namespace Libplanet.Net
                 _logger.Debug($"Broadcasting to GetTxs {tx.Id} message.");
                 Message message = new Messages.Tx(tx.Serialize(true));
                 BroadcastMessage(except, message);
-                //{
-                //    Identity = getTxs.Identity,
-                //};      
             }            
         }
 
@@ -1955,6 +1953,50 @@ namespace Libplanet.Net
                     _store.DeleteChainId(id);
                 }
             }
+
+            return workspace;
+        }
+
+        private BlockChain<T> AcceptBlock(
+            BoundPeer peer,
+            BlockChain<T> blockChain,
+            Block<T> block,
+            CancellationToken cancellationToken
+        )
+        {
+            BlockChain<T> workspace = blockChain;
+            bool renderActions = true;
+            bool renderBlocks = true;
+            bool evaluateActions = true;
+            Block<T> tip = workspace?.Tip;
+
+            if (workspace != null && workspace.ContainsBlock(block.Hash))
+            {
+                _logger.Debug($"Already contains block #{block.Index} {block.Hash}, ignoring.");
+                return workspace;
+            }
+
+            if (tip.Index >= block.Index)
+            {
+                _logger.Debug($"Block index is lower than tip #{block.Index}<{tip.Index} {block.Hash}, ignoring.");
+                return workspace;
+            }
+
+            _logger.Debug($"Try to append a block #{block.Index} {block.Hash}...");
+            //who is informing of tip change event
+            workspace.Append(
+                block,
+                DateTimeOffset.UtcNow,
+                evaluateActions: evaluateActions,//FIXME:not yet sure what are these
+                renderBlocks: renderBlocks,//FIXME:not yet sure what are these
+                renderActions: renderActions//FIXME:not yet sure what are these
+            );
+
+            _logger.Debug(
+                "Block #{BlockIndex} {BlockHash} was appended.",
+                block.Index,
+                block.Hash
+            );
 
             return workspace;
         }

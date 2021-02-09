@@ -507,7 +507,8 @@ namespace Libplanet.Net.Protocols
             {
                 if (retryCount < 3)
                 {
-                    await ValidateAsync(peer, timeout, retryCount++, cancellationToken);
+                    retryCount++;
+                    await ValidateAsync(peer, timeout, retryCount, cancellationToken);
                 }
                 else
                 {

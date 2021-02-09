@@ -86,6 +86,10 @@ namespace Libplanet.Net
                     TransferTxs(getTxs);
                     break;
 
+                case Messages.Tx transaction:
+                    ReceiveTransactionBroadcast(transaction);
+                    break;
+
                 case TxIds txIds:
                     ProcessTxIds(txIds);
                     break;
@@ -111,6 +115,38 @@ namespace Libplanet.Net
                         message
                     );
             }
+        }
+
+        private void ReceiveTransactionBroadcast(Messages.Tx message)
+        {
+            if (message is Messages.Tx parsed)
+            {
+                Transaction<T> tx = Transaction<T>.Deserialize(parsed.Payload);
+                bool valid = BlockChain.Policy.DoesTransactionFollowsPolicy(tx, BlockChain);
+                if (valid)
+                {
+                    try
+                    {
+                        BlockChain.StageTransaction(tx);
+                        TxReceived.Set();
+                        _logger.Debug($"Txs staged successfully: {tx.Id}");
+                        // FIXME: Should exclude peers of source of the transaction ids.
+                        BroadcastMessage(message.Remote.Address, message);
+                    }
+                    catch (InvalidTxException ite)
+                    {
+                        _logger.Error(ite,"{TxId} will not be staged since it is invalid.", tx.Id);
+                    }
+                }
+            }
+            else
+            {
+                string errorMessage =
+                    $"Expected {nameof(Tx)} messages as response of " +
+                    $"the {nameof(GetTxs)} message, but got a {message.GetType().Name} " +
+                    $"message instead: {message}";
+                throw new InvalidMessageException(errorMessage, message);
+            }           
         }
 
         private void TransferBlockStates(GetBlockStates getBlockStates)

@@ -1685,8 +1685,21 @@ namespace Libplanet.Net
 
         private void BroadcastTxIds(Address? except, IEnumerable<TxId> txIds)
         {
-            var message = new TxIds(Address, txIds);
-            BroadcastMessage(except, message);
+            //var message = new TxIds(Address, txIds);
+
+            IEnumerable<Transaction<T>> txs = txIds
+               .Where(txId => _store.ContainsTransaction(txId))
+               .Select(BlockChain.GetTransaction);
+
+            foreach (Transaction<T> tx in txs)
+            {
+                _logger.Debug($"Broadcasting to GetTxs {tx.Id} message.");
+                Message message = new Messages.Tx(tx.Serialize(true));
+                BroadcastMessage(except, message);
+                //{
+                //    Identity = getTxs.Identity,
+                //};      
+            }            
         }
 
         private bool IsDemandNeeded(BlockHeader target)

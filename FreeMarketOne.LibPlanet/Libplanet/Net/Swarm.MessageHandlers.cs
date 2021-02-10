@@ -91,8 +91,15 @@ namespace Libplanet.Net
                     break;
                 
                 case Messages.Blocks blocks:
-                    var task = Task.Run(async () => await ProcessBlock(blocks, _cancellationToken)); 
-                    task.Wait();
+                    var task = Task.Run(async () => await ProcessBlock(blocks, _cancellationToken));
+                    try
+                    {
+                        task.Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error($"Processing received {nameof(blocks)} message, completed with error {e}.");
+                    }                    
                     break;
 
                 case TxIds txIds:
@@ -309,22 +316,46 @@ namespace Libplanet.Net
                     }
                     
                     long prevTip = BlockChain.Tip.Index;
-
-                    //if possible block will be appended here
-                    var chain = AcceptBlock(peer, BlockChain, block, cancellationToken);
-                    //if block appended things are simple!
-                    if (prevTip < chain.Tip.Index)
+                    
+                    if (prevTip == block.Index)
                     {
-                        BlockReceived.Set();
-                        BlockAppended.Set();
+                        //received re-broadcast
+                        if (BlockChain.Tip.Hash.Equals(block.Hash))
+                        {
+                            _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are same tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block");
+                            //should not broadcast as broadcasts will loop and never stop
+                        }
+                        else
+                        {
+                            _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are different  tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block, chain was split and will need re-org.");
+                            //broadcast as chain was split and will need re-org
+                            //BroadcastBlock(peer.Address, block);
+                        }
+                        return;
+                    }
+                    //single block gap try accept simply
+                    long gap = block.Index - prevTip;
+                    if (gap == 1)
+                    {
+                        _logger.Information($"Accepting a received header #{block.Index} { block.Hash } tip before this message {prevTip}");
+                        //if possible block will be appended here
+                        var chain = AcceptBlock(peer, BlockChain, block, cancellationToken);
                         BroadcastBlock(peer.Address, BlockChain.Tip);
                     }
-                    else
+                    else if (gap > 1)
                     {
+                        _logger.Information($"Found chain gap #{gap} larger than single block, tip before this message {prevTip}, a received header #{block.Index} { block.Hash } discarding received and starting SyncPreviousBlocksAsync");
                         //if there is a GAP then go for a long download of previous blocks
                         try
                         {
-                            await SyncPreviousBlocksAsync(BlockChain, peer, block.Hash, null, null, null, 0, cancellationToken);
+                            await SyncPreviousBlocksAsync(BlockChain, 
+                                peer, 
+                                block.Hash, 
+                                null, 
+                                ImmutableHashSet<Address>.Empty, 
+                                null, 
+                                0, 
+                                cancellationToken);
 
                             // FIXME: Clean up events
                             BlockReceived.Set();

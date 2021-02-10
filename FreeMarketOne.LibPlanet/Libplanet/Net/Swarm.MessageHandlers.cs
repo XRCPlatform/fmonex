@@ -337,9 +337,33 @@ namespace Libplanet.Net
                     long gap = block.Index - prevTip;
                     if (gap == 1)
                     {
-                        _logger.Information($"Accepting a received header #{block.Index} { block.Hash } tip before this message {prevTip}");
+                        _logger.Information($"Accepting a received block #{block.Index} { block.Hash } tip before this message {prevTip}");
                         //if possible block will be appended here
-                        var chain = AcceptBlock(peer, BlockChain, block, cancellationToken);
+                        try
+                        {
+                            var chain = AcceptBlock(peer, BlockChain, block, cancellationToken);
+                        }
+                        catch (InvalidBlockPreviousHashException iph)
+                        {
+
+                            _logger.Error(iph, $"Failed to append a received block #{block.Index} { block.Hash } tip before this message {prevTip}. Error {iph}");
+
+                            _logger.Information($"Starting SyncPreviousBlocksAsync due to InvalidBlockPreviousHashException to resolve fork.");
+                            await SyncPreviousBlocksAsync(BlockChain,
+                                peer,
+                                block.Hash,
+                                null,
+                                ImmutableHashSet<Address>.Empty,
+                                null,
+                                0,
+                                cancellationToken);
+
+                            // FIXME: Clean up events
+                            BlockReceived.Set();
+                            BlockAppended.Set();
+                            BroadcastBlock(peer.Address, BlockChain.Tip);
+                        }
+                        
                         BroadcastBlock(peer.Address, BlockChain.Tip);
                     }
                     else if (gap > 1)

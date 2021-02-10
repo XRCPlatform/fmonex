@@ -8,6 +8,8 @@ using Libplanet.Extensions;
 using Newtonsoft.Json;
 using System.Linq;
 using FreeMarketOne.Extensions.Common;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace P2PPayloadGenerator
 {
@@ -29,8 +31,16 @@ namespace P2PPayloadGenerator
         {
             Current = FreeMarketOneServer.Current;
 
+            var task = Task.Factory.StartNew(()=> Current.Initialize(password));
+            try
+            {
+                task.Wait();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
            
-            Current.Initialize(password);
 
             //let events and service start up
             Thread.Sleep(10000);
@@ -52,12 +62,22 @@ namespace P2PPayloadGenerator
 
             while (Current.MarketBlockChainManager.SwarmServer.Peers.Count() < 1 || Current.BaseBlockChainManager.SwarmServer.Peers.Count() < 1 && counter < 1000)
             {
-                if (counter == 1)
+                if (counter == 0)
                 {
-                    //Current.OnionSeedsManager.Start();
                     Current.OnionSeedsManager.MarketSwarm = Current.MarketBlockChainManager.SwarmServer;
                     Current.OnionSeedsManager.BaseSwarm = Current.BaseBlockChainManager.SwarmServer;
-                    Current.OnionSeedsManager.Start();
+                    var task1 = Task.Factory.StartNew(() =>
+                        Current.OnionSeedsManager.Start()
+                    );
+                    try
+                    {
+                        task1.Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    
                     //Current.OnionSeedsManager.MarketSwarm.BootstrapAsync(Current.OnionSeedsManager.OnionSeedPeers.,1000000, 10000, 1, null).ConfigureAwait(false).GetAwaiter().GetResult();
 
 
@@ -77,10 +97,14 @@ namespace P2PPayloadGenerator
             {
                 Console.WriteLine(boundPeer.ToString());
             }
+            List<Task> tasks = new List<Task>();
+            tasks.Add(Task.Factory.StartNew(async () => await Current.BaseBlockChainManager.PullRemoteChainDifferences()));
+            tasks.Add(Task.Factory.StartNew(async () => await Current.MarketBlockChainManager.PullRemoteChainDifferences()));
+            Task.WaitAll(tasks.ToArray());
 
             while (Current.MarketBlockChainManager.BlockChain.Tip.Index <= 2 & Current.BaseBlockChainManager.BlockChain.Tip.Index <= 2)
             {
-                Thread.Sleep(10000);
+             Thread.Sleep(10000);
             }
             Console.WriteLine("Ready to start generating. Press any key to confirm.");
             Console.ReadKey();
@@ -139,7 +163,7 @@ namespace P2PPayloadGenerator
             {
                 UserDataV1 user = new UserDataV1()
                 {
-                    UserName = "TestUser - A[" + i +"]",
+                    UserName = "TestUser - B[" + i +"]",
                     CreatedUtc = DateTime.UtcNow,
                     Description = "The axis of rotation of the Solar System makes a large angle of about 60 degrees relative to the axis of rotation of the Milky Way. " +
                     "That seems unusual - for example, most of the bodies within the Solar Sytem are better behaved than that. Do most stars or planetary systems " +

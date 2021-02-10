@@ -874,7 +874,8 @@ namespace Libplanet.Net
             while (!cancellationToken.IsCancellationRequested)
             {
                 _logger.Verbose("Waiting for a new request...");
-                MessageRequest req = await _requests.TakeAsync(cancellationToken);
+                //sych context deadlocking try configure await false
+                MessageRequest req = _requests.Take(cancellationToken);
                 Interlocked.Decrement(ref _requestCount);
                 _logger.Debug(
                     "Request taken. {Count} requests are left.",

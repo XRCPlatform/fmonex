@@ -206,8 +206,8 @@ namespace FreeMarketOne.P2P
                     List<Task> tasks = new List<Task>();
                     foreach (var itemSeedPeer in OnionSeedPeers)
                     {
-                        tasks.Add(AddSeedsToBaseSwarmAsPeer(itemSeedPeer));
-                        tasks.Add(AddSeedsToMarketSwarmAsPeer(itemSeedPeer));
+                        tasks.Add(Task.Factory.StartNew(()=> AddSeedsToBaseSwarmAsPeer(itemSeedPeer)));
+                        tasks.Add(Task.Factory.StartNew(()=> AddSeedsToMarketSwarmAsPeer(itemSeedPeer)));
                     }
                     try
                     {

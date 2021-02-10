@@ -1978,12 +1978,12 @@ namespace Libplanet.Net
 
             if (tip.Index >= block.Index)
             {
-                _logger.Debug($"Block index is lower than tip #{block.Index}<{tip.Index} {block.Hash}, ignoring.");
+                _logger.Debug($"Block index is equal or lower than tip #{block.Index}<{tip.Index} {block.Hash}, ignoring.");
                 return workspace;
             }
 
-            _logger.Debug($"Try to append a block #{block.Index} {block.Hash}...");
-            //who is informing of tip change event
+            _logger.Debug($"Trying to append a block #{block.Index} {block.Hash}...");
+            
             workspace.Append(
                 block,
                 DateTimeOffset.UtcNow,
@@ -1992,11 +1992,10 @@ namespace Libplanet.Net
                 renderActions: renderActions//FIXME:not yet sure what are these
             );
 
-            _logger.Debug(
-                "Block #{BlockIndex} {BlockHash} was appended.",
-                block.Index,
-                block.Hash
-            );
+            BlockReceived.Set();
+            BlockAppended.Set();
+
+            _logger.Debug($"Block #{block.Index} {block.Hash} was appended.");
 
             return workspace;
         }

@@ -61,8 +61,9 @@ namespace Libplanet.Net
 
         private TaskCompletionSource<object> _runningEvent;
         private CancellationToken _cancellationToken;
-        private ConcurrentDictionary<Address, DealerSocket> _dealers;
 
+        private List<PooledDealerSocket> _dealerSocketConnectionPool;
+        private readonly object poolLock = new object();
         /// <summary>
         /// The <see cref="EventHandler" /> triggered when the different version of
         /// <see cref="Peer" /> is discovered.
@@ -165,7 +166,7 @@ namespace Libplanet.Net
                 _logger,
                 tableSize,
                 bucketSize);
-            _dealers = new ConcurrentDictionary<Address, DealerSocket>();
+            _dealerSocketConnectionPool = new List<PooledDealerSocket>();
         }
 
         /// <summary>
@@ -301,12 +302,12 @@ namespace Libplanet.Net
                 _router.Dispose();
                 _turnClient?.Dispose();
 
-                foreach (DealerSocket dealer in _dealers.Values)
+                foreach (var dealer in _dealerSocketConnectionPool)
                 {
                     dealer.Dispose();
                 }
 
-                _dealers.Clear();
+                _dealerSocketConnectionPool.Clear();
 
                 Running = false;
             }
@@ -740,43 +741,32 @@ namespace Libplanet.Net
                 {
                     if (peer.EndPoint.Port == _listenPort)
                     {
-                        if (!_dealers.TryGetValue(peer.Address, out DealerSocket dealer))
-                        {
-                            dealer = new DealerSocket(ToNetMQAddress(peer));
-                            _dealers[peer.Address] = dealer;
-                        }
                         _logger.Debug($"About to broadcast {msg} to : {peer}");
+                        PooledDealerSocket pooledDealerSocket = RentDealerSocket(peer, false);
                         int retryCount = 1;
-                        bool success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
+                        bool success = pooledDealerSocket.Socket.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
 
                         while (!success && retryCount < 5)
                         {
                             _logger.Debug($"Broadcasting try # {retryCount} failed. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
                             retryCount++;
-                            success = dealer.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
+                            success = pooledDealerSocket.Socket.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
                         }
 
                         if (success)
                         {
                             sw.Stop();
+                            pooledDealerSocket.Return();
                             _logger.Debug($"Broadcasting try # {retryCount} succeeded. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
                         }
                         else
                         {
-                            try
+                            _logger.Debug($"Removing dealer socket for peer {peer} after 5 consecutive failures ms: {sw.ElapsedMilliseconds}");
+                            //netmq poller.remove gets upset if disposed here
+                            if (pooledDealerSocket.KillIfUnhealthy())
                             {
-                                _logger.Debug($"Removing dealer socket for peer {peer} after 5 consecutive failures ms: {sw.ElapsedMilliseconds}");
-                                //dealer.Disconnect(ToNetMQAddress(peer));
-                                //dealer.Close();
-                                //netmq poller.remove gets upset if disposed here
-                                //dealer.Dispose();
-                                _dealers.TryRemove(peer.Address, out _);
+                                RemoveDealerSocket(pooledDealerSocket, false);
                             }
-                            catch (Exception)
-                            {
-                                //swallow
-                            }
-                           
                         }
                     }
                 }
@@ -786,6 +776,58 @@ namespace Libplanet.Net
                 _logger.Error(exc, $"Unexpected error occurred during {nameof(DoBroadcast)}(). {exc}");
                 throw;
             }
+        }
+
+        private void RemoveDealerSocket(PooledDealerSocket pooledDealerSocket, bool dispose = true)
+        {
+            lock (poolLock)
+            {
+                _dealerSocketConnectionPool.Remove(pooledDealerSocket);
+                if (dispose)
+                {
+                    pooledDealerSocket.Dispose();
+                }
+            }
+        }
+
+        private PooledDealerSocket RentDealerSocket(BoundPeer peer, bool exclusive)
+        {
+            PooledDealerSocket poolItem;
+            lock (poolLock)
+            {
+                int acceptableRentsCount = 5;
+                if (exclusive)
+                {
+                    acceptableRentsCount = 0;
+                }
+                //using list instead of dictionary so that we can hold more than 1 socket open for the address for concurency
+                var candidates = _dealerSocketConnectionPool
+                    .Where(
+                        sw => sw.Address.Equals(peer.Address)  
+                        && sw.ActiveRents < acceptableRentsCount
+                        && sw.Available
+                    )
+                    .OrderBy(sw => sw.ActiveRents);//lowest utilisations first
+                
+                _logger.Information($"Found available pooled socket candidates #{candidates?.Count()} out of total {_dealerSocketConnectionPool.Count}");
+
+                poolItem = candidates.FirstOrDefault();
+
+                if (poolItem == null)
+                {
+                     poolItem = new PooledDealerSocket(peer.Address, new DealerSocket(ToNetMQAddress(peer)));
+                     poolItem.Rent(exclusive);
+                    _dealerSocketConnectionPool.Add(poolItem);
+                    _logger.Verbose($"Built new PooledDealerSocket for {peer.Address}");
+                }
+                else
+                {
+                    poolItem.Rent(exclusive);
+                }
+                _logger.Verbose($"Rented pooled dealer socket for {peer.Address} with TotalRents #{poolItem.TotalRents} shared exclusively {poolItem.Exclusive} socket created at {poolItem.TimeCreated}");
+            }
+
+            return poolItem;
         }
 
         private void DoReply(object sender, NetMQQueueEventArgs<NetMQMessage> e)
@@ -874,12 +916,8 @@ namespace Libplanet.Net
             while (!cancellationToken.IsCancellationRequested)
             {
                 _logger.Verbose("Waiting for a new request...");
-                //sych context deadlocking try configure await false
-                MessageRequest req = _requests.Take(cancellationToken);
-                Interlocked.Decrement(ref _requestCount);
-                _logger.Debug(
-                    "Request taken. {Count} requests are left.",
-                    Interlocked.Read(ref _requestCount));
+                MessageRequest req = await _requests.TakeAsync(cancellationToken);
+                _logger.Debug($"Request taken. {Interlocked.Decrement(ref _requestCount)} requests are left.");
 
                 try
                 {
@@ -918,7 +956,7 @@ namespace Libplanet.Net
                 }
             }
         }
-
+        
         private async Task ProcessRequest(MessageRequest req, CancellationToken cancellationToken)
         {
             _logger.Verbose(
@@ -927,51 +965,45 @@ namespace Libplanet.Net
                 req.Id,
                 DateTimeOffset.UtcNow - req.RequestedTime);
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
+            
+            PooledDealerSocket pooledDealerSocket = RentDealerSocket(req.Peer, true);
 
-            using var dealer = new DealerSocket(ToNetMQAddress(req.Peer));
-
-            _logger.Debug(
-                "Trying to send {Message} to {Peer}...",
-                req.Message,
-                req.Peer
-            );
+            _logger.Debug($"Trying to send {req.Message} to {req.Peer}...");
             var message = req.Message.ToNetMQMessage(_privateKey, AsPeer, _appProtocolVersion);
             var result = new List<Message>();
             TaskCompletionSource<IEnumerable<Message>> tcs = req.TaskCompletionSource;
             try
             {
-                await dealer.SendMultipartMessageAsync(
+                await pooledDealerSocket.Socket.SendMultipartMessageAsync(
                     message,
                     timeout: req.Timeout,
                     cancellationToken: cancellationToken
                 );
 
-                _logger.Debug("A message {Message} sent.", req.Message);
+                _logger.Debug($"A message {req.Message} sent.");
 
                 foreach (var i in Enumerable.Range(0, req.ExpectedResponses))
                 {
-                    NetMQMessage raw = await dealer.ReceiveMultipartMessageAsync(
+                    NetMQMessage raw = await pooledDealerSocket.Socket.ReceiveMultipartMessageAsync(
                         timeout: req.Timeout,
                         cancellationToken: cancellationToken
                     );
-                    _logger.Verbose(
-                        "A raw message ({FrameCount} frames) has replied.",
-                        raw.FrameCount
-                    );
+
+                    _logger.Verbose($"A raw message ({raw.FrameCount} frames) has replied.");
+
                     Message reply = Message.Parse(
                         raw,
                         true,
                         _appProtocolVersion,
                         _trustedAppProtocolVersionSigners,
                         _differentAppProtocolVersionEncountered);
-                    _logger.Debug(
-                        "A reply has parsed: {Reply} from {ReplyRemote}",
-                        reply,
-                        reply.Remote
-                    );
+                    
+                    _logger.Debug($"A reply has parsed: {reply} from { reply.Remote}");
 
                     result.Add(reply);
                 }
+                
+                pooledDealerSocket.Return();
 
                 if (req.ExpectedResponses > 0)
                 {
@@ -986,6 +1018,10 @@ namespace Libplanet.Net
             }
             catch (TimeoutException te)
             {
+                if (pooledDealerSocket.KillIfUnhealthy())
+                {
+                    RemoveDealerSocket(pooledDealerSocket, false);
+                }
                 tcs.TrySetException(te);
             }
 
@@ -1125,20 +1161,6 @@ namespace Libplanet.Net
                     await Task.Delay(period, cancellationToken);
                     await Protocol.RefreshTableAsync(maxAge, cancellationToken);
                     await Protocol.CheckReplacementCacheAsync(cancellationToken);
-
-                    ImmutableHashSet<Address> peerAddresses =
-                        Peers.Select(p => p.Address).ToImmutableHashSet();
-                    foreach (var address in _dealers.Keys)
-                    {
-                        if (!peerAddresses.Contains(address) &&
-                            _dealers.TryGetValue(address, out DealerSocket removed))
-                        {
-                            _dealers.TryRemove(address, out DealerSocket _);
-                            //removed.Close();
-                            //if disposed netmq pooler isunhappy
-                            //removed.Dispose();                 
-                        }
-                    }
                 }
                 catch (OperationCanceledException e)
                 {

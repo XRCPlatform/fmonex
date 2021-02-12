@@ -19,11 +19,14 @@ namespace Libplanet.Net
         }
 
         public DateTime TimeCreated { get; }
+        public DateTime TimeLastRented { get; private set; }
         public Address Address { get; }
         public bool Exclusive { get; private set; }        
         public long ActiveRents { get => Interlocked.Read( ref activeRents); }
         public long TotalRents { get => Interlocked.Read(ref totalRents); }  
         public bool Available { get => available; }
+        
+        private bool rented = false;
 
         private readonly object rentAvaliabilityLock = new object();
         internal DealerSocket Socket { get; }
@@ -41,7 +44,11 @@ namespace Libplanet.Net
                 {
                     available = false;
                     Exclusive = exclusive;
-                }               
+                }
+
+                rented = true;
+                TimeLastRented = DateTime.Now;
+
             }
             Interlocked.Increment(ref activeRents);
             Interlocked.Increment(ref totalRents);
@@ -53,11 +60,14 @@ namespace Libplanet.Net
         {
             lock (rentAvaliabilityLock)
             {
-                available = true;
-                Exclusive = false;
-                Interlocked.Exchange(ref timeouts, 0L);
-            }
-            Interlocked.Decrement(ref activeRents);
+                if (rented)//only reset if was in rented state, if double called will
+                {
+                    available = true;
+                    Exclusive = false;
+                    Interlocked.Exchange(ref timeouts, 0L);
+                    Interlocked.Decrement(ref activeRents);
+                }               
+            }            
         }
 
         public void Dispose()

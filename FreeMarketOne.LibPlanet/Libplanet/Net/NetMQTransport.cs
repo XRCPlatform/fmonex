@@ -798,7 +798,7 @@ namespace Libplanet.Net
                 int acceptableRentsCount = 5;
                 if (exclusive)
                 {
-                    acceptableRentsCount = 0;
+                    acceptableRentsCount = 1;
                 }
                 //using list instead of dictionary so that we can hold more than 1 socket open for the address for concurency
                 var candidates = _dealerSocketConnectionPool
@@ -1002,8 +1002,6 @@ namespace Libplanet.Net
 
                     result.Add(reply);
                 }
-                
-                pooledDealerSocket.Return();
 
                 if (req.ExpectedResponses > 0)
                 {
@@ -1023,6 +1021,10 @@ namespace Libplanet.Net
                     RemoveDealerSocket(pooledDealerSocket, false);
                 }
                 tcs.TrySetException(te);
+            }
+            finally
+            {
+                pooledDealerSocket.Return();
             }
 
             _logger.Verbose(

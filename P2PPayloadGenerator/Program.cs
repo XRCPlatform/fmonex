@@ -10,6 +10,7 @@ using System.Linq;
 using FreeMarketOne.Extensions.Common;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using FreeMarketOne.Pools;
 
 namespace P2PPayloadGenerator
 {
@@ -148,8 +149,24 @@ namespace P2PPayloadGenerator
                 if (errors.HasValue)
                 {
                     Console.WriteLine(errors.ToString());
+                    if (errors.Value.Equals(PoolManagerStates.Errors.NoMinimalPeer))
+                    {
+                        Current.OnionSeedsManager.MarketSwarm = Current.MarketBlockChainManager.SwarmServer;
+                        Current.OnionSeedsManager.BaseSwarm = Current.BaseBlockChainManager.SwarmServer;
+                        var task1 = Task.Factory.StartNew(() =>
+                            Current.OnionSeedsManager.Start()
+                        );
+                        try
+                        {
+                            task1.Wait();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
                 }
-                               
+                
 
                 Thread.Sleep(sleepTime);
             }

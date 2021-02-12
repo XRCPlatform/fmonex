@@ -711,6 +711,16 @@ namespace Libplanet.Net
                 {
                     _logger.Error(ex, $"Could not parse NetMQMessage properly; ignore: {{0}}", ex);
                 }
+                catch (FormatException ex)
+                {
+                    NetMQFrame[] remains =  raw.ToArray();
+
+                    var versionToken = remains[0].ConvertToString();
+
+                    AppProtocolVersion remoteVersion = AppProtocolVersion.FromToken(versionToken);
+
+                    _logger.Error(ex, $"Could not parse NetMQMessage properly; versionToken:[{versionToken}] raw:[{raw}]  error:{ex} ");
+                }
                 catch (Exception ex)
                 {
                     const string mname = nameof(ReceiveMessage);

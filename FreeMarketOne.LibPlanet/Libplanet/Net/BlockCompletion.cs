@@ -29,7 +29,7 @@ namespace Libplanet.Net
 
         public BlockCompletion(
             Func<HashDigest<SHA256>, bool> completionPredicate = null,
-            int window = 100
+            int window = 10
         )
         {
             _logger = Log.ForContext<BlockCompletion<TPeer, TAction>>();

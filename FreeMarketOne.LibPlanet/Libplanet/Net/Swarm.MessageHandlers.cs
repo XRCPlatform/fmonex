@@ -361,7 +361,6 @@ namespace Libplanet.Net
                             // FIXME: Clean up events
                             BlockReceived.Set();
                             BlockAppended.Set();
-                            BroadcastBlock(peer.Address, BlockChain.Tip);
                         }
                         
                         BroadcastBlock(peer.Address, BlockChain.Tip);

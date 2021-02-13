@@ -15,6 +15,10 @@ namespace Libplanet.Net
         {
             Address = address;
             Socket = socket;
+            Socket.Options.DelayAttachOnConnect = true;
+            Socket.Options.TcpKeepalive = true;
+            Socket.Options.TcpKeepaliveIdle = TimeSpan.FromMinutes(10);
+            Socket.Options.TcpKeepaliveInterval = TimeSpan.FromMinutes(1);
             TimeCreated = DateTime.Now;
         }
 

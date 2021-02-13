@@ -715,9 +715,7 @@ namespace Libplanet.Net
                 {
                     NetMQFrame[] remains =  raw.ToArray();
 
-                    var versionToken = remains[0].ConvertToString();
-
-                    AppProtocolVersion remoteVersion = AppProtocolVersion.FromToken(versionToken);
+                    var versionToken = remains[0].ConvertToString();                    
 
                     _logger.Error(ex, $"Could not parse NetMQMessage properly; versionToken:[{versionToken}] raw:[{raw}]  error:{ex} ");
                 }
@@ -816,7 +814,7 @@ namespace Libplanet.Net
                         sw => sw.Address.Equals(peer.Address)  
                         && sw.ActiveRents < acceptableRentsCount
                         && sw.Available
-                    )
+                         )
                     .OrderBy(sw => sw.ActiveRents);//lowest utilisations first
                 
                 _logger.Information($"Found available pooled socket candidates #{candidates?.Count()} out of total {_dealerSocketConnectionPool.Count}");
@@ -829,6 +827,7 @@ namespace Libplanet.Net
                      poolItem.Rent(exclusive);
                     _dealerSocketConnectionPool.Add(poolItem);
                     _logger.Verbose($"Built new PooledDealerSocket for {peer.Address}");
+
                 }
                 else
                 {

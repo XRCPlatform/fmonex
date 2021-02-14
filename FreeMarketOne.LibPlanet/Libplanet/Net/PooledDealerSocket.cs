@@ -1,5 +1,6 @@
 ﻿using NetMQ.Sockets;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Libplanet.Net
@@ -16,9 +17,13 @@ namespace Libplanet.Net
             Address = address;
             Socket = socket;
             Socket.Options.DelayAttachOnConnect = true;
-            Socket.Options.TcpKeepalive = true;
-            Socket.Options.TcpKeepaliveIdle = TimeSpan.FromMinutes(10);
-            Socket.Options.TcpKeepaliveInterval = TimeSpan.FromMinutes(1);
+            //these are only awailable on windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Socket.Options.TcpKeepalive = true;
+                Socket.Options.TcpKeepaliveIdle = TimeSpan.FromMinutes(10);
+                Socket.Options.TcpKeepaliveInterval = TimeSpan.FromMinutes(1);
+            }
             TimeCreated = DateTime.Now;
         }
 

@@ -231,6 +231,7 @@ namespace Libplanet.Net.Messages
                 { MessageType.GetBlockStates, typeof(GetBlockStates) },
                 { MessageType.BlockStates, typeof(BlockStates) },
                 { MessageType.DifferentVersion, typeof(DifferentVersion) },
+                { MessageType.BlockBroadcast, typeof(BlockBroadcast) },
             };
 
             if (!types.TryGetValue(rawType, out Type type))

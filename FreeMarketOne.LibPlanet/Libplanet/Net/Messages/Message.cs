@@ -120,6 +120,10 @@ namespace Libplanet.Net.Messages
             //but must not clash with Blocks message as 
             //Blocks is a response to request and clash on routing.
             BlockBroadcast = 0x31,
+
+            //Used to announce new staged transaction to nework similar to Tx
+            //but must not clash with Tx as message Tx is a response object and break routing. 
+            TxBroadcast = 0x32,
         }
 
         private enum MessageFrame
@@ -232,6 +236,7 @@ namespace Libplanet.Net.Messages
                 { MessageType.BlockStates, typeof(BlockStates) },
                 { MessageType.DifferentVersion, typeof(DifferentVersion) },
                 { MessageType.BlockBroadcast, typeof(BlockBroadcast) },
+                { MessageType.TxBroadcast, typeof(TxBroadcast) },
             };
 
             if (!types.TryGetValue(rawType, out Type type))

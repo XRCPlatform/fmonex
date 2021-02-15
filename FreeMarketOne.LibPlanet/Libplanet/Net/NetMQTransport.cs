@@ -21,7 +21,7 @@ namespace Libplanet.Net
 {
     internal class NetMQTransport : ITransport
     {
-        private const int MessageHistoryCapacity = 3000;
+        private const int MessageHistoryCapacity = 300;
 
         private static readonly TimeSpan TurnAllocationLifetime =
             TimeSpan.FromSeconds(777);
@@ -61,14 +61,14 @@ namespace Libplanet.Net
 
         private TaskCompletionSource<object> _runningEvent;
         private CancellationToken _cancellationToken;
+        private NetmqConnectionPool _netmqConnectionPool;
 
-        private List<PooledDealerSocket> _dealerSocketConnectionPool;
-        private readonly object poolLock = new object();
         /// <summary>
         /// The <see cref="EventHandler" /> triggered when the different version of
         /// <see cref="Peer" /> is discovered.
         /// </summary>
         private DifferentAppProtocolVersionEncountered _differentAppProtocolVersionEncountered;
+        private int findConcurrency = 3;
 
         public NetMQTransport(
             PrivateKey privateKey,
@@ -157,6 +157,8 @@ namespace Libplanet.Net
             );
 
             MessageHistory = new FixedSizedQueue<Message>(MessageHistoryCapacity);
+            _netmqConnectionPool = new NetmqConnectionPool(_logger, socks5Proxy);
+
             Protocol = new KademliaProtocol(
                 this,
                 _privateKey.ToAddress(),
@@ -165,8 +167,11 @@ namespace Libplanet.Net
                 _differentAppProtocolVersionEncountered,
                 _logger,
                 tableSize,
-                bucketSize);
-            _dealerSocketConnectionPool = new List<PooledDealerSocket>();
+                bucketSize,
+                findConcurrency,
+                null,
+                _netmqConnectionPool);
+            
         }
 
         /// <summary>
@@ -209,7 +214,6 @@ namespace Libplanet.Net
         }
 
         internal IProtocol Protocol { get; }
-
         internal FixedSizedQueue<Message> MessageHistory { get; }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -301,14 +305,7 @@ namespace Libplanet.Net
                 _replyQueue.Dispose();
                 _router.Dispose();
                 _turnClient?.Dispose();
-
-                foreach (var dealer in _dealerSocketConnectionPool)
-                {
-                    dealer.Dispose();
-                }
-
-                _dealerSocketConnectionPool.Clear();
-
+                _netmqConnectionPool.ShutDown();
                 Running = false;
             }
         }
@@ -749,7 +746,7 @@ namespace Libplanet.Net
                     if (peer.EndPoint.Port == _listenPort)
                     {
                         _logger.Debug($"About to broadcast {msg} to : {peer}");
-                        PooledDealerSocket pooledDealerSocket = RentDealerSocket(peer, false);
+                        PooledDealerSocket pooledDealerSocket = _netmqConnectionPool.RentDealerSocket(peer, false);
                         int retryCount = 1;
                         bool success = pooledDealerSocket.Socket.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
 
@@ -763,17 +760,15 @@ namespace Libplanet.Net
                         if (success)
                         {
                             sw.Stop();
-                            pooledDealerSocket.Return();
+                            _netmqConnectionPool.Return(pooledDealerSocket);
                             _logger.Debug($"Broadcasting try # {retryCount} succeeded. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
                         }
                         else
                         {
                             _logger.Debug($"Removing dealer socket for peer {peer} after 5 consecutive failures ms: {sw.ElapsedMilliseconds}");
                             //netmq poller.remove gets upset if disposed here
-                            if (pooledDealerSocket.KillIfUnhealthy())
-                            {
-                                RemoveDealerSocket(pooledDealerSocket, false);
-                            }
+                            _netmqConnectionPool.KillIfUnhealthy(pooledDealerSocket);
+
                         }
                     }
                 }
@@ -785,58 +780,7 @@ namespace Libplanet.Net
             }
         }
 
-        private void RemoveDealerSocket(PooledDealerSocket pooledDealerSocket, bool dispose = true)
-        {
-            lock (poolLock)
-            {
-                _dealerSocketConnectionPool.Remove(pooledDealerSocket);
-                if (dispose)
-                {
-                    pooledDealerSocket.Dispose();
-                }
-            }
-        }
-
-        private PooledDealerSocket RentDealerSocket(BoundPeer peer, bool exclusive)
-        {
-            PooledDealerSocket poolItem;
-            lock (poolLock)
-            {
-                int acceptableRentsCount = 5;
-                if (exclusive)
-                {
-                    acceptableRentsCount = 1;
-                }
-                //using list instead of dictionary so that we can hold more than 1 socket open for the address for concurency
-                var candidates = _dealerSocketConnectionPool
-                    .Where(
-                        sw => sw.Address.Equals(peer.Address)  
-                        && sw.ActiveRents < acceptableRentsCount
-                        && sw.Available
-                         )
-                    .OrderBy(sw => sw.ActiveRents);//lowest utilisations first
-                
-                _logger.Information($"Found available pooled socket candidates #{candidates?.Count()} out of total {_dealerSocketConnectionPool.Count}");
-
-                poolItem = candidates.FirstOrDefault();
-
-                if (poolItem == null)
-                {
-                     poolItem = new PooledDealerSocket(peer.Address, new DealerSocket(ToNetMQAddress(peer)));
-                     poolItem.Rent(exclusive);
-                    _dealerSocketConnectionPool.Add(poolItem);
-                    _logger.Verbose($"Built new PooledDealerSocket for {peer.Address}");
-
-                }
-                else
-                {
-                    poolItem.Rent(exclusive);
-                }
-                _logger.Verbose($"Rented pooled dealer socket for {peer.Address} with TotalRents #{poolItem.TotalRents} shared exclusively {poolItem.Exclusive} socket created at {poolItem.TimeCreated}");
-            }
-
-            return poolItem;
-        }
+       
 
         private void DoReply(object sender, NetMQQueueEventArgs<NetMQMessage> e)
         {
@@ -973,8 +917,8 @@ namespace Libplanet.Net
                 req.Id,
                 DateTimeOffset.UtcNow - req.RequestedTime);
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
-            
-            PooledDealerSocket pooledDealerSocket = RentDealerSocket(req.Peer, true);
+
+            PooledDealerSocket pooledDealerSocket = _netmqConnectionPool.RentDealerSocket(req.Peer, true);
 
             _logger.Debug($"Trying to send {req.Message} to {req.Peer}...");
             var message = req.Message.ToNetMQMessage(_privateKey, AsPeer, _appProtocolVersion);
@@ -1024,15 +968,12 @@ namespace Libplanet.Net
             }
             catch (TimeoutException te)
             {
-                if (pooledDealerSocket.KillIfUnhealthy())
-                {
-                    RemoveDealerSocket(pooledDealerSocket, false);
-                }
+                _netmqConnectionPool.KillIfUnhealthy(pooledDealerSocket);
                 tcs.TrySetException(te);
             }
             finally
             {
-                pooledDealerSocket.Return();
+               _netmqConnectionPool.Return(pooledDealerSocket);
             }
 
             _logger.Verbose(

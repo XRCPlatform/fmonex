@@ -43,6 +43,7 @@ namespace Libplanet.Net
 
         private BlockHashDemand? _demandBlockHash;
         private ConcurrentDictionary<TxId, BoundPeer> _demandTxIds;
+        private List<TxId> broadcastedTransactions = new List<TxId>();
 
         static Swarm()
         {
@@ -1323,7 +1324,7 @@ namespace Libplanet.Net
             //var message = new BlockHeaderMessage(BlockChain.Genesis.Hash, block.GetBlockHeader());
             var enumerable = new List<byte[]>();
             enumerable.Add(block.Serialize());
-            var message = new Messages.Blocks(enumerable, BlockChain.Genesis.Hash);
+            var message = new BlockBroadcast(enumerable, BlockChain.Genesis.Hash);
             BroadcastMessage(except, message);
             _logger.Debug("Block broadcasting complete.");
         }
@@ -1644,7 +1645,7 @@ namespace Libplanet.Net
                 txsCount,
                 spent);
         }
-
+        private static object broadcastFilterLock = new object();
         private async Task BroadcastTxAsync(
             TimeSpan broadcastTxInterval,
             CancellationToken cancellationToken)
@@ -1669,6 +1670,21 @@ namespace Libplanet.Net
                                     string.Join(", ", txIds));
                                 BroadcastTxIds(null, txIds);
                             }
+
+                            lock (broadcastFilterLock)
+                            {
+                                //prune transactions that are no longer staged
+                                for (int i = 0; i < broadcastedTransactions.Count(); i++)
+                                {
+                                    var item = broadcastedTransactions[i];
+                                    //if not found in staged remove from broadcasted register to avoid filling up memory
+                                    if (!txIds.Where(t => t == item).Any())
+                                    {
+                                        broadcastedTransactions.RemoveAt(i);
+                                    }
+                                }
+                            }                            
+                            
                         }, cancellationToken);
                 }
                 catch (OperationCanceledException e)
@@ -1697,7 +1713,16 @@ namespace Libplanet.Net
                 _logger.Debug($"Broadcasting to GetTxs {tx.Id} message.");
                 Message message = new Messages.Tx(tx.Serialize(true));
                 BroadcastMessage(except, message);
-            }            
+
+                lock (broadcastFilterLock)
+                {
+                    //register to avoid re-broadcasts [if not already registered]
+                    if (!broadcastedTransactions.Where(t => t == tx.Id).Any())
+                    {
+                        broadcastedTransactions.Add(tx.Id);
+                    }
+                }  
+            }
         }
 
         private bool IsDemandNeeded(BlockHeader target)

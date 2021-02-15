@@ -77,11 +77,7 @@ namespace Libplanet.Net
         {
             lock (poolLock)
             {
-                var candidates = pool.Where(sw => sw.Address.Equals(peer.Address));
-                foreach (var item in candidates)
-                {
-                    pool.Remove(item);
-                }
+                pool.RemoveAll(sw => sw.Address.Equals(peer.Address));
             }
         }
 

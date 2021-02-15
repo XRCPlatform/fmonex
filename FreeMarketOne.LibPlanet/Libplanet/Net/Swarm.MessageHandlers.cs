@@ -86,11 +86,11 @@ namespace Libplanet.Net
                     TransferTxs(getTxs);
                     break;
 
-                case Messages.Tx transaction:
+                case TxBroadcast transaction:
                     ReceiveTransactionBroadcast(transaction);
                     break;
                 
-                case Messages.BlockBroadcast blocks:
+                case BlockBroadcast blocks:
                     var task = Task.Run(async () => await ProcessBlock(blocks, _cancellationToken));
                     try
                     {
@@ -129,15 +129,15 @@ namespace Libplanet.Net
             }
         }
 
-        private void ReceiveTransactionBroadcast(Messages.Tx message)
+        private void ReceiveTransactionBroadcast(TxBroadcast message)
         {
-            if (message is Messages.Tx parsed)
+            if (message is TxBroadcast parsed)
             {
 
                 if (!(message.Remote is BoundPeer peer))
                 {
                     _logger.Information(
-                        $"Ignores a {nameof(Messages.Tx)} message because it was sent by an invalid peer: " +
+                        $"Ignores a {nameof(TxBroadcast)} message because it was sent by an invalid peer: " +
                         "{PeerAddress}.",
                         message.Remote?.Address.ToHex()
                     );
@@ -146,7 +146,7 @@ namespace Libplanet.Net
 
                 Transaction<T> tx = Transaction<T>.Deserialize(parsed.Payload);
 
-                _logger.Debug($"Received a {nameof(Messages.Tx)} message: {tx}.");
+                _logger.Debug($"Received a {nameof(TxBroadcast)} message: {tx}.");
 
                 if (!_store.ContainsTransaction(tx.Id))
                 {
@@ -170,8 +170,8 @@ namespace Libplanet.Net
             else
             {
                 string errorMessage =
-                    $"Expected {nameof(Tx)} messages as response of " +
-                    $"the {nameof(Tx)} message, but got a {message.GetType().Name} " +
+                    $"Expected {nameof(TxBroadcast)} messages as response of " +
+                    $"the {nameof(TxBroadcast)} message, but got a {message.GetType().Name} " +
                     $"message instead: {message}";
                 throw new InvalidMessageException(errorMessage, message);
             }           

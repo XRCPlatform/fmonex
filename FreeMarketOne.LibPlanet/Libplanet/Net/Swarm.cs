@@ -1711,7 +1711,7 @@ namespace Libplanet.Net
             foreach (Transaction<T> tx in txs)
             {
                 _logger.Debug($"Broadcasting to GetTxs {tx.Id} message.");
-                Message message = new Messages.Tx(tx.Serialize(true));
+                Message message = new TxBroadcast(tx.Serialize(true));
                 BroadcastMessage(except, message);
 
                 lock (broadcastFilterLock)

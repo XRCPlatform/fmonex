@@ -29,6 +29,7 @@ namespace Libplanet.Net.Protocols
         private readonly int _findConcurrency;
 
         private readonly ILogger _logger;
+        private NetmqConnectionPool _netmqConnectionPool;
 
         public KademliaProtocol(
             ITransport transport,
@@ -40,7 +41,8 @@ namespace Libplanet.Net.Protocols
             int? tableSize,
             int? bucketSize,
             int findConcurrency = Kademlia.FindConcurrency,
-            TimeSpan? requestTimeout = null)
+            TimeSpan? requestTimeout = null,
+            NetmqConnectionPool netmqConnectionPool = null)
         {
             _transport = transport;
             _appProtocolVersion = appProtocolVersion;
@@ -57,6 +59,7 @@ namespace Libplanet.Net.Protocols
             _requestTimeout =
                 requestTimeout ??
                 TimeSpan.FromMilliseconds(Kademlia.IdleRequestTimeout);
+            _netmqConnectionPool = netmqConnectionPool;
         }
 
         public IEnumerable<BoundPeer> Peers => _routing.Peers;
@@ -166,6 +169,7 @@ namespace Libplanet.Net.Protocols
             }
             catch (TimeoutException)
             {
+
             }
         }
 
@@ -541,6 +545,10 @@ namespace Libplanet.Net.Protocols
         private void RemovePeer(BoundPeer peer)
         {
             _routing.RemovePeer(peer);
+
+            if (_netmqConnectionPool != null) {
+                _netmqConnectionPool.Recycle(peer);
+            }
         }
 
         /// <summary>

@@ -90,7 +90,7 @@ namespace Libplanet.Net
                     ReceiveTransactionBroadcast(transaction);
                     break;
                 
-                case Messages.Blocks blocks:
+                case Messages.BlockBroadcast blocks:
                     var task = Task.Run(async () => await ProcessBlock(blocks, _cancellationToken));
                     try
                     {
@@ -263,7 +263,7 @@ namespace Libplanet.Net
             }
         }
 
-        private async Task ProcessBlock(Messages.Blocks message, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task ProcessBlock(Messages.BlockBroadcast message, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!(message.Remote is BoundPeer peer))
             {
@@ -271,7 +271,7 @@ namespace Libplanet.Net
                 return;
             }
 
-            if (message is Messages.Blocks blockMessage)
+            if (message is Messages.BlockBroadcast blockMessage)
             {
                 IList<byte[]> payloads = blockMessage.Payloads;
 
@@ -409,9 +409,7 @@ namespace Libplanet.Net
             else
             {
                 string errorMessage =
-                    $"Expected a {nameof(Blocks)} message as a response of " +
-                    $"the {nameof(Messages.Blocks)} message, but got a {message.GetType().Name} " +
-                    $"message instead: {message}";
+                    $"Expected a {nameof(BlockBroadcast)} message but got a {message.GetType().Name} message instead: {message}";
                 throw new InvalidMessageException(errorMessage, message);
             }
 

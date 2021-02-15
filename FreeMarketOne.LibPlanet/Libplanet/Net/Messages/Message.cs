@@ -115,6 +115,11 @@ namespace Libplanet.Net.Messages
             /// value of the message.
             /// </summary>
             DifferentVersion = 0x30,
+            
+            //Used to announce new blocks to network, similar 
+            //but must not clash with Blocks message as 
+            //Blocks is a response to request and clash on routing.
+            BlockBroadcast = 0x31,
         }
 
         private enum MessageFrame

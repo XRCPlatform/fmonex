@@ -8,9 +8,8 @@ namespace Libplanet.Net.Messages
 {
     internal class Blocks : Message
     {
-        public Blocks(IEnumerable<byte[]> payloads, HashDigest<SHA256> genesisHash)
+        public Blocks(IEnumerable<byte[]> payloads)
         {
-            GenesisHash = genesisHash;
             if (payloads.Count() > int.MaxValue)
             {
                 throw new ArgumentOutOfRangeException(
@@ -21,11 +20,8 @@ namespace Libplanet.Net.Messages
             Payloads = payloads.ToList();
         }
 
-        public HashDigest<SHA256> GenesisHash { get; }
-
         public Blocks(NetMQFrame[] body)
         {
-            GenesisHash = new HashDigest<SHA256>(body[0].Buffer);
             int payloadCount = body[1].ConvertToInt32();
             Payloads = body.Skip(2).Take(payloadCount)
                 .Select(f => f.ToByteArray())
@@ -40,7 +36,6 @@ namespace Libplanet.Net.Messages
         {
             get
             {
-                yield return new NetMQFrame(GenesisHash.ToByteArray());
                 yield return new NetMQFrame(
                     NetworkOrderBitsConverter.GetBytes(Payloads.Count));
 

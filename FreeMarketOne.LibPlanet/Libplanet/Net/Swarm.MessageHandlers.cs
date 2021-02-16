@@ -500,7 +500,7 @@ namespace Libplanet.Net
 
                 if (blocks.Count == getData.ChunkSize)
                 {
-                    var response = new Messages.Blocks(blocks, BlockChain.Genesis.Hash)
+                    var response = new Messages.Blocks(blocks)//should include genesis ? , BlockChain.Genesis.Hash
                     {
                         Identity = getData.Identity,
                     };
@@ -518,7 +518,7 @@ namespace Libplanet.Net
 
             if (blocks.Any())
             {
-                var response = new Messages.Blocks(blocks, BlockChain.Genesis.Hash)
+                var response = new Messages.Blocks(blocks)//should include genesis ? , BlockChain.Genesis.Hash
                 {
                     Identity = getData.Identity,
                 };

@@ -497,6 +497,20 @@ namespace Libplanet.Net
                     byte[] payload = block.Serialize();
                     blocks.Add(payload);
                 }
+                else
+                {
+                    if (BlockChain.Genesis.Hash.Equals(hash))
+                    {
+                        _logger.Verbose($"Requested block {hash} is genesis.");
+                        Block<T> block = BlockChain.Genesis;
+                        byte[] payload = block.Serialize();
+                        blocks.Add(payload);
+                    }
+                    else
+                    {
+                        _logger.Verbose($"Block {hash} not found. Sending empty reply for {hash}.");
+                    }
+                }
 
                 if (blocks.Count == getData.ChunkSize)
                 {

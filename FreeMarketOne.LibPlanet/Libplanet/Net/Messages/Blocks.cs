@@ -22,8 +22,8 @@ namespace Libplanet.Net.Messages
 
         public Blocks(NetMQFrame[] body)
         {
-            int payloadCount = body[1].ConvertToInt32();
-            Payloads = body.Skip(2).Take(payloadCount)
+            int payloadCount = body[0].ConvertToInt32();
+            Payloads = body.Skip(1).Take(payloadCount)
                 .Select(f => f.ToByteArray())
                 .ToList();
         }

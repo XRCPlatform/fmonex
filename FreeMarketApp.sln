@@ -55,8 +55,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Extensions", "Lib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.BlockChain.Test", "FreeMarketOne.BlockChain.Test\FreeMarketOne.BlockChain.Test.csproj", "{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "FreeMarketOneSetup", "FreeMarketOneSetup\FreeMarketOneSetup.wixproj", "{51DBDA53-361C-4863-ACDA-85E28DF86D70}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Skynet", "FreeMarketOne.Skynet\FreeMarketOne.Skynet.csproj", "{8BE56029-EDF0-4886-B863-A9C007C8FAF0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Skynet.Test", "FreeMarketOne.Skynet.Test\FreeMarketOne.Skynet.Test.csproj", "{791648BB-8E82-4826-B8B3-08C5C98661B8}"
@@ -262,12 +260,6 @@ Global
 		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}.Release|x86.ActiveCfg = Release|Any CPU
 		{DBFD6236-1C6E-44AC-BBDF-B4FC80219DD6}.Release|x86.Build.0 = Release|Any CPU
-		{51DBDA53-361C-4863-ACDA-85E28DF86D70}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{51DBDA53-361C-4863-ACDA-85E28DF86D70}.Debug|x86.ActiveCfg = Debug|x86
-		{51DBDA53-361C-4863-ACDA-85E28DF86D70}.Debug|x86.Build.0 = Debug|x86
-		{51DBDA53-361C-4863-ACDA-85E28DF86D70}.Release|Any CPU.ActiveCfg = Release|x86
-		{51DBDA53-361C-4863-ACDA-85E28DF86D70}.Release|x86.ActiveCfg = Release|x86
-		{51DBDA53-361C-4863-ACDA-85E28DF86D70}.Release|x86.Build.0 = Release|x86
 		{8BE56029-EDF0-4886-B863-A9C007C8FAF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8BE56029-EDF0-4886-B863-A9C007C8FAF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BE56029-EDF0-4886-B863-A9C007C8FAF0}.Debug|x86.ActiveCfg = Debug|Any CPU

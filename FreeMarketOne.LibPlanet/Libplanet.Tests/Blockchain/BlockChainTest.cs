@@ -33,7 +33,7 @@ namespace Libplanet.Tests.Blockchain
         private StoreFixture _fx;
         private BlockPolicy<DumbAction> _policy;
         private BlockChain<DumbAction> _blockChain;
-        private RecordingRenderer<DumbAction> _renderer;
+        private ValidatingActionRenderer<DumbAction> _renderer;
         private Block<DumbAction> _validNext;
         private List<Transaction<DumbAction>> _emptyTransaction;
 
@@ -56,6 +56,7 @@ namespace Libplanet.Tests.Blockchain
                 _fx.GenesisBlock,
                 renderers: new[] { new LoggedActionRenderer<DumbAction>(_renderer, Log.Logger) }
             );
+            _renderer.BlockChain = _blockChain;
             _renderer.ResetRecords();
 
             _emptyTransaction = new List<Transaction<DumbAction>>();
@@ -298,6 +299,41 @@ namespace Libplanet.Tests.Blockchain
                 maxTransactions: maxTxs
             );
             Assert.Equal(maxTxs, block.Transactions.Count());
+        }
+
+        [Fact]
+        public async Task MineBlockWithLowerNonces()
+        {
+            var key = new PrivateKey();
+            StageTransactions(
+                new[]
+                {
+                    Transaction<DumbAction>.Create(
+                        0,
+                        key,
+                        _blockChain.Genesis.Hash,
+                        new DumbAction[0]
+                    ),
+                }
+            );
+            await _blockChain.MineBlock(_fx.Address1);
+
+            // Trying to mine with lower nonce (0) than expected.
+            StageTransactions(
+                new[]
+                {
+                    Transaction<DumbAction>.Create(
+                        0,
+                        key,
+                        _blockChain.Genesis.Hash,
+                        new DumbAction[0]
+                    ),
+                }
+            );
+            Block<DumbAction> block = await _blockChain.MineBlock(_fx.Address1);
+
+            Assert.Empty(block.Transactions);
+            Assert.Empty(_blockChain.ListStagedTransactions());
         }
 
         [Fact]

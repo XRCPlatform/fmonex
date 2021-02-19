@@ -1659,32 +1659,36 @@ namespace Libplanet.Net
                     await Task.Run(
                         () =>
                         {
-                            List<TxId> txIds = BlockChain
-                                .GetStagedTransactionIds()
-                                .ToList();
+                            List<TxId> txIds = new List<TxId>();
+                            List<TxId> stagedTxIds = BlockChain.GetStagedTransactionIds().ToList();
+                            foreach (var item in stagedTxIds)
+                            {
+                                //if not already broadcasted then include in broadcastable list
+                                if (!broadcastedTransactions.Where(t => t == item).Any())
+                                {
+                                    txIds.Add(item);
+                                }
+                            }
 
                             if (txIds.Any())
                             {
-                                _logger.Debug(
-                                    "Broadcast Staged Transactions: [{txIds}]",
-                                    string.Join(", ", txIds));
+                                _logger.Debug("Preparing to broadcast staged transactions: [{txIds}]", string.Join(", ", txIds));
                                 BroadcastTxIds(null, txIds);
-                            }
 
-                            lock (broadcastFilterLock)
-                            {
-                                //prune transactions that are no longer staged
-                                for (int i = 0; i < broadcastedTransactions.Count(); i++)
+                                lock (broadcastFilterLock) //don't want to reset on empty staged set
                                 {
-                                    var item = broadcastedTransactions[i];
-                                    //if not found in staged remove from broadcasted register to avoid filling up memory
-                                    if (!txIds.Where(t => t == item).Any())
+                                    //prune transactions that are no longer staged
+                                    for (int i = 0; i < broadcastedTransactions.Count(); i++)
                                     {
-                                        broadcastedTransactions.RemoveAt(i);
+                                        var item = broadcastedTransactions[i];
+                                        //if not found in staged remove from broadcasted register to avoid filling up memory
+                                        if (!txIds.Where(t => t == item).Any())
+                                        {
+                                            broadcastedTransactions.RemoveAt(i);
+                                        }
                                     }
                                 }
-                            }                            
-                            
+                            }
                         }, cancellationToken);
                 }
                 catch (OperationCanceledException e)
@@ -1710,18 +1714,14 @@ namespace Libplanet.Net
 
             foreach (Transaction<T> tx in txs)
             {
-                _logger.Debug($"Broadcasting to GetTxs {tx.Id} message.");
-                Message message = new TxBroadcast(tx.Serialize(true));
-                BroadcastMessage(except, message);
-
-                lock (broadcastFilterLock)
+                //only broadcast if it was not before
+                if (!broadcastedTransactions.Contains(tx.Id))
                 {
-                    //register to avoid re-broadcasts [if not already registered]
-                    if (!broadcastedTransactions.Where(t => t == tx.Id).Any())
-                    {
-                        broadcastedTransactions.Add(tx.Id);
-                    }
-                }  
+                    _logger.Debug($"Broadcasting TxBroadcast {tx.Id} message.");
+                    Message message = new TxBroadcast(tx.Serialize(true));
+                    BroadcastMessage(except, message);
+                    broadcastedTransactions.Add(tx.Id);
+                }
             }
         }
 

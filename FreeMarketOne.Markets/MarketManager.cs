@@ -8,8 +8,9 @@ using Libplanet.Store;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Net;
+using System.Runtime.Caching;
 
 namespace FreeMarketOne.Markets
 {
@@ -47,7 +48,8 @@ namespace FreeMarketOne.Markets
         private ILogger _logger { get; set; }
 
         private readonly object _locked = new object();
-
+        private readonly MemoryCache _cache;
+        private readonly CacheItemPolicy _cachePolicy;
         /// <summary>
         /// Inicialization of market manager
         /// </summary>
@@ -58,6 +60,9 @@ namespace FreeMarketOne.Markets
             _logger.Information("Initializing Market Manager");
 
             _configuration = configuration;
+            _cache = new MemoryCache("item.seller.pubkey");
+            _cachePolicy = new CacheItemPolicy();
+            _cachePolicy.SlidingExpiration = TimeSpan.FromMinutes(30);
         }
 
         /// <summary>
@@ -87,12 +92,25 @@ namespace FreeMarketOne.Markets
         /// <returns></returns>
         public List<byte[]> GetSellerPubKeyFromMarketItem(MarketItemV1 itemMarket)
         {
-            if (!string.IsNullOrEmpty(itemMarket.Signature))
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            string sig = itemMarket.Signature;
+            if (!string.IsNullOrEmpty(sig))
             {
-                _logger.Information(string.Format("Recovering seller public key for item hash {0}.", itemMarket.Hash));
-
+                var key = _cache.Get(itemMarket.Hash) as List<byte[]>;
+                if (key != null)
+                {
+                    sw.Stop();
+                    _logger.Information($"Found cached seller public key for item hash {itemMarket.Hash}, elapsed {sw.ElapsedMilliseconds}.");
+                    return key;
+                }
+                
                 var itemMarketBytes = itemMarket.ToByteArrayForSign();
-                return UserPublicKey.Recover(itemMarketBytes, itemMarket.Signature);
+                var pubKey = UserPublicKey.Recover(itemMarketBytes, itemMarket.Signature);
+                _cache.Set(itemMarket.Hash, pubKey, _cachePolicy);
+                sw.Stop();
+                _logger.Information($"Recovering seller public key for item hash {itemMarket.Hash}, elapsed {sw.ElapsedMilliseconds}.");
+                return pubKey;
             }
             else
             {

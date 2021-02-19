@@ -11,8 +11,10 @@ using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Text;
 
 namespace FreeMarketOne.Users
@@ -41,6 +43,8 @@ namespace FreeMarketOne.Users
         private SHAProcessor _shaProcessor;
 
         private readonly object _locked = new object();
+        private readonly MemoryCache _cache;
+        private readonly CacheItemPolicy _cachePolicy;
 
         public UserManager(IBaseConfiguration configuration)
         {
@@ -50,6 +54,9 @@ namespace FreeMarketOne.Users
             _configuration = configuration;
             _privateKeyState = PrivateKeyStates.NoKey;
             _shaProcessor = new SHAProcessor();
+            _cache = new MemoryCache("user.pubkey");
+            _cachePolicy = new CacheItemPolicy();
+            _cachePolicy.SlidingExpiration = TimeSpan.FromMinutes(120);
         }
 
         /// <summary>
@@ -252,15 +259,29 @@ namespace FreeMarketOne.Users
             BasePoolManager basePoolManager,
             IBlockChainManager<BaseAction> blockChainManager)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             lock (_locked)
             {
+                foreach (var item in userPubKeys)
+                {
+                    var publicKey = Convert.ToBase64String(item);
+                    UserDataV1 retval = _cache.Get(publicKey) as UserDataV1;
+                    if (retval != null)
+                    {
+                        _logger.Information($"UserData found in cache. elapsed {sw.ElapsedMilliseconds}");
+                        return retval;
+                    }
+                }
+                
+
                 var types = new Type[] { typeof(UserDataV1) };
 
                 //checking pool
                 var poolItems = basePoolManager.GetAllActionItemByType(types);
                 if (poolItems.Any())
                 {
-                    _logger.Information(string.Format("Some UserData found in pool. Checking if they are mine."));
+                    _logger.Information($"Some UserData found in pool. Checking if they are mine. elapsed {sw.ElapsedMilliseconds}");
                     poolItems.Reverse();
 
                     foreach (var itemPool in poolItems)
@@ -268,13 +289,14 @@ namespace FreeMarketOne.Users
                         var userData = (UserDataV1)itemPool;
                         if (userData.PublicKey != null)
                         {
+                            _cache.Set(userData.PublicKey, userData, _cachePolicy);
                             var publicKeyBytes = Convert.FromBase64String(userData.PublicKey);
 
                             foreach (var itemUserPubKey in userPubKeys)
                             {
                                 if (publicKeyBytes.SequenceEqual(itemUserPubKey))
                                 {
-                                    _logger.Information(string.Format("Found UserData in pool."));
+                                    _logger.Information($"Found UserData in pool. elapsed {sw.ElapsedMilliseconds}");
 
                                     return userData;
                                 }
@@ -304,13 +326,14 @@ namespace FreeMarketOne.Users
                                     var userData = (UserDataV1)itemBase;
                                     if (userData.PublicKey != null)
                                     {
+                                        _cache.Set(userData.PublicKey, userData, _cachePolicy);
                                         var publicKeyBytes = Convert.FromBase64String(userData.PublicKey);
 
                                         foreach (var itemUserPubKey in userPubKeys)
                                         {
                                             if (publicKeyBytes.SequenceEqual(itemUserPubKey))
                                             {
-                                                _logger.Information(string.Format("Found UserData in chain."));
+                                                _logger.Information($"Found UserData in chain. elapsed {sw.ElapsedMilliseconds}");
 
                                                 return userData;
                                             }
@@ -321,7 +344,7 @@ namespace FreeMarketOne.Users
                         }
                     }
                 }
-
+                _logger.Information($"UserData not found on chain or in cache. elapsed {sw.ElapsedMilliseconds}");
                 return null;
             }
         }
@@ -417,10 +440,10 @@ namespace FreeMarketOne.Users
             BasePoolManager basePoolManager,
             IBlockChainManager<BaseAction> baseBlockChain)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             lock (_locked)
             {
-                _logger.Information(string.Format("GetAllReviewsForPubKey."));
-
                 var typesReview = new Type[] { typeof(ReviewUserDataV1) };
                 var typesUser = new Type[] { typeof(UserDataV1) };
                 var result = new List<ReviewUserDataV1>();
@@ -437,6 +460,7 @@ namespace FreeMarketOne.Users
                 
                 if (userData == null)
                 {
+                    _logger.Information($"Reviews not found as recieved null UserData. elapsed: {sw.ElapsedMilliseconds}");
                     return result;
                 }
 
@@ -463,10 +487,7 @@ namespace FreeMarketOne.Users
                                         if ((reviewData.UserSignature == itemUserData.Signature)
                                             && (reviewData.UserHash == itemUserData.Hash))
                                         {
-                                            _logger.Information(
-                                                string.Format("Found UserData signature {0} hash {1}.",
-                                                itemUserData.Signature,
-                                                itemUserData.Hash));
+                                            _logger.Information($"Found UserData signature {itemUserData.Signature} hash {itemUserData.Hash}. elapsed: {sw.ElapsedMilliseconds}");
 
                                             result.Add(reviewData);
                                             break;
@@ -477,7 +498,8 @@ namespace FreeMarketOne.Users
                         }
                     }
                 }
-
+                sw.Stop();
+                _logger.Information($"GetAllReviewsForPubKey. elapsed: {sw.ElapsedMilliseconds}");
                 return result;
             }
         }

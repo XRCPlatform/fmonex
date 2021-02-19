@@ -73,7 +73,6 @@ namespace Libplanet.Net
                 {
                     available = true;
                     Exclusive = false;
-                    Interlocked.Exchange(ref timeouts, 0L);
                     Interlocked.Decrement(ref activeRents);
                 }               
             }            

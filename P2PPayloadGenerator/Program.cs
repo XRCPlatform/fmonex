@@ -25,11 +25,13 @@ namespace P2PPayloadGenerator
 
         private static int counter = 0;
         private static int counter1 = 0;
+        private static StreamWriter stream;
 
         public static FreeMarketOneServer Current { get; private set; }
 
         private static void Init(string password)
         {
+            stream = File.CreateText($"run_{Guid.NewGuid()}.csv");
             Current = FreeMarketOneServer.Current;
 
             var task = Task.Factory.StartNew(()=> Current.Initialize(password));
@@ -78,12 +80,12 @@ namespace P2PPayloadGenerator
                     {
                         Console.WriteLine(e);
                     }
-                    
+
                     //Current.OnionSeedsManager.MarketSwarm.BootstrapAsync(Current.OnionSeedsManager.OnionSeedPeers.,1000000, 10000, 1, null).ConfigureAwait(false).GetAwaiter().GetResult();
 
 
                 }
-      
+
                 Console.WriteLine($"Waiting for peers base {Current.BaseBlockChainManager.SwarmServer.Peers.Count()} market {Current.MarketBlockChainManager.SwarmServer.Peers.Count()}");
                 Interlocked.Increment(ref counter);
                 Thread.Sleep(10000);
@@ -105,10 +107,8 @@ namespace P2PPayloadGenerator
 
             while (Current.MarketBlockChainManager.BlockChain.Tip.Index <= 2 & Current.BaseBlockChainManager.BlockChain.Tip.Index <= 2)
             {
-             Thread.Sleep(10000);
-            }
-            Console.WriteLine("Ready to start generating. Press any key to confirm.");
-            Console.ReadKey();
+                Thread.Sleep(10000);
+            }            
         }
 
         static void Main(string[] args)
@@ -123,13 +123,8 @@ namespace P2PPayloadGenerator
                 GenerateUsers(int.Parse(args[CommandNumberOfExecutionsArgIndex]), int.Parse(args[CommandSleepTimeArgIndex]));
             }
 
-            while (true)
-            {
-                Thread.Sleep(10000);
-                if (Console.ReadLine().Equals("quit", StringComparison.InvariantCultureIgnoreCase)) {
-                    break;
-                }
-            }
+            stream.Close();
+            stream.Dispose();
         }
 
 
@@ -180,7 +175,7 @@ namespace P2PPayloadGenerator
             {
                 UserDataV1 user = new UserDataV1()
                 {
-                    UserName = "TestUser - B[" + i +"]",
+                    UserName = "TestUser - C[" + i +"]",
                     CreatedUtc = DateTime.UtcNow,
                     Description = "The axis of rotation of the Solar System makes a large angle of about 60 degrees relative to the axis of rotation of the Milky Way. " +
                     "That seems unusual - for example, most of the bodies within the Solar Sytem are better behaved than that. Do most stars or planetary systems " +
@@ -193,34 +188,19 @@ namespace P2PPayloadGenerator
                 
                 var signedUserData = SignUserData(user, privateKey);
 
-                Console.WriteLine(signedUserData.UserName + "" + signedUserData.PublicKey);
+                string data = signedUserData.UserName + "," + signedUserData.PublicKey;
+                stream.WriteLine(data);
+                stream.Flush();
+
+                Console.WriteLine(data);
 
                 var result = Current.BasePoolManager.AcceptActionItem(signedUserData);
                 if (result != null)
                 {
                     Console.WriteLine("result:" + result.ToString());
                 }
-                GenerateOffers(6, 10, privateKey, user);
                 Thread.Sleep(sleepTime);
-            }
-
-            Console.ReadKey();
-        }
-
-        public static UserDataV1 SignUserData_(UserDataV1 userData, UserPrivateKey privateKey)
-        {
-            lock (_locked)
-            {
-                userData.BaseSignature = userData.Signature;
-                userData.PublicKey = Convert.ToBase64String(privateKey.PublicKey.KeyParam.Q.GetEncoded());
-
-                var bytesToSign = userData.ToByteArrayForSign();
-
-                userData.Signature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
-
-                userData.Hash = userData.GenerateHash();
-
-                return userData;
+                GenerateOffers(6, sleepTime, privateKey, user);
             }
         }
 
@@ -228,18 +208,13 @@ namespace P2PPayloadGenerator
         {
             lock (_locked)
             {
+                
                 var clone = userData.Clone<UserDataV1>();
-                clone.UserName = userData.UserName;
-                clone.Description = userData.Description;
                 clone.BaseSignature = clone.Signature;
                 clone.PublicKey = Convert.ToBase64String(privateKey.PublicKey.KeyParam.Q.GetEncoded());
-
                 var bytesToSign = clone.ToByteArrayForSign();
-
                 clone.Signature = Convert.ToBase64String(privateKey.Sign(bytesToSign));
-
                 clone.Hash = clone.GenerateHash();
-
                 return clone;
             }
         }

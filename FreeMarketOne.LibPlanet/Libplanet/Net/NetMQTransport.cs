@@ -565,7 +565,7 @@ namespace Libplanet.Net
                     _logger.Debug(logMsg, reply.Count, reqId, peer.Address, reply);
 
                     sw.Stop();
-                    _logger.Debug($"EndOfBlocking calls to {peer} for {message} elapsed ms: {sw.ElapsedMilliseconds}");
+                    _logger.Debug($"Completed SendMessageWithReply {message} to {peer} elapsed ms: {sw.ElapsedMilliseconds}");
                     return reply;
                 }
                 else

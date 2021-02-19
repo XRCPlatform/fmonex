@@ -25,6 +25,7 @@ namespace Libplanet.Net
             lock (poolLock)
             {
                 pool.Remove(pooledDealerSocket);
+                _logger.Information($"Removed pooled socket for address {pooledDealerSocket.Address} total usages:{pooledDealerSocket.TotalRents}, active:{pooledDealerSocket.ActiveRents}.");
                 if (dispose)
                 {
                     pooledDealerSocket.Dispose();
@@ -78,6 +79,7 @@ namespace Libplanet.Net
             lock (poolLock)
             {
                 pool.RemoveAll(sw => sw.Address.Equals(peer.Address));
+                _logger.Information($"Removed all pooled sockets for peer:{peer}.");
             }
         }
 
@@ -95,6 +97,7 @@ namespace Libplanet.Net
                 dealer.Dispose();
             }
             pool.Clear();
+            _logger.Information($"Removed all pooled sockets.");
         }
 
         public void KillIfUnhealthy(PooledDealerSocket pooledDealerSocket)
@@ -108,6 +111,7 @@ namespace Libplanet.Net
         public void Return(PooledDealerSocket pooledDealerSocket)
         {
             pooledDealerSocket.Return();
+            _logger.Information($"Returned socket to pool for address:{pooledDealerSocket.Address}");
         }
     }
 }

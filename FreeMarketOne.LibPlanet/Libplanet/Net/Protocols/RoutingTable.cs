@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Libplanet.Net.Messages;
 using Serilog;
 
 namespace Libplanet.Net.Protocols
@@ -15,6 +16,7 @@ namespace Libplanet.Net.Protocols
         private readonly KBucket[] _buckets;
 
         private readonly ILogger _logger;
+        public event EventHandler<PeerStateChangeEventArgs> PeerStateChange;
 
         public RoutingTable(
             Address address,
@@ -42,6 +44,11 @@ namespace Libplanet.Net.Protocols
             {
                 _buckets[i] = new KBucket(bucketSize, random, _logger);
             }
+        }
+
+        protected void OnPeerStateChange(PeerStateChangeEventArgs e)
+        {
+            PeerStateChange?.Invoke(this, e);
         }
 
         public int Count => _buckets.Sum(bucket => bucket.Count);
@@ -113,10 +120,17 @@ namespace Libplanet.Net.Protocols
             if (peer.Address.Equals(_address))
             {
                 throw new ArgumentException("Cannot add self to routing table.");
-            }
+            }           
 
             _logger.Debug("Adding peer {Peer} to routing table.", peer);
             BucketOf(peer).AddPeer(peer);
+
+            PeerStateChangeEventArgs args = new PeerStateChangeEventArgs
+            {
+                Peer = peer,
+                Change = Messages.PeerStateChange.Joined
+            };
+            OnPeerStateChange(args);
         }
 
         public bool RemovePeer(BoundPeer peer)
@@ -132,7 +146,16 @@ namespace Libplanet.Net.Protocols
             }
 
             _logger.Debug("Removing peer {Peer} from routing table.", peer);
-            return BucketOf(peer).RemovePeer(peer);
+            var success = BucketOf(peer).RemovePeer(peer);
+
+            PeerStateChangeEventArgs args = new PeerStateChangeEventArgs
+            {
+                Peer = peer,
+                Change = Messages.PeerStateChange.Removed
+            };
+            OnPeerStateChange(args);
+
+            return success;
         }
 
         public bool RemoveCache(BoundPeer peer)

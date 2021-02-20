@@ -79,6 +79,7 @@ namespace Libplanet.Net
         /// to trust <see cref="AppProtocolVersion"/>s they signed.  To trust any party, pass
         /// <c>null</c>, which is default.</param>
         /// <param name="options">Options for <see cref="Swarm{T}"/>.</param>
+        /// <param name="peerStateChangeHandler">An event to inform sibling swarms of peer activity.</param>
         public Swarm(
             BlockChain<T> blockChain,
             PrivateKey privateKey,
@@ -89,7 +90,8 @@ namespace Libplanet.Net
             IEnumerable<IceServer> iceServers = null,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
             IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
-            SwarmOptions options = null)
+            SwarmOptions options = null,
+            EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
             : this(
                 blockChain,
                 privateKey,
@@ -103,7 +105,8 @@ namespace Libplanet.Net
                 iceServers,
                 differentAppProtocolVersionEncountered,
                 trustedAppProtocolVersionSigners,
-                options)
+                options,
+                peerStateChangeHandler)
         {
         }
 
@@ -120,7 +123,8 @@ namespace Libplanet.Net
             IEnumerable<IceServer> iceServers = null,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
             IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
-            SwarmOptions options = null)
+            SwarmOptions options = null,
+            EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             BlockChain = blockChain ?? throw new ArgumentNullException(nameof(blockChain));
             _store = BlockChain.Store;
@@ -159,7 +163,8 @@ namespace Libplanet.Net
                 differentAppProtocolVersionEncountered,
                 ProcessMessageHandler,
                 _logger,
-                options.Socks5Proxy
+                options.Socks5Proxy,
+                peerStateChangeHandler
             );
 
             Options = options ?? new SwarmOptions();

@@ -42,7 +42,8 @@ namespace Libplanet.Net.Protocols
             int? bucketSize,
             int findConcurrency = Kademlia.FindConcurrency,
             TimeSpan? requestTimeout = null,
-            NetmqConnectionPool netmqConnectionPool = null)
+            NetmqConnectionPool netmqConnectionPool = null,
+            EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             _transport = transport;
             _appProtocolVersion = appProtocolVersion;
@@ -56,6 +57,7 @@ namespace Libplanet.Net.Protocols
             _bucketSize = bucketSize ?? Kademlia.BucketSize;
             _findConcurrency = findConcurrency;
             _routing = new RoutingTable(_address, _tableSize, _bucketSize, _random, _logger);
+            _routing.PeerStateChange += peerStateChangeHandler;
             _requestTimeout =
                 requestTimeout ??
                 TimeSpan.FromMilliseconds(Kademlia.IdleRequestTimeout);

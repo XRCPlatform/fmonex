@@ -674,12 +674,18 @@ namespace Libplanet.Net
                         "A raw message [frame count: {0}] has received.",
                         raw.FrameCount
                     );
-                    Message message = Message.Parse(
-                        raw,
-                        false,
-                        _appProtocolVersion,
-                        _trustedAppProtocolVersionSigners,
-                        _differentAppProtocolVersionEncountered);
+                    Message message = null;
+                    try
+                    {
+                        message = Message.Parse(raw, false, _appProtocolVersion, _trustedAppProtocolVersionSigners, _differentAppProtocolVersionEncountered);
+                    }
+                    catch (FormatException)
+                    {
+                        //possibly a reply message was sent
+                        message = Message.Parse(raw, true, _appProtocolVersion, _trustedAppProtocolVersionSigners, _differentAppProtocolVersionEncountered);
+                        _logger.Debug($"Expected request message {message} but arrived as reply Swarm:{_listenPort}, recieved from {message.Remote}");
+                    }
+                   
                     _logger.Debug("A message has parsed: {0}, from {1}", message, message.Remote);
 
                     if (!message.Remote.ToString().EndsWith($":{_listenPort}."))

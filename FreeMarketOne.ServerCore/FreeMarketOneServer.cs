@@ -320,7 +320,15 @@ namespace FreeMarketOne.ServerCore
                     };
                     if (!BaseBlockChainManager.SwarmServer.Peers.Where(p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any())
                     {
-                        await BaseBlockChainManager.SwarmServer.AddPeersAsync(peers, TimeSpans.HalfMinute);
+                        try
+                        {
+                            await BaseBlockChainManager.SwarmServer.AddPeersAsync(peers, TimeSpans.HalfMinute);
+                        }
+                        catch (Exception)
+                        {
+                            //swallow
+                        }
+                        
                     }
                 }
                 if (endPoint.Port == 9113 && (e.Change.Equals(PeerStateChange.Joined) ||e.Change.Equals(PeerStateChange.TwoWayDialogConfirmed)))
@@ -332,7 +340,14 @@ namespace FreeMarketOne.ServerCore
                     };
                     //if peer not exists is peers list
                     if (!MarketBlockChainManager.SwarmServer.Peers.Where(p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any()){
-                        await MarketBlockChainManager.SwarmServer.AddPeersAsync(peers, TimeSpans.HalfMinute);
+                        try
+                        {
+                            await MarketBlockChainManager.SwarmServer.AddPeersAsync(peers, TimeSpans.HalfMinute);
+                        }
+                        catch (Exception)
+                        {
+                            //swallow not very important just a helper
+                        }                        
                     }
                     
                 }

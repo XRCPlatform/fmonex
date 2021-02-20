@@ -69,6 +69,7 @@ namespace Libplanet.Net
         /// </summary>
         private DifferentAppProtocolVersionEncountered _differentAppProtocolVersionEncountered;
         private int findConcurrency = 3;
+        public event EventHandler<PeerStateChangeEventArgs> PeerStateChangeEvent;
 
         public NetMQTransport(
             PrivateKey privateKey,
@@ -83,7 +84,8 @@ namespace Libplanet.Net
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered,
             EventHandler<Message> processMessageHandler,
             ILogger logger,
-            string socks5Proxy)
+            string socks5Proxy,
+            EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             Running = false;
 
@@ -170,8 +172,9 @@ namespace Libplanet.Net
                 bucketSize,
                 findConcurrency,
                 null,
-                _netmqConnectionPool);
-            
+                _netmqConnectionPool,
+                peerStateChangeHandler);
+            PeerStateChangeEvent = peerStateChangeHandler;
         }
 
         /// <summary>
@@ -445,7 +448,7 @@ namespace Libplanet.Net
             catch (Exception e)
             {
                 _logger.Debug($"Error while processing SendMessageWithReplyAsync {message} to {peer} retry# {retry}");
-                if (retry < 5)
+                if (retry < 3)
                 {
                     retry++;
                     return await SendMessageWithReplyAsync(peer, message, timeout, cancellationToken, retry);
@@ -566,6 +569,14 @@ namespace Libplanet.Net
 
                     sw.Stop();
                     _logger.Debug($"Completed SendMessageWithReply {message} to {peer} elapsed ms: {sw.ElapsedMilliseconds}");
+
+                    PeerStateChangeEventArgs args = new PeerStateChangeEventArgs
+                    {
+                        Peer = peer,
+                        Change = PeerStateChange.TwoWayDialogConfirmed
+                    };
+                    OnPeerStateChange(args);
+
                     return reply;
                 }
                 else
@@ -622,6 +633,11 @@ namespace Libplanet.Net
                 throw;
             }
             
+        }
+
+        protected void OnPeerStateChange(PeerStateChangeEventArgs e)
+        {
+            PeerStateChangeEvent?.Invoke(this, e);
         }
 
         public void BroadcastMessage(Address? except, Message message)

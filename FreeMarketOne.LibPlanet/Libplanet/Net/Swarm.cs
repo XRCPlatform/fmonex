@@ -1724,6 +1724,10 @@ namespace Libplanet.Net
                 {
                     _logger.Debug($"Broadcasting TxBroadcast {tx.Id} message.");
                     Message message = new TxBroadcast(tx.Serialize(true));
+                    if (except.HasValue)
+                    {
+                        message.Identity = except.Value.ToByteArray();
+                    }                    
                     BroadcastMessage(except, message);
                     broadcastedTransactions.Add(tx.Id);
                 }

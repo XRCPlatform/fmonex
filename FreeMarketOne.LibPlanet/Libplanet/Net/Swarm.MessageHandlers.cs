@@ -157,8 +157,12 @@ namespace Libplanet.Net
                         {
                             BlockChain.StageTransaction(tx);
                             TxReceived.Set();
-                            _logger.Debug($"Txs staged successfully: {tx.Id}");
-                            BroadcastMessage(message.Remote.Address, message);
+                            _logger.Debug($"Txs staged successfully: {tx.Id}");                            
+
+                            Message newMessage = new TxBroadcast(tx.Serialize(true));
+                            message.Identity = message.Remote.Address.ToByteArray();
+
+                            BroadcastMessage(message.Remote.Address, newMessage);
                         }
                         catch (InvalidTxException ite)
                         {

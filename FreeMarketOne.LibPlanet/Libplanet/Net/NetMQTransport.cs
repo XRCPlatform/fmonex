@@ -679,11 +679,13 @@ namespace Libplanet.Net
                     {
                         message = Message.Parse(raw, false, _appProtocolVersion, _trustedAppProtocolVersionSigners, _differentAppProtocolVersionEncountered);
                     }
-                    catch (FormatException)
+                    catch (FormatException ex)
                     {
                         //possibly a reply message was sent
+                        _logger.Error($"Got error parsing message {raw} {raw.} {ex}");                        
                         message = Message.Parse(raw, true, _appProtocolVersion, _trustedAppProtocolVersionSigners, _differentAppProtocolVersionEncountered);
                         _logger.Debug($"Expected request message {message} but arrived as reply Swarm:{_listenPort}, recieved from {message.Remote}");
+                        //if success swallow, if failed will raise another format ex that will be handled above
                     }
                    
                     _logger.Debug("A message has parsed: {0}, from {1}", message, message.Remote);

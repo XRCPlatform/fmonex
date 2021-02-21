@@ -1679,20 +1679,22 @@ namespace Libplanet.Net
                             {
                                 _logger.Debug("Preparing to broadcast staged transactions: [{txIds}]", string.Join(", ", txIds));
                                 BroadcastTxIds(null, txIds);
-
-                                lock (broadcastFilterLock) //don't want to reset on empty staged set
-                                {
-                                    //prune transactions that are no longer staged
-                                    for (int i = 0; i < broadcastedTransactions.Count(); i++)
-                                    {
-                                        var item = broadcastedTransactions[i];
-                                        //if not found in staged remove from broadcasted register to avoid filling up memory
-                                        if (!txIds.Where(t => t == item).Any())
-                                        {
-                                            broadcastedTransactions.RemoveAt(i);
-                                        }
-                                    }
-                                }
+                                
+                                //FIXME: Prune this list upon block arival as transactions included in block get safely removed from staged.
+                                
+                                //lock (broadcastFilterLock) //don't want to reset on empty staged set
+                                //{
+                                //    //prune transactions that are no longer staged
+                                //    for (int i = 0; i < broadcastedTransactions.Count(); i++)
+                                //    {
+                                //        var item = broadcastedTransactions[i];
+                                //        //if not found in staged remove from broadcasted register to avoid filling up memory
+                                //        if (!txIds.Where(t => t == item).Any())
+                                //        {
+                                //            broadcastedTransactions.RemoveAt(i);
+                                //        }
+                                //    }
+                                //}
                             }
                         }, cancellationToken);
                 }

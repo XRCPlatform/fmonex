@@ -50,8 +50,10 @@ namespace Libplanet.Net
                         && sw.ActiveRents < acceptableRentsCount
                         && sw.Available
                          )
-                    .OrderBy(sw => sw.ActiveRents);//lowest utilisations first
-
+                    .OrderByDescending(sw => sw.TimeLastRented);
+                //there is a small chance of unexpected message returned from previous conversation 
+                //as the socket is open and due to delays a message could have been sent to here sometime back
+                //so using oldest connection should reduce it's probability
                 _logger.Information($"Found available pooled socket candidates #{candidates?.Count()} out of total {pool.Count}");
 
                 poolItem = candidates.FirstOrDefault();

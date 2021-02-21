@@ -730,14 +730,7 @@ namespace Libplanet.Net
                 }
                 catch (FormatException ex)
                 {
-                    Message reply = Message.Parse(
-                        raw,
-                        true,
-                        _appProtocolVersion,
-                        _trustedAppProtocolVersionSigners,
-                        _differentAppProtocolVersionEncountered);
-
-                    _logger.Error(ex, $"Could not parse NetMQMessage properly; Maybe message was reply :[{reply}] error:{ex} ");
+                    _logger.Error(ex, $"Could not parse NetMQMessage error:{ex}");
                 }
                 catch (Exception ex)
                 {

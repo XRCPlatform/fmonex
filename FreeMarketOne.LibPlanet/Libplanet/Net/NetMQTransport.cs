@@ -988,6 +988,11 @@ namespace Libplanet.Net
                 _netmqConnectionPool.KillIfUnhealthy(pooledDealerSocket);
                 tcs.TrySetException(te);
             }
+            catch (FormatException fe)
+            {
+                _logger.Error($"A message request:{req.Message} recieved a reply that could not parse. Error:{fe}");
+                tcs.TrySetException(fe);
+            }
             finally
             {
                _netmqConnectionPool.Return(pooledDealerSocket);

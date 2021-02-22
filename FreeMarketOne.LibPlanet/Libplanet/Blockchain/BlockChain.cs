@@ -978,7 +978,7 @@ namespace Libplanet.Blockchain
                                     previousTotalDifficulty: Tip.TotalDifficulty,
                                     miner: miner,
                                     previousHash: prevHash,
-                                    timestamp: currentTime,
+                                    timestamp: DateTimeOffset.UtcNow,
                                     transactions: transactionsToMine,
                                     cancellationToken: cancellationTokenSource.Token);
                 validatioResult = ValidateNextBlock(block);

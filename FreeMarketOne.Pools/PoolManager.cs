@@ -283,6 +283,7 @@ namespace FreeMarketOne.Pools
                 bool validSignature = ValidateSignature(actionItem);
                 if (!validSignature)
                 {
+                    _logger.Information($"Item {actionItem.Hash} was rejected because of invalid signature.");
                     return PoolManagerStates.Errors.InvalidSignature;
                 }
 
@@ -292,12 +293,17 @@ namespace FreeMarketOne.Pools
             } 
             else
             {
+                _logger.Information($"Item {actionItem.Hash} was rejected because of PoolManagerStates.Errors.NoMinimalPeer.");
                 return PoolManagerStates.Errors.NoMinimalPeer;
             }
         }
 
         private bool ValidateSignature(IBaseItem actionItem)
         {
+            if (actionItem.Signature == null)
+            {
+                return false;
+            }
             var buyerPubKeys = UserPublicKey.Recover(actionItem.ToByteArrayForSign(), actionItem.Signature);
             return buyerPubKeys.Any();
         }
@@ -366,24 +372,28 @@ namespace FreeMarketOne.Pools
                 //Verify type of item in tx
                 if (!((IDefaultBlockPolicy<T>)_blockChain.Policy).ValidTypesOfActionItems.Contains(actionItem.GetType()))
                 {
+                    _logger.Information($"Action item {actionItem.Hash} PoolManagerStates.Errors.WrontTypeOfContent.");
                     return PoolManagerStates.Errors.WrontTypeOfContent;
                 }
 
                 //Verify existence of equal action item in unstaged tx
                 if (ExistInStagedTransactions(actionItem))
                 {
+                    _logger.Information($"Action item {actionItem.Hash} ExistInStagedTransactions => PoolManagerStates.Errors.Duplication.");
                     return PoolManagerStates.Errors.Duplication;
                 }
 
                 //Verification based on type
                 if (actionItem.GetType() == typeof(MarketItemV1) && (!IsMarketItemValid(actionItem)))
                 {
+                    _logger.Information($"Action item {actionItem.Hash} IsMarketItemValid. PoolManagerStates.Errors.StateOfItemIsInProgress");
                     return PoolManagerStates.Errors.StateOfItemIsInProgress;
                 }
 
                 //Verification based on type
                 if (actionItem.GetType() == typeof(UserDataV1) && (!IsUserDataValid(actionItem)))
                 {
+                    _logger.Information($"Action item {actionItem.Hash} IsUserDataValid. PoolManagerStates.Errors.StateOfItemIsInProgress");
                     return PoolManagerStates.Errors.StateOfItemIsInProgress;
                 }
 
@@ -397,6 +407,7 @@ namespace FreeMarketOne.Pools
             }
             else
             {
+                _logger.Information($"Action item {actionItem.Hash} PoolManagerStates.Errors.NoValidContentHash.");
                 return PoolManagerStates.Errors.NoValidContentHash;
             }
         }

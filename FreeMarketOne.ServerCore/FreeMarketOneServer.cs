@@ -14,6 +14,8 @@ using FreeMarketOne.Tor;
 using FreeMarketOne.Users;
 using Libplanet;
 using Libplanet.Blocks;
+using Libplanet.Net;
+using Libplanet.Net.Messages;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Serilog;
@@ -21,6 +23,7 @@ using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading;
@@ -72,6 +75,7 @@ namespace FreeMarketOne.ServerCore
 
         public event EventHandler<List<HashDigest<SHA256>>> MarketBlockClearedOldersEvent;
         public event EventHandler<NetworkHeartbeatArgs> NetworkHeartbeatEvent;
+        public event EventHandler<PeerStateChangeEventArgs> PeerStateChanged;
         public event EventHandler FreeMarketOneServerLoadedEvent;
         public event EventHandler FreeMarketOneServerLoggedInEvent;
         public event EventHandler<string> LoadingEvent;
@@ -130,7 +134,7 @@ namespace FreeMarketOne.ServerCore
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(Configuration.FullBaseDirectory, Configuration.LogFilePath),
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{Exception}{NewLine}",
+                    outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{Exception}{NewLine}",
                     rollingInterval: RollingInterval.Day, shared: true)
                 .CreateLogger();
             _logger = Log.Logger.ForContext<FreeMarketOneServer>();
@@ -190,7 +194,7 @@ namespace FreeMarketOne.ServerCore
                         LoadingEvent?.Invoke(this, "Loading Base BlockChain Manager...");
                         BaseBlockChainLoadEndedEvent += new EventHandler(Current.BaseBlockChainLoaded);
                         BaseBlockChainChangedEvent += new EventHandler<(Block<BaseAction> OldTip, Block<BaseAction> NewTip)>(Current.BaseBlockChainChanged);
-
+                        PeerStateChanged += new EventHandler<PeerStateChangeEventArgs>(Current.PeerStateChangedHandlerAsync);
                         BaseBlockChainManager = new BlockChainManager<BaseAction>(
                             Configuration,
                             Configuration.BlockChainBasePath,
@@ -202,7 +206,8 @@ namespace FreeMarketOne.ServerCore
                             UserManager.PrivateKey,
                             new NetworkProtocolVersion(),
                             preloadEnded: BaseBlockChainLoadEndedEvent,
-                            blockChainChanged: BaseBlockChainChangedEvent);
+                            blockChainChanged: BaseBlockChainChangedEvent,
+                            peerStateChangeHandler: PeerStateChanged);
 
                         LoadingEvent?.Invoke(this, "Starting BaseChain Initial Block Download...");
                         BaseBlockChainManager.Start();
@@ -220,6 +225,9 @@ namespace FreeMarketOne.ServerCore
 
                         LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
                         BasePoolManager.Start();
+
+                        //Add Swarm server to seed manager
+                        OnionSeedsManager.BaseSwarm = BaseBlockChainManager.SwarmServer;
 
                         //Initialize Market Blockchain Manager
                         LoadingEvent?.Invoke(this, "Loading Market BlockChain Manager...");
@@ -244,7 +252,8 @@ namespace FreeMarketOne.ServerCore
                             genesisBlock,
                             preloadEnded: MarketBlockChainLoadEndedEvent,
                             blockChainChanged: MarketBlockChainChangedEvent,
-                            clearedOlderBlocks: MarketBlockClearedOldersEvent);
+                            clearedOlderBlocks: MarketBlockClearedOldersEvent,
+                            peerStateChangeHandler: PeerStateChanged);
                         LoadingEvent?.Invoke(this, "Starting MarketChain Initial Block Download...");
                         MarketBlockChainManager.Start();
 
@@ -294,6 +303,54 @@ namespace FreeMarketOne.ServerCore
             {
                 _logger.Error(ex.Message);
                 _logger.Error(ex.StackTrace);
+            }
+        }
+
+        private async void PeerStateChangedHandlerAsync(object sender, PeerStateChangeEventArgs e)
+        {
+            if (e.Peer.EndPoint != null)
+            {
+                var endPoint = e.Peer.EndPoint;
+                if (endPoint.Port == 9114 && (e.Change.Equals(PeerStateChange.Joined) || e.Change.Equals(PeerStateChange.TwoWayDialogConfirmed)))
+                {
+                    var sibling = new BoundPeer(e.Peer.PublicKey, new DnsEndPoint(e.Peer.EndPoint.Host, 9113));
+                    var peers = new List<Peer>
+                    {
+                        sibling
+                    };
+                    if (!BaseBlockChainManager.SwarmServer.Peers.Where(p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any())
+                    {
+                        try
+                        {
+                            await BaseBlockChainManager.SwarmServer.AddPeersAsync(peers, TimeSpans.HalfMinute);
+                        }
+                        catch (Exception)
+                        {
+                            //swallow
+                        }
+                        
+                    }
+                }
+                if (endPoint.Port == 9113 && (e.Change.Equals(PeerStateChange.Joined) ||e.Change.Equals(PeerStateChange.TwoWayDialogConfirmed)))
+                {
+                    var sibling = new BoundPeer(e.Peer.PublicKey, new DnsEndPoint(e.Peer.EndPoint.Host, 9114));
+                    var peers = new List<Peer>
+                    {
+                        sibling
+                    };
+                    //if peer not exists is peers list
+                    if (!MarketBlockChainManager.SwarmServer.Peers.Where(p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any()){
+                        try
+                        {
+                            await MarketBlockChainManager.SwarmServer.AddPeersAsync(peers, TimeSpans.HalfMinute);
+                        }
+                        catch (Exception)
+                        {
+                            //swallow not very important just a helper
+                        }                        
+                    }
+                    
+                }
             }
         }
 

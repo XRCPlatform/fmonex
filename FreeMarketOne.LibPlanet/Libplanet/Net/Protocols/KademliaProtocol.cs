@@ -29,6 +29,7 @@ namespace Libplanet.Net.Protocols
         private readonly int _findConcurrency;
 
         private readonly ILogger _logger;
+        private NetmqConnectionPool _netmqConnectionPool;
 
         public KademliaProtocol(
             ITransport transport,
@@ -40,7 +41,9 @@ namespace Libplanet.Net.Protocols
             int? tableSize,
             int? bucketSize,
             int findConcurrency = Kademlia.FindConcurrency,
-            TimeSpan? requestTimeout = null)
+            TimeSpan? requestTimeout = null,
+            NetmqConnectionPool netmqConnectionPool = null,
+            EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             _transport = transport;
             _appProtocolVersion = appProtocolVersion;
@@ -54,9 +57,11 @@ namespace Libplanet.Net.Protocols
             _bucketSize = bucketSize ?? Kademlia.BucketSize;
             _findConcurrency = findConcurrency;
             _routing = new RoutingTable(_address, _tableSize, _bucketSize, _random, _logger);
+            _routing.PeerStateChange += peerStateChangeHandler;
             _requestTimeout =
                 requestTimeout ??
                 TimeSpan.FromMilliseconds(Kademlia.IdleRequestTimeout);
+            _netmqConnectionPool = netmqConnectionPool;
         }
 
         public IEnumerable<BoundPeer> Peers => _routing.Peers;
@@ -166,6 +171,7 @@ namespace Libplanet.Net.Protocols
             }
             catch (TimeoutException)
             {
+
             }
         }
 
@@ -220,8 +226,21 @@ namespace Libplanet.Net.Protocols
             {
                 await Task.WhenAll(tasks);
             }
-            catch (TimeoutException)
+            catch (AggregateException ae)
             {
+                foreach (var e in ae.InnerExceptions)
+                {
+                    // Handle the custom exception.
+                    if (e is TimeoutException)
+                    {
+                        _logger.Verbose($"FindPeerAsync() timed out. {e}");
+                    }
+                    // Rethrow any other exception.
+                    else
+                    {
+                        throw e;
+                    }
+                }
             }
         }
 
@@ -425,17 +444,15 @@ namespace Libplanet.Net.Protocols
             try
             {
                 _logger.Verbose("Trying to ping async to {Peer}.", target);
-                //timeout for ping should be smaller than other multipart messages, as ping is used to checks if peers are alive and around.
-                //if they have gone long timeout is detrimental.
-                //so instead of using passed timeout which is used widely and set to 60s.
                 Message reply = await _transport.SendMessageWithReplyAsync(
                     target,
                     new Ping(),
-                    TimeSpan.FromSeconds(120),
+                    timeout,
                     cancellationToken
                 );
                 if (!(reply is Pong pong))
                 {
+                    _logger.Error($"PingAsync recieved {reply} {reply.GetType()} from {reply.Remote} as reply raising exception.");
                     throw new InvalidMessageException("Received pong is invalid.", reply);
                 }
 
@@ -476,6 +493,15 @@ namespace Libplanet.Net.Protocols
             TimeSpan timeout,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+           await ValidateAsync(peer, timeout, 0, cancellationToken);
+        }
+
+        private async Task ValidateAsync(
+           BoundPeer peer,
+           TimeSpan timeout,
+           int retryCount,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
             try
             {
                 _logger.Verbose("Start to validate a peer: {Peer}", peer);
@@ -485,9 +511,17 @@ namespace Libplanet.Net.Protocols
             }
             catch (PingTimeoutException)
             {
-                _logger.Verbose("Peer {Peer} is invalid, removing...", peer);
-                RemovePeer(peer);
-                throw;
+                if (retryCount < 3)
+                {
+                    retryCount++;
+                    await ValidateAsync(peer, timeout, retryCount, cancellationToken);
+                }
+                else
+                {
+                    _logger.Verbose("Peer {Peer} is invalid, removing...", peer);
+                    RemovePeer(peer);
+                    throw;
+                }                
             }
         }
 
@@ -513,6 +547,10 @@ namespace Libplanet.Net.Protocols
         private void RemovePeer(BoundPeer peer)
         {
             _routing.RemovePeer(peer);
+
+            if (_netmqConnectionPool != null) {
+                _netmqConnectionPool.Recycle(peer);
+            }
         }
 
         /// <summary>

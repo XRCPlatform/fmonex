@@ -86,10 +86,26 @@ namespace Libplanet.Net
                     TransferTxs(getTxs);
                     break;
 
+                case TxBroadcast transaction:
+                    ReceiveTransactionBroadcast(transaction);
+                    break;
+                
+                case BlockBroadcast blocks:
+                    var task = Task.Run(async () => await ProcessBlock(blocks, _cancellationToken));
+                    try
+                    {
+                        task.Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error($"Processing received {nameof(blocks)} message, completed with error {e}.");
+                    }                    
+                    break;
+
                 case TxIds txIds:
                     ProcessTxIds(txIds);
                     break;
-
+               
                 case BlockHashes _:
                     _logger.Error($"{nameof(BlockHashes)} messages are only for IBD.");
                     break;
@@ -111,6 +127,58 @@ namespace Libplanet.Net
                         message
                     );
             }
+        }
+
+        private void ReceiveTransactionBroadcast(TxBroadcast message)
+        {
+            if (message is TxBroadcast parsed)
+            {
+
+                if (!(message.Remote is BoundPeer peer))
+                {
+                    _logger.Information(
+                        $"Ignores a {nameof(TxBroadcast)} message because it was sent by an invalid peer: " +
+                        "{PeerAddress}.",
+                        message.Remote?.Address.ToHex()
+                    );
+                    return;
+                }
+
+                Transaction<T> tx = Transaction<T>.Deserialize(parsed.Payload);
+
+                _logger.Debug($"Received a {nameof(TxBroadcast)} message: {tx}.");
+
+                if (!_store.ContainsTransaction(tx.Id))
+                {
+                    bool valid = BlockChain.Policy.DoesTransactionFollowsPolicy(tx, BlockChain);
+                    if (valid)
+                    {
+                        try
+                        {
+                            BlockChain.StageTransaction(tx);
+                            TxReceived.Set();
+                            _logger.Debug($"Txs staged successfully: {tx.Id}");                            
+
+                            Message newMessage = new TxBroadcast(tx.Serialize(true));
+                            message.Identity = message.Remote.Address.ToByteArray();
+
+                            BroadcastMessage(message.Remote.Address, newMessage);
+                        }
+                        catch (InvalidTxException ite)
+                        {
+                            _logger.Error(ite, "{TxId} will not be staged since it is invalid.", tx.Id);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                string errorMessage =
+                    $"Expected {nameof(TxBroadcast)} messages as response of " +
+                    $"the {nameof(TxBroadcast)} message, but got a {message.GetType().Name} " +
+                    $"message instead: {message}";
+                throw new InvalidMessageException(errorMessage, message);
+            }           
         }
 
         private void TransferBlockStates(GetBlockStates getBlockStates)
@@ -199,6 +267,160 @@ namespace Libplanet.Net
             }
         }
 
+        private async Task ProcessBlock(Messages.BlockBroadcast message, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (!(message.Remote is BoundPeer peer))
+            {
+                _logger.Information($"Blocks was sent from an invalid peer {message.Remote.Address} ignored.");
+                return;
+            }
+
+            if (message is Messages.BlockBroadcast blockMessage)
+            {
+                IList<byte[]> payloads = blockMessage.Payloads;
+
+                _logger.Debug($"Received {payloads.Count} blocks from {message.Remote}.");
+
+                foreach (byte[] payload in payloads)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var genesis = message.GenesisHash;
+
+                    Block<T> block = new Block<T>().Deserialize(payload);
+
+                    if (!genesis.Equals(BlockChain.Genesis.Hash))
+                    {
+                        _logger.Information(
+                            "Blocks was sent from the peer " +
+                            "{PeerAddress} with different genesis block {hash}; ignored.",
+                            message.Remote.Address,
+                            message.GenesisHash
+                        );
+                        return;
+                    }
+
+                    BlockHeaderReceived.Set();
+                    BlockHeader header = block.GetBlockHeader();
+                    _logger.Debug($"Received a {nameof(BlockHeader)} #{ header.Index} {ByteUtil.Hex(header.Hash)}.");
+
+                    try
+                    {
+                        header.Validate(DateTimeOffset.UtcNow);
+                    }
+                    catch (InvalidBlockException ibe)
+                    {
+                        _logger.Information(
+                            ibe,
+                            "A received header #{BlockIndex} {BlockHash} seems invalid; ignored.",
+                            header.Index,
+                            ByteUtil.Hex(header.Hash)
+                        );
+                        return;
+                    }
+                    
+                    long prevTip = BlockChain.Tip.Index;
+                    
+                    if (prevTip == block.Index)
+                    {
+                        //received re-broadcast
+                        if (BlockChain.Tip.Hash.Equals(block.Hash))
+                        {
+                            _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are same tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block");
+                            //should not broadcast as broadcasts will loop and never stop
+                        }
+                        else
+                        {
+                            _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are different  tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block, chain was split and will need re-org.");
+                            //broadcast as chain was split and will need re-org
+                            //BroadcastBlock(peer.Address, block);
+                        }
+                        return;
+                    }
+                    //single block gap try accept simply
+                    long gap = block.Index - prevTip;
+                    if (gap == 1)
+                    {
+                        _logger.Information($"Accepting a received block #{block.Index} { block.Hash } tip before this message {prevTip}");
+                        //if possible block will be appended here
+                        try
+                        {
+                            var chain = AcceptBlock(peer, BlockChain, block, cancellationToken);
+                        }
+                        catch (InvalidBlockPreviousHashException iph)
+                        {
+
+                            _logger.Error(iph, $"Failed to append a received block #{block.Index} { block.Hash } tip before this message {prevTip}. Error {iph}");
+
+                            _logger.Information($"Starting SyncPreviousBlocksAsync due to InvalidBlockPreviousHashException to resolve fork.");
+                            await SyncPreviousBlocksAsync(BlockChain,
+                                peer,
+                                block.Hash,
+                                null,
+                                ImmutableHashSet<Address>.Empty,
+                                null,
+                                0,
+                                cancellationToken);
+
+                            // FIXME: Clean up events
+                            BlockReceived.Set();
+                            BlockAppended.Set();
+                        }
+                        
+                        BroadcastBlock(peer.Address, BlockChain.Tip);
+                    }
+                    else if (gap > 1)
+                    {
+                        _logger.Information($"Found chain gap #{gap} larger than single block, tip before this message {prevTip}, a received header #{block.Index} { block.Hash } discarding received and starting SyncPreviousBlocksAsync");
+                        //if there is a GAP then go for a long download of previous blocks
+                        try
+                        {
+                            await SyncPreviousBlocksAsync(BlockChain, 
+                                peer, 
+                                block.Hash, 
+                                null, 
+                                ImmutableHashSet<Address>.Empty, 
+                                null, 
+                                0, 
+                                cancellationToken);
+
+                            // FIXME: Clean up events
+                            BlockReceived.Set();
+                            BlockAppended.Set();
+                            BroadcastBlock(peer.Address, BlockChain.Tip);
+                        }
+                        catch (TimeoutException)
+                        {
+                            _logger.Debug($"Timeout occurred during {nameof(SyncPreviousBlocksAsync)}");
+                        }
+                        catch (InvalidBlockIndexException ibie)
+                        {
+                            _logger.Warning(
+                                $"{nameof(InvalidBlockIndexException)} occurred during " +
+                                $"{nameof(SyncPreviousBlocksAsync)}: " +
+                                "{ibie}", ibie);
+                        }
+                        catch (Exception e)
+                        {
+                            var msg =
+                                $"Unexpected exception occurred during" +
+                                $" {nameof(SyncPreviousBlocksAsync)}: {{e}}";
+                            _logger.Error(e, msg, e);
+                        }
+                    }                   
+                }
+            }
+            else
+            {
+                string errorMessage =
+                    $"Expected a {nameof(BlockBroadcast)} message but got a {message.GetType().Name} message instead: {message}";
+                throw new InvalidMessageException(errorMessage, message);
+            }
+
+            _logger.Information($"Processed block(s) broadcast from {peer.EndPoint}@{peer.Address.ToHex()}.");
+
+        }
+
         private void TransferTxs(GetTxs getTxs)
         {
             IEnumerable<Transaction<T>> txs = getTxs.TxIds
@@ -207,6 +429,7 @@ namespace Libplanet.Net
 
             foreach (Transaction<T> tx in txs)
             {
+                _logger.Debug($"Responding to GetTxs {tx.Id}");
                 Message response = new Messages.Tx(tx.Serialize(true))
                 {
                     Identity = getTxs.Identity,
@@ -278,10 +501,24 @@ namespace Libplanet.Net
                     byte[] payload = block.Serialize();
                     blocks.Add(payload);
                 }
+                else
+                {
+                    if (BlockChain.Genesis.Hash.Equals(hash))
+                    {
+                        _logger.Verbose($"Requested block {hash} is genesis.");
+                        Block<T> block = BlockChain.Genesis;
+                        byte[] payload = block.Serialize();
+                        blocks.Add(payload);
+                    }
+                    else
+                    {
+                        _logger.Verbose($"Block {hash} not found. Sending empty reply for {hash}.");
+                    }
+                }
 
                 if (blocks.Count == getData.ChunkSize)
                 {
-                    var response = new Messages.Blocks(blocks)
+                    var response = new Messages.Blocks(blocks)//should include genesis ? , BlockChain.Genesis.Hash
                     {
                         Identity = getData.Identity,
                     };
@@ -299,7 +536,7 @@ namespace Libplanet.Net
 
             if (blocks.Any())
             {
-                var response = new Messages.Blocks(blocks)
+                var response = new Messages.Blocks(blocks)//should include genesis ? , BlockChain.Genesis.Hash
                 {
                     Identity = getData.Identity,
                 };

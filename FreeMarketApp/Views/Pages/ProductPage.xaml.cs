@@ -6,6 +6,7 @@ using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
+using FreeMarketOne.Extensions.Common;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
 using FreeMarketOne.Pools;
@@ -290,18 +291,20 @@ namespace FreeMarketApp.Views.Pages
 
                     _offer.XRCTransactionHash = tbXRCReceivingTransaction.Text;
                     //sign market data and generating chain connection
-                    _offer = FMONE.Current.MarketManager.SignBuyerMarketData(
+                    var signedOffer = FMONE.Current.MarketManager.SignBuyerMarketData(
                         _offer,
                         FMONE.Current.TorProcessManager.TorOnionEndPoint,
                         FMONE.Current.UserManager.PrivateKey);
 
+                    _offer = signedOffer.Clone();
+
                     PagesHelper.Log(_logger, string.Format("Propagate bought information to chain."));
 
-                    var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(_offer);
+                    var resultPool = FMONE.Current.MarketPoolManager.AcceptActionItem(signedOffer);
                     if (resultPool == null)
                     {
                         //create a new chat
-                        var newChat = FMONE.Current.ChatManager.CreateNewChat(_offer);
+                        var newChat = FMONE.Current.ChatManager.CreateNewChat(signedOffer);
                         FMONE.Current.ChatManager.SaveChat(newChat);
 
                         await MessageBox.Show(mainWindow,
@@ -310,7 +313,7 @@ namespace FreeMarketApp.Views.Pages
                             MessageBox.MessageBoxButtons.Ok);
 
                         var chatPage = ChatPage.Instance;
-                        chatPage.LoadChatByProduct(_offer.Hash);
+                        chatPage.LoadChatByProduct(signedOffer.Hash);
 
                         PagesHelper.Switch(mainWindow, chatPage);
 

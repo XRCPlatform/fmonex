@@ -883,21 +883,18 @@ namespace Libplanet.Blockchain
             void WatchTip(object target, (Block<T> OldTip, Block<T> NewTip) tip) => cts.Cancel();
             TipChanged += WatchTip;
 
-            Block<T> block;
+            Block<T> block = null;
             try
             {
-                block = await Task.Run(
-                    () => new Block<T>().Mine(
-                        index: index,
-                        difficulty: difficulty,
-                        previousTotalDifficulty: Tip.TotalDifficulty,
-                        miner: miner,
-                        previousHash: prevHash,
-                        timestamp: currentTime,
-                        transactions: transactionsToMine,
-                        cancellationToken: cancellationTokenSource.Token),
+                block = await Task.Run<Block<T>>(
+                    () => MineAndValidateBlock(miner, currentTime, index, difficulty, prevHash, transactionsToMine, cancellationTokenSource),
                     cancellationTokenSource.Token
                 );
+            }
+            catch (InvalidBlockException invalidBlockError)
+            {
+                _logger.Error($"A block #{index} mined, but failed validation with error {invalidBlockError}");
+                //swallow 
             }
             catch (OperationCanceledException)
             {
@@ -959,6 +956,33 @@ namespace Libplanet.Blockchain
                 );
             }
 
+            return block;
+        }
+
+        private Block<T> MineAndValidateBlock(Address miner, DateTimeOffset currentTime, long index, long difficulty, HashDigest<SHA256>? prevHash, List<Transaction<T>> transactionsToMine, CancellationTokenSource cancellationTokenSource)
+        {
+            var block = new Block<T>().Mine(
+                                    index: index,
+                                    difficulty: difficulty,
+                                    previousTotalDifficulty: Tip.TotalDifficulty,
+                                    miner: miner,
+                                    previousHash: prevHash,
+                                    timestamp: currentTime,
+                                    transactions: transactionsToMine,
+                                    cancellationToken: cancellationTokenSource.Token);
+            var validatioResult = ValidateNextBlock(block);
+            while(validatioResult != null) {
+                block = new Block<T>().Mine(
+                                    index: index,
+                                    difficulty: difficulty,
+                                    previousTotalDifficulty: Tip.TotalDifficulty,
+                                    miner: miner,
+                                    previousHash: prevHash,
+                                    timestamp: DateTimeOffset.UtcNow,
+                                    transactions: transactionsToMine,
+                                    cancellationToken: cancellationTokenSource.Token);
+                validatioResult = ValidateNextBlock(block);
+            }
             return block;
         }
 #pragma warning restore MEN003

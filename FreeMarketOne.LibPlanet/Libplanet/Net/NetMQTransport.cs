@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -20,7 +21,7 @@ namespace Libplanet.Net
 {
     internal class NetMQTransport : ITransport
     {
-        private const int MessageHistoryCapacity = 3000;
+        private const int MessageHistoryCapacity = 300;
 
         private static readonly TimeSpan TurnAllocationLifetime =
             TimeSpan.FromSeconds(777);
@@ -60,13 +61,15 @@ namespace Libplanet.Net
 
         private TaskCompletionSource<object> _runningEvent;
         private CancellationToken _cancellationToken;
-        private ConcurrentDictionary<Address, DealerSocket> _dealers;
+        private NetmqConnectionPool _netmqConnectionPool;
 
         /// <summary>
         /// The <see cref="EventHandler" /> triggered when the different version of
         /// <see cref="Peer" /> is discovered.
         /// </summary>
         private DifferentAppProtocolVersionEncountered _differentAppProtocolVersionEncountered;
+        private int findConcurrency = 3;
+        public event EventHandler<PeerStateChangeEventArgs> PeerStateChangeEvent;
 
         public NetMQTransport(
             PrivateKey privateKey,
@@ -81,7 +84,8 @@ namespace Libplanet.Net
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered,
             EventHandler<Message> processMessageHandler,
             ILogger logger,
-            string socks5Proxy)
+            string socks5Proxy,
+            EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             Running = false;
 
@@ -122,7 +126,7 @@ namespace Libplanet.Net
                     // tests
                     try
                     {
-                        var runtime = new NetMQRuntime();
+                        using var runtime = new NetMQRuntime();
                         var workerTasks = new Task[workers];
 
                         for (int i = 0; i < workers; i++)
@@ -155,6 +159,8 @@ namespace Libplanet.Net
             );
 
             MessageHistory = new FixedSizedQueue<Message>(MessageHistoryCapacity);
+            _netmqConnectionPool = new NetmqConnectionPool(_logger, socks5Proxy);
+
             Protocol = new KademliaProtocol(
                 this,
                 _privateKey.ToAddress(),
@@ -163,8 +169,12 @@ namespace Libplanet.Net
                 _differentAppProtocolVersionEncountered,
                 _logger,
                 tableSize,
-                bucketSize);
-            _dealers = new ConcurrentDictionary<Address, DealerSocket>();
+                bucketSize,
+                findConcurrency,
+                null,
+                _netmqConnectionPool,
+                peerStateChangeHandler);
+            PeerStateChangeEvent = peerStateChangeHandler;
         }
 
         /// <summary>
@@ -207,7 +217,6 @@ namespace Libplanet.Net
         }
 
         internal IProtocol Protocol { get; }
-
         internal FixedSizedQueue<Message> MessageHistory { get; }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -261,7 +270,7 @@ namespace Libplanet.Net
 
             tasks.Add(
                 RefreshTableAsync(
-                    TimeSpan.FromMinutes(10),
+                    TimeSpan.FromMinutes(1),
                     TimeSpan.FromMinutes(10),
                     _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
@@ -299,14 +308,7 @@ namespace Libplanet.Net
                 _replyQueue.Dispose();
                 _router.Dispose();
                 _turnClient?.Dispose();
-
-                foreach (DealerSocket dealer in _dealers.Values)
-                {
-                    dealer.Dispose();
-                }
-
-                _dealers.Clear();
-
+                _netmqConnectionPool.ShutDown();
                 Running = false;
             }
         }
@@ -418,20 +420,44 @@ namespace Libplanet.Net
 
         public Task WaitForRunningAsync() => _runningEvent.Task;
 
-        public Task SendMessageAsync(BoundPeer peer, Message message)
-            => SendMessageWithReplyAsync(peer, message, TimeSpan.FromSeconds(240), 0);
-
         public async Task<Message> SendMessageWithReplyAsync(
+           BoundPeer peer,
+           Message message,
+           TimeSpan? timeout,
+           CancellationToken cancellationToken
+           )
+        {
+            return await SendMessageWithReplyAsync(peer, message, timeout, cancellationToken, 0);
+        }
+
+        private async Task<Message> SendMessageWithReplyAsync(
             BoundPeer peer,
             Message message,
             TimeSpan? timeout,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            int retry = 0
+            )
         {
-            IEnumerable<Message> replies =
-                await SendMessageWithReplyAsync(peer, message, timeout, 1, cancellationToken);
-            Message reply = replies.First();
-
-            return reply;
+            try
+            {
+                IEnumerable<Message> replies =
+                await SendMessageWithReply(peer, message, timeout, 1, cancellationToken);
+                Message reply = replies.First();
+                return reply;
+            }
+            catch (Exception e)
+            {
+                _logger.Debug($"Error while processing SendMessageWithReplyAsync {message} to {peer} retry# {retry}");
+                if (retry < 3)
+                {
+                    retry++;
+                    return await SendMessageWithReplyAsync(peer, message, timeout, cancellationToken, retry);
+                }
+                else
+                {
+                    throw e;
+                }
+            }
         }
 
         public async Task<IEnumerable<Message>> SendMessageWithReplyAsync(
@@ -442,14 +468,65 @@ namespace Libplanet.Net
             CancellationToken cancellationToken = default(CancellationToken)
         )
         {
+            return await SendMessageWithReplyAsync(peer, message, timeout, expectedResponses, cancellationToken, 0);
+        }
+
+        private async Task<IEnumerable<Message>> SendMessageWithReplyAsync(
+            BoundPeer peer,
+            Message message,
+            TimeSpan? timeout,
+            int expectedResponses,
+            CancellationToken cancellationToken = default(CancellationToken),
+            int retry = 0
+        )
+        {
+            try
+            {
+                return await SendMessageWithReply(peer, message, timeout, expectedResponses, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.Debug($"Error while processing SendMessageWithReplyAsync {message} to {peer} retry# {retry}");
+                if (retry < 5)
+                {
+                    retry++;
+                    return await SendMessageWithReplyAsync(peer, message, timeout, expectedResponses, cancellationToken, retry);
+                }
+                else
+                {
+                    throw e;
+                }
+            }
+
+        }
+
+        private async Task<IEnumerable<Message>> SendMessageWithReply(
+            BoundPeer peer,
+            Message message,
+            TimeSpan? timeout,
+            int expectedResponses,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
+        {
+
             if (_behindNAT)
             {
                 await CreatePermission(peer);
             }
 
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            string timeoutStr = timeout == null ? "null" : timeout.ToString();
+
+            //creating only one exclusive open channel until message is recieved to avoid unexcpected messages recieved.
+            //FIXME:this is relying on string interning so a bit hack, a dictionary is probably better, but need to solve problem now.
+            _logger.Debug($"About to start call to {peer} for {message}, timeout [{timeoutStr}]");
+
             Guid reqId = Guid.NewGuid();
             try
             {
+
                 DateTimeOffset now = DateTimeOffset.UtcNow;
                 _logger.Verbose(
                     "Enqueue a request {RequestId} to {PeerAddress}: {Message}.",
@@ -462,10 +539,12 @@ namespace Libplanet.Net
 
                 // FIXME should we also cancel tcs sender side too?
                 cancellationToken.Register(() => tcs.TrySetCanceled());
+
                 await _requests.AddAsync(
                     new MessageRequest(reqId, message, peer, now, timeout, expectedResponses, tcs),
                     cancellationToken
                 );
+
                 _logger.Verbose(
                     "Enqueued a request {RequestId} to {PeerAddress}: {Message}; " +
                     "{LeftRequests} left.",
@@ -488,12 +567,31 @@ namespace Libplanet.Net
                         "from {PeerAddress}: {ReplyMessages}.";
                     _logger.Debug(logMsg, reply.Count, reqId, peer.Address, reply);
 
+                    sw.Stop();
+                    _logger.Debug($"Completed SendMessageWithReply {message} to {peer} elapsed ms: {sw.ElapsedMilliseconds}");
+
+                    PeerStateChangeEventArgs args = new PeerStateChangeEventArgs
+                    {
+                        Peer = peer,
+                        Change = PeerStateChange.TwoWayDialogConfirmed
+                    };
+                    OnPeerStateChange(args);
+
                     return reply;
                 }
                 else
                 {
                     return new Message[0];
                 }
+            }
+            catch (AggregateException ae)
+            {
+                foreach (var e in ae.InnerExceptions)
+                {
+                    _logger.Error($"Error in SendMessageWithReply {e}");
+                    throw e;
+                }
+                throw;
             }
             catch (DifferentAppProtocolVersionException e)
             {
@@ -507,7 +605,7 @@ namespace Libplanet.Net
             catch (TimeoutException)
             {
                 _logger.Debug(
-                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() timed out " +
+                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReply)}() timed out " +
                     "after {Timeout} of waiting a reply to {RequestId} from {PeerAddress}.",
                     timeout,
                     reqId,
@@ -518,7 +616,7 @@ namespace Libplanet.Net
             catch (TaskCanceledException)
             {
                 _logger.Debug(
-                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() was " +
+                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReply)}() was " +
                     "cancelled to  wait a reply to {RequestId} from {PeerAddress}.",
                     reqId,
                     peer.Address
@@ -528,12 +626,18 @@ namespace Libplanet.Net
             catch (Exception e)
             {
                 var msg =
-                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReplyAsync)}() encountered " +
+                    $"{nameof(NetMQTransport)}.{nameof(SendMessageWithReply)}() encountered " +
                     "an unexpected exception during sending a request {RequestId} to " +
                     "{PeerAddress} and waiting a reply to it: {Exception}.";
                 _logger.Error(e, msg, reqId, peer.Address, e);
                 throw;
             }
+            
+        }
+
+        protected void OnPeerStateChange(PeerStateChangeEventArgs e)
+        {
+            PeerStateChangeEvent?.Invoke(this, e);
         }
 
         public void BroadcastMessage(Address? except, Message message)
@@ -546,6 +650,7 @@ namespace Libplanet.Net
             string identityHex = ByteUtil.Hex(message.Identity);
             _logger.Debug("Reply {Message} to {Identity}...", message, identityHex);
             _replyQueue.Enqueue(message.ToNetMQMessage(_privateKey, AsPeer, _appProtocolVersion));
+            _logger.Debug($"Reply queue length {_replyQueue.LongCount()}"); 
         }
 
         public async Task CheckAllPeersAsync(CancellationToken cancellationToken, TimeSpan? timeout)
@@ -569,17 +674,26 @@ namespace Libplanet.Net
                         "A raw message [frame count: {0}] has received.",
                         raw.FrameCount
                     );
-                    Message message = Message.Parse(
-                        raw,
-                        false,
-                        _appProtocolVersion,
-                        _trustedAppProtocolVersionSigners,
-                        _differentAppProtocolVersionEncountered);
+                    Message message = null;
+                    try
+                    {
+                        message = Message.Parse(raw, false, _appProtocolVersion, _trustedAppProtocolVersionSigners, _differentAppProtocolVersionEncountered);
+                    }
+                    catch (FormatException ex)
+                    {
+                        //possibly a reply message was sent
+                        _logger.Error($"Got error parsing message {raw} {raw} {ex}");                        
+                        message = Message.Parse(raw, true, _appProtocolVersion, _trustedAppProtocolVersionSigners, _differentAppProtocolVersionEncountered);
+                        _logger.Debug($"Expected request message {message} but arrived as reply Swarm:{_listenPort}, recieved from {message.Remote}");
+                        //if success swallow, if failed will raise another format ex that will be handled above
+                    }
+                   
                     _logger.Debug("A message has parsed: {0}, from {1}", message, message.Remote);
 
-                    if (!message.Remote.ToString().EndsWith($":{_listenPort}.")) {
+                    if (!message.Remote.ToString().EndsWith($":{_listenPort}."))
+                    {
                         _logger.Debug($"A message {message} arrived from a wrong swarm: expected swarm {_listenPort}, recieved from {message.Remote}");
-                        //can't redirect to anothe listener at this stage
+                        //can't redirect to another listener at this stage
                     }
                     else
                     {
@@ -599,7 +713,7 @@ namespace Libplanet.Net
                                 exc);
                             throw;
                         }
-                    }                   
+                    }
                 }
                 catch (DifferentAppProtocolVersionException dapve)
                 {
@@ -613,6 +727,10 @@ namespace Libplanet.Net
                 catch (InvalidMessageException ex)
                 {
                     _logger.Error(ex, $"Could not parse NetMQMessage properly; ignore: {{0}}", ex);
+                }
+                catch (FormatException ex)
+                {
+                    _logger.Error(ex, $"Could not parse NetMQMessage error:{ex}");
                 }
                 catch (Exception ex)
                 {
@@ -638,41 +756,48 @@ namespace Libplanet.Net
                 _logger.Debug("Peers to broadcast: {PeersCount}", peers.Count);
 
                 NetMQMessage message = msg.ToNetMQMessage(_privateKey, AsPeer, _appProtocolVersion);
-
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 foreach (BoundPeer peer in peers)
                 {
                     if (peer.EndPoint.Port == _listenPort)
                     {
-                        if (!_dealers.TryGetValue(peer.Address, out DealerSocket dealer))
+                        _logger.Debug($"About to broadcast {msg} to : {peer}");
+                        PooledDealerSocket pooledDealerSocket = _netmqConnectionPool.RentDealerSocket(peer, false);
+                        int retryCount = 1;
+                        bool success = pooledDealerSocket.Socket.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
+
+                        while (!success && retryCount < 5)
                         {
-                            dealer = new DealerSocket(ToNetMQAddress(peer));
-                            _dealers[peer.Address] = dealer;
+                            _logger.Debug($"Broadcasting try # {retryCount} failed. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
+                            retryCount++;
+                            success = pooledDealerSocket.Socket.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
                         }
 
-                        if (!dealer.TrySendMultipartMessage(TimeSpan.FromSeconds(120), message))
+                        if (success)
                         {
-                            _logger.Warning(
-                                "Broadcasting timed out. [Peer: {Peer}, Message: {Message}]",
-                                peer,
-                                msg
-                            );
-                            //disposing dealer sockets on the basis of mere timeout is detrimental
-                            //they will be removed elsewhere in rebuilding connections
-                            //dealer.Dispose();
-                            //_dealers.TryRemove(peer.Address, out _);
+                            sw.Stop();
+                            _netmqConnectionPool.Return(pooledDealerSocket);
+                            _logger.Debug($"Broadcasting try # {retryCount} succeeded. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
                         }
-                    }                   
+                        else
+                        {
+                            _logger.Debug($"Removing dealer socket for peer {peer} after 5 consecutive failures ms: {sw.ElapsedMilliseconds}");
+                            //netmq poller.remove gets upset if disposed here
+                            _netmqConnectionPool.KillIfUnhealthy(pooledDealerSocket);
+
+                        }
+                    }
                 }
             }
             catch (Exception exc)
             {
-                _logger.Error(
-                    exc,
-                    $"Unexpected error occurred during {nameof(DoBroadcast)}(). {{error}}",
-                    exc);
+                _logger.Error(exc, $"Unexpected error occurred during {nameof(DoBroadcast)}(). {exc}");
                 throw;
             }
         }
+
+       
 
         private void DoReply(object sender, NetMQQueueEventArgs<NetMQMessage> e)
         {
@@ -681,13 +806,22 @@ namespace Libplanet.Net
 
             // FIXME The current timeout value(1 sec) is arbitrary.
             // We should make this configurable or fix it to an unneeded structure.
-            if (_router.TrySendMultipartMessage(TimeSpan.FromSeconds(120), msg))
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            int tryCount = 1;
+            bool success = _router.TrySendMultipartMessage(TimeSpan.FromMinutes(5), msg);
+
+            while (!success && tryCount < 5)
             {
-                _logger.Debug("A reply sent to {Identity}", identityHex);
+                _logger.Debug($"Failed to reply to {identityHex} on try# {tryCount} duration ms: {sw.ElapsedMilliseconds}");
+                tryCount++;
+                success = _router.TrySendMultipartMessage(TimeSpan.FromMinutes(5), msg);
             }
-            else
+
+            if (success)
             {
-                _logger.Debug("Failed to reply to {Identity}", identityHex);
+                sw.Stop();
+                _logger.Debug($"A reply sent to {identityHex} on try# {tryCount} duration ms: {sw.ElapsedMilliseconds}");
             }
         }
 
@@ -752,10 +886,7 @@ namespace Libplanet.Net
             {
                 _logger.Verbose("Waiting for a new request...");
                 MessageRequest req = await _requests.TakeAsync(cancellationToken);
-                Interlocked.Decrement(ref _requestCount);
-                _logger.Debug(
-                    "Request taken. {Count} requests are left.",
-                    Interlocked.Read(ref _requestCount));
+                _logger.Debug($"Request taken. {Interlocked.Decrement(ref _requestCount)} requests are left. Time in queue {req.RequestedTime - DateTimeOffset.UtcNow}");
 
                 try
                 {
@@ -794,7 +925,7 @@ namespace Libplanet.Net
                 }
             }
         }
-
+        
         private async Task ProcessRequest(MessageRequest req, CancellationToken cancellationToken)
         {
             _logger.Verbose(
@@ -803,52 +934,40 @@ namespace Libplanet.Net
                 req.Id,
                 DateTimeOffset.UtcNow - req.RequestedTime);
             DateTimeOffset startedTime = DateTimeOffset.UtcNow;
-            
-            if (!_dealers.TryGetValue(req.Peer.Address, out DealerSocket dealer))
-            {
-                dealer = new DealerSocket(ToNetMQAddress(req.Peer));
-                _dealers[req.Peer.Address] = dealer;
-            }
 
-            _logger.Debug(
-                "Trying to send {Message} to {Peer}...",
-                req.Message,
-                req.Peer
-            );
+            PooledDealerSocket pooledDealerSocket = _netmqConnectionPool.RentDealerSocket(req.Peer, true);
+
+            _logger.Debug($"Trying to send {req.Message} to {req.Peer}...");
             var message = req.Message.ToNetMQMessage(_privateKey, AsPeer, _appProtocolVersion);
             var result = new List<Message>();
             TaskCompletionSource<IEnumerable<Message>> tcs = req.TaskCompletionSource;
             try
             {
-                await dealer.SendMultipartMessageAsync(
+                await pooledDealerSocket.Socket.SendMultipartMessageAsync(
                     message,
                     timeout: req.Timeout,
                     cancellationToken: cancellationToken
                 );
 
-                _logger.Debug("A message {Message} sent.", req.Message);
+                _logger.Debug($"A message {req.Message} sent.");
 
                 foreach (var i in Enumerable.Range(0, req.ExpectedResponses))
                 {
-                    NetMQMessage raw = await dealer.ReceiveMultipartMessageAsync(
+                    NetMQMessage raw = await pooledDealerSocket.Socket.ReceiveMultipartMessageAsync(
                         timeout: req.Timeout,
                         cancellationToken: cancellationToken
                     );
-                    _logger.Verbose(
-                        "A raw message ({FrameCount} frames) has replied.",
-                        raw.FrameCount
-                    );
+
+                    _logger.Verbose($"A raw message ({raw.FrameCount} frames) has replied.");
+
                     Message reply = Message.Parse(
                         raw,
                         true,
                         _appProtocolVersion,
                         _trustedAppProtocolVersionSigners,
                         _differentAppProtocolVersionEncountered);
-                    _logger.Debug(
-                        "A reply has parsed: {Reply} from {ReplyRemote}",
-                        reply,
-                        reply.Remote
-                    );
+                    
+                    _logger.Debug($"A reply has parsed: {reply} from { reply.Remote}");
 
                     result.Add(reply);
                 }
@@ -866,7 +985,17 @@ namespace Libplanet.Net
             }
             catch (TimeoutException te)
             {
+                _netmqConnectionPool.KillIfUnhealthy(pooledDealerSocket);
                 tcs.TrySetException(te);
+            }
+            catch (FormatException fe)
+            {
+                _logger.Error($"A message request:{req.Message} recieved a reply that could not parse. Error:{fe}");
+                tcs.TrySetException(fe);
+            }
+            finally
+            {
+               _netmqConnectionPool.Return(pooledDealerSocket);
             }
 
             _logger.Verbose(
@@ -1005,20 +1134,6 @@ namespace Libplanet.Net
                     await Task.Delay(period, cancellationToken);
                     await Protocol.RefreshTableAsync(maxAge, cancellationToken);
                     await Protocol.CheckReplacementCacheAsync(cancellationToken);
-
-                    ImmutableHashSet<Address> peerAddresses =
-                        Peers.Select(p => p.Address).ToImmutableHashSet();
-                    foreach (var address in _dealers.Keys)
-                    {
-                        if (!peerAddresses.Contains(address) &&
-                            _dealers.TryGetValue(address, out DealerSocket removed))
-                        {
-                            //remove but not dispose it will be cleaned up by runtime later
-                            _dealers.TryRemove(address, out DealerSocket removed2);
-                            //dispose was causing errors down the line in concurent code
-                            //removed.Dispose();
-                        }
-                    }
                 }
                 catch (OperationCanceledException e)
                 {
@@ -1042,8 +1157,8 @@ namespace Libplanet.Net
             {
                 try
                 {
-                    await Protocol.RebuildConnectionAsync(cancellationToken);
                     await Task.Delay(period, cancellationToken);
+                    await Protocol.RebuildConnectionAsync(cancellationToken);
                 }
                 catch (OperationCanceledException e)
                 {

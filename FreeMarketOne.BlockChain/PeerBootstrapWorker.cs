@@ -20,7 +20,7 @@ namespace FreeMarketOne.BlockChain
         private ILogger _logger { get; set; }
         private CancellationTokenSource _cancellationToken { get; set; }
 
-        private const int SwarmDialTimeout = 300000;
+        private const int SwarmDialTimeout = 30000;
 
         private PrivateKey _privateKey { get; set; }
         private BlockChain<T> _blockChain;
@@ -89,29 +89,33 @@ namespace FreeMarketOne.BlockChain
                     }
                 });
 
-                Task.Run(async () =>
+                var swarmBootStrapTask = Task.Run(async () =>
                 {
-                    try
-                    {
-                        await _swarmServer.WaitForRunningAsync();
-                        await _swarmServer.AddPeersAsync(
-                            _seedPeers,
-                            TimeSpan.FromMinutes(2),
-                            _cancellationToken.Token);
-                    }
-                    catch (TimeoutException e)
-                    {
-                        _logger.Error(e.Message);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error(string.Format("Exception occurred during AddPeers {0}", e));
-                    }
+                    //AddPeersAsync does same thing as bootstrap?
+                    //try
+                    //{
+                    //    await _swarmServer.WaitForRunningAsync();
+                    //    await _swarmServer.AddPeersAsync(
+                    //        _seedPeers,
+                    //        TimeSpan.FromSeconds(30),
+                    //        _cancellationToken.Token);
+                    //}
+                    //catch (TimeoutException e)
+                    //{
+                    //    _logger.Error(e.Message);
+                    //}
+                    //catch (Exception e)
+                    //{
+                    //    _logger.Error(string.Format("Exception occurred during AddPeers {0}", e));
+                    //}
 
                     var bootstrapTask = Task.Run(async () =>
                     {
                         try
                         {
+                            _logger.Debug($"Waiting for Swarm to start in BootstrapAsync from PeerBootstrapWorker for {_swarmServer.AsPeer}");
+                            await _swarmServer.WaitForRunningAsync();
+                            _logger.Debug($"Starting BootstrapAsync from PeerBootstrapWorker for {_swarmServer.AsPeer}");
                             await _swarmServer.BootstrapAsync(
                                 _seedPeers,
                                 SwarmDialTimeout,
@@ -132,7 +136,8 @@ namespace FreeMarketOne.BlockChain
                             _logger.Error(string.Format("Exception occurred during bootstrap {0}", e));
                         }
                     });
-
+                    //block here before starting preloading
+                    bootstrapTask.Wait();
                     await PreloadAsync();
 
                     _logger.Information(
@@ -143,7 +148,7 @@ namespace FreeMarketOne.BlockChain
                     );
                 });
 
-                yield return new WaitUntil(() => swarmStartTask.IsCompleted);
+                yield return new WaitUntil(() => swarmStartTask.IsCompleted & swarmStartTask.IsCompleted);
             }
         }
 
@@ -151,13 +156,13 @@ namespace FreeMarketOne.BlockChain
         {
             DateTimeOffset started = DateTimeOffset.UtcNow;
             long existingBlocks = _blockChain?.Tip?.Index ?? 0;
-            _logger.Information("Preloading starts");
+            _logger.Information($"Preloading starts on {_swarmServer.AsPeer}");
             _preloadStarted?.Invoke(this, null);
 
             try
             {
                 await _swarmServer.PreloadAsync(
-                    TimeSpan.FromMilliseconds(SwarmDialTimeout),
+                    null,
                     new Progress<PreloadState>(state =>
                         _preloadProcessed?.Invoke(this, state)
                     ),

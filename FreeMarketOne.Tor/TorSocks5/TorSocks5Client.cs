@@ -100,7 +100,7 @@ namespace FreeMarketOne.Tor
 				int? port = TorSocks5EndPoint.GetPortOrDefault();
 				try
 				{
-					if (!TcpClient.Connected)
+					if (!TcpClient.Connected && port.HasValue && port > 0 && !string.IsNullOrEmpty(host))
                     {
 						await TcpClient.ConnectAsync(host, port.Value).ConfigureAwait(false);
 					}					

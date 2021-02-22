@@ -40,7 +40,7 @@ namespace FreeMarketOne.P2P
         private TorProcessManager _torProcessManager { get; set; }
         private IPAddress _serverPublicAddress { get; set; }
         private string _serverOnionAddress { get; set; }
-        private List<string> _onionSeeds { get; set; }        
+        private List<string> _onionSeeds { get; set; }
         public Swarm<BaseAction> BaseSwarm { get; set; }
         public Swarm<MarketAction> MarketSwarm { get; set; }
 
@@ -81,18 +81,15 @@ namespace FreeMarketOne.P2P
             }
         }
 
-        public void Start()
+        public async Task Start()
         {
             _logger.Information(string.Format("Loading of: {0} by Tor Gate: {1}", _torOnionEndPoint, _torSocks5EndPoint));
 
-            //we have to load first onion seeds synchroniously
-            ProcessOnionSeeds();
+            await ProcessOnionSeedsAsync();
 
             IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("OnionPeriodicCheck", (cancellation) =>
             {
-                ProcessOnionSeeds();
-
-                return Task.CompletedTask;
+                return ProcessOnionSeedsAsync();
             },
             _cancellationToken.Token,
             repeatEvery: TimeSpans.TenMinutes,
@@ -107,7 +104,7 @@ namespace FreeMarketOne.P2P
         {
             if (_httpClient == null)
             {
-                var handler = new HttpClientHandler {};
+                var handler = new HttpClientHandler { };
                 if (_listenersUseTor)
                 {
                     var proxy = new HttpToSocks5Proxy("127.0.0.1", 9050);
@@ -149,7 +146,7 @@ namespace FreeMarketOne.P2P
             }
         }
 
-        private void ProcessOnionSeeds()
+        private async Task ProcessOnionSeedsAsync()
         {
             var dateTimeUtc = DateTime.UtcNow;
 
@@ -161,7 +158,7 @@ namespace FreeMarketOne.P2P
             // Get local seeds
             if (_onionSeeds != null)
             {
-                foreach(string onionSeed in _onionSeeds)
+                foreach (string onionSeed in _onionSeeds)
                 {
                     AddOnionSeedString(onionSeed);
                 }
@@ -192,7 +189,7 @@ namespace FreeMarketOne.P2P
                                 AddOnionSeedString(onion);
 
                             }
-                        }                        
+                        }
                     }
                     else
                     {
@@ -206,18 +203,23 @@ namespace FreeMarketOne.P2P
 
                 if ((OnionSeedPeers != null) && (OnionSeedPeers.Any()) && (BaseSwarm != null) && (MarketSwarm != null))
                 {
+                    List<Task> tasks = new List<Task>();
                     foreach (var itemSeedPeer in OnionSeedPeers)
                     {
-                        // no need to create paralell runs, these could be ticking in background without stresssing tor services
-                        try
+                        tasks.Add(Task.Factory.StartNew(()=> AddSeedsToBaseSwarmAsPeer(itemSeedPeer)));
+                        tasks.Add(Task.Factory.StartNew(()=> AddSeedsToMarketSwarmAsPeer(itemSeedPeer)));
+                    }
+                    try
+                    {
+                        Task.WaitAll(tasks.ToArray());
+                    }
+                    catch (AggregateException ae)
+                    {
+                        foreach (var e in ae.Flatten().InnerExceptions)
                         {
-                            AddSeedsToBaseSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
-                            AddSeedsToMarketSwarmAsPeer(itemSeedPeer).ConfigureAwait(false).GetAwaiter().GetResult();
+                            _logger.Error($"Error adding seeds to swarm {e.Message}");
                         }
-                        catch (Exception e)
-                        {
-                            _logger.Error(string.Format("Cant add seed to swarm {0}", e));
-                        }
+                        
                     }
                 }
 
@@ -229,7 +231,7 @@ namespace FreeMarketOne.P2P
                 if (MarketSwarm != null)
                 {
                     periodicCheckLog.AppendLine(string.Format("Swarm Market Peers: {0}", MarketSwarm.Peers.Count()));
-                }                    
+                }
 
             }
             else
@@ -270,20 +272,25 @@ namespace FreeMarketOne.P2P
         /// <returns></returns>
         private async Task AddSeedsToBaseSwarmAsPeer(OnionSeedPeer seed)
         {
+            var publicKey = new PublicKey(ByteUtil.ParseHex(seed.PublicKeyHex));
+            var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
+
             if (BaseSwarm.Peers.Any())
             {
-                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.PublicKeyHex));
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
-
-                _logger.Information(string.Format("Adding base peer pubkey: {0}", boundPeer.ToString()));
-
                 var exist = BaseSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
-                if (exist == null)
-                    await BaseSwarm.AddPeersAsync(
-                        new[] { boundPeer },
-                        TimeSpan.FromMinutes(2),
-                        _cancellationToken.Token);
+                if (exist != null)
+                {
+                    return;
+                }
             }
+
+            _logger.Information(string.Format("Adding base peer pubkey: {0}", boundPeer.ToString()));
+
+            await BaseSwarm.AddPeersAsync(
+                    new[] { boundPeer },
+                    TimeSpan.FromSeconds(10),
+                    _cancellationToken.Token).ConfigureAwait(false);
+
         }
 
         /// <summary>
@@ -293,23 +300,28 @@ namespace FreeMarketOne.P2P
         /// <returns></returns>
         private async Task AddSeedsToMarketSwarmAsPeer(OnionSeedPeer seed)
         {
+
+            var publicKey = new PublicKey(ByteUtil.ParseHex(seed.PublicKeyHex));
+            var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
+
             if (MarketSwarm.Peers.Any())
             {
-                var publicKey = new PublicKey(ByteUtil.ParseHex(seed.PublicKeyHex));
-                var boundPeer = new BoundPeer(publicKey, new DnsEndPoint(seed.UrlBlockChain, seed.PortBlockChainBase));
-
-                _logger.Information(string.Format("Adding market peer pubkey: {0}", boundPeer.ToString()));
-
                 var exist = MarketSwarm.Peers.FirstOrDefault(p => p.PublicKey == publicKey);
-                if (exist == null)
-                    await MarketSwarm.AddPeersAsync(
-                        new[] { boundPeer },
-                        TimeSpan.FromMinutes(2),
-                        _cancellationToken.Token);
+                if (exist != null)
+                {
+                    return;
+                }
             }
+
+            _logger.Information(string.Format("Adding market peer pubkey: {0}", boundPeer.ToString()));
+            await MarketSwarm.AddPeersAsync(
+                    new[] { boundPeer },
+                    TimeSpan.FromSeconds(10),
+                    _cancellationToken.Token).ConfigureAwait(false);
+
         }
 
-       
+
         public void Dispose()
         {
             Interlocked.Exchange(ref running, 2);

@@ -26,6 +26,7 @@ using FreeMarketOne.DataStructure.ProtocolVersions;
 using FreeMarketOne.Extensions.Common;
 using static FreeMarketOne.Extensions.Common.ServiceHelper;
 using Libplanet.Store;
+using Libplanet.Net.Messages;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -61,6 +62,7 @@ namespace FreeMarketOne.BlockChain
         private EventHandler<PreloadState> _preloadProcessed { get; set; }
         private EventHandler _preloadEnded { get; set; }
         private EventHandler<(Block<T> OldTip, Block<T> NewTip)> _blockChainChanged { get; set; }
+        private EventHandler<PeerStateChangeEventArgs> _peerStateChangeHandler { get; set; }
 
         private EventHandler<List<HashDigest<SHA256>>> _clearedOlderBlocks { get; set; }
         private IBaseConfiguration _configuration { get; }
@@ -104,7 +106,8 @@ namespace FreeMarketOne.BlockChain
             EventHandler<PreloadState> preloadProcessed = null,
             EventHandler preloadEnded = null,
             EventHandler<(Block<T> OldTip, Block<T> NewTip)> blockChainChanged = null,
-            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null)
+            EventHandler<List<HashDigest<SHA256>>> clearedOlderBlocks = null,
+            EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             _logger = Log.Logger.ForContext(Serilog.Core.Constants.SourceContextPropertyName,
                 string.Format("{0}.{1}.{2}", typeof(BlockChainManager<T>).Namespace, typeof(BlockChainManager<T>).Name.Replace("`1", string.Empty), typeof(T).Name));
@@ -136,6 +139,7 @@ namespace FreeMarketOne.BlockChain
             _blockChainChanged = blockChainChanged;
             _clearedOlderBlocks = clearedOlderBlocks;
             _protocolVersion = protocolVersion;
+            _peerStateChangeHandler = peerStateChangeHandler;
 
             _logger.Information(string.Format("Initializing BlockChain Manager for : {0}", typeof(T).Name));
         }
@@ -160,8 +164,8 @@ namespace FreeMarketOne.BlockChain
             if (host != null)
             {
                 _swarmServer = new Swarm<T>(
-                    _blockChain,
-                    _privateKey,
+                    blockChain: _blockChain,
+                    privateKey: _privateKey,
                     appProtocolVersion: _protocolVersion.GetProtocolVersion(),
                     host: host,
                     listenPort: port,
@@ -170,7 +174,8 @@ namespace FreeMarketOne.BlockChain
                     trustedAppProtocolVersionSigners: _protocolVersion.GetProtocolSigners(),
                     options: new SwarmOptions {
                         Socks5Proxy = _configuration.ListenersUseTor ? "127.0.0.1:9050" : null
-                    }
+                    },
+                    peerStateChangeHandler: _peerStateChangeHandler
                 );
 
                 var peers = GetPeersFromOnionManager(typeof(T));
@@ -372,21 +377,21 @@ namespace FreeMarketOne.BlockChain
                 _seedPeers = peers.Where(peer => peer.PublicKey != _privateKey.PublicKey).ToImmutableList();
 
                 //blocking calls deliberately as we don't want to create a DDOS attack here when newtrok re-connected
-                _swarmServer.AddPeersAsync(_seedPeers, TimeSpans.FiveMinutes).ConfigureAwait(false).GetAwaiter().GetResult();
-                _swarmServer.CheckAllPeersAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                await _swarmServer.AddPeersAsync(_seedPeers, TimeSpan.FromSeconds(30));
+                await _swarmServer.CheckAllPeersAsync();
 
                 //same script is executed at service manager but this could kick in earlier than service manager poll period
-                var diff = ValidateChainAgainstNetwork().ConfigureAwait(false).GetAwaiter().GetResult();
+                var diff = await ValidateChainAgainstNetwork();
                 if (diff.Any())
                 {
-                    PullRemoteChainDifferences().ConfigureAwait(false).GetAwaiter().GetResult();
+                    await PullRemoteChainDifferences();
                 }
             }
         }
 
         public async Task<IEnumerable<PeerChainState>> ValidateChainAgainstNetwork()
         {
-            var states = await _swarmServer.GetPeerChainStateAsync(TimeSpan.FromMinutes(10), new CancellationToken());            
+            var states = await _swarmServer.GetPeerChainStateAsync(TimeSpan.FromMinutes(1), new CancellationToken());            
             return states.Where(peerToCheck => peerToCheck.TipIndex> BlockChain.Tip.Index && peerToCheck.TotalDifficulty > BlockChain.Tip.TotalDifficulty);
         }
 

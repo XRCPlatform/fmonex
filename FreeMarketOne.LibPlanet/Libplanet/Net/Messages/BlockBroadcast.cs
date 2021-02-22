@@ -6,10 +6,11 @@ using NetMQ;
 
 namespace Libplanet.Net.Messages
 {
-    internal class Blocks : Message
+    internal class BlockBroadcast : Message
     {
-        public Blocks(IEnumerable<byte[]> payloads)
+        public BlockBroadcast(IEnumerable<byte[]> payloads, HashDigest<SHA256> genesisHash)
         {
+            GenesisHash = genesisHash;
             if (payloads.Count() > int.MaxValue)
             {
                 throw new ArgumentOutOfRangeException(
@@ -20,22 +21,26 @@ namespace Libplanet.Net.Messages
             Payloads = payloads.ToList();
         }
 
-        public Blocks(NetMQFrame[] body)
+        public HashDigest<SHA256> GenesisHash { get; }
+
+        public BlockBroadcast(NetMQFrame[] body)
         {
-            int payloadCount = body[0].ConvertToInt32();
-            Payloads = body.Skip(1).Take(payloadCount)
+            GenesisHash = new HashDigest<SHA256>(body[0].Buffer);
+            int payloadCount = body[1].ConvertToInt32();
+            Payloads = body.Skip(2).Take(payloadCount)
                 .Select(f => f.ToByteArray())
                 .ToList();
         }
 
         public List<byte[]> Payloads { get; }
 
-        protected override MessageType Type => MessageType.Blocks;
+        protected override MessageType Type => MessageType.BlockBroadcast;
 
         protected override IEnumerable<NetMQFrame> DataFrames
         {
             get
             {
+                yield return new NetMQFrame(GenesisHash.ToByteArray());
                 yield return new NetMQFrame(
                     NetworkOrderBitsConverter.GetBytes(Payloads.Count));
 

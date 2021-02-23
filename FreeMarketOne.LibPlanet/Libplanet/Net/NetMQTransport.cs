@@ -62,6 +62,7 @@ namespace Libplanet.Net
         private TaskCompletionSource<object> _runningEvent;
         private CancellationToken _cancellationToken;
         private NetmqConnectionPool _netmqConnectionPool;
+        private List<Task> requestTasks = new List<Task>();
 
         /// <summary>
         /// The <see cref="EventHandler" /> triggered when the different version of
@@ -136,7 +137,22 @@ namespace Libplanet.Net
                             );
                         }
 
+                        Task shepard = Task.Factory.StartNew(
+                            async () =>
+                            {
+                                while (true)
+                                {   
+                                    //trim hanging task references
+                                    requestTasks.RemoveAll(t => t.IsCompleted);
+                                    await Task.Delay(TimeSpan.FromMinutes(5));
+                                }
+                            }
+                        );
+
                         runtime.Run(workerTasks);
+                        shepard.Wait();
+                        Task.WaitAll(requestTasks.ToArray());
+                        
                     }
                     catch (NetMQException e)
                     {
@@ -487,7 +503,7 @@ namespace Libplanet.Net
             catch (Exception e)
             {
                 _logger.Debug($"Error while processing SendMessageWithReplyAsync {message} to {peer} retry# {retry}");
-                if (retry < 5)
+                if (retry < 3)
                 {
                     retry++;
                     return await SendMessageWithReplyAsync(peer, message, timeout, expectedResponses, cancellationToken, retry);
@@ -767,7 +783,7 @@ namespace Libplanet.Net
                         int retryCount = 1;
                         bool success = pooledDealerSocket.Socket.TrySendMultipartMessage(TimeSpan.FromMinutes(2), message);
 
-                        while (!success && retryCount < 5)
+                        while (!success && retryCount < 3)
                         {
                             _logger.Debug($"Broadcasting try # {retryCount} failed. [Peer: {peer}, Message: {msg}] duration ms: {sw.ElapsedMilliseconds}");
                             retryCount++;
@@ -811,7 +827,7 @@ namespace Libplanet.Net
             int tryCount = 1;
             bool success = _router.TrySendMultipartMessage(TimeSpan.FromMinutes(5), msg);
 
-            while (!success && tryCount < 5)
+            while (!success && tryCount < 3)
             {
                 _logger.Debug($"Failed to reply to {identityHex} on try# {tryCount} duration ms: {sw.ElapsedMilliseconds}");
                 tryCount++;
@@ -879,8 +895,7 @@ namespace Libplanet.Net
             }
         }
 
-        private async Task ProcessRuntime(
-            CancellationToken cancellationToken = default(CancellationToken))
+        private async Task ProcessRuntime(CancellationToken cancellationToken = default(CancellationToken))
         {
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -890,10 +905,22 @@ namespace Libplanet.Net
 
                 try
                 {
-                    if (req.Peer.EndPoint.Port == _listenPort.Value)
-                    {
-                        await ProcessRequest(req, cancellationToken);
-                    }
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    cts.CancelAfter(TimeSpan.FromMinutes(10));
+
+                    CancellationTokenSource cancellationTokenSource =
+                        CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
+
+                    requestTasks.Add(
+                        Task.Factory.StartNew(
+                           async () =>
+                           {
+                               if (req.Peer.EndPoint.Port == _listenPort.Value)
+                               {
+                                   await ProcessRequest(req, cancellationTokenSource.Token);
+                               }
+                           }
+                         ));
                 }
                 catch (OperationCanceledException)
                 {

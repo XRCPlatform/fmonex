@@ -93,7 +93,7 @@ namespace Libplanet.Net
 
         internal bool KillIfUnhealthy()
         {
-            if (Interlocked.Read(ref activeRents) <2 && Interlocked.Read(ref timeouts) >3)
+            if (Interlocked.Read(ref activeRents) <2 && Interlocked.Read(ref timeouts) >1)
             {
                 lock (rentAvaliabilityLock)
                 {

@@ -882,7 +882,13 @@ namespace Libplanet.Blockchain
 
             void WatchTip(object target, (Block<T> OldTip, Block<T> NewTip) tip) => cts.Cancel();
             TipChanged += WatchTip;
-
+            
+            //no valid transactions to mine, wait for valid transactions 
+            if (transactionsToMine.Count < 1)
+            {
+                return Tip;
+            }
+            
             Block<T> block = null;
             try
             {

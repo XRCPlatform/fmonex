@@ -318,7 +318,10 @@ namespace FreeMarketOne.ServerCore
                     {
                         sibling
                     };
-                    if (!BaseBlockChainManager.SwarmServer.Peers.Where(p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any())
+                    if (BaseBlockChainManager != null 
+                        && BaseBlockChainManager.SwarmServer != null 
+                        && !BaseBlockChainManager.SwarmServer.Peers.Where(
+                            p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any())
                     {
                         try
                         {
@@ -339,7 +342,10 @@ namespace FreeMarketOne.ServerCore
                         sibling
                     };
                     //if peer not exists is peers list
-                    if (!MarketBlockChainManager.SwarmServer.Peers.Where(p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any()){
+                    if (MarketBlockChainManager != null 
+                        && MarketBlockChainManager.SwarmServer != null 
+                        && !MarketBlockChainManager.SwarmServer.Peers.Where(
+                            p => p.EndPoint.Host.Equals(e.Peer.EndPoint.Host)).Any()){
                         try
                         {
                             await MarketBlockChainManager.SwarmServer.AddPeersAsync(peers, TimeSpans.HalfMinute);

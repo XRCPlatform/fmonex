@@ -69,11 +69,8 @@ namespace FreeMarketOne.Pools
 
                     if (_swarmServer?.Running ?? false)
                     {
-                        if (!block.Hash.Equals(_blockChain.Tip.Hash))
-                        {
-                            _swarmServer.BroadcastBlock(block);
-                        }
-                        
+                        //broadcast even if tip is unchanged
+                        _swarmServer.BroadcastBlock(block);
                     }
 
                     return block;

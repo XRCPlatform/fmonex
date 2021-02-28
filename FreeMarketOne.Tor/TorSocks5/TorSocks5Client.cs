@@ -82,7 +82,7 @@ namespace FreeMarketOne.Tor
 			}
 		}
 
-		private async Task ConnectAsync()
+		internal async Task ConnectAsync()
 		{
 			if (TorSocks5EndPoint is null)
 			{
@@ -135,7 +135,7 @@ namespace FreeMarketOne.Tor
 		/// https://www.torproject.org/docs/tor-manual.html.en
 		/// https://gitweb.torproject.org/torspec.git/tree/socks-extensions.txt#n35
 		/// </summary>
-		private async Task HandshakeAsync(bool isolateStream = true)
+		internal async Task HandshakeAsync(bool isolateStream = true)
 		{
 			await HandshakeAsync(isolateStream ? RandomString.Generate(21) : "").ConfigureAwait(false);
 		}
@@ -146,7 +146,7 @@ namespace FreeMarketOne.Tor
 		/// https://gitweb.torproject.org/torspec.git/tree/socks-extensions.txt#n35
 		/// </summary>
 		/// <param name="identity">Isolates streams by identity. If identity is empty string, it won't isolate stream.</param>
-		private async Task HandshakeAsync(string identity)
+		internal async Task HandshakeAsync(string identity)
 		{
 			if (TorSocks5EndPoint is null)
 			{

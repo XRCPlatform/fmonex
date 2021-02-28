@@ -73,6 +73,7 @@ https://docs.libplanet.io/</Description>
   <!-- The above hacky trick is borrowed from the following Stack Overflow
   answer: https://stackoverflow.com/a/45004898/383405 (see #2). -->
   <ItemGroup>
+    <ProjectReference Include="..\..\FreeMarketOne.Tor\FreeMarketOne.Tor.csproj" />
     <ProjectReference Include="..\Libplanet.Stun\Libplanet.Stun.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\..\netmq\src\NetMQ\NetMQ.csproj" />
   </ItemGroup>

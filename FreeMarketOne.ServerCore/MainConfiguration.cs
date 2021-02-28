@@ -6,7 +6,7 @@ using System;
 
 namespace FreeMarketOne.ServerCore
 {
-    public class MainConfiguration : BaseConfiguration
+    public class MainConfiguration : ExtendedConfiguration
     {
         private static readonly TimeSpan _blockInterval = TimeSpan.FromSeconds(300);
         private static readonly TimeSpan _poolCheckInterval = TimeSpan.FromSeconds(32);

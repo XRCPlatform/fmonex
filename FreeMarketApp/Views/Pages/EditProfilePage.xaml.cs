@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FreeMarketOne.Extensions.Helpers;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
+using FreeMarketOne.DataStructure;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -114,7 +115,9 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var config = (ExtendedConfiguration)FMONE.Current.Configuration;
+            var approxSpanToNewBlock = config.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+
             var result = await MessageBox.Show(mainWindow,
                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_SaveMyProfile"), approxSpanToNewBlock.TotalSeconds),
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),

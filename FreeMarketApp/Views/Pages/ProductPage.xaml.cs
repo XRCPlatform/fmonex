@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Common;
 using FreeMarketOne.Extensions.Helpers;
@@ -84,7 +85,8 @@ namespace FreeMarketApp.Views.Pages
         {
             var textHelper = new TextHelper();
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var config = FMONE.Current.Configuration;
+            var approxSpanToNewBlock = ((ExtendedConfiguration)config).BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             string reviewText = String.Empty;
             int stars = 0;
 
@@ -246,7 +248,9 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonBuy_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var config = (ExtendedConfiguration)FMONE.Current.Configuration;
+            var approxSpanToNewBlock = config.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+
             var tbXRCReceivingTransaction = Instance.FindControl<TextBox>("TBXRCReceivingTransaction");
 
             var result = await MessageBox.Show(mainWindow,

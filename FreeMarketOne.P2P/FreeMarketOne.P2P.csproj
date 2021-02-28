@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FreeMarketOne.Configuration\FreeMarketOne.Configuration.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Tor\FreeMarketOne.Tor.csproj" />
   </ItemGroup>
 

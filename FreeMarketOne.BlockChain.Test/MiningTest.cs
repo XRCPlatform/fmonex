@@ -49,7 +49,7 @@ namespace FreeMarketOne.BlockChain.Test
                     _baseBlockChainManager.SwarmServer,
                     _baseBlockChainManager.PrivateKey,
                     _baseBlockChainManager.BlockChain,
-                    _configuration.BlockChainBasePolicy);
+                    ((ExtendedConfiguration)_configuration).BlockChainBasePolicy);
                 _basePoolManager.Start();
 
             }

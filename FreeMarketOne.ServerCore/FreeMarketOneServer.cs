@@ -14,6 +14,7 @@ using FreeMarketOne.Tor;
 using FreeMarketOne.Users;
 using Libplanet;
 using Libplanet.Blocks;
+using Libplanet.Extensions;
 using Libplanet.Net;
 using Libplanet.Net.Messages;
 using Microsoft.Extensions.Configuration;
@@ -55,7 +56,8 @@ namespace FreeMarketOne.ServerCore
         public IMarketManager MarketManager;
         public IChatManager ChatManager;
         public IBaseConfiguration Configuration;
-
+        private IDefaultBlockPolicy<BaseAction> blockChainBasePolicy;
+        private IDefaultBlockPolicy<MarketAction> blockChainMarketPolicy;
         public SearchIndexer SearchIndexer;
         public SearchEngine SearchEngine;
 
@@ -129,7 +131,8 @@ namespace FreeMarketOne.ServerCore
         {
             //Environment
             Configuration = MakeConfiguration(configFilePath);
-
+            blockChainBasePolicy = ((ExtendedConfiguration)Configuration).BlockChainBasePolicy;
+            blockChainMarketPolicy = ((ExtendedConfiguration)Configuration).BlockChainMarketPolicy;
             //Initialize Logger
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
@@ -200,7 +203,7 @@ namespace FreeMarketOne.ServerCore
                             Configuration.BlockChainBasePath,
                             Configuration.BlockChainSecretPath,
                             Configuration.BlockChainBaseGenesis,
-                            Configuration.BlockChainBasePolicy,
+                            blockChainBasePolicy,
                             GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, ServerPublicAddress.PublicIP, Configuration.ListenerBaseEndPoint),
                             OnionSeedsManager,
                             UserManager.PrivateKey,
@@ -221,7 +224,7 @@ namespace FreeMarketOne.ServerCore
                             BaseBlockChainManager.SwarmServer,
                             BaseBlockChainManager.PrivateKey,
                             BaseBlockChainManager.BlockChain,
-                            Configuration.BlockChainBasePolicy);
+                            blockChainBasePolicy);
 
                         LoadingEvent?.Invoke(this, "Starting Base PoolManager...");
                         BasePoolManager.Start();
@@ -236,14 +239,15 @@ namespace FreeMarketOne.ServerCore
                         MarketBlockChainChangedEvent += new EventHandler<(Block<MarketAction> OldTip, Block<MarketAction> NewTip)>(Current.MarketBlockChainChanged);
 
                         var hashCheckPoints = BaseBlockChainManager.GetActionItemsByType(typeof(CheckPointMarketDataV1));
-                        var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, Configuration.BlockChainMarketPolicy);
+                        
+                        var genesisBlock = BlockHelper.GetGenesisMarketBlockByHash(hashCheckPoints, blockChainMarketPolicy);
 
                         MarketBlockChainManager = new BlockChainManager<MarketAction>(
                             Configuration,
                             Configuration.BlockChainMarketPath,
                             Configuration.BlockChainSecretPath,
                             Configuration.BlockChainMarketGenesis,
-                            Configuration.BlockChainMarketPolicy,
+                            blockChainMarketPolicy,
                             GetPublicIpEndpoint(TorProcessManager.TorOnionEndPoint, ServerPublicAddress.PublicIP, Configuration.ListenerMarketEndPoint),
                             OnionSeedsManager,
                             UserManager.PrivateKey,
@@ -271,7 +275,7 @@ namespace FreeMarketOne.ServerCore
                                 MarketBlockChainManager.SwarmServer,
                                 MarketBlockChainManager.PrivateKey,
                                 MarketBlockChainManager.BlockChain,
-                                Configuration.BlockChainMarketPolicy);
+                                blockChainMarketPolicy);
 
                             LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
                             MarketPoolManager.Start();
@@ -418,7 +422,7 @@ namespace FreeMarketOne.ServerCore
                         MarketBlockChainManager.SwarmServer,
                         MarketBlockChainManager.PrivateKey,
                         MarketBlockChainManager.BlockChain,
-                        Configuration.BlockChainMarketPolicy);
+                        blockChainMarketPolicy);
 
                     LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
                     MarketPoolManager.Start();

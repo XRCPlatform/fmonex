@@ -89,6 +89,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.Chats\FreeMarketOne.Chats.csproj" />
+    <ProjectReference Include="..\FreeMarketOne.Configuration\FreeMarketOne.Configuration.csproj">
+      <Private>true</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FreeMarketOne.Markets\FreeMarketOne.Markets.csproj" />
     <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Skynet\FreeMarketOne.Skynet.csproj" />

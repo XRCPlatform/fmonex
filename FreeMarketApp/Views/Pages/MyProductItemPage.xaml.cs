@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.Markets;
 using FreeMarketOne.Pools;
 using Serilog;
@@ -61,7 +62,9 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonRemove_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var config = (ExtendedConfiguration)FMONE.Current.Configuration;
+            var approxSpanToNewBlock = config.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+
             var result = await MessageBox.Show(mainWindow,
                  string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_RemoveProduct"), approxSpanToNewBlock.TotalSeconds),
                  SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),

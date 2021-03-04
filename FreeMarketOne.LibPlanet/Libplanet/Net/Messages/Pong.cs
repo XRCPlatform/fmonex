@@ -1,26 +1,32 @@
-using System.Collections.Generic;
-using NetMQ;
+using Bencodex;
+using Bencodex.Types;
 
 namespace Libplanet.Net.Messages
 {
-    internal class Pong : Message
+    public class Pong : IBenEncodeable
     {
         public Pong()
         {
         }
 
-        public Pong(NetMQFrame[] body)
+        public Pong(byte[] bytes)
         {
+
         }
 
-        protected override MessageType Type => MessageType.Pong;
-
-        protected override IEnumerable<NetMQFrame> DataFrames
+        public object FromBenBytes(byte[] bytes)
         {
-            get
-            {
-                yield break;
-            }
+            return new Pong();
+        }
+
+        public byte[] SerializeToBen()
+        {
+            return new Codec().Encode(ToBencodex());
+        }
+
+        public Dictionary ToBencodex()
+        {
+            return Dictionary.Empty;
         }
     }
 }

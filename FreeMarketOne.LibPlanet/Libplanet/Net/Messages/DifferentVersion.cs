@@ -1,26 +1,32 @@
-using System.Collections.Generic;
-using NetMQ;
+using Bencodex;
+using Bencodex.Types;
 
 namespace Libplanet.Net.Messages
 {
-    internal class DifferentVersion : Message
+    public class DifferentVersion : IBenEncodeable
     {
         public DifferentVersion()
         {
         }
 
-        public DifferentVersion(NetMQFrame[] body)
+        public DifferentVersion(byte[] bytes)
         {
+
         }
 
-        protected override MessageType Type => MessageType.DifferentVersion;
-
-        protected override IEnumerable<NetMQFrame> DataFrames
+        public object FromBenBytes(byte[] bytes)
         {
-            get
-            {
-                yield break;
-            }
+            return new Ping();
+        }
+
+        public byte[] SerializeToBen()
+        {
+            return new Codec().Encode(ToBencodex());
+        }
+
+        public Dictionary ToBencodex()
+        {
+            return Dictionary.Empty;
         }
     }
 }

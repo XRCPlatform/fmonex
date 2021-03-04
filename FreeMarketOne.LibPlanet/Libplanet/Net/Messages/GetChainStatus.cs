@@ -1,26 +1,31 @@
-using System.Collections.Generic;
-using NetMQ;
-
+using Bencodex;
+using Bencodex.Types;
 namespace Libplanet.Net.Messages
 {
-    internal class GetChainStatus : Message
+    public class GetChainStatus : IBenEncodeable
     {
         public GetChainStatus()
         {
         }
 
-        public GetChainStatus(NetMQFrame[] body)
+        public GetChainStatus(byte[] bytes)
         {
+
         }
 
-        protected override MessageType Type => MessageType.GetChainStatus;
-
-        protected override IEnumerable<NetMQFrame> DataFrames
+        public object FromBenBytes(byte[] bytes)
         {
-            get
-            {
-                yield break;
-            }
+            return new Ping();
+        }
+
+        public byte[] SerializeToBen()
+        {
+            return new Codec().Encode(ToBencodex());
+        }
+
+        public Dictionary ToBencodex()
+        {
+            return Dictionary.Empty;
         }
     }
 }

@@ -248,6 +248,11 @@ namespace FreeMarketOne.Tor
 		/// </summary>
 		public async Task<TotContent> RequestAsync(TotRequest request, int timeout = 3000)
 		{
+            if (timeout < 3000)
+            {
+				timeout = 3000;
+			}
+
 			Guard.MinimumAndNotNull(nameof(timeout), timeout, 1);
 
 			var requestBytes = request.ToBytes();

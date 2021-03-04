@@ -252,6 +252,11 @@ namespace Libplanet.Net
             Stopwatch sw = new Stopwatch();
             sw.Start();
             PooledClient pooledClient = null;
+            if (timeout.TotalMilliseconds < 1000)
+            {
+                timeout = TimeSpan.FromSeconds(30);
+            }
+
             try
             {
                 pooledClient = await _clientPool.Get(peer);
@@ -261,8 +266,8 @@ namespace Libplanet.Net
                     MessageId = TotMessageId.Random,
                     MessageType = TotMessageType.Request
                 };
-
-                var response = await client.RequestAsync(request, timeout.Milliseconds);
+               
+                var response = await client.RequestAsync(request, (int)timeout.TotalMilliseconds);
 
                 PeerStateChangeEventArgs args = new PeerStateChangeEventArgs
                 {

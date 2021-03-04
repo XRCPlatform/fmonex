@@ -64,8 +64,7 @@ namespace FreeMarketOne.Tor
 				try
 				{
 					var tcpClient = await TcpListener.AcceptTcpClientAsync().ConfigureAwait(false); // TcpListener.Stop() will trigger ObjectDisposedException
-					var totClient = new TotClient(tcpClient);
-
+					var totClient = new TotClient(tcpClient);					
 					await totClient.StartAsync().ConfigureAwait(false);
 					totClient.RequestArrived += TotClient_RequestArrived;
 					using (await ClientsLock.LockAsync().ConfigureAwait(false))

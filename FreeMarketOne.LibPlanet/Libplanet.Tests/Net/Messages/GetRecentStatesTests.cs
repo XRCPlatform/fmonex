@@ -8,32 +8,29 @@ using Xunit;
 
 namespace Libplanet.Tests.Net.Messages
 {
-    public class BlockHashesTest
+    public class GetRecentStatesTests
     {
-
-        [Fact]
-        public void Constructor()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                new BlockHashes(null, new[] { default(HashDigest<SHA256>) })
-            );
-            Assert.Throws<ArgumentException>(() =>
-                new BlockHashes(123, new HashDigest<SHA256>[0])
-            );
-        }
 
         [Fact]
         public void SerializesAndDesrializeFromBen()
         {
             HashDigest<SHA256>[] blockHashes = GenerateRandomBlockHashes(100L).ToArray();
-            var msg = new BlockHashes(123, blockHashes);
-            Assert.Equal(123, msg.StartIndex);
-            Assert.Equal(blockHashes, msg.Hashes);
-            var ben = msg.SerializeToBen();
-            var result = new BlockHashes(ben);
 
-            Assert.Equal(msg.StartIndex, result.StartIndex);
-            Assert.Equal(msg.Hashes, result.Hashes);
+            var random = new Random();
+            var buffer = new byte[HashDigest<SHA256>.Size];            
+            random.NextBytes(buffer);
+            var target =new HashDigest<SHA256>(buffer);
+
+            var msg = new GetRecentStates(new Libplanet.Blockchain.BlockLocator(blockHashes), target, 123);
+            Assert.Equal(123, msg.Offset);
+            Assert.Equal(blockHashes, msg.BaseLocator);
+
+            var ben = msg.SerializeToBen();
+            var result = new GetRecentStates(ben);
+
+            Assert.Equal(msg.Offset, result.Offset);
+            Assert.Equal(msg.BaseLocator, result.BaseLocator);
+            Assert.Equal(msg.TargetBlockHash, result.TargetBlockHash);
         }
 
         private static IEnumerable<HashDigest<SHA256>> GenerateRandomBlockHashes(long count)

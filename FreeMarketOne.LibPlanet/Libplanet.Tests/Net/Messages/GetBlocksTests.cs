@@ -8,32 +8,23 @@ using Xunit;
 
 namespace Libplanet.Tests.Net.Messages
 {
-    public class BlockHashesTest
+    public class GetBlocksTest
     {
-
-        [Fact]
-        public void Constructor()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                new BlockHashes(null, new[] { default(HashDigest<SHA256>) })
-            );
-            Assert.Throws<ArgumentException>(() =>
-                new BlockHashes(123, new HashDigest<SHA256>[0])
-            );
-        }
-
         [Fact]
         public void SerializesAndDesrializeFromBen()
         {
             HashDigest<SHA256>[] blockHashes = GenerateRandomBlockHashes(100L).ToArray();
-            var msg = new BlockHashes(123, blockHashes);
-            Assert.Equal(123, msg.StartIndex);
-            Assert.Equal(blockHashes, msg.Hashes);
-            var ben = msg.SerializeToBen();
-            var result = new BlockHashes(ben);
 
-            Assert.Equal(msg.StartIndex, result.StartIndex);
-            Assert.Equal(msg.Hashes, result.Hashes);
+            var msg = new GetBlocks(blockHashes, 100);
+
+            Assert.Equal(100, msg.ChunkSize);
+            Assert.Equal(blockHashes, msg.BlockHashes);
+
+            var ben = msg.SerializeToBen();
+            var result = new GetBlocks(ben);
+
+            Assert.Equal(msg.ChunkSize, result.ChunkSize);
+            Assert.Equal(msg.BlockHashes, result.BlockHashes);
         }
 
         private static IEnumerable<HashDigest<SHA256>> GenerateRandomBlockHashes(long count)

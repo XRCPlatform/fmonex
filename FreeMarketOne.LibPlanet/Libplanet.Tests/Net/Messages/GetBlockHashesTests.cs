@@ -8,32 +8,29 @@ using Xunit;
 
 namespace Libplanet.Tests.Net.Messages
 {
-    public class BlockHashesTest
+    public class GetBlockHashesTests
     {
-
-        [Fact]
-        public void Constructor()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                new BlockHashes(null, new[] { default(HashDigest<SHA256>) })
-            );
-            Assert.Throws<ArgumentException>(() =>
-                new BlockHashes(123, new HashDigest<SHA256>[0])
-            );
-        }
 
         [Fact]
         public void SerializesAndDesrializeFromBen()
         {
             HashDigest<SHA256>[] blockHashes = GenerateRandomBlockHashes(100L).ToArray();
-            var msg = new BlockHashes(123, blockHashes);
-            Assert.Equal(123, msg.StartIndex);
-            Assert.Equal(blockHashes, msg.Hashes);
-            var ben = msg.SerializeToBen();
-            var result = new BlockHashes(ben);
 
-            Assert.Equal(msg.StartIndex, result.StartIndex);
-            Assert.Equal(msg.Hashes, result.Hashes);
+            var random = new Random();
+            var buffer = new byte[HashDigest<SHA256>.Size];            
+            random.NextBytes(buffer);
+            var stop = new HashDigest<SHA256>(buffer);
+
+            var msg = new GetBlockHashes(new Libplanet.Blockchain.BlockLocator(blockHashes), stop);
+
+            Assert.Equal(stop, msg.Stop);
+            Assert.Equal(blockHashes, msg.Locator);
+
+            var ben = msg.SerializeToBen();
+            var result = new GetBlockHashes(ben);
+
+            Assert.Equal(msg.Stop, result.Stop);
+            Assert.Equal(msg.Locator, result.Locator);
         }
 
         private static IEnumerable<HashDigest<SHA256>> GenerateRandomBlockHashes(long count)

@@ -46,7 +46,7 @@ namespace Libplanet.Tests.Net.Messages
         }
 
         [Fact]
-        public void DataFrames()
+        public void SerializesAndDesrializeFromBen()
         {
             // This test lengthens long... Please read the brief description of the entire payload
             // structure from the comment in the RecentStates.DataFrames property code.
@@ -100,83 +100,28 @@ namespace Libplanet.Tests.Net.Messages
                         a.ToHex().ToLowerInvariant(), states);
                 }).ToImmutableDictionary();
 
-            RecentStates reply =
+            RecentStates original =
                 new RecentStates(blockHash, -1, 1, compressedBlockStates, stateRefs);
 
-            var versionSigner = new PrivateKey();
-            AppProtocolVersion version = AppProtocolVersion.Sign(versionSigner, 1);
-            Peer peer = new BoundPeer(privKey.PublicKey, new DnsEndPoint("0.0.0.0", 1234));
 
-            NetMQMessage msg = reply.ToNetMQMessage(privKey, peer, version);
-            const int headerSize = Message.CommonFrames;  // version, type, peer, sig
-            int stateRefsOffset = headerSize + 3;  // blockHash, offsetHash, iteration
-            int blockStatesOffset = stateRefsOffset + 1 + (accountsCount * 4);
-            Assert.Equal(
-               blockStatesOffset + 1 + (compressedBlockStates.Count * 4),
-               msg.FrameCount
-            );
-            Assert.Equal(blockHash, new HashDigest<SHA256>(msg[headerSize].Buffer));
-            Assert.Equal(accountsCount, msg[stateRefsOffset].ConvertToInt32());
-            for (int i = 0; i < accountsCount; i++)
-            {
-                int offset = stateRefsOffset + 1 + (i * 4);
-                Assert.Equal(Address.Size * 2, msg[offset].BufferSize);
-                var key = Encoding.UTF8.GetString(msg[offset].Buffer);
-                Assert.Contains(new Address(key), accounts);
+            var ben = original.SerializeToBen();
+            //var r1 = (RecentStates) original.FromBenBytes(ben);
+            var r2 = new RecentStates(ben);
 
-                Assert.Equal(4, msg[offset + 1].BufferSize);
-                Assert.Equal(2, msg[offset + 1].ConvertToInt32());
+            Assert.Equal(original.BlockHash, r2.BlockHash);
+            Assert.Equal(original.BlockStates, r2.BlockStates);
+            Assert.Equal(original.Iteration, r2.Iteration);
+            Assert.Equal(original.Offset, r2.Offset);
+            Assert.Equal(original.Missing, r2.Missing);
 
-                Assert.Equal(HashDigest<SHA256>.Size, msg[offset + 2].BufferSize);
-                Assert.Equal(stateRefs[key][0], new HashDigest<SHA256>(msg[offset + 2].Buffer));
-                Assert.Equal(HashDigest<SHA256>.Size, msg[offset + 3].BufferSize);
-                Assert.Equal(stateRefs[key][1], new HashDigest<SHA256>(msg[offset + 3].Buffer));
 
-                accounts.Remove(new Address(key));
-            }
+            //RecentStates missing = new RecentStates(blockHash, -1, 1, null, null);
+            //msg = missing.ToNetMQMessage(privKey, peer, version);
+            //Assert.Equal(blockHash, new HashDigest<SHA256>(msg[headerSize].Buffer));
+            //Assert.Equal(-1, msg[stateRefsOffset].ConvertToInt32());
 
-            Assert.Empty(accounts);
-            Assert.Equal(compressedBlockStates.Count, msg[blockStatesOffset].ConvertToInt32());
-
-            var codec = new Bencodex.Codec();
-            for (int i = 0; i < compressedBlockStates.Count; i++)
-            {
-                int offset = blockStatesOffset + 1 + (i * 4);
-
-                var hash = new HashDigest<SHA256>(msg[offset].Buffer);
-                Assert.Contains(hash, compressedBlockStates);
-                Assert.Equal(1, msg[offset + 1].ConvertToInt32());
-
-                var addr = new Address(Encoding.UTF8.GetString(msg[offset + 2].Buffer));
-                Assert.Equal(new Address(compressedBlockStates[hash].Keys.First()), addr);
-
-                using (var compressed = new MemoryStream(msg[offset + 3].Buffer))
-                using (var df = new DeflateStream(compressed, CompressionMode.Decompress))
-                using (var decompressed = new MemoryStream())
-                {
-                    df.CopyTo(decompressed);
-                    decompressed.Seek(0, SeekOrigin.Begin);
-                    string state = ((Text)codec.Decode(decompressed)).Value;
-                    Assert.Equal($"B:{hash}:{addr}", state);
-                }
-            }
-
-            msg = reply.ToNetMQMessage(privKey, peer, version);
-            var parsed = new RecentStates(msg.Skip(headerSize).ToArray());
-            Assert.Equal(blockHash, parsed.BlockHash);
-            Assert.False(parsed.Missing);
-            Assert.Equal(compressedBlockStates, parsed.BlockStates);
-            Assert.Equal(stateRefs, parsed.StateReferences);
-
-            RecentStates missing = new RecentStates(blockHash, -1, 1, null, null);
-            msg = missing.ToNetMQMessage(privKey, peer, version);
-            Assert.Equal(blockHash, new HashDigest<SHA256>(msg[headerSize].Buffer));
-            Assert.Equal(-1, msg[stateRefsOffset].ConvertToInt32());
-
-            parsed = new RecentStates(
-                missing.ToNetMQMessage(privKey, peer, version).Skip(headerSize).ToArray());
-            Assert.Equal(blockHash, parsed.BlockHash);
-            Assert.True(parsed.Missing);
-        }
+            //Assert.Equal(blockHash, parsed.BlockHash);
+            //Assert.True(parsed.Missing);
+        }    
     }
 }

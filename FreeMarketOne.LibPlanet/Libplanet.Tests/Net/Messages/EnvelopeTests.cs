@@ -1,39 +1,37 @@
-﻿using Libplanet.Net.Messages;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
+using Libplanet.Crypto;
+using Libplanet.Net;
+using Libplanet.Net.Messages;
+using NetMQ;
 using Xunit;
-
 
 namespace Libplanet.Tests.Net.Messages
 {
-    public class BlockHashesTest
+    public class EnvelopeTests
     {
-
         [Fact]
-        public void Constructor()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                new BlockHashes(null, new[] { default(HashDigest<SHA256>) })
-            );
-            Assert.Throws<ArgumentException>(() =>
-                new BlockHashes(123, new HashDigest<SHA256>[0])
-            );
-        }
-
-        [Fact]
-        public void SerializesAndDesrializeFromBen()
+        public void CanSerializeAndRestoreMessageToEnvelope()
         {
             HashDigest<SHA256>[] blockHashes = GenerateRandomBlockHashes(100L).ToArray();
             var msg = new BlockHashes(123, blockHashes);
             Assert.Equal(123, msg.StartIndex);
             Assert.Equal(blockHashes, msg.Hashes);
-            var ben = msg.SerializeToBen();
-            var result = new BlockHashes(ben);
+            var privKey = new PrivateKey();
+            AppProtocolVersion ver = AppProtocolVersion.Sign(privKey, 3);
+            BoundPeer peer = new BoundPeer(privKey.PublicKey, new DnsEndPoint("0.0.0.0", 1234));
 
-            Assert.Equal(msg.StartIndex, result.StartIndex);
-            Assert.Equal(msg.Hashes, result.Hashes);
+            var envelope = new Envelope(peer, ver);
+            envelope.Initialize(privKey, msg);
+
+            Assert.Equal(msg.GetType(),envelope.GetMessageType());
+            var restored = envelope.GetBody<BlockHashes>();
+
+            Assert.Equal(msg.StartIndex, restored.StartIndex);
+            Assert.Equal(msg.Hashes, restored.Hashes);
         }
 
         private static IEnumerable<HashDigest<SHA256>> GenerateRandomBlockHashes(long count)

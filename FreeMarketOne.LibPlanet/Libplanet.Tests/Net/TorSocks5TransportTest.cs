@@ -22,8 +22,16 @@ namespace Libplanet.Tests
         private static readonly PrivateKey VersionSigner = new PrivateKey();
         private static readonly AppProtocolVersion AppProtocolVersion =
             AppProtocolVersion.Sign(VersionSigner, 1);
-        private ILogger _logger = Log.ForContext<TorSocks5TransportTest>(); 
+        private ILogger _logger = null;
         private PrivateKey _privateKey = new PrivateKey();
+        private TorSocks5Transport torSocks5Transport = null;
+
+        public TorSocks5TransportTest()
+        {
+            _logger = Log.ForContext<TorSocks5TransportTest>();
+            torSocks5Transport = new TorSocks5Transport(VersionSigner, AppProtocolVersion, ImmutableHashSet<PublicKey>.Empty, 10, 10, 0, "127.0.0.1", 9114, null, null, _logger, null, null);
+
+        }
 
         [Fact]
         public void PacksLibPlanetMessageIntoTransportMessage()
@@ -41,8 +49,8 @@ namespace Libplanet.Tests
 
             Assert.Equal(msg.GetType(), envelope.GetMessageType());
             
-            byte[] pak = TorSocks5Transport.PackEnvelope(envelope);
-            var return_envelope = TorSocks5Transport.UnPackEnvelope(pak);
+            byte[] pak = torSocks5Transport.PackEnvelope(envelope);
+            var return_envelope = torSocks5Transport.UnPackEnvelope(pak);
             return_envelope.IsValid(AppProtocolVersion, null, null);
             var result = return_envelope.GetBody<BlockHashes>();
             Assert.Equal(msg.StartIndex, result.StartIndex);
@@ -63,8 +71,8 @@ namespace Libplanet.Tests
             envelope.Initialize(privKey, msg);
             Assert.Equal(msg.GetType(), envelope.GetMessageType());
 
-            byte[] pak = TorSocks5Transport.PackEnvelope(envelope);
-            var return_envelope = TorSocks5Transport.UnPackEnvelope(pak);
+            byte[] pak = torSocks5Transport.PackEnvelope(envelope);
+            var return_envelope = torSocks5Transport.UnPackEnvelope(pak);
             Assert.True(return_envelope.IsValid(AppProtocolVersion, null, null));
 
             var result = return_envelope.GetBody<BlockHashes>();
@@ -88,8 +96,8 @@ namespace Libplanet.Tests
             envelope.Initialize(privKey, msg);
             Assert.Equal(msg.GetType(), envelope.GetMessageType());
 
-            byte[] pak = TorSocks5Transport.PackEnvelope(envelope);
-            var return_envelope = TorSocks5Transport.UnPackEnvelope(pak);
+            byte[] pak = torSocks5Transport.PackEnvelope(envelope);
+            var return_envelope = torSocks5Transport.UnPackEnvelope(pak);
             
             var result = return_envelope.GetBody<BlockHashes>();
             Assert.Equal(msg.StartIndex, result.StartIndex);
@@ -117,8 +125,8 @@ namespace Libplanet.Tests
 
             Assert.Equal(blockStates.GetType(), envelope.GetMessageType());
 
-            byte[] pak = TorSocks5Transport.PackEnvelope(envelope);
-            var return_envelope = TorSocks5Transport.UnPackEnvelope(pak);
+            byte[] pak = torSocks5Transport.PackEnvelope(envelope);
+            var return_envelope = torSocks5Transport.UnPackEnvelope(pak);
             return_envelope.IsValid(AppProtocolVersion, null, null);
             var result = return_envelope.GetBody<BlockStates>();
             Assert.Equal(blockStates.BlockHash, result.BlockHash);

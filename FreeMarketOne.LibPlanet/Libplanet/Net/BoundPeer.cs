@@ -1,7 +1,9 @@
 using System;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using Libplanet.Crypto;
 
 namespace Libplanet.Net
@@ -69,5 +71,21 @@ namespace Libplanet.Net
         {
             return $"{Address}.{EndPoint}.{PublicIPAddress}";
         }
+
+        public static BoundPeer DeserializePeer(byte[] bytes)
+        {
+            var formatter = new BinaryFormatter();
+            using MemoryStream stream = new MemoryStream(bytes);
+            return (BoundPeer)formatter.Deserialize(stream);
+        }
+
+        public static byte[] SerializePeer(BoundPeer peer)
+        {
+            var formatter = new BinaryFormatter();
+            using MemoryStream stream = new MemoryStream();
+            formatter.Serialize(stream, peer);
+            return stream.ToArray();
+        }
+
     }
 }

@@ -499,17 +499,15 @@ namespace Libplanet.Net
 
         public Envelope UnPackEnvelope(byte[] bytes)
         {
-            string json = Unzip(bytes);
-            
-            _logger.Debug($"JSON received:{json}");
-            
+            string json = Unzip(bytes);            
+            //_logger.Debug($"JSON received:{json}");            
             return JsonConvert.DeserializeObject<Envelope>(json);
         }
 
         public byte[] PackEnvelope(Envelope envelope)
         {
             string json = JsonConvert.SerializeObject(envelope, Formatting.None);
-            _logger.Debug($"JSON sent:{json}");
+            //_logger.Debug($"JSON sent:{json}");
             return Zip(json);
         }
 

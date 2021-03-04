@@ -31,11 +31,19 @@ namespace FreeMarketOne.Tor
 		public event EventHandler<TotRequest> RequestArrived;
 		private void OnRequestArrived(TotRequest request) => RequestArrived?.Invoke(this, request);
 		private ILogger _logger { get; set; }
-		/// <param name="connectedClient">Must be already connected.</param>
-		public TotClient(TcpClient connectedClient)
+        public string Host { get => _host;  }
+        public int Port { get => _port;  }
+
+        /// <param name="connectedClient">Must be already connected.</param>
+        /// 
+        private string _host;
+		private int _port = 0;
+		public TotClient(TcpClient connectedClient, string host, int port)
 		{
 			_logger = Log.Logger.ForContext<TotClient>();
 			Guard.NotNull(nameof(connectedClient), connectedClient);
+			_host = host;
+			_port = port;
 
 			InitLock = new AsyncLock();
 
@@ -53,7 +61,12 @@ namespace FreeMarketOne.Tor
 			}
 		}
 
-		public async Task StartAsync()
+        public TotClient(TcpClient connectedClient): this(connectedClient, "unknown", 0)
+        {
+			
+		}
+
+        public async Task StartAsync()
 		{
 			using (await InitLock.LockAsync().ConfigureAwait(false))
 			{

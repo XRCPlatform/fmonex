@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 
 namespace Libplanet.Blockchain
 {
-    internal class BlockLocator : IEnumerable<HashDigest<SHA256>>
+    public class BlockLocator : IEnumerable<HashDigest<SHA256>>
     {
         private readonly IEnumerable<HashDigest<SHA256>> _impl;
 

@@ -316,7 +316,7 @@ namespace Libplanet.Net
 
         public void ReplyMessage<TResponse>(TotRequest request, TotClient client, TResponse responseMessage)
         {
-            Envelope responseEnvelope = new Envelope();
+            Envelope responseEnvelope = new Envelope(AsPeer,_appProtocolVersion);
             responseEnvelope.Initialize<TResponse>(_privateKey, responseMessage);
             TotContent response = new TotContent(PackEnvelope(responseEnvelope));
             client.RespondSuccessAsync(request.MessageId, response).ConfigureAwait(false).GetAwaiter().GetResult();

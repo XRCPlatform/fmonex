@@ -22,6 +22,8 @@ namespace Libplanet.Net
         {
             TotClient client = message.Client;
             
+            _logger.Debug($"Received {message.MessageType} message.");
+
             switch (message.MessageType)
             {
                 case MessageType.Ping:                    
@@ -39,12 +41,13 @@ namespace Libplanet.Net
                     break;
 
                 case MessageType.FindNeighbors :
-                    _logger.Debug($"Received MessageType.FindNeighbors message, no handler assigned.");
-                    break;
+
+                    // it's handled in KademliaProtocol ReceiveMessage() event handler
+                    break;                    
 
                 case MessageType.GetBlockHashes:
 
-                    var getBlockHashes = (GetBlockHashes)message.Body;
+                    var getBlockHashes = message.Envelope.GetBody<GetBlockHashes>();
                     BlockChain.FindNextHashes(
                                            getBlockHashes.Locator,
                                            getBlockHashes.Stop,
@@ -59,33 +62,33 @@ namespace Libplanet.Net
 
                 case MessageType.GetRecentStates:
 
-                    var getRecentStates = (GetRecentStates)message.Body;
+                    var getRecentStates = message.Envelope.GetBody<GetRecentStates>();
                     var states = TransferRecentStates(getRecentStates);
                     Transport.ReplyMessage<RecentStates>(message.Request, client, states);                    
                     break;
 
                 case MessageType.GetBlocks:
 
-                    var getBlocks = (GetBlocks)message.Body;
+                    var getBlocks = message.Envelope.GetBody<GetBlocks>();
                     var blocks = TransferBlocks(getBlocks, message.Peer);
                     Transport.ReplyMessage<Messages.Blocks>(message.Request, client, blocks);
                     break;
 
                 case MessageType.GetTxs :
 
-                    var getTxs = (GetTxs)message.Body;
+                    var getTxs = message.Envelope.GetBody<GetTxs>();
                     var txs = TransferTxs(getTxs);
                     Transport.ReplyMessage<Transactions>(message.Request, client, txs);
                     break;
 
                 case MessageType.TxBroadcast :
                     
-                    var transaction = (TxBroadcast)message.Body;
+                    var transaction = message.Envelope.GetBody<TxBroadcast>();
                     ReceiveTransactionBroadcast(transaction, message.Peer);
                     break;
 
                 case MessageType.Blocks:
-                    var blocksBroadcast = (Messages.Blocks)message.Body;
+                    var blocksBroadcast = message.Envelope.GetBody<Messages.Blocks>();
                     var task = Task.Run(async () => await ProcessBlock(null, blocksBroadcast, _cancellationToken));
                     try
                     {
@@ -99,19 +102,19 @@ namespace Libplanet.Net
 
                 case MessageType.TxIds:
                     
-                    var txIds = (TxIds)message.Body;
+                    var txIds = message.Envelope.GetBody<TxIds>();
                     ProcessTxIds(txIds, message.Peer);
                     break;
                
                 case MessageType.BlockHashes:
                     
-                    var blockHashes = (BlockHashes)message.Body;
+                    var blockHashes = message.Envelope.GetBody<BlockHashes>();
                     _logger.Error($"{nameof(BlockHashes)} messages are only for IBD.");
                     break;
 
                 case MessageType.BlockHeaderMessage:
 
-                    var blockHeader = (BlockHeaderMessage)message.Body;
+                    var blockHeader = message.Envelope.GetBody<BlockHeaderMessage>();
                     Task.Run(
                         async () => await ProcessBlockHeader(blockHeader, message.Peer, _cancellationToken),
                         _cancellationToken
@@ -120,7 +123,7 @@ namespace Libplanet.Net
 
                 case MessageType.GetBlockStates :
 
-                    var getBlockStates = (GetBlockStates)message.Body;
+                    var getBlockStates = message.Envelope.GetBody<GetBlockStates>();
                     var blockStates = TransferBlockStates(getBlockStates);
                     if (blockStates != null)
                     {

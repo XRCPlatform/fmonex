@@ -70,12 +70,13 @@ namespace FreeMarketOne.Tor
 		{
 			using (await InitLock.LockAsync().ConfigureAwait(false))
 			{
-				ListenNetworkStreamTask = ListenNetworkStreamAsync();
+				 ListenNetworkStreamTask = ListenNetworkStreamAsync();
 			}
 		}
 
 		private async Task ListenNetworkStreamAsync()
 		{
+			int emptyCounter = 0;
 			while (true)
 			{
 				try
@@ -86,8 +87,21 @@ namespace FreeMarketOne.Tor
 					var receiveCount = await stream.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false); // TcpClient.Disposep() will trigger ObjectDisposedException
 					if (receiveCount <= 0)
 					{
+						await Task.Delay(1000).ConfigureAwait(false);
+						// wait 100ms, then retry
+						//if nothing arrived on pipe does not mean disconnected
+						//but if reaches long poll then it's a problem
+						//in total wait 2minutes before throwing a connectionExecption 
+						if (emptyCounter < 120)
+                        {
+							emptyCounter++;
+							continue;
+						}
 						throw new ConnectionException($"Client lost connection.");
 					}
+					
+					//reset
+					emptyCounter = 0;
 
 					// if we could fit everything into our buffer, then we get our message
 					if (!stream.DataAvailable)

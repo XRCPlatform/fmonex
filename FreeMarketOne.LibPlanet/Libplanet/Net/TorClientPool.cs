@@ -91,6 +91,7 @@ namespace Libplanet.Net
             {
                 _logger.Verbose($"Client {cl.Host}{cl.Port} disconected. Error:{e}");
                 cl.TcpClient.Close();
+                cl.Disconnected -= ClientDisconected;
                 int count = _pool.RemoveAll(c => (bool)!c.Client?.TcpClient?.Connected);
                 _logger.Verbose($"Removed {count} dead clients from pool.");
             }

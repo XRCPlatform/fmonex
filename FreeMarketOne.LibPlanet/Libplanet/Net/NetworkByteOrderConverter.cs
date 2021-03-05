@@ -1,4 +1,6 @@
-﻿namespace Libplanet.Net
+﻿using System;
+
+namespace Libplanet.Net
 {
     /// <summary>
     /// This static class serves to convert between byte-arrays, and various integer sizes
@@ -116,27 +118,14 @@
 
         public static byte[] GetBytes(long value)
         {
-            var buffer = new byte[8];
-            PutInt64(value, buffer);
-
-            return buffer;
-        }
-
-        /// <summary>
-        /// Given a 64-bit integer, and a byte-array buffer and offset,
-        /// - write the 8 bytes of that integer into the buffer starting at that offset, in Big-endian order.
-        /// </summary>
-        /// <param name="value">the long value to convert into bytes</param>
-        /// <param name="buffer">the byte-array to write the long value's bytes into</param>
-        public static void PutInt64(long value, byte[] buffer)
-        {
             //bug fix as original implementation thrown arithmetic overthow exception
-            buffer = NetworkOrderLong(value);
+            return NetworkOrderLong(value);
         }
 
+    
         private static byte[] NetworkOrderLong(long value)
         {
-            var bytes = BitConverter.GetBytes(Offset);
+            var bytes = BitConverter.GetBytes(value);
             if (BitConverter.IsLittleEndian)
             {
                 Array.Reverse(bytes);

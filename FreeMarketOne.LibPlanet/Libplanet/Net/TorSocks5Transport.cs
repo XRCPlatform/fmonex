@@ -215,8 +215,8 @@ namespace Libplanet.Net
                         Client = client,
                         Request = request,
                         Peer = envelope.FromPeer,
-                        MessageType = envelope.MessageType
-
+                        MessageType = envelope.MessageType,
+                        Envelope = envelope
                     };
                     Protocol.ReceiveMessage(notification);
                     //response must be delegated to swarm as transport is dull
@@ -257,6 +257,8 @@ namespace Libplanet.Net
                 timeout = TimeSpan.FromSeconds(30);
             }
 
+            _logger.Debug($"Processing request:{envelope.MessageType} Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] configured timeout ms:[{timeout.TotalMilliseconds}]");
+
             try
             {
                 pooledClient = await _clientPool.Get(peer);
@@ -278,12 +280,12 @@ namespace Libplanet.Net
 
                 _clientPool.Return(pooledClient);
                 sw.Stop();
-                _logger.Debug($"Processed request:{envelope.MessageType} Peer:[{pooledClient.Host}:{pooledClient.Port}] configured timeout ms:[{timeout.Milliseconds}] elapsed time {sw.ElapsedMilliseconds}");
+                _logger.Debug($"Processed request:{envelope.MessageType} Peer:[{pooledClient.Host}:{pooledClient.Port}] configured timeout ms:[{timeout.TotalMilliseconds}] elapsed time {sw.ElapsedMilliseconds}");
                 return response;
             }
             catch (Exception e)
             {
-                _logger.Error($"Error procesing:{envelope.MessageType} Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Host}] configured timeout ms:[{timeout.Milliseconds}] elapsed time {sw.ElapsedMilliseconds} Error:{e}");
+                _logger.Error($"Error procesing:{envelope.MessageType} Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] configured timeout ms:[{timeout.Milliseconds}] elapsed time {sw.ElapsedMilliseconds} Error:{e}");
                 if (pooledClient != null)
                 {
                     _clientPool.KillIfUnhealthy(pooledClient);
@@ -319,7 +321,10 @@ namespace Libplanet.Net
             Envelope responseEnvelope = new Envelope(AsPeer,_appProtocolVersion);
             responseEnvelope.Initialize<TResponse>(_privateKey, responseMessage);
             TotContent response = new TotContent(PackEnvelope(responseEnvelope));
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             client.RespondSuccessAsync(request.MessageId, response).ConfigureAwait(false).GetAwaiter().GetResult();
+            _logger.Debug($"Sent a response for{responseEnvelope.MessageType} time taken to respond {sw.ElapsedMilliseconds} ms.");
         }
 
 
@@ -500,14 +505,22 @@ namespace Libplanet.Net
         public Envelope UnPackEnvelope(byte[] bytes)
         {
             string json = Unzip(bytes);            
-            //_logger.Debug($"JSON received:{json}");            
-            return JsonConvert.DeserializeObject<Envelope>(json);
+            _logger.Debug($"JSON received:{json}");
+            var e = JsonConvert.DeserializeObject<Envelope>(json);
+            if (e.MessageType != MessageType.Ping && e.MessageType != MessageType.Pong) {
+                _logger.Debug($"JSON received:{json}");
+            }
+            return e;
         }
 
         public byte[] PackEnvelope(Envelope envelope)
         {
             string json = JsonConvert.SerializeObject(envelope, Formatting.None);
-            //_logger.Debug($"JSON sent:{json}");
+
+            if (envelope.MessageType != MessageType.Ping && envelope.MessageType != MessageType.Pong)
+            {
+                _logger.Debug($"JSON sent:{json}");
+            }
             return Zip(json);
         }
 

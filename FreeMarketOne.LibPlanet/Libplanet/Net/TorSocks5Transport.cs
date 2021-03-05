@@ -177,6 +177,9 @@ namespace Libplanet.Net
         {
             try
             {
+                if (except == null) {
+                    except = AsPeer;
+                }
                 List<BoundPeer> peers = Protocol.PeersToBroadcast(except.Address).ToList();
                 _logger.Debug("Broadcasting message: {Message} as {AsPeer}", message, AsPeer);
                 _logger.Debug("Peers to broadcast: {PeersCount}", peers.Count);

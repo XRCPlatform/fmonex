@@ -21,16 +21,16 @@ namespace Libplanet.Net
         private void ProcessMessageHandler(object target, ReceivedRequestEventArgs message)
         {
             TotClient client = message.Client;
-            
+
             _logger.Debug($"Received {message.MessageType} message.");
 
             switch (message.MessageType)
             {
-                case MessageType.Ping:                    
+                case MessageType.Ping:
                     Transport.ReplyMessage<Pong>(message.Request, client, new Pong());
                     break;
 
-                case MessageType.GetChainStatus :
+                case MessageType.GetChainStatus:
                     // This is based on the assumption that genesis block always exists.
                     var chainStatus = new ChainStatus(
                         BlockChain.Genesis.Hash,
@@ -40,10 +40,10 @@ namespace Libplanet.Net
                     Transport.ReplyMessage<ChainStatus>(message.Request, client, chainStatus);
                     break;
 
-                case MessageType.FindNeighbors :
+                case MessageType.FindNeighbors:
 
                     // it's handled in KademliaProtocol ReceiveMessage() event handler
-                    break;                    
+                    break;
 
                 case MessageType.GetBlockHashes:
 
@@ -64,7 +64,7 @@ namespace Libplanet.Net
 
                     var getRecentStates = message.Envelope.GetBody<GetRecentStates>();
                     var states = TransferRecentStates(getRecentStates);
-                    Transport.ReplyMessage<RecentStates>(message.Request, client, states);                    
+                    Transport.ReplyMessage<RecentStates>(message.Request, client, states);
                     break;
 
                 case MessageType.GetBlocks:
@@ -74,40 +74,43 @@ namespace Libplanet.Net
                     Transport.ReplyMessage<Messages.Blocks>(message.Request, client, blocks);
                     break;
 
-                case MessageType.GetTxs :
+                case MessageType.GetTxs:
 
                     var getTxs = message.Envelope.GetBody<GetTxs>();
                     var txs = TransferTxs(getTxs);
                     Transport.ReplyMessage<Transactions>(message.Request, client, txs);
                     break;
 
-                case MessageType.TxBroadcast :
-                    
+                case MessageType.TxBroadcast:
+
                     var transaction = message.Envelope.GetBody<TxBroadcast>();
                     ReceiveTransactionBroadcast(transaction, message.Peer);
+                    //ack the reciept
+                    Transport.ReplyMessage<Pong>(message.Request, client, new Pong());
                     break;
-
                 case MessageType.Blocks:
                     var blocksBroadcast = message.Envelope.GetBody<Messages.Blocks>();
                     var task = Task.Run(async () => await ProcessBlock(null, blocksBroadcast, _cancellationToken));
                     try
                     {
+                        //ack the reciept
+                        var task2 = Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));                        
                         task.Wait();
                     }
                     catch (Exception e)
                     {
                         _logger.Error($"Processing received {nameof(blocks)} message, completed with error {e}.");
-                    }                    
+                    }
                     break;
 
                 case MessageType.TxIds:
-                    
+
                     var txIds = message.Envelope.GetBody<TxIds>();
                     ProcessTxIds(txIds, message.Peer);
                     break;
-               
+
                 case MessageType.BlockHashes:
-                    
+
                     var blockHashes = message.Envelope.GetBody<BlockHashes>();
                     _logger.Error($"{nameof(BlockHashes)} messages are only for IBD.");
                     break;
@@ -121,14 +124,14 @@ namespace Libplanet.Net
                     );
                     break;
 
-                case MessageType.GetBlockStates :
+                case MessageType.GetBlockStates:
 
                     var getBlockStates = message.Envelope.GetBody<GetBlockStates>();
                     var blockStates = TransferBlockStates(getBlockStates);
                     if (blockStates != null)
                     {
                         Transport.ReplyMessage<BlockStates>(message.Request, client, blockStates);
-                    }                    
+                    }
                     break;
 
                 default:
@@ -175,7 +178,7 @@ namespace Libplanet.Net
                     (states is null ? "Not found" : "Found") + " the block {BlockHash}'s states.",
                     getBlockStates.BlockHash
                 );
-               return new BlockStates(getBlockStates.BlockHash, states);
+                return new BlockStates(getBlockStates.BlockHash, states);
             }
 
             return null;
@@ -400,7 +403,7 @@ namespace Libplanet.Net
             foreach (Transaction<T> tx in txs)
             {
                 _logger.Debug($"Adding {tx.Id} to response.");
-                response.Add(tx.Serialize(true));               
+                response.Add(tx.Serialize(true));
             }
             return new Transactions(response);
         }
@@ -613,7 +616,7 @@ namespace Libplanet.Net
                 nextOffset,
                 iteration,
                 blockStates,
-                stateRefs?.ToImmutableDictionary());          
+                stateRefs?.ToImmutableDictionary());
         }
     }
 }

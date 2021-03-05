@@ -192,7 +192,7 @@ namespace Libplanet.Net
 
         public Address Address => _privateKey.ToAddress();
 
-        public Peer AsPeer => Transport.AsPeer;
+        public BoundPeer AsPeer => Transport.AsPeer;
 
         /// <summary>
         /// The last time when any message was arrived.
@@ -460,12 +460,12 @@ namespace Libplanet.Net
 
         public void BroadcastBlock(Block<T> block)
         {
-            BroadcastBlock(null, block);
+            BroadcastBlock(AsPeer, block);
         }
 
         public void BroadcastTxs(IEnumerable<Transaction<T>> txs)
         {
-            BroadcastTxs(null, txs);
+            BroadcastTxs(AsPeer, txs);
         }
 
         public string TraceTable()
@@ -1642,7 +1642,7 @@ namespace Libplanet.Net
                             if (txIds.Any())
                             {
                                 _logger.Debug("Preparing to broadcast staged transactions: [{txIds}]", string.Join(", ", txIds));
-                                BroadcastTxIds(null, txIds);
+                                BroadcastTxIds(AsPeer, txIds);
                                 
                                 //FIXME: Prune this list upon block arival as transactions included in block get safely removed from staged.
                                 

@@ -96,6 +96,7 @@ namespace Libplanet.Net
                 cl.Disconnected -= ClientDisconected;
                 int count = _pool.RemoveAll(c => (bool)!c.Client?.TcpClient?.Connected);
                 _logger.Verbose($"Removed {count} dead clients from pool.");
+                cl.StopAsync().ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -133,7 +134,7 @@ namespace Libplanet.Net
         public void Return(PooledClient client)
         {
             client.Return();
-            _logger.Information($"Returned {client.Host}{client.Port} socket to pool [totalRents:{client.TotalRents} Created:{client.TimeCreated}");
+            _logger.Information($"Returned {client.Host}{client.Port} socket to pool [totalRents:{client.TotalRents} active rents:{client.ActiveRents}] Created:{client.TimeCreated}");
         }
     }
 }

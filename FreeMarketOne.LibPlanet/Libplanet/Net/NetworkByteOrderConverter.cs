@@ -130,14 +130,18 @@
         /// <param name="buffer">the byte-array to write the long value's bytes into</param>
         public static void PutInt64(long value, byte[] buffer)
         {
-            buffer[0] = (byte)(value >> 56);
-            buffer[1] = (byte)(value >> 48);
-            buffer[2] = (byte)(value >> 40);
-            buffer[3] = (byte)(value >> 32);
-            buffer[4] = (byte)(value >> 24);
-            buffer[5] = (byte)(value >> 16);
-            buffer[6] = (byte)(value >> 8);
-            buffer[7] = (byte)value;
+            //bug fix as original implementation thrown arithmetic overthow exception
+            buffer = NetworkOrderLong(value);
+        }
+
+        private static byte[] NetworkOrderLong(long value)
+        {
+            var bytes = BitConverter.GetBytes(Offset);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
+            return bytes;
         }
     }
 }

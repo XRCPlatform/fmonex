@@ -90,7 +90,7 @@ namespace Libplanet.Net
                     break;
                 case MessageType.Blocks:
                     var blocksBroadcast = message.Envelope.GetBody<Messages.Blocks>();
-                    var task = Task.Run(async () => await ProcessBlock(null, blocksBroadcast, _cancellationToken));
+                    var task = Task.Run(async () => await ProcessBlock(message.Peer, blocksBroadcast, _cancellationToken));
                     try
                     {
                         //ack the reciept
@@ -253,7 +253,7 @@ namespace Libplanet.Net
         {
             if (!(remote is BoundPeer peer))
             {
-                _logger.Information($"Blocks was sent from an invalid peer {remote.Address} ignored.");
+                _logger.Information($"Blocks was sent from an invalid peer {remote.EndPoint} ignored.");
                 return;
             }
 

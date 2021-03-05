@@ -10,6 +10,6 @@ namespace Libplanet.Net.Messages
         public TotClient Client { get; set; }
         public TotRequest Request { get; set; }
         public MessageType MessageType { get; set; }
-        public object Body { get; set; }
+        public Envelope Envelope { get; set; }
     }
 }

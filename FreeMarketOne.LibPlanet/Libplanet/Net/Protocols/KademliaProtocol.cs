@@ -118,17 +118,7 @@ namespace Libplanet.Net.Protocols
                         e);
                 }
             }
-
-            if (!_routing.Peers.Any())
-            {
-                throw new PeerDiscoveryException("All seeds are unreachable.");
-            }
-
-            if (findPeerTasks.Count == 0)
-            {
-                throw new PeerDiscoveryException("Bootstrap failed.");
-            }
-
+            
             try
             {
                 await Task.WhenAll(findPeerTasks);
@@ -139,6 +129,15 @@ namespace Libplanet.Net.Protocols
                           " {Exception}";
                 _logger.Error(e, msg, e);
                 throw;
+            }
+            if (!_routing.Peers.Any())
+            {
+                throw new PeerDiscoveryException("All seeds are unreachable.");
+            }
+
+            if (findPeerTasks.Count == 0)
+            {
+                throw new PeerDiscoveryException("Bootstrap failed.");
             }
         }
 
@@ -283,12 +282,12 @@ namespace Libplanet.Net.Protocols
 #pragma warning disable CS4014 // To run UpdateAsync() without await.
         public void ReceiveMessage(ReceivedRequestEventArgs requestEventArgs)
         {
+            UpdateAsync(requestEventArgs?.Peer);
+
             if (requestEventArgs.MessageType == MessageType.FindNeighbors)
             {
                 ReceiveFindPeer(requestEventArgs);
             }
-
-            UpdateAsync(requestEventArgs?.Peer);
         }
 
 #pragma warning restore CS4014
@@ -445,11 +444,8 @@ namespace Libplanet.Net.Protocols
             try
             {
                 _logger.Verbose("Trying to ping async to {Peer}.", target);
-                Pong reply = await _transport.SendMessageWithReplyAsync<Ping,Pong>(
-                    target,
-                    new Ping(),
-                    timeout
-                );
+                Pong reply = await _transport.SendMessageWithReplyAsync<Ping,Pong>(target,new Ping(),timeout);
+                UpdateAsync(target);
             }
             catch (TimeoutException)
             {
@@ -457,6 +453,7 @@ namespace Libplanet.Net.Protocols
             }
             catch (DifferentAppProtocolVersionException)
             {
+                RemovePeer(target);
                 _logger.Error("Different AppProtocolVersion encountered at PingAsync.");
                 throw;
             }
@@ -517,7 +514,7 @@ namespace Libplanet.Net.Protocols
         // if corresponding bucket for remote peer is not full, just adds remote peer.
         // otherwise check whether if the least recently used (LRU) peer
         // is alive to determine evict LRU peer or discard remote peer.
-        private void UpdateAsync(Peer rawPeer)
+        private void UpdateAsync(BoundPeer rawPeer)
         {
             _logger.Verbose($"Try to {nameof(UpdateAsync)}() {{Peer}}.", rawPeer);
             if (rawPeer is null)

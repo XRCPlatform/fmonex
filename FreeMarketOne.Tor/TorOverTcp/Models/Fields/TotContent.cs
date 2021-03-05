@@ -121,7 +121,7 @@ namespace FreeMarketOne.Tor.TorOverTcp.Models.Fields
 			byte[] bytes = BitConverter.GetBytes(Length);
 			if (BitConverter.IsLittleEndian)
             {
-				Array.Reverse(bytes);
+				//Array.Reverse(bytes);
 			}				
 			return ByteHelpers.Combine(bytes, Content);
 		}

@@ -30,7 +30,7 @@ namespace Libplanet.Net
         public DateTime TimeCreated { get; }
         public DateTime TimeLastRented { get; private set; }
         public Address Address { get; }
-        public bool Exclusive { get; private set; }
+        
         public long ActiveRents { get => Interlocked.Read(ref activeRents); }
         public long TotalRents { get => Interlocked.Read(ref totalRents); }
         public bool Available { get => available; }
@@ -67,6 +67,7 @@ namespace Libplanet.Net
                 if (rented)//only reset if was in rented state, if double called will
                 {
                     available = true;
+                    rented = false;
                     Interlocked.Decrement(ref activeRents);
                 }
             }

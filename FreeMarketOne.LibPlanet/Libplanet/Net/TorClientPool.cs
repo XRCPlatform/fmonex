@@ -61,7 +61,7 @@ namespace Libplanet.Net
             {
                 poolItem.Rent();
             }
-            _logger.Verbose($"Rented pooled dealer socket for {peer.Address} with TotalRents #{poolItem.TotalRents} shared exclusively {poolItem.Exclusive} socket created at {poolItem.TimeCreated}");
+            _logger.Verbose($"Rented pooled tor socket for {peer} with TotalRents #{poolItem.TotalRents} socket created at {poolItem.TimeCreated}");
 
             return poolItem;
         }
@@ -90,7 +90,9 @@ namespace Libplanet.Net
             try
             {
                 _logger.Verbose($"Client {cl.Host}{cl.Port} disconected. Error:{e}");
-                cl.TcpClient.Close();
+                int count2 = _pool.RemoveAll(c => c.Client?.TcpClient?.Client.RemoteEndPoint == cl?.TcpClient?.Client.RemoteEndPoint);
+                _logger.Verbose($"Removed {count2} specific clients from pool.");
+                //cl.TcpClient.Close();
                 cl.Disconnected -= ClientDisconected;
                 int count = _pool.RemoveAll(c => (bool)!c.Client?.TcpClient?.Connected);
                 _logger.Verbose($"Removed {count} dead clients from pool.");

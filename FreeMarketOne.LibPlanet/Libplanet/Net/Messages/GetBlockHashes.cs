@@ -88,14 +88,17 @@ namespace Libplanet.Net.Messages
         /// <see cref="BlockStates"/>.</returns>
         public Dictionary ToBencodex()
         {
-            var dict = Dictionary.Empty
-                    .Add(StopKey, Stop.Value.ToByteArray());
-                if (Locator.Any())
-                {
-                    dict = dict.Add(
-                        LocatorKey,
-                        Locator.Select(hash => (IValue)(Binary)hash.ToByteArray()));
-                }
+            var dict = Dictionary.Empty;
+            if (Stop.HasValue)
+            {
+                dict = dict.Add(StopKey, Stop.Value.ToByteArray());
+            }
+            if (Locator.Any())
+            {
+                dict = dict.Add(
+                    LocatorKey,
+                    Locator.Select(hash => (IValue)(Binary)hash.ToByteArray()));
+            }
             return dict;
         }
 

@@ -72,6 +72,11 @@ namespace FreeMarketOne.Tor
 				 ListenNetworkStreamTask = ListenNetworkStreamAsync();
 			}
 		}
+		public int GetExpectedStreamLengthFromBytes(byte[] receivedBytes)
+		{
+			int purposeLength = receivedBytes[4];
+			return BitConverter.ToInt32(receivedBytes.Skip(5 + purposeLength).Take(4).ToArray(), 0);
+		}
 
 		private async Task ListenNetworkStreamAsync()
 		{
@@ -87,11 +92,12 @@ namespace FreeMarketOne.Tor
 					{
 						throw new ConnectionException($"Client lost connection.");
 					}
-					
+
+					var expectedLen = GetExpectedStreamLengthFromBytes(buffer);
 					await Task.Delay(100).ConfigureAwait(false); //let the underlying socket buffers sync
 
 					// if we could fit everything into our buffer, then we get our message
-					if (!stream.DataAvailable)
+					if (expectedLen == receiveCount)//!stream.DataAvailable 
 					{
 						foreach (var messageBytes in TotMessageBase.SplitByMessages(buffer.Take(receiveCount).ToArray()))
 						{
@@ -104,7 +110,7 @@ namespace FreeMarketOne.Tor
 						// while we have data available, start building a bytearray
 						var builder = new ByteArrayBuilder();
 						builder.Append(buffer.Take(receiveCount).ToArray());
-						while (stream.DataAvailable)
+						while (expectedLen > builder.Length)
 						{
 							Array.Clear(buffer, 0, buffer.Length);
 							receiveCount = await stream.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false);

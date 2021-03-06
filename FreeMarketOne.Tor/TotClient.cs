@@ -1,16 +1,15 @@
-﻿using System;
+﻿using FreeMarketOne.Extensions.Helpers;
+using FreeMarketOne.Tor.Exceptions;
+using FreeMarketOne.Tor.TorOverTcp.Models.Fields;
+using FreeMarketOne.Tor.TorOverTcp.Models.Messages;
+using FreeMarketOne.Tor.TorOverTcp.Models.Messages.Bases;
+using Serilog;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using FreeMarketOne.Tor.Exceptions;
-using FreeMarketOne.Tor.TorOverTcp.Models.Fields;
-using FreeMarketOne.Tor.TorOverTcp.Models.Messages;
-using FreeMarketOne.Tor.TorOverTcp.Models.Messages.Bases;
-using FreeMarketOne.Extensions.Helpers;
-using Serilog.Core;
-using Serilog;
 
 namespace FreeMarketOne.Tor
 {
@@ -76,7 +75,6 @@ namespace FreeMarketOne.Tor
 
 		private async Task ListenNetworkStreamAsync()
 		{
-			int emptyCounter = 0;
 			while (true)
 			{
 				try
@@ -87,21 +85,8 @@ namespace FreeMarketOne.Tor
 					var receiveCount = await stream.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false); // TcpClient.Disposep() will trigger ObjectDisposedException
 					if (receiveCount <= 0)
 					{
-						//await Task.Delay(1000).ConfigureAwait(false);
-						//// wait 100ms, then retry
-						////if nothing arrived on pipe does not mean disconnected
-						////but if reaches long poll then it's a problem
-						////in total wait 2minutes before throwing a connectionExecption 
-						//if (emptyCounter < 120)
-      //                  {
-						//	emptyCounter++;
-						//	continue;
-						//}
 						throw new ConnectionException($"Client lost connection.");
 					}
-					
-					//reset
-					emptyCounter = 0;
 
 					// if we could fit everything into our buffer, then we get our message
 					if (!stream.DataAvailable)
@@ -112,25 +97,28 @@ namespace FreeMarketOne.Tor
 						}
 						continue;
 					}
-
-					// while we have data available, start building a bytearray
-					var builder = new ByteArrayBuilder();
-					builder.Append(buffer.Take(receiveCount).ToArray());
-					while (stream.DataAvailable)
+					else
 					{
-						Array.Clear(buffer, 0, buffer.Length);
-						receiveCount = await stream.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false);
-						if (receiveCount <= 0)
-						{
-							throw new ConnectionException($"Client lost connection.");
-						}
+						// while we have data available, start building a bytearray
+						var builder = new ByteArrayBuilder();
 						builder.Append(buffer.Take(receiveCount).ToArray());
+						while (stream.DataAvailable)
+						{
+							Array.Clear(buffer, 0, buffer.Length);
+							receiveCount = await stream.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false);
+							if (receiveCount <= 0)
+							{
+								throw new ConnectionException($"Client lost connection.");
+							}
+							builder.Append(buffer.Take(receiveCount).ToArray());
+						}
+
+						foreach (var messageBytes in TotMessageBase.SplitByMessages(builder.ToArray()))
+						{
+							ProcessMessageBytesAsync(messageBytes);
+						}
 					}
 
-					foreach (var messageBytes in TotMessageBase.SplitByMessages(builder.ToArray()))
-					{
-						ProcessMessageBytesAsync(messageBytes);
-					}
 					continue;
 				}
 				catch (ObjectDisposedException ex)

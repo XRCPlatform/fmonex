@@ -90,7 +90,8 @@ namespace FreeMarketOne.Tor
 					var receiveCount = await stream.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false); // TcpClient.Disposep() will trigger ObjectDisposedException
 					if (receiveCount <= 0)
 					{
-						throw new ConnectionException($"Client lost connection.");
+						return;//this is completly normal to finish streaming not an exception
+						//throw new ConnectionException($"Client lost connection.");
 					}
 
 					var expectedLen = GetExpectedStreamLengthFromBytes(buffer);

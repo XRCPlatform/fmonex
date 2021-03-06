@@ -27,19 +27,14 @@ namespace Libplanet.Net.Messages
         {
             var list = dict.GetValue<List>(BaseLocatorKey).Select(f => new HashDigest<SHA256>((Binary)f));
             BaseLocator = new BlockLocator(list);
-            Offset = ConvertToInt64(dict.GetValue<Binary>(OffsetKey));
+            Offset = dict.GetValue<Integer>(OffsetKey);
             TargetBlockHash = new HashDigest<SHA256>(dict.GetValue<Binary>(TargetHashKey));
         }
-
-        public long ConvertToInt64(byte[] Buffer)
-        {
-            return NetworkOrderBitsConverter.ToInt64(Buffer);
-        }
-        
+                   
         public Dictionary ToBencodex()
         {
             var dict = Dictionary.Empty
-                .Add(OffsetKey, NetworkOrderBitsConverter.GetBytes(Offset))
+                .Add(OffsetKey, Offset)
                 .Add(TargetHashKey, TargetBlockHash.ToByteArray());
             if (BaseLocator.Any())
             {

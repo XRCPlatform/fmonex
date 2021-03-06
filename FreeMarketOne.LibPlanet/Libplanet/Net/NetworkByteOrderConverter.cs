@@ -16,7 +16,11 @@ namespace Libplanet.Net
         /// <returns></returns>
         public static short ToInt16(byte[] buffer)
         {
-            return BitConverter.ToInt16(buffer,0);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(buffer);
+            }
+            return BitConverter.ToInt16(buffer);
         }
 
         /// <summary>
@@ -44,7 +48,11 @@ namespace Libplanet.Net
         /// <returns></returns>
         public static int ToInt32(byte[] buffer)
         {
-            return BitConverter.ToInt32(buffer,0);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(buffer);
+            }
+            return BitConverter.ToInt32(buffer);
         }
 
         /// <summary>
@@ -72,7 +80,11 @@ namespace Libplanet.Net
         /// <returns></returns>
         public static long ToInt64(byte[] buffer)
         {
-            return BitConverter.ToInt64(buffer, 0); 
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(buffer);
+            }
+            return BitConverter.ToInt64(buffer); 
         }
 
         /// <summary>

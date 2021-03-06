@@ -22,8 +22,9 @@ namespace Libplanet.Net.Messages
         public ChainStatus(Bencodex.Types.Dictionary dict)
         {
             GenesisHash = new HashDigest<SHA256>(dict.GetValue<Binary>(GenesisHashKey).ToImmutableArray());
-            TipIndex = ConvertToInt64(dict.GetValue<Binary>(TipIndexKey));
-            TotalDifficulty = new BigInteger(dict.GetValue<Binary>(TotalDifficultyKey));
+            TipIndex = dict.GetValue<Integer>(TipIndexKey);
+            //TotalDifficulty = new BigInteger(dict.GetValue<Binary>(TotalDifficultyKey));
+            TotalDifficulty = dict.GetValue<Integer>(TotalDifficultyKey);
         }
 
         public ChainStatus(byte[] bytes) : this(DecodeBytesToBen(bytes))
@@ -52,18 +53,13 @@ namespace Libplanet.Net.Messages
         {
             return new Codec().Encode(ToBencodex());
         }
-               
-        public long ConvertToInt64(byte[] Buffer)
-        {
-            return NetworkOrderBitsConverter.ToInt64(Buffer);
-        }
 
         public Dictionary ToBencodex()
         {
             var dict = Dictionary.Empty
                 .Add(GenesisHashKey, GenesisHash.ToByteArray())
-                .Add(TipIndexKey, NetworkOrderBitsConverter.GetBytes(TipIndex))
-                .Add(TotalDifficultyKey, TotalDifficulty.ToByteArray());
+                .Add(TipIndexKey,TipIndex)
+                .Add(TotalDifficultyKey, (IValue)(Bencodex.Types.Integer)TotalDifficulty);
             return dict;
         }
 

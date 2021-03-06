@@ -54,7 +54,7 @@ namespace Libplanet.Net.Messages
         {
             if (dict.ContainsKey((IKey)(Binary)StartIndexKey))
             {
-                StartIndex = NetworkOrderBitsConverter.ToInt64(dict.GetValue<Binary>(StartIndexKey));
+                StartIndex = dict.GetValue<Integer>(StartIndexKey);
             }
 
             var temp = new List<HashDigest<SHA256>>();
@@ -119,7 +119,7 @@ namespace Libplanet.Net.Messages
             var dict = Dictionary.Empty;
             if (StartIndex is long offset)
             {
-                dict = dict.Add(StartIndexKey, NetworkOrderBitsConverter.GetBytes(offset));
+                dict = dict.Add(StartIndexKey, offset);
                 if (Hashes.Any())
                 {
                     dict = dict.Add(

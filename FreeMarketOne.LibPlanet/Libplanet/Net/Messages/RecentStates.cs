@@ -29,7 +29,7 @@ namespace Libplanet.Net.Messages
         {
             if (dict.ContainsKey((IKey)(Binary)OffsetKey))
             {
-                Offset = NetworkOrderBitsConverter.ToInt64(dict.GetValue<Binary>(OffsetKey));
+                Offset = dict.GetValue<Integer>(OffsetKey);
             }
 
             if (dict.ContainsKey((IKey)(Binary)BlockHashKey))
@@ -39,13 +39,13 @@ namespace Libplanet.Net.Messages
 
             if (dict.ContainsKey((IKey)(Binary)BlockHashKey))
             {
-                Iteration = NetworkOrderBitsConverter.ToInt32(dict.GetValue<Binary>(IterationKey));
+                Iteration = dict.GetValue<Integer>(IterationKey);
             }
 
 
             if (dict.ContainsKey((IKey)(Binary)AccountsCountKey))
             {
-                int accountsCount = NetworkOrderBitsConverter.ToInt32(dict.GetValue<Binary>(AccountsCountKey));
+                int accountsCount = dict.GetValue<Integer>(AccountsCountKey);
                 if (accountsCount < 0)
                 {
                     BlockStates = null;
@@ -290,16 +290,16 @@ namespace Libplanet.Net.Messages
 
             var dict = Dictionary.Empty
                 .Add(BlockHashKey, BlockHash.ToByteArray())
-                .Add(OffsetKey, NetworkOrderLong(Offset))//; NetworkOrderBitsConverter.GetBytes(Offset))
-                .Add(IterationKey, NetworkOrderBitsConverter.GetBytes(Iteration));
+                .Add(OffsetKey, Offset)
+                .Add(IterationKey, Iteration);
 
             if (Missing)
             {
-                dict = dict.Add(AccountsCountKey, NetworkOrderLong(-1)); ;
+                dict = dict.Add(AccountsCountKey, -1); ;
             }
             else
             {
-                dict = dict.Add(AccountsCountKey, NetworkOrderLong(StateReferences.Count()));
+                dict = dict.Add(AccountsCountKey, StateReferences.Count());
             }
 
             if (StateReferences.Any())
@@ -339,15 +339,6 @@ namespace Libplanet.Net.Messages
             return dict;
         }
 
-        private byte[] NetworkOrderLong(long Offset)
-        {
-            var bytes = BitConverter.GetBytes(Offset);
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(bytes);
-            }                
-            return bytes;
-        }
 
         //protected override IEnumerable<NetMQFrame> DataFrames
         //{

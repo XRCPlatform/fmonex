@@ -32,7 +32,7 @@ namespace Libplanet.Net.Messages
         {
             if (dict.ContainsKey((IKey)(Binary)ChunkSizeKey))
             {
-                ChunkSize = NetworkOrderBitsConverter.ToInt32(dict.GetValue<Binary>(ChunkSizeKey));
+                ChunkSize = dict.GetValue<Integer>(ChunkSizeKey);
             }
 
             var temp = new List<HashDigest<SHA256>>();
@@ -97,7 +97,7 @@ namespace Libplanet.Net.Messages
             var dict = Dictionary.Empty;
             if (ChunkSize is int offset)
             {
-                dict = dict.Add(ChunkSizeKey, NetworkOrderBitsConverter.GetBytes(offset));
+                dict = dict.Add(ChunkSizeKey, offset);
             }
             if (BlockHashes.Any())
             {

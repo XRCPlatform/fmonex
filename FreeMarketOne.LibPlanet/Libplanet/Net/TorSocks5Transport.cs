@@ -327,7 +327,7 @@ namespace Libplanet.Net
             Stopwatch sw = new Stopwatch();
             sw.Start();
             client.RespondSuccessAsync(request.MessageId, response).ConfigureAwait(false).GetAwaiter().GetResult();
-            _logger.Debug($"Sent a response for{responseEnvelope.MessageType} time taken to respond {sw.ElapsedMilliseconds} ms.");
+            _logger.Debug($"Sent a response for {responseEnvelope.MessageType} time taken to respond {sw.ElapsedMilliseconds} ms.");
         }
 
 
@@ -508,7 +508,6 @@ namespace Libplanet.Net
         public Envelope UnPackEnvelope(byte[] bytes)
         {
             string json = Unzip(bytes);            
-            _logger.Debug($"JSON received:{json}");
             var e = JsonConvert.DeserializeObject<Envelope>(json);
             //if (e.MessageType != MessageType.Ping && e.MessageType != MessageType.Pong) {
             //    _logger.Debug($"JSON received:{json}");
@@ -519,7 +518,6 @@ namespace Libplanet.Net
         public byte[] PackEnvelope(Envelope envelope)
         {
             string json = JsonConvert.SerializeObject(envelope, Formatting.None);
-
             //if (envelope.MessageType != MessageType.Ping && envelope.MessageType != MessageType.Pong)
             //{
             //    _logger.Debug($"JSON sent:{json}");

@@ -510,9 +510,9 @@ namespace Libplanet.Net
             string json = Unzip(bytes);            
             _logger.Debug($"JSON received:{json}");
             var e = JsonConvert.DeserializeObject<Envelope>(json);
-            if (e.MessageType != MessageType.Ping && e.MessageType != MessageType.Pong) {
-                _logger.Debug($"JSON received:{json}");
-            }
+            //if (e.MessageType != MessageType.Ping && e.MessageType != MessageType.Pong) {
+            //    _logger.Debug($"JSON received:{json}");
+            //}
             return e;
         }
 
@@ -520,10 +520,10 @@ namespace Libplanet.Net
         {
             string json = JsonConvert.SerializeObject(envelope, Formatting.None);
 
-            if (envelope.MessageType != MessageType.Ping && envelope.MessageType != MessageType.Pong)
-            {
-                _logger.Debug($"JSON sent:{json}");
-            }
+            //if (envelope.MessageType != MessageType.Ping && envelope.MessageType != MessageType.Pong)
+            //{
+            //    _logger.Debug($"JSON sent:{json}");
+            //}
             return Zip(json);
         }
 

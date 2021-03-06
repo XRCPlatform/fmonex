@@ -16,10 +16,7 @@ namespace Libplanet.Net
         /// <returns></returns>
         public static short ToInt16(byte[] buffer)
         {
-            var i = buffer[0] << 8 |
-                    buffer[1];
-
-            return (short)i;
+            return BitConverter.ToInt16(buffer);
         }
 
         /// <summary>
@@ -30,23 +27,14 @@ namespace Libplanet.Net
 
         public static byte[] GetBytes(short value)
         {
-            var buffer = new byte[2];
-            PutInt16(value, buffer);
-
-            return buffer;
+            var bytes = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
+            return bytes;
         }
 
-        /// <summary>
-        /// Given a 16-bit integer, and a byte-array buffer and offset,
-        /// - write the 2 bytes of that integer into the buffer starting at that offset, in Big-endian order.
-        /// </summary>
-        /// <param name="value">the short to convert into bytes</param>
-        /// <param name="buffer">the byte-array to write the short's bytes into</param>
-        public static void PutInt16(short value, byte[] buffer)
-        {
-            buffer[0] = (byte)(value >> 8);
-            buffer[1] = (byte)value;
-        }
 
         /// <summary>
         /// Given a byte-array assumed to be in Big-endian order, and an offset into it
@@ -56,11 +44,7 @@ namespace Libplanet.Net
         /// <returns></returns>
         public static int ToInt32(byte[] buffer)
         {
-            return
-                buffer[0] << 24 |
-                buffer[1] << 16 |
-                buffer[2] << 8 |
-                buffer[3];
+            return BitConverter.ToInt32(buffer);
         }
 
         /// <summary>
@@ -68,28 +52,17 @@ namespace Libplanet.Net
         /// </summary>
         /// <param name="value">the int to convert</param>
         /// <returns>a 4-byte array containing that integer's bits</returns>
-
         public static byte[] GetBytes(int value)
         {
-            var buffer = new byte[4];
-            PutInt32(value, buffer);
-
-            return buffer;
+            var bytes = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
+            return bytes;
         }
 
-        /// <summary>
-        /// Given a 32-bit integer, and a byte-array buffer and offset,
-        /// - write the 4 bytes of that integer into the buffer starting at that offset, in Big-endian order.
-        /// </summary>
-        /// <param name="value">the integer to convert into bytes</param>
-        /// <param name="buffer">the byte-array to write the integer's bytes into</param>
-        public static void PutInt32(int value, byte[] buffer)
-        {
-            buffer[0] = (byte)(value >> 24);
-            buffer[1] = (byte)(value >> 16);
-            buffer[2] = (byte)(value >> 8);
-            buffer[3] = (byte)value;
-        }
+       
 
         /// <summary>
         /// Given a byte-array assumed to be in Big-endian order, and an offset into it
@@ -99,15 +72,7 @@ namespace Libplanet.Net
         /// <returns></returns>
         public static long ToInt64(byte[] buffer)
         {
-            return
-                (long)buffer[0] << 56 |
-                (long)buffer[1] << 48 |
-                (long)buffer[2] << 40 |
-                (long)buffer[3] << 32 |
-                (long)buffer[4] << 24 |
-                (long)buffer[5] << 16 |
-                (long)buffer[6] << 8 |
-                (long)buffer[7];
+            return BitConverter.ToInt64(buffer); 
         }
 
         /// <summary>
@@ -117,13 +82,6 @@ namespace Libplanet.Net
         /// <returns>The network order presentation of <paramref name="value"/> as an 8-byte array.</returns>
 
         public static byte[] GetBytes(long value)
-        {
-            //bug fix as original implementation thrown arithmetic overthow exception
-            return NetworkOrderLong(value);
-        }
-
-    
-        private static byte[] NetworkOrderLong(long value)
         {
             var bytes = BitConverter.GetBytes(value);
             if (BitConverter.IsLittleEndian)

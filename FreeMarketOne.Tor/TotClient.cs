@@ -87,6 +87,8 @@ namespace FreeMarketOne.Tor
 					{
 						throw new ConnectionException($"Client lost connection.");
 					}
+					
+					await Task.Delay(100).ConfigureAwait(false); //let the underlying socket buffers sync
 
 					// if we could fit everything into our buffer, then we get our message
 					if (!stream.DataAvailable)
@@ -111,6 +113,7 @@ namespace FreeMarketOne.Tor
 								throw new ConnectionException($"Client lost connection.");
 							}
 							builder.Append(buffer.Take(receiveCount).ToArray());
+							await Task.Delay(100).ConfigureAwait(false);
 						}
 
 						foreach (var messageBytes in TotMessageBase.SplitByMessages(builder.ToArray()))

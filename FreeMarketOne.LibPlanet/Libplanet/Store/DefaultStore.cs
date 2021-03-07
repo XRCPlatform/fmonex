@@ -847,8 +847,10 @@ namespace Libplanet.Store
         {
             long nextNonce = GetTxNonce(chainId, signer) + delta;
             var collectionId = TxNonceId(chainId);
+            _logger.Debug($"Trying to IncreaseTxNonce collection:{collectionId}");
             LiteCollection<BsonDocument> collection = _db.GetCollection<BsonDocument>(collectionId);
             var docId = new BsonValue(signer.ToByteArray());
+            _logger.Debug($"Trying to IncreaseTxNonce docId:{docId.AsString}");
             collection.Upsert(docId, new BsonDocument() { ["v"] = new BsonValue(nextNonce) });
         }
 

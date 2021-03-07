@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Libplanet.Net.Messages;
 using Serilog;
 
@@ -14,7 +15,7 @@ namespace Libplanet.Net.Protocols
         private readonly Address _address;
         private readonly int _tableSize;
         private readonly KBucket[] _buckets;
-
+        private IPAddress localhostIPAddress = IPAddress.Parse("127.0.0.1");
         private readonly ILogger _logger;
         public event EventHandler<PeerStateChangeEventArgs> PeerStateChange;
 
@@ -117,9 +118,11 @@ namespace Libplanet.Net.Protocols
                 throw new ArgumentNullException(nameof(peer));
             }
 
-            if (peer.Address.Equals(_address))
+            if (peer.Address.Equals(_address) || peer.PublicIPAddress == localhostIPAddress)
             {
-                throw new ArgumentException("Cannot add self to routing table.");
+                //no need to throw exeptions as this is just normal logic
+                return;
+                //throw new ArgumentException("Cannot add self to routing table.");
             }           
 
             _logger.Debug("Adding peer {Peer} to routing table.", peer);

@@ -83,10 +83,19 @@ namespace Libplanet.Net
 
                 case MessageType.TxBroadcast:
 
-                    var transaction = message.Envelope.GetBody<TxBroadcast>();
-                    ReceiveTransactionBroadcast(transaction, message.Peer);
-                    //ack the reciept
-                    Transport.ReplyMessage<Pong>(message.Request, client, new Pong());
+                    var transaction = message.Envelope.GetBody<TxBroadcast>();                    
+                    var trxBroadcast = Task.Run(() => ReceiveTransactionBroadcast(transaction, message.Peer));
+                    try
+                    {
+                        //ack the reciept
+                        Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));
+                        trxBroadcast.Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error($"Processing received TxBroadcast message, completed with error {e}.");
+                    }
+                   
                     break;
                 case MessageType.Blocks:
                     var blocksBroadcast = message.Envelope.GetBody<Messages.Blocks>();

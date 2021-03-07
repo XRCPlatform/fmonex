@@ -45,6 +45,7 @@ namespace Libplanet.Net
         private BlockHashDemand? _demandBlockHash;
         private ConcurrentDictionary<TxId, BoundPeer> _demandTxIds;
         private List<TxId> broadcastedTransactions = new List<TxId>();
+        private IPAddress localhostIp = IPAddress.Parse("127.0.0.1");
 
         static Swarm()
         {
@@ -986,7 +987,7 @@ namespace Libplanet.Net
             var netMQTransport = (TorSocks5Transport)Transport;
             await netMQTransport.CheckAllPeersAsync(cancellationToken, timeout);
         }
-
+        
         public async Task AddPeersAsync(
             IEnumerable<Peer> peers,
             TimeSpan? timeout,
@@ -1002,7 +1003,7 @@ namespace Libplanet.Net
                 cancellationToken = _cancellationToken;
             }
 
-            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address));
+            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address) && peer?.PublicIPAddress != localhostIp);
             await ((TorSocks5Transport)Transport).AddPeersAsync(peersExceptMe, timeout, cancellationToken);
         }
 

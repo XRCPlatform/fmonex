@@ -118,7 +118,7 @@ namespace Libplanet.Net.Protocols
                 throw new ArgumentNullException(nameof(peer));
             }
 
-            if (peer.Address.Equals(_address) || peer.PublicIPAddress == localhostIPAddress)
+            if (peer.Address.Equals(_address) || peer?.PublicIPAddress == localhostIPAddress)
             {
                 //no need to throw exeptions as this is just normal logic
                 return;

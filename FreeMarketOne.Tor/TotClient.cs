@@ -72,10 +72,12 @@ namespace FreeMarketOne.Tor
 				 ListenNetworkStreamTask = ListenNetworkStreamAsync();
 			}
 		}
+
 		public int GetExpectedStreamLengthFromBytes(byte[] receivedBytes)
 		{
 			int purposeLength = receivedBytes[4];
-			return BitConverter.ToInt32(receivedBytes.Skip(5 + purposeLength).Take(4).ToArray(), 0);
+			int contentLength = BitConverter.ToInt32(receivedBytes.Skip(5 + purposeLength).Take(4).ToArray(), 0);
+			return 5 + purposeLength + 4 + contentLength;
 		}
 
 		private async Task ListenNetworkStreamAsync()

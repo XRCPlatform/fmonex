@@ -64,6 +64,11 @@ namespace Libplanet.Net
 
                     var getRecentStates = message.Envelope.GetBody<GetRecentStates>();
                     var states = TransferRecentStates(getRecentStates);
+                    
+                    _logger.Error($"Processing TransferRecentStates message, " +
+                        $"request getRecentStates->ben:[{getRecentStates.SerializeToBen()}]" +                        
+                        $"respons RecentStates->ben:[{states.SerializeToBen()}]");
+
                     Transport.ReplyMessage<RecentStates>(message.Request, client, states);
                     break;
 

@@ -46,7 +46,7 @@ namespace Libplanet.Net
         private ConcurrentDictionary<TxId, BoundPeer> _demandTxIds;
         private List<TxId> broadcastedTransactions = new List<TxId>();
         private IPAddress localhostIp = IPAddress.Parse("127.0.0.1");
-
+        private int _listenPort = 0;
         static Swarm()
         {
             if (!(Type.GetType("Mono.Runtime") is null))
@@ -152,6 +152,8 @@ namespace Libplanet.Net
             _logger = Log.ForContext<Swarm<T>>()
                 .ForContext("SwarmId", loggerId);
 
+            _listenPort = listenPort.GetValueOrDefault();
+            
             //TODO: move this to config or TorProcessManager or _socks5Proxy for now just need first build to complete
             var torSocksProxyIp = IPAddress.Parse("127.0.0.1");
             IPEndPoint torSocksProxyEndpoint = new IPEndPoint(torSocksProxyIp, 9050);
@@ -448,8 +450,7 @@ namespace Libplanet.Net
             }
 
             IEnumerable<BoundPeer> peers = seedPeers.OfType<BoundPeer>();
-            
-            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address) && peer.EndPoint.Host != "127.0.0.1" && peer.EndPoint.Host != ((BoundPeer)AsPeer).EndPoint.Host );
+            IEnumerable<BoundPeer> peersExceptMe = PeersExceptMe(peers);
 
             await Transport.BootstrapAsync(
                 peersExceptMe,
@@ -457,6 +458,16 @@ namespace Libplanet.Net
                 findNeighborsTimeout,
                 depth,
                 cancellationToken);
+        }
+
+        private IEnumerable<BoundPeer> PeersExceptMe(IEnumerable<BoundPeer> peers)
+        {
+            return peers.Where(
+                    peer => !peer.Address.Equals(AsPeer.Address)
+                    && peer.EndPoint.Host != "127.0.0.1"
+                    && peer.EndPoint.Host != ((BoundPeer)AsPeer).EndPoint.Host
+                    && peer.EndPoint.Port == _listenPort
+                );
         }
 
         public void BroadcastBlock(Block<T> block)
@@ -611,17 +622,8 @@ namespace Libplanet.Net
 
                     if (!peersWithHeight.Any())
                     {
-                        if (retryCount <= maxRetryCount)
-                        {
-                            await AddPeersAsync(peers: Peers, dialTimeout, cancellationToken);
-                            await Task.Delay(2000);
-                            continue;
-                        }
-                        else
-                        {
-                            _logger.Information("There is no appropriate peer for preloading.");
-                            return;
-                        }                        
+                        _logger.Information("There is no appropriate peer for preloading.");
+                        return;
                     }
 
                     PreloadStarted.Set();

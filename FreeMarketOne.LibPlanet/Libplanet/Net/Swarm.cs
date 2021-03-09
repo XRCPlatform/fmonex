@@ -611,8 +611,17 @@ namespace Libplanet.Net
 
                     if (!peersWithHeight.Any())
                     {
-                        _logger.Information("There is no appropriate peer for preloading.");
-                        return;
+                        if (retryCount <= maxRetryCount)
+                        {
+                            await AddPeersAsync(peers: Peers, dialTimeout, cancellationToken);
+                            await Task.Delay(2000);
+                            continue;
+                        }
+                        else
+                        {
+                            _logger.Information("There is no appropriate peer for preloading.");
+                            return;
+                        }                        
                     }
 
                     PreloadStarted.Set();

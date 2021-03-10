@@ -245,20 +245,27 @@ namespace Libplanet.Store
         /// <inheritdoc/>
         public override long AppendIndex(Guid chainId, HashDigest<SHA256> hash)
         {
-            var exists = _db.GetCollection<HashDoc>(IndexCollectionName)
-                .Find(dest => dest.ChainId.Equals(chainId)
-                                && dest.Hash.Equals(hash));
-            
-            if (exists.FirstOrDefault() is null) {
-                return _db.GetCollection<HashDoc>(IndexCollectionName)
-                    .Insert(new HashDoc
+           _db.GetCollection<HashDoc>(IndexCollectionName)
+                    .Upsert(new HashDoc
                     {
                         Hash = hash,
                         ChainId = chainId
-                    }) - 1;
-            }
+                    });
 
-            return exists.FirstOrDefault().Id - 1;            
+            _db.GetCollection<HashDoc>(IndexCollectionName).EnsureIndex(x => x.ChainId);
+            _db.GetCollection<HashDoc>(IndexCollectionName).EnsureIndex(y => y.Hash);
+
+            var exists = _db.GetCollection<HashDoc>(IndexCollectionName)
+                .Find(dest => dest.ChainId.Equals(chainId)
+                                && dest.Hash.Equals(hash));
+
+            if (exists.FirstOrDefault() != null)
+            {
+                return exists.FirstOrDefault().Id -1;
+            }
+            
+            throw new Exception("Insert failed");
+            
         }
 
         /// <inheritdoc/>

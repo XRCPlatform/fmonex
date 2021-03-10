@@ -313,9 +313,9 @@ namespace Libplanet.Net
                     return;
                 }
 
-                long prevTip = BlockChain.Tip.Index;
+                long? prevTip = BlockChain?.Tip?.Index;
 
-                if (prevTip == block.Index)
+                if (prevTip.HasValue && prevTip == block.Index)
                 {
                     //received re-broadcast
                     if (BlockChain.Tip.Hash.Equals(block.Hash))
@@ -332,7 +332,7 @@ namespace Libplanet.Net
                     return;
                 }
                 //single block gap try accept simply
-                long gap = block.Index - prevTip;
+                long gap = block.Index - prevTip.GetValueOrDefault();
                 if (gap == 1)
                 {
                     _logger.Information($"Accepting a received block #{block.Index} { block.Hash } tip before this message {prevTip}");

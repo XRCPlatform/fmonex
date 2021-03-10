@@ -27,11 +27,11 @@ namespace Libplanet.Store
     /// <seealso cref="IStore"/>
     public class DefaultStore : BaseBlockStatesStore
     {
-        private const string IndexCollectionName = "idx";
+        private const string IndexColPrefix = "index_";
 
-        private const string StateRefIdPrefix = "srf";
+        private const string StateRefIdPrefix = "stateref_";
 
-        private const string TxNonceIdCollectionName = "nos";
+        private const string TxNonceIdPrefix = "nonce_";
 
         private static readonly UPath TxRootPath = UPath.Root / "tx";
         private static readonly UPath BlockRootPath = UPath.Root / "block";
@@ -164,23 +164,23 @@ namespace Libplanet.Store
         }
 
         private LiteCollection<StagedTxIdDoc> StagedTxIds =>
-            _db.GetCollection<StagedTxIdDoc>("stx");
+            _db.GetCollection<StagedTxIdDoc>("staged_txids");
 
         /// <inheritdoc/>
         public override IEnumerable<Guid> ListChainIds()
         {
-            return _db.GetCollection<HashDoc>(IndexCollectionName).FindAll().Select(c => c.ChainId);
-           
+            return _db.GetCollectionNames()
+                .Where(name => name.StartsWith(IndexColPrefix))
+                .Select(name => ParseChainId(name.Substring(IndexColPrefix.Length)));
         }
 
         /// <inheritdoc/>
         public override void DeleteChainId(Guid chainId)
         {
-           
+            _db.DropCollection(IndexCollection(chainId).Name);
+            _db.DropCollection(TxNonceId(chainId));
             _db.DropCollection(StateRefId(chainId));
             _lastStateRefCaches.Remove(chainId);
-            _db.GetCollection<TxNonceDoc>(TxNonceIdCollectionName).Delete(c => c.ChainId.Equals(chainId));
-            _db.GetCollection<HashDoc>(IndexCollectionName).Delete(c => c.ChainId.Equals(chainId));
         }
 
         /// <inheritdoc />
@@ -220,8 +220,8 @@ namespace Libplanet.Store
             int offset,
             int? limit)
         {
-            return _db.GetCollection<HashDoc>(IndexCollectionName)
-                .Find(d => d.ChainId.Equals(chainId), offset, limit ?? int.MaxValue)
+            return IndexCollection(chainId)
+                .Find(Query.All(), offset, limit ?? int.MaxValue)
                 .Select(i => i.Hash);
         }
 
@@ -238,34 +238,13 @@ namespace Libplanet.Store
                 }
             }
 
-            return _db.GetCollection<HashDoc>(IndexCollectionName)
-                .Find(d => d.ChainId.Equals(chainId) && d.Id.Equals(index + 1)).FirstOrDefault()?.Hash;
+            return IndexCollection(chainId).FindById(index + 1)?.Hash;
         }
 
         /// <inheritdoc/>
         public override long AppendIndex(Guid chainId, HashDigest<SHA256> hash)
         {
-           _db.GetCollection<HashDoc>(IndexCollectionName)
-                    .Upsert(new HashDoc
-                    {
-                        Hash = hash,
-                        ChainId = chainId
-                    });
-
-            _db.GetCollection<HashDoc>(IndexCollectionName).EnsureIndex(x => x.ChainId);
-            _db.GetCollection<HashDoc>(IndexCollectionName).EnsureIndex(y => y.Hash);
-
-            var exists = _db.GetCollection<HashDoc>(IndexCollectionName)
-                .Find(dest => dest.ChainId.Equals(chainId)
-                                && dest.Hash.Equals(hash));
-
-            if (exists.FirstOrDefault() != null)
-            {
-                return exists.FirstOrDefault().Id -1;
-            }
-            
-            throw new Exception("Insert failed");
-            
+            return IndexCollection(chainId).Insert(new HashDoc { Hash = hash }) - 1;
         }
 
         /// <inheritdoc/>
@@ -274,6 +253,9 @@ namespace Libplanet.Store
             Guid destinationChainId,
             HashDigest<SHA256> branchPoint)
         {
+            LiteCollection<HashDoc> srcColl = IndexCollection(sourceChainId);
+            LiteCollection<HashDoc> destColl = IndexCollection(destinationChainId);
+
             HashDigest<SHA256>? genesisHash = IterateIndexes(sourceChainId, 0, 1)
                 .Cast<HashDigest<SHA256>?>()
                 .FirstOrDefault();
@@ -282,20 +264,9 @@ namespace Libplanet.Store
             {
                 return;
             }
-            _db.GetCollection<HashDoc>(IndexCollectionName)
-                .InsertBulk(_db.GetCollection<HashDoc>(IndexCollectionName)
-                            .Find(
-                                  d => d.ChainId.Equals(sourceChainId) 
-                                  )
-                            .TakeWhile(i => !i.Hash.Equals(branchPoint))
-                            .Skip(1)                            
-                            .Select(
-                                    p => new HashDoc()
-                                    {
-                                        ChainId = destinationChainId,
-                                        Hash = p.Hash
-                                    })
-                            );
+
+            destColl.InsertBulk(srcColl.FindAll()
+                .TakeWhile(i => !i.Hash.Equals(branchPoint)).Skip(1));
 
             AppendIndex(destinationChainId, branchPoint);
         }
@@ -840,53 +811,45 @@ namespace Libplanet.Store
         /// <inheritdoc/>
         public override IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId)
         {
-            var collection = _db.GetCollection<TxNonceDoc>(TxNonceIdCollectionName);
-            var all = collection.Find(c => c.ChainId.Equals(chainId));
-            foreach (var txNonceDoc in all)
+            var collectionId = TxNonceId(chainId);
+            LiteCollection<BsonDocument> collection = _db.GetCollection<BsonDocument>(collectionId);
+            foreach (BsonDocument doc in collection.FindAll())
             {
-                yield return new KeyValuePair<Address, long>(txNonceDoc.Address, txNonceDoc.Nonce);               
+                if (doc.TryGetValue("_id", out BsonValue id) && id.IsBinary)
+                {
+                    var address = new Address(id.AsBinary);
+                    if (doc.TryGetValue("v", out BsonValue v) && v.IsInt64 && v.AsInt64 > 0)
+                    {
+                        yield return new KeyValuePair<Address, long>(address, v.AsInt64);
+                    }
+                }
             }
         }
 
         /// <inheritdoc/>
         public override long GetTxNonce(Guid chainId, Address address)
         {
-            var collection = _db.GetCollection<TxNonceDoc>(TxNonceIdCollectionName);
-            var docId = GetTxNonceDocId(chainId, address);
-            var txNonce = collection.FindById(docId);
+            var collectionId = TxNonceId(chainId);
+            LiteCollection<BsonDocument> collection = _db.GetCollection<BsonDocument>(collectionId);
+            var docId = new BsonValue(address.ToByteArray());
+            BsonDocument doc = collection.FindById(docId);
 
-            if (txNonce is null)
+            if (doc is null)
             {
                 return 0;
             }
 
-            return txNonce.Nonce;
-        }
-
-        private BsonValue GetTxNonceDocId(Guid chainId, Address signer)
-        {
-            var builder = new ByteArrayBuilder();
-            builder.Append(chainId.ToByteArray());
-            builder.Append(signer.ToByteArray());
-            return new BsonValue(builder.ToArray());
+            return doc.TryGetValue("v", out BsonValue v) ? v.AsInt64 : 0;
         }
 
         /// <inheritdoc/>
         public override void IncreaseTxNonce(Guid chainId, Address signer, long delta = 1)
         {
             long nextNonce = GetTxNonce(chainId, signer) + delta;
-            var docId = GetTxNonceDocId(chainId, signer);
-
-            TxNonceDoc nonceDoc = new TxNonceDoc()
-            {
-                Id = docId,
-                ChainId = chainId,
-                Nonce = nextNonce,
-                Address = signer
-            };
-
-            var collection = _db.GetCollection<TxNonceDoc>(TxNonceIdCollectionName);
-            collection.Upsert(docId, nonceDoc);          
+            var collectionId = TxNonceId(chainId);
+            LiteCollection<BsonDocument> collection = _db.GetCollection<BsonDocument>(collectionId);
+            var docId = new BsonValue(signer.ToByteArray());
+            collection.Upsert(docId, new BsonDocument() { ["v"] = new BsonValue(nextNonce) });
         }
 
         /// <inheritdoc/>
@@ -1028,10 +991,14 @@ namespace Libplanet.Store
             return $"{StateRefIdPrefix}{FormatChainId(chainId)}";
         }
 
-
-        private IEnumerable<HashDoc> IndexCollection(Guid chainId)
+        private string TxNonceId(Guid chainId)
         {
-            return _db.GetCollection<HashDoc>(IndexCollectionName).Find(d => d.ChainId.Equals(chainId));
+            return $"{TxNonceIdPrefix}{FormatChainId(chainId)}";
+        }
+
+        private LiteCollection<HashDoc> IndexCollection(Guid chainId)
+        {
+            return _db.GetCollection<HashDoc>($"{IndexColPrefix}{FormatChainId(chainId)}");
         }
 
         internal class StateRefDoc
@@ -1063,7 +1030,7 @@ namespace Libplanet.Store
         private class HashDoc
         {
             public long Id { get; set; }
-            public Guid ChainId { get; set; }
+
             public HashDigest<SHA256> Hash { get; set; }
         }
 
@@ -1072,17 +1039,6 @@ namespace Libplanet.Store
             public long Id { get; set; }
 
             public TxId TxId { get; set; }
-        }
-
-        private class TxNonceDoc
-        {
-            public BsonValue Id { get; set; }
-
-            public Guid ChainId { get; set; }
-
-            public long Nonce { get; set; }
-
-            public Address Address { get; set; }
         }
     }
 }

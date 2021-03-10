@@ -258,7 +258,7 @@ namespace Libplanet.Store
                     }) - 1;
             }
 
-            return exists.FirstOrDefault().Id;            
+            return exists.FirstOrDefault().Id - 1;            
         }
 
         /// <inheritdoc/>

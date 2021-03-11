@@ -2,7 +2,7 @@
 
 dotnet_runtime="linux-x64"
 warp_runtime="linux-x64"
-configuration="release"
+configuration="Debug"
 git_commit=$(git log --format=%h --abbrev=7 -n 1)
 publish_directory="../FreeMarketApp/bin/${configuration}/netcoreapp3.1/${dotnet_runtime}/publish"
 download_directory="/tmp"
@@ -44,7 +44,7 @@ EOF
 cd pkg-debian/
 find . -type f ! -regex '.*.git.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > DEBIAN/md5sums
 cd ..
-dpkg -b pkg-debian freemarketone-0.0.1_amd64.deb
+dpkg -b pkg-debian freemarketone-0.1.0_amd64.deb
 
 rm -Rf pkg-debian
 

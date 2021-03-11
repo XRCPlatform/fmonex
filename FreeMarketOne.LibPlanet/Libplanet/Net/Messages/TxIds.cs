@@ -1,48 +1,95 @@
+using Bencodex;
+using Bencodex.Types;
+using Libplanet.Tx;
 using System.Collections.Generic;
 using System.Linq;
-using Libplanet.Tx;
-using NetMQ;
 
 namespace Libplanet.Net.Messages
 {
-    internal class TxIds : Message
+    public class TxIds : IBenEncodeable
     {
+        private static readonly byte[] senderKey = { 0x49 }; // 'I'
+        private static readonly byte[] idsKey = { 0x43 };    // 'S'
+
         public TxIds(Address sender, IEnumerable<TxId> txIds)
         {
             Sender = sender;
             Ids = txIds;
         }
-
-        public TxIds(NetMQFrame[] frames)
+        public TxIds(byte[] bytes) : this(DecodeBytesToBen(bytes))
         {
-            Sender = new Address(frames[0].Buffer);
-            int txCount = frames[1].ConvertToInt32();
-            Ids = frames
-                .Skip(2).Take(txCount)
-                .Select(f => f.ConvertToTxId())
-                .ToList();
         }
+
+        public TxIds(Dictionary dict)
+        {
+            //    Sender = new Address(frames[0].Buffer);
+            //    int txCount = frames[1].ConvertToInt32();
+            //    Ids = frames
+            //        .Skip(2).Take(txCount)
+            //        .Select(f => f.ConvertToTxId())
+            //        .ToList();
+            if (dict.ContainsKey((IKey)(Binary)senderKey))
+            {
+                Sender = new Address(dict.GetValue<Binary>(senderKey));
+            }
+
+            var temp = new List<TxId>();
+            if (dict.ContainsKey((IKey)(Binary)idsKey))
+            {
+                var list = dict.GetValue<Bencodex.Types.List>(idsKey)
+                    .Select(hash => ((Binary)hash).Value);
+                foreach (var item in list)
+                {
+                    temp.Add(new TxId(item));
+                }
+            }
+
+            Ids = temp;
+        }
+
+        public Dictionary ToBencodex()
+        {
+            var dict = Dictionary.Empty;
+            dict = dict.Add(senderKey, Sender.ToByteArray());
+            if (Ids.Any())
+            {
+                dict = dict.Add(
+                    idsKey,
+                    Ids.Select(txid => (IValue)(Binary)txid.ToByteArray()));
+            }
+            return dict;
+        }
+
 
         public IEnumerable<TxId> Ids { get; }
 
         public Address Sender { get; }
 
-        protected override MessageType Type => MessageType.TxIds;
-
-        protected override IEnumerable<NetMQFrame> DataFrames
+        private static Bencodex.Types.Dictionary DecodeBytesToBen(byte[] bytes)
         {
-            get
+            IValue value = new Codec().Decode(bytes);
+            if (!(value is Dictionary dict))
             {
-                yield return new NetMQFrame(Sender.ToByteArray());
-
-                yield return new NetMQFrame(
-                    NetworkOrderBitsConverter.GetBytes(Ids.Count()));
-
-                foreach (TxId id in Ids)
-                {
-                    yield return new NetMQFrame(id.ToByteArray());
-                }
+                throw new DecodingException(
+                    $"Expected {typeof(Dictionary)} but " +
+                    $"{value.GetType()}");
             }
+            return dict;
+        }
+
+        public byte[] SerializeToBen()
+        {
+            return new Codec().Encode(ToBencodex());
+        }
+
+        public object FromBenBytes(byte[] bytes)
+        {
+            return new TxIds(DecodeBytesToBen(bytes));
+        }
+
+        public static TxIds Deserialize(byte[] bytes)
+        {
+            return new TxIds(DecodeBytesToBen(bytes));
         }
     }
 }

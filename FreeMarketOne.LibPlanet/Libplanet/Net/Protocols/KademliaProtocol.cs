@@ -29,7 +29,7 @@ namespace Libplanet.Net.Protocols
         private readonly int _findConcurrency;
 
         private readonly ILogger _logger;
-        private NetmqConnectionPool _netmqConnectionPool;
+        private TorClientPool _clientPool;
 
         public KademliaProtocol(
             ITransport transport,
@@ -42,7 +42,7 @@ namespace Libplanet.Net.Protocols
             int? bucketSize,
             int findConcurrency = Kademlia.FindConcurrency,
             TimeSpan? requestTimeout = null,
-            NetmqConnectionPool netmqConnectionPool = null,
+            TorClientPool clientPool = null,
             EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             _transport = transport;
@@ -61,7 +61,7 @@ namespace Libplanet.Net.Protocols
             _requestTimeout =
                 requestTimeout ??
                 TimeSpan.FromMilliseconds(Kademlia.IdleRequestTimeout);
-            _netmqConnectionPool = netmqConnectionPool;
+            _clientPool = clientPool;
         }
 
         public IEnumerable<BoundPeer> Peers => _routing.Peers;
@@ -118,17 +118,7 @@ namespace Libplanet.Net.Protocols
                         e);
                 }
             }
-
-            if (!_routing.Peers.Any())
-            {
-                throw new PeerDiscoveryException("All seeds are unreachable.");
-            }
-
-            if (findPeerTasks.Count == 0)
-            {
-                throw new PeerDiscoveryException("Bootstrap failed.");
-            }
-
+            
             try
             {
                 await Task.WhenAll(findPeerTasks);
@@ -139,6 +129,15 @@ namespace Libplanet.Net.Protocols
                           " {Exception}";
                 _logger.Error(e, msg, e);
                 throw;
+            }
+            if (!_routing.Peers.Any())
+            {
+                throw new PeerDiscoveryException("All seeds are unreachable.");
+            }
+
+            if (findPeerTasks.Count == 0)
+            {
+                throw new PeerDiscoveryException("Bootstrap failed.");
             }
         }
 
@@ -281,15 +280,16 @@ namespace Libplanet.Net.Protocols
         }
 
 #pragma warning disable CS4014 // To run UpdateAsync() without await.
-        public void ReceiveMessage(Message message)
+        public void ReceiveMessage(ReceivedRequestEventArgs requestEventArgs)
         {
-            if (message is FindNeighbors findPeer)
-            {
-                ReceiveFindPeer(findPeer);
-            }
+            UpdateAsync(requestEventArgs?.Peer);
 
-            UpdateAsync(message?.Remote);
+            if (requestEventArgs.MessageType == MessageType.FindNeighbors)
+            {
+                ReceiveFindPeer(requestEventArgs);
+            }
         }
+
 #pragma warning restore CS4014
 
         public string Trace()
@@ -444,31 +444,16 @@ namespace Libplanet.Net.Protocols
             try
             {
                 _logger.Verbose("Trying to ping async to {Peer}.", target);
-                Message reply = await _transport.SendMessageWithReplyAsync(
-                    target,
-                    new Ping(),
-                    timeout,
-                    cancellationToken
-                );
-                if (!(reply is Pong pong))
-                {
-                    _logger.Error($"PingAsync recieved {reply} {reply.GetType()} from {reply.Remote} as reply raising exception.");
-                    throw new InvalidMessageException("Received pong is invalid.", reply);
-                }
-
-                if (pong.Remote.Address.Equals(_address))
-                {
-                    throw new InvalidMessageException("Cannot receive pong from self", pong);
-                }
+                Pong reply = await _transport.SendMessageWithReplyAsync<Ping,Pong>(target,new Ping(),timeout);
+                UpdateAsync(target);
             }
             catch (TimeoutException)
             {
-                throw new PingTimeoutException(
-                    target,
-                    $"Timeout occurred during dial to {target}.");
+                throw new PingTimeoutException(target,$"Timeout occurred during dial to {target}.");
             }
             catch (DifferentAppProtocolVersionException)
             {
+                RemovePeer(target);
                 _logger.Error("Different AppProtocolVersion encountered at PingAsync.");
                 throw;
             }
@@ -529,7 +514,7 @@ namespace Libplanet.Net.Protocols
         // if corresponding bucket for remote peer is not full, just adds remote peer.
         // otherwise check whether if the least recently used (LRU) peer
         // is alive to determine evict LRU peer or discard remote peer.
-        private void UpdateAsync(Peer rawPeer)
+        private void UpdateAsync(BoundPeer rawPeer)
         {
             _logger.Verbose($"Try to {nameof(UpdateAsync)}() {{Peer}}.", rawPeer);
             if (rawPeer is null)
@@ -548,8 +533,8 @@ namespace Libplanet.Net.Protocols
         {
             _routing.RemovePeer(peer);
 
-            if (_netmqConnectionPool != null) {
-                _netmqConnectionPool.Recycle(peer);
+            if (_clientPool != null) {
+                _clientPool.Recycle(peer);
             }
         }
 
@@ -616,8 +601,7 @@ namespace Libplanet.Net.Protocols
             int count = Math.Min(neighbors.Count, _findConcurrency);
             for (var i = 0; i < count; i++)
             {
-                var peers =
-                    await GetNeighbors(neighbors[i], target, timeout, cancellationToken);
+                var peers = await GetNeighbors(neighbors[i], target, timeout, cancellationToken);
                 history.Add(neighbors[i]);
                 found.AddRange(peers.Where(peer => !found.Contains(peer)));
             }
@@ -634,21 +618,13 @@ namespace Libplanet.Net.Protocols
             var findPeer = new FindNeighbors(target);
             try
             {
-                Message reply = await _transport.SendMessageWithReplyAsync(
+                Neighbors reply = await _transport.SendMessageWithReplyAsync<FindNeighbors,Neighbors>(
                     addressee,
                     findPeer,
-                    timeout,
-                    cancellationToken
+                    timeout
                 );
-                if (!(reply is Neighbors neighbors))
-                {
-                    throw new InvalidMessageException(
-                        $"Reply to {nameof(FindNeighbors)} is invalid.",
-                        reply
-                    );
-                }
 
-                return neighbors.Found;
+                return reply.Found;
             }
             catch (TimeoutException)
             {
@@ -657,15 +633,6 @@ namespace Libplanet.Net.Protocols
             }
         }
 
-        // send pong back to remote
-        private void ReceivePing(Ping ping)
-        {
-            if (ping.Remote.Address.Equals(_address))
-            {
-                throw new ArgumentException(
-                    "Cannot receive ping from self");
-            }
-        }
 
         /// <summary>
         /// Process <see cref="Peer"/>s that is replied by sending <see cref="FindNeighbors"/>
@@ -787,17 +754,14 @@ namespace Libplanet.Net.Protocols
 
         // FIXME: this method is not safe from amplification attack
         // maybe ping/pong/ping/pong is required
-        private void ReceiveFindPeer(FindNeighbors findNeighbors)
+        private void ReceiveFindPeer(ReceivedRequestEventArgs args)
         {
             IEnumerable<BoundPeer> found =
-                _routing.Neighbors(findNeighbors.Target, _bucketSize, true);
+                _routing.Neighbors(args.Peer, _bucketSize, true);
 
-            Neighbors neighbors = new Neighbors(found)
-            {
-                Identity = findNeighbors.Identity,
-            };
+            Neighbors neighbors = new Neighbors(found);
 
-            _transport.ReplyMessage(neighbors);
-        }
+            _transport.ReplyMessage(args.Request, args.Client, neighbors);
+        }       
     }
 }

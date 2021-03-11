@@ -1,26 +1,62 @@
-using System.Collections.Generic;
+using Bencodex;
+using Bencodex.Types;
+using System.Collections.Immutable;
 using System.Security.Cryptography;
-using NetMQ;
+
 
 namespace Libplanet.Net.Messages
 {
-    internal class GetBlockStates : Message
+    public class GetBlockStates : IBenEncodeable
     {
+        private static readonly byte[] BlockHeaderKey = { 0x42 };    // 'B'
         public GetBlockStates(HashDigest<SHA256> blockHash)
         {
             BlockHash = blockHash;
         }
 
-        public GetBlockStates(NetMQFrame[] frames)
-            : this(new HashDigest<SHA256>(frames[0].Buffer))
+        public GetBlockStates(byte[] bytes) : this(DecodeBytesToBen(bytes))
         {
         }
 
-        public HashDigest<SHA256> BlockHash { get; }
+        public GetBlockStates(Dictionary dict)
+        {
+            BlockHash = new HashDigest<SHA256>(dict.ContainsKey((IKey)(Binary)BlockHeaderKey)
+            ? dict.GetValue<Binary>(BlockHeaderKey).ToImmutableArray()
+            : ImmutableArray<byte>.Empty);
+        }
 
-        protected override MessageType Type => MessageType.GetBlockStates;
+        private static Bencodex.Types.Dictionary DecodeBytesToBen(byte[] bytes)
+        {
+            IValue value = new Codec().Decode(bytes);
+            if (!(value is Dictionary dict))
+            {
+                throw new DecodingException(
+                    $"Expected {typeof(Dictionary)} but " +
+                    $"{value.GetType()}");
+            }
+            return dict;
+        }
 
-        protected override IEnumerable<NetMQFrame> DataFrames =>
-            new[] { new NetMQFrame(BlockHash.ToByteArray()) };
+        public HashDigest<SHA256> BlockHash { get; set; }
+
+        public Dictionary ToBencodex()
+        {
+            var dict = Dictionary.Empty
+                .Add(BlockHeaderKey, BlockHash.ToByteArray());
+            return dict;
+        }
+
+        public static GetBlockStates Deserialize(byte[] bytes)
+        {
+            return new GetBlockStates(DecodeBytesToBen(bytes));
+        }
+        public byte[] SerializeToBen()
+        {
+            return new Codec().Encode(ToBencodex());
+        }
+        public object FromBenBytes(byte[] bytes)
+        {
+            return Deserialize(bytes);
+        }
     }
 }

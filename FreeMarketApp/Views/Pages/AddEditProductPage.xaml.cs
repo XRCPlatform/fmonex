@@ -5,6 +5,7 @@ using Avalonia.Media.Imaging;
 using FreeMarketApp.Helpers;
 using FreeMarketApp.Resources;
 using FreeMarketApp.Views.Controls;
+using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Common;
 using FreeMarketOne.Extensions.Helpers;
@@ -158,7 +159,8 @@ namespace FreeMarketApp.Views.Pages
         public async void ButtonSave_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
-            var approxSpanToNewBlock = FMONE.Current.Configuration.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
+            var config = (ExtendedConfiguration) FMONE.Current.Configuration;
+            var approxSpanToNewBlock = config.BlockChainMarketPolicy.GetApproxTimeSpanToMineNextBlock();
             var result = await MessageBox.Show(mainWindow,
                 string.Format(SharedResources.ResourceManager.GetString("Dialog_Confirmation_SaveMyItem"), approxSpanToNewBlock.TotalSeconds),
                 SharedResources.ResourceManager.GetString("Dialog_Confirmation_Title"),

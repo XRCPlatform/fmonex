@@ -1,23 +1,19 @@
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Tor.Exceptions;
-using FreeMarketOne.Tor.TorSocks5;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static FreeMarketOne.Extensions.Common.ServiceHelper;
 
 namespace FreeMarketOne.Tor
 {
-	public class TorProcessManager : IDisposable
+    public class TorProcessManager : IDisposable
     {
 		/// <summary>
 		/// If null then it's just a mock, clearnet is used.

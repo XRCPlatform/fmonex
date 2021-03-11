@@ -1,18 +1,16 @@
+﻿using Libplanet.Net.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
-using Libplanet.Crypto;
-using Libplanet.Net;
-using Libplanet.Net.Messages;
-using NetMQ;
 using Xunit;
+
 
 namespace Libplanet.Tests.Net.Messages
 {
     public class BlockHashesTest
     {
+
         [Fact]
         public void Constructor()
         {
@@ -25,20 +23,17 @@ namespace Libplanet.Tests.Net.Messages
         }
 
         [Fact]
-        public void DataFrames()
+        public void SerializesAndDesrializeFromBen()
         {
             HashDigest<SHA256>[] blockHashes = GenerateRandomBlockHashes(100L).ToArray();
             var msg = new BlockHashes(123, blockHashes);
             Assert.Equal(123, msg.StartIndex);
             Assert.Equal(blockHashes, msg.Hashes);
-            var privKey = new PrivateKey();
-            AppProtocolVersion ver = AppProtocolVersion.Sign(privKey, 3);
-            Peer peer = new BoundPeer(privKey.PublicKey, new DnsEndPoint("0.0.0.0", 1234));
-            NetMQFrame[] frames =
-                msg.ToNetMQMessage(privKey, peer, ver).Skip(Message.CommonFrames).ToArray();
-            var restored = new BlockHashes(frames);
-            Assert.Equal(msg.StartIndex, restored.StartIndex);
-            Assert.Equal(msg.Hashes, restored.Hashes);
+            var ben = msg.SerializeToBen();
+            var result = new BlockHashes(ben);
+
+            Assert.Equal(msg.StartIndex, result.StartIndex);
+            Assert.Equal(msg.Hashes, result.Hashes);
         }
 
         private static IEnumerable<HashDigest<SHA256>> GenerateRandomBlockHashes(long count)

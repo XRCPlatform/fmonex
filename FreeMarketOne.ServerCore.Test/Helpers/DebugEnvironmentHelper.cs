@@ -57,6 +57,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
             //Initialize genesis blocks
             var genesisHelper = new GenesisHelper();
             var genesis = genesisHelper.GenerateIt(configuration);
+            var blockChainBasePolicy = ((ExtendedConfiguration)configuration).BlockChainBasePolicy;
 
             //Initialize Base BlockChain Manager
             baseBlockChainManager = new BlockChainManager<BaseAction>(
@@ -64,7 +65,7 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 configuration.BlockChainBasePath,
                 configuration.BlockChainSecretPath,
                 null,
-                configuration.BlockChainBasePolicy,
+                blockChainBasePolicy,
                 GetPublicIpEndpoint(torOnionEndPoint, configuration.ListenerBaseEndPoint),
                 onionSeedsManager,
                 userPrivateKey,

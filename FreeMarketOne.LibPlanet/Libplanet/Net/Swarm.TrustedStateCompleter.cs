@@ -82,14 +82,13 @@ namespace Libplanet.Net
                         blockHash,
                         peer
                     );
-                    Message reply;
+                    BlockStates reply;
                     try
                     {
-                        reply = await Transport.SendMessageWithReplyAsync(
+                        reply = await Transport.SendMessageWithReplyAsync<GetBlockStates, BlockStates>(
                             peer,
                             request,
-                            timeout: Options.RecentStateRecvTimeout,
-                            cancellationToken: cancellationToken
+                            timeout: Options.RecentStateRecvTimeout
                         );
                     }
                     catch (TimeoutException e)

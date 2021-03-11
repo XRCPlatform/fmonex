@@ -1,10 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\FreeMarketOne.Configuration\FreeMarketOne.Configuration.csproj">
+      <Private>true</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
   </ItemGroup>
 

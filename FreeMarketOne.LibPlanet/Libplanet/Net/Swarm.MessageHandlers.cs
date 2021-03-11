@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Bencodex.Types;
+using FreeMarketOne.Tor;
 using Libplanet.Blockchain;
 using Libplanet.Blocks;
 using Libplanet.Net.Messages;
@@ -17,171 +18,171 @@ namespace Libplanet.Net
 {
     public partial class Swarm<T>
     {
-        private void ProcessMessageHandler(object target, Message message)
+        private void ProcessMessageHandler(object target, ReceivedRequestEventArgs message)
         {
-            switch (message)
+            TotClient client = message.Client;
+
+            _logger.Debug($"Received {message.MessageType} message.");
+
+            switch (message.MessageType)
             {
-                case Ping ping:
-                {
-                    _logger.Debug($"Received a {nameof(Ping)} message.");
-
-                    // This case can be dealt in Transport.
-                    var pong = new Pong()
-                    {
-                        Identity = ping.Identity,
-                    };
-
-                    Transport.ReplyMessage(pong);
+                case MessageType.Ping:
+                    Transport.ReplyMessage<Pong>(message.Request, client, new Pong());
                     break;
-                }
 
-                case GetChainStatus getChainStatus:
-                {
-                    _logger.Debug($"Received a {nameof(GetChainStatus)} message.");
-
+                case MessageType.GetChainStatus:
                     // This is based on the assumption that genesis block always exists.
                     var chainStatus = new ChainStatus(
                         BlockChain.Genesis.Hash,
                         BlockChain.Tip.Index,
-                        BlockChain.Tip.TotalDifficulty)
-                    {
-                        Identity = getChainStatus.Identity,
-                    };
+                        BlockChain.Tip.TotalDifficulty);
 
-                    Transport.ReplyMessage(chainStatus);
-                    break;
-                }
-
-                case FindNeighbors _:
-                    _logger.Debug($"Received a {nameof(FindNeighbors)} message.");
+                    Transport.ReplyMessage<ChainStatus>(message.Request, client, chainStatus);
                     break;
 
-                case GetBlockHashes getBlockHashes:
-                {
+                case MessageType.FindNeighbors:
+
+                    // it's handled in KademliaProtocol ReceiveMessage() event handler
+                    break;
+
+                case MessageType.GetBlockHashes:
+
+                    var getBlockHashes = message.Envelope.GetBody<GetBlockHashes>();
                     BlockChain.FindNextHashes(
-                        getBlockHashes.Locator,
-                        getBlockHashes.Stop,
-                        FindNextHashesChunkSize
-                    ).Deconstruct(
-                        out long? offset,
-                        out IReadOnlyList<HashDigest<SHA256>> hashes
-                    );
-                    var reply = new BlockHashes(offset, hashes)
-                    {
-                        Identity = getBlockHashes.Identity,
-                    };
-                    Transport.ReplyMessage(reply);
-                    break;
-                }
-
-                case GetRecentStates getRecentStates:
-                    TransferRecentStates(getRecentStates);
+                                           getBlockHashes.Locator,
+                                           getBlockHashes.Stop,
+                                           FindNextHashesChunkSize
+                                       ).Deconstruct<long?, IReadOnlyList<HashDigest<SHA256>>>(
+                                           out long? offset,
+                                           out IReadOnlyList<HashDigest<SHA256>> hashes
+                                       );
+                    var reply = new BlockHashes(offset, hashes);
+                    Transport.ReplyMessage<BlockHashes>(message.Request, client, reply);
                     break;
 
-                case GetBlocks getBlocks:
-                    TransferBlocks(getBlocks);
+                case MessageType.GetRecentStates:
+
+                    var getRecentStates = message.Envelope.GetBody<GetRecentStates>();
+                    var states = TransferRecentStates(getRecentStates);
+                    
+                    _logger.Error($"Processing TransferRecentStates message, " +
+                        $"request getRecentStates->ben:[{getRecentStates.SerializeToBen()}]" +                        
+                        $"respons RecentStates->ben:[{states.SerializeToBen()}]");
+
+                    Transport.ReplyMessage<RecentStates>(message.Request, client, states);
                     break;
 
-                case GetTxs getTxs:
-                    TransferTxs(getTxs);
+                case MessageType.GetBlocks:
+
+                    var getBlocks = message.Envelope.GetBody<GetBlocks>();
+                    var blocks = TransferBlocks(getBlocks, message.Peer);
+                    Transport.ReplyMessage<Messages.Blocks>(message.Request, client, blocks);
                     break;
 
-                case TxBroadcast transaction:
-                    ReceiveTransactionBroadcast(transaction);
+                case MessageType.GetTxs:
+
+                    var getTxs = message.Envelope.GetBody<GetTxs>();
+                    var txs = TransferTxs(getTxs);
+                    Transport.ReplyMessage<Transactions>(message.Request, client, txs);
                     break;
-                
-                case BlockBroadcast blocks:
-                    var task = Task.Run(async () => await ProcessBlock(blocks, _cancellationToken));
+
+                case MessageType.TxBroadcast:
+
+                    var transaction = message.Envelope.GetBody<TxBroadcast>();                    
+                    var trxBroadcast = Task.Run(() => ReceiveTransactionBroadcast(transaction, message.Peer));
                     try
                     {
+                        //ack the reciept
+                        Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));
+                        trxBroadcast.Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error($"Processing received TxBroadcast message, completed with error {e}.");
+                    }
+                   
+                    break;
+                case MessageType.Blocks:
+                    var blocksBroadcast = message.Envelope.GetBody<Messages.Blocks>();
+                    var task = Task.Run(async () => await ProcessBlock(message.Peer, blocksBroadcast, _cancellationToken));
+                    try
+                    {
+                        //ack the reciept
+                        var task2 = Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));                        
                         task.Wait();
                     }
                     catch (Exception e)
                     {
                         _logger.Error($"Processing received {nameof(blocks)} message, completed with error {e}.");
-                    }                    
+                    }
                     break;
 
-                case TxIds txIds:
-                    ProcessTxIds(txIds);
+                case MessageType.TxIds:
+
+                    var txIds = message.Envelope.GetBody<TxIds>();
+                    ProcessTxIds(txIds, message.Peer);
                     break;
-               
-                case BlockHashes _:
+
+                case MessageType.BlockHashes:
+
+                    var blockHashes = message.Envelope.GetBody<BlockHashes>();
                     _logger.Error($"{nameof(BlockHashes)} messages are only for IBD.");
                     break;
 
-                case BlockHeaderMessage blockHeader:
+                case MessageType.BlockHeaderMessage:
+
+                    var blockHeader = message.Envelope.GetBody<BlockHeaderMessage>();
                     Task.Run(
-                        async () => await ProcessBlockHeader(blockHeader, _cancellationToken),
+                        async () => await ProcessBlockHeader(blockHeader, message.Peer, _cancellationToken),
                         _cancellationToken
                     );
                     break;
 
-                case GetBlockStates getBlockStates:
-                    TransferBlockStates(getBlockStates);
+                case MessageType.GetBlockStates:
+
+                    var getBlockStates = message.Envelope.GetBody<GetBlockStates>();
+                    var blockStates = TransferBlockStates(getBlockStates);
+                    if (blockStates != null)
+                    {
+                        Transport.ReplyMessage<BlockStates>(message.Request, client, blockStates);
+                    }
                     break;
 
                 default:
-                    throw new InvalidMessageException(
-                        $"Failed to handle message: {message}",
-                        message
-                    );
+                    throw new InvalidMessageException($"Failed to handle message: {message}", message.MessageType);
             }
         }
 
-        private void ReceiveTransactionBroadcast(TxBroadcast message)
+        private void ReceiveTransactionBroadcast(TxBroadcast message, BoundPeer peer)
         {
-            if (message is TxBroadcast parsed)
+            Transaction<T> tx = Transaction<T>.Deserialize(message.Payload);
+
+            _logger.Debug($"Received a {nameof(TxBroadcast)} message: {tx}.");
+
+            if (!_store.ContainsTransaction(tx.Id))
             {
-
-                if (!(message.Remote is BoundPeer peer))
+                bool valid = BlockChain.Policy.DoesTransactionFollowsPolicy(tx, BlockChain);
+                if (valid)
                 {
-                    _logger.Information(
-                        $"Ignores a {nameof(TxBroadcast)} message because it was sent by an invalid peer: " +
-                        "{PeerAddress}.",
-                        message.Remote?.Address.ToHex()
-                    );
-                    return;
-                }
-
-                Transaction<T> tx = Transaction<T>.Deserialize(parsed.Payload);
-
-                _logger.Debug($"Received a {nameof(TxBroadcast)} message: {tx}.");
-
-                if (!_store.ContainsTransaction(tx.Id))
-                {
-                    bool valid = BlockChain.Policy.DoesTransactionFollowsPolicy(tx, BlockChain);
-                    if (valid)
+                    try
                     {
-                        try
-                        {
-                            BlockChain.StageTransaction(tx);
-                            TxReceived.Set();
-                            _logger.Debug($"Txs staged successfully: {tx.Id}");                            
+                        BlockChain.StageTransaction(tx);
+                        TxReceived.Set();
+                        _logger.Debug($"Txs staged successfully: {tx.Id}");
 
-                            Message newMessage = new TxBroadcast(tx.Serialize(true));
-                            message.Identity = message.Remote.Address.ToByteArray();
+                        TxBroadcast newMessage = new TxBroadcast(tx.Serialize(true), false);
 
-                            BroadcastMessage(message.Remote.Address, newMessage);
-                        }
-                        catch (InvalidTxException ite)
-                        {
-                            _logger.Error(ite, "{TxId} will not be staged since it is invalid.", tx.Id);
-                        }
+                        BroadcastMessage(peer, newMessage);
+                    }
+                    catch (InvalidTxException ite)
+                    {
+                        _logger.Error(ite, "{TxId} will not be staged since it is invalid.", tx.Id);
                     }
                 }
             }
-            else
-            {
-                string errorMessage =
-                    $"Expected {nameof(TxBroadcast)} messages as response of " +
-                    $"the {nameof(TxBroadcast)} message, but got a {message.GetType().Name} " +
-                    $"message instead: {message}";
-                throw new InvalidMessageException(errorMessage, message);
-            }           
         }
 
-        private void TransferBlockStates(GetBlockStates getBlockStates)
+        private BlockStates TransferBlockStates(GetBlockStates getBlockStates)
         {
             if (BlockChain.StateStore is IBlockStatesStore blockStatesStore)
             {
@@ -191,25 +192,20 @@ namespace Libplanet.Net
                     (states is null ? "Not found" : "Found") + " the block {BlockHash}'s states.",
                     getBlockStates.BlockHash
                 );
-                var reply = new BlockStates(getBlockStates.BlockHash, states)
-                {
-                    Identity = getBlockStates.Identity,
-                };
-                Transport.ReplyMessage(reply);
+                return new BlockStates(getBlockStates.BlockHash, states);
             }
+
+            return null;
         }
 
         private async Task ProcessBlockHeader(
             BlockHeaderMessage message,
+            BoundPeer peer,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (!(message.Remote is BoundPeer peer))
+            if (peer == null)
             {
-                _logger.Information(
-                    "BlockHeaderMessage was sent from invalid peer " +
-                    "{PeerAddress}; ignored.",
-                    message.Remote.Address
-                );
+                _logger.Information($"BlockHeaderMessage was sent from invalid peer {peer}; ignored.");
                 return;
             }
 
@@ -218,7 +214,7 @@ namespace Libplanet.Net
                 _logger.Information(
                     "BlockHeaderMessage was sent from the peer " +
                     "{PeerAddress} with different genesis block {hash}; ignored.",
-                    message.Remote.Address,
+                    peer,
                     message.GenesisHash
                 );
                 return;
@@ -267,186 +263,170 @@ namespace Libplanet.Net
             }
         }
 
-        private async Task ProcessBlock(Messages.BlockBroadcast message, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task ProcessBlock(BoundPeer remote, Messages.Blocks blockMessage, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (!(message.Remote is BoundPeer peer))
+            if (!(remote is BoundPeer peer))
             {
-                _logger.Information($"Blocks was sent from an invalid peer {message.Remote.Address} ignored.");
+                _logger.Information($"Blocks was sent from an invalid peer {remote.EndPoint} ignored.");
                 return;
             }
 
-            if (message is Messages.BlockBroadcast blockMessage)
+            IEnumerable<byte[]> payloads = blockMessage.Payloads;
+
+            _logger.Debug($"Received {payloads.Count()} blocks from {remote}.");
+
+            foreach (byte[] payload in payloads)
             {
-                IList<byte[]> payloads = blockMessage.Payloads;
+                cancellationToken.ThrowIfCancellationRequested();
 
-                _logger.Debug($"Received {payloads.Count} blocks from {message.Remote}.");
+                var genesis = blockMessage.GenesisHash;
 
-                foreach (byte[] payload in payloads)
+                Block<T> block = new Block<T>().Deserialize(payload);
+
+                if (!genesis.Equals(BlockChain.Genesis.Hash))
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    _logger.Information(
+                        "Blocks was sent from the peer " +
+                        "{PeerAddress} with different genesis block {hash}; ignored.",
+                        remote,
+                        blockMessage.GenesisHash
+                    );
+                    return;
+                }
 
-                    var genesis = message.GenesisHash;
+                BlockHeaderReceived.Set();
+                BlockHeader header = block.GetBlockHeader();
+                _logger.Debug($"Received a {nameof(BlockHeader)} #{ header.Index} {ByteUtil.Hex(header.Hash)}.");
 
-                    Block<T> block = new Block<T>().Deserialize(payload);
+                try
+                {
+                    header.Validate(DateTimeOffset.UtcNow);
+                }
+                catch (InvalidBlockException ibe)
+                {
+                    _logger.Information(
+                        ibe,
+                        "A received header #{BlockIndex} {BlockHash} seems invalid; ignored.",
+                        header.Index,
+                        ByteUtil.Hex(header.Hash)
+                    );
+                    return;
+                }
 
-                    if (!genesis.Equals(BlockChain.Genesis.Hash))
+                long? prevTip = BlockChain?.Tip?.Index;
+
+                if (prevTip.HasValue && prevTip == block.Index)
+                {
+                    //received re-broadcast
+                    if (BlockChain.Tip.Hash.Equals(block.Hash))
                     {
-                        _logger.Information(
-                            "Blocks was sent from the peer " +
-                            "{PeerAddress} with different genesis block {hash}; ignored.",
-                            message.Remote.Address,
-                            message.GenesisHash
-                        );
-                        return;
+                        _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are same tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block");
+                        //should not broadcast as broadcasts will loop and never stop
                     }
-
-                    BlockHeaderReceived.Set();
-                    BlockHeader header = block.GetBlockHeader();
-                    _logger.Debug($"Received a {nameof(BlockHeader)} #{ header.Index} {ByteUtil.Hex(header.Hash)}.");
-
+                    else
+                    {
+                        _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are different  tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block, chain was split and will need re-org.");
+                        //broadcast as chain was split and will need re-org
+                        //BroadcastBlock(peer.Address, block);
+                    }
+                    return;
+                }
+                //single block gap try accept simply
+                long gap = block.Index - prevTip.GetValueOrDefault();
+                if (gap == 1)
+                {
+                    _logger.Information($"Accepting a received block #{block.Index} { block.Hash } tip before this message {prevTip}");
+                    //if possible block will be appended here
                     try
                     {
-                        header.Validate(DateTimeOffset.UtcNow);
+                        var chain = AcceptBlock(peer, BlockChain, block, cancellationToken);
                     }
-                    catch (InvalidBlockException ibe)
+                    catch (InvalidBlockPreviousHashException iph)
                     {
-                        _logger.Information(
-                            ibe,
-                            "A received header #{BlockIndex} {BlockHash} seems invalid; ignored.",
-                            header.Index,
-                            ByteUtil.Hex(header.Hash)
-                        );
-                        return;
+
+                        _logger.Error(iph, $"Failed to append a received block #{block.Index} { block.Hash } tip before this message {prevTip}. Error {iph}");
+
+                        _logger.Information($"Starting SyncPreviousBlocksAsync due to InvalidBlockPreviousHashException to resolve fork.");
+                        await SyncPreviousBlocksAsync(BlockChain,
+                            peer,
+                            block.Hash,
+                            null,
+                            ImmutableHashSet<Address>.Empty,
+                            null,
+                            0,
+                            cancellationToken);
+
+                        // FIXME: Clean up events
+                        BlockReceived.Set();
+                        BlockAppended.Set();
                     }
-                    
-                    long prevTip = BlockChain.Tip.Index;
-                    
-                    if (prevTip == block.Index)
-                    {
-                        //received re-broadcast
-                        if (BlockChain.Tip.Hash.Equals(block.Hash))
-                        {
-                            _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are same tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block");
-                            //should not broadcast as broadcasts will loop and never stop
-                        }
-                        else
-                        {
-                            _logger.Information($"Previous index #{prevTip} and recieved index #{block.Index} and their hashes are different  tip:{ BlockChain.Tip} vs received:{ block.Hash } rejecting recieved block, chain was split and will need re-org.");
-                            //broadcast as chain was split and will need re-org
-                            //BroadcastBlock(peer.Address, block);
-                        }
-                        return;
-                    }
-                    //single block gap try accept simply
-                    long gap = block.Index - prevTip;
-                    if (gap == 1)
-                    {
-                        _logger.Information($"Accepting a received block #{block.Index} { block.Hash } tip before this message {prevTip}");
-                        //if possible block will be appended here
-                        try
-                        {
-                            var chain = AcceptBlock(peer, BlockChain, block, cancellationToken);
-                        }
-                        catch (InvalidBlockPreviousHashException iph)
-                        {
 
-                            _logger.Error(iph, $"Failed to append a received block #{block.Index} { block.Hash } tip before this message {prevTip}. Error {iph}");
-
-                            _logger.Information($"Starting SyncPreviousBlocksAsync due to InvalidBlockPreviousHashException to resolve fork.");
-                            await SyncPreviousBlocksAsync(BlockChain,
-                                peer,
-                                block.Hash,
-                                null,
-                                ImmutableHashSet<Address>.Empty,
-                                null,
-                                0,
-                                cancellationToken);
-
-                            // FIXME: Clean up events
-                            BlockReceived.Set();
-                            BlockAppended.Set();
-                        }
-                        
-                        BroadcastBlock(peer.Address, BlockChain.Tip);
-                    }
-                    else if (gap > 1)
-                    {
-                        _logger.Information($"Found chain gap #{gap} larger than single block, tip before this message {prevTip}, a received header #{block.Index} { block.Hash } discarding received and starting SyncPreviousBlocksAsync");
-                        //if there is a GAP then go for a long download of previous blocks
-                        try
-                        {
-                            await SyncPreviousBlocksAsync(BlockChain, 
-                                peer, 
-                                block.Hash, 
-                                null, 
-                                ImmutableHashSet<Address>.Empty, 
-                                null, 
-                                0, 
-                                cancellationToken);
-
-                            // FIXME: Clean up events
-                            BlockReceived.Set();
-                            BlockAppended.Set();
-                            BroadcastBlock(peer.Address, BlockChain.Tip);
-                        }
-                        catch (TimeoutException)
-                        {
-                            _logger.Debug($"Timeout occurred during {nameof(SyncPreviousBlocksAsync)}");
-                        }
-                        catch (InvalidBlockIndexException ibie)
-                        {
-                            _logger.Warning(
-                                $"{nameof(InvalidBlockIndexException)} occurred during " +
-                                $"{nameof(SyncPreviousBlocksAsync)}: " +
-                                "{ibie}", ibie);
-                        }
-                        catch (Exception e)
-                        {
-                            var msg =
-                                $"Unexpected exception occurred during" +
-                                $" {nameof(SyncPreviousBlocksAsync)}: {{e}}";
-                            _logger.Error(e, msg, e);
-                        }
-                    }                   
+                    BroadcastBlock(peer, BlockChain.Tip);
                 }
-            }
-            else
-            {
-                string errorMessage =
-                    $"Expected a {nameof(BlockBroadcast)} message but got a {message.GetType().Name} message instead: {message}";
-                throw new InvalidMessageException(errorMessage, message);
+                else if (gap > 1)
+                {
+                    _logger.Information($"Found chain gap #{gap} larger than single block, tip before this message {prevTip}, a received header #{block.Index} { block.Hash } discarding received and starting SyncPreviousBlocksAsync");
+                    //if there is a GAP then go for a long download of previous blocks
+                    try
+                    {
+                        await SyncPreviousBlocksAsync(BlockChain,
+                            peer,
+                            block.Hash,
+                            null,
+                            ImmutableHashSet<Address>.Empty,
+                            null,
+                            0,
+                            cancellationToken);
+
+                        // FIXME: Clean up events
+                        BlockReceived.Set();
+                        BlockAppended.Set();
+                        BroadcastBlock(peer, BlockChain.Tip);
+                    }
+                    catch (TimeoutException)
+                    {
+                        _logger.Debug($"Timeout occurred during {nameof(SyncPreviousBlocksAsync)}");
+                    }
+                    catch (InvalidBlockIndexException ibie)
+                    {
+                        _logger.Warning(
+                            $"{nameof(InvalidBlockIndexException)} occurred during " +
+                            $"{nameof(SyncPreviousBlocksAsync)}: " +
+                            "{ibie}", ibie);
+                    }
+                    catch (Exception e)
+                    {
+                        var msg =
+                            $"Unexpected exception occurred during" +
+                            $" {nameof(SyncPreviousBlocksAsync)}: {{e}}";
+                        _logger.Error(e, msg, e);
+                    }
+                }
             }
 
             _logger.Information($"Processed block(s) broadcast from {peer.EndPoint}@{peer.Address.ToHex()}.");
 
         }
 
-        private void TransferTxs(GetTxs getTxs)
+        private Transactions TransferTxs(GetTxs getTxs)
         {
             IEnumerable<Transaction<T>> txs = getTxs.TxIds
                 .Where(txId => _store.ContainsTransaction(txId))
                 .Select(BlockChain.GetTransaction);
-
+            List<byte[]> response = new List<byte[]>();
             foreach (Transaction<T> tx in txs)
             {
-                _logger.Debug($"Responding to GetTxs {tx.Id}");
-                Message response = new Messages.Tx(tx.Serialize(true))
-                {
-                    Identity = getTxs.Identity,
-                };
-                Transport.ReplyMessage(response);
+                _logger.Debug($"Adding {tx.Id} to response.");
+                response.Add(tx.Serialize(true));
             }
+            return new Transactions(response);
         }
 
-        private void ProcessTxIds(TxIds message)
+        private void ProcessTxIds(TxIds message, BoundPeer peer)
         {
-            if (!(message.Remote is BoundPeer peer))
+            if (peer == null)
             {
-                _logger.Information(
-                    $"Ignores a {nameof(TxIds)} message because it was sent by an invalid peer: " +
-                    "{PeerAddress}.",
-                    message.Remote?.Address.ToHex()
-                );
+                _logger.Information($"Ignores a {nameof(TxIds)} message because it was sent by an invalid peer: {peer.EndPoint.Host}:{peer.EndPoint.Port}.");
                 return;
             }
 
@@ -476,13 +456,9 @@ namespace Libplanet.Net
             }
         }
 
-        private void TransferBlocks(GetBlocks getData)
+        private Messages.Blocks TransferBlocks(GetBlocks getData, BoundPeer peer)
         {
-            string identityHex = ByteUtil.Hex(getData.Identity);
-            _logger.Verbose(
-                $"Preparing a {nameof(Blocks)} message to reply to {{Identity}}...",
-                identityHex
-            );
+            _logger.Verbose($"Preparing a {nameof(Blocks)} message to reply to {peer}...");
 
             var blocks = new List<byte[]>();
 
@@ -491,10 +467,10 @@ namespace Libplanet.Net
             int total = hashes.Count;
             const string logMsg =
                 "Fetching a block #{Index}/{Total} ({Hash}) to include to " +
-                "a reply to {Identity}...";
+                "a reply to {Peer}...";
             foreach (HashDigest<SHA256> hash in hashes)
             {
-                _logger.Verbose(logMsg, i, total, hash, identityHex);
+                _logger.Verbose(logMsg, i, total, hash, peer);
                 if (_store.ContainsBlock(hash))
                 {
                     Block<T> block = _store.GetBlock<T>(hash);
@@ -515,44 +491,22 @@ namespace Libplanet.Net
                         _logger.Verbose($"Block {hash} not found. Sending empty reply for {hash}.");
                     }
                 }
+                //chunking must be lead by client request/response as we can't handle more than 1 response for now
+                //if (blocks.Count == getData.ChunkSize)
+                //{
+                //    var response = new Messages.Blocks(blocks, BlockChain.Genesis.Hash);
+                //    _logger.Verbose("Enqueuing a blocks reply (...{Index}/{Total})...", i, total);
+                //    Transport.ReplyMessage(response);
+                //    blocks.Clear();
+                //}
 
-                if (blocks.Count == getData.ChunkSize)
-                {
-                    var response = new Messages.Blocks(blocks)//should include genesis ? , BlockChain.Genesis.Hash
-                    {
-                        Identity = getData.Identity,
-                    };
-                    _logger.Verbose(
-                        "Enqueuing a blocks reply (...{Index}/{Total})...",
-                        i,
-                        total
-                    );
-                    Transport.ReplyMessage(response);
-                    blocks.Clear();
-                }
-
-                i++;
+                //i++;
             }
-
-            if (blocks.Any())
-            {
-                var response = new Messages.Blocks(blocks)//should include genesis ? , BlockChain.Genesis.Hash
-                {
-                    Identity = getData.Identity,
-                };
-                _logger.Verbose(
-                    "Enqueuing a blocks reply (...{Index}/{Total}) to {Identity}...",
-                    total,
-                    total,
-                    identityHex
-                );
-                Transport.ReplyMessage(response);
-            }
-
-            _logger.Debug("Blocks were transferred to {Identity}.", identityHex);
+            _logger.Verbose("Sendig a blocks reply (...{Index}/{Total}) to {Identity}...", total, total, peer);
+            return new Messages.Blocks(blocks, BlockChain.Genesis.Hash);
         }
 
-        private void TransferRecentStates(GetRecentStates getRecentStates)
+        private RecentStates TransferRecentStates(GetRecentStates getRecentStates)
         {
             BlockLocator baseLocator = getRecentStates.BaseLocator;
             HashDigest<SHA256>? @base = BlockChain.FindBranchPoint(baseLocator);
@@ -671,17 +625,12 @@ namespace Libplanet.Net
                 }
             }
 
-            var reply = new RecentStates(
+            return new RecentStates(
                 target,
                 nextOffset,
                 iteration,
                 blockStates,
-                stateRefs?.ToImmutableDictionary())
-            {
-                Identity = getRecentStates.Identity,
-            };
-
-            Transport.ReplyMessage(reply);
+                stateRefs?.ToImmutableDictionary());
         }
     }
 }

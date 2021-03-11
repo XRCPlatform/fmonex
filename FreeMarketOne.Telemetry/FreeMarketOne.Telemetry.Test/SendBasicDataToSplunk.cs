@@ -1,4 +1,3 @@
-using FreeMarketOne.DataStructure;
 using FreeMarketOne.ServerCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

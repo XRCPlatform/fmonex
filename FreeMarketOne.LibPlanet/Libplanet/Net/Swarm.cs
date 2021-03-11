@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AsyncIO;
 using Bencodex.Types;
+using FreeMarketOne.Tor;
 using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
@@ -44,7 +45,8 @@ namespace Libplanet.Net
         private BlockHashDemand? _demandBlockHash;
         private ConcurrentDictionary<TxId, BoundPeer> _demandTxIds;
         private List<TxId> broadcastedTransactions = new List<TxId>();
-
+        private IPAddress localhostIp = IPAddress.Parse("127.0.0.1");
+        private int _listenPort = 0;
         static Swarm()
         {
             if (!(Type.GetType("Mono.Runtime") is null))
@@ -150,7 +152,14 @@ namespace Libplanet.Net
             _logger = Log.ForContext<Swarm<T>>()
                 .ForContext("SwarmId", loggerId);
 
-            Transport = new NetMQTransport(
+            _listenPort = listenPort.GetValueOrDefault();
+            
+            //TODO: move this to config or TorProcessManager or _socks5Proxy for now just need first build to complete
+            var torSocksProxyIp = IPAddress.Parse("127.0.0.1");
+            IPEndPoint torSocksProxyEndpoint = new IPEndPoint(torSocksProxyIp, 9050);
+            var socks5Manager = new TorSocks5Manager(torSocksProxyEndpoint);
+
+            Transport = new TorSocks5Transport(
                 _privateKey,
                 _appProtocolVersion,
                 TrustedAppProtocolVersionSigners,
@@ -158,12 +167,11 @@ namespace Libplanet.Net
                 bucketSize,
                 workers,
                 host,
-                listenPort,
-                iceServers,
+                listenPort,                
                 differentAppProtocolVersionEncountered,
                 ProcessMessageHandler,
                 _logger,
-                options.Socks5Proxy,
+                socks5Manager,
                 peerStateChangeHandler
             );
 
@@ -181,13 +189,13 @@ namespace Libplanet.Net
             }
         }
 
-        public bool Running => Transport is NetMQTransport p && p.Running;
+        public bool Running => Transport is TorSocks5Transport p && p.Running;
 
         public DnsEndPoint EndPoint => AsPeer is BoundPeer boundPeer ? boundPeer.EndPoint : null;
 
         public Address Address => _privateKey.ToAddress();
 
-        public Peer AsPeer => Transport.AsPeer;
+        public BoundPeer AsPeer => Transport.AsPeer;
 
         /// <summary>
         /// The last time when any message was arrived.
@@ -216,7 +224,7 @@ namespace Libplanet.Net
 
         internal ITransport Transport { get; private set; }
 
-        internal IProtocol Protocol => (Transport as NetMQTransport)?.Protocol;
+        internal IProtocol Protocol => (Transport as TorSocks5Transport)?.Protocol;
 
         internal AsyncAutoResetEvent TxReceived { get; }
 
@@ -245,9 +253,9 @@ namespace Libplanet.Net
         /// <summary>
         /// Waits until this <see cref="Swarm{T}"/> instance gets started to run.
         /// </summary>
-        /// <returns>A <see cref="Task"/> completed when <see cref="NetMQTransport.Running"/>
+        /// <returns>A <see cref="Task"/> completed when <see cref="TorSocks5Transport.Running"/>
         /// property becomes <c>true</c>.</returns>
-        public Task WaitForRunningAsync() => (Transport as NetMQTransport)?.WaitForRunningAsync();
+        public Task WaitForRunningAsync() => (Transport as TorSocks5Transport)?.WaitForRunningAsync();
 
         public void Dispose()
         {
@@ -442,8 +450,7 @@ namespace Libplanet.Net
             }
 
             IEnumerable<BoundPeer> peers = seedPeers.OfType<BoundPeer>();
-            
-            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address) && peer.EndPoint.Host != "127.0.0.1" && peer.EndPoint.Host != ((BoundPeer)AsPeer).EndPoint.Host );
+            IEnumerable<BoundPeer> peersExceptMe = PeersExceptMe(peers);
 
             await Transport.BootstrapAsync(
                 peersExceptMe,
@@ -453,19 +460,29 @@ namespace Libplanet.Net
                 cancellationToken);
         }
 
+        private IEnumerable<BoundPeer> PeersExceptMe(IEnumerable<BoundPeer> peers)
+        {
+            return peers.Where(
+                    peer => !peer.Address.Equals(AsPeer.Address)
+                    && peer.EndPoint.Host != "127.0.0.1"
+                    && peer.EndPoint.Host != ((BoundPeer)AsPeer).EndPoint.Host
+                    && peer.EndPoint.Port == _listenPort
+                );
+        }
+
         public void BroadcastBlock(Block<T> block)
         {
-            BroadcastBlock(null, block);
+            BroadcastBlock(AsPeer, block);
         }
 
         public void BroadcastTxs(IEnumerable<Transaction<T>> txs)
         {
-            BroadcastTxs(null, txs);
+            BroadcastTxs(AsPeer, txs);
         }
 
         public string TraceTable()
         {
-            return Transport is null ? string.Empty : (Transport as NetMQTransport)?.Trace();
+            return Transport is null ? string.Empty : (Transport as TorSocks5Transport)?.Trace();
         }
 
         /// <summary>
@@ -955,8 +972,8 @@ namespace Libplanet.Net
             TimeSpan? timeout = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            NetMQTransport netMQTransport = (NetMQTransport)Transport;
-            return await netMQTransport.FindSpecificPeerAsync(
+            TorSocks5Transport socks5Transport = (TorSocks5Transport)Transport;
+            return await socks5Transport.FindSpecificPeerAsync(
                 target,
                 depth,
                 timeout,
@@ -978,10 +995,10 @@ namespace Libplanet.Net
             cancellationToken = CancellationTokenSource
                 .CreateLinkedTokenSource(cancellationToken, _cancellationToken).Token;
 
-            var netMQTransport = (NetMQTransport)Transport;
+            var netMQTransport = (TorSocks5Transport)Transport;
             await netMQTransport.CheckAllPeersAsync(cancellationToken, timeout);
         }
-
+        
         public async Task AddPeersAsync(
             IEnumerable<Peer> peers,
             TimeSpan? timeout,
@@ -997,8 +1014,8 @@ namespace Libplanet.Net
                 cancellationToken = _cancellationToken;
             }
 
-            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address));
-            await ((NetMQTransport)Transport).AddPeersAsync(peersExceptMe, timeout, cancellationToken);
+            var peersExceptMe = peers.Where(peer => !peer.Address.Equals(AsPeer.Address) && peer?.PublicIPAddress != localhostIp);
+            await ((TorSocks5Transport)Transport).AddPeersAsync(peersExceptMe, timeout, cancellationToken);
         }
 
         // FIXME: This would be better if it's merged with GetDemandBlockHashes
@@ -1011,11 +1028,10 @@ namespace Libplanet.Net
         {
             var request = new GetBlockHashes(locator, stop);
 
-            Message parsedMessage = await Transport.SendMessageWithReplyAsync(
+            BlockHashes parsedMessage = await Transport.SendMessageWithReplyAsync<GetBlockHashes, BlockHashes>(
                 peer,
                 request,
-                TimeSpan.FromMinutes(10),
-                cancellationToken: cancellationToken
+                TimeSpan.FromMinutes(10)
             );
 
             if (parsedMessage is BlockHashes blockHashes)
@@ -1043,12 +1059,7 @@ namespace Libplanet.Net
                 }
 
                 yield break;
-            }
-
-            string errorMessage =
-                $"The response of {nameof(GetBlockHashes)} is expected to be " +
-                $"{nameof(BlockHashes)}, not {parsedMessage.GetType().Name}: {parsedMessage}";
-            throw new InvalidMessageException(errorMessage, parsedMessage);
+            }          
         }
 
         internal async IAsyncEnumerable<Block<T>> GetBlocksAsync(
@@ -1072,48 +1083,28 @@ namespace Libplanet.Net
                 yield break;
             }
 
-            TimeSpan blockRecvTimeout = Options.BlockRecvTimeout
-                                        + TimeSpan.FromSeconds(hashCount * 30);
+            TimeSpan blockRecvTimeout = Options.BlockRecvTimeout + TimeSpan.FromSeconds(hashCount * 30);
             if (blockRecvTimeout > Options.MaxTimeout)
             {
                 blockRecvTimeout = Options.MaxTimeout;
             }
 
-            IEnumerable<Message> replies = await Transport.SendMessageWithReplyAsync(
+           var reply = await Transport.SendMessageWithReplyAsync<GetBlocks, Messages.Blocks>(
                 peer,
                 request,
-                blockRecvTimeout,
-                ((hashCount - 1) / request.ChunkSize) + 1,
-                cancellationToken
+                blockRecvTimeout
             );
 
-            foreach (Message message in replies)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            IEnumerable<byte[]> payloads = reply.Payloads;
+            _logger.Debug($"Received {payloads.Count()} blocks from remote {peer}.");
+
+            foreach (byte[] payload in payloads)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
-                if (message is Messages.Blocks blockMessage)
-                {
-                    IList<byte[]> payloads = blockMessage.Payloads;
-                    _logger.Debug(
-                        "Received {Number} blocks from {Peer}.",
-                        payloads.Count,
-                        message.Remote);
-                    foreach (byte[] payload in payloads)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        Block<T> block = new Block<T>().Deserialize(payload);
-
-                        yield return block;
-                    }
-                }
-                else
-                {
-                    string errorMessage =
-                        $"Expected a {nameof(Blocks)} message as a response of " +
-                        $"the {nameof(GetBlocks)} message, but got a {message.GetType().Name} " +
-                        $"message instead: {message}";
-                    throw new InvalidMessageException(errorMessage, message);
-                }
+                Block<T> block = new Block<T>().Deserialize(payload);
+                yield return block;
             }
 
             _logger.Information(
@@ -1134,35 +1125,22 @@ namespace Libplanet.Net
 
             _logger.Debug("Required tx count: {Count}.", txCount);
 
-            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromSeconds(txCount * 30);
+            var txRecvTimeout = Options.TxRecvTimeout + TimeSpan.FromSeconds(txCount * 2);
             if (txRecvTimeout > Options.MaxTimeout)
             {
                 txRecvTimeout = Options.MaxTimeout;
             }
 
-            IEnumerable<Message> replies = await Transport.SendMessageWithReplyAsync(
+            var reply = await Transport.SendMessageWithReplyAsync<GetTxs, Transactions>(
                 peer,
                 request,
-                txRecvTimeout,
-                txCount,
-                cancellationToken
+                txRecvTimeout
             );
 
-            foreach (Message message in replies)
+            foreach (var payload in reply.Payloads)
             {
-                if (message is Messages.Tx parsed)
-                {
-                    Transaction<T> tx = Transaction<T>.Deserialize(parsed.Payload);
-                    yield return tx;
-                }
-                else
-                {
-                    string errorMessage =
-                        $"Expected {nameof(Tx)} messages as response of " +
-                        $"the {nameof(GetTxs)} message, but got a {message.GetType().Name} " +
-                        $"message instead: {message}";
-                    throw new InvalidMessageException(errorMessage, message);
-                }
+                Transaction<T> tx = Transaction<T>.Deserialize(payload);
+                yield return tx;
             }
         }
 
@@ -1323,27 +1301,27 @@ namespace Libplanet.Net
             }
         }
 
-        private void BroadcastBlock(Address? except, Block<T> block)
+        private void BroadcastBlock(BoundPeer except, Block<T> block)
         {
             _logger.Debug("Trying to broadcast blocks...");
             //var message = new BlockHeaderMessage(BlockChain.Genesis.Hash, block.GetBlockHeader());
             var enumerable = new List<byte[]>();
             enumerable.Add(block.Serialize());
-            var message = new BlockBroadcast(enumerable, BlockChain.Genesis.Hash);
+            var message = new Messages.Blocks(enumerable, BlockChain.Genesis.Hash);
             BroadcastMessage(except, message);
             _logger.Debug("Block broadcasting complete.");
         }
 
-        private void BroadcastTxs(Address? except, IEnumerable<Transaction<T>> txs)
+        private void BroadcastTxs(BoundPeer except, IEnumerable<Transaction<T>> txs)
         {
             List<TxId> txIds = txs.Select(tx => tx.Id).ToList();
             _logger.Debug("Broadcast {TransactionsNumber} txs...", txIds.Count);
             BroadcastTxIds(except, txIds);
         }
 
-        private void BroadcastMessage(Address? except, Message message)
+        private void BroadcastMessage<Tb>(BoundPeer except, Tb message)
         {
-            Transport.BroadcastMessage(except, message);
+            Transport.BroadcastMessage<Tb>(except, message);
         }
 
         private Task<(BoundPeer Peer, ChainStatus ChainStatus)[]> DialToExistingPeers(
@@ -1356,9 +1334,8 @@ namespace Libplanet.Net
             var peersExceptMe = Peers.Where(peer => !peer.Address.Equals(AsPeer.Address));
 
             IEnumerable<Task<(BoundPeer, ChainStatus)>> tasks = peersExceptMe.Select(
-                peer => Transport.SendMessageWithReplyAsync(
-                    peer, new GetChainStatus(), TimeSpan.FromMinutes(5), cancellationToken
-                ).ContinueWith<(BoundPeer, ChainStatus)>(
+                peer => Transport.SendMessageWithReplyAsync<GetChainStatus, ChainStatus>(peer, new GetChainStatus(), TimeSpan.FromMinutes(5))
+                .ContinueWith<(BoundPeer, ChainStatus)>(
                     t =>
                     {
                         if (t.IsFaulted || t.IsCanceled || !(t.Result is ChainStatus chainStatus))
@@ -1390,7 +1367,7 @@ namespace Libplanet.Net
                         }
                         else
                         {
-                            return (peer, chainStatus);
+                            return (peer, t.Result);
                         }
                     },
                     cancellationToken
@@ -1457,14 +1434,13 @@ namespace Libplanet.Net
                         "Requests recent states to a peer ({Peer}) {Offset}.",
                         peer,
                         offset);
-                    Message reply;
+                    RecentStates reply;
                     try
                     {
-                        reply = await Transport.SendMessageWithReplyAsync(
+                        reply = await Transport.SendMessageWithReplyAsync<GetRecentStates,RecentStates>(
                             peer,
                             request,
-                            timeout: null,
-                            cancellationToken: cancellationToken
+                            TimeSpan.FromMinutes(5)
                         );
 
                         _logger.Debug("Received recent states from a peer ({Peer}).", peer);
@@ -1678,7 +1654,7 @@ namespace Libplanet.Net
                             if (txIds.Any())
                             {
                                 _logger.Debug("Preparing to broadcast staged transactions: [{txIds}]", string.Join(", ", txIds));
-                                BroadcastTxIds(null, txIds);
+                                BroadcastTxIds(AsPeer, txIds);
                                 
                                 //FIXME: Prune this list upon block arival as transactions included in block get safely removed from staged.
                                 
@@ -1713,7 +1689,7 @@ namespace Libplanet.Net
             }
         }
 
-        private void BroadcastTxIds(Address? except, IEnumerable<TxId> txIds)
+        private void BroadcastTxIds(BoundPeer except, IEnumerable<TxId> txIds)
         {
             IEnumerable<Transaction<T>> txs = txIds
                .Where(txId => _store.ContainsTransaction(txId))
@@ -1725,12 +1701,9 @@ namespace Libplanet.Net
                 if (!broadcastedTransactions.Contains(tx.Id))
                 {
                     _logger.Debug($"Broadcasting TxBroadcast {tx.Id} message.");
-                    Message message = new TxBroadcast(tx.Serialize(true));
-                    if (except.HasValue)
-                    {
-                        message.Identity = except.Value.ToByteArray();
-                    }                    
-                    BroadcastMessage(except, message);
+                    TxBroadcast message = new TxBroadcast(tx.Serialize(true), false);
+                                  
+                    BroadcastMessage<TxBroadcast>(except, message);
                     broadcastedTransactions.Add(tx.Id);
                 }
             }
@@ -2069,7 +2042,7 @@ namespace Libplanet.Net
                     // FIXME: Clean up events
                     BlockReceived.Set();
                     BlockAppended.Set();
-                    BroadcastBlock(peer.Address, BlockChain.Tip);
+                    BroadcastBlock(peer, BlockChain.Tip);
                 }
                 catch (TimeoutException)
                 {

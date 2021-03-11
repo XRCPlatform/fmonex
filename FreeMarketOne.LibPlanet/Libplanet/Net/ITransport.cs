@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using FreeMarketOne.Tor;
+using FreeMarketOne.Tor.TorOverTcp.Models.Messages;
 using Libplanet.Net.Messages;
 
 namespace Libplanet.Net
 {
     internal interface ITransport : IDisposable
     {
-        Peer AsPeer { get; }
+        BoundPeer AsPeer { get; }
 
         IEnumerable<BoundPeer> Peers { get; }
 
@@ -29,21 +31,13 @@ namespace Libplanet.Net
             int depth,
             CancellationToken cancellationToken);
 
-        Task<Message> SendMessageWithReplyAsync(
+        Task<TResponse> SendMessageWithReplyAsync<TRequest, TResponse>(
             BoundPeer peer,
-            Message message,
-            TimeSpan? timeout,
-            CancellationToken cancellationToken);
+            TRequest message,
+            TimeSpan? timeout);
 
-        Task<IEnumerable<Message>> SendMessageWithReplyAsync(
-            BoundPeer peer,
-            Message message,
-            TimeSpan? timeout,
-            int expectedResponses,
-            CancellationToken cancellationToken = default(CancellationToken));
+        Task BroadcastMessage<T>(BoundPeer except, T message);
 
-        void BroadcastMessage(Address? except, Message message);
-
-        void ReplyMessage(Message message);
+        void ReplyMessage<TResponse>(TotRequest request, TotClient client, TResponse responseMessage);
     }
 }

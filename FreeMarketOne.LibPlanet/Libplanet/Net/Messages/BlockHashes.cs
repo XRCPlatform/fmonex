@@ -1,17 +1,38 @@
+using Bencodex;
+using Bencodex.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using NetMQ;
+
 
 namespace Libplanet.Net.Messages
 {
-    internal class BlockHashes : Message
+    public class BlockHashes : IBenEncodeable
     {
+        private static readonly byte[] StartIndexKey = { 0x53 }; // 'S'
+        private static readonly byte[] BlockHashesKey = { 0x42 }; // 'B'
+
+        public BlockHashes(byte[] bytes) : this(DecodeBytesToBen(bytes))
+        {
+        }
+
+        private static Bencodex.Types.Dictionary DecodeBytesToBen(byte[] bytes)
+        {
+            IValue value = new Codec().Decode(bytes);
+            if (!(value is Dictionary dict))
+            {
+                throw new DecodingException(
+                    $"Expected {typeof(Dictionary)} but " +
+                    $"{value.GetType()}");
+            }
+            return dict;
+        }
+
         public BlockHashes(long? startIndex, IEnumerable<HashDigest<SHA256>> hashes)
         {
             StartIndex = startIndex;
-            Hashes = hashes.ToList();
+            Hashes = hashes;
 
             if (StartIndex is null && Hashes.Any())
             {
@@ -29,52 +50,84 @@ namespace Libplanet.Net.Messages
             }
         }
 
-        public BlockHashes(NetMQFrame[] frames)
+        public BlockHashes(Bencodex.Types.Dictionary dict)
         {
-            int hashCount = frames[0].ConvertToInt32();
-            var hashes = new List<HashDigest<SHA256>>(hashCount);
-            if (hashCount > 0)
+            if (dict.ContainsKey((IKey)(Binary)StartIndexKey))
             {
-                StartIndex = frames[1].ConvertToInt64();
-                for (int i = 2, end = hashCount + 2; i < end; i++)
+                StartIndex = dict.GetValue<Integer>(StartIndexKey);
+            }
+
+            var temp = new List<HashDigest<SHA256>>();
+            if (dict.ContainsKey((IKey)(Binary)BlockHashesKey))
+            {
+                var list = dict.GetValue<Bencodex.Types.List>(BlockHashesKey)
+                    .Select(hash => ((Binary)hash).Value);
+                foreach (var item in list)
                 {
-                    hashes.Add(frames[i].ConvertToHashDigest<SHA256>());
+                    temp.Add(new HashDigest<SHA256>(item));
                 }
             }
 
-            Hashes = hashes;
+            Hashes = temp;
         }
 
         /// <summary>
         /// The block index of the first hash in <see cref="Hashes"/>.
         /// It is <c>null</c> iff <see cref="Hashes"/> are empty.
         /// </summary>
-        public long? StartIndex { get; }
+        public long? StartIndex { get; set; }
 
         /// <summary>
         /// The continuous block hashes, from the lowest index to the highest index.
         /// </summary>
-        public IEnumerable<HashDigest<SHA256>> Hashes { get; }
-
-        protected override MessageType Type => MessageType.BlockHashes;
-
-        protected override IEnumerable<NetMQFrame> DataFrames
+        public IEnumerable<HashDigest<SHA256>> Hashes { get; set; }
+      
+        /// <summary>
+        /// Gets <see cref="BlockHashes"/> instance from serialized <paramref name="bytes"/>.
+        /// </summary>
+        /// <param name="bytes">Serialized <see cref="BlockHashes"/>.</param>
+        /// <returns>Deserialized <see cref="BlockHashes"/>.</returns>
+        /// <exception cref="DecodingException">Thrown when decoded value is not
+        /// <see cref="Bencodex.Types.Dictionary"/> type.</exception>
+        public static BlockHashes Deserialize(byte[] bytes)
         {
-            get
-            {
-                yield return new NetMQFrame(
-                    NetworkOrderBitsConverter.GetBytes(Hashes.Count()));
-                if (StartIndex is long offset)
-                {
-                    yield return new NetMQFrame(
-                        NetworkOrderBitsConverter.GetBytes(offset));
+            return new BlockHashes(DecodeBytesToBen(bytes));
+        }
 
-                    foreach (HashDigest<SHA256> hash in Hashes)
-                    {
-                        yield return new NetMQFrame(hash.ToByteArray());
-                    }
+        public object FromBenBytes(byte[] bytes)
+        {
+            return Deserialize(bytes);
+        }
+
+        /// <summary>
+        /// Gets serialized byte array of the <see cref="BlockStates"/>.
+        /// </summary>
+        /// <returns>Serialized byte array of <see cref="BlockStates"/>.</returns>
+        public byte[] SerializeToBen()
+        {
+            return new Codec().Encode(ToBencodex());
+        }
+
+        /// <summary>
+        /// Gets <see cref="Bencodex.Types.Dictionary"/> representation of
+        /// <see cref="BlockStates"/>.
+        /// </summary>
+        /// <returns><see cref="Bencodex.Types.Dictionary"/> representation of
+        /// <see cref="BlockStates"/>.</returns>
+        public Dictionary ToBencodex()
+        {
+            var dict = Dictionary.Empty;
+            if (StartIndex is long offset)
+            {
+                dict = dict.Add(StartIndexKey, offset);
+                if (Hashes.Any())
+                {
+                    dict = dict.Add(
+                        BlockHashesKey,
+                        Hashes.Select(hash => (IValue)(Binary)hash.ToByteArray()));
                 }
             }
+            return dict;
         }
     }
 }

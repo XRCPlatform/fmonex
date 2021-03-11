@@ -1,7 +1,4 @@
-﻿using Libplanet.Blockchain.Policies;
-using Libplanet.Action;
-using System.Net;
-using Libplanet.Extensions;
+﻿using System.Net;
 using System;
 using System.Collections.Generic;
 
@@ -30,8 +27,8 @@ namespace FreeMarketOne.DataStructure
         string TelemetryServerUri { get; set; }
         string FullBaseDirectory { get; set; }
 
-        IDefaultBlockPolicy<BaseAction> BlockChainBasePolicy { get; set; }
-        IDefaultBlockPolicy<MarketAction> BlockChainMarketPolicy { get; set; }
+        //IDefaultBlockPolicy<BaseAction> BlockChainBasePolicy { get; set; }
+        //IDefaultBlockPolicy<MarketAction> BlockChainMarketPolicy { get; set; }
 
         bool ListenersUseTor { get; set; }
         string ListenersForceThisIp { get; set; }

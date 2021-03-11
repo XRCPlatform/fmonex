@@ -6,7 +6,7 @@ set -e
 
 dotnet_runtime="win-x64"
 warp_runtime="win-x64"
-configuration="release"
+configuration="Debug"
 git_commit=$(git log --format=%h --abbrev=7 -n 1)
 publish_directory="../FreeMarketApp/bin/${configuration}/netcoreapp3.1/${dotnet_runtime}/publish"
 download_directory="/tmp"
@@ -42,10 +42,10 @@ cp -f -R $publish_directory/* $WINEPREFIX/drive_c/fmone
 
 echo "$nsis_sha256 $cache_dir/$nsis_filename" | if sha256sum --check ; then
     echo "Building with nsis"
-    if [ ! -f "$WINEPREFIX/drive_c/Program Files/NSIS/makensis.exe" ]; then
+    if [ ! -f "$WINEPREFIX/drive_c/Program Files (x86)/NSIS/makensis.exe" ]; then
         wine "$cache_dir/$nsis_filename"
     fi
-    wine "$WINEPREFIX/drive_c/Program Files/NSIS/makensis.exe" /DPRODUCT_VERSION=$version fmone-windows.nsi
+    wine "$WINEPREFIX/drive_c/Program Files (x86)/NSIS/makensis.exe" /DPRODUCT_VERSION=$version fmone-windows.nsi
 else
     echo "nsis file was not the correct checksum" >&2
 fi

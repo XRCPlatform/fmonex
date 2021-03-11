@@ -28,7 +28,7 @@ namespace FreeMarketOne.ServerCore
             this.BlockChainMarketGenesis = "market_genesis.dat";
             this.BlockChainSecretPath = "data/key.data";
             this.BlockChainUserPath = "data/user.data";
-            this.ListenersUseTor = false;
+            this.ListenersUseTor = true;
             this.ListenerBaseEndPoint = 9111; //EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9111/");
             this.ListenerMarketEndPoint = 9112; // EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9112/");
             this.ChangellyApiKey = "5fe8cbe95ade4e73bdb62db0897e3615";

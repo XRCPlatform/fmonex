@@ -28,7 +28,7 @@ namespace FreeMarketOne.ServerCore
             this.BlockChainMarketPath = "data/testnet_blockchain_market";
             this.BlockChainSecretPath = "data/testnet_key.data";
             this.BlockChainUserPath = "data/testnet_user.data";
-            this.ListenersUseTor = false;
+            this.ListenersUseTor = true;
             this.ListenerBaseEndPoint = 9113;// EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9113/");
             this.ListenerMarketEndPoint = 9114;//EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9114/");
             this.TelemetryServerUri = "http://40.115.21.64:8088/services/collector/event";

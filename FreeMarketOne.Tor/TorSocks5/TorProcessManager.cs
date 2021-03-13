@@ -15,10 +15,11 @@ namespace FreeMarketOne.Tor
 {
     public class TorProcessManager : IDisposable
     {
-		/// <summary>
-		/// If null then it's just a mock, clearnet is used.
-		/// </summary>
-		private IBaseConfiguration _configuration { get; }
+        private static readonly object startLock = new object();
+        /// <summary>
+        /// If null then it's just a mock, clearnet is used.
+        /// </summary>
+        private IBaseConfiguration _configuration { get; }
 
         public string TorOnionEndPoint { get; private set; }
 
@@ -61,18 +62,20 @@ namespace FreeMarketOne.Tor
 
         public bool Start()
         {
-            if (_configuration.TorEndPoint is null)
+            lock (startLock)
             {
-                return false;
-            }
-            if (client == null)
-            {
-                client = new TorSocks5Client(_configuration.TorEndPoint);
-            }           
+                if (_configuration.TorEndPoint is null)
+                {
+                    return false;
+                }
+                if (client == null)
+                {
+                    client = new TorSocks5Client(_configuration.TorEndPoint);
+                }
 
-            //new Thread(delegate () // Do not ask. This is the only way it worked on Win10/Ubuntu18.04/Manjuro(1 processor VM)/Fedora(1 processor VM)
-            //{
-            try
+                //new Thread(delegate () // Do not ask. This is the only way it worked on Win10/Ubuntu18.04/Manjuro(1 processor VM)/Fedora(1 processor VM)
+                //{
+                try
                 {
                     try
                     {
@@ -150,10 +153,10 @@ namespace FreeMarketOne.Tor
 
                         //check if TOR is online
                         Task.Delay(3000).ConfigureAwait(false).GetAwaiter().GetResult(); // dotnet brainfart, ConfigureAwait(false) IS NEEDED HERE otherwise (only on) Manjuro Linux fails, WTF?!!
-                        
+
                         if (!IsTorRunning(_configuration.TorEndPoint))
                         {
-                            
+
                             throw new TorException("Attempted to start Tor, but it is not running.");
                         }
                         else
@@ -162,6 +165,7 @@ namespace FreeMarketOne.Tor
                         }
 
                         _logger.Information("Tor is running.");
+                        LastRestarted = DateTimeOffset.UtcNow;
                     }
                     catch (Exception ex)
                     {
@@ -175,9 +179,10 @@ namespace FreeMarketOne.Tor
 
                     return false;
                 }
-            //}).Start();
+                //}).Start();
 
-            _running = CommonStates.Running;
+                _running = CommonStates.Running;
+            }           
 
             return true;
         }
@@ -273,7 +278,7 @@ namespace FreeMarketOne.Tor
         {
             lock (_torsocksauthlock)
             {
-                if (!client.IsConnected)
+                if (!client.IsConnected && (client.TcpClient == null || !client.TcpClient.Connected))
                 {
                     client.ConnectAndHandshake(true);
                 }
@@ -291,6 +296,40 @@ namespace FreeMarketOne.Tor
 
             return IsTorRunning(_configuration.TorEndPoint);
 
+        }
+        private DateTimeOffset LastRestarted { get; set; }
+
+        public void ReStart()
+        {
+            lock (startLock)
+            {
+                var diff = DateTimeOffset.UtcNow - LastRestarted;
+                if (diff.TotalMinutes < 5)
+                {
+                    _logger.Information($"Tor process was restarted {diff} ago.");
+                    return;
+                }
+           
+                try
+                {
+                    _logger.Information($"Restarting Tor process..");
+                    Stop();
+                    
+                    LastRestarted = DateTimeOffset.UtcNow;
+
+                    if (client != null)
+                    {
+                        client.TcpClient.Close();
+                        client.TcpClient.Dispose();
+                        client = null;
+                    }
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }                
+            }
+            Start();
         }
 
         //public async Task<bool> IsOnionSeedRunningAsync(string url, int port)

@@ -5,6 +5,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FreeMarketOne.Tor.Exceptions;
+using FreeMarketOne.Tor.Models.Fields.OctetFields;
 using Libplanet.Crypto;
 using Libplanet.Net.Messages;
 using Serilog;
@@ -446,6 +448,20 @@ namespace Libplanet.Net.Protocols
                 _logger.Verbose("Trying to ping async to {Peer}.", target);
                 Pong reply = await _transport.SendMessageWithReplyAsync<Ping,Pong>(target,new Ping(),timeout);
                 UpdateAsync(target);
+            }
+            catch (TorSocks5FailureResponseException exx)
+            {
+                if (exx.RepField == RepField.HostUnreachable) {
+                    RemovePeer(target);
+                    _logger.Error($"Host {target} is no longer reacheable and has been removed. ");
+                    //swallow as no need to bubble up
+                    return;
+                }
+                else
+                {
+                    throw;
+                }
+                
             }
             catch (TimeoutException)
             {

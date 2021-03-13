@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using FreeMarketOne.Tor;
 using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
@@ -77,15 +78,16 @@ namespace Libplanet.Tests.Net
             IEnumerable<IceServer> iceServers = null,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
             IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
-            SwarmOptions options = null)
+            SwarmOptions options = null,
+            TorProcessManager torProcessManager = null)
         {
             var fx = new DefaultStoreFixture(memory: true);
             var policy = new BlockPolicy<DumbAction>(new MinerReward(1));
             var blockchain = TestUtils.MakeBlockChain(policy, fx.Store);
-            return CreateSwarm(
-                blockchain,
+            return CreateSwarm(                
+                blockchain,                
                 privateKey,
-                appProtocolVersion,
+                appProtocolVersion,                
                 tableSize,
                 bucketSize,
                 host,
@@ -94,13 +96,15 @@ namespace Libplanet.Tests.Net
                 iceServers,
                 differentAppProtocolVersionEncountered,
                 trustedAppProtocolVersionSigners,
-                options);
+                options,
+                torProcessManager);
         }
 
         private Swarm<T> CreateSwarm<T>(
-            BlockChain<T> blockChain,
-            PrivateKey privateKey = null,
+            BlockChain<T> blockChain,            
+            PrivateKey privateKey = null,            
             AppProtocolVersion? appProtocolVersion = null,
+            
             int? tableSize = null,
             int? bucketSize = null,
             string host = null,
@@ -109,7 +113,8 @@ namespace Libplanet.Tests.Net
             IEnumerable<IceServer> iceServers = null,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
             IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
-            SwarmOptions options = null
+            SwarmOptions options = null,
+            TorProcessManager torProcessManager = null
         )
             where T : IAction, new()
         {
@@ -118,13 +123,13 @@ namespace Libplanet.Tests.Net
                 host = IPAddress.Loopback.ToString();
             }
 
-            var swarm = new Swarm<T>(
-                blockChain,
+            var swarm = new Swarm<T>(                
+                blockChain,               
                 privateKey ?? new PrivateKey(),
                 appProtocolVersion ?? DefaultAppProtocolVersion,
+                torProcessManager,
                 tableSize,
-                bucketSize,
-                5,
+                bucketSize,                
                 host,
                 listenPort,
                 createdAt,

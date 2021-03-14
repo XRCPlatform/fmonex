@@ -29,6 +29,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using static FreeMarketOne.Users.UserManager;
 
 namespace FreeMarketOne.ServerCore
 {
@@ -122,13 +123,15 @@ namespace FreeMarketOne.ServerCore
             return configuration;
         }
 
-        public async Task InitializeAsync(string password = null, UserDataV1 firstUseData = null)
+        public async Task<PrivateKeyStates> InitializeAsync(string password = null, UserDataV1 firstUseData = null)
         {
-            await Task.Run(() => this.Initialize(password, firstUseData));
+            return await Task.Run(() => this.Initialize(password, firstUseData));
         }
 		
-        public void Initialize(string password = null, UserDataV1 firstUserData = null, string configFilePath = null)
+        public PrivateKeyStates Initialize(string password = null, UserDataV1 firstUserData = null, string configFilePath = null)
         {
+            PrivateKeyStates initResult = PrivateKeyStates.NoPassword;
+
             //Environment
             Configuration = MakeConfiguration(configFilePath);
             blockChainBasePolicy = ((ExtendedConfiguration)Configuration).BlockChainBasePolicy;
@@ -153,7 +156,10 @@ namespace FreeMarketOne.ServerCore
 
                 //User manager
                 UserManager = new UserManager(Configuration);
-                if (UserManager.Initialize(password, firstUserData) == Users.UserManager.PrivateKeyStates.Valid)
+                
+                initResult = UserManager.Initialize(password, firstUserData);
+                
+                if (initResult == PrivateKeyStates.Valid)
                 {
                     FreeMarketOneServerLoggedInEvent?.Invoke(this, null);
                     Console.WriteLine(ByteUtil.Hex(UserManager.GetCurrentUserPublicKey()));
@@ -298,16 +304,23 @@ namespace FreeMarketOne.ServerCore
                         _logger.Error("Unexpected error. Could not automatically start Tor. Try running Tor manually.");
                     }
                 }
+                else if(initResult == PrivateKeyStates.WrongPassword)
+                {
+                    LoadingEvent?.Invoke(this, "Login failed...");
+                    _logger.Error("Wrong password supplied.");
+                    //throw new BadPasswordException();
+                }
                 else
                 {
                     _logger.Warning("No user account is necessary to create one.");
-                }
+                }               
             }
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
                 _logger.Error(ex.StackTrace);
             }
+            return initResult;
         }
 
         private async void PeerStateChangedHandlerAsync(object sender, PeerStateChangeEventArgs e)

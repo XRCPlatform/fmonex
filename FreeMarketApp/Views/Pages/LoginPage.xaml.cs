@@ -11,6 +11,7 @@ using Serilog;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using static FreeMarketOne.Users.UserManager;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp.Views.Pages
@@ -64,7 +65,7 @@ namespace FreeMarketApp.Views.Pages
             var errorMessages = new StringBuilder();
             var textHelper = new TextHelper();
 
-            if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 10)
+            if (string.IsNullOrEmpty(tbPassword.Text) || tbPassword.Text.Length < 16)
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_LoginPage_ShortPassword"));
                 errorCount++;
@@ -81,28 +82,34 @@ namespace FreeMarketApp.Views.Pages
             if (errorCount == 0)
             {
                 //reloading server with splash window
-                async void AppAsyncLoadingStart()
+                async Task<PrivateKeyStates> AppAsyncLoadingStart()
                 {
                     PagesHelper.Switch(mainWindow, LoadingPage.Instance);
                     mainViewModel = new MainWindowViewModel();
                     mainViewModel.StartupProgressText = "Unlocking...";
                     mainWindow.DataContext = mainViewModel;
                     await Task.Delay(10);
-                    await GetAppLoadingAsync(tbPassword.Text);
 
-                    if (FMONE.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
+                    var result = await GetAppLoadingAsync(tbPassword.Text);
+
+                    if (result == UserManager.PrivateKeyStates.Valid)
+                    {
+           
+
+                        // if (FMONE.Current.UserManager.PrivateKeyState == UserManager.PrivateKeyStates.Valid) {
                         PagesHelper.Switch(mainWindow, MainPage.Instance);
                         PagesHelper.UnlockTools(mainWindow, true);
                         PagesHelper.SetUserData(_logger, mainWindow);
                     } 
                     else
                     {
+                        PagesHelper.Switch(mainWindow, LoginPage.Instance);
                         tbPassword.Text = string.Empty;
                         tbError.Text = SharedResources.ResourceManager.GetString("Dialog_LoginPage_WatermarkWrongPassword");
                     }
+                    return result;
                 }
-
-                AppAsyncLoadingStart();
+                await AppAsyncLoadingStart();
             }
             else
             {
@@ -113,15 +120,13 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
-        private static async Task<bool> GetAppLoadingAsync(string password)
+        private static async Task<PrivateKeyStates> GetAppLoadingAsync(string password)
         {
-        await Task.Run(async () =>
-        {
-            FMONE.Current.LoadingEvent += new EventHandler<string>(LoadingEvent);
-            await FMONE.Current.InitializeAsync(password);
-        }).ConfigureAwait(true);
-
-        return true;
+            return await Task.Run(async () =>
+            {
+                FMONE.Current.LoadingEvent += new EventHandler<string>(LoadingEvent);
+                return await FMONE.Current.InitializeAsync(password);
+            });
         }
 
         private static void LoadingEvent(object sender, string message)

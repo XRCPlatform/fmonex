@@ -63,7 +63,7 @@ namespace Libplanet.Net
         /// <param name="privateKey">A private key to sign messages.  The public part of
         /// this key become a part of its end address for being pointed by peers.</param>
         /// <param name="appProtocolVersion">An app protocol to comply.</param>
-        /// <param name="workers">The number of background workers (i.e., threads).</param>
+        /// <param name="torProcessManager">A tor process manager that allows starting restarting lost process.</param>
         /// <param name="host">A hostname to be a part of a public endpoint, that peers use when
         /// they connect to this node.  Note that this is not a hostname to listen to;
         /// <see cref="Swarm{T}"/> always listens to 0.0.0.0 &amp; ::/0.</param>
@@ -86,7 +86,7 @@ namespace Libplanet.Net
             BlockChain<T> blockChain,
             PrivateKey privateKey,
             AppProtocolVersion appProtocolVersion,
-            int workers = 50,
+            TorProcessManager torProcessManager = null,
             string host = null,
             int? listenPort = null,
             IEnumerable<IceServer> iceServers = null,
@@ -98,9 +98,9 @@ namespace Libplanet.Net
                 blockChain,
                 privateKey,
                 appProtocolVersion,
+                torProcessManager,
                 null,
-                null,
-                workers,
+                null,                
                 host,
                 listenPort,
                 null,
@@ -116,9 +116,9 @@ namespace Libplanet.Net
             BlockChain<T> blockChain,
             PrivateKey privateKey,
             AppProtocolVersion appProtocolVersion,
+            TorProcessManager torProcessManager,
             int? tableSize,
-            int? bucketSize,
-            int workers = 5,
+            int? bucketSize,            
             string host = null,
             int? listenPort = null,
             DateTimeOffset? createdAt = null,
@@ -165,13 +165,13 @@ namespace Libplanet.Net
                 TrustedAppProtocolVersionSigners,
                 tableSize,
                 bucketSize,
-                workers,
                 host,
                 listenPort,                
                 differentAppProtocolVersionEncountered,
                 ProcessMessageHandler,
                 _logger,
                 socks5Manager,
+                torProcessManager,
                 peerStateChangeHandler
             );
 

@@ -29,7 +29,7 @@ namespace Libplanet.Tests
         public TorSocks5TransportTest()
         {
             _logger = Log.ForContext<TorSocks5TransportTest>();
-            torSocks5Transport = new TorSocks5Transport(VersionSigner, AppProtocolVersion, ImmutableHashSet<PublicKey>.Empty, 10, 10, 0, "127.0.0.1", 9114, null, null, _logger, null, null);
+            torSocks5Transport = new TorSocks5Transport(VersionSigner, AppProtocolVersion, ImmutableHashSet<PublicKey>.Empty, 10, 10, "127.0.0.1", 9114, null, null, _logger, null, null, null);
 
         }
 

@@ -27,6 +27,7 @@ using FreeMarketOne.Extensions.Common;
 using static FreeMarketOne.Extensions.Common.ServiceHelper;
 using Libplanet.Store;
 using Libplanet.Net.Messages;
+using FreeMarketOne.Tor;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -73,7 +74,7 @@ namespace FreeMarketOne.BlockChain
         public DefaultStore Storage { get => _storage; }
         public Swarm<T> SwarmServer { get => _swarmServer; }
         public UserPrivateKey PrivateKey { get => _privateKey; }
-
+        private TorProcessManager _torProcessManager;
         /// <summary>
         /// BlockChain Manager which operate specified blockchain data
         /// </summary>
@@ -99,6 +100,7 @@ namespace FreeMarketOne.BlockChain
             IOnionSeedsManager seedsManager,
             UserPrivateKey userPrivateKey,
             IProtocolVersion protocolVersion,
+            TorProcessManager torProcessManager,
             List<IBaseItem> listHashCheckPoints = null,
             Block<T> genesisBlock = null,
             EventHandler bootstrapStarted = null,
@@ -117,7 +119,7 @@ namespace FreeMarketOne.BlockChain
             _blockChainPolicy = blockChainPolicy;
             _blockChainGenesisName = blockChainGenesisName;
             _endPoint = endPoint;
-
+            _torProcessManager = torProcessManager;
             _privateKey = userPrivateKey;
             _storage = new DefaultStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
             _onionSeedManager = seedsManager;
@@ -167,6 +169,7 @@ namespace FreeMarketOne.BlockChain
                     blockChain: _blockChain,
                     privateKey: _privateKey,
                     appProtocolVersion: _protocolVersion.GetProtocolVersion(),
+                    torProcessManager: _torProcessManager,
                     host: host,
                     listenPort: port,
                     iceServers: null,

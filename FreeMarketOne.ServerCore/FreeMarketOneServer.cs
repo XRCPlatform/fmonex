@@ -171,7 +171,7 @@ namespace FreeMarketOne.ServerCore
                     if (torInitialized)
                     {
                         //Loading 
-                        LoadingEvent?.Invoke(this, "Loading Tor Circles Info...");
+                        LoadingEvent?.Invoke(this, "Acquiring Tor Circuit...");
                         ServerPublicAddress.GetMyTorExitIP();
 
                         //Chat Manager
@@ -208,6 +208,7 @@ namespace FreeMarketOne.ServerCore
                             OnionSeedsManager,
                             UserManager.PrivateKey,
                             new NetworkProtocolVersion(),
+                            torProcessManager: TorProcessManager,
                             preloadEnded: BaseBlockChainLoadEndedEvent,
                             blockChainChanged: BaseBlockChainChangedEvent,
                             peerStateChangeHandler: PeerStateChanged);
@@ -252,6 +253,7 @@ namespace FreeMarketOne.ServerCore
                             OnionSeedsManager,
                             UserManager.PrivateKey,
                             new NetworkProtocolVersion(),
+                            torProcessManager: TorProcessManager,
                             hashCheckPoints,
                             genesisBlock,
                             preloadEnded: MarketBlockChainLoadEndedEvent,

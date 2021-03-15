@@ -16,33 +16,52 @@ namespace FreeMarketOne.Search
 
         public XRCTransactionSummary GetTransaction(string address, string hash)
         {
-            var xrcTransaction = _client.GetTransaction(hash).ConfigureAwait(false).GetAwaiter().GetResult();
-            if (xrcTransaction == null){
-                return null;
-            }
-
-            decimal total = 0;
-            foreach (var vout in xrcTransaction.VOut)
+            try
             {
-                if (vout.ScriptPubKey.Addresses != null)
+                var xrcTransaction = _client.GetTransaction(hash).ConfigureAwait(false).GetAwaiter().GetResult();
+                if (xrcTransaction == null)
                 {
-                    foreach (var taddress in vout.ScriptPubKey.Addresses)
+                    return new XRCTransactionSummary()
                     {
-                        if (taddress.Equals(address))
+                        Confirmations = 0,
+                        Date = DateTimeOffset.UtcNow,
+                        Total = 0
+                    };
+                }
+
+                decimal total = 0;
+                foreach (var vout in xrcTransaction.VOut)
+                {
+                    if (vout.ScriptPubKey.Addresses != null)
+                    {
+                        foreach (var taddress in vout.ScriptPubKey.Addresses)
                         {
-                            total += vout.Value;
+                            if (taddress.Equals(address))
+                            {
+                                total += vout.Value;
+                            }
                         }
                     }
-                }                
+                }
+                //var total = xrcTransaction.VOut.Where(x => x.ScriptPubKey.Addresses.Equals(address)).Sum(x => x.Value);
+
+                return new XRCTransactionSummary()
+                {
+                    Confirmations = xrcTransaction.Confirmations.GetValueOrDefault(),
+                    Date = DateTimeOffset.FromUnixTimeSeconds((long)xrcTransaction.BlockTime.GetValueOrDefault()),
+                    Total = total
+                };
             }
-
-            //var total = xrcTransaction.VOut.Where(x => x.ScriptPubKey.Addresses.Equals(address)).Sum(x => x.Value);
-
+            catch (Exception)
+            {
+                
+            }
+            //should only hit this is exeptional cirumstance
             return new XRCTransactionSummary()
             {
-                Confirmations = xrcTransaction.Confirmations.GetValueOrDefault(),
-                Date = DateTimeOffset.FromUnixTimeSeconds((long)xrcTransaction.BlockTime.GetValueOrDefault()),
-                Total = total
+                Confirmations = 0,
+                Date = DateTimeOffset.UtcNow,
+                Total = 0
             };
         }
     }

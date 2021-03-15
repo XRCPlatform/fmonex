@@ -1,4 +1,6 @@
 ﻿using FreeMarketOne.Tor;
+using FreeMarketOne.Tor.Exceptions;
+using FreeMarketOne.Tor.Models.Fields.OctetFields;
 using FreeMarketOne.Tor.TorOverTcp.Models.Fields;
 using FreeMarketOne.Tor.TorOverTcp.Models.Messages;
 using Libplanet.Crypto;
@@ -32,7 +34,6 @@ namespace Libplanet.Net
         private int? _listenPort;
         private DnsEndPoint _endPoint;
         private CancellationTokenSource _runtimeCancellationTokenSource;
-        private TaskCompletionSource<object> _runningEvent;
         private CancellationToken _cancellationToken;
         private TorClientPool _clientPool;
         private int findConcurrency = 3;
@@ -42,6 +43,8 @@ namespace Libplanet.Net
 
         private TorSocks5Manager _torSocs5Manager;
         private TotServer _server;
+        private static TorControlClient torControlClient;
+        private TorProcessManager _torProcessManager;
 
         public TorSocks5Transport(
             PrivateKey privateKey,
@@ -49,13 +52,13 @@ namespace Libplanet.Net
             IImmutableSet<PublicKey> trustedAppProtocolVersionSigners,
             int? tableSize,
             int? bucketSize,
-            int workers,
             string host,
             int? listenPort,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered,
             EventHandler<ReceivedRequestEventArgs> processMessageHandler,
             ILogger logger,
             TorSocks5Manager torSocs5Manager,
+            TorProcessManager torProcessManager,
             EventHandler<PeerStateChangeEventArgs> peerStateChangeHandler = null)
         {
             Running = false;
@@ -95,6 +98,20 @@ namespace Libplanet.Net
                 peerStateChangeHandler);
 
             PeerStateChangeEvent = peerStateChangeHandler;
+            _torProcessManager = torProcessManager;
+
+            try
+            {
+                if (torControlClient == null)
+                {
+                    torControlClient = new TorControlClient("127.0.0.1", 9051, "Let'sUpdateThisLaterProgramatically");
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Information($"Clould not construct TorControlClient on swarm {_listenPort} error {e}");
+            }
+              
         }
 
         internal IProtocol Protocol { get; }
@@ -125,14 +142,16 @@ namespace Libplanet.Net
         {
             if (Running)
             {
-                throw new SwarmException("Swarm is already running.");
+                //throw new SwarmException("Swarm is already running.");
+                return;
             }
 
             Running = true;
             _cancellationToken = cancellationToken;
             List<Task> tasks = new List<Task>();
 
-            tasks.Add(RefreshTableAsync(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(10), _cancellationToken));
+            tasks.Add(WaitForCirquit(_cancellationToken));
+            tasks.Add(RefreshTableAsync(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(10), _cancellationToken));            
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
             await await Task.WhenAny(tasks);
         }
@@ -148,14 +167,48 @@ namespace Libplanet.Net
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _listenPort.Value);
 
             _server = new TotServer(endPoint);
-            _logger.Information($"Listening on {_listenPort}");
-
+            _logger.Information($"Listening on {_listenPort}");           
+            
             await _server.StartAsync();
             _server.RequestArrived += RequestArrived;
+
+            try
+            {
+                await torControlClient.Init().ConfigureAwait(false);
+                await WaitForCirquit(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.Information($"Failed initializing TorControlClient on swarm {_listenPort} experienced error {e}");
+            }
 
             return;
         }
 
+        public async Task WaitForCirquit(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                bool hasCircuit = false;
+                while (!hasCircuit)
+                {
+                    hasCircuit = await torControlClient.IsCircuitEstablishedAsync(cancellationToken);
+
+                    if (!hasCircuit)
+                    {
+                        _logger.Information($"TOR cirquit is NOT ESTABLISHED, changing cirquit and waiting to acquire.");
+                        await torControlClient.ChangeCircuitAsync();
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Information($"WaitForCirquit on swarm {_listenPort} experienced error {e}");
+            }
+            
+            return;
+        }
 
         public async Task StopAsync(TimeSpan waitFor, CancellationToken cancellationToken = default)
         {
@@ -286,6 +339,52 @@ namespace Libplanet.Net
                 _logger.Debug($"Processed request:{envelope.MessageType} Peer:[{pooledClient.Host}:{pooledClient.Port}] configured timeout ms:[{timeout.TotalMilliseconds}] elapsed time {sw.ElapsedMilliseconds}");
                 return response;
             }
+            catch (ConnectionException cex)
+            {
+                _logger.Debug($"Tor connection exception:{cex}");
+                //restart tor /// cex
+                try
+                {
+                    if (_torProcessManager != null)//&& !_torProcessManager.IsTorRunning()
+                    {
+                        _logger.Debug($"Tor is down, starting ...");
+                        _torProcessManager.ReStart();
+                        _logger.Debug($"Tor started.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.Debug($"Failure starting Tor {e}.");
+                }
+                
+                throw cex;
+            }
+            catch (TorSocks5FailureResponseException socks5Error)
+            {
+                //useful info
+                //https://github.com/torproject/torspec/blob/master/control-spec.txt
+                //https://iphelix.medium.com/hacking-the-tor-control-protocol-fb844db6a606
+                if (torControlClient.Running)
+                {
+                    try
+                    {
+                        var ct = new CancellationToken();
+                        var hasCircuit = await torControlClient.IsCircuitEstablishedAsync();
+                        var streaminfo = await torControlClient.SendCommandAsync("GETINFO stream-status", ct);
+                        _logger.Debug($"Connection to peer Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] failed with Error:{socks5Error} Status: hasCircuit:{hasCircuit} StreamInfo:{streaminfo}");
+                    }
+                    catch (Exception)
+                    {
+                        //swallow;
+                    }
+                   
+                }
+                else
+                {
+                    _logger.Debug($"Connection to peer Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] failed with Error:{socks5Error}");
+                }
+                throw socks5Error;
+            }
             catch (Exception e)
             {
                 _logger.Error($"Error procesing:{envelope.MessageType} Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] configured timeout ms:[{timeout.Milliseconds}] elapsed time {sw.ElapsedMilliseconds} Error:{e}");
@@ -331,22 +430,10 @@ namespace Libplanet.Net
         }
 
 
-        public bool Running
-        {
-            get => _runningEvent.Task.Status == TaskStatus.RanToCompletion;
-
-            private set
-            {
-                if (value)
-                {
-                    _runningEvent.TrySetResult(null);
-                }
-                else
-                {
-                    _runningEvent = new TaskCompletionSource<object>();
-                }
-            }
-        }
+        public bool Running { get; set; }
+        //{
+        //    get => _server?.TcpListener != null;            
+        //}
 
         private async Task RefreshTableAsync(
            TimeSpan period,
@@ -485,7 +572,16 @@ namespace Libplanet.Net
 
         public string Trace() => Protocol is null ? string.Empty : Protocol.Trace();
 
-        public Task WaitForRunningAsync() => _runningEvent.Task;
+        public Task WaitForRunningAsync()
+        {
+            while (true)
+            {
+                if (Running)  break;
+                Task.Delay(TimeSpan.FromSeconds(1));
+            }
+            return Task.CompletedTask;
+        }
+        
 
         public async Task CheckAllPeersAsync(CancellationToken cancellationToken, TimeSpan? timeout)
         {

@@ -65,11 +65,12 @@ namespace FreeMarketOne.BlockChain.Test.Helpers
                 configuration.BlockChainBasePath,
                 configuration.BlockChainSecretPath,
                 null,
-                blockChainBasePolicy,
+                blockChainBasePolicy,                
                 GetPublicIpEndpoint(torOnionEndPoint, configuration.ListenerBaseEndPoint),
                 onionSeedsManager,
                 userPrivateKey,
                 new DebugNetworkProtocolVersion(),
+                null,        
                 genesisBlock: genesis,
                 preloadEnded: _baseBlockChainLoadedEvent,
                 blockChainChanged: _baseBlockChainChangedEvent);

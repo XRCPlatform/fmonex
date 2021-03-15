@@ -66,6 +66,7 @@ namespace FreeMarketOne.Tor
 					var tcpClient = await TcpListener.AcceptTcpClientAsync().ConfigureAwait(false); // TcpListener.Stop() will trigger ObjectDisposedException
 					var totClient = new TotClient(tcpClient);					
 					await totClient.StartAsync().ConfigureAwait(false);
+					totClient.Disconnected += TotClient_Disconnected;
 					totClient.RequestArrived += TotClient_RequestArrived;
 					using (await ClientsLock.LockAsync().ConfigureAwait(false))
 					{
@@ -85,6 +86,15 @@ namespace FreeMarketOne.Tor
 					_logger.Error(ex, "Error in AcceptTcpClientsAsync");
 				}
 			}
+		}
+
+		private void TotClient_Disconnected(object sender, Exception e)
+		{
+			TotClient client = (TotClient)sender;
+			client.Disconnected -= TotClient_Disconnected;
+			client.RequestArrived -= TotClient_RequestArrived;
+			client.StopAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+			Clients.Remove(client);
 		}
 
 		private void TotClient_RequestArrived(object sender, TotRequest request) => OnRequestArrived(sender as TotClient, request);

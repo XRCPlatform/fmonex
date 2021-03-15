@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Lucene.Net.Search;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace FreeMarketOne.ServerCore
@@ -71,6 +72,19 @@ namespace FreeMarketOne.ServerCore
                 "dleu464lfj6xqjyp.onion:80:dleu464lfj6xqjyp.onion:9113:9114:04dd48b8ce0cf21d1c37e7e460ac0cfcb88ddc7c08b2f25e93c13399f9920e8ec406728238fdcb34693a104d59d35cfd317e9e20bc98ac1aacb0086b565fc9f676"
             );
             return JsonConvert.SerializeObject(appSettings);
+        }
+
+        /**
+         * Get appsettings.json
+         */
+        public IConfigurationRoot GetAppSettings(string path)
+        {
+            //Configuration
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(DataDirPath)
+                .AddJsonFile(ConfigFile, true, false);
+            var configFile = builder.Build();
+            return configFile;
         }
         
         /**

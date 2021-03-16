@@ -45,7 +45,7 @@ namespace Libplanet.Net
         private TotServer _server;
         private static TorControlClient torControlClient;
         private TorProcessManager _torProcessManager;
-
+        private readonly AsyncLock _circuitLoadingMutex;
         public TorSocks5Transport(
             PrivateKey privateKey,
             AppProtocolVersion appProtocolVersion,
@@ -99,7 +99,7 @@ namespace Libplanet.Net
 
             PeerStateChangeEvent = peerStateChangeHandler;
             _torProcessManager = torProcessManager;
-
+            _circuitLoadingMutex = new AsyncLock();
             try
             {
                 if (torControlClient == null)
@@ -189,16 +189,19 @@ namespace Libplanet.Net
         {
             try
             {
-                bool hasCircuit = false;
-                while (!hasCircuit)
+                using (await _circuitLoadingMutex.LockAsync(cancellationToken).ConfigureAwait(false))
                 {
-                    hasCircuit = await torControlClient.IsCircuitEstablishedAsync(cancellationToken);
-
-                    if (!hasCircuit)
+                    bool hasCircuit = false;
+                    while (!hasCircuit)
                     {
-                        _logger.Information($"TOR cirquit is NOT ESTABLISHED, changing cirquit and waiting to acquire.");
-                        await torControlClient.ChangeCircuitAsync();
-                        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                        hasCircuit = await torControlClient.IsCircuitEstablishedAsync(cancellationToken);
+
+                        if (!hasCircuit)
+                        {
+                            _logger.Information($"TOR cirquit is NOT ESTABLISHED, changing cirquit and waiting to acquire.");
+                            await torControlClient.ChangeCircuitAsync();
+                            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                        }
                     }
                 }
             }

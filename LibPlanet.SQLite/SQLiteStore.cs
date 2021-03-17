@@ -500,6 +500,88 @@ namespace LibPlanet.SQLite
             return null;
         }
 
+        /// <summary>
+        /// Deletes the states with specified keys (i.e., <paramref name="stateKeys"/>)
+        /// updated by actions in the specified block (i.e., <paramref name="blockHash"/>).
+        /// </summary>
+        /// <param name="blockHash"><see cref="Block{T}.Hash"/> to delete states.
+        /// </param>
+        /// <param name="stateKeys">The state keys to delete which were updated by actions
+        /// in the specified block (i.e., <paramref name="blockHash"/>).
+        /// </param>
+        /// <seealso cref="GetBlockStates"/>
+        private void DeleteBlockStates(
+            HashDigest<SHA256> blockHash,
+            IEnumerable<string> stateKeys)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                IImmutableDictionary<string, IValue> dict = GetBlockStates(blockHash);
+                if (dict is null)
+                {
+                    return;
+                }
+
+                dict = dict.RemoveRange(stateKeys);
+                if (dict.Any())
+                {
+                    SetBlockStates(blockHash, dict);
+                }
+                else
+                {
+                    var key = BlockStateKey(blockHash);
+
+                    helper.RemoveBytes(key, StateDbName, _connection);
+                    _statesCache.Remove(blockHash);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during DeleteBlockStates: {e.Message}.");
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void PruneBlockStates<T>(
+            Guid chainId,
+            Block<T> until)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                string[] keys = ListStateKeys(chainId).ToArray();
+                long untilIndex = until.Index;
+                foreach (var key in keys)
+                {
+                    Tuple<HashDigest<SHA256>, long>[] stateRefs =
+                        IterateStateReferences(chainId, key, untilIndex, null, null)
+                            .OrderByDescending(tuple => tuple.Item2)
+                            .ToArray();
+                    var dict = new Dictionary<HashDigest<SHA256>, List<string>>();
+                    foreach ((HashDigest<SHA256> blockHash, long index) in stateRefs.Skip(1))
+                    {
+                        if (!dict.ContainsKey(blockHash))
+                        {
+                            dict.Add(blockHash, new List<string>());
+                        }
+
+                        dict[blockHash].Add(key);
+                    }
+
+                    foreach (var kv in dict)
+                    {
+                        DeleteBlockStates(kv.Key, kv.Value);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during PruneBlockStates: {e.Message}.");
+            }
+        }
 
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
@@ -613,11 +695,6 @@ namespace LibPlanet.SQLite
         }
 
         public override Tuple<HashDigest<SHA256>, long> LookupStateReference(Guid chainId, string key, long lookupUntilBlockIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void PruneBlockStates<T>(Guid chainId, Block<T> until)
         {
             throw new NotImplementedException();
         }

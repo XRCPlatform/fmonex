@@ -55,8 +55,6 @@ namespace LibPlanet.SQLite
         private readonly SqliteConnection _connection;
         private readonly string _path;
 
-        //private readonly RocksDb _blockDb;
-        //private readonly RocksDb _txDb;
         //private readonly RocksDb _stateDb;
         //private readonly RocksDb _stagedTxDb;
         //private readonly RocksDb _chainDb;
@@ -139,6 +137,17 @@ namespace LibPlanet.SQLite
                         [Key] VARCHAR(128) NOT NULL,
                         [Data] BLOB NOT NULL);
                     CREATE INDEX " + TxDbName + @"_index ON " + TxDbName + @"([Key]);
+                ";
+                createCommand.ExecuteNonQuery();
+
+                createCommand = _connection.CreateCommand();
+                createCommand.CommandText =
+                @"
+                    CREATE TABLE IF NOT EXISTS " + StateDbName + @"(
+                        [Index] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [Key] VARCHAR(128) NOT NULL,
+                        [Data] BLOB NOT NULL);
+                    CREATE INDEX " + StateDbName + @"_index ON " + StateDbName + @"([Key]);
                 ";
                 createCommand.ExecuteNonQuery();
 
@@ -413,6 +422,85 @@ namespace LibPlanet.SQLite
             return false;
         }
 
+        /// <inheritdoc/>
+        public override void SetBlockStates(
+            HashDigest<SHA256> blockHash,
+            IImmutableDictionary<string, IValue> states)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                var serialized = new Bencodex.Types.Dictionary(
+                    states.ToImmutableDictionary(
+                        kv => (IKey)(Text)kv.Key,
+                        kv => kv.Value
+                    )
+                );
+
+                var key = BlockStateKey(blockHash);
+
+                var codec = new Codec();
+                byte[] value = codec.Encode(serialized);
+
+                helper.PutBytes(key, StateDbName, value, _connection);
+                _statesCache.AddOrUpdate(blockHash, states);
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during SetBlockStates: {e.Message}.");
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IImmutableDictionary<string, IValue> GetBlockStates(
+            HashDigest<SHA256> blockHash
+        )
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                if (_statesCache.TryGetValue(
+                    blockHash,
+                    out IImmutableDictionary<string, IValue> cached))
+                {
+                    return cached;
+                }
+
+                var key = BlockStateKey(blockHash);
+                byte[] bytes = helper.GetBytes(key, StateDbName, _connection);
+
+                if (bytes is null)
+                {
+                    return null;
+                }
+
+                IValue value = new Codec().Decode(bytes);
+                if (!(value is Bencodex.Types.Dictionary dict))
+                {
+                    throw new DecodingException(
+                        $"Expected {typeof(Bencodex.Types.Dictionary)} but " +
+                        $"{value.GetType()}");
+                }
+
+                ImmutableDictionary<string, IValue> states = dict.ToImmutableDictionary(
+                    kv => ((Text)kv.Key).Value,
+                    kv => kv.Value
+                );
+                _statesCache.AddOrUpdate(blockHash, states);
+                return states;
+
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during GetBlockStates: {e.Message}.");
+            }
+
+            return null;
+        }
+
+
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockKeyPrefix), blockHash.ToString());
@@ -421,6 +509,11 @@ namespace LibPlanet.SQLite
         private string TxKey(TxId txId)
         {
             return string.Format("{0}{1}", Encoding.ASCII.GetString(TxKeyPrefix), txId.ToString());
+        }
+
+        private string BlockStateKey(HashDigest<SHA256> blockHash)
+        {
+            return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockStateKeyPrefix), blockHash.ToString());
         }
 
 
@@ -455,11 +548,6 @@ namespace LibPlanet.SQLite
         }
 
         public override BlockDigest? GetBlockDigest(HashDigest<SHA256> blockHash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IImmutableDictionary<string, IValue> GetBlockStates(HashDigest<SHA256> blockHash)
         {
             throw new NotImplementedException();
         }
@@ -530,11 +618,6 @@ namespace LibPlanet.SQLite
         }
 
         public override void PruneBlockStates<T>(Guid chainId, Block<T> until)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetBlockStates(HashDigest<SHA256> blockHash, IImmutableDictionary<string, IValue> states)
         {
             throw new NotImplementedException();
         }

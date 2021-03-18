@@ -55,11 +55,6 @@ namespace LibPlanet.SQLite
         private readonly SqliteConnection _connection;
         private readonly string _path;
 
-        //private readonly RocksDb _stateDb;
-        //private readonly RocksDb _stagedTxDb;
-        //private readonly RocksDb _chainDb;
-        //private readonly RocksDb _stateRefDb;
-
         private string SQLiteDbPath(string dbName) => Path.Combine(_path, dbName);
 
         public SQLiteStore(
@@ -122,7 +117,7 @@ namespace LibPlanet.SQLite
                 createCommand.CommandText =
                 @"
                     CREATE TABLE IF NOT EXISTS " + BlockDbName + @"(
-                        [Index] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                         [Key] VARCHAR(128) NOT NULL,
                         [Data] BLOB NOT NULL);
                     CREATE INDEX " + BlockDbName + @"_index ON " + BlockDbName + @"([Key]);
@@ -133,7 +128,7 @@ namespace LibPlanet.SQLite
                 createCommand.CommandText =
                 @"
                     CREATE TABLE IF NOT EXISTS " + TxDbName + @"(
-                        [Index] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                         [Key] VARCHAR(128) NOT NULL,
                         [Data] BLOB NOT NULL);
                     CREATE INDEX " + TxDbName + @"_index ON " + TxDbName + @"([Key]);
@@ -144,10 +139,46 @@ namespace LibPlanet.SQLite
                 createCommand.CommandText =
                 @"
                     CREATE TABLE IF NOT EXISTS " + StateDbName + @"(
-                        [Index] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                         [Key] VARCHAR(128) NOT NULL,
                         [Data] BLOB NOT NULL);
                     CREATE INDEX " + StateDbName + @"_index ON " + StateDbName + @"([Key]);
+                ";
+                createCommand.ExecuteNonQuery();
+
+                createCommand = _connection.CreateCommand();
+                createCommand.CommandText =
+                @"
+                    CREATE TABLE IF NOT EXISTS " + StagedTxDbName + @"(
+                        [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [Key] VARCHAR(128) NOT NULL,
+                        [Data] BLOB NOT NULL);
+                    CREATE INDEX " + StagedTxDbName + @"_index ON " + StagedTxDbName + @"([Key]);
+                ";
+                createCommand.ExecuteNonQuery();
+
+                createCommand = _connection.CreateCommand();
+                createCommand.CommandText =
+                @"
+                    CREATE TABLE IF NOT EXISTS " + StateRefDbName + @"(
+                        [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [Key] VARCHAR(128) NOT NULL,
+                        [Data] BLOB NOT NULL);
+                    CREATE INDEX " + StateRefDbName + @"_index ON " + StateRefDbName + @"([Key]);
+                ";
+                createCommand.ExecuteNonQuery();
+
+                createCommand = _connection.CreateCommand();
+                createCommand.CommandText =
+                @"
+                    CREATE TABLE IF NOT EXISTS " + ChainDbName + @"(
+                        [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [ParentId] INTEGER NOT NULL,
+                        [Type] VARCHAR(1) NOT NULL,
+                        [Key] VARCHAR(128) NOT NULL,
+                        [Data] BLOB NOT NULL);
+                    CREATE INDEX " + ChainDbName + @"_indexType ON " + ChainDbName + @"([Type]);
+                    CREATE INDEX " + ChainDbName + @"_indexKey ON " + ChainDbName + @"([Key]);
                 ";
                 createCommand.ExecuteNonQuery();
 
@@ -233,7 +264,7 @@ namespace LibPlanet.SQLite
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "SELECT [Key] FROM " + BlockDbName + " ORDER BY [Index] ASC;";
+                cmd.CommandText = "SELECT [Key] FROM " + BlockDbName + " ORDER BY [Id] ASC;";
                 var reader = cmd.ExecuteReader();
 
                 if ((reader != null) && (reader.HasRows))
@@ -544,6 +575,604 @@ namespace LibPlanet.SQLite
         }
 
         /// <inheritdoc/>
+        public override long CountIndex(Guid chainId)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                    cmd.Parameters.AddWithValue("@typeD", IndexCountKey);
+                    cmd.Parameters.AddWithValue("@type", CanonicalChainIdIdKey);
+                    cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
+                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " + 
+                        "WHERE T.[Key] = @key AND T.[Type] = @type;";
+                    var reader = cmd.ExecuteReader();
+
+                    if ((reader != null) && (reader.HasRows))
+                    {
+                        reader.Read();
+                        var data = (byte[])reader.GetValue("Data");
+                        return helper.ToInt64(data);
+                    } 
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during CountIndex: {e.Message}.");
+            }
+
+            return 0;
+        }
+
+        /// <inheritdoc/>
+        public override long AppendIndex(Guid chainId, HashDigest<SHA256> hash)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                long index = CountIndex(chainId);
+
+                byte[] indexBytes = helper.GetBytes(index);
+                byte[] key = IndexKeyPrefix.Concat(indexBytes).ToArray();
+
+                using (var firstTransaction = _connection.BeginTransaction())
+                {
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                        cmd.Parameters.AddWithValue("@typeC", CanonicalChainIdIdKey);
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                        var reader = cmd.ExecuteReader();
+
+                        if ((reader != null) && (reader.HasRows))
+                        {
+                            reader.Read();
+
+                            return (byte[])reader.GetValue("Data");
+                        }
+                    }
+
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                        cmd.Parameters.AddWithValue("@key", key);
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "INSERT INTO " + dbName + " ([Key], [Data]) VALUES (@key, @data);";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    firstTransaction.Commit();
+                }
+
+                using var writeBatch = new WriteBatch();
+
+                writeBatch.Put(key, hash.ToByteArray(), cf);
+                writeBatch.Put(IndexCountKey, RocksDBStoreBitConverter.GetBytes(index + 1), cf);
+
+                _chainDb.Write(writeBatch);
+
+                return index;
+
+
+
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                    cmd.Parameters.AddWithValue("@typeD", IndexCountKey);
+                    cmd.Parameters.AddWithValue("@type", CanonicalChainIdIdKey);
+                    cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
+                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
+                        "WHERE T.[Key] = @key AND T.[Type] = @type;";
+                    var reader = cmd.ExecuteReader();
+
+                    if ((reader != null) && (reader.HasRows))
+                    {
+                        reader.Read();
+                        var data = (byte[])reader.GetValue("Data");
+                        return helper.ToInt64(data);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during CountIndex: {e.Message}.");
+            }
+
+            return 0;
+        }
+
+        private string BlockKey(HashDigest<SHA256> blockHash)
+        {
+            return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockKeyPrefix), blockHash.ToString());
+        }
+
+        private string TxKey(TxId txId)
+        {
+            return string.Format("{0}{1}", Encoding.ASCII.GetString(TxKeyPrefix), txId.ToString());
+        }
+
+        private string BlockStateKey(HashDigest<SHA256> blockHash)
+        {
+            return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockStateKeyPrefix), blockHash.ToString());
+        }
+
+
+
+
+
+        /// <inheritdoc/>
+        public override void DeleteChainId(Guid chainId)
+        {
+            _logger.Debug($"Deleting chainID: {chainId}.");
+            _lastStateRefCaches.Remove(chainId);
+
+            var cfName = chainId.ToString();
+            try
+            {
+                _chainDb.DropColumnFamily(cfName);
+            }
+            catch (KeyNotFoundException)
+            {
+                // Do nothing according to the specification: DeleteChainId() should be idempotent.
+                _logger.Debug($"No such chain ID in _chainDb: {cfName}.", cfName);
+            }
+
+            try
+            {
+                _stateRefDb.DropColumnFamily(cfName);
+            }
+            catch (KeyNotFoundException)
+            {
+                // Do nothing according to the specification: DeleteChainId() should be idempotent.
+                _logger.Debug($"No such chain ID in _stateRefDb: {cfName}.", cfName);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void ForkBlockIndexes(
+            Guid sourceChainId,
+            Guid destinationChainId,
+            HashDigest<SHA256> branchPoint)
+        {
+            HashDigest<SHA256>? genesisHash = IterateIndexes(sourceChainId, 0, 1)
+                .Cast<HashDigest<SHA256>?>()
+                .FirstOrDefault();
+
+            if (genesisHash is null || branchPoint.Equals(genesisHash))
+            {
+                return;
+            }
+
+            foreach (HashDigest<SHA256> hash in IterateIndexes(sourceChainId, 1, null))
+            {
+                AppendIndex(destinationChainId, hash);
+
+                if (hash.Equals(branchPoint))
+                {
+                    break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void ForkStateReferences<T>(
+            Guid sourceChainId,
+            Guid destinationChainId,
+            Block<T> branchPoint)
+        {
+            byte[] prefix = StateRefKeyPrefix;
+            ColumnFamilyHandle destCf = GetColumnFamily(_stateRefDb, destinationChainId);
+
+            foreach (Iterator it in IterateDb(_stateRefDb, prefix, sourceChainId))
+            {
+                byte[] key = it.Key();
+                byte[] indexBytes = key.Skip(key.Length - sizeof(long)).ToArray();
+                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
+
+                if (index > branchPoint.Index)
+                {
+                    continue;
+                }
+
+                _stateRefDb.Put(key, it.Value(), destCf);
+            }
+
+            using Iterator destIt = _stateRefDb.NewIterator(destCf);
+
+            destIt.Seek(prefix);
+
+            if (!(destIt.Valid() && destIt.Key().StartsWith(prefix))
+                && CountIndex(sourceChainId) < 1)
+            {
+                throw new ChainIdNotFoundException(
+                    sourceChainId,
+                    "The source chain to be forked does not exist.");
+            }
+
+            _lastStateRefCaches.Remove(destinationChainId);
+        }
+
+        /// <inheritdoc/>
+        public override BlockDigest? GetBlockDigest(HashDigest<SHA256> blockHash)
+        {
+            if (_blockCache.TryGetValue(blockHash, out BlockDigest cachedDigest))
+            {
+                return cachedDigest;
+            }
+
+            byte[] key = BlockKey(blockHash);
+            byte[] bytes = _blockDb.Get(key);
+
+            if (bytes is null)
+            {
+                return null;
+            }
+
+            BlockDigest blockDigest = BlockDigest.Deserialize(bytes);
+
+            _blockCache.AddOrUpdate(blockHash, blockDigest);
+            return blockDigest;
+        }
+
+        /// <inheritdoc />
+        public override Guid? GetCanonicalChainId()
+        {
+            byte[] bytes = _chainDb.Get(CanonicalChainIdIdKey);
+
+            return bytes is null
+                ? (Guid?)null
+                : new Guid(bytes);
+        }
+
+        /// <inheritdoc/>
+        public override long GetTxNonce(Guid chainId, Address address)
+        {
+            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
+            byte[] key = TxNonceKey(address);
+            byte[] bytes = _chainDb.Get(key, cf);
+
+            return bytes is null
+                ? 0
+                : RocksDBStoreBitConverter.ToInt64(bytes);
+        }
+
+        /// <inheritdoc/>
+        public override void IncreaseTxNonce(Guid chainId, Address signer, long delta = 1)
+        {
+            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
+            long nextNonce = GetTxNonce(chainId, signer) + delta;
+
+            byte[] key = TxNonceKey(signer);
+            byte[] bytes = RocksDBStoreBitConverter.GetBytes(nextNonce);
+
+            _chainDb.Put(key, bytes, cf);
+        }
+
+        /// <inheritdoc/>
+        public override HashDigest<SHA256>? IndexBlockHash(Guid chainId, long index)
+        {
+            if (index < 0)
+            {
+                index += CountIndex(chainId);
+
+                if (index < 0)
+                {
+                    return null;
+                }
+            }
+
+            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
+
+            byte[] indexBytes = RocksDBStoreBitConverter.GetBytes(index);
+
+            byte[] key = IndexKeyPrefix.Concat(indexBytes).ToArray();
+            byte[] bytes = _chainDb.Get(key, cf);
+            return bytes is null
+                ? (HashDigest<SHA256>?)null
+                : new HashDigest<SHA256>(bytes);
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<HashDigest<SHA256>> IterateIndexes(
+            Guid chainId,
+            int offset,
+            int? limit)
+        {
+            int count = 0;
+            byte[] prefix = IndexKeyPrefix;
+
+            foreach (Iterator it in IterateDb(_chainDb, prefix, chainId).Skip(offset))
+            {
+                if (count >= limit)
+                {
+                    break;
+                }
+
+                byte[] value = it.Value();
+                yield return new HashDigest<SHA256>(value);
+
+                count += 1;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<TxId> IterateStagedTransactionIds()
+        {
+            byte[] prefix = StagedTxKeyPrefix;
+            foreach (var it in IterateDb(_stagedTxDb, prefix))
+            {
+                byte[] key = it.Key();
+                byte[] txIdBytes = key.Skip(prefix.Length).ToArray();
+                yield return new TxId(txIdBytes);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
+            Guid chainId,
+            string key,
+            long? highestIndex,
+            long? lowestIndex,
+            int? limit)
+        {
+            highestIndex ??= long.MaxValue;
+            lowestIndex ??= 0;
+            limit ??= int.MaxValue;
+
+            if (highestIndex < lowestIndex)
+            {
+                var message =
+                    $"highestIndex({highestIndex}) must be greater than or equal to " +
+                    $"lowestIndex({lowestIndex})";
+                throw new ArgumentException(
+                    message,
+                    nameof(highestIndex));
+            }
+
+            byte[] keyBytes = RocksDBStoreBitConverter.GetBytes(key);
+            byte[] prefix = StateRefKeyPrefix.Concat(keyBytes).ToArray();
+
+            return IterateStateReferences(
+                chainId, prefix, highestIndex.Value, lowestIndex.Value, limit.Value);
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<TxId> IterateTransactionIds()
+        {
+            byte[] prefix = TxKeyPrefix;
+
+            foreach (Iterator it in IterateDb(_txDb, prefix))
+            {
+                byte[] key = it.Key();
+                byte[] txIdBytes = key.Skip(prefix.Length).ToArray();
+
+                var txId = new TxId(txIdBytes);
+                yield return txId;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IImmutableDictionary<string, IImmutableList<HashDigest<SHA256>>>
+            ListAllStateReferences(
+                Guid chainId,
+                long lowestIndex = 0,
+                long highestIndex = long.MaxValue)
+        {
+            byte[] prefix = StateRefKeyPrefix;
+
+            var stateRefs = new List<StateRef>();
+
+            foreach (Iterator it in IterateDb(_stateRefDb, prefix, chainId))
+            {
+                byte[] key = it.Key();
+                int stateKeyLength = key.Length - sizeof(long) - prefix.Length;
+                byte[] stateKeyBytes = key.Skip(prefix.Length).Take(stateKeyLength).ToArray();
+                string stateKey = RocksDBStoreBitConverter.GetString(stateKeyBytes);
+
+                byte[] indexBytes = key.Skip(prefix.Length + stateKeyLength).ToArray();
+                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
+
+                if (index < lowestIndex || index > highestIndex)
+                {
+                    continue;
+                }
+
+                var hash = new HashDigest<SHA256>(it.Value());
+                var stateRef = new StateRef
+                {
+                    StateKey = stateKey,
+                    BlockHash = hash,
+                    BlockIndex = index,
+                };
+
+                stateRefs.Add(stateRef);
+            }
+
+            return stateRefs
+                .GroupBy(stateRef => stateRef.StateKey)
+                .ToImmutableDictionary(
+                    g => g.Key,
+                    g => (IImmutableList<HashDigest<SHA256>>)g
+                        .Select(r => r.BlockHash).ToImmutableList()
+                );
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<Guid> ListChainIds()
+        {
+            string path = Path.Combine(_path, ChainDbName);
+
+            foreach (string name in RocksDb.ListColumnFamilies(_options, path))
+            {
+                Guid guid;
+
+                try
+                {
+                    guid = Guid.Parse(name);
+                }
+                catch (FormatException)
+                {
+                    continue;
+                }
+
+                yield return guid;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> ListStateKeys(Guid chainId)
+        {
+            byte[] prefix = StateRefKeyPrefix;
+            var prevStateKey = string.Empty;
+
+            foreach (Iterator it in IterateDb(_stateRefDb, prefix, chainId))
+            {
+                byte[] key = it.Key();
+                int stateKeyLength = key.Length - sizeof(long) - prefix.Length;
+                byte[] stateKeyBytes = key.Skip(prefix.Length).Take(stateKeyLength).ToArray();
+                string stateKey = RocksDBStoreBitConverter.GetString(stateKeyBytes);
+
+                if (stateKey != prevStateKey)
+                {
+                    yield return stateKey;
+                    prevStateKey = stateKey;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId)
+        {
+            byte[] prefix = TxNonceKeyPrefix;
+
+            foreach (Iterator it in IterateDb(_chainDb, prefix, chainId))
+            {
+                byte[] addressBytes = it.Key()
+                    .Skip(prefix.Length)
+                    .ToArray();
+                var address = new Address(addressBytes);
+                long nonce = RocksDBStoreBitConverter.ToInt64(it.Value());
+                yield return new KeyValuePair<Address, long>(address, nonce);
+            }
+        }
+
+        public override Tuple<HashDigest<SHA256>, long> LookupStateReference(
+            Guid chainId,
+            string key,
+            long lookupUntilBlockIndex)
+        {
+            if (_lastStateRefCaches.TryGetValue(
+                    chainId,
+                    out LruCache<string, Tuple<HashDigest<SHA256>, long>> stateRefCache)
+                && stateRefCache.TryGetValue(
+                    key,
+                    out Tuple<HashDigest<SHA256>, long> cache))
+            {
+                long cachedIndex = cache.Item2;
+
+                if (cachedIndex <= lookupUntilBlockIndex)
+                {
+                    return cache;
+                }
+            }
+
+            Tuple<HashDigest<SHA256>, long> stateRef =
+                IterateStateReferences(chainId, key, lookupUntilBlockIndex, null, limit: 1)
+                .FirstOrDefault();
+
+            if (stateRef is null)
+            {
+                return null;
+            }
+
+            if (!_lastStateRefCaches.ContainsKey(chainId))
+            {
+                _lastStateRefCaches[chainId] =
+                    new LruCache<string, Tuple<HashDigest<SHA256>, long>>();
+            }
+
+            stateRefCache = _lastStateRefCaches[chainId];
+
+            if (!stateRefCache.TryGetValue(key, out cache) || cache.Item2 < stateRef.Item2)
+            {
+                stateRefCache[key] = new Tuple<HashDigest<SHA256>, long>(
+                    stateRef.Item1,
+                    stateRef.Item2);
+            }
+
+            return stateRef;
+        }
+
+        /// <inheritdoc />
+        public override void SetCanonicalChainId(Guid chainId)
+        {
+            byte[] bytes = chainId.ToByteArray();
+            _chainDb.Put(CanonicalChainIdIdKey, bytes);
+        }
+
+        /// <inheritdoc/>
+        public override void StageTransactionIds(IImmutableSet<TxId> txids)
+        {
+            foreach (TxId txId in txids)
+            {
+                byte[] key = StagedTxKey(txId);
+                _stagedTxDb.Put(key, EmptyBytes);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void StoreStateReference(
+            Guid chainId,
+            IImmutableSet<string> keys,
+            HashDigest<SHA256> blockHash,
+            long blockIndex)
+        {
+            ColumnFamilyHandle cf = GetColumnFamily(_stateRefDb, chainId);
+            foreach (string key in keys)
+            {
+                byte[] keyBytes = StateRefKey(key, blockIndex);
+                _stateRefDb.Put(keyBytes, blockHash.ToByteArray(), cf);
+            }
+
+            if (!_lastStateRefCaches.ContainsKey(chainId))
+            {
+                _lastStateRefCaches[chainId] =
+                    new LruCache<string, Tuple<HashDigest<SHA256>, long>>();
+            }
+
+            LruCache<string, Tuple<HashDigest<SHA256>, long>> stateRefCache =
+                _lastStateRefCaches[chainId];
+
+            foreach (string key in keys)
+            {
+                _logger.Debug($"Try to set cache {key}");
+                if (!stateRefCache.TryGetValue(key, out Tuple<HashDigest<SHA256>, long> cache)
+                    || cache.Item2 < blockIndex)
+                {
+                    stateRefCache[key] =
+                        new Tuple<HashDigest<SHA256>, long>(blockHash, blockIndex);
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void UnstageTransactionIds(ISet<TxId> txids)
+        {
+            foreach (TxId txId in txids)
+            {
+                byte[] key = StagedTxKey(txId);
+                _stagedTxDb.Remove(key);
+            }
+        }
+
+        /// <inheritdoc/>
         public override void PruneBlockStates<T>(
             Guid chainId,
             Block<T> until)
@@ -581,142 +1210,6 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during PruneBlockStates: {e.Message}.");
             }
-        }
-
-        private string BlockKey(HashDigest<SHA256> blockHash)
-        {
-            return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockKeyPrefix), blockHash.ToString());
-        }
-
-        private string TxKey(TxId txId)
-        {
-            return string.Format("{0}{1}", Encoding.ASCII.GetString(TxKeyPrefix), txId.ToString());
-        }
-
-        private string BlockStateKey(HashDigest<SHA256> blockHash)
-        {
-            return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockStateKeyPrefix), blockHash.ToString());
-        }
-
-
-
-
-
-
-
-        public override long AppendIndex(Guid chainId, HashDigest<SHA256> hash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override long CountIndex(Guid chainId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void DeleteChainId(Guid chainId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void ForkBlockIndexes(Guid sourceChainId, Guid destinationChainId, HashDigest<SHA256> branchPoint)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void ForkStateReferences<T>(Guid sourceChainId, Guid destinationChainId, Block<T> branchPoint)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override BlockDigest? GetBlockDigest(HashDigest<SHA256> blockHash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Guid? GetCanonicalChainId()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override long GetTxNonce(Guid chainId, Address address)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void IncreaseTxNonce(Guid chainId, Address signer, long delta = 1)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override HashDigest<SHA256>? IndexBlockHash(Guid chainId, long index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<HashDigest<SHA256>> IterateIndexes(Guid chainId, int offset, int? limit)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<TxId> IterateStagedTransactionIds()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(Guid chainId, string key, long? highestIndex = null, long? lowestIndex = null, int? limit = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<TxId> IterateTransactionIds()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IImmutableDictionary<string, IImmutableList<HashDigest<SHA256>>> ListAllStateReferences(Guid chainId, long lowestIndex = 0, long highestIndex = long.MaxValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<Guid> ListChainIds()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<string> ListStateKeys(Guid chainId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Tuple<HashDigest<SHA256>, long> LookupStateReference(Guid chainId, string key, long lookupUntilBlockIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetCanonicalChainId(Guid chainId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void StageTransactionIds(IImmutableSet<TxId> txids)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void StoreStateReference(Guid chainId, IImmutableSet<string> keys, HashDigest<SHA256> blockHash, long blockIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void UnstageTransactionIds(ISet<TxId> txids)
-        {
-            throw new NotImplementedException();
         }
     }
 }

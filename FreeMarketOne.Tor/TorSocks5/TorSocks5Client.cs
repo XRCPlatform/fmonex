@@ -31,7 +31,7 @@ namespace FreeMarketOne.Tor
 
 		public int DestinationPort { get; private set; }
 
-		private EndPoint remoteEndPoint { get; set; }
+		private EndPoint RemoteEndPoint { get; set; }
 
 		private static readonly object _torsocksauthlock = new object();
 
@@ -75,10 +75,10 @@ namespace FreeMarketOne.Tor
 			TorSocks5EndPoint = null;
 			DestinationHost = tcpClient.Client.RemoteEndPoint.GetHostOrDefault();
 			DestinationPort = tcpClient.Client.RemoteEndPoint.GetPortOrDefault().Value;
-            remoteEndPoint = tcpClient.Client.RemoteEndPoint;
+            RemoteEndPoint = tcpClient.Client.RemoteEndPoint;
 			if (!IsConnected)
 			{
-				throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {remoteEndPoint}.");
+				throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {RemoteEndPoint}.");
 			}
 		}
 
@@ -112,7 +112,7 @@ namespace FreeMarketOne.Tor
 				}
 
 				Stream = TcpClient.GetStream();
-                remoteEndPoint = TcpClient.Client.RemoteEndPoint;
+                RemoteEndPoint = TcpClient.Client.RemoteEndPoint;
 			}
 		}
 
@@ -233,7 +233,7 @@ namespace FreeMarketOne.Tor
                     TcpClient = IPAddress.TryParse(host, out IPAddress ip) ? new TcpClient(ip.AddressFamily) : new TcpClient();
                     await TcpClient.ConnectAsync(host, port).ConfigureAwait(false);
                     Stream = TcpClient.GetStream();
-                    remoteEndPoint = TcpClient.Client.RemoteEndPoint;
+                    RemoteEndPoint = TcpClient.Client.RemoteEndPoint;
                 }
 
                 return;
@@ -292,15 +292,15 @@ namespace FreeMarketOne.Tor
 				// try reconnect, maybe the server came online already
 				try
 				{
-					await ConnectToDestinationAsync(remoteEndPoint, isRecursiveCall: isRecursiveCall).ConfigureAwait(false);
+					await ConnectToDestinationAsync(RemoteEndPoint, isRecursiveCall: isRecursiveCall).ConfigureAwait(false);
 				}
 				catch (Exception ex) when (IsConnectionRefused(ex))
 				{
-					throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {remoteEndPoint}.", ex);
+					throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {RemoteEndPoint}.", ex);
 				}
 				if (!IsConnected)
 				{
-					throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {remoteEndPoint}.");
+					throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {RemoteEndPoint}.");
 				}
 			}
 		}
@@ -414,18 +414,18 @@ namespace FreeMarketOne.Tor
 			{
 				if (isRecursiveCall)
 				{
-					throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {remoteEndPoint}.", ex);
+					throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {RemoteEndPoint}.", ex);
 				}
 				else
 				{
 					// try reconnect, maybe the server came online already
 					try
 					{
-						await ConnectToDestinationAsync(remoteEndPoint, isRecursiveCall: true).ConfigureAwait(false);
+						await ConnectToDestinationAsync(RemoteEndPoint, isRecursiveCall: true).ConfigureAwait(false);
 					}
 					catch (Exception ex2) when (IsConnectionRefused(ex2))
 					{
-						throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {remoteEndPoint}.", ex2);
+						throw new ConnectionException($"{nameof(TorSocks5Client)} is not connected to {RemoteEndPoint}.", ex2);
 					}
 					return await SendAsync(sendBuffer, receiveBufferSize, isRecursiveCall: true).ConfigureAwait(false);
 				}

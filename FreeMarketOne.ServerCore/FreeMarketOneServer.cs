@@ -176,10 +176,6 @@ namespace FreeMarketOne.ServerCore
                     SpinWait.SpinUntil(() => torInitialized, 10000);
                     if (torInitialized)
                     {
-                        //Loading 
-                        LoadingEvent?.Invoke(this, "Acquiring Tor Circuit...");
-                        ServerPublicAddress.GetMyTorExitIP();
-
                         //Chat Manager
                         LoadingEvent?.Invoke(this, "Loading Chat Manager...");
                         ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, TorProcessManager.TorOnionEndPoint, Configuration.ListenersUseTor ? "127.0.0.1:9050" : null);
@@ -221,6 +217,11 @@ namespace FreeMarketOne.ServerCore
 
                         LoadingEvent?.Invoke(this, "Starting BaseChain Initial Block Download...");
                         BaseBlockChainManager.Start();
+
+                        //Loading 
+                        LoadingEvent?.Invoke(this, "Acquiring Tor Circuit...");
+                        BaseBlockChainManager.SwarmServer.WaitForRunningAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                        //ServerPublicAddress.GetMyTorExitIP();
 
                         //Initialize Base Pool
                         LoadingEvent?.Invoke(this, "Loading Base Pool Manager...");

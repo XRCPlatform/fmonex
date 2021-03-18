@@ -255,10 +255,10 @@ namespace Libplanet.Net
                                 _logger.Information($"TOR cirquit is NOT ESTABLISHED, requested new cirquit. Elapsed:{total.ElapsedMilliseconds}ms");
                                 stopwatch.Reset();
                             }
-                        }
-                        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                        }                        
                     }
-                    _logger.Information($"TOR cirquit ESTABLISHED. Elapsed:{total.ElapsedMilliseconds - 1000}ms");
+                    _logger.Information($"TOR cirquit ESTABLISHED. Elapsed:{total.ElapsedMilliseconds}ms");
                     
                     return true;
                 }
@@ -434,7 +434,8 @@ namespace Libplanet.Net
                         var ct = new CancellationToken();
                         var hasCircuit = await _torControlClient.IsCircuitEstablishedAsync();
                         var streaminfo = await _torControlClient.SendCommandAsync("GETINFO stream-status", ct);
-                        _logger.Debug($"Connection to peer Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] failed with Error:{socks5Error} Status: hasCircuit:{hasCircuit} StreamInfo:{streaminfo}");
+                        //var cirquitinfo = await _torControlClient.SendCommandAsync("GETINFO circuit-status", ct);
+                        _logger.Debug($"Connection to peer Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] failed with Error:{socks5Error} Status: hasCircuit:{hasCircuit} \n StreamInfo:{streaminfo}");
                     }
                     catch (Exception)
                     {

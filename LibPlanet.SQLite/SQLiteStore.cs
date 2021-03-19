@@ -1128,6 +1128,67 @@ namespace LibPlanet.SQLite
             }
         }
 
+        /// <inheritdoc/>
+        public override void StageTransactionIds(IImmutableSet<TxId> txids)
+        {
+            var helper = new SQLiteHelper();
+
+            foreach (TxId txId in txids)
+            {
+                var key = StagedTxKey(txId);
+                helper.PutBytes(key, StagedTxDbName, EmptyBytes, _connection);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void UnstageTransactionIds(ISet<TxId> txids)
+        {
+            var helper = new SQLiteHelper();
+
+            foreach (TxId txId in txids)
+            {
+                var key = StagedTxKey(txId);
+                helper.RemoveBytes(key, StagedTxDbName, _connection);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId)
+        {
+            byte[] prefix = TxNonceKeyPrefix;
+            var helper = new SQLiteHelper();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                cmd.Parameters.AddWithValue("@typeD", helper.GetString(TxNonceKeyPrefix));
+                cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                cmd.CommandText = "SELECT TD.[Key] FROM " + ChainDbName + " AS T " +
+                    "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
+                    "WHERE T.[Key] = @key AND T.[Type] = @typeC;";
+                var reader = cmd.ExecuteReader();
+
+                if ((reader != null) && (reader.HasRows))
+                {
+                    while (reader.Read())
+                    {
+                        var key = (string)reader.GetValue("Key");
+                        var keyBytes = helper.GetBytes(key);
+                        byte[] data = (byte[])reader.GetValue("Data");
+                       
+                        byte[] addressBytes = keyBytes
+                            .Skip(prefix.Length)
+                            .ToArray();
+
+                        var address = new Address(addressBytes);
+                        long nonce = helper.ToInt64(data);
+                        yield return new KeyValuePair<Address, long>(address, nonce);
+                    }
+                }
+            }
+        }
+
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
@@ -1316,22 +1377,6 @@ namespace LibPlanet.SQLite
             }
         }
 
-        /// <inheritdoc/>
-        public override IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId)
-        {
-            byte[] prefix = TxNonceKeyPrefix;
-
-            foreach (Iterator it in IterateDb(_chainDb, prefix, chainId))
-            {
-                byte[] addressBytes = it.Key()
-                    .Skip(prefix.Length)
-                    .ToArray();
-                var address = new Address(addressBytes);
-                long nonce = RocksDBStoreBitConverter.ToInt64(it.Value());
-                yield return new KeyValuePair<Address, long>(address, nonce);
-            }
-        }
-
         public override Tuple<HashDigest<SHA256>, long> LookupStateReference(
             Guid chainId,
             string key,
@@ -1380,16 +1425,6 @@ namespace LibPlanet.SQLite
         }
 
         /// <inheritdoc/>
-        public override void StageTransactionIds(IImmutableSet<TxId> txids)
-        {
-            foreach (TxId txId in txids)
-            {
-                byte[] key = StagedTxKey(txId);
-                _stagedTxDb.Put(key, EmptyBytes);
-            }
-        }
-
-        /// <inheritdoc/>
         public override void StoreStateReference(
             Guid chainId,
             IImmutableSet<string> keys,
@@ -1421,16 +1456,6 @@ namespace LibPlanet.SQLite
                     stateRefCache[key] =
                         new Tuple<HashDigest<SHA256>, long>(blockHash, blockIndex);
                 }
-            }
-        }
-
-        /// <inheritdoc/>
-        public override void UnstageTransactionIds(ISet<TxId> txids)
-        {
-            foreach (TxId txId in txids)
-            {
-                byte[] key = StagedTxKey(txId);
-                _stagedTxDb.Remove(key);
             }
         }
 

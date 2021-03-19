@@ -1526,83 +1526,7 @@ namespace LibPlanet.SQLite
                 );
         }
 
-        private string BlockKey(HashDigest<SHA256> blockHash)
-        {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
-        }
-
-        private string TxKey(TxId txId)
-        {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxKeyPrefix), txId.ToString());
-        }
-
-        private string BlockStateKey(HashDigest<SHA256> blockHash)
-        {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockStateKeyPrefix), blockHash.ToString());
-        }
-
-        private string TxNonceKey(Address address)
-        {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxNonceKeyPrefix), address.ToHex());
-        }
-
-        private string StagedTxKey(TxId txId)
-        {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(StagedTxKeyPrefix), txId.ToString());
-        }
-
-        private string StateRefKey(string stateKey)
-        {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(StateRefKeyPrefix), stateKey);
-        }
-
-        private class StateRef
-        {
-            public string StateKey { get; set; }
-
-            public long BlockIndex { get; set; }
-
-            public HashDigest<SHA256> BlockHash { get; set; }
-        }
-
         /// <inheritdoc/>
-        public override void ForkStateReferences<T>(
-            Guid sourceChainId,
-            Guid destinationChainId,
-            Block<T> branchPoint)
-        {
-            byte[] prefix = StateRefKeyPrefix;
-            ColumnFamilyHandle destCf = GetColumnFamily(_stateRefDb, destinationChainId);
-
-            foreach (Iterator it in IterateDb(_stateRefDb, prefix, sourceChainId))
-            {
-                byte[] key = it.Key();
-                byte[] indexBytes = key.Skip(key.Length - sizeof(long)).ToArray();
-                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
-
-                if (index > branchPoint.Index)
-                {
-                    continue;
-                }
-
-                _stateRefDb.Put(key, it.Value(), destCf);
-            }
-
-            using Iterator destIt = _stateRefDb.NewIterator(destCf);
-
-            destIt.Seek(prefix);
-
-            if (!(destIt.Valid() && destIt.Key().StartsWith(prefix))
-                && CountIndex(sourceChainId) < 1)
-            {
-                throw new ChainIdNotFoundException(
-                    sourceChainId,
-                    "The source chain to be forked does not exist.");
-            }
-
-            _lastStateRefCaches.Remove(destinationChainId);
-        }
-
         public override Tuple<HashDigest<SHA256>, long> LookupStateReference(
             Guid chainId,
             string key,
@@ -1688,6 +1612,83 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during PruneBlockStates: {e.Message}.");
             }
+        }
+
+        private string BlockKey(HashDigest<SHA256> blockHash)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
+        }
+
+        private string TxKey(TxId txId)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxKeyPrefix), txId.ToString());
+        }
+
+        private string BlockStateKey(HashDigest<SHA256> blockHash)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockStateKeyPrefix), blockHash.ToString());
+        }
+
+        private string TxNonceKey(Address address)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxNonceKeyPrefix), address.ToHex());
+        }
+
+        private string StagedTxKey(TxId txId)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(StagedTxKeyPrefix), txId.ToString());
+        }
+
+        private string StateRefKey(string stateKey)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(StateRefKeyPrefix), stateKey);
+        }
+
+        private class StateRef
+        {
+            public string StateKey { get; set; }
+
+            public long BlockIndex { get; set; }
+
+            public HashDigest<SHA256> BlockHash { get; set; }
+        }
+
+        /// <inheritdoc/>
+        public override void ForkStateReferences<T>(
+            Guid sourceChainId,
+            Guid destinationChainId,
+            Block<T> branchPoint)
+        {
+            byte[] prefix = StateRefKeyPrefix;
+            ColumnFamilyHandle destCf = GetColumnFamily(_stateRefDb, destinationChainId);
+
+            foreach (Iterator it in IterateDb(_stateRefDb, prefix, sourceChainId))
+            {
+                byte[] key = it.Key();
+                byte[] indexBytes = key.Skip(key.Length - sizeof(long)).ToArray();
+                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
+
+                if (index > branchPoint.Index)
+                {
+                    continue;
+                }
+
+                _stateRefDb.Put(key, it.Value(), destCf);
+            }
+
+            using Iterator destIt = _stateRefDb.NewIterator(destCf);
+
+            destIt.Seek(prefix);
+
+            if (!(destIt.Valid() && destIt.Key().StartsWith(prefix))
+                && CountIndex(sourceChainId) < 1)
+            {
+                throw new ChainIdNotFoundException(
+                    sourceChainId,
+                    "The source chain to be forked does not exist.");
+            }
+
+            _lastStateRefCaches.Remove(destinationChainId);
         }
     }
 }

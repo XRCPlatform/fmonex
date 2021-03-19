@@ -863,7 +863,7 @@ namespace LibPlanet.SQLite
                     cmd.Parameters.AddWithValue("@typeD", helper.GetString(TxNonceKeyPrefix));
                     cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
                     cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
-                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
+                        "JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
                         "WHERE TD.[Key] = @key AND T.[Type] = @type;";
                     var reader = cmd.ExecuteReader();
 
@@ -946,6 +946,71 @@ namespace LibPlanet.SQLite
             catch (Exception e)
             {
                 _logger.Error($"Error during DeleteChainId: {e.Message}.");
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<HashDigest<SHA256>> IterateIndexes(
+            Guid chainId,
+            int offset,
+            int? limit)
+        {
+            int count = 0;
+            var helper = new SQLiteHelper();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                cmd.Parameters.AddWithValue("@typeD", helper.GetString(IndexKeyPrefix));
+                cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
+                    "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
+                    "WHERE T.[Key] = @key AND T.[Type] = @typeC;";
+                var reader = cmd.ExecuteReader();
+
+                if ((reader != null) && (reader.HasRows))
+                {
+                    while (reader.Read())
+                    {
+                        if (count >= limit)
+                        {
+                            break;
+                        }
+
+                        byte[] value = (byte[])reader.GetValue("Data");
+                        yield return new HashDigest<SHA256>(value);
+
+                        count += 1;
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<TxId> IterateStagedTransactionIds()
+        {
+            byte[] prefix = StagedTxKeyPrefix;
+            var helper = new SQLiteHelper();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT [Key] FROM " + StagedTxDbName + " ORDER BY [Id] ASC;";
+                var reader = cmd.ExecuteReader();
+
+                if ((reader != null) && (reader.HasRows))
+                {
+                    while (reader.Read())
+                    {
+                        var key = (string)reader.GetValue("Key");
+                        var keyBytes = helper.GetBytes(key);
+                        byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
+
+                        var txId = new TxId(txIdBytes);
+                        yield return txId;
+                    }
+                }
             }
         }
 
@@ -1063,41 +1128,6 @@ namespace LibPlanet.SQLite
             return bytes is null
                 ? (HashDigest<SHA256>?)null
                 : new HashDigest<SHA256>(bytes);
-        }
-
-        /// <inheritdoc/>
-        public override IEnumerable<HashDigest<SHA256>> IterateIndexes(
-            Guid chainId,
-            int offset,
-            int? limit)
-        {
-            int count = 0;
-            byte[] prefix = IndexKeyPrefix;
-
-            foreach (Iterator it in IterateDb(_chainDb, prefix, chainId).Skip(offset))
-            {
-                if (count >= limit)
-                {
-                    break;
-                }
-
-                byte[] value = it.Value();
-                yield return new HashDigest<SHA256>(value);
-
-                count += 1;
-            }
-        }
-
-        /// <inheritdoc/>
-        public override IEnumerable<TxId> IterateStagedTransactionIds()
-        {
-            byte[] prefix = StagedTxKeyPrefix;
-            foreach (var it in IterateDb(_stagedTxDb, prefix))
-            {
-                byte[] key = it.Key();
-                byte[] txIdBytes = key.Skip(prefix.Length).ToArray();
-                yield return new TxId(txIdBytes);
-            }
         }
 
         /// <inheritdoc/>

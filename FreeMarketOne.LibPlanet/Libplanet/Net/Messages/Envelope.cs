@@ -56,7 +56,11 @@ namespace Libplanet.Net.Messages
                 byte[] bytes = serializable.SerializeToBen();
                 Body = Convert.ToBase64String(bytes.ToArray());
                 Signature = Convert.ToBase64String(key.Sign(bytes.ToArray()));
-            }            
+            }
+            else 
+            {
+                throw new Exception("Item to be sent does not implement IBenEncodeable");
+            }
         }
 
         /// <summary>

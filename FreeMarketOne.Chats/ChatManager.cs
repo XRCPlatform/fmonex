@@ -23,6 +23,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static FreeMarketOne.Extensions.Common.ServiceHelper;
+using Libplanet.Net;
+using FreeMarketOne.DataStructure.ProtocolVersions;
+using FreeMarketOne.Tor;
+using Libplanet.Net.Messages;
 
 namespace FreeMarketOne.Chats
 {
@@ -44,6 +48,7 @@ namespace FreeMarketOne.Chats
         private string _serverOnionAddress { get; set; }
 
         private string _socks5Proxy;
+        private readonly TorSocks5Transport transport;
 
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
@@ -59,10 +64,12 @@ namespace FreeMarketOne.Chats
         public bool IsRunning => _running == CommonStates.Running;
 
         public ChatManager(IBaseConfiguration configuration,
+            AppProtocolVersion protocolVersion,
             UserPrivateKey privateKey,
             IUserManager userManager,
             string serverPublicAddress,
-            string socks5Proxy,
+            TorSocks5Manager torSocksManager,
+            TorProcessManager torProcessManager,
             TimeSpan? repeatEvery = null,
             TimeSpan? startAfter = null)
         {
@@ -75,7 +82,9 @@ namespace FreeMarketOne.Chats
             _userPrivateKey = privateKey;
             _userManager = userManager;
             _serverOnionAddress = serverPublicAddress;
-            _socks5Proxy = socks5Proxy ?? null;
+
+            transport = new TorSocks5Transport(_userPrivateKey, protocolVersion, null, null, null, "127.0.0.1", 9115, null, ReceivedMessageHandler, _logger, torSocksManager, torProcessManager, null);
+
             if (!repeatEvery.HasValue)
             {
                 _repeatEvery = TimeSpans.HalfMinute;
@@ -93,6 +102,44 @@ namespace FreeMarketOne.Chats
             {
                 _startAfter = startAfter.Value;
             }
+        }
+
+        private void ReceivedMessageHandler(object sender, ReceivedRequestEventArgs message)
+        {
+            TotClient client = message.Client;
+
+            Console.WriteLine($"Receiving chat message from peer: {message.Peer}.");
+            _logger.Information($"Receiving chat message from peer: {message.Peer}.");
+
+            var receivedChatItem = message.Envelope.GetBody<ChatItem>();
+
+            _logger.Information("Loading new chat message.");
+            var localChat = GetChat(receivedChatItem.MarketItemHash);
+            if (localChat != null)
+            {
+                var newChatItem = new ChatItem();
+                newChatItem.DateCreated = receivedChatItem.DateCreated;
+                newChatItem.Message = receivedChatItem.Message;
+                newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
+                newChatItem.Type = (int)DetectWhoIm(localChat, false);
+                newChatItem.Propagated = true;
+
+                _logger.Information("Add a new item to chat item.");
+                if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
+                localChat.ChatItems.Add(newChatItem);
+
+                if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
+                {
+                    localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
+                }
+
+                _logger.Information("Saving local chat with new data.");
+
+                SaveChat(localChat);
+            }
+
+            _logger.Information("Returning data.");
+            transport.ReplyMessage<Pong>(message.Request, client, new Pong());
         }
 
         /// <summary>
@@ -114,13 +161,13 @@ namespace FreeMarketOne.Chats
         /// <summary>
         /// Start loop task to listen chat messages
         /// </summary>
-        public void Start()
+        public async Task Start()
         {
             _running = CommonStates.Running;
 
-            StartMQListener();
+            await transport.StartAsync();
 
-            IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ChatManagerChecker", (cancellation) =>
+            IAsyncLoop periodicLogLoop = this._asyncLoopFactory.Run("ChatManagerChecker", async (cancellation) =>
             {
                 var dateTimeUtc = DateTime.UtcNow;
 
@@ -138,21 +185,37 @@ namespace FreeMarketOne.Chats
                             {
                                 if (!chat.ChatItems[i].Propagated)
                                 {
-                                    var chatPeerIp = chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller ?
-                                                    chat.MarketItem.BuyerOnionEndpoint : chat.SellerEndPoint;
+                                    string chatPeerIp = null;
+                                    List<byte[]> pubKeys;
+                                    if (chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller)
+                                    {
+                                        chatPeerIp =  chat.MarketItem.BuyerOnionEndpoint;
+                                        pubKeys = UserPublicKey.Recover(chat.MarketItem.ToByteArrayForSign(), chat.MarketItem.BuyerSignature);
+                                    }
+                                    else
+                                    {
+                                        chatPeerIp = chat.SellerEndPoint;
+                                        pubKeys = UserPublicKey.Recover(chat.MarketItem.ToByteArrayForSign(), chat.MarketItem.Signature);
+                                    }
+                                    PublicKey publicKey = new PublicKey(pubKeys.FirstOrDefault());
+
                                     var endPoint = GetChatPeerEndpoint(chatPeerIp);
+                                    var peer = new BoundPeer(publicKey, endPoint);
+
+                                    chat.ChatItems[i].MarketItemHash = chat.MarketItem.Hash;
 
                                     periodicCheckLog.AppendLine(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
                                     _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
-
-                                    if (SendNQMessage(chat.ChatItems[i], chat.MarketItem.Hash, endPoint))
+                  
+                                    var response = await transport.SendMessageWithReplyAsync<ChatItem, Pong>(peer, chat.ChatItems[i], TimeSpan.FromSeconds(30));
+                                    if (response != null)
                                     {
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
 
                                         chat.ChatItems[i].Propagated = true;
                                         anyChange = true;
-                                    } 
+                                    }
                                     else
                                     {
                                         periodicCheckLog.AppendLine(string.Format("Chat peer is offline."));
@@ -183,7 +246,7 @@ namespace FreeMarketOne.Chats
                     Console.WriteLine(periodicCheckLogResult.ToString());
                 }
 
-                return Task.CompletedTask;
+                return;
             },
             _cancellationToken.Token,
             repeatEvery: _repeatEvery,
@@ -206,10 +269,10 @@ namespace FreeMarketOne.Chats
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        private static void ClientOnReceiveReady(object sender, NetMQSocketEventArgs args)
-        {
-            Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
-        }
+        //private static void ClientOnReceiveReady(object sender, NetMQSocketEventArgs args)
+        //{
+        //    Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
+        //}
 
         /// <summary>
         /// Send message by NetMQ
@@ -217,40 +280,40 @@ namespace FreeMarketOne.Chats
         /// <param name="chatItem"></param>
         /// <param name="signature"></param>
         /// <returns></returns>
-        private bool SendNQMessage(ChatItem chatItem, string hash, DnsEndPoint endPoint)
-        {
-            var connectionString = ToNetMQAddress(endPoint.Host);
-            using (var client = new RequestSocket(connectionString))//should connection be passed here?
-            {
-                try
-                {
-                    var chatMessage = new ChatMessage();
-                    chatMessage.Message = chatItem.Message;
-                    chatMessage.ExtraMessage = chatItem.ExtraMessage;
-                    chatMessage.DateCreated = chatItem.DateCreated;
-                    chatMessage.Hash = hash;
+        //private bool SendNQMessage(ChatItem chatItem, string hash, DnsEndPoint endPoint)
+        //{
+        //    var connectionString = ToNetMQAddress(endPoint.Host);
+        //    using (var client = new RequestSocket(connectionString))//should connection be passed here?
+        //    {
+        //        try
+        //        {
+        //            var chatMessage = new ChatMessage();
+        //            chatMessage.Message = chatItem.Message;
+        //            chatMessage.ExtraMessage = chatItem.ExtraMessage;
+        //            chatMessage.DateCreated = chatItem.DateCreated;
+        //            chatMessage.Hash = hash;
 
-                    client.Connect(connectionString);
+        //            client.Connect(connectionString);
 
-                    client.SendMultipartMessage(chatMessage.ToNetMQMessage());
-                    client.ReceiveReady += ClientOnReceiveReady;
-                    bool pollResult = client.Poll(TimeSpan.FromMilliseconds(RequestTimeout));
-                    client.ReceiveReady -= ClientOnReceiveReady;
-                    client.Disconnect(connectionString);
+        //            client.SendMultipartMessage(chatMessage.ToNetMQMessage());
+        //            client.ReceiveReady += ClientOnReceiveReady;
+        //            bool pollResult = client.Poll(TimeSpan.FromMilliseconds(RequestTimeout));
+        //            client.ReceiveReady -= ClientOnReceiveReady;
+        //            client.Disconnect(connectionString);
 
-                    return pollResult;
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(
-                        ex,
-                        $"An unexpected exception occurred during SendNQMessage(): {ex}"
-                    );
-                }
-            }
+        //            return pollResult;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.Error(
+        //                ex,
+        //                $"An unexpected exception occurred during SendNQMessage(): {ex}"
+        //            );
+        //        }
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         /// <summary>
         /// Descrypt chat items in chat
@@ -309,12 +372,12 @@ namespace FreeMarketOne.Chats
             }
         }
 
-        private string ToNetMQAddress(string onionAddress)
-        {
-            return string.IsNullOrEmpty(_socks5Proxy) ?
-                $"tcp://{onionAddress}:{_configuration.ListenerChatEndPoint.Port}" :
-                $"socks5://{_socks5Proxy};{onionAddress}:{_configuration.ListenerChatEndPoint.Port}";
-        }
+        //private string ToNetMQAddress(string onionAddress)
+        //{
+        //    return string.IsNullOrEmpty(_socks5Proxy) ?
+        //        $"tcp://{onionAddress}:{_configuration.ListenerChatEndPoint.Port}" :
+        //        $"socks5://{_socks5Proxy};{onionAddress}:{_configuration.ListenerChatEndPoint.Port}";
+        //}
 
         /// <summary>
         /// Load separate chat listener over NetMQ
@@ -402,6 +465,7 @@ namespace FreeMarketOne.Chats
             newInitialMessage.ExtraMessage = result.SellerEndPoint;
             newInitialMessage.DateCreated = DateTime.UtcNow;
             newInitialMessage.Type = (int)ChatItemTypeEnum.Seller;
+            newInitialMessage.MarketItemHash = offer.Hash;
 
             result.ChatItems.Add(newInitialMessage);
             return result;
@@ -550,7 +614,7 @@ namespace FreeMarketOne.Chats
         /// </summary>
         /// <param name="chatData"></param>
         /// <param name="message"></param>
-        public void PrepaireMessageToWorker(ChatDataV1 chatData, string message)
+        public void PrepareMessage(ChatDataV1 chatData, string message)
         {
             if (chatData != null)
             {
@@ -564,7 +628,7 @@ namespace FreeMarketOne.Chats
                     newChatItem.DateCreated = DateTime.UtcNow;
                     newChatItem.Type = (int)DetectWhoIm(chatData, true);
                     newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
-
+                    newChatItem.MarketItemHash = chatData.MarketItem.Hash;
                     chatData.ChatItems.Add(newChatItem);
 
                     SaveChat(chatData);

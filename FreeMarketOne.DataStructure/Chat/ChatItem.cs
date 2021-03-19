@@ -18,6 +18,9 @@ namespace FreeMarketOne.DataStructure.Chat
 
         [JsonProperty("t")]
         public int Type { get; set; }
+        
+        [JsonProperty("h")]
+        public string MarketItemHash { get; set; }
 
         [JsonProperty("p")]
         public bool Propagated { get; set; }

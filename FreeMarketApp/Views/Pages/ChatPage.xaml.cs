@@ -178,7 +178,7 @@ namespace FreeMarketApp.Views.Pages
                         }
                         else
                         {
-                            chatManager.PrepaireMessageToWorker(chatData, tbMessage.Text);
+                            chatManager.PrepareMessage(chatData, tbMessage.Text);
 
                             LoadChatByProduct(hash);
                             tbMessage.Text = string.Empty;

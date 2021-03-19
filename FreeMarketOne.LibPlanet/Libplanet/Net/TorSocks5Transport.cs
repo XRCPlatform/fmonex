@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace Libplanet.Net
 {
-    internal class TorSocks5Transport : ITransport
+    public class TorSocks5Transport : ITransport
     {
         private readonly PrivateKey _privateKey;
         private readonly AppProtocolVersion _appProtocolVersion;

@@ -5,6 +5,7 @@ using Libplanet.Blocks;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FreeMarketOne.Chats
 {
@@ -14,13 +15,13 @@ namespace FreeMarketOne.Chats
         void SaveChat(ChatDataV1 chatData);
         ChatDataV1 CreateNewSellerChat(MarketItemV1 offer);
         ChatDataV1 CreateNewChat(MarketItemV1 offer);
-        void Start();
+        Task Start();
         void ProcessNewBlock(Block<MarketAction> block);
         bool IsChatManagerRunning();
         bool CanSendNextMessage(ChatDataV1 chatData);
         List<ChatDataV1> GetAllChats();
         List<ChatItem> DecryptChatItems(List<ChatItem> chatItems);
-        void PrepaireMessageToWorker(ChatDataV1 chatData, string message);
+        void PrepareMessage(ChatDataV1 chatData, string message);
         bool IsChatValid(List<ChatItem> chatItems);
         ChatDataV1 GetChat(string hash);
     }

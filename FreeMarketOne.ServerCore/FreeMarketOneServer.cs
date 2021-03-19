@@ -154,6 +154,9 @@ namespace FreeMarketOne.ServerCore
                 TorProcessManager = new TorProcessManager(Configuration);
                 var torInitialized = TorProcessManager.Start();
 
+                var socksProxyIp = IPAddress.Parse("127.0.0.1");
+
+                TorSocks5Manager torSocksManager = new TorSocks5Manager(new IPEndPoint(socksProxyIp,9050));
                 //User manager
                 UserManager = new UserManager(Configuration);
                 
@@ -178,8 +181,18 @@ namespace FreeMarketOne.ServerCore
                     {
                         //Chat Manager
                         LoadingEvent?.Invoke(this, "Loading Chat Manager...");
-                        ChatManager = new ChatManager(Configuration, UserManager.PrivateKey, UserManager, TorProcessManager.TorOnionEndPoint, Configuration.ListenersUseTor ? "127.0.0.1:9050" : null);
-                        ChatManager.Start();
+                        
+                        ChatManager = new ChatManager(
+                            Configuration, 
+                            new AppProtocolVersion(), 
+                            UserManager.PrivateKey, 
+                            UserManager, 
+                            TorProcessManager.TorOnionEndPoint, 
+                            torSocksManager,
+                            TorProcessManager
+                        );
+                        
+                        ChatManager.Start().ConfigureAwait(false);
 
                         //Initialize OnionSeeds
                         LoadingEvent?.Invoke(this, "Loading Onion Seed Manager...");

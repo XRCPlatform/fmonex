@@ -58,8 +58,18 @@ namespace FreeMarketOne.ServerCore.Test
             _userManager.PrivateKey = _userPrivateKey;
 
             //Chat Manager
-            ChatManager = new ChatManager(_configuration, _userPrivateKey, _userManager, _configuration.ListenerChatEndPoint.Address.ToString(), null,TimeSpans.FiveSeconds, TimeSpans.TenSeconds);
-            ChatManager.Start();
+            ChatManager = new ChatManager(
+                _configuration,
+                new Libplanet.Net.AppProtocolVersion(), 
+                _userPrivateKey, 
+                _userManager,
+                _configuration.ListenerChatEndPoint.Address.ToString(),
+                null,
+                null,
+                TimeSpans.FiveSeconds, 
+                TimeSpans.TenSeconds);
+
+            ChatManager.Start().ConfigureAwait(false).GetAwaiter().GetResult();
 
             SpinWait.SpinUntil(() => ChatManager.IsChatManagerRunning());
 
@@ -85,7 +95,7 @@ namespace FreeMarketOne.ServerCore.Test
 
             //propagate new chat message
             syncedChat = ChatManager.GetChat(newChat.MarketItem.Hash);
-            ChatManager.PrepaireMessageToWorker(syncedChat, "this is a test");
+            ChatManager.PrepareMessage(syncedChat, "this is a test");
 
             Thread.Sleep((int)TimeSpans.TenSeconds.TotalMilliseconds);
             SpinWait.SpinUntil(() => ChatManager.GetChat(newChat.MarketItem.Hash).ChatItems.Count > 3);

@@ -162,9 +162,11 @@ namespace LibPlanet.SQLite
                 @"
                     CREATE TABLE IF NOT EXISTS " + StateRefDbName + @"(
                         [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        [ParentId] INTEGER,
                         [Key] VARCHAR(128) NOT NULL,
                         [Data] BLOB NOT NULL);
-                    CREATE INDEX " + StateRefDbName + @"_index ON " + StateRefDbName + @"([Key]);
+                    CREATE INDEX " + StateRefDbName + @"_indexKey ON " + StateRefDbName + @"([Key]);
+                    CREATE INDEX " + StateRefDbName + @"_indexParentId ON " + StateRefDbName + @"([ParentId]);
                 ";
                 createCommand.ExecuteNonQuery();
 
@@ -173,12 +175,13 @@ namespace LibPlanet.SQLite
                 @"
                     CREATE TABLE IF NOT EXISTS " + ChainDbName + @"(
                         [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                        [ParentId] INTEGER NOT NULL,
+                        [ParentId] INTEGER,
                         [Type] VARCHAR(1) NOT NULL,
                         [Key] VARCHAR(128) NOT NULL,
                         [Data] BLOB NOT NULL);
                     CREATE INDEX " + ChainDbName + @"_indexType ON " + ChainDbName + @"([Type]);
                     CREATE INDEX " + ChainDbName + @"_indexKey ON " + ChainDbName + @"([Key]);
+                    CREATE INDEX " + ChainDbName + @"_indexParentId ON " + ChainDbName + @"([ParentId]);
                 ";
                 createCommand.ExecuteNonQuery();
 
@@ -585,8 +588,8 @@ namespace LibPlanet.SQLite
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@key", chainId.ToString());
-                    cmd.Parameters.AddWithValue("@typeD", IndexCountKey);
-                    cmd.Parameters.AddWithValue("@type", CanonicalChainIdIdKey);
+                    cmd.Parameters.AddWithValue("@typeD", helper.GetString(IndexCountKey));
+                    cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
                     cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
                         "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " + 
                         "WHERE T.[Key] = @key AND T.[Type] = @type;";
@@ -605,7 +608,7 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountIndex: {e.Message}.");
             }
 
-            return 0;
+            return -1;
         }
 
         /// <inheritdoc/>
@@ -622,118 +625,247 @@ namespace LibPlanet.SQLite
 
                 using (var firstTransaction = _connection.BeginTransaction())
                 {
+                    long parentChainDbId = 0;
                     using (var cmd = _connection.CreateCommand())
                     {
                         cmd.Parameters.AddWithValue("@key", chainId.ToString());
-                        cmd.Parameters.AddWithValue("@typeC", CanonicalChainIdIdKey);
+                        cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
                         cmd.CommandType = CommandType.Text;
                         cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
-                        var reader = cmd.ExecuteReader();
-
-                        if ((reader != null) && (reader.HasRows))
-                        {
-                            reader.Read();
-
-                            return (byte[])reader.GetValue("Data");
-                        }
+                        parentChainDbId = (long)cmd.ExecuteScalar();
                     }
 
+                    var data = helper.GetBytes(index + 1);
                     using (var cmd = _connection.CreateCommand())
                     {
                         cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
-                        cmd.Parameters.AddWithValue("@key", key);
+                        cmd.Parameters.AddWithValue("@type", helper.GetString(IndexCountKey));
+                        cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                        cmd.Parameters.AddWithValue("@key", helper.GetString(IndexCountKey));
                         cmd.CommandType = CommandType.Text;
-                        cmd.CommandText = "INSERT INTO " + dbName + " ([Key], [Data]) VALUES (@key, @data);";
+                        cmd.CommandText = "UPDATE " + ChainDbName + " SET [Key] = @key, [Data] = @data " +
+                            "WHERE [Type] = @type AND [ParentId] = @parentId;";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    data = hash.ToByteArray();
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                        cmd.Parameters.AddWithValue("@type", helper.GetString(IndexKeyPrefix));
+                        cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                        cmd.Parameters.AddWithValue("@key", helper.GetString(key));
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
                         cmd.ExecuteNonQuery();
                     }
 
                     firstTransaction.Commit();
                 }
 
-                using var writeBatch = new WriteBatch();
-
-                writeBatch.Put(key, hash.ToByteArray(), cf);
-                writeBatch.Put(IndexCountKey, RocksDBStoreBitConverter.GetBytes(index + 1), cf);
-
-                _chainDb.Write(writeBatch);
-
                 return index;
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during AppendIndex: {e.Message}.");
+            }
 
+            return -1;
+        }
 
+        /// <inheritdoc />
+        public override void SetCanonicalChainId(Guid chainId)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
 
-                using (var cmd = _connection.CreateCommand())
+                long parentChainDbId = 0;
+                byte[] data = chainId.ToByteArray();
+
+                using (var firstTransaction = _connection.BeginTransaction(IsolationLevel.ReadUncommitted))
                 {
-                    cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.AddWithValue("@key", chainId.ToString());
-                    cmd.Parameters.AddWithValue("@typeD", IndexCountKey);
-                    cmd.Parameters.AddWithValue("@type", CanonicalChainIdIdKey);
-                    cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
-                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
-                        "WHERE T.[Key] = @key AND T.[Type] = @type;";
-                    var reader = cmd.ExecuteReader();
-
-                    if ((reader != null) && (reader.HasRows))
+                    using (var cmd = _connection.CreateCommand())
                     {
-                        reader.Read();
-                        var data = (byte[])reader.GetValue("Data");
-                        return helper.ToInt64(data);
+                        cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                        cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
+                        cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([Type], [Key], [Data]) VALUES (@type, @key, @data); " +
+                            @"SELECT last_insert_rowid();";
+                        parentChainDbId = (long)cmd.ExecuteScalar();
                     }
+
+                    //KEYS ONLY - TO DELETE
+                    //data = EmptyBytes;
+                    //using (var cmd = _connection.CreateCommand())
+                    //{
+                    //    cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                    //    cmd.Parameters.AddWithValue("@type", IndexKeyPrefix);
+                    //    cmd.Parameters.AddWithValue("@key", IndexKeyPrefix);
+                    //    cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                    //    cmd.CommandType = CommandType.Text;
+                    //    cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
+                    //    cmd.ExecuteNonQuery();
+                    //}
+
+                    //data = EmptyBytes;
+                    //using (var cmd = _connection.CreateCommand())
+                    //{
+                    //    cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                    //    cmd.Parameters.AddWithValue("@type", TxNonceKeyPrefix);
+                    //    cmd.Parameters.AddWithValue("@key", TxNonceKeyPrefix);
+                    //    cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                    //    cmd.CommandType = CommandType.Text;
+                    //    cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
+                    //    cmd.ExecuteNonQuery();
+                    //}
+
+                    data = EmptyBytes;
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                        cmd.Parameters.AddWithValue("@type", helper.GetString(IndexCountKey));
+                        cmd.Parameters.AddWithValue("@key", helper.GetString(IndexCountKey));
+                        cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    firstTransaction.Commit();
                 }
             }
             catch (Exception e)
             {
-                _logger.Error($"Error during CountIndex: {e.Message}.");
+                _logger.Error($"Error during SetCanonicalChainId: {e.Message}.");
             }
-
-            return 0;
         }
-
-        private string BlockKey(HashDigest<SHA256> blockHash)
-        {
-            return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockKeyPrefix), blockHash.ToString());
-        }
-
-        private string TxKey(TxId txId)
-        {
-            return string.Format("{0}{1}", Encoding.ASCII.GetString(TxKeyPrefix), txId.ToString());
-        }
-
-        private string BlockStateKey(HashDigest<SHA256> blockHash)
-        {
-            return string.Format("{0}{1}", Encoding.ASCII.GetString(BlockStateKeyPrefix), blockHash.ToString());
-        }
-
-
-
-
 
         /// <inheritdoc/>
         public override void DeleteChainId(Guid chainId)
         {
-            _logger.Debug($"Deleting chainID: {chainId}.");
-            _lastStateRefCaches.Remove(chainId);
-
-            var cfName = chainId.ToString();
             try
             {
-                _chainDb.DropColumnFamily(cfName);
-            }
-            catch (KeyNotFoundException)
-            {
-                // Do nothing according to the specification: DeleteChainId() should be idempotent.
-                _logger.Debug($"No such chain ID in _chainDb: {cfName}.", cfName);
-            }
+                var helper = new SQLiteHelper();
 
-            try
-            {
-                _stateRefDb.DropColumnFamily(cfName);
+                _logger.Debug($"Deleting chainID: {chainId}.");
+                _lastStateRefCaches.Remove(chainId);
+
+                using (var firstTransaction = _connection.BeginTransaction())
+                {
+                    long parentChainDbId = 0;
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                        cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                        parentChainDbId = (long)cmd.ExecuteScalar();
+                    }
+
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "DELETE FROM " + ChainDbName + " WHERE [ParentId] = @parentId;";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "DELETE FROM " + StateRefDbName + " WHERE [ParentId] = @parentId;";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    firstTransaction.Commit();
+                }
             }
-            catch (KeyNotFoundException)
+            catch (Exception e)
             {
-                // Do nothing according to the specification: DeleteChainId() should be idempotent.
-                _logger.Debug($"No such chain ID in _stateRefDb: {cfName}.", cfName);
+                _logger.Error($"Error during DeleteChainId: {e.Message}.");
             }
         }
+
+        /// <inheritdoc/>
+        public override BlockDigest? GetBlockDigest(HashDigest<SHA256> blockHash)
+        {
+            try
+            {
+                if (_blockCache.TryGetValue(blockHash, out BlockDigest cachedDigest))
+                {
+                    return cachedDigest;
+                }
+
+                var helper = new SQLiteHelper();
+                var key = BlockKey(blockHash);
+
+                byte[] bytes = helper.GetBytes(key, BlockDbName, _connection);
+                if (bytes is null)
+                {
+                    return null;
+                }
+
+                BlockDigest blockDigest = BlockDigest.Deserialize(bytes);
+
+                _blockCache.AddOrUpdate(blockHash, blockDigest);
+                return blockDigest;
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during GetBlockDigest: {e.Message}.");
+            }
+
+            return null;
+        }
+
+        /// <inheritdoc />
+        public override Guid? GetCanonicalChainId()
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = "SELECT [Data] FROM " + ChainDbName + " WHERE [Type] = @typeC;";
+                    var bytes = (byte[])cmd.ExecuteScalar();
+
+                    return bytes is null
+                        ? (Guid?)null
+                        : new Guid(bytes);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during GetCanonicalChainId: {e.Message}.");
+            }
+
+            return null;
+        }
+
+
+        private string BlockKey(HashDigest<SHA256> blockHash)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
+        }
+
+        private string TxKey(TxId txId)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxKeyPrefix), txId.ToString());
+        }
+
+        private string BlockStateKey(HashDigest<SHA256> blockHash)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockStateKeyPrefix), blockHash.ToString());
+        }
+
+
+
 
         /// <inheritdoc/>
         public override void ForkBlockIndexes(
@@ -797,38 +929,6 @@ namespace LibPlanet.SQLite
             }
 
             _lastStateRefCaches.Remove(destinationChainId);
-        }
-
-        /// <inheritdoc/>
-        public override BlockDigest? GetBlockDigest(HashDigest<SHA256> blockHash)
-        {
-            if (_blockCache.TryGetValue(blockHash, out BlockDigest cachedDigest))
-            {
-                return cachedDigest;
-            }
-
-            byte[] key = BlockKey(blockHash);
-            byte[] bytes = _blockDb.Get(key);
-
-            if (bytes is null)
-            {
-                return null;
-            }
-
-            BlockDigest blockDigest = BlockDigest.Deserialize(bytes);
-
-            _blockCache.AddOrUpdate(blockHash, blockDigest);
-            return blockDigest;
-        }
-
-        /// <inheritdoc />
-        public override Guid? GetCanonicalChainId()
-        {
-            byte[] bytes = _chainDb.Get(CanonicalChainIdIdKey);
-
-            return bytes is null
-                ? (Guid?)null
-                : new Guid(bytes);
         }
 
         /// <inheritdoc/>
@@ -1108,13 +1208,6 @@ namespace LibPlanet.SQLite
             }
 
             return stateRef;
-        }
-
-        /// <inheritdoc />
-        public override void SetCanonicalChainId(Guid chainId)
-        {
-            byte[] bytes = chainId.ToByteArray();
-            _chainDb.Put(CanonicalChainIdIdKey, bytes);
         }
 
         /// <inheritdoc/>

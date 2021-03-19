@@ -1360,6 +1360,95 @@ namespace LibPlanet.SQLite
             }
         }
 
+        /// <inheritdoc/>
+        public override IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
+            Guid chainId,
+            string key,
+            long? highestIndex,
+            long? lowestIndex,
+            int? limit)
+        {
+            highestIndex ??= long.MaxValue;
+            lowestIndex ??= 0;
+            limit ??= int.MaxValue;
+
+            if (highestIndex < lowestIndex)
+            {
+                var message =
+                    $"highestIndex({highestIndex}) must be greater than or equal to " +
+                    $"lowestIndex({lowestIndex})";
+                throw new ArgumentException(
+                    message,
+                    nameof(highestIndex));
+            }
+
+            var helper = new SQLiteHelper();
+
+            byte[] keyBytes = helper.GetBytes(key);
+            byte[] prefix = StateRefKeyPrefix.Concat(keyBytes).ToArray();
+
+            return IterateStateReferences(
+                chainId, prefix, highestIndex.Value, lowestIndex.Value, limit.Value);
+        }
+
+        private IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
+            Guid chainId,
+            byte[] prefix,
+            long highestIndex,
+            long lowestIndex,
+            int limit)
+        {
+            var helper = new SQLiteHelper();
+
+            long parentChainDbId = 0;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                parentChainDbId = (long)cmd.ExecuteScalar();
+            }
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                cmd.CommandText = "SELECT [Key], [KeyIndex], [Data] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId ORDER BY [KeyIndex] DESC;";
+                var reader = cmd.ExecuteReader();
+
+                if ((reader != null) && (reader.HasRows))
+                {
+                    while (reader.Read())
+                    {
+                        var key = (string)reader.GetValue("Key");
+                        var keyBytes = helper.GetBytes(key);
+
+                        if (keyBytes.StartsWith(prefix))
+                        {
+                            long index = (long)reader.GetValue("KeyIndex");
+
+                            if (index > highestIndex)
+                            {
+                                continue;
+                            }
+
+                            if (index < lowestIndex || limit <= 0)
+                            {
+                                break;
+                            }
+
+                            byte[] hashBytes = (byte[])reader.GetValue("Data");
+                            var hash = new HashDigest<SHA256>(hashBytes);
+
+                            yield return new Tuple<HashDigest<SHA256>, long>(hash, index);
+                            limit--;
+                        }
+                    }
+                }
+            }
+        }
+
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
@@ -1388,73 +1477,6 @@ namespace LibPlanet.SQLite
         private string StateRefKey(string stateKey)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(StateRefKeyPrefix), stateKey);
-        }
-
-        /// <inheritdoc/>
-        public override void ForkStateReferences<T>(
-            Guid sourceChainId,
-            Guid destinationChainId,
-            Block<T> branchPoint)
-        {
-            byte[] prefix = StateRefKeyPrefix;
-            ColumnFamilyHandle destCf = GetColumnFamily(_stateRefDb, destinationChainId);
-
-            foreach (Iterator it in IterateDb(_stateRefDb, prefix, sourceChainId))
-            {
-                byte[] key = it.Key();
-                byte[] indexBytes = key.Skip(key.Length - sizeof(long)).ToArray();
-                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
-
-                if (index > branchPoint.Index)
-                {
-                    continue;
-                }
-
-                _stateRefDb.Put(key, it.Value(), destCf);
-            }
-
-            using Iterator destIt = _stateRefDb.NewIterator(destCf);
-
-            destIt.Seek(prefix);
-
-            if (!(destIt.Valid() && destIt.Key().StartsWith(prefix))
-                && CountIndex(sourceChainId) < 1)
-            {
-                throw new ChainIdNotFoundException(
-                    sourceChainId,
-                    "The source chain to be forked does not exist.");
-            }
-
-            _lastStateRefCaches.Remove(destinationChainId);
-        }
-
-        /// <inheritdoc/>
-        public override IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
-            Guid chainId,
-            string key,
-            long? highestIndex,
-            long? lowestIndex,
-            int? limit)
-        {
-            highestIndex ??= long.MaxValue;
-            lowestIndex ??= 0;
-            limit ??= int.MaxValue;
-
-            if (highestIndex < lowestIndex)
-            {
-                var message =
-                    $"highestIndex({highestIndex}) must be greater than or equal to " +
-                    $"lowestIndex({lowestIndex})";
-                throw new ArgumentException(
-                    message,
-                    nameof(highestIndex));
-            }
-
-            byte[] keyBytes = RocksDBStoreBitConverter.GetBytes(key);
-            byte[] prefix = StateRefKeyPrefix.Concat(keyBytes).ToArray();
-
-            return IterateStateReferences(
-                chainId, prefix, highestIndex.Value, lowestIndex.Value, limit.Value);
         }
 
         /// <inheritdoc/>
@@ -1501,6 +1523,45 @@ namespace LibPlanet.SQLite
                     g => (IImmutableList<HashDigest<SHA256>>)g
                         .Select(r => r.BlockHash).ToImmutableList()
                 );
+        }
+
+
+        /// <inheritdoc/>
+        public override void ForkStateReferences<T>(
+            Guid sourceChainId,
+            Guid destinationChainId,
+            Block<T> branchPoint)
+        {
+            byte[] prefix = StateRefKeyPrefix;
+            ColumnFamilyHandle destCf = GetColumnFamily(_stateRefDb, destinationChainId);
+
+            foreach (Iterator it in IterateDb(_stateRefDb, prefix, sourceChainId))
+            {
+                byte[] key = it.Key();
+                byte[] indexBytes = key.Skip(key.Length - sizeof(long)).ToArray();
+                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
+
+                if (index > branchPoint.Index)
+                {
+                    continue;
+                }
+
+                _stateRefDb.Put(key, it.Value(), destCf);
+            }
+
+            using Iterator destIt = _stateRefDb.NewIterator(destCf);
+
+            destIt.Seek(prefix);
+
+            if (!(destIt.Valid() && destIt.Key().StartsWith(prefix))
+                && CountIndex(sourceChainId) < 1)
+            {
+                throw new ChainIdNotFoundException(
+                    sourceChainId,
+                    "The source chain to be forked does not exist.");
+            }
+
+            _lastStateRefCaches.Remove(destinationChainId);
         }
 
         public override Tuple<HashDigest<SHA256>, long> LookupStateReference(

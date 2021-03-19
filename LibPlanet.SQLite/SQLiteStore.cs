@@ -1449,6 +1449,83 @@ namespace LibPlanet.SQLite
             }
         }
 
+        /// <inheritdoc/>
+        public override IImmutableDictionary<string, IImmutableList<HashDigest<SHA256>>>
+            ListAllStateReferences(
+                Guid chainId,
+                long lowestIndex = 0,
+                long highestIndex = long.MaxValue)
+        {
+            byte[] prefix = StateRefKeyPrefix;
+
+            var stateRefs = new List<StateRef>();
+
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                long parentChainDbId = 0;
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                    cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                    parentChainDbId = (long)cmd.ExecuteScalar();
+                }
+
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                    cmd.CommandText = "SELECT [Key], [KeyIndex], [Data] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId ORDER BY [KeyIndex] DESC;";
+                    var reader = cmd.ExecuteReader();
+
+                    if ((reader != null) && (reader.HasRows))
+                    {
+                        while (reader.Read())
+                        {
+                            var key = (string)reader.GetValue("Key");
+                            var keyBytes = helper.GetBytes(key);
+
+                            byte[] stateKeyBytes = keyBytes.Skip(prefix.Length).ToArray();
+                            string stateKey = helper.GetString(stateKeyBytes);
+
+                            long index = (long)reader.GetValue("KeyIndex");
+
+                            if (index < lowestIndex || index > highestIndex)
+                            {
+                                continue;
+                            }
+
+                            var data = (byte[])reader.GetValue("Data");
+                            var hash = new HashDigest<SHA256>(data);
+                            var stateRef = new StateRef
+                            {
+                                StateKey = stateKey,
+                                BlockHash = hash,
+                                BlockIndex = index,
+                            };
+
+                            stateRefs.Add(stateRef);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during ListAllStateReferences: {e.Message}.");
+            }
+
+            return stateRefs
+                .GroupBy(stateRef => stateRef.StateKey)
+                .ToImmutableDictionary(
+                    g => g.Key,
+                    g => (IImmutableList<HashDigest<SHA256>>)g
+                        .Select(r => r.BlockHash).ToImmutableList()
+                );
+        }
+
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
@@ -1479,52 +1556,14 @@ namespace LibPlanet.SQLite
             return string.Format("{0}{1}", Encoding.UTF8.GetString(StateRefKeyPrefix), stateKey);
         }
 
-        /// <inheritdoc/>
-        public override IImmutableDictionary<string, IImmutableList<HashDigest<SHA256>>>
-            ListAllStateReferences(
-                Guid chainId,
-                long lowestIndex = 0,
-                long highestIndex = long.MaxValue)
+        private class StateRef
         {
-            byte[] prefix = StateRefKeyPrefix;
+            public string StateKey { get; set; }
 
-            var stateRefs = new List<StateRef>();
+            public long BlockIndex { get; set; }
 
-            foreach (Iterator it in IterateDb(_stateRefDb, prefix, chainId))
-            {
-                byte[] key = it.Key();
-                int stateKeyLength = key.Length - sizeof(long) - prefix.Length;
-                byte[] stateKeyBytes = key.Skip(prefix.Length).Take(stateKeyLength).ToArray();
-                string stateKey = RocksDBStoreBitConverter.GetString(stateKeyBytes);
-
-                byte[] indexBytes = key.Skip(prefix.Length + stateKeyLength).ToArray();
-                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
-
-                if (index < lowestIndex || index > highestIndex)
-                {
-                    continue;
-                }
-
-                var hash = new HashDigest<SHA256>(it.Value());
-                var stateRef = new StateRef
-                {
-                    StateKey = stateKey,
-                    BlockHash = hash,
-                    BlockIndex = index,
-                };
-
-                stateRefs.Add(stateRef);
-            }
-
-            return stateRefs
-                .GroupBy(stateRef => stateRef.StateKey)
-                .ToImmutableDictionary(
-                    g => g.Key,
-                    g => (IImmutableList<HashDigest<SHA256>>)g
-                        .Select(r => r.BlockHash).ToImmutableList()
-                );
+            public HashDigest<SHA256> BlockHash { get; set; }
         }
-
 
         /// <inheritdoc/>
         public override void ForkStateReferences<T>(

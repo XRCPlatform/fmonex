@@ -845,7 +845,7 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during GetCanonicalChainId: {e.Message}.");
             }
 
-            return null;
+            return (Guid?)null;
         }
 
         /// <inheritdoc/>
@@ -876,6 +876,8 @@ namespace LibPlanet.SQLite
                             ? 0
                             : helper.ToInt64(bytes);
                     }
+
+                    return 0;
                 }
             }
             catch (Exception e)
@@ -889,13 +891,62 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override void IncreaseTxNonce(Guid chainId, Address signer, long delta = 1)
         {
-            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
-            long nextNonce = GetTxNonce(chainId, signer) + delta;
+            try
+            {
+                var helper = new SQLiteHelper();
 
-            byte[] key = TxNonceKey(signer);
-            byte[] bytes = RocksDBStoreBitConverter.GetBytes(nextNonce);
+                long nonce = GetTxNonce(chainId, signer);
+                long nextNonce = nonce + delta;
 
-            _chainDb.Put(key, bytes, cf);
+                var key = TxNonceKey(signer);
+                byte[] bytes = helper.GetBytes(nextNonce);
+
+                using (var firstTransaction = _connection.BeginTransaction())
+                {
+                    long parentChainDbId = 0;
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                        cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                        parentChainDbId = (long)cmd.ExecuteScalar();
+                    }
+
+                    if (nonce == 0)
+                    {
+                        using (var cmd = _connection.CreateCommand())
+                        {
+                            cmd.Parameters.Add("@data", SqliteType.Blob, bytes.Length).Value = bytes;
+                            cmd.Parameters.AddWithValue("@type", helper.GetString(TxNonceKeyPrefix));
+                            cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                            cmd.Parameters.AddWithValue("@key", key);
+                            cmd.CommandType = CommandType.Text;
+                            cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
+                            cmd.ExecuteNonQuery();
+                        }
+                    } 
+                    else
+                    {
+                        using (var cmd = _connection.CreateCommand())
+                        {
+                            cmd.Parameters.Add("@data", SqliteType.Blob, bytes.Length).Value = bytes;
+                            cmd.Parameters.AddWithValue("@type", helper.GetString(TxNonceKeyPrefix));
+                            cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                            cmd.Parameters.AddWithValue("@key", key);
+                            cmd.CommandType = CommandType.Text;
+                            cmd.CommandText = "UPDATE " + ChainDbName + @" SET [Data] = @Data WHERE [ParentId] = @parentId AND [Type] = @type AND [Key] = @key);";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    firstTransaction.Commit();
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during DeleteChainId: {e.Message}.");
+            }
         }
 
         private string BlockKey(HashDigest<SHA256> blockHash)

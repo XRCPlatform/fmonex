@@ -164,6 +164,7 @@ namespace LibPlanet.SQLite
                         [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                         [ParentId] INTEGER,
                         [Key] VARCHAR(128) NOT NULL,
+                        [KeyIndex] INTEGER NOT NULL,
                         [Data] BLOB NOT NULL);
                     CREATE INDEX " + StateRefDbName + @"_indexKey ON " + StateRefDbName + @"([Key]);
                     CREATE INDEX " + StateRefDbName + @"_indexParentId ON " + StateRefDbName + @"([ParentId]);
@@ -936,7 +937,7 @@ namespace LibPlanet.SQLite
                             cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
                             cmd.Parameters.AddWithValue("@key", key);
                             cmd.CommandType = CommandType.Text;
-                            cmd.CommandText = "UPDATE " + ChainDbName + @" SET [Data] = @Data WHERE [ParentId] = @parentId AND [Type] = @type AND [Key] = @key);";
+                            cmd.CommandText = "UPDATE " + ChainDbName + @" SET [Data] = @Data WHERE [ParentId] = @parentId AND [Type] = @type AND [Key] = @key;";
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -1189,6 +1190,176 @@ namespace LibPlanet.SQLite
             }
         }
 
+        /// <inheritdoc/>
+        public override void ForkBlockIndexes(
+            Guid sourceChainId,
+            Guid destinationChainId,
+            HashDigest<SHA256> branchPoint)
+        {
+            HashDigest<SHA256>? genesisHash = IterateIndexes(sourceChainId, 0, 1)
+                .Cast<HashDigest<SHA256>?>()
+                .FirstOrDefault();
+
+            if (genesisHash is null || branchPoint.Equals(genesisHash))
+            {
+                return;
+            }
+
+            foreach (HashDigest<SHA256> hash in IterateIndexes(sourceChainId, 1, null))
+            {
+                AppendIndex(destinationChainId, hash);
+
+                if (hash.Equals(branchPoint))
+                {
+                    break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> ListStateKeys(Guid chainId)
+        {
+            byte[] prefix = StateRefKeyPrefix;
+            var prevStateKey = string.Empty;
+
+            var helper = new SQLiteHelper();
+
+            long parentChainDbId = 0;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                parentChainDbId = (long)cmd.ExecuteScalar();
+            }
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                cmd.CommandText = "SELECT [Key], [KeyIndex], [Data] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId ORDER BY [Id] ASC;";
+                var reader = cmd.ExecuteReader();
+
+                if ((reader != null) && (reader.HasRows))
+                {
+                    while (reader.Read())
+                    {
+                        var key = (string)reader.GetValue("Key");
+                        var keyBytes = helper.GetBytes(key);
+
+                        byte[] stateKeyBytes = keyBytes.Skip(prefix.Length).ToArray();
+                        string stateKey = helper.GetString(stateKeyBytes);
+
+                        if (stateKey != prevStateKey)
+                        {
+                            yield return stateKey;
+                            prevStateKey = stateKey;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void StoreStateReference(
+            Guid chainId,
+            IImmutableSet<string> keys,
+            HashDigest<SHA256> blockHash,
+            long blockIndex)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                using (var firstTransaction = _connection.BeginTransaction())
+                {
+                    long parentChainDbId = 0;
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                        cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                        parentChainDbId = (long)cmd.ExecuteScalar();
+                    }
+
+                    foreach (string key in keys)
+                    {
+                        var stateKey = StateRefKey(key);
+                        long? stateRefId = null;
+                        using (var cmd = _connection.CreateCommand())
+                        {
+                            cmd.Parameters.AddWithValue("@parentId", chainId.ToString());
+                            cmd.Parameters.AddWithValue("@key", stateKey);
+                            cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                            cmd.CommandType = CommandType.Text;
+                            cmd.CommandText = "SELECT [Id] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId AND [Key] = @key AND [KeyIndex] = @keyIndex;";
+                            var obj = cmd.ExecuteScalar();
+
+                            if (!obj.Equals(DBNull.Value)) {
+                                stateRefId = (long)obj;
+                            }
+                        }
+
+                        var data = blockHash.ToByteArray();
+                        if (stateRefId.HasValue)
+                        {
+                            using (var cmd = _connection.CreateCommand())
+                            {
+                                cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                                cmd.Parameters.AddWithValue("@key", stateKey);
+                                cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                                cmd.Parameters.AddWithValue("@id", stateRefId.Value);
+                                cmd.CommandType = CommandType.Text;
+                                cmd.CommandText = "UPDATE " + StateRefDbName + @" SET [Key] = @key, [KeyIndex] = @keyIndex, [Data] = @data WHERE [Id] = @id;";
+                                cmd.ExecuteNonQuery();
+                            }
+                        } 
+                        else
+                        {
+                            using (var cmd = _connection.CreateCommand())
+                            {
+                                cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                                cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                                cmd.Parameters.AddWithValue("@key", stateKey);
+                                cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                                cmd.CommandType = CommandType.Text;
+                                cmd.CommandText = "INSERT INTO " + StateRefDbName + @" ([ParentId], [Key], [KeyIndex], [Data]) VALUES (@parentId, @key, @keyIndex, @data);";
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+
+                    firstTransaction.Commit();
+                }
+
+                if (!_lastStateRefCaches.ContainsKey(chainId))
+                {
+                    _lastStateRefCaches[chainId] =
+                        new LruCache<string, Tuple<HashDigest<SHA256>, long>>();
+                }
+
+                LruCache<string, Tuple<HashDigest<SHA256>, long>> stateRefCache =
+                    _lastStateRefCaches[chainId];
+
+                foreach (string key in keys)
+                {
+                    _logger.Debug($"Try to set cache {key}");
+                    if (!stateRefCache.TryGetValue(key, out Tuple<HashDigest<SHA256>, long> cache)
+                        || cache.Item2 < blockIndex)
+                    {
+                        stateRefCache[key] =
+                            new Tuple<HashDigest<SHA256>, long>(blockHash, blockIndex);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during StoreStateReference: {e.Message}.");
+            }
+        }
+
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
@@ -1214,33 +1385,9 @@ namespace LibPlanet.SQLite
             return string.Format("{0}{1}", Encoding.UTF8.GetString(StagedTxKeyPrefix), txId.ToString());
         }
 
-
-
-
-        /// <inheritdoc/>
-        public override void ForkBlockIndexes(
-            Guid sourceChainId,
-            Guid destinationChainId,
-            HashDigest<SHA256> branchPoint)
+        private string StateRefKey(string stateKey)
         {
-            HashDigest<SHA256>? genesisHash = IterateIndexes(sourceChainId, 0, 1)
-                .Cast<HashDigest<SHA256>?>()
-                .FirstOrDefault();
-
-            if (genesisHash is null || branchPoint.Equals(genesisHash))
-            {
-                return;
-            }
-
-            foreach (HashDigest<SHA256> hash in IterateIndexes(sourceChainId, 1, null))
-            {
-                AppendIndex(destinationChainId, hash);
-
-                if (hash.Equals(branchPoint))
-                {
-                    break;
-                }
-            }
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(StateRefKeyPrefix), stateKey);
         }
 
         /// <inheritdoc/>
@@ -1356,27 +1503,6 @@ namespace LibPlanet.SQLite
                 );
         }
 
-        /// <inheritdoc/>
-        public override IEnumerable<string> ListStateKeys(Guid chainId)
-        {
-            byte[] prefix = StateRefKeyPrefix;
-            var prevStateKey = string.Empty;
-
-            foreach (Iterator it in IterateDb(_stateRefDb, prefix, chainId))
-            {
-                byte[] key = it.Key();
-                int stateKeyLength = key.Length - sizeof(long) - prefix.Length;
-                byte[] stateKeyBytes = key.Skip(prefix.Length).Take(stateKeyLength).ToArray();
-                string stateKey = RocksDBStoreBitConverter.GetString(stateKeyBytes);
-
-                if (stateKey != prevStateKey)
-                {
-                    yield return stateKey;
-                    prevStateKey = stateKey;
-                }
-            }
-        }
-
         public override Tuple<HashDigest<SHA256>, long> LookupStateReference(
             Guid chainId,
             string key,
@@ -1422,41 +1548,6 @@ namespace LibPlanet.SQLite
             }
 
             return stateRef;
-        }
-
-        /// <inheritdoc/>
-        public override void StoreStateReference(
-            Guid chainId,
-            IImmutableSet<string> keys,
-            HashDigest<SHA256> blockHash,
-            long blockIndex)
-        {
-            ColumnFamilyHandle cf = GetColumnFamily(_stateRefDb, chainId);
-            foreach (string key in keys)
-            {
-                byte[] keyBytes = StateRefKey(key, blockIndex);
-                _stateRefDb.Put(keyBytes, blockHash.ToByteArray(), cf);
-            }
-
-            if (!_lastStateRefCaches.ContainsKey(chainId))
-            {
-                _lastStateRefCaches[chainId] =
-                    new LruCache<string, Tuple<HashDigest<SHA256>, long>>();
-            }
-
-            LruCache<string, Tuple<HashDigest<SHA256>, long>> stateRefCache =
-                _lastStateRefCaches[chainId];
-
-            foreach (string key in keys)
-            {
-                _logger.Debug($"Try to set cache {key}");
-                if (!stateRefCache.TryGetValue(key, out Tuple<HashDigest<SHA256>, long> cache)
-                    || cache.Item2 < blockIndex)
-                {
-                    stateRefCache[key] =
-                        new Tuple<HashDigest<SHA256>, long>(blockHash, blockIndex);
-                }
-            }
         }
 
         /// <inheritdoc/>

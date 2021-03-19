@@ -860,11 +860,12 @@ namespace LibPlanet.SQLite
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@key", key);
+                    cmd.Parameters.AddWithValue("@keyChainId", chainId.ToString());
                     cmd.Parameters.AddWithValue("@typeD", helper.GetString(TxNonceKeyPrefix));
                     cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
                     cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
                         "JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
-                        "WHERE TD.[Key] = @key AND T.[Type] = @type;";
+                        "WHERE TD.[Key] = @key AND T.[Type] = @type AND T.[Key] = @keyChainId;";
                     var reader = cmd.ExecuteReader();
 
                     if ((reader != null) && (reader.HasRows))
@@ -1012,6 +1013,59 @@ namespace LibPlanet.SQLite
                     }
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public override HashDigest<SHA256>? IndexBlockHash(Guid chainId, long index)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                if (index < 0)
+                {
+                    index += CountIndex(chainId);
+
+                    if (index < 0)
+                    {
+                        return null;
+                    }
+                }
+
+                byte[] indexBytes = helper.GetBytes(index);
+                byte[] key = IndexKeyPrefix.Concat(indexBytes).ToArray();
+
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@key", key);
+                    cmd.Parameters.AddWithValue("@keyChainId", chainId.ToString());
+                    cmd.Parameters.AddWithValue("@typeD", helper.GetString(IndexKeyPrefix));
+                    cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
+                    cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
+                        "JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
+                        "WHERE TD.[Key] = @key AND T.[Type] = @type AND T.[Key] = @keyChainId;";
+                    var reader = cmd.ExecuteReader();
+
+                    if ((reader != null) && (reader.HasRows))
+                    {
+                        reader.Read();
+                        var bytes = (byte[])reader.GetValue("Data");
+
+                        return bytes is null
+                            ? (HashDigest<SHA256>?)null
+                            : new HashDigest<SHA256>(bytes);
+                    }
+
+                    return (HashDigest<SHA256>?)null;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during IndexBlockHash: {e.Message}.");
+            }
+
+            return (HashDigest<SHA256>?)null;
         }
 
         private string BlockKey(HashDigest<SHA256> blockHash)

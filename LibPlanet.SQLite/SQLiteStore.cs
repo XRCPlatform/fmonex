@@ -1068,6 +1068,66 @@ namespace LibPlanet.SQLite
             return (HashDigest<SHA256>?)null;
         }
 
+        /// <inheritdoc/>
+        public override IEnumerable<TxId> IterateTransactionIds()
+        {
+            byte[] prefix = TxKeyPrefix;
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT [Key] FROM " + TxDbName + " ORDER BY [Id] ASC;";
+                var reader = cmd.ExecuteReader();
+
+                if ((reader != null) && (reader.HasRows))
+                {
+                    while (reader.Read())
+                    {
+                        var key = (byte[])reader.GetValue("Key");
+                        byte[] txIdBytes = key.Skip(prefix.Length).ToArray();
+
+                        var txId = new TxId(txIdBytes);
+                        yield return txId;
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<Guid> ListChainIds()
+        {
+            var helper = new SQLiteHelper();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
+                cmd.CommandText = "SELECT [Key] FROM " + ChainDbName + " WHERE [Type] = @Type ORDER BY [Id] ASC;";
+                var reader = cmd.ExecuteReader();
+
+                if ((reader != null) && (reader.HasRows))
+                {
+                    while (reader.Read())
+                    {
+                        var key = (string)reader.GetValue("Key");
+
+                        Guid guid;
+
+                        try
+                        {
+                            guid = Guid.Parse(key);
+                        }
+                        catch (FormatException)
+                        {
+                            continue;
+                        }
+
+                        yield return guid;
+                    }
+                }
+            }
+        }
+
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
@@ -1161,30 +1221,6 @@ namespace LibPlanet.SQLite
         }
 
         /// <inheritdoc/>
-        public override HashDigest<SHA256>? IndexBlockHash(Guid chainId, long index)
-        {
-            if (index < 0)
-            {
-                index += CountIndex(chainId);
-
-                if (index < 0)
-                {
-                    return null;
-                }
-            }
-
-            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
-
-            byte[] indexBytes = RocksDBStoreBitConverter.GetBytes(index);
-
-            byte[] key = IndexKeyPrefix.Concat(indexBytes).ToArray();
-            byte[] bytes = _chainDb.Get(key, cf);
-            return bytes is null
-                ? (HashDigest<SHA256>?)null
-                : new HashDigest<SHA256>(bytes);
-        }
-
-        /// <inheritdoc/>
         public override IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
             Guid chainId,
             string key,
@@ -1211,21 +1247,6 @@ namespace LibPlanet.SQLite
 
             return IterateStateReferences(
                 chainId, prefix, highestIndex.Value, lowestIndex.Value, limit.Value);
-        }
-
-        /// <inheritdoc/>
-        public override IEnumerable<TxId> IterateTransactionIds()
-        {
-            byte[] prefix = TxKeyPrefix;
-
-            foreach (Iterator it in IterateDb(_txDb, prefix))
-            {
-                byte[] key = it.Key();
-                byte[] txIdBytes = key.Skip(prefix.Length).ToArray();
-
-                var txId = new TxId(txIdBytes);
-                yield return txId;
-            }
         }
 
         /// <inheritdoc/>
@@ -1272,28 +1293,6 @@ namespace LibPlanet.SQLite
                     g => (IImmutableList<HashDigest<SHA256>>)g
                         .Select(r => r.BlockHash).ToImmutableList()
                 );
-        }
-
-        /// <inheritdoc/>
-        public override IEnumerable<Guid> ListChainIds()
-        {
-            string path = Path.Combine(_path, ChainDbName);
-
-            foreach (string name in RocksDb.ListColumnFamilies(_options, path))
-            {
-                Guid guid;
-
-                try
-                {
-                    guid = Guid.Parse(name);
-                }
-                catch (FormatException)
-                {
-                    continue;
-                }
-
-                yield return guid;
-            }
         }
 
         /// <inheritdoc/>

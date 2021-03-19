@@ -1614,6 +1614,130 @@ namespace LibPlanet.SQLite
             }
         }
 
+        /// <inheritdoc/>
+        public override void ForkStateReferences<T>(
+            Guid sourceChainId,
+            Guid destinationChainId,
+            Block<T> branchPoint)
+        {
+            try
+            {
+                var isDestinationValid = false;
+                var helper = new SQLiteHelper();
+
+                using (var firstTransaction = _connection.BeginTransaction())
+                {
+                    long sourceParentChainDbId = 0;
+                    long destinationParentChainDbId = 0;
+                    
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@key", sourceChainId.ToString());
+                        cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                        sourceParentChainDbId = (long)cmd.ExecuteScalar();
+                    }
+
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.Parameters.AddWithValue("@key", destinationParentChainDbId.ToString());
+                        cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                        var obj = cmd.ExecuteScalar();
+
+                        if (!obj.Equals(DBNull.Value))
+                        {
+                            isDestinationValid = true;
+                            destinationParentChainDbId = (long)obj;
+                        } 
+                    }
+
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.CommandType = CommandType.Text;
+                        cmd.Parameters.AddWithValue("@parentId", sourceParentChainDbId);
+                        cmd.CommandText = "SELECT [Key], [KeyIndex], [Data] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId ORDER BY [KeyIndex] DESC;";
+                        var reader = cmd.ExecuteReader();
+
+                        if ((reader != null) && (reader.HasRows))
+                        {
+                            while (reader.Read())
+                            {
+                                var stateKey = (string)reader.GetValue("Key");
+                                long blockIndex = (long)reader.GetValue("KeyIndex");
+                                byte[] data = (byte[])reader.GetValue("Data");
+
+                                if (blockIndex > branchPoint.Index)
+                                {
+                                    continue;
+                                }
+
+                                long? stateRefId = null;
+                                using (var subCmd = _connection.CreateCommand())
+                                {
+                                    subCmd.Parameters.AddWithValue("@parentId", destinationParentChainDbId.ToString());
+                                    subCmd.Parameters.AddWithValue("@key", stateKey);
+                                    subCmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                                    subCmd.CommandType = CommandType.Text;
+                                    subCmd.CommandText = "SELECT [Id] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId AND [Key] = @key AND [KeyIndex] = @keyIndex;";
+                                    var obj = cmd.ExecuteScalar();
+
+                                    if (!obj.Equals(DBNull.Value))
+                                    {
+                                        stateRefId = (long)obj;
+                                    }
+                                }
+
+                                if (stateRefId.HasValue)
+                                {
+                                    using (var subCmd = _connection.CreateCommand())
+                                    {
+                                        subCmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                                        subCmd.Parameters.AddWithValue("@key", stateKey);
+                                        subCmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                                        subCmd.Parameters.AddWithValue("@id", stateRefId.Value);
+                                        subCmd.CommandType = CommandType.Text;
+                                        subCmd.CommandText = "UPDATE " + StateRefDbName + @" SET [Key] = @key, [KeyIndex] = @keyIndex, [Data] = @data WHERE [Id] = @id;";
+                                        subCmd.ExecuteNonQuery();
+                                    }
+                                }
+                                else
+                                {
+                                    using (var subCmd = _connection.CreateCommand())
+                                    {
+                                        subCmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                                        subCmd.Parameters.AddWithValue("@parentId", destinationParentChainDbId);
+                                        subCmd.Parameters.AddWithValue("@key", stateKey);
+                                        subCmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                                        subCmd.CommandType = CommandType.Text;
+                                        subCmd.CommandText = "INSERT INTO " + StateRefDbName + @" ([ParentId], [Key], [KeyIndex], [Data]) VALUES (@parentId, @key, @keyIndex, @data);";
+                                        subCmd.ExecuteNonQuery();
+                                    }
+                                }
+                            }
+
+                            firstTransaction.Commit();
+                        }
+                    }
+                }
+
+                if (!isDestinationValid && CountIndex(sourceChainId) < 1)
+                {
+                    throw new ChainIdNotFoundException(
+                        sourceChainId,
+                        "The source chain to be forked does not exist.");
+                }
+
+                _lastStateRefCaches.Remove(destinationChainId);
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during ForkStateReferences: {e.Message}.");
+            }
+        }
+
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
@@ -1651,44 +1775,6 @@ namespace LibPlanet.SQLite
             public long BlockIndex { get; set; }
 
             public HashDigest<SHA256> BlockHash { get; set; }
-        }
-
-        /// <inheritdoc/>
-        public override void ForkStateReferences<T>(
-            Guid sourceChainId,
-            Guid destinationChainId,
-            Block<T> branchPoint)
-        {
-            byte[] prefix = StateRefKeyPrefix;
-            ColumnFamilyHandle destCf = GetColumnFamily(_stateRefDb, destinationChainId);
-
-            foreach (Iterator it in IterateDb(_stateRefDb, prefix, sourceChainId))
-            {
-                byte[] key = it.Key();
-                byte[] indexBytes = key.Skip(key.Length - sizeof(long)).ToArray();
-                long index = RocksDBStoreBitConverter.ToInt64(indexBytes);
-
-                if (index > branchPoint.Index)
-                {
-                    continue;
-                }
-
-                _stateRefDb.Put(key, it.Value(), destCf);
-            }
-
-            using Iterator destIt = _stateRefDb.NewIterator(destCf);
-
-            destIt.Seek(prefix);
-
-            if (!(destIt.Valid() && destIt.Key().StartsWith(prefix))
-                && CountIndex(sourceChainId) < 1)
-            {
-                throw new ChainIdNotFoundException(
-                    sourceChainId,
-                    "The source chain to be forked does not exist.");
-            }
-
-            _lastStateRefCaches.Remove(destinationChainId);
         }
     }
 }

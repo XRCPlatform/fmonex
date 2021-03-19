@@ -848,6 +848,55 @@ namespace LibPlanet.SQLite
             return null;
         }
 
+        /// <inheritdoc/>
+        public override long GetTxNonce(Guid chainId, Address address)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                var key = TxNonceKey(address);
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@key", key);
+                    cmd.Parameters.AddWithValue("@typeD", helper.GetString(TxNonceKeyPrefix));
+                    cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
+                    cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
+                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
+                        "WHERE TD.[Key] = @key AND T.[Type] = @type;";
+                    var reader = cmd.ExecuteReader();
+
+                    if ((reader != null) && (reader.HasRows))
+                    {
+                        reader.Read();
+                        var bytes = (byte[])reader.GetValue("Data");
+
+                        return bytes is null
+                            ? 0
+                            : helper.ToInt64(bytes);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during GetTxNonce: {e.Message}.");
+            }
+
+            return -1;
+        }
+
+        /// <inheritdoc/>
+        public override void IncreaseTxNonce(Guid chainId, Address signer, long delta = 1)
+        {
+            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
+            long nextNonce = GetTxNonce(chainId, signer) + delta;
+
+            byte[] key = TxNonceKey(signer);
+            byte[] bytes = RocksDBStoreBitConverter.GetBytes(nextNonce);
+
+            _chainDb.Put(key, bytes, cf);
+        }
 
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
@@ -862,6 +911,16 @@ namespace LibPlanet.SQLite
         private string BlockStateKey(HashDigest<SHA256> blockHash)
         {
             return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockStateKeyPrefix), blockHash.ToString());
+        }
+
+        private string TxNonceKey(Address address)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxNonceKeyPrefix), address.ToHex());
+        }
+
+        private string StagedTxKey(TxId txId)
+        {
+            return string.Format("{0}{1}", Encoding.UTF8.GetString(StagedTxKeyPrefix), txId.ToString());
         }
 
 
@@ -929,30 +988,6 @@ namespace LibPlanet.SQLite
             }
 
             _lastStateRefCaches.Remove(destinationChainId);
-        }
-
-        /// <inheritdoc/>
-        public override long GetTxNonce(Guid chainId, Address address)
-        {
-            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
-            byte[] key = TxNonceKey(address);
-            byte[] bytes = _chainDb.Get(key, cf);
-
-            return bytes is null
-                ? 0
-                : RocksDBStoreBitConverter.ToInt64(bytes);
-        }
-
-        /// <inheritdoc/>
-        public override void IncreaseTxNonce(Guid chainId, Address signer, long delta = 1)
-        {
-            ColumnFamilyHandle cf = GetColumnFamily(_chainDb, chainId);
-            long nextNonce = GetTxNonce(chainId, signer) + delta;
-
-            byte[] key = TxNonceKey(signer);
-            byte[] bytes = RocksDBStoreBitConverter.GetBytes(nextNonce);
-
-            _chainDb.Put(key, bytes, cf);
         }
 
         /// <inheritdoc/>

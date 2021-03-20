@@ -138,7 +138,8 @@ namespace FreeMarketOne.Chats
             }
 
             _logger.Information("Returning data.");
-            transport.ReplyMessage<Pong>(message.Request, client, new Pong());
+            //original round tripped the message figure out why?
+            transport.ReplyMessage<ChatItem>(message.Request, client, receivedChatItem);
         }
 
         /// <summary>
@@ -207,7 +208,7 @@ namespace FreeMarketOne.Chats
                                     _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
                                     try
                                     {
-                                        await transport.SendMessageWithReplyAsync<ChatItem, Pong>(peer, chat.ChatItems[i], TimeSpan.FromMinutes(1));
+                                        await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[i], TimeSpan.FromMinutes(1));
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
 

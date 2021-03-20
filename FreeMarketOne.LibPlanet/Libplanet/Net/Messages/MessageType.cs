@@ -92,7 +92,6 @@ namespace Libplanet.Net.Messages
         /// Request a block's delta states.
         /// </summary>
         GetBlockStates = 0x22,
-
         /// <summary>
         /// A reply to <see cref="GetBlockStates"/>.
         /// Contains the delta states of the requested block.
@@ -114,5 +113,7 @@ namespace Libplanet.Net.Messages
         //Used to announce new staged transaction to nework similar to Tx
         //but must not clash with Tx as message Tx is a response object and break routing. 
         TxBroadcast = 0x32,
+
+        ChatItem = 0x33,
     }
 }

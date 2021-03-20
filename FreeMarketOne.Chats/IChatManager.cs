@@ -2,9 +2,8 @@
 using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using Libplanet.Blocks;
-using System;
+using Libplanet.Net.Messages;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FreeMarketOne.Chats

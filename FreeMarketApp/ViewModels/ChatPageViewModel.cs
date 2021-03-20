@@ -1,8 +1,7 @@
 ﻿using FreeMarketOne.DataStructure.Chat;
-using System;
+using Libplanet.Net.Messages;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace FreeMarketApp.ViewModels
 {

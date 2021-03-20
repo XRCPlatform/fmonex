@@ -1,11 +1,10 @@
 ﻿using Bencodex;
 using Bencodex.Types;
-using Libplanet.Net.Messages;
 using Newtonsoft.Json;
 using System;
 using System.Text;
 
-namespace FreeMarketOne.DataStructure.Chat
+namespace Libplanet.Net.Messages
 {
     public class ChatItem: IBenEncodeable
     {

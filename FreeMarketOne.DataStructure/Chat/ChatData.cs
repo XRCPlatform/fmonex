@@ -1,8 +1,8 @@
 ﻿using FreeMarketOne.DataStructure.Objects.BaseItems;
+using Libplanet.Net.Messages;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FreeMarketOne.DataStructure.Chat
 {

@@ -206,20 +206,19 @@ namespace FreeMarketOne.Chats
 
                                     periodicCheckLog.AppendLine(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
                                     _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
-                  
-                                    var response = await transport.SendMessageWithReplyAsync<ChatItem, Pong>(peer, chat.ChatItems[i], TimeSpan.FromSeconds(30));
-                                    if (response != null)
+                                    try
                                     {
+                                        await transport.SendMessageWithReplyAsync<ChatItem, Pong>(peer, chat.ChatItems[i], TimeSpan.FromMinutes(1));
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
 
                                         chat.ChatItems[i].Propagated = true;
                                         anyChange = true;
                                     }
-                                    else
+                                    catch (Exception e)
                                     {
-                                        periodicCheckLog.AppendLine(string.Format("Chat peer is offline."));
-                                        _logger.Information(string.Format("Chat peer is offline."));
+                                        periodicCheckLog.AppendLine("Chat peer is offline.");
+                                        _logger.Information($"Chat peer is offline. {e}");
                                     }
                                 }
                             }

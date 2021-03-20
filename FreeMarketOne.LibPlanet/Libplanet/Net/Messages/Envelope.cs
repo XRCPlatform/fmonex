@@ -1,15 +1,8 @@
-﻿using FreeMarketOne.Extensions.Helpers;
-using Libplanet.Crypto;
-using Newtonsoft.Json;
+﻿using Libplanet.Crypto;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
-using Libplanet.Serialization;
-using System.Runtime.Serialization;
 
 namespace Libplanet.Net.Messages
 {
@@ -38,6 +31,7 @@ namespace Libplanet.Net.Messages
             { MessageType.DifferentVersion, typeof(DifferentVersion) },
             { MessageType.BlockBroadcast, typeof(Blocks) },
             { MessageType.TxBroadcast, typeof(TxBroadcast) },
+            { MessageType.ChatItem, typeof(ChatItem) },
         };
         public Envelope(){}
 

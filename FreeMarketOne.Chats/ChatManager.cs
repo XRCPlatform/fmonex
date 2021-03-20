@@ -67,7 +67,6 @@ namespace FreeMarketOne.Chats
             AppProtocolVersion protocolVersion,
             UserPrivateKey privateKey,
             IUserManager userManager,
-            string serverPublicAddress,
             TorSocks5Manager torSocksManager,
             TorProcessManager torProcessManager,
             TimeSpan? repeatEvery = null,
@@ -81,9 +80,9 @@ namespace FreeMarketOne.Chats
             _cancellationToken = new CancellationTokenSource();
             _userPrivateKey = privateKey;
             _userManager = userManager;
-            _serverOnionAddress = serverPublicAddress;
+            _serverOnionAddress = torProcessManager.TorOnionEndPoint;
 
-            transport = new TorSocks5Transport(_userPrivateKey, protocolVersion, null, null, null, "127.0.0.1", 9115, null, ReceivedMessageHandler, _logger, torSocksManager, torProcessManager, null);
+            transport = new TorSocks5Transport(_userPrivateKey, protocolVersion, null, null, null, torProcessManager.TorOnionEndPoint, 9115, null, ReceivedMessageHandler, _logger, torSocksManager, torProcessManager, null);
 
             if (!repeatEvery.HasValue)
             {

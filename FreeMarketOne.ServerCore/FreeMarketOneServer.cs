@@ -187,7 +187,6 @@ namespace FreeMarketOne.ServerCore
                             new AppProtocolVersion(), 
                             UserManager.PrivateKey, 
                             UserManager, 
-                            TorProcessManager.TorOnionEndPoint, 
                             torSocksManager,
                             TorProcessManager
                         );

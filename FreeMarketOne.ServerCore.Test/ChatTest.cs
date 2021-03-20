@@ -63,7 +63,7 @@ namespace FreeMarketOne.ServerCore.Test
                 new Libplanet.Net.AppProtocolVersion(), 
                 _userPrivateKey, 
                 _userManager,
-                _configuration.ListenerChatEndPoint.Address.ToString(),
+                //_configuration.ListenerChatEndPoint.Address.ToString(),
                 null,
                 null,
                 TimeSpans.FiveSeconds, 

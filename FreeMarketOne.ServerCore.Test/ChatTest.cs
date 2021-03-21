@@ -60,13 +60,14 @@ namespace FreeMarketOne.ServerCore.Test
             //Chat Manager
             ChatManager = new ChatManager(
                 _configuration,
-                new Libplanet.Net.AppProtocolVersion(), 
-                _userPrivateKey, 
+                new Libplanet.Net.AppProtocolVersion(),
+                _userPrivateKey,
                 _userManager,
                 //_configuration.ListenerChatEndPoint.Address.ToString(),
                 null,
                 null,
-                TimeSpans.FiveSeconds, 
+                null,
+                TimeSpans.FiveSeconds,
                 TimeSpans.TenSeconds);
 
             ChatManager.Start().ConfigureAwait(false).GetAwaiter().GetResult();

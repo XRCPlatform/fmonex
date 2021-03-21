@@ -192,6 +192,7 @@ namespace FreeMarketOne.Search
                 Document doc = new Document
                 {
                     new StringField("ID", marketItem.Signature, Field.Store.YES),
+                    new StringField("ItemHash", marketItem.Hash, Field.Store.NO),
                     new StringField("BlockHash", blockHash, Field.Store.YES),
                     new TextField("Title",marketItem.Title,Field.Store.NO),
                     new TextField("Manufacturer",string.IsNullOrEmpty(marketItem.Manufacturer) ? "Unspecified":marketItem.Manufacturer,Field.Store.NO),

@@ -179,20 +179,6 @@ namespace FreeMarketOne.ServerCore
                     SpinWait.SpinUntil(() => torInitialized, 10000);
                     if (torInitialized)
                     {
-                        //Chat Manager
-                        LoadingEvent?.Invoke(this, "Loading Chat Manager...");
-                        
-                        ChatManager = new ChatManager(
-                            Configuration, 
-                            new AppProtocolVersion(), 
-                            UserManager.PrivateKey, 
-                            UserManager, 
-                            torSocksManager,
-                            TorProcessManager
-                        );
-                        
-                        ChatManager.Start().ConfigureAwait(false);
-
                         //Initialize OnionSeeds
                         LoadingEvent?.Invoke(this, "Loading Onion Seed Manager...");
                         OnionSeedsManager = new OnionSeedsManager(Configuration, TorProcessManager, ServerPublicAddress.PublicIP);
@@ -313,6 +299,21 @@ namespace FreeMarketOne.ServerCore
                         LoadingEvent?.Invoke(this, "Loading Local Search Engine...");
                         SearchIndexer.Initialize(BasePoolManager, BaseBlockChainManager);
                         SearchEngine = new SearchEngine(MarketManager, SearchHelper.GetDataFolder(Configuration));
+
+                        //Chat Manager
+                        LoadingEvent?.Invoke(this, "Loading Chat Manager...");
+
+                        ChatManager = new ChatManager(
+                            Configuration,
+                            new AppProtocolVersion(),
+                            UserManager.PrivateKey,
+                            UserManager,
+                            torSocksManager,
+                            TorProcessManager,
+                            SearchEngine
+                        );
+
+                        ChatManager.Start().ConfigureAwait(false);
                     }
                     else
                     {

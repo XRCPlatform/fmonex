@@ -134,8 +134,7 @@ namespace FreeMarketOne.Search
 
             return bq;
 
-        }
-
+        }      
 
         public DrillDownQuery BuildDrillDown(List<Selector> selectors, Query baseQuery)
         {
@@ -263,7 +262,10 @@ namespace FreeMarketOne.Search
         {
             return new TermQuery(new Term("ID", signature));
         }
-
+        public Query BuildQueryByItemHash(string marketItemHash)
+        {
+            return new TermQuery(new Term("ItemHash", marketItemHash));
+        }
         /// <summary>
         /// GetMyOffers retruns My Offers Sold, or Bought. Open offers are returned as part of normal search.
         /// </summary>

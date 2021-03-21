@@ -1,14 +1,17 @@
-﻿using Avalonia.Remote.Protocol;
+﻿using FreeMarketOne.BlockChain;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
 using FreeMarketOne.Markets;
-using FreeMarketOne.P2P;
+using FreeMarketOne.Search;
+using FreeMarketOne.Tor;
 using FreeMarketOne.Users;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
+using Libplanet.Net;
+using Libplanet.Net.Messages;
 using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
@@ -23,10 +26,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static FreeMarketOne.Extensions.Common.ServiceHelper;
-using Libplanet.Net;
-using FreeMarketOne.DataStructure.ProtocolVersions;
-using FreeMarketOne.Tor;
-using Libplanet.Net.Messages;
 
 namespace FreeMarketOne.Chats
 {
@@ -63,12 +62,15 @@ namespace FreeMarketOne.Chats
 
         public bool IsRunning => _running == CommonStates.Running;
 
+        private readonly SearchEngine _searchEngine;
+
         public ChatManager(IBaseConfiguration configuration,
             AppProtocolVersion protocolVersion,
             UserPrivateKey privateKey,
             IUserManager userManager,
             TorSocks5Manager torSocksManager,
             TorProcessManager torProcessManager,
+            SearchEngine searchEngine,
             TimeSpan? repeatEvery = null,
             TimeSpan? startAfter = null)
         {
@@ -81,6 +83,7 @@ namespace FreeMarketOne.Chats
             _userPrivateKey = privateKey;
             _userManager = userManager;
             _serverOnionAddress = torProcessManager.TorOnionEndPoint;
+            _searchEngine = searchEngine;
 
             transport = new TorSocks5Transport(_userPrivateKey, protocolVersion, null, null, null, torProcessManager.TorOnionEndPoint, 9115, null, ReceivedMessageHandler, _logger, torSocksManager, torProcessManager, null);
 
@@ -114,32 +117,62 @@ namespace FreeMarketOne.Chats
 
             _logger.Information("Loading new chat message.");
             var localChat = GetChat(receivedChatItem.MarketItemHash);
-            if (localChat != null)
+            //although chats are re-created on both sides, there could be race conditions were IBD is ongoing but chat message has been received
+            //the chat could have been deleted if someone reset the whole folder
+            //as chat was created on a buyer side during checkout process
+            //allowing resuming conversation by creating chat if it does not exist
+            if (localChat == null) 
             {
-                var newChatItem = new ChatItem();
-                newChatItem.DateCreated = receivedChatItem.DateCreated;
-                newChatItem.Message = receivedChatItem.Message;
-                newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
-                newChatItem.Type = (int)DetectWhoIm(localChat, false);
-                newChatItem.Propagated = true;
-
-                _logger.Information("Add a new item to chat item.");
-                if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
-                localChat.ChatItems.Add(newChatItem);
-
-                if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
+                _logger.Information("Did  not find historic chat, ceating new on recieved message");
+                //there may be a case for offers that are past market chain longevity
+                //var result  = _searchEngine.GetMyCompletedOffers(OfferDirection.Bought, 1000, 0);
+                var result = _searchEngine.Search(_searchEngine.BuildQueryByItemHash(receivedChatItem.MarketItemHash), false, 1);
+                if (result != null)
                 {
-                    localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
+                    MarketItem marketItem = result.Results.FirstOrDefault();
+                    //MarketItem marketItem = result.Results.Find(m => m.Hash == receivedChatItem.MarketItemHash);
+                    if (marketItem != null)
+                    {
+                        localChat = CreateNewChat((MarketItemV1)marketItem);
+                        AppendToChat(receivedChatItem, localChat);
+                    }
+                    else
+                    {
+                        _logger.Information($"Could not find Market item hash {receivedChatItem.MarketItemHash} in search index.");
+                    }
                 }
-
-                _logger.Information("Saving local chat with new data.");
-
-                SaveChat(localChat);
+            }
+            else
+            {
+                AppendToChat(receivedChatItem, localChat);
             }
 
             _logger.Information("Returning data.");
             //original round tripped the message figure out why?
             transport.ReplyMessage<ChatItem>(message.Request, client, receivedChatItem);
+        }
+
+        private void AppendToChat(ChatItem receivedChatItem, ChatDataV1 localChat)
+        {
+            var newChatItem = new ChatItem();
+            newChatItem.DateCreated = receivedChatItem.DateCreated;
+            newChatItem.Message = receivedChatItem.Message;
+            newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
+            newChatItem.Type = (int)DetectWhoIm(localChat, false);
+            newChatItem.Propagated = true;
+
+            _logger.Information("Add a new item to chat item.");
+            if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
+            localChat.ChatItems.Add(newChatItem);
+
+            if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
+            {
+                localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
+            }
+
+            _logger.Information("Saving local chat with new data.");
+
+            SaveChat(localChat);
         }
 
         /// <summary>
@@ -208,7 +241,7 @@ namespace FreeMarketOne.Chats
                                     _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
                                     try
                                     {
-                                        await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[i], TimeSpan.FromMinutes(1));
+                                        var m = await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[i], TimeSpan.FromSeconds(30));
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
 
@@ -225,6 +258,7 @@ namespace FreeMarketOne.Chats
 
                             if (anyChange)
                             {
+                                //is this not reseting? where did it save
                                 var savedChat = GetChat(chat.MarketItem.Hash);
                                 for (int i = 0; i < chat.ChatItems.Count; i++)
                                 {
@@ -703,22 +737,43 @@ namespace FreeMarketOne.Chats
                     {
                         if (types.Contains(itemMarket.GetType()))
                         {
-                            var marketData = (MarketItemV1)itemMarket;
-                            var itemMarketBytes = itemMarket.ToByteArrayForSign();
-                            var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
-
-                            foreach (var itemPubKey in itemPubKeys)
+                            var marketData = (MarketItemV1)itemMarket;                            
+                            if (marketData.BuyerSignature != null && marketData.State == (int)MarketManager.ProductStateEnum.Sold)
                             {
-                                if (itemPubKey.SequenceEqual(userPubKey))
+                                var itemMarketBytes = itemMarket.ToByteArrayForSign();
+                                var itemPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.Signature);
+
+                                foreach (var itemPubKey in itemPubKeys)
                                 {
-                                    if (marketData.State == (int)MarketManager.ProductStateEnum.Sold)
+                                    if (itemPubKey.SequenceEqual(userPubKey))
                                     {
-                                        _logger.Information(string.Format("Creating a new chat for item {0}.", itemMarket.Hash));
-                                        var newChat = CreateNewSellerChat((MarketItemV1)itemMarket);
-                                        SaveChat(newChat);
+                                        //id chats were preserved by leaving chat folder don't create new chat password and etc
+                                        var found = GetChat(itemMarket.Hash);
+                                        if (found == null)
+                                        {
+                                            _logger.Information(string.Format("Creating a new chat for item {0}.", itemMarket.Hash));
+                                            var newChat = CreateNewSellerChat((MarketItemV1)itemMarket);
+                                            SaveChat(newChat);
+                                        }
                                     }
                                 }
-                            }
+
+                                var buyerPubKeys = UserPublicKey.Recover(itemMarketBytes, marketData.BuyerSignature);
+                                foreach (var itemPubKey in buyerPubKeys)
+                                {
+                                    if (itemPubKey.SequenceEqual(userPubKey))
+                                    {
+                                        //id chats were preserved by leaving chat folder don't create new chat password and etc
+                                        var found = GetChat(itemMarket.Hash);
+                                        if (found == null)
+                                        {
+                                            _logger.Information(string.Format("Creating a new chat for item {0}.", itemMarket.Hash));
+                                            var newChat = CreateNewChat((MarketItemV1)itemMarket);
+                                            SaveChat(newChat);
+                                        }
+                                    }
+                                }
+                            }                            
                         }
                     }
                 }
@@ -727,6 +782,7 @@ namespace FreeMarketOne.Chats
 
         public void Dispose()
         {
+            transport.StopAsync(TimeSpan.FromSeconds(1), _cancellationToken.Token).ConfigureAwait(false).GetAwaiter().GetResult();
             _running = CommonStates.Stopping;
 
             _cancellationToken.Cancel();

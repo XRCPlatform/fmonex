@@ -31,9 +31,9 @@ namespace LibPlanet.SQLite
         private const string DbFile = "blockchain.db";
 
         private static readonly byte[] IndexKeyPrefix = { (byte)'I' };
-        private static readonly byte[] BlockKeyPrefix = { (byte)'B' };
+        //private static readonly byte[] BlockKeyPrefix = { (byte)'B' };
         private static readonly byte[] BlockStateKeyPrefix = { (byte)'S' };
-        private static readonly byte[] TxKeyPrefix = { (byte)'T' };
+        //private static readonly byte[] TxKeyPrefix = { (byte)'T' };
         private static readonly byte[] TxNonceKeyPrefix = { (byte)'N' };
         private static readonly byte[] StagedTxKeyPrefix = { (byte)'t' };
         private static readonly byte[] IndexCountKey = { (byte)'c' };
@@ -263,7 +263,7 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override IEnumerable<HashDigest<SHA256>> IterateBlockHashes()
         {
-            byte[] prefix = BlockKeyPrefix;
+           // byte[] prefix = BlockKeyPrefix;
 
             var helper = new SQLiteHelper();
 
@@ -278,10 +278,10 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                        var keyBytes = helper.GetBytes(key);
-                        byte[] hashBytes = keyBytes.Skip(prefix.Length).ToArray();
+                        //   var keyBytes = helper.GetBytes(key);
+                        //   byte[] hashBytes = keyBytes.Skip(prefix.Length).ToArray();
 
-                        var blockHash = new HashDigest<SHA256>(hashBytes);
+                        var blockHash = new HashDigest<SHA256>(ByteUtil.ParseHex(key));
                         yield return blockHash;
                     }
                 }
@@ -1075,7 +1075,7 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override IEnumerable<TxId> IterateTransactionIds()
         {
-            byte[] prefix = TxKeyPrefix;
+    //        byte[] prefix = TxKeyPrefix;
 
             var helper = new SQLiteHelper();
 
@@ -1090,10 +1090,10 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                        var keyBytes = helper.GetBytes(key);
-                        byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
+                        //var keyBytes = helper.GetBytes(key);
+                        //byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
 
-                        var txId = new TxId(txIdBytes);
+                        var txId = new TxId(ByteUtil.ParseHex(key));
                         yield return txId;
                     }
                 }
@@ -1750,12 +1750,12 @@ namespace LibPlanet.SQLite
 
         private string BlockKey(HashDigest<SHA256> blockHash)
         {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockKeyPrefix), blockHash.ToString());
+            return blockHash.ToString();
         }
 
         private string TxKey(TxId txId)
         {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxKeyPrefix), txId.ToString());
+            return txId.ToString();
         }
 
         private string BlockStateKey(HashDigest<SHA256> blockHash)

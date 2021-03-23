@@ -1,0 +1,88 @@
+.header {
+  z-index: 1;
+  top: 0;
+  color: #e8eef1;
+  display: flex;
+  font-family: "Rubik";
+  left: 0;
+  position: fixed;
+  right: 0;
+  height: 23px !important;
+
+  background-image: linear-gradient(
+      66deg,
+      transparent 0%,
+      transparent 24%,
+      rgba(195, 195, 195, 0.04) 24%,
+      rgba(195, 195, 195, 0.04) 80%,
+      transparent 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      153deg,
+      transparent 0%,
+      transparent 29%,
+      rgba(195, 195, 195, 0.04) 29%,
+      rgba(195, 195, 195, 0.04) 45%,
+      transparent 45%,
+      transparent 100%
+    ),
+    linear-gradient(
+      199deg,
+      transparent 0%,
+      transparent 32%,
+      rgba(195, 195, 195, 0.04) 32%,
+      rgba(195, 195, 195, 0.04) 59%,
+      transparent 59%,
+      transparent 100%
+    ),
+    linear-gradient(
+      277deg,
+      transparent 0%,
+      transparent 56%,
+      rgba(195, 195, 195, 0.04) 56%,
+      rgba(195, 195, 195, 0.04) 57%,
+      transparent 57%,
+      transparent 100%
+    ),
+    linear-gradient(90deg, rgb(0, 0, 0), rgb(0, 0, 0));
+  /*   background: #14202E;  */
+  padding: 5px 10px;
+
+  justify-content: space-between;
+}
+.user-notifications {
+  font-size: 1.1em;
+  vertical-align: middle;
+  color: #e8eef1;
+  /*  color: #EDB603; */
+  cursor: pointer;
+}
+.user-login {
+  font-size: 1.1em;
+  vertical-align: middle;
+  /* color: #e8eef1; */
+  color: #2ecc71;
+  cursor: pointer;
+  
+}
+
+.user-time i {
+  font-size: 1.1em;
+  vertical-align: middle;
+  color: #e8eef1;
+}
+.clock {
+  font-family: "Rubik";
+  font-size: 1em;
+}
+
+.logo {
+  font-family: "Merriweather Sans", sans-serif;
+  opacity: 0.9;
+  font-size: 15px;
+}
+
+.logo span {
+  color: #fca611;
+}

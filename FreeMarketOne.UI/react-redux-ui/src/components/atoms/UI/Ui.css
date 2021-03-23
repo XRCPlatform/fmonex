@@ -1,0 +1,47 @@
+.divider-vertical {
+  display: inline-block;
+  width: 1px;
+  background-color: #e8eef1;
+  margin: 0 8px;
+  height: 8px !important;
+  opacity: 0.5;
+}
+
+.divider {
+  display: flex;
+}
+.divider:before,
+.divider:after {
+  content: "";
+  flex: 1;
+}
+.line {
+  align-items: center;
+  margin: 1em 0.5em;
+  color: #e8eef1;
+}
+.line:before,
+.line:after {
+  height: 0.5px;
+  /*   margin: 0 1em; */
+}
+
+.razor:before,
+.razor:after {
+  box-shadow: 0 0.5px 0 #e8eef1;
+}
+
+.gradient {
+  align-items: stretch;
+  margin: 1em 0.5em;
+  height: 0.07em;
+  line-height: 0.07em;
+  background: #fca611;
+  color: #e8eef1;
+}
+.gradient:before {
+  background: linear-gradient(to right, #0b0e11, #fca611);
+}
+.gradient:after {
+  background: linear-gradient(to left, #0b0e11, #fca611);
+}

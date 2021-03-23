@@ -1,0 +1,93 @@
+.footer {
+  bottom: 0;
+  color: #e8eef1;
+  display: flex;
+  font-family: "Rubik";
+  left: 0;
+  position: fixed;
+  right: 0;
+  height: 20px !important;
+  background-image: linear-gradient(
+      66deg,
+      transparent 0%,
+      transparent 24%,
+      rgba(195, 195, 195, 0.04) 24%,
+      rgba(195, 195, 195, 0.04) 80%,
+      transparent 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      153deg,
+      transparent 0%,
+      transparent 29%,
+      rgba(195, 195, 195, 0.04) 29%,
+      rgba(195, 195, 195, 0.04) 45%,
+      transparent 45%,
+      transparent 100%
+    ),
+    linear-gradient(
+      199deg,
+      transparent 0%,
+      transparent 32%,
+      rgba(195, 195, 195, 0.04) 32%,
+      rgba(195, 195, 195, 0.04) 59%,
+      transparent 59%,
+      transparent 100%
+    ),
+    linear-gradient(
+      277deg,
+      transparent 0%,
+      transparent 56%,
+      rgba(195, 195, 195, 0.04) 56%,
+      rgba(195, 195, 195, 0.04) 57%,
+      transparent 57%,
+      transparent 100%
+    ),
+    linear-gradient(90deg, rgb(0, 0, 0), rgb(0, 0, 0));
+  padding: 5px 10px;
+  justify-content: space-between;
+}
+
+.indicators {
+  float: right !important;
+}
+.indicators span {
+  font-size: 11.2px !important;
+}
+
+.indicators i {
+  color: #2ecc71;
+  /* color: #E74C3C;
+color: #F1C40F; */
+  font-size: 1.5em !important;
+  vertical-align: middle;
+}
+
+.price {
+  font-size: 11.2px !important;
+}
+.xrc_btc {
+  color: #2ecc71;
+  font-size: 11.2px !important;
+}
+
+.xrc_fiat {
+  color: #e74c3c;
+  font-size: 11.2px !important;
+}
+.xrc_ltc {
+  color: #2ecc71;
+  font-size: 11.2px !important;
+}
+
+
+.in-out i {
+  color: #e8eef1;
+  font-size: 20px !important;
+  cursor: pointer;
+}
+
+.in-out i:hover {
+  color: #fca611;
+ 
+}

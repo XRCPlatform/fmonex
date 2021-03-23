@@ -265,6 +265,8 @@ namespace LibPlanet.SQLite
         {
             byte[] prefix = BlockKeyPrefix;
 
+            var helper = new SQLiteHelper();
+
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandType = CommandType.Text;
@@ -275,8 +277,9 @@ namespace LibPlanet.SQLite
                 {
                     while (reader.Read())
                     {
-                        var key = (byte[])reader.GetValue("Key");
-                        byte[] hashBytes = key.Skip(prefix.Length).ToArray();
+                        var key = (string)reader.GetValue("Key");
+                        var keyBytes = helper.GetBytes(key);
+                        byte[] hashBytes = keyBytes.Skip(prefix.Length).ToArray();
 
                         var blockHash = new HashDigest<SHA256>(hashBytes);
                         yield return blockHash;
@@ -915,7 +918,7 @@ namespace LibPlanet.SQLite
                         parentChainDbId = (long)cmd.ExecuteScalar();
                     }
 
-                    if (nonce == 0)
+                    if (nonce <= 0)
                     {
                         using (var cmd = _connection.CreateCommand())
                         {
@@ -1039,7 +1042,7 @@ namespace LibPlanet.SQLite
                 using (var cmd = _connection.CreateCommand())
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.AddWithValue("@key", key);
+                    cmd.Parameters.AddWithValue("@key", helper.GetString(key));
                     cmd.Parameters.AddWithValue("@keyChainId", chainId.ToString());
                     cmd.Parameters.AddWithValue("@typeD", helper.GetString(IndexKeyPrefix));
                     cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
@@ -1074,6 +1077,8 @@ namespace LibPlanet.SQLite
         {
             byte[] prefix = TxKeyPrefix;
 
+            var helper = new SQLiteHelper();
+
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandType = CommandType.Text;
@@ -1084,8 +1089,9 @@ namespace LibPlanet.SQLite
                 {
                     while (reader.Read())
                     {
-                        var key = (byte[])reader.GetValue("Key");
-                        byte[] txIdBytes = key.Skip(prefix.Length).ToArray();
+                        var key = (string)reader.GetValue("Key");
+                        var keyBytes = helper.GetBytes(key);
+                        byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
 
                         var txId = new TxId(txIdBytes);
                         yield return txId;
@@ -1272,66 +1278,70 @@ namespace LibPlanet.SQLite
             {
                 var helper = new SQLiteHelper();
 
-                using (var firstTransaction = _connection.BeginTransaction())
+                long parentChainDbId = 0;
+                using (var cmd = _connection.CreateCommand())
                 {
-                    long parentChainDbId = 0;
-                    using (var cmd = _connection.CreateCommand())
+                    cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                    cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
+                    parentChainDbId = (long)cmd.ExecuteScalar();
+                }
+
+                if (keys.Count > 0)
+                {
+                    using (var firstTransaction = _connection.BeginTransaction())
                     {
-                        cmd.Parameters.AddWithValue("@key", chainId.ToString());
-                        cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
-                        cmd.CommandType = CommandType.Text;
-                        cmd.CommandText = "SELECT [Id] FROM " + ChainDbName + " WHERE [Key] = @key AND [Type] = @typeC;";
-                        parentChainDbId = (long)cmd.ExecuteScalar();
-                    }
-
-                    foreach (string key in keys)
-                    {
-                        var stateKey = StateRefKey(key);
-                        long? stateRefId = null;
-                        using (var cmd = _connection.CreateCommand())
+                        foreach (string key in keys)
                         {
-                            cmd.Parameters.AddWithValue("@parentId", chainId.ToString());
-                            cmd.Parameters.AddWithValue("@key", stateKey);
-                            cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
-                            cmd.CommandType = CommandType.Text;
-                            cmd.CommandText = "SELECT [Id] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId AND [Key] = @key AND [KeyIndex] = @keyIndex;";
-                            var obj = cmd.ExecuteScalar();
-
-                            if (!obj.Equals(DBNull.Value)) {
-                                stateRefId = (long)obj;
-                            }
-                        }
-
-                        var data = blockHash.ToByteArray();
-                        if (stateRefId.HasValue)
-                        {
+                            var stateKey = StateRefKey(key);
+                            long? stateRefId = null;
                             using (var cmd = _connection.CreateCommand())
                             {
-                                cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
-                                cmd.Parameters.AddWithValue("@key", stateKey);
-                                cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
-                                cmd.Parameters.AddWithValue("@id", stateRefId.Value);
-                                cmd.CommandType = CommandType.Text;
-                                cmd.CommandText = "UPDATE " + StateRefDbName + @" SET [Key] = @key, [KeyIndex] = @keyIndex, [Data] = @data WHERE [Id] = @id;";
-                                cmd.ExecuteNonQuery();
-                            }
-                        } 
-                        else
-                        {
-                            using (var cmd = _connection.CreateCommand())
-                            {
-                                cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
-                                cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                                cmd.Parameters.AddWithValue("@parentId", chainId.ToString());
                                 cmd.Parameters.AddWithValue("@key", stateKey);
                                 cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
                                 cmd.CommandType = CommandType.Text;
-                                cmd.CommandText = "INSERT INTO " + StateRefDbName + @" ([ParentId], [Key], [KeyIndex], [Data]) VALUES (@parentId, @key, @keyIndex, @data);";
-                                cmd.ExecuteNonQuery();
+                                cmd.CommandText = "SELECT [Id] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId AND [Key] = @key AND [KeyIndex] = @keyIndex;";
+                                var obj = cmd.ExecuteScalar();
+
+                                if (!obj.Equals(DBNull.Value))
+                                {
+                                    stateRefId = (long)obj;
+                                }
+                            }
+
+                            var data = blockHash.ToByteArray();
+                            if (stateRefId.HasValue)
+                            {
+                                using (var cmd = _connection.CreateCommand())
+                                {
+                                    cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                                    cmd.Parameters.AddWithValue("@key", stateKey);
+                                    cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                                    cmd.Parameters.AddWithValue("@id", stateRefId.Value);
+                                    cmd.CommandType = CommandType.Text;
+                                    cmd.CommandText = "UPDATE " + StateRefDbName + @" SET [Key] = @key, [KeyIndex] = @keyIndex, [Data] = @data WHERE [Id] = @id;";
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            else
+                            {
+                                using (var cmd = _connection.CreateCommand())
+                                {
+                                    cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
+                                    cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
+                                    cmd.Parameters.AddWithValue("@key", stateKey);
+                                    cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
+                                    cmd.CommandType = CommandType.Text;
+                                    cmd.CommandText = "INSERT INTO " + StateRefDbName + @" ([ParentId], [Key], [KeyIndex], [Data]) VALUES (@parentId, @key, @keyIndex, @data);";
+                                    cmd.ExecuteNonQuery();
+                                }
                             }
                         }
-                    }
 
-                    firstTransaction.Commit();
+                        firstTransaction.Commit();
+                    }
                 }
 
                 if (!_lastStateRefCaches.ContainsKey(chainId))

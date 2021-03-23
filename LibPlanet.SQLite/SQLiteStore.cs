@@ -32,13 +32,13 @@ namespace LibPlanet.SQLite
 
         private static readonly byte[] IndexKeyPrefix = { (byte)'I' };
         //private static readonly byte[] BlockKeyPrefix = { (byte)'B' };
-        private static readonly byte[] BlockStateKeyPrefix = { (byte)'S' };
+        //private static readonly byte[] BlockStateKeyPrefix = { (byte)'S' };
         //private static readonly byte[] TxKeyPrefix = { (byte)'T' };
         private static readonly byte[] TxNonceKeyPrefix = { (byte)'N' };
-        private static readonly byte[] StagedTxKeyPrefix = { (byte)'t' };
+        //private static readonly byte[] StagedTxKeyPrefix = { (byte)'t' };
         private static readonly byte[] IndexCountKey = { (byte)'c' };
         private static readonly byte[] CanonicalChainIdIdKey = { (byte)'C' };
-        private static readonly byte[] StateRefKeyPrefix = { (byte)'s' };
+        //private static readonly byte[] StateRefKeyPrefix = { (byte)'s' };
 
         private static readonly byte[] EmptyBytes = new byte[0];
 
@@ -281,7 +281,7 @@ namespace LibPlanet.SQLite
                         //   var keyBytes = helper.GetBytes(key);
                         //   byte[] hashBytes = keyBytes.Skip(prefix.Length).ToArray();
 
-                        var blockHash = new HashDigest<SHA256>(ByteUtil.ParseHex(key));
+                        var blockHash = new HashDigest<SHA256>(helper.ParseHex(key));
                         yield return blockHash;
                     }
                 }
@@ -995,7 +995,6 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override IEnumerable<TxId> IterateStagedTransactionIds()
         {
-            byte[] prefix = StagedTxKeyPrefix;
             var helper = new SQLiteHelper();
 
             using (var cmd = _connection.CreateCommand())
@@ -1009,10 +1008,10 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                        var keyBytes = helper.GetBytes(key);
-                        byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
-
-                        var txId = new TxId(txIdBytes);
+                  //      var keyBytes = helper.GetBytes(key);
+                   //     byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
+                        
+                        var txId = new TxId(helper.ParseHex(key));
                         yield return txId;
                     }
                 }
@@ -1093,7 +1092,7 @@ namespace LibPlanet.SQLite
                         //var keyBytes = helper.GetBytes(key);
                         //byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
 
-                        var txId = new TxId(ByteUtil.ParseHex(key));
+                        var txId = new TxId(helper.ParseHex(key));
                         yield return txId;
                     }
                 }
@@ -1162,7 +1161,7 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId)
         {
-            byte[] prefix = TxNonceKeyPrefix;
+           // byte[] prefix = TxNonceKeyPrefix;
             var helper = new SQLiteHelper();
 
             using (var cmd = _connection.CreateCommand())
@@ -1181,14 +1180,14 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                        var keyBytes = helper.GetBytes(key);
+                        //var keyBytes = helper.GetBytes(key);
                         byte[] data = (byte[])reader.GetValue("Data");
                        
-                        byte[] addressBytes = keyBytes
-                            .Skip(prefix.Length)
-                            .ToArray();
+                        //byte[] addressBytes = keyBytes
+                        //    .Skip(prefix.Length)
+                        //    .ToArray();
 
-                        var address = new Address(addressBytes);
+                        var address = new Address(key);
                         long nonce = helper.ToInt64(data);
                         yield return new KeyValuePair<Address, long>(address, nonce);
                     }
@@ -1225,7 +1224,6 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override IEnumerable<string> ListStateKeys(Guid chainId)
         {
-            byte[] prefix = StateRefKeyPrefix;
             var prevStateKey = string.Empty;
 
             var helper = new SQLiteHelper();
@@ -1251,11 +1249,7 @@ namespace LibPlanet.SQLite
                 {
                     while (reader.Read())
                     {
-                        var key = (string)reader.GetValue("Key");
-                        var keyBytes = helper.GetBytes(key);
-
-                        byte[] stateKeyBytes = keyBytes.Skip(prefix.Length).ToArray();
-                        string stateKey = helper.GetString(stateKeyBytes);
+                        var stateKey = (string)reader.GetValue("Key");
 
                         if (stateKey != prevStateKey)
                         {
@@ -1395,10 +1389,10 @@ namespace LibPlanet.SQLite
             var helper = new SQLiteHelper();
 
             byte[] keyBytes = helper.GetBytes(key);
-            byte[] prefix = StateRefKeyPrefix.Concat(keyBytes).ToArray();
+            //byte[] prefix = StateRefKeyPrefix.Concat(keyBytes).ToArray();
 
             return IterateStateReferences(
-                chainId, prefix, highestIndex.Value, lowestIndex.Value, limit.Value);
+                chainId, null, highestIndex.Value, lowestIndex.Value, limit.Value);
         }
 
         private IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
@@ -1431,29 +1425,23 @@ namespace LibPlanet.SQLite
                 {
                     while (reader.Read())
                     {
-                        var key = (string)reader.GetValue("Key");
-                        var keyBytes = helper.GetBytes(key);
+                        long index = (long)reader.GetValue("KeyIndex");
 
-                        if (keyBytes.StartsWith(prefix))
+                        if (index > highestIndex)
                         {
-                            long index = (long)reader.GetValue("KeyIndex");
-
-                            if (index > highestIndex)
-                            {
-                                continue;
-                            }
-
-                            if (index < lowestIndex || limit <= 0)
-                            {
-                                break;
-                            }
-
-                            byte[] hashBytes = (byte[])reader.GetValue("Data");
-                            var hash = new HashDigest<SHA256>(hashBytes);
-
-                            yield return new Tuple<HashDigest<SHA256>, long>(hash, index);
-                            limit--;
+                            continue;
                         }
+
+                        if (index < lowestIndex || limit <= 0)
+                        {
+                            break;
+                        }
+
+                        byte[] hashBytes = (byte[])reader.GetValue("Data");
+                        var hash = new HashDigest<SHA256>(hashBytes);
+
+                        yield return new Tuple<HashDigest<SHA256>, long>(hash, index);
+                        limit--;
                     }
                 }
             }
@@ -1466,8 +1454,6 @@ namespace LibPlanet.SQLite
                 long lowestIndex = 0,
                 long highestIndex = long.MaxValue)
         {
-            byte[] prefix = StateRefKeyPrefix;
-
             var stateRefs = new List<StateRef>();
 
             try
@@ -1495,12 +1481,7 @@ namespace LibPlanet.SQLite
                     {
                         while (reader.Read())
                         {
-                            var key = (string)reader.GetValue("Key");
-                            var keyBytes = helper.GetBytes(key);
-
-                            byte[] stateKeyBytes = keyBytes.Skip(prefix.Length).ToArray();
-                            string stateKey = helper.GetString(stateKeyBytes);
-
+                            var stateKey = (string)reader.GetValue("Key");
                             long index = (long)reader.GetValue("KeyIndex");
 
                             if (index < lowestIndex || index > highestIndex)
@@ -1760,22 +1741,22 @@ namespace LibPlanet.SQLite
 
         private string BlockStateKey(HashDigest<SHA256> blockHash)
         {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(BlockStateKeyPrefix), blockHash.ToString());
+            return blockHash.ToString();
         }
 
         private string TxNonceKey(Address address)
         {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(TxNonceKeyPrefix), address.ToHex());
+            return address.ToHex();
         }
 
         private string StagedTxKey(TxId txId)
         {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(StagedTxKeyPrefix), txId.ToString());
+            return txId.ToString();
         }
 
         private string StateRefKey(string stateKey)
         {
-            return string.Format("{0}{1}", Encoding.UTF8.GetString(StateRefKeyPrefix), stateKey);
+            return stateKey;
         }
 
         private class StateRef

@@ -328,7 +328,7 @@ namespace LibPlanet.SQLite
                 using (var cmd = _connection.CreateCommand())
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = "SELECT COUNT([Index]) FROM " + BlockDbName + ";";
+                    cmd.CommandText = "SELECT COUNT([Id]) FROM " + BlockDbName + ";";
                     return (long)cmd.ExecuteScalar();
                 }
             }
@@ -348,7 +348,7 @@ namespace LibPlanet.SQLite
                 using (var cmd = _connection.CreateCommand())
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = "SELECT COUNT([Index]) FROM " + TxDbName + ";";
+                    cmd.CommandText = "SELECT COUNT([Id]) FROM " + TxDbName + ";";
                     return (long)cmd.ExecuteScalar();
                 }
             }
@@ -1108,7 +1108,7 @@ namespace LibPlanet.SQLite
             {
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
-                cmd.CommandText = "SELECT [Key] FROM " + ChainDbName + " WHERE [Type] = @Type ORDER BY [Id] ASC;";
+                cmd.CommandText = "SELECT [Key] FROM " + ChainDbName + " WHERE [Type] = @type ORDER BY [Id] ASC;";
                 var reader = cmd.ExecuteReader();
 
                 if ((reader != null) && (reader.HasRows))
@@ -1392,7 +1392,7 @@ namespace LibPlanet.SQLite
             //byte[] prefix = StateRefKeyPrefix.Concat(keyBytes).ToArray();
 
             return IterateStateReferences(
-                chainId, null, highestIndex.Value, lowestIndex.Value, limit.Value);
+                chainId, keyBytes, highestIndex.Value, lowestIndex.Value, limit.Value);
         }
 
         private IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
@@ -1418,7 +1418,8 @@ namespace LibPlanet.SQLite
             {
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
-                cmd.CommandText = "SELECT [Key], [KeyIndex], [Data] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId ORDER BY [KeyIndex] DESC;";
+                cmd.Parameters.AddWithValue("@key", helper.GetString(prefix));
+                cmd.CommandText = "SELECT [Key], [KeyIndex], [Data] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId AND [Key] = @key ORDER BY [KeyIndex] DESC;";
                 var reader = cmd.ExecuteReader();
 
                 if ((reader != null) && (reader.HasRows))

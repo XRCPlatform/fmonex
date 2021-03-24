@@ -658,7 +658,7 @@ namespace LibPlanet.SQLite
                         cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
                         cmd.Parameters.AddWithValue("@type", helper.GetString(IndexKeyPrefix));
                         cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
-                        cmd.Parameters.AddWithValue("@key", helper.GetString(key));
+                        cmd.Parameters.AddWithValue("@key", helper.Hex(key));
                         cmd.CommandType = CommandType.Text;
                         cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
                         cmd.ExecuteNonQuery();
@@ -1041,7 +1041,7 @@ namespace LibPlanet.SQLite
                 using (var cmd = _connection.CreateCommand())
                 {
                     cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.AddWithValue("@key", helper.GetString(key));
+                    cmd.Parameters.AddWithValue("@key", helper.Hex(key));
                     cmd.Parameters.AddWithValue("@keyChainId", chainId.ToString());
                     cmd.Parameters.AddWithValue("@typeD", helper.GetString(IndexKeyPrefix));
                     cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
@@ -1299,7 +1299,7 @@ namespace LibPlanet.SQLite
                                 cmd.CommandText = "SELECT [Id] FROM " + StateRefDbName + " WHERE [ParentId] = @parentId AND [Key] = @key AND [KeyIndex] = @keyIndex;";
                                 var obj = cmd.ExecuteScalar();
 
-                                if (!obj.Equals(DBNull.Value))
+                                if ((obj != null) && (!obj.Equals(DBNull.Value)))
                                 {
                                     stateRefId = (long)obj;
                                 }

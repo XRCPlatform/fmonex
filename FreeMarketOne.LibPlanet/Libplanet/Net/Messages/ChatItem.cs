@@ -2,6 +2,7 @@
 using Bencodex.Types;
 using Newtonsoft.Json;
 using System;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Libplanet.Net.Messages
@@ -26,13 +27,16 @@ namespace Libplanet.Net.Messages
         [JsonProperty("p")]
         public bool Propagated { get; set; }
 
-      
+        [JsonProperty("d")]
+        public HashDigest<SHA256> Digest { get; set; }
+
         private static readonly byte[] MessageKey = { 0x41 }; 
         private static readonly byte[] ExtraMessageKey = { 0x42 }; 
         private static readonly byte[] DateCreatedKey = { 0x43 }; 
         private static readonly byte[] TypeKey = { 0x44 };
         private static readonly byte[] MarketItemHashKey = { 0x45 };
         private static readonly byte[] PropagatedKey = { 0x46 };
+        private static readonly byte[] DigestKey = { 0x47 };
         public ChatItem()
         {
 
@@ -80,6 +84,10 @@ namespace Libplanet.Net.Messages
             {
                 Propagated = (dict.GetValue<Integer>(PropagatedKey) == (Integer)1) ? true : false;
             }
+            if (dict.ContainsKey((IKey)(Binary)DigestKey))
+            {
+                Digest = new HashDigest<SHA256>(dict.GetValue<Binary>(DigestKey));
+            }            
         }
 
 
@@ -109,6 +117,7 @@ namespace Libplanet.Net.Messages
             dict = dict.Add(MarketItemHashKey, (IValue)(Binary)Encoding.UTF8.GetBytes(MarketItemHash));
             int prop = Propagated ? 1 : 0;
             dict = dict.Add(PropagatedKey, (IValue)(Integer)prop);
+            dict = dict.Add(DigestKey, (IValue)(Binary)Digest.ToByteArray());          
             return dict;
         }
     }

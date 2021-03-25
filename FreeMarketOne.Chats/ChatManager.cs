@@ -1,5 +1,4 @@
-﻿using FreeMarketOne.BlockChain;
-using FreeMarketOne.DataStructure;
+﻿using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.Extensions.Helpers;
@@ -7,13 +6,12 @@ using FreeMarketOne.Markets;
 using FreeMarketOne.Search;
 using FreeMarketOne.Tor;
 using FreeMarketOne.Users;
+using Libplanet;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.Net;
 using Libplanet.Net.Messages;
-using NetMQ;
-using NetMQ.Sockets;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -22,6 +20,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,7 +45,6 @@ namespace FreeMarketOne.Chats
         private TimeSpan _startAfter { get; set; }
         private string _serverOnionAddress { get; set; }
 
-        private string _socks5Proxy;
         private readonly TorSocks5Transport transport;
 
         /// <summary>
@@ -55,10 +53,6 @@ namespace FreeMarketOne.Chats
         private CommonStates _running;
 
         private ILogger _logger { get; set; }
-
-        private readonly object _locked = new object();
-
-        private const int RequestTimeout = 5000; // ms
 
         public bool IsRunning => _running == CommonStates.Running;
 
@@ -76,7 +70,7 @@ namespace FreeMarketOne.Chats
         {
             _logger = Log.Logger.ForContext<ChatManager>();
             _logger.Information("Initializing Chat Manager");
-            
+
             _asyncLoopFactory = new AsyncLoopFactory(_logger);
             _configuration = configuration;
             _cancellationToken = new CancellationTokenSource();
@@ -90,7 +84,7 @@ namespace FreeMarketOne.Chats
             if (!repeatEvery.HasValue)
             {
                 _repeatEvery = TimeSpans.HalfMinute;
-            } 
+            }
             else
             {
                 _repeatEvery = repeatEvery.Value;
@@ -106,22 +100,64 @@ namespace FreeMarketOne.Chats
             }
         }
 
+        public static HashDigest<SHA256> ToHashDigest(byte[] rawData)
+        {
+            using (SHA256 shaHash = SHA256.Create())
+            {
+                byte[] bytes = shaHash.ComputeHash(rawData);
+                return new HashDigest<SHA256>(bytes);
+            }
+        }
+
+        public static HashDigest<SHA256> ToHashDigest(string rawData)
+        {
+            using (SHA256 shaHash = SHA256.Create())
+            {
+                byte[] bytes = shaHash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+                return new HashDigest<SHA256>(bytes);
+            }
+        }
+
+        public static string Hash(byte[] rawData)
+        {
+            using (SHA256 shaHash = SHA256.Create())
+            {
+                byte[] bytes = shaHash.ComputeHash(rawData);
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Sender's identity, private key possession for peers pubkey is validated in transport layer.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="message"></param>
         private void ReceivedMessageHandler(object sender, ReceivedRequestEventArgs message)
         {
             TotClient client = message.Client;
-
+            ChatDataV1 localChat = null;
+            string pubKeyHash = Hash(message.Peer.PublicKey.Format(false));
             Console.WriteLine($"Receiving chat message from peer: {message.Peer}.");
             _logger.Information($"Receiving chat message from peer: {message.Peer}.");
 
             var receivedChatItem = message.Envelope.GetBody<ChatItem>();
 
             _logger.Information("Loading new chat message.");
-            var localChat = GetChat(receivedChatItem.MarketItemHash);
+            if (receivedChatItem.MarketItemHash == null)
+            {
+                localChat = GetChat(pubKeyHash);
+            }
+
             //although chats are re-created on both sides, there could be race conditions were IBD is ongoing but chat message has been received
             //the chat could have been deleted if someone reset the whole folder
             //as chat was created on a buyer side during checkout process
             //allowing resuming conversation by creating chat if it does not exist
-            if (localChat == null) 
+            if (localChat == null)
             {
                 _logger.Information("Did  not find historic chat, ceating new on recieved message");
                 //there may be a case for offers that are past market chain longevity
@@ -146,9 +182,18 @@ namespace FreeMarketOne.Chats
             {
                 AppendToChat(receivedChatItem, localChat);
             }
+            try
+            {
+                var validated = DecryptAndVerifyChatItem(localChat.ChatItems, receivedChatItem);
+                //store digest for retransmition
+                receivedChatItem.Digest = validated.Digest;
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Failure decrypting and validating message digest.");
+            }
 
-            _logger.Information("Returning data.");
-            //original round tripped the message figure out why?
+            _logger.Information("Sending ACK response.");
             transport.ReplyMessage<ChatItem>(message.Request, client, receivedChatItem);
         }
 
@@ -163,17 +208,27 @@ namespace FreeMarketOne.Chats
 
             _logger.Information("Add a new item to chat item.");
             if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
-            localChat.ChatItems.Add(newChatItem);
+
+            //avoid duplicate system retry[s]  
+            var found = localChat.ChatItems.Find(c => c.Digest.Equals(receivedChatItem.Digest)
+                                                   && c.DateCreated.Equals(receivedChatItem.DateCreated));
+            if (found == null)
+            {
+                localChat.ChatItems.Add(newChatItem);
+            }
 
             if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
             {
                 localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
             }
 
+
+
             _logger.Information("Saving local chat with new data.");
 
             SaveChat(localChat);
         }
+
 
         /// <summary>
         /// Is change manager running
@@ -222,7 +277,7 @@ namespace FreeMarketOne.Chats
                                     List<byte[]> pubKeys;
                                     if (chat.ChatItems[i].Type == (int)ChatItemTypeEnum.Seller)
                                     {
-                                        chatPeerIp =  chat.MarketItem.BuyerOnionEndpoint;
+                                        chatPeerIp = chat.MarketItem.BuyerOnionEndpoint;
                                         pubKeys = UserPublicKey.Recover(chat.MarketItem.ToByteArrayForSign(), chat.MarketItem.BuyerSignature);
                                     }
                                     else
@@ -241,10 +296,14 @@ namespace FreeMarketOne.Chats
                                     _logger.Information(string.Format("Trying to send chat message to {0}.", endPoint.ToString()));
                                     try
                                     {
-                                        var m = await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[i], TimeSpan.FromSeconds(30));
+                                        ///there seem to be a problem here that mesages go to the drain
+                                        var response = await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[i], TimeSpan.FromSeconds(5));
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
-
+                                        if (!response.Digest.Equals(chat.ChatItems[i]))
+                                        {
+                                            throw new FailedMessageDigestValidation("Message digest after transmition to remote is not the same. Crypto error.");
+                                        }
                                         chat.ChatItems[i].Propagated = true;
                                         anyChange = true;
                                     }
@@ -297,56 +356,14 @@ namespace FreeMarketOne.Chats
             return endPoint;
         }
 
-        /// <summary>
-        /// This can be deleted is it for development
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        //private static void ClientOnReceiveReady(object sender, NetMQSocketEventArgs args)
-        //{
-        //    Console.WriteLine("Server replied ({0})", args.Socket.ReceiveFrameString());
-        //}
 
-        /// <summary>
-        /// Send message by NetMQ
-        /// </summary>
-        /// <param name="chatItem"></param>
-        /// <param name="signature"></param>
-        /// <returns></returns>
-        //private bool SendNQMessage(ChatItem chatItem, string hash, DnsEndPoint endPoint)
-        //{
-        //    var connectionString = ToNetMQAddress(endPoint.Host);
-        //    using (var client = new RequestSocket(connectionString))//should connection be passed here?
-        //    {
-        //        try
-        //        {
-        //            var chatMessage = new ChatMessage();
-        //            chatMessage.Message = chatItem.Message;
-        //            chatMessage.ExtraMessage = chatItem.ExtraMessage;
-        //            chatMessage.DateCreated = chatItem.DateCreated;
-        //            chatMessage.Hash = hash;
-
-        //            client.Connect(connectionString);
-
-        //            client.SendMultipartMessage(chatMessage.ToNetMQMessage());
-        //            client.ReceiveReady += ClientOnReceiveReady;
-        //            bool pollResult = client.Poll(TimeSpan.FromMilliseconds(RequestTimeout));
-        //            client.ReceiveReady -= ClientOnReceiveReady;
-        //            client.Disconnect(connectionString);
-
-        //            return pollResult;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _logger.Error(
-        //                ex,
-        //                $"An unexpected exception occurred during SendNQMessage(): {ex}"
-        //            );
-        //        }
-        //    }
-
-        //    return false;
-        //}
+        public ChatItem DecryptAndVerifyChatItem(List<ChatItem> chatItems, ChatItem lastItem)
+        {
+            var password = chatItems.First().Message;
+            var aes = new SymmetricKey(Encoding.UTF8.GetBytes(password));
+            ChatItem processedItem = DecryptChatItem(aes, lastItem);
+            return processedItem;
+        }
 
         /// <summary>
         /// Descrypt chat items in chat
@@ -358,7 +375,7 @@ namespace FreeMarketOne.Chats
             var result = new List<ChatItem>();
 
             var password = chatItems.First().Message;
-            var aes = new SymmetricKey(Encoding.ASCII.GetBytes(password));
+            var aes = new SymmetricKey(Encoding.UTF8.GetBytes(password));
             var first = true;
 
             foreach (var item in chatItems)
@@ -371,21 +388,34 @@ namespace FreeMarketOne.Chats
 
                 try
                 {
-                    var processedItem = new ChatItem();
-                    processedItem.DateCreated = item.DateCreated;
-                    processedItem.ExtraMessage = item.ExtraMessage;
-                    processedItem.Propagated = item.Propagated;
-                    processedItem.Type = item.Type;
-                    processedItem.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
+                    ChatItem processedItem = DecryptChatItem(aes, item);
                     result.Add(processedItem);
                 }
-                catch (Exception )
+                catch (Exception ex)
                 {
-
+                    _logger.Error(ex, $"An unexpected exception occurred during DecryptChatItems(): {ex}");
                 }
             }
 
             return result;
+        }
+
+        private ChatItem DecryptChatItem(SymmetricKey aes, ChatItem item)
+        {
+            var processedItem = new ChatItem();
+            processedItem.DateCreated = item.DateCreated;
+            processedItem.ExtraMessage = item.ExtraMessage;
+            processedItem.Propagated = item.Propagated;
+            processedItem.Type = item.Type;
+            processedItem.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
+            processedItem.Digest = ToHashDigest(processedItem.Message);
+            if (!processedItem.Digest.Equals(item.Digest))
+            {
+                _logger.Warning($"Failed message digest validation. Expected:[{item.Digest}] actual:{processedItem.Digest}, most likely due to cryptographic failures.");
+                throw new FailedMessageDigestValidation("Failed to decrypt messages.");
+            }
+
+            return processedItem;
         }
 
         /// <summary>
@@ -403,70 +433,6 @@ namespace FreeMarketOne.Chats
             {
                 return false;
             }
-        }
-
-        //private string ToNetMQAddress(string onionAddress)
-        //{
-        //    return string.IsNullOrEmpty(_socks5Proxy) ?
-        //        $"tcp://{onionAddress}:{_configuration.ListenerChatEndPoint.Port}" :
-        //        $"socks5://{_socks5Proxy};{onionAddress}:{_configuration.ListenerChatEndPoint.Port}";
-        //}
-
-        /// <summary>
-        /// Load separate chat listener over NetMQ
-        /// </summary>
-        private void StartMQListener()
-        {
-            Task.Run(() =>
-            {
-                var endPoint = _configuration.ListenerChatEndPoint.ToString();
-                var connectionString = string.Format("tcp://{0}", endPoint.ToString());
-
-                using (var response = new ResponseSocket())
-                {
-                    response.Options.Linger = TimeSpan.Zero;
-                    Console.WriteLine("Chat listener binding {0}", endPoint);
-                    response.Bind(connectionString);
-
-                    while (true)
-                    {
-                        var clientMessage = response.ReceiveMultipartMessage(4);//why 4 frames?
-
-                        Console.WriteLine("Receiving chat message from peer.");
-                        _logger.Information("Receiving chat message from peer.");
-
-                        var receivedChatItem = new ChatMessage(clientMessage);
-
-                        _logger.Information("Loading new chat message.");
-                        var localChat = GetChat(receivedChatItem.Hash);
-                        if (localChat != null)
-                        {
-                            var newChatItem = new ChatItem();
-                            newChatItem.DateCreated = receivedChatItem.DateCreated;
-                            newChatItem.Message = receivedChatItem.Message;
-                            newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
-                            newChatItem.Type = (int)DetectWhoIm(localChat, false);
-                            newChatItem.Propagated = true;
-
-                            _logger.Information("Add a new item to chat item.");
-                            if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
-                            localChat.ChatItems.Add(newChatItem);
-
-                            if (!string.IsNullOrEmpty(receivedChatItem.ExtraMessage))
-                            {
-                                localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
-                            }
-
-                            _logger.Information("Saving local chat with new data.");
-
-                            SaveChat(localChat);
-                        } 
-
-                        _logger.Information("Returning data.");
-                        response.SendMultipartMessage(clientMessage);
-                    }
-                }
-            });
         }
 
         /// <summary>
@@ -499,7 +465,7 @@ namespace FreeMarketOne.Chats
             newInitialMessage.DateCreated = DateTime.UtcNow;
             newInitialMessage.Type = (int)ChatItemTypeEnum.Seller;
             newInitialMessage.MarketItemHash = offer.Hash;
-
+            newInitialMessage.Digest = ToHashDigest(newInitialMessage.Message);
             result.ChatItems.Add(newInitialMessage);
             return result;
         }
@@ -654,14 +620,15 @@ namespace FreeMarketOne.Chats
                 if (chatData.ChatItems.Any())
                 {
                     var password = chatData.ChatItems.First().Message;
-                    var aes = new SymmetricKey(Encoding.ASCII.GetBytes(password));
-
+                    var aes = new SymmetricKey(Encoding.UTF8.GetBytes(password));
+                    byte[] messageBytes = Encoding.UTF8.GetBytes(message);
                     var newChatItem = new ChatItem();
-                    newChatItem.Message = Convert.ToBase64String(aes.Encrypt(Encoding.UTF8.GetBytes(message)));
+                    newChatItem.Message = Convert.ToBase64String(aes.Encrypt(messageBytes));
                     newChatItem.DateCreated = DateTime.UtcNow;
                     newChatItem.Type = (int)DetectWhoIm(chatData, true);
                     newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
                     newChatItem.MarketItemHash = chatData.MarketItem.Hash;
+                    newChatItem.Digest = ToHashDigest(messageBytes);
                     chatData.ChatItems.Add(newChatItem);
 
                     SaveChat(chatData);
@@ -688,13 +655,13 @@ namespace FreeMarketOne.Chats
                     {
                         _logger.Information(string.Format("Im Seller {0}", isMyMessage));
                         return ChatItemTypeEnum.Seller;
-                    } 
+                    }
                     else
                     {
                         _logger.Information(string.Format("Im Buyer. {0}", isMyMessage));
                         return ChatItemTypeEnum.Buyer;
                     }
-                } 
+                }
                 else
                 {
                     if (firstItem.Type == (int)ChatItemTypeEnum.Seller)
@@ -708,7 +675,7 @@ namespace FreeMarketOne.Chats
                         return ChatItemTypeEnum.Seller;
                     }
                 }
-            } 
+            }
             else
             {
                 //case of first message (first is message from seller because of it we are buyer)
@@ -737,7 +704,7 @@ namespace FreeMarketOne.Chats
                     {
                         if (types.Contains(itemMarket.GetType()))
                         {
-                            var marketData = (MarketItemV1)itemMarket;                            
+                            var marketData = (MarketItemV1)itemMarket;
                             if (marketData.BuyerSignature != null && marketData.State == (int)MarketManager.ProductStateEnum.Sold)
                             {
                                 var itemMarketBytes = itemMarket.ToByteArrayForSign();
@@ -773,7 +740,7 @@ namespace FreeMarketOne.Chats
                                         }
                                     }
                                 }
-                            }                            
+                            }
                         }
                     }
                 }

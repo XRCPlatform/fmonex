@@ -31,14 +31,9 @@ namespace LibPlanet.SQLite
         private const string DbFile = "blockchain.db";
 
         private static readonly byte[] IndexKeyPrefix = { (byte)'I' };
-        //private static readonly byte[] BlockKeyPrefix = { (byte)'B' };
-        //private static readonly byte[] BlockStateKeyPrefix = { (byte)'S' };
-        //private static readonly byte[] TxKeyPrefix = { (byte)'T' };
         private static readonly byte[] TxNonceKeyPrefix = { (byte)'N' };
-        //private static readonly byte[] StagedTxKeyPrefix = { (byte)'t' };
         private static readonly byte[] IndexCountKey = { (byte)'c' };
         private static readonly byte[] CanonicalChainIdIdKey = { (byte)'C' };
-        //private static readonly byte[] StateRefKeyPrefix = { (byte)'s' };
 
         private static readonly byte[] EmptyBytes = new byte[0];
 
@@ -263,8 +258,6 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override IEnumerable<HashDigest<SHA256>> IterateBlockHashes()
         {
-           // byte[] prefix = BlockKeyPrefix;
-
             var helper = new SQLiteHelper();
 
             using (var cmd = _connection.CreateCommand())
@@ -702,31 +695,6 @@ namespace LibPlanet.SQLite
                         parentChainDbId = (long)cmd.ExecuteScalar();
                     }
 
-                    //KEYS ONLY - TO DELETE
-                    //data = EmptyBytes;
-                    //using (var cmd = _connection.CreateCommand())
-                    //{
-                    //    cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
-                    //    cmd.Parameters.AddWithValue("@type", IndexKeyPrefix);
-                    //    cmd.Parameters.AddWithValue("@key", IndexKeyPrefix);
-                    //    cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
-                    //    cmd.CommandType = CommandType.Text;
-                    //    cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
-                    //    cmd.ExecuteNonQuery();
-                    //}
-
-                    //data = EmptyBytes;
-                    //using (var cmd = _connection.CreateCommand())
-                    //{
-                    //    cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
-                    //    cmd.Parameters.AddWithValue("@type", TxNonceKeyPrefix);
-                    //    cmd.Parameters.AddWithValue("@key", TxNonceKeyPrefix);
-                    //    cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
-                    //    cmd.CommandType = CommandType.Text;
-                    //    cmd.CommandText = "INSERT INTO " + ChainDbName + @" ([ParentId], [Type], [Key], [Data]) VALUES (@parentId, @type, @key, @data);";
-                    //    cmd.ExecuteNonQuery();
-                    //}
-
                     data = EmptyBytes;
                     using (var cmd = _connection.CreateCommand())
                     {
@@ -1012,9 +980,6 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                  //      var keyBytes = helper.GetBytes(key);
-                   //     byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
-                        
                         var txId = new TxId(helper.ParseHex(key));
                         yield return txId;
                     }
@@ -1078,8 +1043,6 @@ namespace LibPlanet.SQLite
         /// <inheritdoc/>
         public override IEnumerable<TxId> IterateTransactionIds()
         {
-    //        byte[] prefix = TxKeyPrefix;
-
             var helper = new SQLiteHelper();
 
             using (var cmd = _connection.CreateCommand())
@@ -1093,9 +1056,6 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                        //var keyBytes = helper.GetBytes(key);
-                        //byte[] txIdBytes = keyBytes.Skip(prefix.Length).ToArray();
-
                         var txId = new TxId(helper.ParseHex(key));
                         yield return txId;
                     }
@@ -1388,7 +1348,6 @@ namespace LibPlanet.SQLite
             var helper = new SQLiteHelper();
 
             byte[] keyBytes = helper.GetBytes(key);
-            //byte[] prefix = StateRefKeyPrefix.Concat(keyBytes).ToArray();
 
             return IterateStateReferences(
                 chainId, keyBytes, highestIndex.Value, lowestIndex.Value, limit.Value);

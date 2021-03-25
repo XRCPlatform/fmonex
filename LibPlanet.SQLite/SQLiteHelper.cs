@@ -9,31 +9,38 @@ namespace LibPlanet.SQLiteStore
 {
     internal class SQLiteHelper
     {
-        internal byte[] GetBytes(string key, string dbName, SqliteConnection connection)
+        internal byte[] GetBytes(string key, string dbName, string connectionString)
         {
-            using (var cmd = connection.CreateCommand())
+            using (var _connection = new SqliteConnection(connectionString))
             {
-                cmd.Parameters.AddWithValue("@key", key);
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "SELECT [Data] FROM " + dbName + " WHERE [Key] == @key;";
-                var reader = cmd.ExecuteReader();
+                _connection.Open();
 
-                if ((reader != null) && (reader.HasRows))
+                using (var cmd = _connection.CreateCommand())
                 {
-                    reader.Read();
+                    cmd.Parameters.AddWithValue("@key", key);
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = "SELECT [Data] FROM " + dbName + " WHERE [Key] == @key;";
+                    var reader = cmd.ExecuteReader();
 
-                    return (byte[])reader.GetValue("Data");      
+                    if ((reader != null) && (reader.HasRows))
+                    {
+                        reader.Read();
+
+                        return (byte[])reader.GetValue("Data");
+                    }
                 }
             }
 
             return null;
         }
 
-        internal void PutBytes(string key, string dbName, byte[] data, SqliteConnection connection)
+        internal void PutBytes(string key, string dbName, byte[] data, string connectionString)
         {
-            using (var firstTransaction = connection.BeginTransaction())
+            using (var _connection = new SqliteConnection(connectionString))
             {
-                using (var cmd = connection.CreateCommand())
+                _connection.Open();
+
+                using (var cmd = _connection.CreateCommand())
                 {
                     cmd.Parameters.Add("@data", SqliteType.Blob, data.Length).Value = data;
                     cmd.Parameters.AddWithValue("@key", key);
@@ -41,24 +48,22 @@ namespace LibPlanet.SQLiteStore
                     cmd.CommandText = "INSERT INTO " + dbName + " ([Key], [Data]) VALUES (@key, @data);";
                     cmd.ExecuteNonQuery();
                 }
-
-                firstTransaction.Commit();
             }
         }
 
-        internal void RemoveBytes(string key, string dbName, SqliteConnection connection)
+        internal void RemoveBytes(string key, string dbName, string connectionString)
         {
-            using (var firstTransaction = connection.BeginTransaction())
+            using (var _connection = new SqliteConnection(connectionString))
             {
-                using (var cmd = connection.CreateCommand())
+                _connection.Open();
+
+                using (var cmd = _connection.CreateCommand())
                 {
                     cmd.Parameters.AddWithValue("@key", key);
                     cmd.CommandType = CommandType.Text;
                     cmd.CommandText = "DELETE FROM " + dbName + " WHERE [Key] = @key;";
                     cmd.ExecuteNonQuery();
                 }
-
-                firstTransaction.Commit();
             }
         }
 

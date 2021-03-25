@@ -73,7 +73,8 @@ System.Reflection.Assembly.GetExecutingAssembly().Location),
 
             var txNonceS = storeSQLite.GetTxNonce(chainIdS.Value, Address1);
 
-            foreach (var hashS in storeSQLite.IterateBlockHashes())
+            var listBlocksS = storeSQLite.IterateBlockHashes().ToList();
+            foreach (var hashS in listBlocksS)
             {
                 var blockS = storeSQLite.GetBlock<DumbAction>(hashS);
                 if (blockS.Transactions.Count() == 0) continue;

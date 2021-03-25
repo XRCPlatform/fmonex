@@ -278,8 +278,6 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                        //   var keyBytes = helper.GetBytes(key);
-                        //   byte[] hashBytes = keyBytes.Skip(prefix.Length).ToArray();
 
                         var blockHash = new HashDigest<SHA256>(helper.ParseHex(key));
                         yield return blockHash;

@@ -25,9 +25,9 @@ using System.Security.Cryptography;
 using FreeMarketOne.DataStructure.ProtocolVersions;
 using FreeMarketOne.Extensions.Common;
 using static FreeMarketOne.Extensions.Common.ServiceHelper;
-using Libplanet.Store;
 using Libplanet.Net.Messages;
 using FreeMarketOne.Tor;
+using LibPlanet.SQLite;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -49,7 +49,7 @@ namespace FreeMarketOne.BlockChain
 
         private UserPrivateKey _privateKey { get; set; }
         private BlockChain<T> _blockChain;
-        private DefaultStore _storage;
+        private SQLiteStore _storage;
         private Swarm<T> _swarmServer;
         private ImmutableList<Peer> _seedPeers;
         private IImmutableSet<Address> _trustedPeers;
@@ -71,7 +71,7 @@ namespace FreeMarketOne.BlockChain
         private Block<T> _genesisBlock { get; }
 
         public BlockChain<T> BlockChain { get => _blockChain; }
-        public DefaultStore Storage { get => _storage; }
+        public SQLiteStore Storage { get => _storage; }
         public Swarm<T> SwarmServer { get => _swarmServer; }
         public UserPrivateKey PrivateKey { get => _privateKey; }
         private TorProcessManager _torProcessManager;
@@ -121,7 +121,7 @@ namespace FreeMarketOne.BlockChain
             _endPoint = endPoint;
             _torProcessManager = torProcessManager;
             _privateKey = userPrivateKey;
-            _storage = new DefaultStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
+            _storage = new SQLiteStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
             _onionSeedManager = seedsManager;
 
             if (genesisBlock == null)

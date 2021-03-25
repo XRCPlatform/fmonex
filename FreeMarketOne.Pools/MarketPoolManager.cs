@@ -3,7 +3,7 @@ using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Extensions;
 using Libplanet.Net;
-using Libplanet.Store;
+using LibPlanet.SQLite;
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace FreeMarketOne.Pools
         public MarketPoolManager(
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
-            DefaultStore storage,
+            SQLiteStore storage,
             Swarm<MarketAction> swarmServer,
             PrivateKey privateKey,
             BlockChain<MarketAction> blockChain,

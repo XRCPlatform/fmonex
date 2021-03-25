@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FreeMarketOne.DataStructure;
 using Libplanet.Extensions.Helpers;
-using Libplanet.Store;
+using LibPlanet.SQLite;
 
 namespace FreeMarketOne.Pools
 {
@@ -24,7 +24,7 @@ namespace FreeMarketOne.Pools
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private PrivateKey _privateKey { get; set; }
-        private DefaultStore _storage;
+        private SQLiteStore _storage;
         private BlockChain<T> _blockChain;
         private Swarm<T> _swarmServer;
         private Address _address;
@@ -35,7 +35,7 @@ namespace FreeMarketOne.Pools
             Swarm<T> swarmServer,
             BlockChain<T> blockChain,
             Address address,
-            DefaultStore storage,
+            SQLiteStore storage,
             PrivateKey privateKey,
             CancellationTokenSource cancellationTokenSource,
             EventHandler eventNewBlock = null)

@@ -328,7 +328,7 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountBlocks: {e.Message}.");
             }
 
-            return -1;
+            return 0;
         }
 
         /// <inheritdoc/>
@@ -348,7 +348,7 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountTransactions: {e.Message}.");
             }
 
-            return -1;
+            return 0;
         }
 
         /// <inheritdoc/>
@@ -366,7 +366,7 @@ namespace LibPlanet.SQLite
                 var key = BlockKey(blockHash);
                 byte[] bytes = helper.GetBytes(key, BlockDbName, _connection);
 
-                if (bytes != null) 
+                if (bytes != null)
                     return true;
             }
             catch (Exception e)
@@ -590,7 +590,7 @@ namespace LibPlanet.SQLite
                     cmd.Parameters.AddWithValue("@typeD", helper.GetString(IndexCountKey));
                     cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
                     cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
-                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " + 
+                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
                         "WHERE T.[Key] = @key AND T.[Type] = @type;";
                     var reader = cmd.ExecuteReader();
 
@@ -599,7 +599,7 @@ namespace LibPlanet.SQLite
                         reader.Read();
                         var data = (byte[])reader.GetValue("Data");
                         return helper.ToInt64(data);
-                    } 
+                    }
                 }
             }
             catch (Exception e)
@@ -607,7 +607,7 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountIndex: {e.Message}.");
             }
 
-            return -1;
+            return 0;
         }
 
         /// <inheritdoc/>
@@ -616,6 +616,9 @@ namespace LibPlanet.SQLite
             try
             {
                 var helper = new SQLiteHelper();
+
+                var existChainId = ExistCanonicalChainId(chainId);
+                if (!existChainId) SetCanonicalChainId(chainId);
 
                 long index = CountIndex(chainId);
 
@@ -669,7 +672,40 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during AppendIndex: {e.Message}.");
             }
 
-            return -1;
+            return 0;
+        }
+
+        private bool ExistCanonicalChainId(Guid chainId)
+        {
+            try
+            {
+                var helper = new SQLiteHelper();
+
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@key", chainId.ToString());
+                    cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
+                    cmd.CommandText = "SELECT COUNT([Id]) FROM " + ChainDbName + " " +
+                        "WHERE [Key] = @key AND [Type] = @type;";
+                    var count = (long)cmd.ExecuteScalar();
+
+                    if (count > 0)
+                    {
+                        return true;
+                    } 
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error during CountIndex: {e.Message}.");
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -806,7 +842,7 @@ namespace LibPlanet.SQLite
                 {
                     cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = "SELECT [Data] FROM " + ChainDbName + " WHERE [Type] = @typeC;";
+                    cmd.CommandText = "SELECT [Data] FROM " + ChainDbName + " WHERE [Type] = @typeC ORDER BY [Id] ASC LIMIT 1;";
                     var bytes = (byte[])cmd.ExecuteScalar();
 
                     return bytes is null
@@ -828,6 +864,9 @@ namespace LibPlanet.SQLite
             try
             {
                 var helper = new SQLiteHelper();
+
+                var existChainId = ExistCanonicalChainId(chainId);
+                if (!existChainId) SetCanonicalChainId(chainId);
 
                 var key = TxNonceKey(address);
                 using (var cmd = _connection.CreateCommand())
@@ -860,7 +899,7 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during GetTxNonce: {e.Message}.");
             }
 
-            return -1;
+            return 0;
         }
 
         /// <inheritdoc/>

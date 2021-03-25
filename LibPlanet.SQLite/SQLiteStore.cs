@@ -1170,7 +1170,7 @@ namespace LibPlanet.SQLite
                 cmd.Parameters.AddWithValue("@key", chainId.ToString());
                 cmd.Parameters.AddWithValue("@typeD", helper.GetString(TxNonceKeyPrefix));
                 cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
-                cmd.CommandText = "SELECT TD.[Key] FROM " + ChainDbName + " AS T " +
+                cmd.CommandText = "SELECT TD.[Key], TD.[Data] FROM " + ChainDbName + " AS T " +
                     "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
                     "WHERE T.[Key] = @key AND T.[Type] = @typeC;";
                 var reader = cmd.ExecuteReader();
@@ -1292,7 +1292,7 @@ namespace LibPlanet.SQLite
                             long? stateRefId = null;
                             using (var cmd = _connection.CreateCommand())
                             {
-                                cmd.Parameters.AddWithValue("@parentId", chainId.ToString());
+                                cmd.Parameters.AddWithValue("@parentId", parentChainDbId);
                                 cmd.Parameters.AddWithValue("@key", stateKey);
                                 cmd.Parameters.AddWithValue("@keyIndex", blockIndex);
                                 cmd.CommandType = CommandType.Text;

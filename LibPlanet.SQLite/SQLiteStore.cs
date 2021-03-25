@@ -969,16 +969,18 @@ namespace LibPlanet.SQLite
                 cmd.Parameters.AddWithValue("@key", chainId.ToString());
                 cmd.Parameters.AddWithValue("@typeD", helper.GetString(IndexKeyPrefix));
                 cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
+                cmd.Parameters.AddWithValue("@offset", offset);
+                cmd.Parameters.AddWithValue("@limit", long.MaxValue);
                 cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
                     "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
-                    "WHERE T.[Key] = @key AND T.[Type] = @typeC;";
+                    "WHERE T.[Key] = @key AND T.[Type] = @typeC ORDER BY T.[Id] ASC LIMIT @limit OFFSET @offset;";
                 var reader = cmd.ExecuteReader();
 
                 if ((reader != null) && (reader.HasRows))
                 {
                     while (reader.Read())
                     {
-                        if (count >= limit)
+                        if ((limit.HasValue) && (count >= limit))
                         {
                             break;
                         }
@@ -1180,13 +1182,8 @@ namespace LibPlanet.SQLite
                     while (reader.Read())
                     {
                         var key = (string)reader.GetValue("Key");
-                        //var keyBytes = helper.GetBytes(key);
                         byte[] data = (byte[])reader.GetValue("Data");
                        
-                        //byte[] addressBytes = keyBytes
-                        //    .Skip(prefix.Length)
-                        //    .ToArray();
-
                         var address = new Address(key);
                         long nonce = helper.ToInt64(data);
                         yield return new KeyValuePair<Address, long>(address, nonce);

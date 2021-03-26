@@ -105,11 +105,13 @@ namespace LibPlanet.SQLite
 
         private string GetConnectionString()
         {
-            return "Data Source=" + SQLiteDbPath(DbFile);
+            return "Data Source=" + SQLiteDbPath(DbFile) + ";Cache=Shared";
         }
 
         private void CreateTables()
         {
+            _logger.Information($"CreateTables.");
+
             var helper = new SQLiteHelper();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
@@ -228,17 +230,21 @@ namespace LibPlanet.SQLite
                     transaction.Commit();
                 }
             }
+
+            _logger.Information($"Finished CreateTables.");
         }
 
         /// <inheritdoc/>
         public override void Dispose()
         {
-
+            _logger.Information($"Dispose.");
         }
 
         /// <inheritdoc/>
         public override void PutBlock<T>(Block<T> block)
         {
+            _logger.Information($"PutBlock.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -268,11 +274,15 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during PutBlock: {e.Message}.");
             }
+
+            _logger.Information($"Finished PutBlock.");
         }
 
         /// <inheritdoc/>
         public override void PutTransaction<T>(Transaction<T> tx)
         {
+            _logger.Information($"PutTransaction.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -297,12 +307,17 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during PutTransaction: {e.Message}.");
             }
+
+            _logger.Information($"Finished PutTransaction.");
         }
 
         /// <inheritdoc/>
         public override IEnumerable<HashDigest<SHA256>> IterateBlockHashes()
         {
+            _logger.Information($"IterateBlockHashes.");
+
             var helper = new SQLiteHelper();
+            var result = new List<HashDigest<SHA256>>();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
@@ -321,16 +336,23 @@ namespace LibPlanet.SQLite
                             var key = (string)reader.GetValue("Key");
 
                             var blockHash = new HashDigest<SHA256>(helper.ParseHex(key));
-                            yield return blockHash;
+                            //yield return blockHash;
+                            result.Add(blockHash);
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished IterateBlockHashes.");
+
+            return result;
         }
 
         /// <inheritdoc/>
         public override Transaction<T> GetTransaction<T>(TxId txid)
         {
+            _logger.Information($"GetTransaction.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -357,12 +379,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during GetTransaction: {e.Message}.");
             }
 
+            _logger.Information($"Finished GetTransaction.");
+
             return null;
         }
 
         /// <inheritdoc/>
         public override long CountBlocks()
         {
+            _logger.Information($"CountBlocks.");
+
             try
             {
                 using (var _connection = new SqliteConnection(GetConnectionString()))
@@ -382,12 +408,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountBlocks: {e.Message}.");
             }
 
+            _logger.Information($"Finished CountBlocks.");
+
             return 0;
         }
 
         /// <inheritdoc/>
         public override long CountTransactions()
         {
+            _logger.Information($"CountTransactions.");
+
             try
             {
                 using (var _connection = new SqliteConnection(GetConnectionString()))
@@ -407,12 +437,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountTransactions: {e.Message}.");
             }
 
+            _logger.Information($"Finished CountTransactions.");
+
             return 0;
         }
 
         /// <inheritdoc/>
         public override bool ContainsBlock(HashDigest<SHA256> blockHash)
         {
+            _logger.Information($"ContainsBlock.");
+
             try
             {
                 if (_blockCache.ContainsKey(blockHash))
@@ -433,12 +467,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during ContainsBlock: {e.Message}.");
             }
 
+            _logger.Information($"Finished ContainsBlock.");
+
             return false;
         }
 
         /// <inheritdoc/>
         public override bool ContainsTransaction(TxId txId)
         {
+            _logger.Information($"ContainsTransaction.");
+
             try
             {
                 if (_txCache.ContainsKey(txId))
@@ -459,12 +497,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during ContainsTransaction: {e.Message}.");
             }
 
+            _logger.Information($"Finished ContainsTransaction.");
+
             return false;
         }
 
         /// <inheritdoc/>
         public override bool DeleteBlock(HashDigest<SHA256> blockHash)
         {
+            _logger.Information($"DeleteBlock.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -485,12 +527,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during DeleteBlock: {e.Message}.");
             }
 
+            _logger.Information($"Finished DeleteBlock.");
+
             return false;
         }
 
         /// <inheritdoc/>
         public override bool DeleteTransaction(TxId txid)
         {
+            _logger.Information($"DeleteTransaction.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -511,6 +557,8 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during DeleteTransaction: {e.Message}.");
             }
 
+            _logger.Information($"Finished DeleteTransaction.");
+
             return false;
         }
 
@@ -519,6 +567,8 @@ namespace LibPlanet.SQLite
             HashDigest<SHA256> blockHash,
             IImmutableDictionary<string, IValue> states)
         {
+            _logger.Information($"SetBlockStates.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -542,6 +592,8 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during SetBlockStates: {e.Message}.");
             }
+
+            _logger.Information($"Finished SetBlockStates.");
         }
 
         /// <inheritdoc/>
@@ -549,6 +601,8 @@ namespace LibPlanet.SQLite
             HashDigest<SHA256> blockHash
         )
         {
+            _logger.Information($"GetBlockStates.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -589,6 +643,8 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during GetBlockStates: {e.Message}.");
             }
 
+            _logger.Information($"Finished GetBlockStates.");
+
             return null;
         }
 
@@ -606,6 +662,8 @@ namespace LibPlanet.SQLite
             HashDigest<SHA256> blockHash,
             IEnumerable<string> stateKeys)
         {
+            _logger.Information($"DeleteBlockStates.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -633,11 +691,15 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during DeleteBlockStates: {e.Message}.");
             }
+
+            _logger.Information($"Finished DeleteBlockStates.");
         }
 
         /// <inheritdoc/>
         public override long CountIndex(Guid chainId)
         {
+            _logger.Information($"CountIndex.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -671,12 +733,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountIndex: {e.Message}.");
             }
 
+            _logger.Information($"Finished CountIndex.");
+
             return 0;
         }
 
         /// <inheritdoc/>
         public override long AppendIndex(Guid chainId, HashDigest<SHA256> hash)
         {
+            _logger.Information($"AppendIndex.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -741,11 +807,15 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during AppendIndex: {e.Message}.");
             }
 
+            _logger.Information($"Finished AppendIndex.");
+
             return 0;
         }
 
         private bool ExistCanonicalChainId(Guid chainId)
         {
+            _logger.Information($"ExistCanonicalChainId.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -779,12 +849,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during CountIndex: {e.Message}.");
             }
 
+            _logger.Information($"Finished ExistCanonicalChainId.");
+
             return false;
         }
 
         /// <inheritdoc />
         public override void SetCanonicalChainId(Guid chainId)
         {
+            _logger.Information($"SetCanonicalChainId.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -829,11 +903,15 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during SetCanonicalChainId: {e.Message}.");
             }
+
+            _logger.Information($"Finished SetCanonicalChainId.");
         }
 
         /// <inheritdoc/>
         public override void DeleteChainId(Guid chainId)
         {
+            _logger.Information($"DeleteChainId.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -889,11 +967,15 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during DeleteChainId: {e.Message}.");
             }
+
+            _logger.Information($"Finished DeleteChainId.");
         }
 
         /// <inheritdoc/>
         public override BlockDigest? GetBlockDigest(HashDigest<SHA256> blockHash)
         {
+            _logger.Information($"GetBlockDigest.");
+
             try
             {
                 if (_blockCache.TryGetValue(blockHash, out BlockDigest cachedDigest))
@@ -920,12 +1002,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during GetBlockDigest: {e.Message}.");
             }
 
+            _logger.Information($"Finished GetBlockDigest.");
+
             return null;
         }
 
         /// <inheritdoc />
         public override Guid? GetCanonicalChainId()
         {
+            _logger.Information($"GetCanonicalChainId.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -952,12 +1038,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during GetCanonicalChainId: {e.Message}.");
             }
 
+            _logger.Information($"Finished GetCanonicalChainId.");
+
             return (Guid?)null;
         }
 
         /// <inheritdoc/>
         public override long GetTxNonce(Guid chainId, Address address)
         {
+            _logger.Information($"GetTxNonce.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -1002,12 +1092,16 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during GetTxNonce: {e.Message}.");
             }
 
+            _logger.Information($"Finished GetTxNonce.");
+
             return 0;
         }
 
         /// <inheritdoc/>
         public override void IncreaseTxNonce(Guid chainId, Address signer, long delta = 1)
         {
+            _logger.Information($"IncreaseTxNonce.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -1083,6 +1177,8 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during DeleteChainId: {e.Message}.");
             }
+
+            _logger.Information($"Finished IncreaseTxNonce.");
         }
 
         /// <inheritdoc/>
@@ -1091,8 +1187,11 @@ namespace LibPlanet.SQLite
             int offset,
             int? limit)
         {
+            _logger.Information($"IterateIndexes.");
+
             int count = 0;
             var helper = new SQLiteHelper();
+            var result = new List<HashDigest<SHA256>>();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
@@ -1121,19 +1220,27 @@ namespace LibPlanet.SQLite
                             }
 
                             byte[] value = (byte[])reader.GetValue("Data");
-                            yield return new HashDigest<SHA256>(value);
+                            //yield return new HashDigest<SHA256>(value);
+                            result.Add(new HashDigest<SHA256>(value));
 
                             count += 1;
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished IterateIndexes.");
+
+            return result;
         }
 
         /// <inheritdoc/>
         public override IEnumerable<TxId> IterateStagedTransactionIds()
         {
+            _logger.Information($"IterateStagedTransactionIds.");
+
             var helper = new SQLiteHelper();
+            var result = new List<TxId>();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
@@ -1151,16 +1258,24 @@ namespace LibPlanet.SQLite
                         {
                             var key = (string)reader.GetValue("Key");
                             var txId = new TxId(helper.ParseHex(key));
-                            yield return txId;
+
+                            result.Add(txId);
+                            //yield return txId;
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished IterateStagedTransactionIds.");
+
+            return result;
         }
 
         /// <inheritdoc/>
         public override HashDigest<SHA256>? IndexBlockHash(Guid chainId, long index)
         {
+            _logger.Information($"IndexBlockHash.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -1213,13 +1328,18 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during IndexBlockHash: {e.Message}.");
             }
 
+            _logger.Information($"Finished IndexBlockHash.");
+
             return (HashDigest<SHA256>?)null;
         }
 
         /// <inheritdoc/>
         public override IEnumerable<TxId> IterateTransactionIds()
         {
+            _logger.Information($"IterateTransactionIds.");
+
             var helper = new SQLiteHelper();
+            var result = new List<TxId>();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
@@ -1236,17 +1356,26 @@ namespace LibPlanet.SQLite
                         {
                             var key = (string)reader.GetValue("Key");
                             var txId = new TxId(helper.ParseHex(key));
-                            yield return txId;
+                            //yield return txId;
+
+                            result.Add(txId);
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished IterateTransactionIds.");
+
+            return result;
         }
 
         /// <inheritdoc/>
         public override IEnumerable<Guid> ListChainIds()
         {
+            _logger.Information($"ListChainIds.");
+
             var helper = new SQLiteHelper();
+            var result = new List<Guid>();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
@@ -1275,16 +1404,23 @@ namespace LibPlanet.SQLite
                                 continue;
                             }
 
-                            yield return guid;
+                            //yield return guid;
+                            result.Add(guid);
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished ListChainIds.");
+
+            return result;
         }
 
         /// <inheritdoc/>
         public override void StageTransactionIds(IImmutableSet<TxId> txids)
         {
+            _logger.Information($"StageTransactionIds.");
+
             var helper = new SQLiteHelper();
 
             foreach (TxId txId in txids)
@@ -1292,11 +1428,15 @@ namespace LibPlanet.SQLite
                 var key = StagedTxKey(txId);
                 helper.PutBytes(key, StagedTxDbName, EmptyBytes, GetConnectionString());
             }
+
+            _logger.Information($"Finished StageTransactionIds.");
         }
 
         /// <inheritdoc/>
         public override void UnstageTransactionIds(ISet<TxId> txids)
         {
+            _logger.Information($"UnstageTransactionIds.");
+
             var helper = new SQLiteHelper();
 
             foreach (TxId txId in txids)
@@ -1304,13 +1444,17 @@ namespace LibPlanet.SQLite
                 var key = StagedTxKey(txId);
                 helper.RemoveBytes(key, StagedTxDbName, GetConnectionString());
             }
+
+            _logger.Information($"Finished UnstageTransactionIds.");
         }
 
         /// <inheritdoc/>
         public override IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId)
         {
-            var helper = new SQLiteHelper();
+            _logger.Information($"ListTxNonces.");
 
+            var helper = new SQLiteHelper();
+            var result = new List<KeyValuePair<Address, long>>();
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
                 _connection.Open();
@@ -1335,11 +1479,17 @@ namespace LibPlanet.SQLite
 
                             var address = new Address(key);
                             long nonce = helper.ToInt64(data);
-                            yield return new KeyValuePair<Address, long>(address, nonce);
+                            //yield return new KeyValuePair<Address, long>(address, nonce);
+
+                            result.Add(new KeyValuePair<Address, long>(address, nonce));
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished ListTxNonces.");
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -1348,6 +1498,8 @@ namespace LibPlanet.SQLite
             Guid destinationChainId,
             HashDigest<SHA256> branchPoint)
         {
+            _logger.Information($"ForkBlockIndexes.");
+
             HashDigest<SHA256>? genesisHash = IterateIndexes(sourceChainId, 0, 1)
                 .Cast<HashDigest<SHA256>?>()
                 .FirstOrDefault();
@@ -1367,14 +1519,19 @@ namespace LibPlanet.SQLite
                     break;
                 }
             }
+
+            _logger.Information($"Finished ForkBlockIndexes.");
         }
 
         /// <inheritdoc/>
         public override IEnumerable<string> ListStateKeys(Guid chainId)
         {
+            _logger.Information($"ListStateKeys.");
+
             var prevStateKey = string.Empty;
 
             var helper = new SQLiteHelper();
+            var result = new List<string>();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
@@ -1405,13 +1562,18 @@ namespace LibPlanet.SQLite
 
                             if (stateKey != prevStateKey)
                             {
-                                yield return stateKey;
+                                result.Add(stateKey);
+                                //yield return stateKey;
                                 prevStateKey = stateKey;
                             }
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished ListStateKeys.");
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -1421,6 +1583,8 @@ namespace LibPlanet.SQLite
             HashDigest<SHA256> blockHash,
             long blockIndex)
         {
+            _logger.Information($"StoreStateReference.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -1520,6 +1684,8 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during StoreStateReference: {e.Message}.");
             }
+
+            _logger.Information($"Finished StoreStateReference.");
         }
 
         /// <inheritdoc/>
@@ -1530,6 +1696,8 @@ namespace LibPlanet.SQLite
             long? lowestIndex,
             int? limit)
         {
+            _logger.Information($"IterateStateReferences.");
+
             highestIndex ??= long.MaxValue;
             lowestIndex ??= 0;
             limit ??= int.MaxValue;
@@ -1548,8 +1716,10 @@ namespace LibPlanet.SQLite
 
             byte[] keyBytes = helper.GetBytes(key);
 
+            _logger.Information($"Finished IterateStateReferences.");
+
             return IterateStateReferences(
-                chainId, keyBytes, highestIndex.Value, lowestIndex.Value, limit.Value);
+                chainId, keyBytes, highestIndex.Value, lowestIndex.Value, limit.Value).ToList();
         }
 
         private IEnumerable<Tuple<HashDigest<SHA256>, long>> IterateStateReferences(
@@ -1559,7 +1729,10 @@ namespace LibPlanet.SQLite
             long lowestIndex,
             int limit)
         {
+            _logger.Information($"IterateStateReferences.");
+
             var helper = new SQLiteHelper();
+            var result = new List<Tuple<HashDigest<SHA256>, long>>();
 
             using (var _connection = new SqliteConnection(GetConnectionString()))
             {
@@ -1602,12 +1775,17 @@ namespace LibPlanet.SQLite
                             byte[] hashBytes = (byte[])reader.GetValue("Data");
                             var hash = new HashDigest<SHA256>(hashBytes);
 
-                            yield return new Tuple<HashDigest<SHA256>, long>(hash, index);
+                            //yield return new Tuple<HashDigest<SHA256>, long>(hash, index);
+                            result.Add(new Tuple<HashDigest<SHA256>, long>(hash, index));
                             limit--;
                         }
                     }
                 }
             }
+
+            _logger.Information($"Finished IterateStateReferences.");
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -1617,6 +1795,8 @@ namespace LibPlanet.SQLite
                 long lowestIndex = 0,
                 long highestIndex = long.MaxValue)
         {
+            _logger.Information($"ListAllStateReferences.");
+
             var stateRefs = new List<StateRef>();
 
             try
@@ -1676,6 +1856,8 @@ namespace LibPlanet.SQLite
                 _logger.Error($"Error during ListAllStateReferences: {e.Message}.");
             }
 
+            _logger.Information($"Finished ListAllStateReferences.");
+
             return stateRefs
                 .GroupBy(stateRef => stateRef.StateKey)
                 .ToImmutableDictionary(
@@ -1691,6 +1873,8 @@ namespace LibPlanet.SQLite
             string key,
             long lookupUntilBlockIndex)
         {
+            _logger.Information($"LookupStateReference.");
+
             if (_lastStateRefCaches.TryGetValue(
                     chainId,
                     out LruCache<string, Tuple<HashDigest<SHA256>, long>> stateRefCache)
@@ -1730,6 +1914,8 @@ namespace LibPlanet.SQLite
                     stateRef.Item2);
             }
 
+            _logger.Information($"Finished LookupStateReference.");
+
             return stateRef;
         }
 
@@ -1738,6 +1924,8 @@ namespace LibPlanet.SQLite
             Guid chainId,
             Block<T> until)
         {
+            _logger.Information($"PruneBlockStates.");
+
             try
             {
                 var helper = new SQLiteHelper();
@@ -1771,6 +1959,8 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during PruneBlockStates: {e.Message}.");
             }
+
+            _logger.Information($"Finished PruneBlockStates.");
         }
 
         /// <inheritdoc/>
@@ -1779,6 +1969,8 @@ namespace LibPlanet.SQLite
             Guid destinationChainId,
             Block<T> branchPoint)
         {
+            _logger.Information($"ForkStateReferences.");
+
             try
             {
                 var isDestinationValid = false;
@@ -1915,6 +2107,8 @@ namespace LibPlanet.SQLite
             {
                 _logger.Error($"Error during ForkStateReferences: {e.Message}.");
             }
+
+            _logger.Information($"Finished ForkStateReferences.");
         }
 
         private string BlockKey(HashDigest<SHA256> blockHash)

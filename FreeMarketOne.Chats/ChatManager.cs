@@ -302,7 +302,7 @@ namespace FreeMarketOne.Chats
                                         var response = await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[i], TimeSpan.FromSeconds(5));
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
-                                        if (!response.Digest.Equals(chat.ChatItems[i]))
+                                        if (!response.Digest.Equals(chat.ChatItems[i].Digest))
                                         {
                                             throw new FailedMessageDigestValidation("Message digest after transmition to remote is not the same. Crypto error.");
                                         }

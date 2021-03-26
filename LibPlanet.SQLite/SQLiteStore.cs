@@ -974,13 +974,13 @@ namespace LibPlanet.SQLite
                     using (var cmd = _connection.CreateCommand())
                     {
                         cmd.CommandType = CommandType.Text;
+                        cmd.CommandType = CommandType.Text;
                         cmd.Parameters.AddWithValue("@key", key);
                         cmd.Parameters.AddWithValue("@keyChainId", chainId.ToString());
-                        cmd.Parameters.AddWithValue("@typeD", helper.GetString(TxNonceKeyPrefix));
-                        cmd.Parameters.AddWithValue("@type", helper.GetString(CanonicalChainIdIdKey));
-                        cmd.CommandText = "SELECT TD.[Data] FROM " + ChainDbName + " AS T " +
-                            "JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
-                            "WHERE TD.[Key] = @key AND T.[Type] = @type AND T.[Key] = @keyChainId;";
+                        cmd.Parameters.AddWithValue("@typeN", helper.GetString(TxNonceKeyPrefix));
+                        cmd.CommandText = "SELECT TN.[Data] FROM " + ChainDbName + " AS TN " +
+                            "JOIN " + ChainDbName + " AS TC ON TC.[Id] = TN.[ParentId] AND TC.[Key] = @keyChainId " +
+                            "WHERE TN.[Type] = @typeN AND TN.[Key] = @key;";
                         var reader = cmd.ExecuteReader();
 
                         if ((reader != null) && (reader.HasRows))
@@ -1070,7 +1070,7 @@ namespace LibPlanet.SQLite
                                 cmd.Parameters.Add("@data", SqliteType.Blob, bytes.Length).Value = bytes;
                                 cmd.Parameters.AddWithValue("@nonceId", nonceId);
                                 cmd.CommandType = CommandType.Text;
-                                cmd.CommandText = "UPDATE " + ChainDbName + @" SET [Data] = @Data WHERE [Id] = @nonceId;";
+                                cmd.CommandText = "UPDATE " + ChainDbName + @" SET [Data] = @data WHERE [Id] = @nonceId;";
                                 cmd.ExecuteNonQuery();
                             }
                         }
@@ -1319,11 +1319,11 @@ namespace LibPlanet.SQLite
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@key", chainId.ToString());
-                    cmd.Parameters.AddWithValue("@typeD", helper.GetString(TxNonceKeyPrefix));
-                    cmd.Parameters.AddWithValue("@typeC", helper.GetString(CanonicalChainIdIdKey));
-                    cmd.CommandText = "SELECT TD.[Key], TD.[Data] FROM " + ChainDbName + " AS T " +
-                        "LEFT JOIN " + ChainDbName + " AS TD ON T.[Id] = TD.[ParentId] AND TD.[Type] = @typeD " +
-                        "WHERE T.[Key] = @key AND T.[Type] = @typeC;";
+                    cmd.Parameters.AddWithValue("@typeN", helper.GetString(TxNonceKeyPrefix));
+                    cmd.CommandText = "SELECT TN.[Key], TN.[Data] FROM " + ChainDbName + " AS TN " +
+                        "JOIN " + ChainDbName + " AS TC ON TC.[Id] = TN.[ParentId] AND TC.[Key] = @key " +
+                        "WHERE TN.[Type] = @typeN;";
+
                     var reader = cmd.ExecuteReader();
 
                     if ((reader != null) && (reader.HasRows))

@@ -32,6 +32,8 @@ namespace LibPlanet.SQLiteStore.Tests
                 0x88, 0x69, 0x58, 0xbc, 0x3e, 0x85, 0x60, 0x92, 0x9c, 0xcc,
             });
 
+            var privateKey = new PrivateKey();
+
             var path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(
 System.Reflection.Assembly.GetExecutingAssembly().Location),
                 $"sqlitedb_test_{Guid.NewGuid()}"
@@ -56,12 +58,13 @@ System.Reflection.Assembly.GetExecutingAssembly().Location),
 
             for (var i = 0; i < 10; i++)
             {
-                MakeTenTransactionsWithActions(_blockChainSQLite);
+                privateKey = new PrivateKey();
+                MakeTenTransactionsWithActions(_blockChainSQLite, privateKey);
                 _blockChainSQLite.MineBlock(Address1).Wait();
             }
 
             //stage tx only for db test
-            MakeTenTransactionsWithActions(_blockChainSQLite);
+            MakeTenTransactionsWithActions(_blockChainSQLite, privateKey);
 
             var chainIdS = storeSQLite.GetCanonicalChainId();
 
@@ -182,6 +185,12 @@ System.Reflection.Assembly.GetExecutingAssembly().Location),
             var listStateKeysForkSorceS = storeSQLite.ListStateKeys(chainIdS.Value).ToList();
             var listStateKeysForkS = storeSQLite.ListStateKeys(destChainIdS).ToList();
 
+            var listForktxNoncesS = storeSQLite.ListTxNonces(destChainIdS).ToList();
+            var listSourcetxNoncesS = storeSQLite.ListTxNonces(chainIdS.Value).ToList();
+
+            var txNonceS1 = storeSQLite.GetTxNonce(chainIdS.Value, privateKey.ToAddress());
+            var txNonceS2 = storeSQLite.GetTxNonce(destChainIdS, privateKey.ToAddress());
+
             //duplication
             //storeSQLite.ForkStates(chainIdS.Value, destChainIdS, forkBlockS);
 
@@ -196,11 +205,11 @@ System.Reflection.Assembly.GetExecutingAssembly().Location),
             storeSQLite.DeleteChainId(chainIdS.Value);
         }
 
-        public void MakeTenTransactionsWithActions(BlockChain<DumbAction> blockChain)
+        public void MakeTenTransactionsWithActions(BlockChain<DumbAction> blockChain, PrivateKey privateKey)
         {
             for (var i = 0; i < 5; i++)
             {
-                var privateKey = new PrivateKey();
+                //var privateKey = new PrivateKey();
                 var address = privateKey.ToAddress();
                 var actions = new[]
                 {

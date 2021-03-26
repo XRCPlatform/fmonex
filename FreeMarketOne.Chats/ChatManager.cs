@@ -102,25 +102,12 @@ namespace FreeMarketOne.Chats
             }
         }
 
-        public static HashDigest<SHA256> ToHashDigest(byte[] rawData)
+        private static string Hash(string rawData)
         {
-            using (SHA256 shaHash = SHA256.Create())
-            {
-                byte[] bytes = shaHash.ComputeHash(rawData);
-                return new HashDigest<SHA256>(bytes);
-            }
+            return Hash(Encoding.UTF8.GetBytes(rawData));
         }
 
-        public static HashDigest<SHA256> ToHashDigest(string rawData)
-        {
-            using (SHA256 shaHash = SHA256.Create())
-            {
-                byte[] bytes = shaHash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-                return new HashDigest<SHA256>(bytes);
-            }
-        }
-
-        public static string Hash(byte[] rawData)
+        private static string Hash(byte[] rawData)
         {
             using (SHA256 shaHash = SHA256.Create())
             {
@@ -410,7 +397,7 @@ namespace FreeMarketOne.Chats
             processedItem.Propagated = item.Propagated;
             processedItem.Type = item.Type;
             processedItem.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
-            processedItem.Digest = ToHashDigest(processedItem.Message);
+            processedItem.Digest = Hash(processedItem.Message);
             if (!processedItem.Digest.Equals(item.Digest))
             {
                 _logger.Warning($"Failed message digest validation. Expected:[{item.Digest}] actual:{processedItem.Digest}, most likely due to cryptographic failures.");
@@ -467,7 +454,7 @@ namespace FreeMarketOne.Chats
             newInitialMessage.DateCreated = DateTime.UtcNow;
             newInitialMessage.Type = (int)ChatItemTypeEnum.Seller;
             newInitialMessage.MarketItemHash = offer.Hash;
-            newInitialMessage.Digest = ToHashDigest(newInitialMessage.Message);
+            newInitialMessage.Digest = Hash(newInitialMessage.Message);
             result.ChatItems.Add(newInitialMessage);
             return result;
         }
@@ -638,7 +625,7 @@ namespace FreeMarketOne.Chats
                     newChatItem.Type = (int)DetectWhoIm(chatData, true);
                     newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
                     newChatItem.MarketItemHash = chatData.MarketItem.Hash;
-                    newChatItem.Digest = ToHashDigest(messageBytes);
+                    newChatItem.Digest = Hash(messageBytes);
                     chatData.ChatItems.Add(newChatItem);
 
                     SaveChat(chatData);

@@ -28,7 +28,7 @@ namespace Libplanet.Net.Messages
         public bool Propagated { get; set; }
 
         [JsonProperty("s")]
-        public HashDigest<SHA256> Digest { get; set; }
+        public string Digest { get; set; }
 
         private static readonly byte[] MessageKey = { 0x41 }; 
         private static readonly byte[] ExtraMessageKey = { 0x42 }; 
@@ -86,7 +86,7 @@ namespace Libplanet.Net.Messages
             }
             if (dict.ContainsKey((IKey)(Binary)DigestKey))
             {
-                Digest = new HashDigest<SHA256>(dict.GetValue<Binary>(DigestKey));
+                Digest = Encoding.UTF8.GetString(dict.GetValue<Binary>(DigestKey));
             }            
         }
 
@@ -117,7 +117,7 @@ namespace Libplanet.Net.Messages
             dict = dict.Add(MarketItemHashKey, (IValue)(Binary)Encoding.UTF8.GetBytes(MarketItemHash));
             int prop = Propagated ? 1 : 0;
             dict = dict.Add(PropagatedKey, (IValue)(Integer)prop);
-            dict = dict.Add(DigestKey, (IValue)(Binary)Digest.ToByteArray());          
+            dict = dict.Add(DigestKey, (IValue)(Binary)Encoding.UTF8.GetBytes(Digest));          
             return dict;
         }
     }

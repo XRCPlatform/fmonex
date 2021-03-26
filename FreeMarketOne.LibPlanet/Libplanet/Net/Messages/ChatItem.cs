@@ -27,7 +27,7 @@ namespace Libplanet.Net.Messages
         [JsonProperty("p")]
         public bool Propagated { get; set; }
 
-        [JsonProperty("d")]
+        [JsonProperty("s")]
         public HashDigest<SHA256> Digest { get; set; }
 
         private static readonly byte[] MessageKey = { 0x41 }; 

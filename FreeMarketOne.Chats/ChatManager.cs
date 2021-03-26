@@ -51,6 +51,8 @@ namespace FreeMarketOne.Chats
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
         private CommonStates _running;
+        
+        private static readonly object _fileLock = new object();
 
         private ILogger _logger { get; set; }
 
@@ -489,9 +491,7 @@ namespace FreeMarketOne.Chats
         /// <param name="chatData"></param>
         public void SaveChat(ChatDataV1 chatData)
         {
-            var _object = new Object();
-
-            lock (_object)
+            lock (_fileLock)
             {
                 var fullPath = CheckExistenceOfFolder();
 
@@ -508,7 +508,19 @@ namespace FreeMarketOne.Chats
 
                 var pathKey = Path.Combine(fullPath, chatData.MarketItem.Hash);
 
-                File.WriteAllBytes(pathKey, encryptedChatData);
+                try
+                {
+                    File.WriteAllBytes(pathKey, encryptedChatData);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e,$" Failed saving file {pathKey}. Will retry in in 1s.");
+                    //give a chance for file to be released
+                    Thread.Sleep(1000);
+                    //retry as this could happen in race condition when chat is read and written at same time
+                    File.WriteAllBytes(pathKey, encryptedChatData);
+                }
+                
             }
         }
 
@@ -519,9 +531,7 @@ namespace FreeMarketOne.Chats
         /// <returns></returns>
         public ChatDataV1 GetChat(string hash)
         {
-            var _object = new Object();
-
-            lock (_object)
+            lock (_fileLock)
             {
                 try
                 {

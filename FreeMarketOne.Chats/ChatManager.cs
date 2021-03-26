@@ -188,12 +188,17 @@ namespace FreeMarketOne.Chats
 
         private void AppendToChat(ChatItem receivedChatItem, ChatDataV1 localChat)
         {
+            if (String.IsNullOrEmpty(receivedChatItem.Digest))
+            {
+                throw new ArgumentException("Recieved item is misding digest.");
+            }
             var newChatItem = new ChatItem();
             newChatItem.DateCreated = receivedChatItem.DateCreated;
             newChatItem.Message = receivedChatItem.Message;
             newChatItem.ExtraMessage = receivedChatItem.ExtraMessage;
             newChatItem.Type = (int)DetectWhoIm(localChat, false);
             newChatItem.Propagated = true;
+            newChatItem.Digest = receivedChatItem.Digest;
 
             _logger.Information("Add a new item to chat item.");
             if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
@@ -210,8 +215,6 @@ namespace FreeMarketOne.Chats
             {
                 localChat.SellerEndPoint = receivedChatItem.ExtraMessage;
             }
-
-
 
             _logger.Information("Saving local chat with new data.");
 

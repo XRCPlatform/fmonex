@@ -778,7 +778,10 @@ namespace FreeMarketOne.Pools
 
                             _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
 
-                            _blockChain.StageTransaction(tx);
+                            if (_blockChain.Policy.DoesTransactionFollowsPolicy(tx, _blockChain))
+                            {
+                                _blockChain.StageTransaction(tx);
+                            }
 
                             _logger.Information("Clearing all item actions from local pool.");
                             for (int i = 0; i < items.Count(); i++)

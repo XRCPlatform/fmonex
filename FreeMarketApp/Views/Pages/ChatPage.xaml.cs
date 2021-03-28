@@ -67,9 +67,9 @@ namespace FreeMarketApp.Views.Pages
                 _asyncLoopFactory = new AsyncLoopFactory(_logger);
                 IAsyncLoop periodicLogLoop = _asyncLoopFactory.Run("ChatChecker", (cancellation) =>
                 {
-                    if ((_activeChat != null) && (_activeChat.MarketItem != null))
+                    if ((_activeChat != null) && (_activeChat.MarketItemHash != null))
                     {
-                        var chatData = chatManager.GetChat(_activeChat.MarketItem.Hash);
+                        var chatData = chatManager.GetChat(_activeChat.MarketItemHash);
                         if (chatData.ChatItems != null)
                         {
                             if ((chatData.ChatItems.Count != _activeChat.ChatItems.Count) ||
@@ -77,7 +77,7 @@ namespace FreeMarketApp.Views.Pages
                             {
                                 Dispatcher.UIThread.InvokeAsync(() =>
                                 {
-                                    Instance.LoadChatByProduct(_activeChat.MarketItem.Hash);
+                                    Instance.LoadChatByProduct(_activeChat.MarketItemHash);
                                 });
                             }
                         }

@@ -102,9 +102,9 @@ namespace FreeMarketOne.Chats
             }
         }
 
-        private static string Hash(string rawData)
+        private static string Hash(string rawData, string password)
         {
-            return Hash(Encoding.UTF8.GetBytes(rawData));
+            return Hash(Encoding.UTF8.GetBytes(rawData + password));
         }
 
         private static string Hash(byte[] rawData)
@@ -130,17 +130,14 @@ namespace FreeMarketOne.Chats
         {
             TotClient client = message.Client;
             ChatDataV1 localChat = null;
-            string pubKeyHash = Hash(message.Peer.PublicKey.Format(false));
+            //string pubKeyHash = Hash(message.Peer.PublicKey.Format(false));
             Console.WriteLine($"Receiving chat message from peer: {message.Peer}.");
             _logger.Information($"Receiving chat message from peer: {message.Peer}.");
 
             var receivedChatItem = message.Envelope.GetBody<ChatItem>();
 
             _logger.Information("Loading new chat message.");
-            if (receivedChatItem.MarketItemHash == null)
-            {
-                localChat = GetChat(pubKeyHash);
-            }
+            localChat = GetChat(receivedChatItem.MarketItemHash);
 
             //although chats are re-created on both sides, there could be race conditions were IBD is ongoing but chat message has been received
             //the chat could have been deleted if someone reset the whole folder
@@ -149,10 +146,14 @@ namespace FreeMarketOne.Chats
             if (localChat == null)
             {
                 _logger.Information("Did  not find historic chat, ceating new on recieved message");
-                //there may be a case for offers that are past market chain longevity
-                //var result  = _searchEngine.GetMyCompletedOffers(OfferDirection.Bought, 1000, 0);
+               
                 var result = _searchEngine.Search(_searchEngine.BuildQueryByItemHash(receivedChatItem.MarketItemHash), false, 1);
-                if (result != null)
+                //if (result == null || result.TotalHits<1) 
+                //{
+                //    //maybe this should be market chain search thought manager not index
+                //    //there may be a case for offers that are past market chain longevity                    
+                //}
+                if (result != null || result.TotalHits < 1)
                 {
                     MarketItem marketItem = result.Results.FirstOrDefault();
                     //MarketItem marketItem = result.Results.Find(m => m.Hash == receivedChatItem.MarketItemHash);
@@ -169,6 +170,11 @@ namespace FreeMarketOne.Chats
             }
             else
             {
+                AppendToChat(receivedChatItem, localChat);
+            }
+            if (localChat == null)
+            {
+                localChat = CreateNewChat(receivedChatItem.MarketItemHash);
                 AppendToChat(receivedChatItem, localChat);
             }
             try
@@ -351,9 +357,8 @@ namespace FreeMarketOne.Chats
 
         public ChatItem DecryptAndVerifyChatItem(List<ChatItem> chatItems, ChatItem lastItem)
         {
-            var password = chatItems.First().Message;
-            var aes = new SymmetricKey(Encoding.UTF8.GetBytes(password));
-            ChatItem processedItem = DecryptChatItem(aes, lastItem);
+            var password = chatItems.First().Message;            
+            ChatItem processedItem = DecryptChatItem(password, lastItem);
             return processedItem;
         }
 
@@ -367,7 +372,6 @@ namespace FreeMarketOne.Chats
             var result = new List<ChatItem>();
 
             var password = chatItems.First().Message;
-            var aes = new SymmetricKey(Encoding.UTF8.GetBytes(password));
             var first = true;
 
             foreach (var item in chatItems)
@@ -380,7 +384,7 @@ namespace FreeMarketOne.Chats
 
                 try
                 {
-                    ChatItem processedItem = DecryptChatItem(aes, item);
+                    ChatItem processedItem = DecryptChatItem(password, item);
                     result.Add(processedItem);
                 }
                 catch (Exception ex)
@@ -392,15 +396,16 @@ namespace FreeMarketOne.Chats
             return result;
         }
 
-        private ChatItem DecryptChatItem(SymmetricKey aes, ChatItem item)
+        private ChatItem DecryptChatItem(string password, ChatItem item)
         {
+            var aes = new SymmetricKey(Encoding.UTF8.GetBytes(password));
             var processedItem = new ChatItem();
             processedItem.DateCreated = item.DateCreated;
             processedItem.ExtraMessage = item.ExtraMessage;
             processedItem.Propagated = item.Propagated;
             processedItem.Type = item.Type;
             processedItem.Message = Encoding.UTF8.GetString(aes.Decrypt(Convert.FromBase64String(item.Message)));
-            processedItem.Digest = Hash(processedItem.Message);
+            processedItem.Digest = Hash(processedItem.Message, password);
             if (!processedItem.Digest.Equals(item.Digest))
             {
                 _logger.Warning($"Failed message digest validation. Expected:[{item.Digest}] actual:{processedItem.Digest}, most likely due to cryptographic failures.");
@@ -437,9 +442,17 @@ namespace FreeMarketOne.Chats
             var result = new ChatDataV1();
             result.DateCreated = DateTime.UtcNow;
             result.MarketItem = offer;
+            result.MarketItemHash = offer.Hash;
             return result;
         }
 
+        public ChatDataV1 CreateNewChat(string marketItemHash)
+        {
+            var result = new ChatDataV1();
+            result.DateCreated = DateTime.UtcNow;
+            result.MarketItemHash = marketItemHash;
+            return result;
+        }
         /// <summary>
         /// Generate a new chat data at seller side
         /// </summary>
@@ -457,7 +470,7 @@ namespace FreeMarketOne.Chats
             newInitialMessage.DateCreated = DateTime.UtcNow;
             newInitialMessage.Type = (int)ChatItemTypeEnum.Seller;
             newInitialMessage.MarketItemHash = offer.Hash;
-            newInitialMessage.Digest = Hash(newInitialMessage.Message);
+            newInitialMessage.Digest = Hash(newInitialMessage.Message,"");
             result.ChatItems.Add(newInitialMessage);
             return result;
         }
@@ -496,7 +509,7 @@ namespace FreeMarketOne.Chats
 
                 var encryptedChatData = aes.Encrypt(compressedChatData);
 
-                var pathKey = Path.Combine(fullPath, chatData.MarketItem.Hash);
+                var pathKey = Path.Combine(fullPath, chatData.MarketItemHash);
 
                 try
                 {
@@ -504,7 +517,7 @@ namespace FreeMarketOne.Chats
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e,$" Failed saving file {pathKey}. Will retry in in 1s.");
+                    _logger.Error(e,$"Failed saving file {pathKey}. Will retry in in 1s.");
                     //give a chance for file to be released
                     Thread.Sleep(1000);
                     //retry as this could happen in race condition when chat is read and written at same time
@@ -628,7 +641,7 @@ namespace FreeMarketOne.Chats
                     newChatItem.Type = (int)DetectWhoIm(chatData, true);
                     newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
                     newChatItem.MarketItemHash = chatData.MarketItem.Hash;
-                    newChatItem.Digest = Hash(messageBytes);
+                    newChatItem.Digest = Hash(message, password);
                     chatData.ChatItems.Add(newChatItem);
 
                     SaveChat(chatData);

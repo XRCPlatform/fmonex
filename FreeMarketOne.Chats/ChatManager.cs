@@ -192,6 +192,7 @@ namespace FreeMarketOne.Chats
                 }
                 catch (Exception e)
                 {
+                    receivedChatItem.Digest = "LostKeys";
                     _logger.Error(e, "Failure decrypting and validating message digest.");
                 }
                 _logger.Information("Sending ACK response.");
@@ -231,7 +232,7 @@ namespace FreeMarketOne.Chats
             }
 
             _logger.Information("Saving local chat with new data.");
-
+            localChat.ChatItems.OrderByDescending(c => c.DateCreated);
             SaveChat(localChat);
         }
 
@@ -321,9 +322,12 @@ namespace FreeMarketOne.Chats
                                         var response = await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[i], TimeSpan.FromSeconds(5));
                                         periodicCheckLog.AppendLine(string.Format("Sending chat message done."));
                                         _logger.Information(string.Format("Sending chat message done."));
-                                        if (!response.Digest.Equals(chat.ChatItems[i].Digest))
+                                        if (!response.Digest.Equals(chat.ChatItems[i].Digest) || response.Digest == "LostKeys")
                                         {
-                                            throw new FailedMessageDigestValidation("Message digest after transmition to remote is not the same. Crypto error.");
+                                            _logger.Information(string.Format("Remote peer did not send right digest, resending key"));
+                                            //TODO verify that public keys are same as original chat creator so that we don't send this to mailicious parties
+                                            var response2 = await transport.SendMessageWithReplyAsync<ChatItem, ChatItem>(peer, chat.ChatItems[0], TimeSpan.FromSeconds(5));
+                                            //throw new FailedMessageDigestValidation("Message digest after transmition to remote is not the same. Crypto error.");
                                         }
                                         chat.ChatItems[i].Propagated = true;
                                         anyChange = true;
@@ -338,7 +342,6 @@ namespace FreeMarketOne.Chats
 
                             if (anyChange)
                             {
-                                //is this not reseting? where did it save
                                 var savedChat = GetChat(chat.MarketItem.Hash);
                                 for (int i = 0; i < chat.ChatItems.Count; i++)
                                 {
@@ -380,7 +383,7 @@ namespace FreeMarketOne.Chats
 
         public ChatItem DecryptAndVerifyChatItem(List<ChatItem> chatItems, ChatItem lastItem)
         {
-            var password = chatItems.First().Message;            
+            var password = chatItems.First().Message;
             ChatItem processedItem = DecryptChatItem(password, lastItem);
             return processedItem;
         }

@@ -210,9 +210,24 @@ namespace FreeMarketApp.Views.Pages
                 var btWithoutMessage = Instance.FindControl<Border>("BIWithoutMessage");
                 var svChat = Instance.FindControl<ScrollViewer>("SVChat");
 
-                btSendMessage.Tag = chatData.MarketItem.Hash;
-                tbTitle.Text = chatData.MarketItem.Title;
-                srTitle.IsVisible = true;
+                btSendMessage.Tag = chatData.MarketItemHash;
+
+                if (chatData.MarketItem != null){
+                    tbTitle.Text = chatData.MarketItem.Title;
+                    srTitle.IsVisible = true;
+                }
+                else
+                {
+                    var results = FMONE.Current.SearchEngine.Search(FMONE.Current.SearchEngine.BuildQueryByItemHash(chatData.MarketItemHash));
+                    if (results.Results.Count > 0)
+                    {
+                        var doc = results.Results.FirstOrDefault();
+                        tbTitle.Text = doc.Title;
+                        srTitle.IsVisible = true;
+                    }
+                }
+                
+               
 
                 ((ChatPageViewModel)DataContext).ChatItems.Clear();
                 if ((chatData.ChatItems != null) && chatData.ChatItems.Any() && chatManager.IsChatValid(chatData.ChatItems))

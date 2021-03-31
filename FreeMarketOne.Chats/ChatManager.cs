@@ -47,6 +47,7 @@ namespace FreeMarketOne.Chats
 
         private readonly TorSocks5Transport transport;
 
+        private readonly object ReceiveLock = new object();
         /// <summary>
         /// 0: Not started, 1: Running, 2: Stopping, 3: Stopped
         /// </summary>
@@ -128,6 +129,7 @@ namespace FreeMarketOne.Chats
         /// <param name="message"></param>
         private void ReceivedMessageHandler(object sender, ReceivedRequestEventArgs message)
         {
+           
             TotClient client = message.Client;
             ChatDataV1 localChat = null;
             //string pubKeyHash = Hash(message.Peer.PublicKey.Format(false));
@@ -136,60 +138,65 @@ namespace FreeMarketOne.Chats
 
             var receivedChatItem = message.Envelope.GetBody<ChatItem>();
 
-            _logger.Information("Loading new chat message.");
-            localChat = GetChat(receivedChatItem.MarketItemHash);
-
-            //although chats are re-created on both sides, there could be race conditions were IBD is ongoing but chat message has been received
-            //the chat could have been deleted if someone reset the whole folder
-            //as chat was created on a buyer side during checkout process
-            //allowing resuming conversation by creating chat if it does not exist
-            if (localChat == null)
+            lock (ReceiveLock)
             {
-                _logger.Information("Did  not find historic chat, ceating new on recieved message");
-               
-                var result = _searchEngine.Search(_searchEngine.BuildQueryByItemHash(receivedChatItem.MarketItemHash), false, 1);
-                //if (result == null || result.TotalHits<1) 
-                //{
-                //    //maybe this should be market chain search thought manager not index
-                //    //there may be a case for offers that are past market chain longevity                    
-                //}
-                if (result != null || result.TotalHits < 1)
+                _logger.Information("Loading new chat message.");
+                localChat = GetChat(receivedChatItem.MarketItemHash);
+
+                //although chats are re-created on both sides, there could be race conditions were IBD is ongoing but chat message has been received
+                //the chat could have been deleted if someone reset the whole folder
+                //as chat was created on a buyer side during checkout process
+                //allowing resuming conversation by creating chat if it does not exist
+                if (localChat == null)
                 {
-                    MarketItem marketItem = result.Results.FirstOrDefault();
-                    //MarketItem marketItem = result.Results.Find(m => m.Hash == receivedChatItem.MarketItemHash);
-                    if (marketItem != null)
+                    _logger.Information("Did  not find historic chat, ceating new on recieved message");
+
+                    var result = _searchEngine.Search(_searchEngine.BuildQueryByItemHash(receivedChatItem.MarketItemHash), false, 1);
+                    //if (result == null || result.TotalHits<1) 
+                    //{
+                    //    //maybe this should be market chain search thought manager not index
+                    //    //there may be a case for offers that are past market chain longevity                    
+                    //}
+                    if (result != null || result.TotalHits > 0)
                     {
-                        localChat = CreateNewChat((MarketItemV1)marketItem);
-                        AppendToChat(receivedChatItem, localChat);
-                    }
-                    else
-                    {
-                        _logger.Information($"Could not find Market item hash {receivedChatItem.MarketItemHash} in search index.");
+                        MarketItem marketItem = result.Results.FirstOrDefault();
+                        //MarketItem marketItem = result.Results.Find(m => m.Hash == receivedChatItem.MarketItemHash);
+                        if (marketItem != null)
+                        {
+                            localChat = CreateNewChat((MarketItemV1)marketItem);
+                            AppendToChat(receivedChatItem, localChat);
+                        }
+                        else
+                        {
+                            _logger.Information($"Could not find Market item hash {receivedChatItem.MarketItemHash} in search index.");
+                        }
                     }
                 }
-            }
-            else
-            {
-                AppendToChat(receivedChatItem, localChat);
-            }
-            if (localChat == null)
-            {
-                localChat = CreateNewChat(receivedChatItem.MarketItemHash);
-                AppendToChat(receivedChatItem, localChat);
-            }
-            try
-            {
-                var validated = DecryptAndVerifyChatItem(localChat.ChatItems, receivedChatItem);
-                //store digest for retransmition
-                receivedChatItem.Digest = validated.Digest;
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Failure decrypting and validating message digest.");
-            }
-
-            _logger.Information("Sending ACK response.");
-            transport.ReplyMessage<ChatItem>(message.Request, client, receivedChatItem);
+                else
+                {
+                    AppendToChat(receivedChatItem, localChat);
+                }
+                if (localChat == null)
+                {
+                    localChat = CreateNewChat(receivedChatItem.MarketItemHash);
+                    AppendToChat(receivedChatItem, localChat);
+                }
+                try
+                {
+                    if (localChat.ChatItems.Count > 1)
+                    {
+                        var validated = DecryptAndVerifyChatItem(localChat.ChatItems, receivedChatItem);
+                        //store digest for retransmition
+                        receivedChatItem.Digest = validated.Digest;
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "Failure decrypting and validating message digest.");
+                }
+                _logger.Information("Sending ACK response.");
+                transport.ReplyMessage<ChatItem>(message.Request, client, receivedChatItem);
+            }           
         }
 
         private void AppendToChat(ChatItem receivedChatItem, ChatDataV1 localChat)
@@ -205,6 +212,7 @@ namespace FreeMarketOne.Chats
             newChatItem.Type = (int)DetectWhoIm(localChat, false);
             newChatItem.Propagated = true;
             newChatItem.Digest = receivedChatItem.Digest;
+            newChatItem.MarketItemHash = receivedChatItem.MarketItemHash;
 
             _logger.Information("Add a new item to chat item.");
             if (localChat.ChatItems == null) localChat.ChatItems = new List<ChatItem>();
@@ -267,8 +275,23 @@ namespace FreeMarketOne.Chats
 
                         if ((chat.ChatItems != null) && (chat.ChatItems.Any()))
                         {
-                            for (int i = 0; i < chat.ChatItems.Count; i++)
+                            if (chat.MarketItem == null && chat.ChatItems[0].MarketItemHash != null)
                             {
+                                var result = _searchEngine.Search(_searchEngine.BuildQueryByItemHash(chat.ChatItems[0].MarketItemHash), false, 1);
+                                if (result != null || result.TotalHits > 0)
+                                {
+                                    MarketItem marketItem = result.Results.FirstOrDefault();
+                                    if (marketItem != null)
+                                    {
+                                        chat.MarketItem = (MarketItemV1)marketItem;
+                                        anyChange = true;
+                                    }
+                                }
+                            }
+                           
+
+                            for (int i = 0; i < chat.ChatItems.Count; i++)
+                            {                             
                                 if (!chat.ChatItems[i].Propagated)
                                 {
                                     string chatPeerIp = null;
@@ -640,7 +663,7 @@ namespace FreeMarketOne.Chats
                     newChatItem.DateCreated = DateTime.UtcNow;
                     newChatItem.Type = (int)DetectWhoIm(chatData, true);
                     newChatItem.ExtraMessage = string.Empty; //not used - maybe for future
-                    newChatItem.MarketItemHash = chatData.MarketItem.Hash;
+                    newChatItem.MarketItemHash = chatData.MarketItemHash;
                     newChatItem.Digest = Hash(message, password);
                     chatData.ChatItems.Add(newChatItem);
 

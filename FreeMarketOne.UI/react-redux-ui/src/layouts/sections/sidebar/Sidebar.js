@@ -34,6 +34,12 @@ const Sidebar = ({ show }) => {
               <p>My products</p>
             </a>
           </li>
+          <li>
+            <a href="#">
+              <i className="ion-arrow-graph-up-right" />
+              <p>Sales dashboard</p>
+            </a>
+          </li>
         </ul>
       </div>
     </>

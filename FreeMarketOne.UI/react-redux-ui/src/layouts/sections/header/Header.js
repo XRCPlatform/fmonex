@@ -1,50 +1,72 @@
 // React, Redux, Router
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+// Actions
+import { getAllMessages } from "Modules/units/Messages";
 
 // Atoms
 import DividerVerticalSmall from "Components/atoms/UI/DividerVerticalSmall";
-import Autocomplete from "Components/atoms/inputs/Autocomplete";
 import Select from "Components/atoms/inputs/Select";
+import MsgDropdown from "Components/atoms/inputs/MsgDropdown";
+import UserDropdown from "Components/atoms/inputs/UserDropdown";
 
 import "./Header.css";
 
 const OPTIONS = [
-  { id: "223", name: "USD" },
-  { id: "432", name: "BTC" },
-  { id: "645", name: "EUR" },
-  { id: "234", name: "USDT" },
   { id: "765", name: "XRC" },
-  { id: "123", name: "ETH" },
-  { id: "er5", name: "XRP" },
-  { id: "356", name: "DOGE" }
+  { id: "432", name: "BTC" },
+  { id: "645", name: "LTC" }
 ];
 
-const Header = () => {
+const Header = ({ handleOpenSearch }) => {
+  const dispatch = useDispatch();
+
+  // Redux
+  const messages = useSelector(state => state.messages);
+
+  // State
   const [selected, setSelected] = useState(OPTIONS[0]);
+  const [openMsg, setOpenMsg] = useState(false);
+  const [openUser, setOpenUser] = useState(false);
+
+  useEffect(() => {
+    dispatch(getAllMessages());
+  }, []);
+
+  const handleOpenkMsg = () => {
+    setOpenMsg(!openMsg);
+  };
+  const handleOpenUser = () => {
+    setOpenUser(!openUser);
+  };
 
   return (
-    <div className="header">
-      <div className="logo">
-        free<span>market</span>one
-      </div>
+    <>
+      <div className="header">
+        <div className="logo">
+          free<span>market</span>one
+        </div>
+        <div className="header_ctrl">
+          <span className="search-btn">
+            <i className="ion-ios-search" onClick={handleOpenSearch} />
+          </span>
+          <DividerVerticalSmall />
+          <MsgDropdown
+            open={openMsg}
+            handleOpen={handleOpenkMsg}
+            messages={messages}
+          />
 
-      <div>
-        <Autocomplete />
-      </div>
-      <div className="header_ctrl">
-        <span className="user-notifications">
-          <i className="ion-android-chat"> </i>
-        </span>
+          <DividerVerticalSmall />
 
-        <DividerVerticalSmall />
+          <UserDropdown open={openUser} handleOpen={handleOpenUser} />
 
-        <span className="user-login">
-          <i className="ion-ios-contact-outline"> </i>
-        </span>
-        <DividerVerticalSmall />
-        <Select options={OPTIONS} value={selected} onChange={setSelected} />
+          <DividerVerticalSmall />
+          <Select options={OPTIONS} value={selected} onChange={setSelected} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

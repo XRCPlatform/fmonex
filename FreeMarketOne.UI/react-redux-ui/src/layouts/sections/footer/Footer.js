@@ -10,10 +10,13 @@ const Footer = ({ handleToggle, show }) => {
   return (
     <div className="footer">
       <div className="indicators">
-        <span className="in-out" onClick={handleToggle}>
+        <span className="toggle" onClick={handleToggle}>
           <i className={show ? "ion-toggle" : "ion-toggle-filled"} />
         </span>
         <DividerVerticalSmall />
+        {/*        <span className="sync-settings">
+          <i className="ion-android-settings" />
+        </span> */}
         <span className="price">
           XRC/USD <span className="xrc_fiat"> $23,89</span>
         </span>

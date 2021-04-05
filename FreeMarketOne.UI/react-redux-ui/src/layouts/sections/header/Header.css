@@ -7,7 +7,7 @@
   left: 0;
   position: fixed;
   right: 0;
-  height: 23px !important;
+  height: 24px !important;
 
   background-image: linear-gradient(
       66deg,
@@ -51,6 +51,10 @@
 
   justify-content: space-between;
 }
+
+.header_ctrl {
+  padding: 2px 0px;
+}
 .user-notifications {
   font-size: 1.1em;
   vertical-align: middle;
@@ -58,23 +62,27 @@
   /*  color: #EDB603; */
   cursor: pointer;
 }
+
+.user-notifications:hover {
+  color: #fca611;
+}
+
 .user-login {
   font-size: 1.1em;
   vertical-align: middle;
   /* color: #e8eef1; */
-  color: #2ecc71;
+  /*  color: #2ecc71; */
   cursor: pointer;
-  
+  color: #e8eef1;
+}
+.user-login:hover {
+  color: #fca611;
 }
 
 .user-time i {
   font-size: 1.1em;
   vertical-align: middle;
   color: #e8eef1;
-}
-.clock {
-  font-family: "Rubik";
-  font-size: 1em;
 }
 
 .logo {
@@ -86,3 +94,4 @@
 .logo span {
   color: #fca611;
 }
+

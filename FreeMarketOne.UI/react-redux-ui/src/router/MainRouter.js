@@ -8,7 +8,6 @@ import { publicRoutes, privateRoutes } from "Router/Routes";
 
 // Layouts
 import MainLayout from "Layouts/MainLayout";
-import NotFoundPage from "Layouts/NotFoundPage";
 
 // Loaders
 import Spinner from "Layouts/loaders/Spinner";
@@ -103,7 +102,6 @@ const AppRouter = () => {
               />
             );
           })}
-        <Route component={NotFoundPage} />
       </Switch>
     </Suspense>
   );

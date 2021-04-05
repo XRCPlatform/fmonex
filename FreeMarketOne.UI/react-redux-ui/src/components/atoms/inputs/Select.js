@@ -33,8 +33,8 @@ const Select = ({ value, options, onChange }) => {
   return (
     <div className="select" ref={selectRef}>
       <div className="selection" onClick={handleClick}>
-        <div className="label">{value.name}</div>
-        <div className="chevron">
+        <div className={isOpen ? "label open" : "label"}>{value.name}</div>
+        <div className={isOpen ? "chevron open" : "chevron"}>
           {!isOpen ? (
             <i className="ion-android-arrow-dropdown"> </i>
           ) : (

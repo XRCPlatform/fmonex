@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Merriweather+Sans");
 @import url("https://fonts.googleapis.com/css?family=Rubik&display=swap");
 
+
 body {
   font-family: "Merriweather Sans", sans-serif;
   /*   font-family: "Rubik"; */
@@ -169,7 +170,7 @@ body {
 
 .sidebar-nav {
   text-align: center;
-  justify-content: center;
+  justify-content: left;
   position: absolute;
   top: 0;
   width: 130px;
@@ -190,6 +191,7 @@ body {
 
 .sidebar-nav li i {
   font-size: 33px;
+/*  vertical-align:sub; */
 }
 
 .sidebar-nav li a {
@@ -197,6 +199,12 @@ body {
   text-decoration: none;
   color: #999999;
 }
+
+
+/* .sidebar-nav li a span{
+  margin: 0px 0px 0px 10px;
+
+} */
 
 .sidebar-nav li a:hover {
   text-decoration: none;
@@ -221,30 +229,18 @@ body {
   color: #999999;
 }
 
-/* footer nav */
-.wrap-footer {
-  bottom: 0 !important;
+.online i {
+  color: #2ecc71;
 }
-
-.sidebar-footer {
-  justify-content: space-between !important;
-  display: block;
+.busy i {
+  color: #e74c3c;
 }
-
-.sidebar-footer a i {
-  font-size: 24px;
-  margin: 10px;
+.idle i {
+  color: #f1c40f;
+}
+.offline i {
   color: #999999;
-  cursor: pointer;
 }
-
-.sidebar-footer li a:hover {
-  text-decoration: none;
-  color: #fca611;
-}
-
-.sidebar-footer a:active,
-.sidebar-footer a:focus {
-  text-decoration: none;
-  color: #fca611;
+.message-read {
+  color: #e8eef1;
 }

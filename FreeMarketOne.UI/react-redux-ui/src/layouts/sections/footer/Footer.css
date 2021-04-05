@@ -48,9 +48,7 @@
   justify-content: space-between;
 }
 
-.indicators {
-  float: right !important;
-}
+
 .indicators span {
   font-size: 11.2px !important;
 }
@@ -81,13 +79,26 @@ color: #F1C40F; */
 }
 
 
-.in-out i {
+.toggle i {
   color: #e8eef1;
   font-size: 20px !important;
   cursor: pointer;
+ 
 }
 
-.in-out i:hover {
+.toggle i:hover {
+  color: #fca611;
+ 
+}
+
+.sync-settings i {
+  color: #e8eef1;
+  font-size: 18px !important;
+  cursor: pointer;
+ 
+}
+
+.sync-settings i:hover {
   color: #fca611;
  
 }

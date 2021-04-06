@@ -4,17 +4,18 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 
 // Actions
-import { removeConversation } from "Modules/units/Messages";
+import { removeConversation, sendMessage } from "Modules/units/Messages";
 
 // Style
 import "../Chatbox.css";
 
-const Chatbox = ({ data }) => {
+const Chatbox = ({ data, id }) => {
   const dispatch = useDispatch();
 
   // State
   const [open, setOpen] = useState(true);
   const [resizeInput, setResizeInput] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleRemove = (e, id) => {
     e.preventDefault();
@@ -27,6 +28,21 @@ const Chatbox = ({ data }) => {
 
   const handleResizeInput = () => {
     setResizeInput(!resizeInput);
+  };
+
+  const handleClearInput = () => {
+    setMessage("");
+  };
+
+  const handleSend = e => {
+    e.preventDefault();
+    const body = {
+      id: Math.random(),
+      text: message,
+      date: moment().format(),
+      messageSource: true
+    };
+    dispatch(sendMessage(data.id, body, handleClearInput));
   };
 
   return (
@@ -75,10 +91,14 @@ const Chatbox = ({ data }) => {
       </div>
       <div className="chat-input-holder">
         <textarea
+          value={message}
+          onChange={e => setMessage(e.target.value)}
           className={!resizeInput ? "chat-input" : "chat-input-resize"}
           placeholder="Write a message..."
         />
-        <i className="ion-android-send fas" />
+        <span onClick={e => handleSend(e)}>
+          <i className="ion-android-send fas" />
+        </span>
         <span onClick={handleResizeInput}>
           <i
             className={

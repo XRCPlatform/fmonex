@@ -19,9 +19,16 @@ const OPEN_CONVERSATION = "OPEN_CONVERSATION";
 
 const REMOVE_CONVERSATION = "REMOVE_CONVERSATION";
 
+const SEND_MESSAGE = "SEND_MESSAGE";
+
 /**
  * ACTIONS
  */
+
+const isDuplicate = (data, obj) =>
+  data.some(el =>
+    Object.entries(obj).every(([key, value]) => value === el[key])
+  );
 
 export const getAllMessages = () => async dispatch => {
   dispatch({ type: GET_ALL_MSGS_REQ });
@@ -49,6 +56,15 @@ export const removeConversation = id => async dispatch => {
     type: REMOVE_CONVERSATION,
     payload: id
   });
+};
+
+export const sendMessage = (id, body, handleClearInput) => async dispatch => {
+  dispatch({
+    type: SEND_MESSAGE,
+    id,
+    data: body
+  });
+  handleClearInput();
 };
 
 /**
@@ -85,7 +101,10 @@ export default function reducer(state = INIT_STATE, action = {}) {
       return {
         ...state,
         loading: false,
-        conversations: [...state.conversations, action.payload]
+
+        conversations: !isDuplicate(state.conversations, action.payload)
+          ? [...state.conversations, action.payload]
+          : state.conversations
       };
 
     case REMOVE_CONVERSATION:
@@ -94,6 +113,20 @@ export default function reducer(state = INIT_STATE, action = {}) {
         conversations: state.conversations.filter(
           item => item.id !== action.payload
         )
+      };
+
+    case SEND_MESSAGE:
+      return {
+        ...state,
+        loading: false,
+
+        conversations: state.conversations.map(item => {
+          if (item.id === action.id) {
+            item.messages.push(action.data);
+            return item;
+          }
+          return item;
+        })
       };
 
     default:

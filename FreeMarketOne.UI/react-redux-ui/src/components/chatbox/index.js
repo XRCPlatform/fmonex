@@ -23,7 +23,7 @@ const Chat = () => {
     <div className="chatbox-holder">
       {conv?.length > 0 ? (
         conv?.map(item => {
-          return <Chatbox key={item?.id} data={item} />;
+          return <Chatbox key={item?.id} data={item} id={item?.id} />;
         })
       ) : (
         <div />

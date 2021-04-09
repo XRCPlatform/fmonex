@@ -1,0 +1,229 @@
+/* width */
+::-webkit-scrollbar {
+    width: 7px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888; 
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+  }
+
+
+.chatbox-holder {
+  position: fixed;
+  right: 0;
+  bottom: 31px;
+  display: flex;
+  align-items: flex-end;
+  height: 0;
+}
+
+.chatbox {
+  border-top: 1px solid #fca611;
+  width: 300px;
+  height: 400px;
+  margin: 0 20px 0 0;
+  position: relative;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-flow: column;
+  background: #fff;
+  bottom: 0;
+  transition: 0.1s ease-out;
+}
+
+.chatbox-top {
+  position: relative;
+  display: flex;
+  padding: 5px 0;
+  background: #242a31;
+}
+
+.chatbox-min .chatbox-top {
+    opacity: 0.5;
+  }
+
+.chatbox-icons {
+  padding: 0 10px 0 0;
+  display: flex;
+  position: relative;
+}
+
+.chatbox-icons .fa {
+  padding: 3px 5px;
+  margin: 0 0 0 3px;
+  color: white;
+  cursor: pointer;
+}
+
+.chatbox-icons .fa:hover {
+  color: #6c6c6c;
+}
+
+.chatbox-icons span {
+  color: white;
+}
+
+.chat-partner-name {
+  flex: 1;
+  padding: 0 0 0 10px;
+  color: #fff;
+}
+.chat-partner-name span {
+  font-size: 13px;
+}
+.chat-partner-name i {
+  font-size: 15px;
+  vertical-align: middle;
+}
+
+.chat-partner-name i {
+  margin-right: 8px;
+}
+
+.chat-messages {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  margin: 0px 0px 3px 0px; 
+  overflow: auto;
+  display: flex;
+  flex-flow: row wrap;
+  align-content: flex-start;
+  flex: 1;
+}
+
+.message-box-holder {
+  width: 100%;
+  margin: 0 0 15px;
+  display: flex;
+  flex-flow: column;
+  align-items: flex-end;
+}
+
+
+
+
+.message-box {
+  padding: 5px;
+width: 90%;
+  border-radius: 6px 6px 0px 6px;
+  position: relative;
+  background-color: #fff;
+  color: #6c6c6c;
+  font-size: 12px;
+  border: 1px solid #e2e2e2;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+/*   box-shadow: 0 0.2em 0.4em rgba(0, 0, 0, 0.2); */
+ /*  border-color: #aaa #aaa transparent transparent; */
+ white-space: pre-wrap; /* css-3 */    
+ white-space: -moz-pre-wrap; /* Mozilla*/
+ white-space: -pre-wrap; /* Opera 4-6 */    
+ white-space: -o-pre-wrap; /* Opera 7 */    
+ word-wrap: break-word; /* Internet Explorer 5.5+ */
+}
+
+
+
+.message-partner {
+  border-radius: 0px 6px 6px 6px;
+  background-color: #ECECEC;
+  border: 1px solid #e2e2e2;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  align-self: flex-start;
+  width: 90%;
+ /*  border-color: #aaa #aaa transparent transparent; */
+ white-space: pre-wrap; /* css-3 */    
+ white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+ white-space: -pre-wrap; /* Opera 4-6 */    
+ white-space: -o-pre-wrap; /* Opera 7 */    
+ word-wrap: break-word; /* Internet Explorer 5.5+ */
+}
+
+
+
+.chat-input-holder {
+  display: flex;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.chat-input-holder .fas {
+  font-size: 30px;
+  padding: 10px 10px;
+  color: #6c6c6c;
+  cursor: pointer;
+}
+.chat-input-holder .fas:hover {
+  color: #2c3437;
+}
+
+
+.chat-input-holder .res {
+
+    padding: 0px 7px 0px 0px;
+    color: #6c6c6c;
+    cursor: pointer;
+  }
+  .chat-input-holder .res:hover {
+    color: #2c3437;
+  }
+
+
+
+.chat-input {
+  resize: none;
+  padding: 5px 10px;
+  height: 40px;
+  font-size: 14px;
+  color: #2c3437;
+  flex: 1;
+  border: none;
+ 
+}
+
+
+.chat-input-resize {
+    resize: none;
+    padding: 5px 10px;
+    height: 200px;
+    font-size: 14px;
+    color: #2c3437;
+    flex: 1;
+    border: none;
+   
+  }
+
+.chat-input:focus {
+  outline: none;
+}
+
+.chatbox-min {
+  margin-bottom: -362px;
+  height: 30px;
+  border-top: 1px solid #fca611;
+  width: 300px;
+  margin: 0px;
+  position: relative;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-flow: column;
+  background: white;
+  bottom: 0;
+  transition: 0.1s ease-out;
+  
+}
+
+.time-tag-bubble {
+  margin: 15px 0px 0px 15px;
+  float: right;
+  font-size: 10px !important;
+  color: #999999;
+}

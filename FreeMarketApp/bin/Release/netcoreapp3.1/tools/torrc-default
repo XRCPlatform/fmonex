@@ -57,7 +57,7 @@ Log notice file notices.log
 ControlPort 9051
 ## If you enable the controlport, be sure to enable one of these
 ## authentication methods, to prevent attackers from accessing it.
-HashedControlPassword 16:86BF85F8E623A46C603C6E26FC298A769DB44E5F70F2B3A6E566C9BA2C
+HashedControlPassword 16:4916219FE665B41960FD27D375E0A3D1D3A83A6390642BE7937348CBB8
 #CookieAuthentication 1
 
 ############### This section is just for location-hidden services ###

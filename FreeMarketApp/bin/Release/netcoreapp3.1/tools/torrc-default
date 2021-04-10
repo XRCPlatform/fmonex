@@ -35,9 +35,9 @@ SOCKSPort localhost:9050 # Default: Bind to localhost:9050 for local connections
 ## may provide sensitive information to an attacker who obtains the logs.
 ##
 ## Send all messages of level 'notice' or higher to @LOCALSTATEDIR@/log/tor/notices.log
-#Log notice file @LOCALSTATEDIR@/log/tor/notices.log
+Log notice file notices.log
 ## Send every possible message to @LOCALSTATEDIR@/log/tor/debug.log
-#Log debug file @LOCALSTATEDIR@/log/tor/debug.log
+#Log debug file debug.log
 ## Use the system log instead of Tor's logfiles
 #Log notice syslog
 ## To send all messages to stderr:
@@ -57,7 +57,7 @@ SOCKSPort localhost:9050 # Default: Bind to localhost:9050 for local connections
 ControlPort 9051
 ## If you enable the controlport, be sure to enable one of these
 ## authentication methods, to prevent attackers from accessing it.
-HashedControlPassword 16:6A424B4684217A9E606FCE355FB4AB6CE80B4A020BF31E44F52C6AF394
+HashedControlPassword 16:4916219FE665B41960FD27D375E0A3D1D3A83A6390642BE7937348CBB8
 #CookieAuthentication 1
 
 ############### This section is just for location-hidden services ###

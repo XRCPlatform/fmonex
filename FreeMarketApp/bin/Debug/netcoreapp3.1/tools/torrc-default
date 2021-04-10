@@ -35,9 +35,9 @@ SOCKSPort localhost:9050 # Default: Bind to localhost:9050 for local connections
 ## may provide sensitive information to an attacker who obtains the logs.
 ##
 ## Send all messages of level 'notice' or higher to @LOCALSTATEDIR@/log/tor/notices.log
-#Log notice file @LOCALSTATEDIR@/log/tor/notices.log
+Log notice file notices.log
 ## Send every possible message to @LOCALSTATEDIR@/log/tor/debug.log
-#Log debug file @LOCALSTATEDIR@/log/tor/debug.log
+#Log debug file debug.log
 ## Use the system log instead of Tor's logfiles
 #Log notice syslog
 ## To send all messages to stderr:

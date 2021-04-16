@@ -1,0 +1,155 @@
+button,
+input[type="submit"],
+input[type="reset"] {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
+.btn_box {
+  padding: 20px 70px;
+}
+
+.btn-animate {
+  text-decoration: none;
+  font-family: "Lato", sans-serif;
+  color: #fff;
+  position: relative;
+  display: inline-block;
+  margin: 0 auto;
+  width: 110px;
+  height: 30px;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+.btn-animate > svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 110px;
+  height: 30px;
+  stroke-width: 2px;
+  stroke: #ffd700;
+  stroke-linecap: round;
+  fill: transparent;
+}
+.btn-animate > span {
+  color: #ffd700;
+  width: 110px;
+  height: 30px;
+  display: inline-block;
+  text-align: center;
+  font-size: 12px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  line-height: 2.8;
+  transition: all 0.2s ease;
+}
+.btn-animate > span:after {
+  position: absolute;
+  content: "LET'S GO!";
+  color: #ffd700 !important;
+  top: 0;
+  left: -100%;
+  width: 110px;
+  height: 30px;
+  color: #0f0f0f;
+  transition: all 0.2s ease;
+}
+.btn-animate > span:before {
+  position: absolute;
+  content: "";
+  height: 30px;
+  z-index: 0;
+  width: 30px;
+  background-color: #ffd700;
+  border-radius: 50%;
+  top: 0;
+  left: -63%;
+  transition: all 0.4s ease;
+  transform: scale(0);
+  opacity: 0;
+}
+.btn-animate:hover > svg {
+  -webkit-animation: 1s pencil linear forwards;
+  animation: 1s pencil linear forwards;
+}
+.btn-animate:hover > span {
+  left: 100%;
+}
+.btn-animate:hover > span:after {
+  left: -100%;
+}
+
+@-webkit-keyframes pencil {
+  0% {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 700;
+    stroke-width: 2px;
+  }
+  75% {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 400;
+    stroke-width: 1px;
+    fill: transparent;
+  }
+  100% {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 400;
+    stroke-width: 1px;
+    fill: #1c2127;
+  }
+}
+
+@keyframes pencil {
+  0% {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 700;
+    stroke-width: 2px;
+  }
+  75% {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 400;
+    stroke-width: 1px;
+    fill: transparent;
+  }
+  100% {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 400;
+    stroke-width: 1px;
+    fill: #1c2127;
+  }
+}
+@-webkit-keyframes ripple-animation {
+  from {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  to {
+    transform: scale(30);
+    opacity: 0;
+  }
+}
+@keyframes ripple-animation {
+  from {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  to {
+    transform: scale(30);
+    opacity: 0;
+  }
+}
+
+/* other colors
+  color: #F9690E;
+  color: #555;
+  black and fire red
+  background-color: #0F0F0F;
+  color: #6b2b03;
+  */

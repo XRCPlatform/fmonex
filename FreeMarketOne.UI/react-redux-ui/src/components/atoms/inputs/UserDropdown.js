@@ -1,5 +1,8 @@
 import React, { useEffect, useRef } from "react";
 
+import Button from "../buttons/ButtonWithEffect";
+import Rating from "../UI/Rating";
+
 import "./Input.css";
 
 const UserDropdown = ({ open, handleOpen }) => {
@@ -25,6 +28,36 @@ const UserDropdown = ({ open, handleOpen }) => {
       <span className="user-login" onClick={handleOpen}>
         <i className="ion-ios-contact-outline"> </i>
       </span>{" "}
+      <div className="dropdown-content usr">
+        <div className="dropdown-menu-header">
+          <Rating />
+        </div>
+        <div className="section">
+          <span>
+            <i className="ion-android-settings" />
+            <span>Settings</span>
+          </span>
+        </div>
+        <div className="section">
+          <span>
+            <i className="ion-bug" />
+            Report bug
+          </span>
+        </div>
+        <div className="section">
+          <span>
+            <i className="ion-easel" />
+            Suggest feature
+          </span>
+        </div>
+        <div className="section">
+          <span>
+            <i className="ion-power" />
+            Logout
+          </span>
+        </div>
+        <Button title="Login / Signup" />
+      </div>
     </div>
   );
 };

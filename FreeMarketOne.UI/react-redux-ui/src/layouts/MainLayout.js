@@ -19,7 +19,7 @@ const MainLayout = state => {
   };
   return (
     <>
-      <Header handleOpenSearch={handleOpenSearch} />
+      <Header handleOpenSearch={handleOpenSearch} activeSearch={activeSearch} />
       <Autocomplete open={activeSearch} />
       <div id="wrapper" className={show ? "toggled" : ""}>
         <Sidebar show={show} />

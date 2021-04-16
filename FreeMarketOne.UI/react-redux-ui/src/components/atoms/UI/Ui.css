@@ -36,12 +36,19 @@
   margin: 1em 0.5em;
   height: 0.07em;
   line-height: 0.07em;
-  background: #fca611;
+  background: #FFD700;
   color: #e8eef1;
 }
 .gradient:before {
-  background: linear-gradient(to right, #0b0e11, #fca611);
+  background: linear-gradient(to right, #0b0e11, #FFD700);
 }
 .gradient:after {
-  background: linear-gradient(to left, #0b0e11, #fca611);
+  background: linear-gradient(to left, #0b0e11, #FFD700);
+}
+.rating-star i {
+  font-size: 16px;
+  vertical-align: middle;
+color: #FFD700;
+padding: 0px;
+margin-left: 3px;
 }

@@ -7,10 +7,15 @@ const Sidebar = ({ show }) => {
     <>
       <div id="sidebar-wrapper" className={show ? "toggled" : ""}>
         <ul className="sidebar-nav">
-          <li className="sidebar-brand">
+          {/*           <li className="sidebar-brand">
             <span>Hello, Rulez</span>
           </li>
-          <DividerHorizontal gradient />
+          <li className="sidebar-brand-rating">
+            <span>
+              <i className="ion-ios-star" /> 4.7
+            </span>
+          </li>
+          <DividerHorizontal gradient /> */}
           <li>
             <a href="#" className="active">
               <i className="ion-ios-home-outline" />

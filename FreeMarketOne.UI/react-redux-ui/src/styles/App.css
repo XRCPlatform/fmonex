@@ -211,7 +211,7 @@ body {
   text-decoration: none;
   /* color: #1290C9; */
   color: #e8eef1;
-  /*  background: rgba(255, 255, 255, 0.09); */
+  /*  background: rgba(255, 255, 255, 0.09);  */
 }
 .sidebar-nav li:hover i {
   text-decoration: none;
@@ -220,21 +220,19 @@ body {
   /*  background: rgba(255, 255, 255, 0.09); */
 }
 
-.sidebar-nav li a:active i,
-.sidebar-nav li a:focus i {
-  text-decoration: none;
+.sidebar-nav li .selected i {
+
  /*  color: #1290C9; */
   color: #FFD700;
   /*   background: rgba(255, 255, 255, 0.2); */
   /*   background: rgba(255, 255, 255, 0.09); */
 }
-.sidebar-nav li a:active,
-.sidebar-nav li a:focus {
+.sidebar-nav li .selected {
   text-decoration: none;
  /*  color: #1290C9; */
  color: #e8eef1;
   /*   background: rgba(255, 255, 255, 0.2); */
-  /*   background: rgba(255, 255, 255, 0.09); */
+    /*  background: rgba(255, 255, 255, 0.09);  */
 }
 
 .sidebar-nav > .sidebar-brand {

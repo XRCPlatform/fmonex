@@ -9,6 +9,7 @@ const ButtonWithEffect = props => {
         <button
           type="button"
           className="btn-animate ripple"
+          data-ripple-color="#ffffff"
           onClick={e => {
             onClick(e);
           }}

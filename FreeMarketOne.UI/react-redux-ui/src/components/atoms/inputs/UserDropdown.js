@@ -34,7 +34,7 @@ const UserDropdown = ({ open, handleOpen }) => {
         </div>
         <div className="section">
           <span>
-            <i className="ion-android-settings" />
+            <i className="ion-android-options" />
             <span>Settings</span>
           </span>
         </div>

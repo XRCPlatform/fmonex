@@ -1,30 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
+import { NavLink } from "react-router-dom";
 
 import menu from "../../../api/menu.json";
 
-const Item = ({ item }) => {
-  const [active, setActive] = useState(false);
+const MenuLink = ({ item }) => (
+  <li>
+    <NavLink to={item.to} exact key={item.id} activeClassName="selected">
+      <i className={item.icon} />
+      <p>{item.title}</p>
+    </NavLink>
+  </li>
+);
 
-  const handleActive = () => {
-    setActive(!active);
-  };
-
-  return (
-    <li onClick={handleActive}>
-      <a href="#" className={active ? "selected" : ""}>
-        <i className={item.icon} />
-        <p>{item.title}</p>
-      </a>
-    </li>
-  );
-};
 const Sidebar = ({ show }) => {
   return (
     <>
       <div id="sidebar-wrapper" className={show ? "toggled" : ""}>
         <ul className="sidebar-nav">
           {menu?.data?.map(item => {
-            return <Item key={item.id} item={item} />;
+            return <MenuLink key={item.id} item={item} />;
           })}
         </ul>
       </div>

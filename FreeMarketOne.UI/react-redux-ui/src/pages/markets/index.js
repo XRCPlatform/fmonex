@@ -1,12 +1,12 @@
 // React
 import React from "react";
 
-const Home = () => {
+const Markets = () => {
   return (
     <>
-      <p>Homescreen</p>
+      <p>Markets</p>
     </>
   );
 };
 
-export default Home;
+export default Markets;

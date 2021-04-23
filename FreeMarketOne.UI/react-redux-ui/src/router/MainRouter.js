@@ -6,14 +6,12 @@ import { Helmet } from "react-helmet";
 import { Route, Redirect, Switch, useHistory } from "react-router-dom";
 import { publicRoutes, privateRoutes } from "Router/Routes";
 
-// Layouts
-import MainLayout from "Layouts/MainLayout";
-
 // Loaders
 import Spinner from "Layouts/loaders/Spinner";
 
 const PublicRoutes = ({
   component: CustomComp,
+  layout: Layout,
   title,
   description,
   ...rest
@@ -21,19 +19,20 @@ const PublicRoutes = ({
   <Route
     {...rest}
     render={props => (
-      <MainLayout>
+      <Layout>
         <Helmet>
           <title>freemarketone | {title}</title>
           <meta name="description" content={description} />
         </Helmet>
         <CustomComp {...props} />
-      </MainLayout>
+      </Layout>
     )}
   />
 );
 
 const PrivateRoutes = ({
   component: CustomComp,
+  layout: Layout,
   user,
   title,
   description,
@@ -43,13 +42,13 @@ const PrivateRoutes = ({
     {...rest}
     render={props =>
       user ? (
-        <MainLayout>
+        <Layout>
           <Helmet>
             <title>freemarketone | {title}</title>
             <meta name="description" content={description} />
           </Helmet>
           <CustomComp {...props} />
-        </MainLayout>
+        </Layout>
       ) : (
         <Redirect
           to={{
@@ -83,6 +82,7 @@ const AppRouter = () => {
                 path={`/${route.path}`}
                 exact={route.exact}
                 component={route.component}
+                layout={route.layout}
                 title={route.title}
                 description={route.description}
                 user={user}
@@ -97,6 +97,7 @@ const AppRouter = () => {
                 path={`/${route.path}`}
                 exact={route.exact}
                 component={route.component}
+                layout={route.layout}
                 title={route.title}
                 description={route.description}
               />

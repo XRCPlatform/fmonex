@@ -22,6 +22,7 @@ using Serilog;
 
 namespace Libplanet.Tests.Net.Protocols
 {
+    //FMONECHANGE - commented transport tests as changed transport considerably and yet to find time to impement new test transport 
     internal class TestTransport : ITransport
     {
         //        private static readonly PrivateKey VersionSigner = new PrivateKey();
@@ -560,9 +561,9 @@ namespace Libplanet.Tests.Net.Protocols
         //        }
         public BoundPeer AsPeer => throw new NotImplementedException();
 
-        public IEnumerable<BoundPeer> Peers => throw new NotImplementedException();
-
         public DateTimeOffset? LastMessageTimestamp => throw new NotImplementedException();
+
+        public bool Running => throw new NotImplementedException();
 
         public Task BootstrapAsync(IEnumerable<BoundPeer> bootstrapPeers, TimeSpan? pingSeedTimeout, TimeSpan? findNeighborsTimeout, int depth, CancellationToken cancellationToken)
         {

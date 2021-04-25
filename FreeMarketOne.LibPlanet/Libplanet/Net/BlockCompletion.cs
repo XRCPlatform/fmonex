@@ -278,7 +278,7 @@ namespace Libplanet.Net
         public IAsyncEnumerable<Tuple<Block<TAction>, TPeer>> Complete(
             IReadOnlyList<TPeer> peers,
             BlockFetcher blockFetcher,
-            int millisecondsSingleSessionTimeout = 600000,//tan minutes
+            int millisecondsSingleSessionTimeout = 10000,
             CancellationToken cancellationToken = default
         ) =>
             Complete(
@@ -342,18 +342,22 @@ namespace Libplanet.Net
                         hashDigests,
                         peer
                     );
-                    var timeout = new CancellationTokenSource(singleSessionTimeout);
+                    using var timeout = new CancellationTokenSource(singleSessionTimeout);
                     CancellationToken timeoutToken = timeout.Token;
+                    using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+                        timeoutToken,
+                        ct
+                    );
                     timeoutToken.Register(() =>
                         _logger.Debug("Timed out to wait a response from {Peer}.", peer)
                     );
-                    ct.Register(() => timeout.Cancel());
+                    CancellationToken linkedToken = linkedTokenSource.Token;
 
                     try
                     {
                         ConfiguredCancelableAsyncEnumerable<Block<TAction>> blocks =
-                            blockFetcher(peer, hashDigests, timeoutToken)
-                                .WithCancellation(timeoutToken);
+                            blockFetcher(peer, hashDigests, linkedToken)
+                                .WithCancellation(linkedToken);
                         await foreach (Block<TAction> block in blocks)
                         {
                             _logger.Debug(

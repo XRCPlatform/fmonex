@@ -10,6 +10,7 @@ using System.Text;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed to be ben coded message 
     public class RecentStates : IBenEncodeable
     {
         private static readonly Codec _codec = new Codec();

@@ -123,6 +123,8 @@ namespace FreeMarketOne.BlockChain.Policy
 
         public Type[] ValidTypesOfActionItems { get; }
 
+        public IComparer<BlockPerception> CanonicalChainComparer => throw new NotImplementedException();
+
         public bool DoesTransactionFollowsPolicy(Transaction<T> transaction,
             BlockChain<T> blockChain)
         {

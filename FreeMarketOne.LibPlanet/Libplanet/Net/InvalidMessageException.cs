@@ -5,6 +5,7 @@ using Libplanet.Net.Messages;
 
 namespace Libplanet.Net
 {
+	//FMONECHANGE refactored this calls to stop using Message class which was NetMq centric
     public class InvalidMessageException : Exception
     {
         internal InvalidMessageException(string message, MessageType receivedMessage, Exception innerException)

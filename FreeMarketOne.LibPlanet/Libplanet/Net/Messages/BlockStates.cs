@@ -8,6 +8,7 @@ using Bencodex.Types;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     public class BlockStates: IBenEncodeable
     {
         private static readonly byte[] BlockHashKey = { 0x42 }; // 'B'

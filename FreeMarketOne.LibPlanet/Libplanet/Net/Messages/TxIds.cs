@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     public class TxIds : IBenEncodeable
     {
         private static readonly byte[] senderKey = { 0x49 }; // 'I'
@@ -22,12 +23,7 @@ namespace Libplanet.Net.Messages
 
         public TxIds(Dictionary dict)
         {
-            //    Sender = new Address(frames[0].Buffer);
-            //    int txCount = frames[1].ConvertToInt32();
-            //    Ids = frames
-            //        .Skip(2).Take(txCount)
-            //        .Select(f => f.ConvertToTxId())
-            //        .ToList();
+            
             if (dict.ContainsKey((IKey)(Binary)senderKey))
             {
                 Sender = new Address(dict.GetValue<Binary>(senderKey));

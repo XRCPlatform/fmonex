@@ -301,7 +301,7 @@ namespace FreeMarketOne.BlockChain
             var genesisHelper = new GenesisHelper();
             var genesisBytes = genesisHelper.GetGenesis(_blockChainGenesisName);
 
-            return new Block<T>().Deserialize(genesisBytes);
+            return Block<T>.Deserialize(genesisBytes);
         }
 
         public void Stop()
@@ -406,7 +406,7 @@ namespace FreeMarketOne.BlockChain
 
             try
             {
-                await _swarmServer.PreloadAsync(null,null, null, cancellationToken: _cancellationToken.Token );
+                await _swarmServer.PreloadAsync(null, null, cancellationToken: _cancellationToken.Token);
             }
             catch (AggregateException e)
             {

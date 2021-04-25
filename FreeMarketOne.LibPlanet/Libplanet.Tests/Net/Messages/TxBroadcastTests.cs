@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Libplanet.Tests.Net.Messages
 {
+	//FMONECHANGE added new test class to verify message serialziation handling
     public class TxBroadcastTests
     {
         [Fact]
@@ -12,9 +13,9 @@ namespace Libplanet.Tests.Net.Messages
             var random = new Random();
             var buffer = new byte[500];
             random.NextBytes(buffer);
-            TxBroadcast msg = new TxBroadcast(buffer, false);
+            Libplanet.Net.Messages.Tx msg = new Libplanet.Net.Messages.Tx(buffer, false);
             var ben = msg.SerializeToBen();
-            var result = new TxBroadcast(ben);
+            var result = new Libplanet.Net.Messages.Tx(ben);
             Assert.Equal(msg.Payload, result.Payload);
         }
     }

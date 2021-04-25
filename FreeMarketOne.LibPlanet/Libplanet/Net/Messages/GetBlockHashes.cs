@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     public class GetBlockHashes : IBenEncodeable
     {
         private static readonly byte[] LocatorKey = { 0x47 }; // 'G'

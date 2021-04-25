@@ -6,6 +6,7 @@ using Libplanet.Crypto;
 using Libplanet.Store;
 using Libplanet.Tests.Common.Action;
 using Libplanet.Tests.Store;
+using Libplanet.Tests.Store.Trie;
 using Libplanet.Tx;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,6 +23,7 @@ namespace Libplanet.Tests.Blockchain.Policies
         private StoreFixture _fx;
         private BlockChain<DumbAction> _chain;
         private IBlockPolicy<DumbAction> _policy;
+        private IStagePolicy<DumbAction> _stagePolicy;
 
         public BlockPolicyTest(ITestOutputHelper output)
         {
@@ -31,8 +33,10 @@ namespace Libplanet.Tests.Blockchain.Policies
                 blockAction: null,
                 blockIntervalMilliseconds: 3 * 60 * 60 * 1000
             );
+            _stagePolicy = new VolatileStagePolicy<DumbAction>();
             _chain = new BlockChain<DumbAction>(
                 _policy,
+                _stagePolicy,
                 _fx.Store,
                 _fx.StateStore,
                 _fx.GenesisBlock);
@@ -135,8 +139,11 @@ namespace Libplanet.Tests.Blockchain.Policies
         public async Task GetNextBlockDifficulty()
         {
             var store = new DefaultStore(null);
+            var stateStore =
+                new TrieStateStore(new MemoryKeyValueStore(), new MemoryKeyValueStore());
             var dateTimeOffset = FixtureEpoch;
-            var chain = TestUtils.MakeBlockChain(_policy, store, timestamp: dateTimeOffset);
+            var chain =
+                TestUtils.MakeBlockChain(_policy, store, stateStore, timestamp: dateTimeOffset);
             var address = _fx.Address1;
             Assert.Equal(
                 1024,

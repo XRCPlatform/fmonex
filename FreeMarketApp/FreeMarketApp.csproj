@@ -69,6 +69,9 @@
     <EmbeddedResource Include="Assets\splash.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.0-rc1" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.0-rc1" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0-rc1" />

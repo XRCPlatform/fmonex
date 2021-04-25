@@ -6,16 +6,17 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Bencodex;
+using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Assets;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Blockchain.Renderers;
+using Libplanet.Blockchain.Renderers.Debug;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
+using Libplanet.Net.Protocols;
 using Libplanet.Store;
-using Libplanet.Store.Trie;
-using Libplanet.Tests.Common;
 using Libplanet.Tx;
 using Xunit;
 using static Libplanet.Blockchain.KeyConverters;
@@ -23,7 +24,7 @@ using Random = System.Random;
 
 namespace Libplanet.Tests
 {
-    public class TestUtils
+    public static class TestUtils
     {
         public static readonly Address GenesisMinerAddress =
             new Address("21744f4f08db23e044178dafb8273aeb5ebe6644");
@@ -180,8 +181,7 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             Address? miner = null,
             IEnumerable<Transaction<T>> transactions = null,
             DateTimeOffset? timestamp = null,
-            IAction blockAction = null,
-            bool checkStateRootHash = false
+            int protocolVersion = Block<T>.CurrentProtocolVersion
         )
             where T : IAction, new()
         {
@@ -198,28 +198,9 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
                 miner: miner ?? GenesisMinerAddress,
                 previousHash: null,
                 timestamp: timestamp ?? new DateTimeOffset(2018, 11, 29, 0, 0, 0, TimeSpan.Zero),
-                transactions: transactions
+                transactions: transactions,
+                protocolVersion: protocolVersion
             );
-
-            if (checkStateRootHash)
-            {
-                var blockEvaluator = new BlockEvaluator<T>(
-                    blockAction,
-                    (address, digest, arg3) => null,
-                    (address, currency, arg3, arg4) => new FungibleAssetValue(currency),
-                    null);
-                var actionEvaluationResult = blockEvaluator
-                    .EvaluateActions(block, StateCompleterSet<T>.Reject)
-                    .GetTotalDelta(ToStateKey, ToFungibleAssetKey);
-                ITrie trie = new MerkleTrie(new DefaultKeyValueStore(null));
-                foreach (var pair in actionEvaluationResult)
-                {
-                    trie = trie.Set(Encoding.UTF8.GetBytes(pair.Key), pair.Value);
-                }
-
-                var stateRootHash = trie.Commit(rehearsal: true).Hash;
-                block = new Block<T>(block, stateRootHash);
-            }
 
             return block;
         }
@@ -230,7 +211,8 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             byte[] nonce = null,
             long difficulty = 1,
             Address? miner = null,
-            TimeSpan? blockInterval = null
+            TimeSpan? blockInterval = null,
+            int protocolVersion = Block<T>.CurrentProtocolVersion
         )
             where T : IAction, new()
         {
@@ -247,14 +229,15 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             Block<T> block;
             if (nonce == null)
             {
-                block = new Block<T>().Mine(
+                block = Block<T>.Mine(
                     index: index,
                     difficulty: difficulty,
                     previousTotalDifficulty: previousBlock.TotalDifficulty,
                     miner: miner ?? previousBlock.Miner.Value,
                     previousHash: previousHash,
                     timestamp: timestamp,
-                    transactions: txs
+                    transactions: txs,
+                    protocolVersion: protocolVersion
                 );
             }
             else
@@ -267,11 +250,55 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
                     miner: miner ?? previousBlock.Miner.Value,
                     previousHash: previousHash,
                     timestamp: timestamp,
-                    transactions: txs
+                    transactions: txs,
+                    protocolVersion: protocolVersion
                 );
             }
 
             block.Validate(DateTimeOffset.Now);
+
+            return block;
+        }
+
+        public static Block<T> AttachStateRootHash<T>(
+            this Block<T> block, IStateStore stateStore, IAction blockAction)
+            where T : IAction, new()
+        {
+            IValue StateGetter(
+                Address address, HashDigest<SHA256>? blockHash, StateCompleter<T> stateCompleter) =>
+                blockHash is null
+                    ? null
+                    : stateStore.GetState(ToStateKey(address), blockHash.Value);
+
+            FungibleAssetValue FungibleAssetValueGetter(
+                Address address,
+                Currency currency,
+                HashDigest<SHA256>? blockHash,
+                FungibleAssetStateCompleter<T> stateCompleter)
+            {
+                if (blockHash is null)
+                {
+                    return FungibleAssetValue.FromRawValue(currency, 0);
+                }
+
+                IValue value = stateStore.GetState(
+                    ToFungibleAssetKey(address, currency), blockHash.Value);
+                return FungibleAssetValue.FromRawValue(
+                    currency,
+                    value is Bencodex.Types.Integer i ? i.Value : 0);
+            }
+
+            var blockEvaluator = new BlockEvaluator<T>(
+                blockAction, StateGetter, FungibleAssetValueGetter, null);
+            var actionEvaluationResult = blockEvaluator
+                .EvaluateActions(block, StateCompleterSet<T>.Reject)
+                .GetTotalDelta(ToStateKey, ToFungibleAssetKey);
+            stateStore.SetStates(block, actionEvaluationResult);
+            if (stateStore is TrieStateStore trieStateStore)
+            {
+                block = new Block<T>(block, trieStateStore.GetRootHash(block.Hash));
+                stateStore.SetStates(block, actionEvaluationResult);
+            }
 
             return block;
         }
@@ -286,12 +313,13 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
         public static BlockChain<T> MakeBlockChain<T>(
             IBlockPolicy<T> policy,
             IStore store,
+            IStateStore stateStore,
             IEnumerable<T> actions = null,
             PrivateKey privateKey = null,
             DateTimeOffset? timestamp = null,
             IEnumerable<IRenderer<T>> renderers = null,
-            IStateStore stateStore = null,
-            Block<T> genesisBlock = null
+            Block<T> genesisBlock = null,
+            int protocolVersion = Block<T>.CurrentProtocolVersion
         )
             where T : IAction, new()
         {
@@ -320,13 +348,17 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
                 GenesisMinerAddress,
                 null,
                 timestamp ?? DateTimeOffset.MinValue,
-                new[] { tx, });
+                new[] { tx },
+                protocolVersion: protocolVersion
+            );
+            genesisBlock = genesisBlock.AttachStateRootHash(stateStore, policy.BlockAction);
             ValidatingActionRenderer<T> validator = null;
 #pragma warning disable S1121
             var chain = new BlockChain<T>(
                 policy,
+                new VolatileStagePolicy<T>(),
                 store,
-                stateStore ?? store as IStateStore,
+                stateStore,
                 genesisBlock,
                 renderers: renderers ?? new[] { validator = new ValidatingActionRenderer<T>() }
             );
@@ -363,6 +395,19 @@ Actual:   new byte[{actual.LongLength}] {{ {actualRepr} }}";
             }
 
             return Hashcash.Hash(new Codec().Encode(dict));
+        }
+
+        public static PrivateKey GeneratePrivateKeyOfBucketIndex(Address tableAddress, int target)
+        {
+            var table = new RoutingTable(tableAddress);
+            PrivateKey privateKey;
+            do
+            {
+                privateKey = new PrivateKey();
+            }
+            while (table.GetBucketIndexOf(privateKey.ToAddress()) != target);
+
+            return privateKey;
         }
     }
 }

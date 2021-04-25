@@ -4,6 +4,7 @@ using System;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  added new event args class for TOR transport
     public class ReceivedRequestEventArgs : EventArgs
     {
         public BoundPeer Peer { get; set; }

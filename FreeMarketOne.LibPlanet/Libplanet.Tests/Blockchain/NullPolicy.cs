@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
@@ -17,6 +19,9 @@ namespace Libplanet.Tests.Blockchain
             _exceptionToThrow = exceptionToThrow;
             _difficulty = difficulty;
         }
+
+        public IComparer<BlockPerception> CanonicalChainComparer =>
+            new TotalDifficultyComparer(TimeSpan.FromSeconds(3));
 
         public IAction BlockAction => null;
 

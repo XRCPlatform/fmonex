@@ -154,8 +154,9 @@ namespace FreeMarketOne.BlockChain
 
             _blockChain = new BlockChain<T>(
                 _blockChainPolicy,
+                new VolatileStagePolicy<T>(),
                 _storage,
-                _storage,
+                _storage as IStateStore,
                 _genesisBlock
             );
 

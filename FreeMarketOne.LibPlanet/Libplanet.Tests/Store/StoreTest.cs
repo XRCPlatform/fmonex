@@ -516,7 +516,7 @@ namespace Libplanet.Tests.Store
                     ArbitraryBytes = arbitraryBytes.ToImmutableArray(),
                     Md5Digest = digest.ToImmutableArray(),
                 };
-                return Transaction<AtomicityTestAction>.Create(
+                return new Transaction<AtomicityTestAction>().Create(
                     txNonce,
                     key,
                     null,

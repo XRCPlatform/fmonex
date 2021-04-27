@@ -28,7 +28,7 @@ namespace Libplanet.Tests.Blockchain
             var timestamp = DateTimeOffset.UtcNow;
             var txs = new[]
             {
-                Transaction<RandomAction>.Create(
+                new Transaction<RandomAction>().Create(
                     0,
                     signer,
                     null,

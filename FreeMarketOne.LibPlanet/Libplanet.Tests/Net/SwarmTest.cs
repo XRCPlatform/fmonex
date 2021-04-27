@@ -454,7 +454,7 @@ namespace Libplanet.Tests.Net
 
             BlockChain<DumbAction> chainB = swarmB.BlockChain;
 
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 new PrivateKey(),
                 chainB.Genesis.Hash,
@@ -860,7 +860,7 @@ namespace Libplanet.Tests.Net
             foreach (var i in Enumerable.Range(0, 8))
             {
                 miner1.BlockChain.StageTransaction(
-                    Transaction<Sleep>.Create(
+                    new Transaction<Sleep>().Create(
                         0,
                         new PrivateKey(),
                         miner1.BlockChain.Genesis.Hash,
@@ -1525,7 +1525,7 @@ namespace Libplanet.Tests.Net
                 //Assert.Single(
                 //    transport.MessageHistory.Where(msg => msg is Libplanet.Net.Messages.Blocks));
 
-                Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+                Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                     0,
                     new PrivateKey(),
                     sender1.BlockChain.Genesis.Hash,

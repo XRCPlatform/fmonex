@@ -42,7 +42,7 @@ namespace Libplanet.Tests.Blocks
             Transaction<DumbAction>[] txs = Enumerable.Range(0, 50)
                 .Select(i => (privKeys[i % privKeys.Length], i / privKeys.Length))
                 .Select(pair =>
-                    Transaction<DumbAction>.Create(
+                    new Transaction<DumbAction>().Create(
                         nonce: pair.Item2,
                         privateKey: pair.Item1,
                         genesisHash: null,
@@ -195,7 +195,7 @@ namespace Libplanet.Tests.Blocks
             };
 
             Block<PolymorphicAction<BaseAction>> actual =
-                Block<PolymorphicAction<BaseAction>>.Deserialize(encoded);
+                new Block<PolymorphicAction<BaseAction>>().Deserialize(encoded);
             Assert.Equal(_fx.HasTx, actual);
             Assert.Equal(actual.BytesLength, encoded.Length);
             AssertBytesEqual(_fx.HasTx.Serialize(), encoded);
@@ -234,7 +234,7 @@ namespace Libplanet.Tests.Blocks
 
             Transaction<DumbAction>[] blockIdx1Txs =
             {
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     _fx.TxFixture.PrivateKey1,
                     _fx.Genesis.Hash,
@@ -245,14 +245,14 @@ namespace Libplanet.Tests.Blocks
                     },
                     timestamp: DateTimeOffset.MinValue.AddSeconds(1)
                 ),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     _fx.TxFixture.PrivateKey2,
                     _fx.Genesis.Hash,
                     new[] { MakeAction(addresses[2], 'C', addresses[3]) },
                     timestamp: DateTimeOffset.MinValue.AddSeconds(2)
                 ),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     _fx.TxFixture.PrivateKey3,
                     _fx.Genesis.Hash,
@@ -341,21 +341,21 @@ namespace Libplanet.Tests.Blocks
                 // Note that these timestamps in themselves does not have any meanings but are
                 // only arbitrary.  These purpose to make their evaluation order in a block
                 // equal to the order we (the test) intend:
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     _fx.TxFixture.PrivateKey1,
                     _fx.Genesis.Hash,
                     new[] { MakeAction(addresses[0], 'D') },
                     timestamp: DateTimeOffset.MinValue.AddSeconds(1)
                 ),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     _fx.TxFixture.PrivateKey2,
                     _fx.Genesis.Hash,
                     new[] { MakeAction(addresses[3], 'E') },
                     timestamp: DateTimeOffset.MinValue.AddSeconds(3)
                 ),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     _fx.TxFixture.PrivateKey3,
                     _fx.Genesis.Hash,
@@ -502,7 +502,7 @@ namespace Libplanet.Tests.Blocks
         public void DetectInvalidProtocolVersion()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            Block<DumbAction> block = Block<DumbAction>.Mine(
+            Block<DumbAction> block = new Block<DumbAction>().Mine(
                 _fx.Next.Index,
                 _fx.Next.Difficulty,
                 _fx.Genesis.TotalDifficulty,
@@ -514,7 +514,7 @@ namespace Libplanet.Tests.Blocks
             );
             Assert.Throws<InvalidBlockProtocolVersionException>(() => block.Validate(now));
 
-            block = Block<DumbAction>.Mine(
+            block = new Block<DumbAction>().Mine(
                 _fx.Next.Index,
                 _fx.Next.Difficulty,
                 _fx.Genesis.TotalDifficulty,
@@ -531,7 +531,7 @@ namespace Libplanet.Tests.Blocks
         public void CanDetectInvalidTimestamp()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            var block = Block<DumbAction>.Mine(
+            var block = new Block<DumbAction>().Mine(
                 _fx.Next.Index,
                 _fx.Next.Difficulty,
                 _fx.Genesis.TotalDifficulty,
@@ -797,7 +797,7 @@ namespace Libplanet.Tests.Blocks
             DateTimeOffset timestamp = DateTimeOffset.UtcNow;
             var signers = Enumerable.Range(0, signerCount).Select(_ => new PrivateKey());
             ImmutableArray<Transaction<RandomAction>> txs = signers.Select(signer =>
-                Transaction<RandomAction>.Create(
+                new Transaction<RandomAction>().Create(
                     0,
                     new PrivateKey(),
                     null,
@@ -829,9 +829,9 @@ namespace Libplanet.Tests.Blocks
         {
             Transaction<DumbAction>[] txs = new[]
             {
-                Transaction<DumbAction>.Create(0, new PrivateKey(), null, new DumbAction[0]),
-                Transaction<DumbAction>.Create(0, new PrivateKey(), null, new DumbAction[0]),
-                Transaction<DumbAction>.Create(0, new PrivateKey(), null, new DumbAction[0]),
+                new Transaction<DumbAction>().Create(0, new PrivateKey(), null, new DumbAction[0]),
+                new Transaction<DumbAction>().Create(0, new PrivateKey(), null, new DumbAction[0]),
+                new Transaction<DumbAction>().Create(0, new PrivateKey(), null, new DumbAction[0]),
             };
             var block = new Block<DumbAction>(
                 index: 0,

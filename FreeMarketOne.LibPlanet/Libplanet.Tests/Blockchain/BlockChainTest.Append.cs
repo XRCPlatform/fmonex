@@ -380,8 +380,8 @@ namespace Libplanet.Tests.Blockchain
             HashDigest<SHA256> genesis = _blockChain.Genesis.Hash;
             DumbAction[] emptyActions = new DumbAction[0];
             Transaction<DumbAction>
-                txA0 = Transaction<DumbAction>.Create(0, signerA, genesis, emptyActions),
-                txA1 = Transaction<DumbAction>.Create(1, signerA, genesis, emptyActions);
+                txA0 = new Transaction<DumbAction>().Create(0, signerA, genesis, emptyActions),
+                txA1 = new Transaction<DumbAction>().Create(1, signerA, genesis, emptyActions);
             _blockChain.StageTransaction(txA0);
             _blockChain.StageTransaction(txA1);
             Block<DumbAction> block = await _blockChain.MineBlock(
@@ -391,14 +391,14 @@ namespace Libplanet.Tests.Blockchain
             );
 
             Transaction<DumbAction>
-                txA2 = Transaction<DumbAction>.Create(2, signerA, genesis, emptyActions),
-                txA0_ = Transaction<DumbAction>.Create(0, signerA, genesis, emptyActions),
-                txA1_ = Transaction<DumbAction>.Create(1, signerA, genesis, emptyActions),
-                txB0 = Transaction<DumbAction>.Create(1, signerB, genesis, emptyActions),
-                txB1 = Transaction<DumbAction>.Create(1, signerB, genesis, emptyActions),
-                txB2 = Transaction<DumbAction>.Create(2, signerB, genesis, emptyActions),
-                txB0_ = Transaction<DumbAction>.Create(1, signerB, genesis, emptyActions),
-                txB1_ = Transaction<DumbAction>.Create(1, signerB, genesis, emptyActions);
+                txA2 = new Transaction<DumbAction>().Create(2, signerA, genesis, emptyActions),
+                txA0_ = new Transaction<DumbAction>().Create(0, signerA, genesis, emptyActions),
+                txA1_ = new Transaction<DumbAction>().Create(1, signerA, genesis, emptyActions),
+                txB0 = new Transaction<DumbAction>().Create(1, signerB, genesis, emptyActions),
+                txB1 = new Transaction<DumbAction>().Create(1, signerB, genesis, emptyActions),
+                txB2 = new Transaction<DumbAction>().Create(2, signerB, genesis, emptyActions),
+                txB0_ = new Transaction<DumbAction>().Create(1, signerB, genesis, emptyActions),
+                txB1_ = new Transaction<DumbAction>().Create(1, signerB, genesis, emptyActions);
             _blockChain.StageTransaction(txA2);
             _blockChain.StageTransaction(txA0_);
             _blockChain.StageTransaction(txA1_);

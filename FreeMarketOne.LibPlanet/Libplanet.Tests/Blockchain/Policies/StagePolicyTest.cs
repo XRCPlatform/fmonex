@@ -30,7 +30,7 @@ namespace Libplanet.Tests.Blockchain.Policies
             );
             _key = new PrivateKey();
             _txs = Enumerable.Range(0, 5).Select(i =>
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     i,
                     _key,
                     _fx.GenesisBlock.Hash,

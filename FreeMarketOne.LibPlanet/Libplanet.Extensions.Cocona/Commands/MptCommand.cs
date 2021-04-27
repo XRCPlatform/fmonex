@@ -14,7 +14,6 @@ namespace Libplanet.Extensions.Cocona.Commands
     using global::Cocona.Help;
     using Libplanet.Extensions.Cocona.Configuration;
     using Libplanet.Extensions.Cocona.Services;
-    using Libplanet.RocksDBStore;
     using Libplanet.Store.Trie;
 
     internal enum SchemeType
@@ -38,7 +37,6 @@ namespace Libplanet.Extensions.Cocona.Commands
                 new Dictionary<string, Func<string, IKeyValueStore>>
                 {
                     ["default"] = kvStorePath => new DefaultKeyValueStore(kvStorePath),
-                    ["rocksdb"] = kvStorePath => new RocksDBKeyValueStore(kvStorePath),
                 }.ToImmutableSortedDictionary();
 
         [Command(Description = "Compare two trees via root hash.")]

@@ -64,7 +64,8 @@ namespace Libplanet.Tests.Blockchain
             _renderer.ResetRecords();
 
             _emptyTransaction = new List<Transaction<DumbAction>>();
-            _validNext = Block<DumbAction>.Mine(
+            //FMONE CHANGE - block is instance not static class in our case
+            _validNext = new Block<DumbAction>().Mine(
                     1,
                     1024,
                     _fx.GenesisBlock.TotalDifficulty,
@@ -224,36 +225,36 @@ namespace Libplanet.Tests.Blockchain
 
             var txs = new[]
             {
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     keys[0],
                     _blockChain.Genesis.Hash,
                     new DumbAction[] { }),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     1,
                     keys[0],
                     _blockChain.Genesis.Hash,
                     new DumbAction[] { }),
 
                 // pending txs1
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     1,
                     keys[1],
                     _blockChain.Genesis.Hash,
                     new DumbAction[] { }),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     2,
                     keys[1],
                     _blockChain.Genesis.Hash,
                     new DumbAction[] { }),
 
                 // pending txs2
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     keys[2],
                     _blockChain.Genesis.Hash,
                     new DumbAction[] { }),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     2,
                     keys[2],
                     _blockChain.Genesis.Hash,
@@ -322,19 +323,19 @@ namespace Libplanet.Tests.Blockchain
             var key = new PrivateKey();
             var txs = new[]
             {
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     2,
                     key,
                     _blockChain.Genesis.Hash,
                     new DumbAction[0]
                 ),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     1,
                     key,
                     _blockChain.Genesis.Hash,
                     new DumbAction[0]
                 ),
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     key,
                     _blockChain.Genesis.Hash,
@@ -356,7 +357,7 @@ namespace Libplanet.Tests.Blockchain
             StageTransactions(
                 new[]
                 {
-                    Transaction<DumbAction>.Create(
+                    new Transaction<DumbAction>().Create(
                         0,
                         key,
                         _blockChain.Genesis.Hash,
@@ -370,7 +371,7 @@ namespace Libplanet.Tests.Blockchain
             StageTransactions(
                 new[]
                 {
-                    Transaction<DumbAction>.Create(
+                    new Transaction<DumbAction>().Create(
                         0,
                         key,
                         _blockChain.Genesis.Hash,
@@ -475,7 +476,7 @@ namespace Libplanet.Tests.Blockchain
                     TargetAddress = _fx.Address1,
                 },
             };
-            var tx1 = Transaction<PolymorphicAction<BaseAction>>.Create(
+            var tx1 = new Transaction<PolymorphicAction<BaseAction>>().Create(
                 0,
                 new PrivateKey(),
                 genesisBlock.Hash,
@@ -503,7 +504,7 @@ namespace Libplanet.Tests.Blockchain
                     TargetAddress = _fx.Address1,
                 },
             };
-            var tx2 = Transaction<PolymorphicAction<BaseAction>>.Create(
+            var tx2 = new Transaction<PolymorphicAction<BaseAction>>().Create(
                 0,
                 new PrivateKey(),
                 genesisBlock.Hash,
@@ -517,7 +518,7 @@ namespace Libplanet.Tests.Blockchain
             result = BattleResult.FromBencodex((Bencodex.Types.Dictionary)state);
             Assert.Contains("bow", result.UsedWeapons);
 
-            var tx3 = Transaction<PolymorphicAction<BaseAction>>.Create(
+            var tx3 = new Transaction<PolymorphicAction<BaseAction>>().Create(
                 0,
                 new PrivateKey(),
                 genesisBlock.Hash,
@@ -1363,7 +1364,7 @@ namespace Libplanet.Tests.Blockchain
                 };
                 Transaction<DumbAction>[] txs =
                 {
-                    Transaction<DumbAction>.Create(0, privateKey, chain.Genesis.Hash, actions),
+                    new Transaction<DumbAction>().Create(0, privateKey, chain.Genesis.Hash, actions),
                 };
                 b = TestUtils.MineNext(b, txs)
                     .AttachStateRootHash(_fx.StateStore, policy.BlockAction);
@@ -1575,7 +1576,7 @@ namespace Libplanet.Tests.Blockchain
                 store,
                 stateStore
             );
-            var tx1 = Transaction<TestEvaluateAction>.Create(
+            var tx1 = new Transaction<TestEvaluateAction>().Create(
                 0,
                 fromPrivateKey,
                 chain.Genesis.Hash,
@@ -2009,7 +2010,7 @@ namespace Libplanet.Tests.Blockchain
                 for (int j = 0; j < accountsCount; ++j)
                 {
                     int index = i * accountsCount + j;
-                    Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+                    Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                         store.GetTxNonce(chainId, signer),
                         privateKey,
                         chain.Genesis.Hash,

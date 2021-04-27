@@ -48,7 +48,7 @@ namespace Libplanet.Tests.Tx
             );
             DumbAction.RehearsalRecords.Value =
                 ImmutableList<(Address, string)>.Empty;
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 privateKey,
                 null,
@@ -100,7 +100,7 @@ namespace Libplanet.Tests.Tx
         [Fact]
         public void CreateWithDefaultUpdatedAddresses()
         {
-            Transaction<DumbAction> emptyTx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> emptyTx = new Transaction<DumbAction>().Create(
                 0,
                 _fx.PrivateKey1,
                 null,
@@ -108,7 +108,7 @@ namespace Libplanet.Tests.Tx
             );
             Assert.Empty(emptyTx.UpdatedAddresses);
 
-            var tx = Transaction<PolymorphicAction<BaseAction>>.Create(
+            var tx = new Transaction<PolymorphicAction<BaseAction>>().Create(
                 0,
                 _fx.PrivateKey1,
                 null,
@@ -120,7 +120,7 @@ namespace Libplanet.Tests.Tx
             );
 
             Address additionalAddr = new PrivateKey().ToAddress();
-            var txWithAddr = Transaction<PolymorphicAction<BaseAction>>.Create(
+            var txWithAddr = new Transaction<PolymorphicAction<BaseAction>>().Create(
                 0,
                 _fx.PrivateKey1,
                 null,
@@ -137,7 +137,7 @@ namespace Libplanet.Tests.Tx
         public void CreateWithDefaultTimestamp()
         {
             DateTimeOffset rightBefore = DateTimeOffset.UtcNow;
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 _fx.PrivateKey1,
                 null,
@@ -154,7 +154,7 @@ namespace Libplanet.Tests.Tx
         {
             // The privateKey parameter cannot be null.
             Assert.Throws<ArgumentNullException>(() =>
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     null,
                     null,
@@ -166,7 +166,7 @@ namespace Libplanet.Tests.Tx
 
             // The actions parameter cannot be null.
             Assert.Throws<ArgumentNullException>(() =>
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     0,
                     _fx.PrivateKey1,
                     null,
@@ -387,7 +387,7 @@ namespace Libplanet.Tests.Tx
                     0x7b, 0x76,
                 }
             ).PublicKey;
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Deserialize(bytes);
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Deserialize(bytes);
 
             Assert.Equal(publicKey, tx.PublicKey);
             Assert.Equal(ImmutableHashSet<Address>.Empty, tx.UpdatedAddresses);
@@ -464,7 +464,7 @@ namespace Libplanet.Tests.Tx
                 }
             ).PublicKey;
             Transaction<PolymorphicAction<BaseAction>> tx =
-                Transaction<PolymorphicAction<BaseAction>>.Deserialize(bytes);
+                new Transaction<PolymorphicAction<BaseAction>>().Deserialize(bytes);
 
             Assert.Equal(publicKey, tx.PublicKey);
             Assert.Equal(
@@ -569,7 +569,7 @@ namespace Libplanet.Tests.Tx
                 new DumbAction(addresses[2], "R", true, recordRandom: true),
             };
             Transaction<DumbAction> tx =
-                Transaction<DumbAction>.Create(0, _fx.PrivateKey1, null, actions);
+                new Transaction<DumbAction>().Create(0, _fx.PrivateKey1, null, actions);
             foreach (bool rehearsal in new[] { false, true })
             {
                 DumbAction.RehearsalRecords.Value =
@@ -700,7 +700,7 @@ namespace Libplanet.Tests.Tx
         public void EvaluateActionsThrowingException()
         {
             var action = new ThrowException { ThrowOnRehearsal = false, ThrowOnExecution = true };
-            Transaction<ThrowException> tx = Transaction<ThrowException>.Create(
+            Transaction<ThrowException> tx = new Transaction<ThrowException>().Create(
                 0,
                 _fx.PrivateKey1,
                 null,
@@ -737,7 +737,7 @@ namespace Libplanet.Tests.Tx
                 }
             );
             var timestamp = new DateTimeOffset(2018, 11, 21, 0, 0, 0, TimeSpan.Zero);
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 privateKey,
                 null,
@@ -810,7 +810,7 @@ namespace Libplanet.Tests.Tx
                 }
             );
             var timestamp = new DateTimeOffset(2018, 11, 21, 0, 0, 0, TimeSpan.Zero);
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 privateKey,
                 null,
@@ -873,7 +873,7 @@ namespace Libplanet.Tests.Tx
         public void ActionsAreIsolatedFromOutside()
         {
             var actions = new List<DumbAction>();
-            Transaction<DumbAction> t1 = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> t1 = new Transaction<DumbAction>().Create(
                 0,
                 _fx.PrivateKey1,
                 null,

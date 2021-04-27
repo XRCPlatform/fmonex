@@ -314,7 +314,7 @@ namespace Libplanet.Tests.Net
                 var action = new ThrowException { ThrowOnExecution = true };
 
                 var chainId = receiverChain.Id;
-                Transaction<ThrowException> tx = Transaction<ThrowException>.Create(
+                Transaction<ThrowException> tx = new Transaction<ThrowException>().Create(
                     0,
                     new PrivateKey(),
                     minerSwarm.BlockChain.Genesis.Hash,

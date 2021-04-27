@@ -29,17 +29,17 @@ namespace Libplanet.Tests.Blockchain
         [Fact]
         public void StageTransactionWithDifferentGenesis()
         {
-            Transaction<DumbAction> tx1 = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx1 = new Transaction<DumbAction>().Create(
                 0,
                 new PrivateKey(),
                 _blockChain.Genesis.Hash,
                 new List<DumbAction>());
-            Transaction<DumbAction> tx2 = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx2 = new Transaction<DumbAction>().Create(
                 0,
                 new PrivateKey(),
                 null,
                 new List<DumbAction>());
-            Transaction<DumbAction> tx3 = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx3 = new Transaction<DumbAction>().Create(
                 0,
                 new PrivateKey(),
                 default(HashDigest<SHA256>),

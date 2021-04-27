@@ -212,7 +212,7 @@ namespace Libplanet.Tests.Net
             BlockChain<DumbAction> chainB = swarmB.BlockChain;
             BlockChain<DumbAction> chainC = swarmC.BlockChain;
 
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 new PrivateKey(),
                 chainA.Genesis.Hash,
@@ -317,7 +317,7 @@ namespace Libplanet.Tests.Net
             BlockChain<DumbAction> chainB = swarmB.BlockChain;
             BlockChain<DumbAction> chainC = swarmC.BlockChain;
 
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 new PrivateKey(),
                 chainA.Genesis.Hash,
@@ -377,7 +377,7 @@ namespace Libplanet.Tests.Net
                 swarms[i] = CreateSwarm(blockChains[i]);
             }
 
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 new PrivateKey(),
                 blockChains[size - 1].Genesis.Hash,

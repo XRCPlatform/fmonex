@@ -159,7 +159,7 @@ namespace Libplanet.Tests.Store
             privateKey = privateKey ?? new PrivateKey();
             timestamp = timestamp ?? DateTimeOffset.UtcNow;
 
-            return Transaction<DumbAction>.Create(
+            return new Transaction<DumbAction>().Create(
                 nonce,
                 privateKey,
                 GenesisBlock.Hash,

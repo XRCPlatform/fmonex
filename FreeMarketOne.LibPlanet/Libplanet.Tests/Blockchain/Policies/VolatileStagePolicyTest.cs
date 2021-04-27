@@ -21,7 +21,7 @@ namespace Libplanet.Tests.Blockchain.Policies
         {
             TimeSpan timeBuffer = TimeSpan.FromSeconds(2.5);
 
-            Transaction<DumbAction> tx = Transaction<DumbAction>.Create(
+            Transaction<DumbAction> tx = new Transaction<DumbAction>().Create(
                 0,
                 _key,
                 _fx.GenesisBlock.Hash,

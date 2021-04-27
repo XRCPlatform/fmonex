@@ -59,7 +59,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Skynet", "Fre
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Skynet.Test", "FreeMarketOne.Skynet.Test\FreeMarketOne.Skynet.Test.csproj", "{791648BB-8E82-4826-B8B3-08C5C98661B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibPlanet.Extensions.Tests", "LibPlanet.Extensions.Tests\LibPlanet.Extensions.Tests.csproj", "{D67E1448-B769-4D28-BBAB-B067F2E89E03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Extensions.Tests", "LibPlanet.Extensions.Tests\Libplanet.Extensions.Tests.csproj", "{D67E1448-B769-4D28-BBAB-B067F2E89E03}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Search", "FreeMarketOne.Search\FreeMarketOne.Search.csproj", "{995D983D-AE69-45A1-A5B9-91DDFD9558B3}"
 EndProject

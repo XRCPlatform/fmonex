@@ -1105,7 +1105,8 @@ namespace Libplanet.Net
             foreach (byte[] payload in payloads)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                Block<T> block = Block<T>.Deserialize(payload);
+                //FMONE CHANGE - Block inst static in case of FMONE
+                Block<T> block = new Block<T>().Deserialize(payload);
                 yield return block;
             }
 
@@ -1142,7 +1143,8 @@ namespace Libplanet.Net
             //FMONECHANGE - TorSocks5Transport does not support multiple replies
             foreach (var payload in reply.Payloads)
             {
-                Transaction<T> tx = Transaction<T>.Deserialize(payload);
+                // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+                Transaction<T> tx = new Transaction<T>().Deserialize(payload);
                 yield return tx;
             }
         }

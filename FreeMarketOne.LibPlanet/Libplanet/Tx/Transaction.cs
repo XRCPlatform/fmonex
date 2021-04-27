@@ -41,6 +41,14 @@ namespace Libplanet.Tx
         private int _bytesLength;
 
         /// <summary>
+        /// FMONE CHANGE - Empty constructor to use Mine function and Deserialize without Static instance
+        /// </summary>
+        public Transaction()
+        {
+
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Transaction{T}"/>.
         /// <para>This constructor takes all required and only required values
         /// for a <see cref="Transaction{T}"/>, so gives you full control of
@@ -285,7 +293,7 @@ namespace Libplanet.Tx
         /// <see cref="Signer"/> is not derived from its
         /// <see cref="PublicKey"/>.</exception>
         /// <seealso cref="Serialize(bool)"/>
-        public static Transaction<T> Deserialize(byte[] bytes, bool validate = true)
+        public Transaction<T> Deserialize(byte[] bytes, bool validate = true)
         {
             IValue value = new Codec().Decode(bytes);
             if (!(value is Bencodex.Types.Dictionary dict))
@@ -400,7 +408,7 @@ namespace Libplanet.Tx
         /// is passed to <paramref name="privateKey"/> or
         /// or <paramref name="actions"/>.
         /// </exception>
-        public static Transaction<T> Create(
+        public Transaction<T> Create(
             long nonce,
             PrivateKey privateKey,
             HashDigest<SHA256>? genesisHash,

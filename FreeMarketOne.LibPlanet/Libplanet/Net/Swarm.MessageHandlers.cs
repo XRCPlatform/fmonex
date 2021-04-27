@@ -159,7 +159,8 @@ namespace Libplanet.Net
         //FMONECHANGE -  TorSocks5Transport based message handler
         private void ReceiveTransactionBroadcast(Messages.Tx message, BoundPeer peer)
         {
-            Transaction<T> tx = Transaction<T>.Deserialize(message.Payload);
+            // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+            Transaction<T> tx = new Transaction<T>().Deserialize(message.Payload);
 
             _logger.Debug($"Received a {nameof(Messages.Tx)} message: {tx}.");
 
@@ -514,7 +515,8 @@ namespace Libplanet.Net
 
                 var genesis = blockMessage.GenesisHash;
 
-                Block<T> block = Block<T>.Deserialize(payload);
+                //FMONE CHANGE - Block inst static in case of FMONE
+                Block<T> block = new Block<T>().Deserialize(payload);
 
                 if (!genesis.Equals(BlockChain.Genesis.Hash))
                 {

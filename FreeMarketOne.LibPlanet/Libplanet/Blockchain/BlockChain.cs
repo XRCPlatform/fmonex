@@ -381,10 +381,11 @@ namespace Libplanet.Blockchain
             actions = actions ?? ImmutableArray<T>.Empty;
             IEnumerable<Transaction<T>> transactions = new[]
             {
-                Transaction<T>.Create(0, privateKey, null, actions, timestamp: timestamp),
+                // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+                new Transaction<T>().Create(0, privateKey, null, actions, timestamp: timestamp),
             };
-
-            Block<T> block = Block<T>.Mine(
+            // FMONECHANGE - In our case Block is as instance
+            Block<T> block = new Block<T>().Mine(
                 0,
                 0,
                 0,
@@ -1041,7 +1042,7 @@ namespace Libplanet.Blockchain
         private async Task<Block<T>> MineAndValidateBlockAsync(Address miner, DateTimeOffset currentTime, long index, long difficulty, HashDigest<SHA256>? prevHash, List<Transaction<T>> transactionsToMine, CancellationTokenSource cancellationTokenSource)
         {
             var block = await Task.Run(
-                   () => Block<T>.Mine(
+                   () => new Block<T>().Mine(
                        index: index,
                        difficulty: difficulty,
                        previousTotalDifficulty: Tip.TotalDifficulty,
@@ -1055,7 +1056,7 @@ namespace Libplanet.Blockchain
             while (validatioResult != null)
             {
                 block = await Task.Run(
-                    () => Block<T>.Mine(
+                    () => new Block<T>().Mine(
                         index: index,
                         difficulty: difficulty,
                         previousTotalDifficulty: Tip.TotalDifficulty,
@@ -1127,7 +1128,8 @@ namespace Libplanet.Blockchain
             lock (_txLock)
             {
                 // FIXME: Exception should be documented when the genesis block does not exist.
-                Transaction<T> tx = Transaction<T>.Create(
+                // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+                Transaction<T> tx = new Transaction<T>().Create(
                     GetNextTxNonce(privateKey.ToAddress()),
                     privateKey,
                     Genesis.Hash,
@@ -1792,7 +1794,7 @@ namespace Libplanet.Blockchain
                             cnt++;
                         }
 
-                        //FM.ONE IMPROVEMENT - WE NEED TO CALL THIS TO REMOVE ORPHANED BLOCKS;
+                        //FMONE CHANGE - WE NEED TO CALL THIS TO REMOVE ORPHANED BLOCKS;
                         TipChanged?.Invoke(this, (b, null));
                     }
 
@@ -1828,7 +1830,7 @@ namespace Libplanet.Blockchain
                     Store.SetCanonicalChainId(Id);
                     _blocks = new BlockSet<T>(Store);
 
-                    //FM.ONE IMPROVEMENT - WE NEED TO CALL ALL CHANGES TipChanged?.Invoke(this, (oldTip, newTip));
+                    //FMONE CHANGE - WE NEED TO CALL ALL CHANGES TipChanged?.Invoke(this, (oldTip, newTip));
                     for (long x = topmostCommon.Index; x <= other.Tip.Index; x++)
                     {
                         if (other[x] != null)

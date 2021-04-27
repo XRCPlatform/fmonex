@@ -10,16 +10,11 @@
     <CodeAnalysisRuleSet>..\Libplanet.Tests.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AdditionalFiles Include="..\Menees.Analyzers.Settings.xml">
-      <Link>Menees.Analyzers.Settings.xml</Link>
-    </AdditionalFiles>
-    <AdditionalFiles Include="..\stylecop.json" />
-  </ItemGroup>
+
 
   <PropertyGroup Condition=" '$(MSBuildRuntimeType)'=='Mono' And
                              '$(BuildingByReSharper)'!='true'">
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>

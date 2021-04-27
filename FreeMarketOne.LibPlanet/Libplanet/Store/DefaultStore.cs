@@ -331,7 +331,8 @@ namespace Libplanet.Store
                 return null;
             }
 
-            Transaction<T> tx = Transaction<T>.Deserialize(bytes, false);
+            // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+            Transaction<T> tx = new Transaction<T>().Deserialize(bytes, false);
             _txCache.AddOrUpdate(txid, tx);
             return tx;
         }

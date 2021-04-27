@@ -301,7 +301,7 @@ namespace FreeMarketOne.BlockChain
             var genesisHelper = new GenesisHelper();
             var genesisBytes = genesisHelper.GetGenesis(_blockChainGenesisName);
 
-            return Block<T>.Deserialize(genesisBytes);
+            return new Block<T>().Deserialize(genesisBytes);
         }
 
         public void Stop()

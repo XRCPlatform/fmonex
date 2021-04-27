@@ -30,9 +30,18 @@ namespace Libplanet.Blocks
         private int _bytesLength;
 
         /// <summary>
+        /// FMONE CHANGE - Empty constructor to use Mine function and Deserialize without Static instance
+        /// </summary>
+        public Block()
+        {
+
+        }
+
+        /// <summary>
         /// Creates a <see cref="Block{T}"/> instance by manually filling all field values.
         /// For a more automated way, see also <see cref="Mine"/> method.
         /// </summary>
+
         /// <param name="index">The height of the block to create.  Goes to the <see cref="Index"/>.
         /// </param>
         /// <param name="difficulty">The mining difficulty that <paramref name="nonce"/> has to
@@ -179,7 +188,8 @@ namespace Libplanet.Blocks
                     ? new HashDigest<SHA256>(rb.Header.TxHash)
                     : (HashDigest<SHA256>?)null,
                 rb.Transactions
-                    .Select(tx => Transaction<T>.Deserialize(tx.ToArray(), false))
+                    // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+                    .Select(tx => new Transaction<T>().Deserialize(tx.ToArray(), false))
                     .ToList(),
                 rb.Header.PreEvaluationHash.Any()
                     ? new HashDigest<SHA256>(rb.Header.PreEvaluationHash)
@@ -357,8 +367,9 @@ namespace Libplanet.Blocks
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this
         /// operation should be canceled.</param>
+        /// FMONE CHANGE - In our case isnt mining static - paraller processing issue
         /// <returns>A <see cref="Block{T}"/> that mined.</returns>
-        public static Block<T> Mine(
+        public Block<T> Mine(
             long index,
             long difficulty,
             BigInteger previousTotalDifficulty,
@@ -431,9 +442,10 @@ namespace Libplanet.Blocks
         /// <param name="bytes">A <a href="https://bencodex.org/">Bencodex</a>
         /// representation of a <see cref="Block{T}"/>.</param>
         /// <returns>A decoded <see cref="Block{T}"/> object.</returns>
+        /// FMONE CHANGE - It cant be static because of paraller processing
         /// <seealso cref="Serialize()"/>
         [Pure]
-        public static Block<T> Deserialize(byte[] bytes)
+        public Block<T> Deserialize(byte[] bytes)
         {
             IValue value = new Codec().Decode(bytes);
             if (!(value is Bencodex.Types.Dictionary dict))
@@ -686,7 +698,7 @@ namespace Libplanet.Blocks
                 .Select(tx => tx.Serialize(true).ToImmutableArray()).ToImmutableArray());
         }
 
-        private static HashDigest<SHA256>? CalcualteTxHashes(IEnumerable<Transaction<T>> txs)
+        private HashDigest<SHA256>? CalcualteTxHashes(IEnumerable<Transaction<T>> txs)
         {
             if (!txs.Any())
             {

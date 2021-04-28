@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -20,6 +21,11 @@ namespace FreeMarketApp
             
             CommandLineOptions.Parse(args, o =>
             {
+                if (o.ConfigFile != null)
+                {
+                    o.DataDir = Path.GetDirectoryName(Path.GetFullPath(o.ConfigFile));
+                    o.ConfigFile = Path.GetFileName(o.ConfigFile);
+                }
                 FMONE.Current.DataDir = o.DataDir != null ? 
                     new DataDir(o.DataDir, o.ConfigFile) : 
                     new DataDir();

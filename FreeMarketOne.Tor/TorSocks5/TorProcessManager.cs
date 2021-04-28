@@ -80,7 +80,7 @@ namespace FreeMarketOne.Tor
                     try
                     {
                         var torPath = "";
-                        var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
+                        var fulToolsDir = Path.Combine(GetTorBinaryPath(), _toolsDir);
 
                         if (IsTorRunning(_configuration.TorEndPoint))
                         {
@@ -189,7 +189,7 @@ namespace FreeMarketOne.Tor
 
         private void CopyDefaultConfig()
         {
-            string torConfigDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
+            string torConfigDir = Path.Combine(GetTorBinaryPath(), _toolsDir);
             string sourceConfig = Path.Combine(torConfigDir, "torrc-default");
             string targetConfig = Path.Combine(torConfigDir, "Tor", "torrc");
 
@@ -198,7 +198,7 @@ namespace FreeMarketOne.Tor
 
         private void GetOnionEndPoint()
         {
-            string torHiddenServiceDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir, "Tor", "hidden_service");
+            string torHiddenServiceDir = Path.Combine(GetTorBinaryPath(), _toolsDir, "Tor", "hidden_service");
 
             if (Directory.Exists(torHiddenServiceDir))
             {
@@ -222,9 +222,23 @@ namespace FreeMarketOne.Tor
             }
         }
 
+        internal static string GetTorBinaryPath()
+        {
+            var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!fullBaseDirectory.StartsWith('/'))
+                {
+                    fullBaseDirectory.Insert(0, "/");
+                }
+            }
+
+            return fullBaseDirectory;
+        }
+
         private void InstallTor()
         {
-            string torDaemonsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
+            string torDaemonsDir = Path.Combine(GetTorBinaryPath(), _toolsDir);
 
             string dataZip = Path.Combine(torDaemonsDir, "data-folder.zip");
             IoHelper.BetterExtractZipToDirectoryAsync(dataZip, torDaemonsDir).GetAwaiter().GetResult();

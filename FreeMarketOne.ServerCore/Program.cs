@@ -31,12 +31,13 @@ namespace FreeMarketOne.ServerCore
                     if (o.ConfigFile != null)
                     {
                         o.DataDir = Path.GetDirectoryName(Path.GetFullPath(o.ConfigFile));
-                        o.ConfigFile = (Path.GetFileName(o.ConfigFile));
+                        o.ConfigFile = Path.GetFileName(o.ConfigFile);
                     }
+
                     FreeMarketOneServer.Current.DataDir = o.DataDir != null ? 
                         new DataDir(o.DataDir, o.ConfigFile) : 
                         new DataDir();
-                    
+
                     var userManager = new UserManager(FreeMarketOneServer.Current.MakeConfiguration());
                     while (password == "" || (userManager.Initialize(password, null) != Users.UserManager.PrivateKeyStates.Valid))
                     {

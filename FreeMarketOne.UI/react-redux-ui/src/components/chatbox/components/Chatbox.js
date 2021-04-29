@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 import moment from "moment";
@@ -12,10 +12,16 @@ import "../Chatbox.css";
 const Chatbox = ({ data, id }) => {
   const dispatch = useDispatch();
 
+  const chatRef = useRef();
+
   // State
   const [open, setOpen] = useState(true);
   const [resizeInput, setResizeInput] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    chatRef.current.scrollTo(0, chatRef.current.scrollHeight, "auto");
+  }, []);
 
   const handleRemove = (e, id) => {
     e.preventDefault();
@@ -66,7 +72,7 @@ const Chatbox = ({ data, id }) => {
           </span>
         </div>
       </div>
-      <div div className="chat-messages">
+      <div className="chat-messages" ref={chatRef}>
         {data?.messages?.map(i => {
           return i?.messageSource === true ? (
             <div key={i?.id} className="message-box-holder">

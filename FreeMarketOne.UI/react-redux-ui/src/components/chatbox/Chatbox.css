@@ -29,7 +29,7 @@
 }
 
 .chatbox {
-  border-top: 1px solid #fca611;
+  border-top: 1px solid #FFD700;
   width: 300px;
   height: 400px;
   margin: 0 20px 0 0;
@@ -100,6 +100,7 @@
   flex-flow: row wrap;
   align-content: flex-start;
   flex: 1;
+  
 }
 
 .message-box-holder {
@@ -208,7 +209,7 @@ width: 90%;
 .chatbox-min {
   margin-bottom: -362px;
   height: 30px;
-  border-top: 1px solid #fca611;
+  border-top: 1px solid #FFD700;
   width: 300px;
   margin: 0px;
   position: relative;

@@ -1,0 +1,44 @@
+{
+    "data": [
+        {
+            "id": "67e731b1-ba1c-49d1-b02f-435e7fc32726",
+            "title": "",
+            "icon": "ion-ios-home-outline",
+            "status": 1,
+            "to":"/",
+            "subMenu": []
+        },
+        {
+            "id": "567e731b1-ba1c-49d1-b02f-435e7fc32726",
+            "title": "All markets",
+            "icon": "ion-stats-bars",
+            "status": 1,
+            "to":"/markets",
+            "subMenu": []
+        },
+        {
+            "id": "9787e731b1-ba1c-49d1-b02f-435e7fc32726",
+            "title": "Categories",
+            "icon": "ion-ios-list-outline",
+            "status": 1,
+            "to":"/categories",
+            "subMenu": []
+        },
+        {
+            "id": "34532731b1-ba1c-49d1-b02f-435e7fc32726",
+            "title": "My products",
+            "icon": "ion-ios-albums-outline",
+            "status": 1,
+            "to":"/products",
+            "subMenu": []
+        },
+        {
+            "id": "8342731b1-ba1c-49d1-b02f-435e7fc32726",
+            "title": "Sales dashboard",
+            "icon": "ion-arrow-graph-up-right",
+            "status": 1,
+            "to":"/dashboard",
+            "subMenu": []
+        }
+    ]
+}

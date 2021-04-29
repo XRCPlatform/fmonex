@@ -19,7 +19,7 @@ const OPTIONS = [
   { id: "645", name: "LTC" }
 ];
 
-const Header = ({ handleOpenSearch }) => {
+const Header = ({ handleOpenSearch, activeSearch }) => {
   const dispatch = useDispatch();
 
   // Redux
@@ -48,7 +48,7 @@ const Header = ({ handleOpenSearch }) => {
           free<span>market</span>one
         </div>
         <div className="header_ctrl">
-          <span className="search-btn">
+          <span className={!activeSearch ? "search-btn" : "search-btn-active"}>
             <i className="ion-ios-search" onClick={handleOpenSearch} />
           </span>
           <DividerVerticalSmall />

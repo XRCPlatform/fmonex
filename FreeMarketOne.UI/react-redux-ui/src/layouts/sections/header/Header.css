@@ -64,7 +64,7 @@
 }
 
 .user-notifications:hover {
-  color: #fca611;
+  color: #47cf73;
 }
 
 .user-login {
@@ -76,7 +76,7 @@
   color: #e8eef1;
 }
 .user-login:hover {
-  color: #fca611;
+  color: #ae63e4;
 }
 
 .user-time i {
@@ -87,11 +87,18 @@
 
 .logo {
   font-family: "Merriweather Sans", sans-serif;
-  opacity: 0.9;
+ /*  opacity: 0.9; */
   font-size: 15px;
 }
 
 .logo span {
-  color: #fca611;
+/*   color: #fca611; */
+ color: #FFD700;
 }
 
+
+.search-btn-active{
+  color: #0ebeff;
+  font-size: 17px;
+  cursor: pointer;
+}

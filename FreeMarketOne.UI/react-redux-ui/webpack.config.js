@@ -16,6 +16,7 @@ module.exports = env => {
     resolve: {
       modules: [path.resolve(__dirname, "src"), "node_modules"],
       alias: {
+        Assets: path.resolve(__dirname, "src", "assets"),
         Components: path.resolve(__dirname, "src", "components"),
         Layouts: path.resolve(__dirname, "src", "layouts"),
         Modules: path.resolve(__dirname, "src", "modules"),

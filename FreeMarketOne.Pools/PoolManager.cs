@@ -47,7 +47,6 @@ namespace FreeMarketOne.Pools
         private string _memoryPoolFilePath { get; set; }
         private IBaseConfiguration _configuration { get; }
 
-        private DefaultStore _storage;
         private Swarm<T> _swarmServer;
         private PrivateKey _privateKey;
         private BlockChain<T> _blockChain;
@@ -69,7 +68,6 @@ namespace FreeMarketOne.Pools
         public PoolManager(
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
-            DefaultStore storage,
             Swarm<T> swarmServer,
             PrivateKey privateKey,
             BlockChain<T> blockChain,
@@ -82,7 +80,6 @@ namespace FreeMarketOne.Pools
             _actionItemsList = new List<IBaseItem>();
             _pollLock = new object();
             _memoryPoolFilePath = memoryPoolFilePath;
-            _storage = storage;
             _privateKey = privateKey;
             _swarmServer = swarmServer;
             _blockChain = blockChain;
@@ -96,7 +93,6 @@ namespace FreeMarketOne.Pools
                     _swarmServer,
                     _blockChain,
                     _privateKey.ToAddress(),
-                    _storage,
                     _privateKey,
                     _cancellationToken
                     );
@@ -438,9 +434,9 @@ namespace FreeMarketOne.Pools
             }
 
             //Checking existence of chain in staged tx
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {
@@ -496,9 +492,9 @@ namespace FreeMarketOne.Pools
             }
 
             //Checking existence of chain in staged tx
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {
@@ -561,9 +557,9 @@ namespace FreeMarketOne.Pools
             }
 
             //Checking for items on chain
-            foreach (var itemTxId in _storage.IterateTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {
@@ -654,9 +650,9 @@ namespace FreeMarketOne.Pools
             }
 
             //Checking existence of chain in staged tx
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {
@@ -684,9 +680,9 @@ namespace FreeMarketOne.Pools
 
         public bool ExistInStagedTransactions(IBaseItem actionItem)
         {
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {
@@ -729,8 +725,19 @@ namespace FreeMarketOne.Pools
 
             if (_actionItemsList.Any()) totalCount = _actionItemsList.Count();
 
-            var staged = _storage.IterateStagedTransactionIds().ToImmutableHashSet();
-            if (staged != null) totalCount += staged.Count();
+            var staged = _blockChain.GetStagedTransactionIds();
+            if (staged != null)
+            {
+                foreach (var itemTxId in staged)
+                {
+                    var transaction = _blockChain.GetTransaction(itemTxId);
+
+                    if (transaction.Actions.Any())
+                    {
+                        totalCount += transaction.Actions.Count();
+                    }
+                }
+            }
 
             return totalCount;
         }
@@ -786,15 +793,17 @@ namespace FreeMarketOne.Pools
 
                             _logger.Information(string.Format("Propagation of new transaction {0}.", tx.Id));
 
-                            if (_blockChain.Policy.DoesTransactionFollowsPolicy(tx, _blockChain))
+                            if (!_blockChain.Policy.DoesTransactionFollowsPolicy(tx, _blockChain))
                             {
-                                _blockChain.StageTransaction(tx);
-                            }
-
-                            _logger.Information("Clearing all item actions from local pool.");
-                            for (int i = 0; i < items.Count(); i++)
+                                _blockChain.UnstageTransaction(tx);
+                            } 
+                            else
                             {
-                                _actionItemsList.RemoveAll(a => a.Hash == items[i].Hash);
+                                _logger.Information("Clearing all item actions from local pool.");
+                                for (int i = 0; i < items.Count(); i++)
+                                {
+                                    _actionItemsList.RemoveAll(a => a.Hash == items[i].Hash);
+                                }
                             }
 
                             return null;
@@ -821,9 +830,9 @@ namespace FreeMarketOne.Pools
         {
             var result = new List<IBaseItem>();
 
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {
@@ -845,15 +854,15 @@ namespace FreeMarketOne.Pools
 
         public int GetAllActionItemStagedCount()
         {
-            var staged = _storage.IterateStagedTransactionIds().ToImmutableHashSet();
+            var staged = _blockChain.GetStagedTransactionIds();
             return staged.Count();
         }
 
         public IBaseItem GetActionItemStaged(string hash)
         {
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {
@@ -880,9 +889,9 @@ namespace FreeMarketOne.Pools
         {
             var result = new List<IBaseAction>();
 
-            foreach (var itemTxId in _storage.IterateStagedTransactionIds().ToImmutableHashSet())
+            foreach (var itemTxId in _blockChain.GetStagedTransactionIds())
             {
-                var transaction = _storage.GetTransaction<T>(itemTxId);
+                var transaction = _blockChain.GetTransaction(itemTxId);
 
                 if (transaction.Actions.Any())
                 {

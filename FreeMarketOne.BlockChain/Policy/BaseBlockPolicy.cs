@@ -123,7 +123,7 @@ namespace FreeMarketOne.BlockChain.Policy
 
         public Type[] ValidTypesOfActionItems { get; }
 
-        public IComparer<BlockPerception> CanonicalChainComparer => throw new NotImplementedException();
+        public IComparer<BlockPerception> CanonicalChainComparer { get; } = new TotalDifficultyComparer(TimeSpan.FromSeconds(30));
 
         public bool DoesTransactionFollowsPolicy(Transaction<T> transaction,
             BlockChain<T> blockChain)

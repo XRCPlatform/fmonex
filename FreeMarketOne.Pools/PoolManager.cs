@@ -300,12 +300,20 @@ namespace FreeMarketOne.Pools
 
         private bool ValidateSignature(IBaseItem actionItem)
         {
-            if (actionItem.Signature == null)
+            if (actionItem.GetType() == typeof(CheckPointMarketDataV1))
             {
-                return false;
+                //checkpointmarket doesnt have signature
+                return true;
+            } 
+            else
+            {
+                if (actionItem.Signature == null)
+                {
+                    return false;
+                }
+                var buyerPubKeys = UserPublicKey.Recover(actionItem.ToByteArrayForSign(), actionItem.Signature);
+                return buyerPubKeys.Any();
             }
-            var buyerPubKeys = UserPublicKey.Recover(actionItem.ToByteArrayForSign(), actionItem.Signature);
-            return buyerPubKeys.Any();
         }
 
         public bool SaveActionItemsToFile()

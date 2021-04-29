@@ -11,6 +11,11 @@
   <ItemGroup>
     <Compile Remove="SslTcpClient.cs" />
     <Compile Remove="SslTcpServer.cs" />
+
+    <None Update="TorBinaries\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
   </ItemGroup>
 
   <ItemGroup>

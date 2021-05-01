@@ -166,7 +166,6 @@ namespace FreeMarketOne.BlockChain
                     new Progress<PreloadState>(state =>
                         _preloadProcessed?.Invoke(this, state)
                     ),
-                    trustedStateValidators: _trustedPeers,
                     cancellationToken: _cancellationToken.Token
                 );
             }

@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  added new message
     public class Transactions : IBenEncodeable
     {
         private static readonly byte[] TransactionsKey = { 0x42 };    // 'B'

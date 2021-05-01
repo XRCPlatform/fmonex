@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Bencodex.Types;
 using FreeMarketOne.Tor;
 using Libplanet.Blockchain;
+using Libplanet.Blockchain.Policies;
 using Libplanet.Blocks;
 using Libplanet.Net.Messages;
 using Libplanet.Store;
@@ -18,10 +19,11 @@ namespace Libplanet.Net
 {
     public partial class Swarm<T>
     {
+        //FMONECHANGE -  changed to work with new TOR transport
         private void ProcessMessageHandler(object target, ReceivedRequestEventArgs message)
         {
             TotClient client = message.Client;
-
+            
             _logger.Debug($"Received {message.MessageType} message.");
 
             switch (message.MessageType)
@@ -29,48 +31,46 @@ namespace Libplanet.Net
                 case MessageType.Ping:
                     Transport.ReplyMessage<Pong>(message.Request, client, new Pong());
                     break;
-
-                case MessageType.GetChainStatus:
-                    // This is based on the assumption that genesis block always exists.
-                    var chainStatus = new ChainStatus(
-                        BlockChain.Genesis.Hash,
-                        BlockChain.Tip.Index,
-                        BlockChain.Tip.TotalDifficulty);
-
-                    Transport.ReplyMessage<ChainStatus>(message.Request, client, chainStatus);
-                    break;
-
                 case MessageType.FindNeighbors:
 
                     // it's handled in KademliaProtocol ReceiveMessage() event handler
                     break;
 
+                case MessageType.GetChainStatus:
+                    {
+                        _logger.Debug($"Received a {nameof(GetChainStatus)} message.");
+
+                        // This is based on the assumption that genesis block always exists.
+                        Block<T> tip = BlockChain.Tip;
+                        var chainStatus = new ChainStatus(
+                            tip.ProtocolVersion,
+                            BlockChain.Genesis.Hash,
+                            tip.Index,
+                            tip.Hash,
+                            tip.TotalDifficulty
+                        );
+                        //FMONECHANGE -  changed no need for message Identity in TORSocks5Transport solution
+                        Transport.ReplyMessage<ChainStatus>(message.Request, client, chainStatus);
+                        break;
+                    }
+
                 case MessageType.GetBlockHashes:
+                    {
+                        var getBlockHashes = message.Envelope.GetBody<GetBlockHashes>();
+                        BlockChain.FindNextHashes(
+                           getBlockHashes.Locator,
+                           getBlockHashes.Stop,
+                           FindNextHashesChunkSize
+                       ).Deconstruct(
+                           out long? offset,
+                           out IReadOnlyList<HashDigest<SHA256>> hashes
+                       );
+                        var reply = new BlockHashes(offset, hashes);
+                        //FMONECHANGE -  changed no need for message Identity in TORSocks5Transport solution
+                        Transport.ReplyMessage<BlockHashes>(message.Request, client, reply);
+                        break;
 
-                    var getBlockHashes = message.Envelope.GetBody<GetBlockHashes>();
-                    BlockChain.FindNextHashes(
-                                           getBlockHashes.Locator,
-                                           getBlockHashes.Stop,
-                                           FindNextHashesChunkSize
-                                       ).Deconstruct<long?, IReadOnlyList<HashDigest<SHA256>>>(
-                                           out long? offset,
-                                           out IReadOnlyList<HashDigest<SHA256>> hashes
-                                       );
-                    var reply = new BlockHashes(offset, hashes);
-                    Transport.ReplyMessage<BlockHashes>(message.Request, client, reply);
-                    break;
-
-                case MessageType.GetRecentStates:
-
-                    var getRecentStates = message.Envelope.GetBody<GetRecentStates>();
-                    var states = TransferRecentStates(getRecentStates);
-                    
-                    _logger.Error($"Processing TransferRecentStates message, " +
-                        $"request getRecentStates->ben:[{getRecentStates.SerializeToBen()}]" +                        
-                        $"respons RecentStates->ben:[{states.SerializeToBen()}]");
-
-                    Transport.ReplyMessage<RecentStates>(message.Request, client, states);
-                    break;
+                    }
 
                 case MessageType.GetBlocks:
 
@@ -85,38 +85,6 @@ namespace Libplanet.Net
                     var txs = TransferTxs(getTxs);
                     Transport.ReplyMessage<Transactions>(message.Request, client, txs);
                     break;
-
-                case MessageType.TxBroadcast:
-
-                    var transaction = message.Envelope.GetBody<TxBroadcast>();                    
-                    var trxBroadcast = Task.Run(() => ReceiveTransactionBroadcast(transaction, message.Peer));
-                    try
-                    {
-                        //ack the reciept
-                        Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));
-                        trxBroadcast.Wait();
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error($"Processing received TxBroadcast message, completed with error {e}.");
-                    }
-                   
-                    break;
-                case MessageType.Blocks:
-                    var blocksBroadcast = message.Envelope.GetBody<Messages.Blocks>();
-                    var task = Task.Run(async () => await ProcessBlock(message.Peer, blocksBroadcast, _cancellationToken));
-                    try
-                    {
-                        //ack the reciept
-                        var task2 = Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));                        
-                        task.Wait();
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error($"Processing received {nameof(blocks)} message, completed with error {e}.");
-                    }
-                    break;
-
                 case MessageType.TxIds:
 
                     var txIds = message.Envelope.GetBody<TxIds>();
@@ -138,26 +106,63 @@ namespace Libplanet.Net
                     );
                     break;
 
-                case MessageType.GetBlockStates:
+                //FMONECHANGE -  added transaction broadcast message	
+                case MessageType.TxBroadcast:
 
-                    var getBlockStates = message.Envelope.GetBody<GetBlockStates>();
-                    var blockStates = TransferBlockStates(getBlockStates);
-                    if (blockStates != null)
+                    var transaction = message.Envelope.GetBody<Messages.Tx>();
+                    var trxBroadcast = Task.Run(() => ReceiveTransactionBroadcast(transaction, message.Peer));
+                    try
                     {
-                        Transport.ReplyMessage<BlockStates>(message.Request, client, blockStates);
+                        //ack the reciept
+                        Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));
+                        trxBroadcast.Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error($"Processing received Tx message, completed with error {e}.");
+                    }
+
+                    break;
+
+                //FMONECHANGE -  added transaction broadcast message
+                case MessageType.Blocks:
+                    var blocksBroadcast = message.Envelope.GetBody<Messages.Blocks>();
+                    var task = Task.Run(async () => await ProcessBlock(message.Peer, blocksBroadcast, _cancellationToken));
+                    try
+                    {
+                        //ack the reciept
+                        var task2 = Task.Run(() => Transport.ReplyMessage<Pong>(message.Request, client, new Pong()));
+                        task.Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error($"Processing received {nameof(blocks)} message, completed with error {e}.");
                     }
                     break;
+
+                //this seem to be redundant message now. verify in code and delete after libplanet 0.11.1 merge
+                //case MessageType.GetBlockStates:
+
+                //    var getBlockStates = message.Envelope.GetBody<GetBlockStates>();
+                //    var blockStates = TransferBlockStates(getBlockStates);
+                //    if (blockStates != null)
+                //    {
+                //        Transport.ReplyMessage<BlockStates>(message.Request, client, blockStates);
+                //    }
+                //    break;
 
                 default:
                     throw new InvalidMessageException($"Failed to handle message: {message}", message.MessageType);
             }
         }
 
-        private void ReceiveTransactionBroadcast(TxBroadcast message, BoundPeer peer)
+        //FMONECHANGE -  TorSocks5Transport based message handler
+        private void ReceiveTransactionBroadcast(Messages.Tx message, BoundPeer peer)
         {
-            Transaction<T> tx = Transaction<T>.Deserialize(message.Payload);
+            // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+            Transaction<T> tx = new Transaction<T>().Deserialize(message.Payload);
 
-            _logger.Debug($"Received a {nameof(TxBroadcast)} message: {tx}.");
+            _logger.Debug($"Received a {nameof(Messages.Tx)} message: {tx}.");
 
             if (!_store.ContainsTransaction(tx.Id))
             {
@@ -170,7 +175,7 @@ namespace Libplanet.Net
                         TxReceived.Set();
                         _logger.Debug($"Txs staged successfully: {tx.Id}");
 
-                        TxBroadcast newMessage = new TxBroadcast(tx.Serialize(true), false);
+                        Messages.Tx newMessage = new Messages.Tx(tx.Serialize(true), false);
 
                         BroadcastMessage(peer, newMessage);
                     }
@@ -182,27 +187,29 @@ namespace Libplanet.Net
             }
         }
 
-        private BlockStates TransferBlockStates(GetBlockStates getBlockStates)
-        {
-            if (BlockChain.StateStore is IBlockStatesStore blockStatesStore)
-            {
-                IImmutableDictionary<string, IValue> states =
-                    blockStatesStore.GetBlockStates(getBlockStates.BlockHash);
-                _logger.Debug(
-                    (states is null ? "Not found" : "Found") + " the block {BlockHash}'s states.",
-                    getBlockStates.BlockHash
-                );
-                return new BlockStates(getBlockStates.BlockHash, states);
-            }
+        //private BlockStates TransferBlockStates(GetBlockStates getBlockStates)
+        //{
+        //    if (BlockChain.StateStore is IBlockStatesStore blockStatesStore)
+        //    {
+        //        IImmutableDictionary<string, IValue> states =
+        //            blockStatesStore.GetBlockStates(getBlockStates.BlockHash);
+        //        _logger.Debug(
+        //            (states is null ? "Not found" : "Found") + " the block {BlockHash}'s states.",
+        //            getBlockStates.BlockHash
+        //        );
+        //        return new BlockStates(getBlockStates.BlockHash, states);
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         private async Task ProcessBlockHeader(
             BlockHeaderMessage message,
+            //FMONECHANGE -  changed added peer to args
             BoundPeer peer,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            //FMONECHANGE - changed checks and log message
             if (peer == null)
             {
                 _logger.Information($"BlockHeaderMessage was sent from invalid peer {peer}; ignored.");
@@ -246,9 +253,14 @@ namespace Libplanet.Net
 
             using (await _blockSyncMutex.LockAsync(cancellationToken))
             {
-                if (IsDemandNeeded(header))
+                if (IsDemandNeeded(header, peer))
                 {
-                    _demandBlockHash = new BlockHashDemand(header, peer);
+                    _logger.Debug(
+                        "BlockDemand #{index} {blockHash} from {peer}.",
+                        header.Index,
+                        ByteUtil.Hex(header.Hash),
+                        peer);
+                    BlockDemand = new BlockDemand(header, peer, DateTimeOffset.UtcNow);
                 }
                 else
                 {
@@ -257,12 +269,234 @@ namespace Libplanet.Net
                         "(current: {Current}, demand: {Demand}, received: {Received});" +
                         $" {nameof(BlockHeaderMessage)} is ignored.",
                         BlockChain.Tip.Index,
-                        _demandBlockHash?.Header.Index,
+                        BlockDemand?.Header.Index,
                         header.Index);
                 }
             }
         }
 
+
+        //FMONECHANGE -  changed returned type, so that TorSocks5Transport caller can send the message
+        private Transactions TransferTxs(GetTxs getTxs)
+        {
+            List<byte[]> response = new List<byte[]>();
+            foreach (TxId txid in getTxs.TxIds)
+            {
+                Transaction<T> tx = BlockChain.GetTransaction(txid);
+
+                if (tx is null)
+                {
+                    continue;
+                }
+
+                _logger.Debug($"Adding {tx.Id} to response.");
+                response.Add(tx.Serialize(true));
+            }
+            return new Transactions(response);
+        }
+
+        //FMONECHANGE -  added peer argument to suit TorSocks5Transport
+        private void ProcessTxIds(TxIds message, BoundPeer peer)
+        {
+            if (peer == null)
+            {
+                _logger.Information($"Ignores a {nameof(TxIds)} message because it was sent by an invalid peer: {peer.EndPoint.Host}:{peer.EndPoint.Port}.");
+                return;
+            }
+
+            _logger.Debug(
+                $"Received a {nameof(TxIds)} message: {{@TxIds}}.",
+                message.Ids.Select(txid => txid.ToString())
+            );
+
+            IStagePolicy<T> stagePolicy = BlockChain.StagePolicy;
+            ImmutableHashSet<TxId> newTxIds = message.Ids
+                .Where(id => !_demandTxIds.ContainsKey(id))
+                .Where(id => !stagePolicy.Ignores(BlockChain, id))
+                .ToImmutableHashSet();
+
+            if (!newTxIds.Any())
+            {
+                _logger.Debug("No unaware transactions to receive.");
+                return;
+            }
+
+            _logger.Debug(
+                "Unaware transactions to receive: {@TxIds}.",
+                newTxIds.Select(txid => txid.ToString())
+            );
+            foreach (TxId txid in newTxIds)
+            {
+                _demandTxIds.TryAdd(txid, peer);
+            }
+        }
+
+        //FMONECHANGE -  added peer argument to suit TorSocks5Transport
+        private Messages.Blocks TransferBlocks(GetBlocks getData, BoundPeer peer)
+        {
+            _logger.Verbose($"Preparing a {nameof(Blocks)} message to reply to {peer}...");
+
+            var blocks = new List<byte[]>();
+
+            List<HashDigest<SHA256>> hashes = getData.BlockHashes.ToList();
+            int i = 1;
+            int total = hashes.Count;
+            const string logMsg =
+                "Fetching a block #{Index}/{Total} ({Hash}) to include to " +
+                "a reply to {Peer}...";
+            foreach (HashDigest<SHA256> hash in hashes)
+            {
+                _logger.Verbose(logMsg, i, total, hash, peer);
+                if (_store.ContainsBlock(hash))
+                {
+                    Block<T> block = _store.GetBlock<T>(hash);
+                    byte[] payload = block.Serialize();
+                    blocks.Add(payload);
+                }
+                //FMONECHANGE -  added peer argument to suit TorSocks5Transport
+                //chunking must be led by client request/response as we can't handle more than 1 response for now
+                //if (blocks.Count == getData.ChunkSize)
+                //{
+                //    var response = new Messages.Blocks(blocks, BlockChain.Genesis.Hash);
+                //    _logger.Verbose("Enqueuing a blocks reply (...{Index}/{Total})...", i, total);
+                //    Transport.ReplyMessage(response);
+                //    blocks.Clear();
+                //}
+
+                //i++;
+            }
+            _logger.Verbose("Sendig a blocks reply (...{Index}/{Total}) to {Identity}...", total, total, peer);
+            return new Messages.Blocks(blocks, BlockChain.Genesis.Hash);
+        }
+
+        //private RecentStates TransferRecentStates(GetRecentStates getRecentStates)
+        //{
+        //    BlockLocator baseLocator = getRecentStates.BaseLocator;
+        //    HashDigest<SHA256>? @base = BlockChain.FindBranchPoint(baseLocator);
+        //    HashDigest<SHA256> target = getRecentStates.TargetBlockHash;
+        //    IImmutableDictionary<HashDigest<SHA256>,
+        //        IImmutableDictionary<string, IValue>
+        //    > blockStates = null;
+        //    IImmutableDictionary<string, IImmutableList<HashDigest<SHA256>>> stateRefs = null;
+        //    long nextOffset = -1;
+        //    int iteration = 0;
+
+        //    if (BlockChain.StateStore is IBlockStatesStore blockStatesStore &&
+        //        BlockChain.ContainsBlock(target))
+        //    {
+        //        ReaderWriterLockSlim rwlock = BlockChain._rwlock;
+        //        rwlock.EnterReadLock();
+        //        try
+        //        {
+        //            Guid chainId = BlockChain.Id;
+
+        //            _logger.Debug(
+        //                "Getting state references from {Offset}",
+        //                getRecentStates.Offset);
+
+        //            long baseIndex =
+        //                (@base is HashDigest<SHA256> bbh &&
+        //                 _store.GetBlockIndex(bbh) is long bbIdx)
+        //                    ? bbIdx
+        //                    : 0;
+        //            long lowestIndex = baseIndex + getRecentStates.Offset;
+        //            long targetIndex =
+        //                (target is HashDigest<SHA256> tgt &&
+        //                 _store.GetBlockIndex(tgt) is long tgtIdx)
+        //                    ? tgtIdx
+        //                    : long.MaxValue;
+
+        //            iteration =
+        //                (int)Math.Ceiling(
+        //                    (double)(targetIndex - baseIndex + 1) / FindNextStatesChunkSize);
+
+        //            long highestIndex = lowestIndex + FindNextStatesChunkSize - 1 > targetIndex
+        //                ? targetIndex
+        //                : lowestIndex + FindNextStatesChunkSize - 1;
+
+        //            nextOffset = highestIndex == targetIndex
+        //                ? -1
+        //                : getRecentStates.Offset + FindNextStatesChunkSize;
+
+        //            stateRefs = blockStatesStore.ListAllStateReferences(
+        //                chainId,
+        //                lowestIndex: lowestIndex,
+        //                highestIndex: highestIndex
+        //            );
+        //            if (_logger.IsEnabled(LogEventLevel.Verbose))
+        //            {
+        //                _logger.Verbose(
+        //                    "List state references from {From} to {To}:\n{StateReferences}",
+        //                    lowestIndex,
+        //                    highestIndex,
+        //                    string.Join(
+        //                        "\n",
+        //                        stateRefs.Select(kv => $"{kv.Key}: {string.Join(", ", kv.Value)}")
+        //                    )
+        //                );
+        //            }
+
+        //            // GetBlockStates may return null since swarm may not have deep states.
+        //            blockStates = stateRefs.Values
+        //                .Select(refs => refs.Last())
+        //                .ToImmutableHashSet()
+        //                .Select(bh => (bh, blockStatesStore.GetBlockStates(bh)))
+        //                .Where(pair => !(pair.Item2 is null))
+        //                .ToImmutableDictionary(
+        //                    pair => pair.Item1,
+        //                    pair => (IImmutableDictionary<string, IValue>)pair.Item2
+        //                        .ToImmutableDictionary(kv => kv.Key, kv => kv.Value)
+        //                );
+        //        }
+        //        finally
+        //        {
+        //            rwlock.ExitReadLock();
+        //        }
+
+        //        if (_logger.IsEnabled(LogEventLevel.Verbose))
+        //        {
+        //            if (BlockChain.ContainsBlock(target))
+        //            {
+        //                var baseString = @base is HashDigest<SHA256> h
+        //                    ? $"{BlockChain[h].Index}:{h}"
+        //                    : null;
+        //                var targetString = $"{BlockChain[target].Index}:{target}";
+        //                _logger.Verbose(
+        //                    "State references to send (preload):" +
+        //                    " {StateReferences} ({Base}-{Target})",
+        //                    stateRefs.Select(kv =>
+        //                        (
+        //                            kv.Key,
+        //                            string.Join(", ", kv.Value.Select(v => v.ToString()))
+        //                        )
+        //                    ).ToArray(),
+        //                    baseString,
+        //                    targetString
+        //                );
+        //                _logger.Verbose(
+        //                    "Block states to send (preload): {BlockStates} ({Base}-{Target})",
+        //                    blockStates.Select(kv => (kv.Key, kv.Value)).ToArray(),
+        //                    baseString,
+        //                    targetString
+        //                );
+        //            }
+        //            else
+        //            {
+        //                _logger.Verbose(
+        //                    "Nothing to reply because {TargetHash} doesn't exist.", target);
+        //            }
+        //        }
+        //    }
+
+        //    return new RecentStates(
+        //        target,
+        //        nextOffset,
+        //        iteration,
+        //        blockStates,
+        //        stateRefs?.ToImmutableDictionary());
+        //}
+
+        //FMONECHANGE -  added new message handler for TorSocks5Transport
         private async Task ProcessBlock(BoundPeer remote, Messages.Blocks blockMessage, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!(remote is BoundPeer peer))
@@ -281,6 +515,7 @@ namespace Libplanet.Net
 
                 var genesis = blockMessage.GenesisHash;
 
+                //FMONE CHANGE - Block inst static in case of FMONE
                 Block<T> block = new Block<T>().Deserialize(payload);
 
                 if (!genesis.Equals(BlockChain.Genesis.Hash))
@@ -295,7 +530,7 @@ namespace Libplanet.Net
                 }
 
                 BlockHeaderReceived.Set();
-                BlockHeader header = block.GetBlockHeader();
+                BlockHeader header = block.Header;
                 _logger.Debug($"Received a {nameof(BlockHeader)} #{ header.Index} {ByteUtil.Hex(header.Hash)}.");
 
                 try
@@ -351,8 +586,7 @@ namespace Libplanet.Net
                             peer,
                             block.Hash,
                             null,
-                            ImmutableHashSet<Address>.Empty,
-                            null,
+                            TimeSpan.FromMinutes(5),
                             0,
                             cancellationToken);
 
@@ -373,8 +607,7 @@ namespace Libplanet.Net
                             peer,
                             block.Hash,
                             null,
-                            ImmutableHashSet<Address>.Empty,
-                            null,
+                            TimeSpan.FromMinutes(5),
                             0,
                             cancellationToken);
 
@@ -406,231 +639,6 @@ namespace Libplanet.Net
 
             _logger.Information($"Processed block(s) broadcast from {peer.EndPoint}@{peer.Address.ToHex()}.");
 
-        }
-
-        private Transactions TransferTxs(GetTxs getTxs)
-        {
-            IEnumerable<Transaction<T>> txs = getTxs.TxIds
-                .Where(txId => _store.ContainsTransaction(txId))
-                .Select(BlockChain.GetTransaction);
-            List<byte[]> response = new List<byte[]>();
-            foreach (Transaction<T> tx in txs)
-            {
-                _logger.Debug($"Adding {tx.Id} to response.");
-                response.Add(tx.Serialize(true));
-            }
-            return new Transactions(response);
-        }
-
-        private void ProcessTxIds(TxIds message, BoundPeer peer)
-        {
-            if (peer == null)
-            {
-                _logger.Information($"Ignores a {nameof(TxIds)} message because it was sent by an invalid peer: {peer.EndPoint.Host}:{peer.EndPoint.Port}.");
-                return;
-            }
-
-            _logger.Debug(
-                $"Received a {nameof(TxIds)} message: {{@TxIds}}.",
-                message.Ids.Select(txid => txid.ToString())
-            );
-
-            ImmutableHashSet<TxId> newTxIds = message.Ids
-                .Where(id => !_demandTxIds.ContainsKey(id))
-                .Where(id => !_store.ContainsTransaction(id))
-                .ToImmutableHashSet();
-
-            if (!newTxIds.Any())
-            {
-                _logger.Debug("No unaware transactions to receive.");
-                return;
-            }
-
-            _logger.Debug(
-                "Unaware transactions to receive: {@TxIds}.",
-                newTxIds.Select(txid => txid.ToString())
-            );
-            foreach (TxId txid in newTxIds)
-            {
-                _demandTxIds.TryAdd(txid, peer);
-            }
-        }
-
-        private Messages.Blocks TransferBlocks(GetBlocks getData, BoundPeer peer)
-        {
-            _logger.Verbose($"Preparing a {nameof(Blocks)} message to reply to {peer}...");
-
-            var blocks = new List<byte[]>();
-
-            List<HashDigest<SHA256>> hashes = getData.BlockHashes.ToList();
-            int i = 1;
-            int total = hashes.Count;
-            const string logMsg =
-                "Fetching a block #{Index}/{Total} ({Hash}) to include to " +
-                "a reply to {Peer}...";
-            foreach (HashDigest<SHA256> hash in hashes)
-            {
-                _logger.Verbose(logMsg, i, total, hash, peer);
-                if (_store.ContainsBlock(hash))
-                {
-                    Block<T> block = _store.GetBlock<T>(hash);
-                    byte[] payload = block.Serialize();
-                    blocks.Add(payload);
-                }
-                else
-                {
-                    if (BlockChain.Genesis.Hash.Equals(hash))
-                    {
-                        _logger.Verbose($"Requested block {hash} is genesis.");
-                        Block<T> block = BlockChain.Genesis;
-                        byte[] payload = block.Serialize();
-                        blocks.Add(payload);
-                    }
-                    else
-                    {
-                        _logger.Verbose($"Block {hash} not found. Sending empty reply for {hash}.");
-                    }
-                }
-                //chunking must be lead by client request/response as we can't handle more than 1 response for now
-                //if (blocks.Count == getData.ChunkSize)
-                //{
-                //    var response = new Messages.Blocks(blocks, BlockChain.Genesis.Hash);
-                //    _logger.Verbose("Enqueuing a blocks reply (...{Index}/{Total})...", i, total);
-                //    Transport.ReplyMessage(response);
-                //    blocks.Clear();
-                //}
-
-                //i++;
-            }
-            _logger.Verbose("Sendig a blocks reply (...{Index}/{Total}) to {Identity}...", total, total, peer);
-            return new Messages.Blocks(blocks, BlockChain.Genesis.Hash);
-        }
-
-        private RecentStates TransferRecentStates(GetRecentStates getRecentStates)
-        {
-            BlockLocator baseLocator = getRecentStates.BaseLocator;
-            HashDigest<SHA256>? @base = BlockChain.FindBranchPoint(baseLocator);
-            HashDigest<SHA256> target = getRecentStates.TargetBlockHash;
-            IImmutableDictionary<HashDigest<SHA256>,
-                IImmutableDictionary<string, IValue>
-            > blockStates = null;
-            IImmutableDictionary<string, IImmutableList<HashDigest<SHA256>>> stateRefs = null;
-            long nextOffset = -1;
-            int iteration = 0;
-
-            if (BlockChain.StateStore is IBlockStatesStore blockStatesStore &&
-                BlockChain.ContainsBlock(target))
-            {
-                ReaderWriterLockSlim rwlock = BlockChain._rwlock;
-                rwlock.EnterReadLock();
-                try
-                {
-                    Guid chainId = BlockChain.Id;
-
-                    _logger.Debug(
-                        "Getting state references from {Offset}",
-                        getRecentStates.Offset);
-
-                    long baseIndex =
-                        (@base is HashDigest<SHA256> bbh &&
-                         _store.GetBlockIndex(bbh) is long bbIdx)
-                            ? bbIdx
-                            : 0;
-                    long lowestIndex = baseIndex + getRecentStates.Offset;
-                    long targetIndex =
-                        (target is HashDigest<SHA256> tgt &&
-                         _store.GetBlockIndex(tgt) is long tgtIdx)
-                            ? tgtIdx
-                            : long.MaxValue;
-
-                    iteration =
-                        (int)Math.Ceiling(
-                            (double)(targetIndex - baseIndex + 1) / FindNextStatesChunkSize);
-
-                    long highestIndex = lowestIndex + FindNextStatesChunkSize - 1 > targetIndex
-                        ? targetIndex
-                        : lowestIndex + FindNextStatesChunkSize - 1;
-
-                    nextOffset = highestIndex == targetIndex
-                        ? -1
-                        : getRecentStates.Offset + FindNextStatesChunkSize;
-
-                    stateRefs = blockStatesStore.ListAllStateReferences(
-                        chainId,
-                        lowestIndex: lowestIndex,
-                        highestIndex: highestIndex
-                    );
-                    if (_logger.IsEnabled(LogEventLevel.Verbose))
-                    {
-                        _logger.Verbose(
-                            "List state references from {From} to {To}:\n{StateReferences}",
-                            lowestIndex,
-                            highestIndex,
-                            string.Join(
-                                "\n",
-                                stateRefs.Select(kv => $"{kv.Key}: {string.Join(", ", kv.Value)}")
-                            )
-                        );
-                    }
-
-                    // GetBlockStates may return null since swarm may not have deep states.
-                    blockStates = stateRefs.Values
-                        .Select(refs => refs.Last())
-                        .ToImmutableHashSet()
-                        .Select(bh => (bh, blockStatesStore.GetBlockStates(bh)))
-                        .Where(pair => !(pair.Item2 is null))
-                        .ToImmutableDictionary(
-                            pair => pair.Item1,
-                            pair => (IImmutableDictionary<string, IValue>)pair.Item2
-                                .ToImmutableDictionary(kv => kv.Key, kv => kv.Value)
-                        );
-                }
-                finally
-                {
-                    rwlock.ExitReadLock();
-                }
-
-                if (_logger.IsEnabled(LogEventLevel.Verbose))
-                {
-                    if (BlockChain.ContainsBlock(target))
-                    {
-                        var baseString = @base is HashDigest<SHA256> h
-                            ? $"{BlockChain[h].Index}:{h}"
-                            : null;
-                        var targetString = $"{BlockChain[target].Index}:{target}";
-                        _logger.Verbose(
-                            "State references to send (preload):" +
-                            " {StateReferences} ({Base}-{Target})",
-                            stateRefs.Select(kv =>
-                                (
-                                    kv.Key,
-                                    string.Join(", ", kv.Value.Select(v => v.ToString()))
-                                )
-                            ).ToArray(),
-                            baseString,
-                            targetString
-                        );
-                        _logger.Verbose(
-                            "Block states to send (preload): {BlockStates} ({Base}-{Target})",
-                            blockStates.Select(kv => (kv.Key, kv.Value)).ToArray(),
-                            baseString,
-                            targetString
-                        );
-                    }
-                    else
-                    {
-                        _logger.Verbose(
-                            "Nothing to reply because {TargetHash} doesn't exist.", target);
-                    }
-                }
-            }
-
-            return new RecentStates(
-                target,
-                nextOffset,
-                iteration,
-                blockStates,
-                stateRefs?.ToImmutableDictionary());
         }
     }
 }

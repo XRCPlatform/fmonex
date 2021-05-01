@@ -45,7 +45,6 @@ namespace FreeMarketOne.BlockChain.Test
                 _basePoolManager = new BasePoolManager(
                     _configuration,
                     _configuration.MemoryBasePoolPath,
-                    _baseBlockChainManager.Storage,
                     _baseBlockChainManager.SwarmServer,
                     _baseBlockChainManager.PrivateKey,
                     _baseBlockChainManager.BlockChain,
@@ -97,6 +96,8 @@ namespace FreeMarketOne.BlockChain.Test
             var testActionItem2 = new UserDataV1();
             testActionItem2.UserName = "LoginName";
             testActionItem2.Description = "This is a test message";
+            var bytesToSign = testActionItem2.ToByteArrayForSign();
+            testActionItem2.Signature = Convert.ToBase64String(_userPrivateKey.Sign(bytesToSign));
             testActionItem2.Hash = testActionItem2.GenerateHash();
 
             _basePoolManager.AcceptActionItem(testActionItem1);

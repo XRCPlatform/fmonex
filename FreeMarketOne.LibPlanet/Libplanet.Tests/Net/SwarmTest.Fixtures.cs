@@ -10,6 +10,7 @@ using Libplanet.Blockchain.Policies;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Net;
+using Libplanet.Net.Protocols;
 using Libplanet.Tests.Common.Action;
 using Libplanet.Tests.Store;
 using Serilog;
@@ -32,7 +33,7 @@ namespace Libplanet.Tests.Net
                 var policy = new BlockPolicy<DumbAction>(new MinerReward(1));
                 using (var storeFx = new DefaultStoreFixture(memory: true))
                 {
-                    var chain = TestUtils.MakeBlockChain(policy, storeFx.Store);
+                    var chain = TestUtils.MakeBlockChain(policy, storeFx.Store, storeFx.StateStore);
                     Address miner = new PrivateKey().ToAddress();
                     var signer = new PrivateKey();
                     Address address = signer.ToAddress();
@@ -70,22 +71,23 @@ namespace Libplanet.Tests.Net
         private Swarm<DumbAction> CreateSwarm(
             PrivateKey privateKey = null,
             AppProtocolVersion? appProtocolVersion = null,
-            int? tableSize = null,
-            int? bucketSize = null,
+            int tableSize = Kademlia.TableSize,
+            int bucketSize = Kademlia.BucketSize,
             string host = null,
             int? listenPort = null,
             DateTimeOffset? createdAt = null,
             IEnumerable<IceServer> iceServers = null,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
             IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
+			//FMONECHANGE added TorProcessManager
             SwarmOptions options = null,
             TorProcessManager torProcessManager = null)
         {
-            var fx = new DefaultStoreFixture(memory: true);
             var policy = new BlockPolicy<DumbAction>(new MinerReward(1));
-            var blockchain = TestUtils.MakeBlockChain(policy, fx.Store);
-            return CreateSwarm(                
-                blockchain,                
+            var fx = new DefaultStoreFixture(memory: true, blockAction: policy.BlockAction);
+            var blockchain = TestUtils.MakeBlockChain(policy, fx.Store, fx.StateStore);
+            return CreateSwarm(
+                blockchain,
                 privateKey,
                 appProtocolVersion,                
                 tableSize,
@@ -97,6 +99,7 @@ namespace Libplanet.Tests.Net
                 differentAppProtocolVersionEncountered,
                 trustedAppProtocolVersionSigners,
                 options,
+				//FMONECHANGE added TorProcessManager arg
                 torProcessManager);
         }
 
@@ -104,9 +107,8 @@ namespace Libplanet.Tests.Net
             BlockChain<T> blockChain,            
             PrivateKey privateKey = null,            
             AppProtocolVersion? appProtocolVersion = null,
-            
-            int? tableSize = null,
-            int? bucketSize = null,
+            int tableSize = Kademlia.TableSize,
+            int bucketSize = Kademlia.BucketSize,
             string host = null,
             int? listenPort = null,
             DateTimeOffset? createdAt = null,
@@ -114,6 +116,7 @@ namespace Libplanet.Tests.Net
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered = null,
             IEnumerable<PublicKey> trustedAppProtocolVersionSigners = null,
             SwarmOptions options = null,
+			//FMONECHANGE added new arg
             TorProcessManager torProcessManager = null
         )
             where T : IAction, new()
@@ -127,13 +130,12 @@ namespace Libplanet.Tests.Net
                 blockChain,               
                 privateKey ?? new PrivateKey(),
                 appProtocolVersion ?? DefaultAppProtocolVersion,
+                5,
+                //FMONECHANGE added new arg
                 torProcessManager,
-                tableSize,
-                bucketSize,                
                 host,
                 listenPort,
-                createdAt,
-                iceServers,
+                null,                
                 differentAppProtocolVersionEncountered,
                 trustedAppProtocolVersionSigners,
                 options);

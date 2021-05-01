@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 
 namespace Libplanet.Net.Messages
 {
+    //FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     public class GetRecentStates : IBenEncodeable
     {
         private static readonly byte[] BaseLocatorKey = { 0x47 }; // 'G'
@@ -19,10 +20,12 @@ namespace Libplanet.Net.Messages
             Offset = offset;
         }
 
-        public GetRecentStates(byte[] bytes) : this(DecodeBytesToBen(bytes))
+        public GetRecentStates(byte[] bytes)
+            : this(DecodeBytesToBen(bytes))
         {
 
         }
+
         public GetRecentStates(Dictionary dict)
         {
             var list = dict.GetValue<List>(BaseLocatorKey).Select(f => new HashDigest<SHA256>((Binary)f));
@@ -30,7 +33,7 @@ namespace Libplanet.Net.Messages
             Offset = dict.GetValue<Integer>(OffsetKey);
             TargetBlockHash = new HashDigest<SHA256>(dict.GetValue<Binary>(TargetHashKey));
         }
-                   
+
         public Dictionary ToBencodex()
         {
             var dict = Dictionary.Empty
@@ -41,7 +44,8 @@ namespace Libplanet.Net.Messages
                 dict = dict.Add(
                     BaseLocatorKey,
                     BaseLocator.Select(b => (IValue)(Binary)b.ToByteArray()));
-            }            
+            }
+
             return dict;
         }
 

@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     internal class GetTxs : IBenEncodeable
     {
         private static readonly byte[] idsKey = { 0x47 };   // 'G'

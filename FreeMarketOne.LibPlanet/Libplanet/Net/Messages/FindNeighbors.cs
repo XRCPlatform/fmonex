@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     internal class FindNeighbors : IBenEncodeable
     {
         private static readonly byte[] StartIndexKey = { 0x53 }; // 'S'

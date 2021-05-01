@@ -1,4 +1,4 @@
-﻿using Bencodex.Types;
+using Bencodex.Types;
 using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Net.Messages;
@@ -17,11 +17,13 @@ using Xunit;
 
 namespace Libplanet.Tests
 {
+    //FMONECHANGE - added missing test
     public class TorSocks5TransportTest
     {
         private static readonly PrivateKey VersionSigner = new PrivateKey();
         private static readonly AppProtocolVersion AppProtocolVersion =
             AppProtocolVersion.Sign(VersionSigner, 1);
+
         private ILogger _logger = null;
         private PrivateKey _privateKey = new PrivateKey();
         private TorSocks5Transport torSocks5Transport = null;
@@ -29,14 +31,26 @@ namespace Libplanet.Tests
         public TorSocks5TransportTest()
         {
             _logger = Log.ForContext<TorSocks5TransportTest>();
-            torSocks5Transport = new TorSocks5Transport(VersionSigner, AppProtocolVersion, ImmutableHashSet<PublicKey>.Empty, 10, 10, "127.0.0.1", 9114, null, null, _logger, null, null, null);
+            torSocks5Transport = new TorSocks5Transport(
+                VersionSigner,
+                AppProtocolVersion,
+                ImmutableHashSet<PublicKey>.Empty,
+                new Libplanet.Net.Protocols.RoutingTable(_privateKey.ToAddress()),
+                "127.0.0.1",
+                9114,
+                null,
+                null,
+                _logger,
+                null,
+                null,
+                null);
 
         }
 
         [Fact]
         public void PacksLibPlanetMessageIntoTransportMessage()
         {
-      
+
             HashDigest<SHA256>[] blockHashes = GenerateRandomBlockHashes(100L).ToArray();
             var msg = new BlockHashes(123, blockHashes);
             Assert.Equal(123, msg.StartIndex);
@@ -48,7 +62,7 @@ namespace Libplanet.Tests
             envelope.Initialize(privKey, msg);
 
             Assert.Equal(msg.GetType(), envelope.GetMessageType());
-            
+
             byte[] pak = torSocks5Transport.PackEnvelope(envelope);
             var return_envelope = torSocks5Transport.UnPackEnvelope(pak);
             return_envelope.IsValid(AppProtocolVersion, null, null);
@@ -98,7 +112,7 @@ namespace Libplanet.Tests
 
             byte[] pak = torSocks5Transport.PackEnvelope(envelope);
             var return_envelope = torSocks5Transport.UnPackEnvelope(pak);
-            
+
             var result = return_envelope.GetBody<BlockHashes>();
             Assert.Equal(msg.StartIndex, result.StartIndex);
             Assert.Equal(msg.Hashes, result.Hashes);
@@ -145,5 +159,5 @@ namespace Libplanet.Tests
                 yield return new HashDigest<SHA256>(buffer);
             }
         }
-    }    
+    }
 }

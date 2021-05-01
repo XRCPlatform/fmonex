@@ -54,6 +54,21 @@ namespace Libplanet.Tests.Store
             return _store.ContainsBlock(blockHash);
         }
 
+        public void SetBlockPerceivedTime(
+            HashDigest<SHA256> blockHash,
+            DateTimeOffset perceivedTime
+        )
+        {
+            Log(nameof(SetBlockPerceivedTime), blockHash, perceivedTime);
+            _store.SetBlockPerceivedTime(blockHash, perceivedTime);
+        }
+
+        public DateTimeOffset? GetBlockPerceivedTime(HashDigest<SHA256> blockHash)
+        {
+            Log(nameof(GetBlockPerceivedTime), blockHash);
+            return _store.GetBlockPerceivedTime(blockHash);
+        }
+
         public void DeleteChainId(Guid chainId)
         {
             Log(nameof(DeleteChainId), chainId);
@@ -173,6 +188,12 @@ namespace Libplanet.Tests.Store
         {
             Log(nameof(IncreaseTxNonce), chainId, address, delta);
             _store.IncreaseTxNonce(chainId, address, delta);
+        }
+
+        public void ForkTxNonces(Guid sourceChainId, Guid destinationChainId)
+        {
+            Log(nameof(ForkTxNonces), sourceChainId, destinationChainId);
+            _store.ForkTxNonces(sourceChainId, destinationChainId);
         }
 
         public void StageTransactionIds(IImmutableSet<TxId> txids)

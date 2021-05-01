@@ -4,6 +4,7 @@ using NetMQ;
 
 namespace Libplanet.Tests.Net.Protocols
 {
+	//FMONECHANGE -  no longer inherits from base class because we moved away from netmq
     internal class TestMessage 
     {
         public TestMessage(string data)
@@ -11,20 +12,11 @@ namespace Libplanet.Tests.Net.Protocols
             Data = data;
         }
 
-        //public TestMessage(NetMQFrame[] body)
-        //{
-        //}
+        
 
         public string Data { get; }
 
        
 
-        //protected override IEnumerable<NetMQFrame> DataFrames
-        //{
-        //    get
-        //    {
-        //        yield break;
-        //    }
-        //}
     }
 }

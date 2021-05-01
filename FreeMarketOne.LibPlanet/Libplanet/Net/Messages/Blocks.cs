@@ -7,6 +7,7 @@ using Bencodex.Types;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     public class Blocks : IBenEncodeable
     {
         private static readonly byte[] GenesisKey = { 0x47 };   // 'G'
@@ -40,7 +41,7 @@ namespace Libplanet.Net.Messages
             }
             return dict;
         }
-
+		//FMONECHANGE -  added genesis attribute for extra validation
         public HashDigest<SHA256> GenesisHash { get; }
 
         public Blocks(Dictionary dict)
@@ -83,28 +84,6 @@ namespace Libplanet.Net.Messages
             }
             return dict;
         }
-
-        //public BlockBroadcast(NetMQFrame[] body)
-        //{
-        //    GenesisHash = new HashDigest<SHA256>(body[0].Buffer);
-        //    int payloadCount = body[1].ConvertToInt32();
-        //    Payloads = body.Skip(2).Take(payloadCount)
-        //        .Select(f => f.ToByteArray())
-        //        .ToList();
-        //}
-        //protected override IEnumerable<NetMQFrame> DataFrames
-        //{
-        //    get
-        //    {
-        //        yield return new NetMQFrame(GenesisHash.ToByteArray());
-        //        yield return new NetMQFrame(
-        //            NetworkOrderBitsConverter.GetBytes(Payloads.Count));
-
-        //        foreach (var payload in Payloads)
-        //        {
-        //            yield return new NetMQFrame(payload);
-        //        }
-        //    }
-        //}
+        
     }
 }

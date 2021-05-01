@@ -39,6 +39,7 @@ namespace Libplanet.Crypto
     [Equals]
     public class PrivateKey
     {
+        /// FMONE CHANGE - We need to access it in other projects
         public PublicKey _publicKey;
 
         /// <summary>
@@ -72,6 +73,7 @@ namespace Libplanet.Crypto
         {
         }
 
+        /// FMONE CHANGE - We need to access it in other projects
         public PrivateKey(ECPrivateKeyParameters keyParam)
         {
             KeyParam = keyParam;
@@ -121,6 +123,7 @@ namespace Libplanet.Crypto
         [Pure]
         public byte[] ByteArray => KeyParam.D.ToByteArrayUnsigned();
 
+        /// FMONE CHANGE - We need to access it in other projects
         public ECPrivateKeyParameters KeyParam { get; }
 
         public static bool operator ==(PrivateKey left, PrivateKey right) =>
@@ -234,6 +237,7 @@ namespace Libplanet.Crypto
             return new SymmetricKey(result);
         }
 
+        /// FMONE CHANGE - We need to access it in other projects
         public static ECDomainParameters GetECParameters()
         {
             return GetECParameters("secp256k1");

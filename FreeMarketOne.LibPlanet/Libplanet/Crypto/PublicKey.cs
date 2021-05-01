@@ -46,11 +46,13 @@ namespace Libplanet.Crypto
         {
         }
 
+        /// FMONE CHANGE - We need to access it in other projects
         public PublicKey(ECPublicKeyParameters keyParam)
         {
             KeyParam = keyParam;
         }
 
+        /// FMONE CHANGE - We need to access it in other projects
         public ECPublicKeyParameters KeyParam { get; }
 
         public static bool operator ==(PublicKey left, PublicKey right) =>

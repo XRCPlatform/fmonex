@@ -24,7 +24,6 @@ namespace FreeMarketOne.Pools
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private PrivateKey _privateKey { get; set; }
-        private DefaultStore _storage;
         private BlockChain<T> _blockChain;
         private Swarm<T> _swarmServer;
         private Address _address;
@@ -35,7 +34,6 @@ namespace FreeMarketOne.Pools
             Swarm<T> swarmServer,
             BlockChain<T> blockChain,
             Address address,
-            DefaultStore storage,
             PrivateKey privateKey,
             CancellationTokenSource cancellationTokenSource,
             EventHandler eventNewBlock = null)
@@ -46,8 +44,6 @@ namespace FreeMarketOne.Pools
             _blockChain = blockChain;
             _swarmServer = swarmServer;
             _privateKey = privateKey;
-
-            _storage = storage;
             _eventNewBlock = eventNewBlock;
             _address = address;
 
@@ -95,7 +91,7 @@ namespace FreeMarketOne.Pools
                     {
                         if (ex is InvalidTxNonceException invalidTxNonceException)
                         {
-                            var invalidNonceTx = _storage.GetTransaction<T>(invalidTxNonceException.TxId);
+                            var invalidNonceTx = _blockChain.GetTransaction(invalidTxNonceException.TxId);
                             
                             //unpoison
                             _blockChain.UnstageTransaction(invalidNonceTx);
@@ -112,7 +108,7 @@ namespace FreeMarketOne.Pools
                         {
                             _logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
                                 invalidTxException.TxId));
-                            invalidTxs.Add(_storage.GetTransaction<T>(invalidTxException.TxId));
+                            invalidTxs.Add(_blockChain.GetTransaction(invalidTxException.TxId));
                         }
                         else
                         {

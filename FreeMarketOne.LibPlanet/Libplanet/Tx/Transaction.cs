@@ -41,6 +41,14 @@ namespace Libplanet.Tx
         private int _bytesLength;
 
         /// <summary>
+        /// FMONE CHANGE - Empty constructor to use Mine function and Deserialize without Static instance
+        /// </summary>
+        public Transaction()
+        {
+
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Transaction{T}"/>.
         /// <para>This constructor takes all required and only required values
         /// for a <see cref="Transaction{T}"/>, so gives you full control of
@@ -88,13 +96,6 @@ namespace Libplanet.Tx
         /// is passed to <paramref name="signature"/>,
         /// <paramref name="actions"/>, or <paramref name="publicKey"/>.
         /// </exception>
-        /// <exception cref="InvalidTxSignatureException">Thrown when its
-        /// <paramref name="signature"/> is invalid or not signed by
-        /// the account who corresponds to <paramref name="publicKey"/>.
-        /// </exception>
-        /// <exception cref="InvalidTxPublicKeyException">Thrown when its
-        /// <paramref name="signer"/> is not derived from its
-        /// <paramref name="publicKey"/>.</exception>
         public Transaction(
             long nonce,
             Address signer,
@@ -104,17 +105,19 @@ namespace Libplanet.Tx
             DateTimeOffset timestamp,
             IEnumerable<T> actions,
             byte[] signature)
-            : this(
-                nonce,
-                signer,
-                publicKey,
-                genesisHash,
-                updatedAddresses,
-                timestamp,
-                actions,
-                signature,
-                true)
         {
+            Nonce = nonce;
+            Signer = signer;
+            GenesisHash = genesisHash;
+            UpdatedAddresses = updatedAddresses ??
+                               throw new ArgumentNullException(nameof(updatedAddresses));
+            Signature = signature ??
+                        throw new ArgumentNullException(nameof(signature));
+            Timestamp = timestamp;
+            Actions = actions?.ToImmutableList() ??
+                      throw new ArgumentNullException(nameof(actions));
+            PublicKey = publicKey ??
+                        throw new ArgumentNullException(nameof(publicKey));
         }
 
         /// <summary>
@@ -145,40 +148,9 @@ namespace Libplanet.Tx
                     TimestampFormat,
                     CultureInfo.InvariantCulture).ToUniversalTime(),
                 rawTx.Actions.Select(ToAction).ToImmutableList(),
-                rawTx.Signature.ToArray(),
-                false)
+                rawTx.Signature.ToArray())
 #pragma warning restore SA1118 // Parameter spans multiple line
         {
-        }
-
-        internal Transaction(
-            long nonce,
-            Address signer,
-            PublicKey publicKey,
-            HashDigest<SHA256>? genesisHash,
-            IImmutableSet<Address> updatedAddresses,
-            DateTimeOffset timestamp,
-            IEnumerable<T> actions,
-            byte[] signature,
-            bool validate)
-        {
-            Nonce = nonce;
-            Signer = signer;
-            GenesisHash = genesisHash;
-            UpdatedAddresses = updatedAddresses ??
-                    throw new ArgumentNullException(nameof(updatedAddresses));
-            Signature = signature ??
-                    throw new ArgumentNullException(nameof(signature));
-            Timestamp = timestamp;
-            Actions = actions?.ToImmutableList() ??
-                      throw new ArgumentNullException(nameof(actions));
-            PublicKey = publicKey ??
-                        throw new ArgumentNullException(nameof(publicKey));
-
-            if (validate)
-            {
-                Validate();
-            }
         }
 
         private Transaction(
@@ -197,8 +169,7 @@ namespace Libplanet.Tx
                 updatedAddresses,
                 timestamp,
                 actions.ToImmutableList(),
-                new byte[0],
-                false)
+                new byte[0])
         {
         }
 
@@ -312,9 +283,17 @@ namespace Libplanet.Tx
         /// </summary>
         /// <param name="bytes">A <a href="https://bencodex.org/">Bencodex</a>
         /// representation of a <see cref="Transaction{T}"/>.</param>
+        /// <param name="validate">Whether to validate the transaction.</param>
         /// <returns>A decoded <see cref="Transaction{T}"/> object.</returns>
+        /// <exception cref="InvalidTxSignatureException">Thrown when its
+        /// <see cref="Signature"/> is invalid or not signed by
+        /// the account who corresponds to <see cref="PublicKey"/>.
+        /// </exception>
+        /// <exception cref="InvalidTxPublicKeyException">Thrown when its
+        /// <see cref="Signer"/> is not derived from its
+        /// <see cref="PublicKey"/>.</exception>
         /// <seealso cref="Serialize(bool)"/>
-        public static Transaction<T> Deserialize(byte[] bytes)
+        public Transaction<T> Deserialize(byte[] bytes, bool validate = true)
         {
             IValue value = new Codec().Decode(bytes);
             if (!(value is Bencodex.Types.Dictionary dict))
@@ -325,6 +304,11 @@ namespace Libplanet.Tx
             }
 
             var tx = new Transaction<T>(dict);
+            if (validate)
+            {
+                tx.Validate();
+            }
+
             if (bytes.Length < BytesCacheThreshold)
             {
                 tx._bytes = bytes;
@@ -424,7 +408,7 @@ namespace Libplanet.Tx
         /// is passed to <paramref name="privateKey"/> or
         /// or <paramref name="actions"/>.
         /// </exception>
-        public static Transaction<T> Create(
+        public Transaction<T> Create(
             long nonce,
             PrivateKey privateKey,
             HashDigest<SHA256>? genesisHash,

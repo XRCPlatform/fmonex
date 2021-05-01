@@ -13,38 +13,46 @@ namespace Libplanet.Blocks
     /// <summary>
     /// Block header containing information about <see cref="Block{T}"/>s except transactions.
     /// </summary>
-    public readonly struct BlockHeader
+    public readonly struct BlockHeader : IBlockExcerpt
     {
+        internal const int CurrentProtocolVersion = 1;
+
         internal const string TimestampFormat = "yyyy-MM-ddTHH:mm:ss.ffffffZ";
 
-        private static readonly byte[] IndexKey = { 0x69 }; // 'i'
+        internal static readonly byte[] ProtocolVersionKey = { 0x00 };
 
-        private static readonly byte[] TimestampKey = { 0x74 }; // 't'
+        internal static readonly byte[] IndexKey = { 0x69 }; // 'i'
 
-        private static readonly byte[] DifficultyKey = { 0x64 }; // 'd'
+        internal static readonly byte[] TimestampKey = { 0x74 }; // 't'
 
-        private static readonly byte[] TotalDifficultyKey = { 0x54 }; // 'T'
+        internal static readonly byte[] DifficultyKey = { 0x64 }; // 'd'
 
-        private static readonly byte[] NonceKey = { 0x6e }; // 'n'
+        internal static readonly byte[] TotalDifficultyKey = { 0x54 }; // 'T'
 
-        private static readonly byte[] MinerKey = { 0x6d }; // 'm'
+        internal static readonly byte[] NonceKey = { 0x6e }; // 'n'
 
-        private static readonly byte[] PreviousHashKey = { 0x70 }; // 'p'
+        internal static readonly byte[] MinerKey = { 0x6d }; // 'm'
 
-        private static readonly byte[] TxHashKey = { 0x78 }; // 'x'
+        internal static readonly byte[] PreviousHashKey = { 0x70 }; // 'p'
 
-        private static readonly byte[] HashKey = { 0x68 }; // 'h'
+        internal static readonly byte[] TxHashKey = { 0x78 }; // 'x'
 
-        private static readonly byte[] StateRootHashKey = { 0x73 }; // 's'
+        internal static readonly byte[] HashKey = { 0x68 }; // 'h'
 
-        private static readonly byte[] PreEvaluationHashKey = { 0x63 }; // 'c'
+        internal static readonly byte[] StateRootHashKey = { 0x73 }; // 's'
+
+        internal static readonly byte[] PreEvaluationHashKey = { 0x63 }; // 'c'
 
         private static readonly TimeSpan TimestampThreshold =
             TimeSpan.FromSeconds(15);
 
+        private static readonly Codec Codec = new Codec();
+
         /// <summary>
         /// Creates a <see cref="BlockHeader"/> instance.
         /// </summary>
+        /// <param name="protocolVersion">The protocol version.  Goes to the <see
+        /// cref="ProtocolVersion"/>.</param>
         /// <param name="index">The height of the block.  Goes to the <see cref="Index"/>.
         /// </param>
         /// <param name="timestamp">The time this block is created.
@@ -71,6 +79,7 @@ namespace Libplanet.Blocks
         /// <param name="stateRootHash">The <see cref="ITrie.Hash"/> of the states on the block.
         /// </param>
         public BlockHeader(
+            int protocolVersion,
             long index,
             string timestamp,
             ImmutableArray<byte> nonce,
@@ -83,6 +92,7 @@ namespace Libplanet.Blocks
             ImmutableArray<byte> preEvaluationHash,
             ImmutableArray<byte> stateRootHash)
         {
+            ProtocolVersion = protocolVersion;
             Index = index;
             Timestamp = timestamp;
             Nonce = nonce;
@@ -98,6 +108,9 @@ namespace Libplanet.Blocks
 
         public BlockHeader(Bencodex.Types.Dictionary dict)
         {
+            ProtocolVersion = dict.ContainsKey(ProtocolVersionKey)
+                ? (int)dict.GetValue<Integer>(ProtocolVersionKey)
+                : 0;
             Index = dict.GetValue<Integer>(IndexKey);
             Timestamp = dict.GetValue<Text>(TimestampKey);
             Difficulty = dict.GetValue<Integer>(DifficultyKey);
@@ -129,6 +142,11 @@ namespace Libplanet.Blocks
                 : ImmutableArray<byte>.Empty;
         }
 
+        /// <summary>
+        /// The protocol version number.
+        /// </summary>
+        public int ProtocolVersion { get; }
+
         public long Index { get; }
 
         public string Timestamp { get; }
@@ -151,6 +169,8 @@ namespace Libplanet.Blocks
 
         public ImmutableArray<byte> StateRootHash { get; }
 
+        HashDigest<SHA256> IBlockExcerpt.Hash => new HashDigest<SHA256>(Hash);
+
         /// <summary>
         /// Gets <see cref="BlockHeader"/> instance from serialized <paramref name="bytes"/>.
         /// </summary>
@@ -160,7 +180,7 @@ namespace Libplanet.Blocks
         /// <see cref="Bencodex.Types.Dictionary"/> type.</exception>
         public static BlockHeader Deserialize(byte[] bytes)
         {
-            IValue value = new Codec().Decode(bytes);
+            IValue value = Codec.Decode(bytes);
             if (!(value is Bencodex.Types.Dictionary dict))
             {
                 throw new DecodingException(
@@ -196,6 +216,11 @@ namespace Libplanet.Blocks
                 .Add(NonceKey, Nonce.ToArray())
                 .Add(HashKey, Hash.ToArray());
 
+            if (ProtocolVersion != 0)
+            {
+                dict = dict.Add(ProtocolVersionKey, ProtocolVersion);
+            }
+
             if (Miner.Any())
             {
                 dict = dict.Add(MinerKey, Miner.ToArray());
@@ -225,6 +250,7 @@ namespace Libplanet.Blocks
         }
 
         internal static byte[] SerializeForHash(
+            int protocolVersion,
             long index,
             string timestamp,
             long difficulty,
@@ -240,6 +266,11 @@ namespace Libplanet.Blocks
                 .Add("timestamp", timestamp)
                 .Add("difficulty", difficulty)
                 .Add("nonce", nonce.ToArray());
+
+            if (protocolVersion != 0)
+            {
+                dict = dict.Add("protocol_version", protocolVersion);
+            }
 
             if (!miner.IsEmpty)
             {
@@ -266,6 +297,21 @@ namespace Libplanet.Blocks
 
         internal void Validate(DateTimeOffset currentTime)
         {
+            if (ProtocolVersion < 0)
+            {
+                throw new InvalidBlockProtocolVersionException(
+                    ProtocolVersion,
+                    $"A block's protocol version cannot be less than zero: {ProtocolVersion}."
+                );
+            }
+            else if (ProtocolVersion > CurrentProtocolVersion)
+            {
+                string message =
+                    $"Unknown protocol version: {ProtocolVersion}; " +
+                    $"the highest known version is {CurrentProtocolVersion}.";
+                throw new InvalidBlockProtocolVersionException(ProtocolVersion, message);
+            }
+
             DateTimeOffset ts = DateTimeOffset.ParseExact(
                 Timestamp,
                 TimestampFormat,
@@ -368,6 +414,7 @@ namespace Libplanet.Blocks
         }
 
         internal byte[] SerializeForHash(bool includeStateRootHash = true) => SerializeForHash(
+            ProtocolVersion,
             Index,
             Timestamp,
             Difficulty,

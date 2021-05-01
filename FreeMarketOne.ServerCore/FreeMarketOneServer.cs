@@ -227,7 +227,6 @@ namespace FreeMarketOne.ServerCore
                         BasePoolManager = new BasePoolManager(
                             Configuration,
                             Configuration.MemoryBasePoolPath,
-                            BaseBlockChainManager.Storage,
                             BaseBlockChainManager.SwarmServer,
                             BaseBlockChainManager.PrivateKey,
                             BaseBlockChainManager.BlockChain,
@@ -279,7 +278,6 @@ namespace FreeMarketOne.ServerCore
                             MarketPoolManager = new MarketPoolManager(
                                 Configuration,
                                 Configuration.MemoryBasePoolPath,
-                                MarketBlockChainManager.Storage,
                                 MarketBlockChainManager.SwarmServer,
                                 MarketBlockChainManager.PrivateKey,
                                 MarketBlockChainManager.BlockChain,
@@ -433,7 +431,6 @@ namespace FreeMarketOne.ServerCore
                     MarketPoolManager = new MarketPoolManager(
                         Configuration,
                         Configuration.MemoryBasePoolPath,
-                        MarketBlockChainManager.Storage,
                         MarketBlockChainManager.SwarmServer,
                         MarketBlockChainManager.PrivateKey,
                         MarketBlockChainManager.BlockChain,

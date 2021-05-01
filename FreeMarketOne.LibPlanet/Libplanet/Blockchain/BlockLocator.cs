@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 
 namespace Libplanet.Blockchain
 {
+    // FMONE CHANGE changed to be public from internal because used wider
     public class BlockLocator : IEnumerable<HashDigest<SHA256>>
     {
         private readonly IEnumerable<HashDigest<SHA256>> _impl;

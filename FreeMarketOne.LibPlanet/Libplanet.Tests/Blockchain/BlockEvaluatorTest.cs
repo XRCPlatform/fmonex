@@ -7,7 +7,9 @@ using Libplanet.Assets;
 using Libplanet.Blockchain;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
+using Libplanet.Store;
 using Libplanet.Tests.Common.Action;
+using Libplanet.Tests.Store.Trie;
 using Libplanet.Tx;
 using Xunit;
 
@@ -26,19 +28,20 @@ namespace Libplanet.Tests.Blockchain
             var timestamp = DateTimeOffset.UtcNow;
             var txs = new[]
             {
-                Transaction<RandomAction>.Create(
+                new Transaction<RandomAction>().Create(
                     0,
                     signer,
                     null,
                     new[] { new RandomAction(address), }),
             };
+            var stateStore =
+                new TrieStateStore(new MemoryKeyValueStore(), new MemoryKeyValueStore());
             Block<RandomAction> noStateRootBlock = TestUtils.MineGenesis(
                 timestamp: timestamp,
                 transactions: txs);
             Block<RandomAction> stateRootBlock = TestUtils.MineGenesis(
                 timestamp: timestamp,
-                transactions: txs,
-                checkStateRootHash: true);
+                transactions: txs).AttachStateRootHash(stateStore, null);
             var blockEvaluator =
                 new BlockEvaluator<RandomAction>(null, NullStateGetter, NullBalanceGetter, null);
             var generatedRandomNumbers = new List<int>();

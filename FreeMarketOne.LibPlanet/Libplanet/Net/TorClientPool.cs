@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Libplanet.Net
 {
+	//FMONECHANGE created new class to help TorSocks5ClientPool
     public class TorClientPool
     {
         private List<PooledClient> _pool;

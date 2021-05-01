@@ -28,6 +28,7 @@ using static FreeMarketOne.Extensions.Common.ServiceHelper;
 using Libplanet.Store;
 using Libplanet.Net.Messages;
 using FreeMarketOne.Tor;
+using Libplanet.Store.Trie;
 
 namespace FreeMarketOne.BlockChain
 {
@@ -50,6 +51,7 @@ namespace FreeMarketOne.BlockChain
         private UserPrivateKey _privateKey { get; set; }
         private BlockChain<T> _blockChain;
         private DefaultStore _storage;
+        private IStateStore _storageState;
         private Swarm<T> _swarmServer;
         private ImmutableList<Peer> _seedPeers;
         private IImmutableSet<Address> _trustedPeers;
@@ -72,6 +74,7 @@ namespace FreeMarketOne.BlockChain
 
         public BlockChain<T> BlockChain { get => _blockChain; }
         public DefaultStore Storage { get => _storage; }
+        public IStateStore StorageState { get => _storageState; }
         public Swarm<T> SwarmServer { get => _swarmServer; }
         public UserPrivateKey PrivateKey { get => _privateKey; }
         private TorProcessManager _torProcessManager;
@@ -121,7 +124,14 @@ namespace FreeMarketOne.BlockChain
             _endPoint = endPoint;
             _torProcessManager = torProcessManager;
             _privateKey = userPrivateKey;
-            _storage = new DefaultStore(Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath));
+
+            var path = Path.Combine(_configuration.FullBaseDirectory, _blockChainFilePath);
+            _storage = new DefaultStore(path);
+
+            IKeyValueStore stateKeyValueStore = new DefaultKeyValueStore(Path.Combine(path, "states")),
+            stateHashKeyValueStore = new DefaultKeyValueStore(Path.Combine(path, "state_hashes"));
+            _storageState = new TrieStateStore(stateKeyValueStore, stateHashKeyValueStore);
+
             _onionSeedManager = seedsManager;
 
             if (genesisBlock == null)
@@ -154,10 +164,14 @@ namespace FreeMarketOne.BlockChain
 
             _blockChain = new BlockChain<T>(
                 _blockChainPolicy,
+                new VolatileStagePolicy<T>(),
                 _storage,
-                _storage,
+                _storageState,
                 _genesisBlock
             );
+
+            //remove obsolete data from storage
+            RemoveObsoleteData();
 
             //event for new block accepted
             if (_blockChainChanged != null)
@@ -406,7 +420,7 @@ namespace FreeMarketOne.BlockChain
 
             try
             {
-                await _swarmServer.PreloadAsync(null,null, null, cancellationToken: _cancellationToken.Token );
+                await _swarmServer.PreloadAsync(null, null, cancellationToken: _cancellationToken.Token);
             }
             catch (AggregateException e)
             {
@@ -434,5 +448,21 @@ namespace FreeMarketOne.BlockChain
             );
         }
 
+        /// <summary>
+        /// Method remove absolete data from storage
+        /// </summary>
+        private void RemoveObsoleteData()
+        {
+            var pendingObsoleteTxs = _storage.IterateStagedTransactionIds().ToImmutableHashSet();
+            _storage.UnstageTransactionIds(pendingObsoleteTxs);
+
+            var chainIds = _storage.ListChainIds().ToList();
+            var obsoletedChainIds = chainIds.Where(chainId => chainId != _blockChain.Id).ToList();
+
+            foreach (Guid chainId in obsoletedChainIds)
+            {
+                _storage.DeleteChainId(chainId);
+            }
+        }
     }
 }

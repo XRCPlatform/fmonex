@@ -2,6 +2,7 @@
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE - extracted enum to it's own class as deleted the Message class which had this enum before
     public enum MessageType : byte
     {
         Unrecognized = 0x00,

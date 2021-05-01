@@ -59,7 +59,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Skynet", "Fre
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Skynet.Test", "FreeMarketOne.Skynet.Test\FreeMarketOne.Skynet.Test.csproj", "{791648BB-8E82-4826-B8B3-08C5C98661B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibPlanet.Extensions.Tests", "LibPlanet.Extensions.Tests\LibPlanet.Extensions.Tests.csproj", "{D67E1448-B769-4D28-BBAB-B067F2E89E03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Extensions.Tests", "LibPlanet.Extensions.Tests\Libplanet.Extensions.Tests.csproj", "{D67E1448-B769-4D28-BBAB-B067F2E89E03}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Search", "FreeMarketOne.Search\FreeMarketOne.Search.csproj", "{995D983D-AE69-45A1-A5B9-91DDFD9558B3}"
 EndProject
@@ -79,12 +79,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatTest", "ChatTest\ChatTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4C25E99-49F7-4D43-9E05-E508C33856FD}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetMQ", "netmq\src\NetMQ\NetMQ.csproj", "{4C447EC6-F001-41E8-A7C2-108F9FC40AB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMarketOne.Configuration", "FreeMarketOne.Configuration\FreeMarketOne.Configuration.csproj", "{130AAD82-D6D9-44D0-AC44-AD0B3CE71514}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeMarketOne.Configuration", "FreeMarketOne.Configuration\FreeMarketOne.Configuration.csproj", "{130AAD82-D6D9-44D0-AC44-AD0B3CE71514}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Extensions.Cocona", "FreeMarketOne.LibPlanet\Libplanet.Extensions.Cocona\Libplanet.Extensions.Cocona.csproj", "{7C8A1801-5E85-4879-BE67-09D88C5C2996}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -366,6 +369,14 @@ Global
 		{130AAD82-D6D9-44D0-AC44-AD0B3CE71514}.Release|Any CPU.Build.0 = Release|Any CPU
 		{130AAD82-D6D9-44D0-AC44-AD0B3CE71514}.Release|x86.ActiveCfg = Release|Any CPU
 		{130AAD82-D6D9-44D0-AC44-AD0B3CE71514}.Release|x86.Build.0 = Release|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Debug|x86.Build.0 = Debug|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Release|x86.ActiveCfg = Release|Any CPU
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -403,6 +414,7 @@ Global
 		{89D1D431-1DBE-46F9-9859-7CDC9FE29903} = {A794BE5D-399B-4C5F-BB57-1F473B76F5C1}
 		{4C447EC6-F001-41E8-A7C2-108F9FC40AB8} = {C59FF8D9-20E4-40D3-8159-F8ECC2255A47}
 		{130AAD82-D6D9-44D0-AC44-AD0B3CE71514} = {F60B456D-30AB-4150-82C2-36D8955887D3}
+		{7C8A1801-5E85-4879-BE67-09D88C5C2996} = {C59FF8D9-20E4-40D3-8159-F8ECC2255A47}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A565C1B9-4F81-4EDB-A137-BB6F31D986E0}

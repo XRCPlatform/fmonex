@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     internal class Neighbors : IBenEncodeable
     {
         private static readonly byte[] FoundKey = { 0x46 };    // 'F'

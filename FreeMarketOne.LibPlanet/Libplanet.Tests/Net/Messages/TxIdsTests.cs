@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Libplanet.Tests.Net.Messages
 {
+	//FMONECHANGE added new test class to verify message serialziation handling
     public class TxIdsTests
     {
         [Fact]

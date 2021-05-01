@@ -22,6 +22,7 @@ namespace Libplanet.Tests.Net.Messages
             );
         }
 
+		//	FMONECHANGE removed netmq based messages and moved to ben serialization
         [Fact]
         public void SerializesAndDesrializeFromBen()
         {

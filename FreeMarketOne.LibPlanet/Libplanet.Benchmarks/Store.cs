@@ -34,7 +34,7 @@ namespace Libplanet.Benchmarks
                 var blockTxs = new List<Transaction<DumbAction>>();
                 for (int j = 0; j < i % 5; j++)
                 {
-                    blockTxs.Add(Transaction<DumbAction>.Create(nonce++, key, genesis.Hash, new DumbAction[0]));
+                    blockTxs.Add(new Transaction<DumbAction>().Create(nonce++, key, genesis.Hash, new DumbAction[0]));
                 }
                 block = TestUtils.MineNext(block, blockTxs);
                 blocks.Add(block);

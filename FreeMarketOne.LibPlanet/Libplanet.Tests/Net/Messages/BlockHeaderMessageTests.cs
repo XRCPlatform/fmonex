@@ -1,4 +1,4 @@
-﻿using Libplanet.Blocks;
+using Libplanet.Blocks;
 using Libplanet.Net.Messages;
 using System;
 using System.Collections.Immutable;
@@ -8,9 +8,9 @@ using Xunit;
 
 namespace Libplanet.Tests.Net.Messages
 {
+    //FMONECHANGE - added missing test
     public class BlockHeaderMessageTests
     {
-
         [Fact]
         public void SerializesAndDesrializeFromBen()
         {
@@ -18,7 +18,9 @@ namespace Libplanet.Tests.Net.Messages
             var buffer = new byte[HashDigest<SHA256>.Size];
             random.NextBytes(buffer);
             var genesis = new HashDigest<SHA256>(buffer);
-            BlockHeader header = new BlockHeader(1L,
+            BlockHeader header = new BlockHeader(
+                1,
+                123,
                 DateTime.UtcNow.ToString(),
                 buffer.ToImmutableArray(),
                 buffer.ToImmutableArray(),

@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Libplanet.Tests.Net.Protocols
 {
+	//	FMONECHANGE commented out as need new TesTransport implementation, broke when moved away from netmq
     public class ProtocolTest
     {
         //private const int Timeout = 60 * 1000;

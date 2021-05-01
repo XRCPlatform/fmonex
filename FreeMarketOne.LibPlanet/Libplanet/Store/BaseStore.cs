@@ -94,7 +94,8 @@ namespace Libplanet.Store
                     transactions: blockDigest.TxIds
                         .Select(bytes => GetTransaction<T>(new TxId(bytes.ToArray()))),
                     preEvaluationHash: preEvaluationHash,
-                    stateRootHash: stateRootHash
+                    stateRootHash: stateRootHash,
+                    protocolVersion: blockDigest.Header.ProtocolVersion
                 );
             }
 
@@ -118,6 +119,15 @@ namespace Libplanet.Store
 
         /// <inheritdoc />
         public abstract bool ContainsBlock(HashDigest<SHA256> blockHash);
+
+        /// <inheritdoc/>
+        public abstract void SetBlockPerceivedTime(
+            HashDigest<SHA256> blockHash,
+            DateTimeOffset perceivedTime
+        );
+
+        /// <inheritdoc/>
+        public abstract DateTimeOffset? GetBlockPerceivedTime(HashDigest<SHA256> blockHash);
 
         /// <inheritdoc/>
         public abstract IEnumerable<KeyValuePair<Address, long>> ListTxNonces(Guid chainId);
@@ -146,5 +156,8 @@ namespace Libplanet.Store
 
         /// <inheritdoc/>
         public abstract void Dispose();
+
+        /// <inheritdoc/>
+        public abstract void ForkTxNonces(Guid sourceChainId, Guid destinationChainId);
     }
 }

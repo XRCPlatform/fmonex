@@ -22,6 +22,7 @@ namespace Libplanet.Store
         private readonly IKeyValueStore _stateKeyValueStore;
         private readonly IKeyValueStore _stateHashKeyValueStore;
         private readonly bool _secure;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Creates a new <see cref="TrieStateStore"/>.
@@ -40,6 +41,7 @@ namespace Libplanet.Store
             _stateKeyValueStore = stateKeyValueStore;
             _stateHashKeyValueStore = stateHashKeyValueStore;
             _secure = secure;
+            _logger = Log.ForContext<TrieStateStore>();
         }
 
         /// <inheritdoc/>
@@ -48,23 +50,8 @@ namespace Libplanet.Store
             IImmutableDictionary<string, IValue> states)
             where T : IAction, new()
         {
-            ITrie prevStatesTrie;
-            var previousBlockStateHashBytes = block.PreviousHash is null
-                ? null
-                : _stateHashKeyValueStore.Get(block.PreviousHash.Value.ToByteArray());
-            var trieRoot = previousBlockStateHashBytes is null
-                ? null
-                : new HashNode(new HashDigest<SHA256>(previousBlockStateHashBytes));
-            prevStatesTrie = new MerkleTrie(_stateKeyValueStore, trieRoot, _secure);
-
-            foreach (var pair in states)
-            {
-                prevStatesTrie = prevStatesTrie.Set(Encoding.UTF8.GetBytes(pair.Key), pair.Value);
-            }
-
-            var newStateTrie = prevStatesTrie.Commit();
             _stateHashKeyValueStore.Set(
-                block.Hash.ToByteArray(), newStateTrie.Hash.ToByteArray());
+                block.Hash.ToByteArray(), EvalState(block, states).ToByteArray());
         }
 
         /// <inheritdoc/>
@@ -101,7 +88,7 @@ namespace Libplanet.Store
         public void PruneStates(ImmutableHashSet<HashDigest<SHA256>> excludeBlockHashes)
         {
             var stopwatch = new Stopwatch();
-            Log.Verbose($"Started {nameof(PruneStates)}()");
+            _logger.Verbose($"Started {nameof(PruneStates)}()");
             var excludeNodes = new HashSet<HashDigest<SHA256>>();
             foreach (var blockHash in excludeBlockHashes)
             {
@@ -115,24 +102,24 @@ namespace Libplanet.Store
                     _stateKeyValueStore,
                     new HashNode(new HashDigest<SHA256>(stateRootHashBytes)),
                     _secure);
-                Log.Debug("Started to iterate hash nodes.");
+                _logger.Debug("Started to iterate hash nodes.");
                 stopwatch.Start();
                 foreach (HashDigest<SHA256> nodeHash in stateTrie.IterateHashNodes())
                 {
                     excludeNodes.Add(nodeHash);
                 }
 
-                Log.Debug(
+                _logger.Debug(
                     "Finished to iterate hash nodes (elapsed: {ElapsedMilliseconds} ms).",
                     stopwatch.ElapsedMilliseconds);
                 stopwatch.Stop();
             }
 
-            Log.Debug("{Count} hash nodes are excluded.", excludeNodes.Count);
+            _logger.Debug("{Count} hash nodes are excluded.", excludeNodes.Count);
 
             // Clean up nodes.
             long deleteCount = 0;
-            Log.Debug("Started to clean up states.");
+            _logger.Debug("Started to clean up states.");
             stopwatch.Restart();
             foreach (var stateKey in _stateKeyValueStore.ListKeys())
             {
@@ -145,7 +132,7 @@ namespace Libplanet.Store
                 ++deleteCount;
             }
 
-            Log.Debug(
+            _logger.Debug(
                 "Finished to clean up {DeleteCount} state hashes " +
                 "(elapsed: {ElapsedMilliseconds} ms).",
                 deleteCount,
@@ -154,7 +141,7 @@ namespace Libplanet.Store
 
             // Clean up state root hashes.
             deleteCount = 0;
-            Log.Debug("Started to clean up state hashes.");
+            _logger.Debug("Started to clean up state hashes.");
             stopwatch.Restart();
             foreach (var stateHashKey in _stateHashKeyValueStore.ListKeys())
             {
@@ -167,7 +154,7 @@ namespace Libplanet.Store
                 ++deleteCount;
             }
 
-            Log.Debug(
+            _logger.Debug(
                 "Finished to clean up {DeleteCount} states (elapsed: {ElapsedMilliseconds} ms).",
                 deleteCount,
                 stopwatch.ElapsedMilliseconds);
@@ -191,6 +178,30 @@ namespace Libplanet.Store
         public HashDigest<SHA256> GetRootHash(HashDigest<SHA256> blockHash)
             => new HashDigest<SHA256>(_stateHashKeyValueStore.Get(blockHash.ToByteArray()));
 
+        internal HashDigest<SHA256> EvalState<T>(
+            Block<T> block,
+            IImmutableDictionary<string, IValue> states,
+            bool rehearsal = false)
+            where T : IAction, new()
+        {
+            ITrie prevStatesTrie;
+            var previousBlockStateHashBytes = block.PreviousHash is null
+                ? null
+                : _stateHashKeyValueStore.Get(block.PreviousHash.Value.ToByteArray());
+            var trieRoot = previousBlockStateHashBytes is null
+                ? null
+                : new HashNode(new HashDigest<SHA256>(previousBlockStateHashBytes));
+            prevStatesTrie = new MerkleTrie(_stateKeyValueStore, trieRoot, _secure);
+
+            foreach (var pair in states)
+            {
+                prevStatesTrie = prevStatesTrie.Set(Encoding.UTF8.GetBytes(pair.Key), pair.Value);
+            }
+
+            var newStateTrie = prevStatesTrie.Commit(rehearsal);
+            return newStateTrie.Hash;
+        }
+
         internal ITrie GetTrie(HashDigest<SHA256> blockHash)
             =>
                 new MerkleTrie(
@@ -198,5 +209,14 @@ namespace Libplanet.Store
                     new HashNode(
                         new HashDigest<SHA256>(
                             _stateHashKeyValueStore.Get(blockHash.ToByteArray()))));
+
+        internal void SetStates<T>(
+            Block<T> block,
+            HashDigest<SHA256> stateRootHash)
+            where T : IAction, new()
+        {
+            _stateHashKeyValueStore.Set(
+                block.Hash.ToByteArray(), stateRootHash.ToByteArray());
+        }
     }
 }

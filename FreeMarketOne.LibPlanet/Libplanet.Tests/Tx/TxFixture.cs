@@ -59,7 +59,7 @@ namespace Libplanet.Tests.Tx
             var recipient = new Address(PrivateKey1.PublicKey);
             var timestamp = new DateTimeOffset(2018, 11, 21, 0, 0, 0, TimeSpan.Zero);
 
-            Tx = Transaction<PolymorphicAction<BaseAction>>.Create(
+            Tx = new Transaction<PolymorphicAction<BaseAction>>().Create(
                 0,
                 PrivateKey1,
                 genesisHash,
@@ -79,7 +79,7 @@ namespace Libplanet.Tests.Tx
                     ZoneId = 10,
                 },
             };
-            TxWithActions = Transaction<PolymorphicAction<BaseAction>>.Create(
+            TxWithActions = new Transaction<PolymorphicAction<BaseAction>>().Create(
                 0,
                 PrivateKey1,
                 genesisHash,

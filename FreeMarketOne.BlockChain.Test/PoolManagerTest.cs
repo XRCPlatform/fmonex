@@ -39,7 +39,6 @@ namespace FreeMarketOne.BlockChain.Test
                 _basePoolManager = new BasePoolManager(
                     _configuration,
                     _configuration.MemoryBasePoolPath,
-                    _baseBlockChainManager.Storage,
                     _baseBlockChainManager.SwarmServer,
                     _baseBlockChainManager.PrivateKey,
                     _baseBlockChainManager.BlockChain,
@@ -80,6 +79,8 @@ namespace FreeMarketOne.BlockChain.Test
             var testActionItem2 = new UserDataV1();
             testActionItem2.UserName = "LoginName";
             testActionItem2.Description = "This is a test message";
+            var bytesToSign = testActionItem2.ToByteArrayForSign();
+            testActionItem2.Signature = Convert.ToBase64String(_userPrivateKey.Sign(bytesToSign));
             testActionItem2.Hash = testActionItem2.GenerateHash();
 
             Assert.IsNotNull(_basePoolManager.CheckActionItemInProcessing(testActionItem1));
@@ -162,6 +163,8 @@ namespace FreeMarketOne.BlockChain.Test
                 var testActionItem2 = new UserDataV1();
                 testActionItem2.Description = "This is description.";
                 testActionItem2.UserName = "LoginName";
+                var bytesToSign = testActionItem2.ToByteArrayForSign();
+                testActionItem2.Signature = Convert.ToBase64String(_userPrivateKey.Sign(bytesToSign));
                 testActionItem2.Hash = testActionItem2.GenerateHash();
 
                 Assert.IsNull(_basePoolManager.AcceptActionItem(testActionItem1));
@@ -173,6 +176,7 @@ namespace FreeMarketOne.BlockChain.Test
             //now wait until we havent a new block
             SpinWait.SpinUntil((() => _newBlock == true));
             Assert.IsTrue(_newBlock);
+            var acCount = _basePoolManager.GetAllActionItemLocalCount();
             _newBlock = false;
 
             SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
@@ -181,6 +185,7 @@ namespace FreeMarketOne.BlockChain.Test
             //now wait until we havent a new block
             SpinWait.SpinUntil((() => _newBlock == true));
             Assert.IsTrue(_newBlock);
+            acCount = _basePoolManager.GetAllActionItemLocalCount();
             _newBlock = false;
 
             SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
@@ -189,6 +194,7 @@ namespace FreeMarketOne.BlockChain.Test
             //now wait until we havent a new block
             SpinWait.SpinUntil((() => _newBlock == true));
             Assert.IsTrue(_newBlock);
+            acCount = _basePoolManager.GetAllActionItemLocalCount();
             _newBlock = false;
 
             SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
@@ -197,6 +203,7 @@ namespace FreeMarketOne.BlockChain.Test
             //now wait until we havent a new block
             SpinWait.SpinUntil((() => _newBlock == true));
             Assert.IsTrue(_newBlock);
+            acCount = _basePoolManager.GetAllActionItemLocalCount();
             _newBlock = false;
 
             SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemStagedCount() == 1);
@@ -205,6 +212,7 @@ namespace FreeMarketOne.BlockChain.Test
             //now wait until we havent a new block
             SpinWait.SpinUntil((() => _newBlock == true));
             Assert.IsTrue(_newBlock);
+            acCount = _basePoolManager.GetAllActionItemLocalCount();
             _newBlock = false;
 
             SpinWait.SpinUntil(() => _basePoolManager.GetAllActionItemLocalCount() == 0);

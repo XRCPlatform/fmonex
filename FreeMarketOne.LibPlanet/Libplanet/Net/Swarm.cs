@@ -1551,22 +1551,23 @@ namespace Libplanet.Net
         //FMONECHANGE - changed Address to BoundPeer as peer is more useful
         private void BroadcastTxIds(BoundPeer except, IEnumerable<TxId> txIds)
         {
-            IEnumerable<Transaction<T>> txs = txIds
-               .Where(txId => _store.ContainsTransaction(txId))
-               .Select(BlockChain.GetTransaction);
             //FMONECHANGE - broadcasting full transaction instead of just TxId btter suited for TOR network
-            foreach (Transaction<T> tx in txs)
+            foreach (var txId in txIds)
             {
-                //only broadcast if it was not before
-                if (!broadcastedTransactions.Contains(tx.Id))
+                Transaction<T> tx = BlockChain.GetTransaction(txId);
+                if (tx != null)
                 {
-                    _logger.Debug($"Broadcasting TxBroadcast {tx.Id} message.");
-                    Messages.Tx message = new Messages.Tx(tx.Serialize(true), false);
-                    //FMONECHANGE - mapping to TorSocks5Transport messages with generics
-                    BroadcastMessage<Messages.Tx>(except, message);
-                    //FMONECHANGE - adding broadcasted transaction to brodcasted filter
-                    broadcastedTransactions.Add(tx.Id);
-                }
+                    //only broadcast if it was not before
+                    if (!broadcastedTransactions.Contains(tx.Id))
+                    {
+                        _logger.Debug($"Broadcasting TxBroadcast {tx.Id} message.");
+                        Messages.Tx message = new Messages.Tx(tx.Serialize(true), false);
+                        //FMONECHANGE - mapping to TorSocks5Transport messages with generics
+                        BroadcastMessage<Messages.Tx>(except, message);
+                        //FMONECHANGE - adding broadcasted transaction to brodcasted filter
+                        broadcastedTransactions.Add(tx.Id);
+                    }
+                }                
             }
         }
 

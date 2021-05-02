@@ -33,7 +33,13 @@ namespace Libplanet.Net
                     break;
                 case MessageType.FindNeighbors:
 
-                    // it's handled in KademliaProtocol ReceiveMessage() event handler
+                    var findNeighbours = message.Envelope.GetBody<FindNeighbors>();
+                    IEnumerable<BoundPeer> found =
+                    RoutingTable.Neighbors(findNeighbours.Target, RoutingTable.BucketSize, true);
+
+                    Neighbors neighbors = new Neighbors(found);
+                    Transport.ReplyMessage(message.Request, client, neighbors);
+                    //maybe we need to add to routing table this peer ? with PeerDiscovery.Update which is private now. PeerDiscovery.AddPeerAsync ? 
                     break;
 
                 case MessageType.GetChainStatus:

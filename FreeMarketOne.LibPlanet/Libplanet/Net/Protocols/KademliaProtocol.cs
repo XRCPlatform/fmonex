@@ -837,14 +837,15 @@ namespace Libplanet.Net.Protocols
         // FIXME: this method is not safe from amplification attack
         // maybe ping/pong/ping/pong is required
         // FMONECHANGE - TOR transport changed message type, so that transport can send the response to this request we need client and request args
-        private void ReceiveFindPeer(ReceivedRequestEventArgs args)
-        {
-            IEnumerable<BoundPeer> found =
-                _table.Neighbors(args.Peer, _table.BucketSize, true);
+        // FMONECHANGE - Moved to Swarm.MessageHandler class
+        //private void ReceiveFindPeer(ReceivedRequestEventArgs args)
+        //{
+        //    IEnumerable<BoundPeer> found =
+        //        _table.Neighbors(args.Peer, _table.BucketSize, true);
 
-            Neighbors neighbors = new Neighbors(found);
-            // FMONECHANGE - identity is no longer needed as it's netmq concept
-            _transport.ReplyMessage(args.Request, args.Client, neighbors);
-        }
+        //    Neighbors neighbors = new Neighbors(found);
+        //    // FMONECHANGE - identity is no longer needed as it's netmq concept
+        //    _transport.ReplyMessage(args.Request, args.Client, neighbors);
+        //}
     }
 }

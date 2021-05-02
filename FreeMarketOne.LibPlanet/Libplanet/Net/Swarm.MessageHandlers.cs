@@ -33,8 +33,9 @@ namespace Libplanet.Net
                     break;
                 case MessageType.FindNeighbors:
 
+                    var findNeighbours = message.Envelope.GetBody<FindNeighbors>();
                     IEnumerable<BoundPeer> found =
-                    RoutingTable.Neighbors(message.Peer, RoutingTable.BucketSize, true);
+                    RoutingTable.Neighbors(findNeighbours.Target, RoutingTable.BucketSize, true);
 
                     Neighbors neighbors = new Neighbors(found);
                     Transport.ReplyMessage(message.Request, client, neighbors);

@@ -886,33 +886,15 @@ namespace Libplanet.Blockchain
                     transactionsToMine.Add(tx);
                     estimatedBytes += tx.BytesLength;
                 }
-                else if (tx.Nonce < storedNonces[tx.Signer])
+                else 
                 {
-                    _logger.Debug(
-                        "Tx {Index}/{Total} {Transaction} has a lower nonce than expected: " +
-                        "{Nonce} ({Signer})." +
-                        "it will be discarded.",
-                        i,
-                        stagedTransactions.Length,
-                        tx.Id,
-                        tx.Nonce,
-                        tx.Signer
-                    );
+                    _logger.Debug($"Tx {i}/{stagedTransactions.Length} {tx.Id} has {tx.Nonce} which is different than expected [storeNonce]:  ({tx.Signer}). " +
+                        $"it will be discarded, all other transactions by the same signer will also be invalidated.");                       
+                    // Once someone's tx is excluded from a block, their later txs are also all
+                    // excluded in the block, because later nonces become invalid.
+                    skippedSigners.Add(tx.Signer);
                     UnstageTransaction(tx);
-                }
-                else
-                {
-                    _logger.Debug(
-                        "Tx {Index}/{Total} {Transaction} has a higher nonce than expected: " +
-                        "{Nonce} ({Signer}).  " +
-                        "It will be included by a block mined later.",
-                        i,
-                        stagedTransactions.Length,
-                        tx.Id,
-                        tx.Nonce,
-                        tx.Signer
-                    );
-                }
+                }                
 
                 if (timeout < DateTimeOffset.UtcNow)
                 {

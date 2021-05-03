@@ -1,4 +1,5 @@
 .footer {
+  z-index: 9999999;
   bottom: 0;
   color: #e8eef1;
   display: flex;

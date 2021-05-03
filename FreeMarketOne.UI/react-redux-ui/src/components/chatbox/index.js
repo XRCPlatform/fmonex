@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
-import moment from "moment";
+// Actions
+import { removeExcess } from "Modules/units/Messages";
 
 // Components
 import Chatbox from "./components/Chatbox";
@@ -9,6 +10,8 @@ import Chatbox from "./components/Chatbox";
 import "./Chatbox.css";
 
 const Chat = () => {
+  const dispatch = useDispatch();
+
   // Redux
   const conversations = useSelector(state => state.messages?.conversations);
 
@@ -17,6 +20,11 @@ const Chat = () => {
 
   useEffect(() => {
     setConv(conversations);
+    if (conversations.length > 3) {
+      dispatch(removeExcess());
+    } else {
+      setConv(conversations);
+    }
   }, [conversations]);
 
   return (

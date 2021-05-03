@@ -33,9 +33,10 @@ const MsgDropdown = ({ open, handleOpen, messages }) => {
 
   return (
     <div className={open ? "dropdown open" : "dropdown"} ref={selectRef}>
-      <span className="user-notifications" onClick={handleOpen}>
+      <span className="user-notifications icon" onClick={handleOpen}>
         <i className="ion-android-chat" />
-      </span>{" "}
+        {!open && <div className="tooltipp tooltip-bott">Conversations</div>}
+      </span>
       <div className="dropdown-content">
         <div className="dropdown-menu-header">
           <span>Conversations</span>

@@ -22,6 +22,7 @@
   background-color: #242a31;
   padding: 0 10px;
   min-width: 350px;
+
   /*    border-radius: 4px 0px 0px 4px; */
 }
 .search-box button {
@@ -38,14 +39,11 @@
 }
 .search-box button:hover {
   color: #e8eef1;
-
 }
 
 .search-box button:active {
   color: #ffd700;
 }
-
-
 
 .search-btn {
   cursor: pointer;
@@ -58,18 +56,19 @@
 .search-content {
   background: #0e1013;
   top: 34px;
-  right: 178px;
+  /* right: 178px; */
+  left: 50%;
+  margin-left: -212.5px;
   height: 0px;
   transition: 0.3s;
   overflow: hidden;
-  position: absolute;
+  position: fixed;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 }
 .search-content.active {
   height: 45px;
   border-top: 1px solid #0ebeff;
 }
-
 
 /* Select list -------> */
 .select {
@@ -235,7 +234,6 @@
 .dropdown-menu-header {
   padding: 8px 10px 6px 10px;
   font-size: 10px;
-
   border-bottom: 1px solid #4b535a;
   color: #e1e4e4;
   text-transform: uppercase;

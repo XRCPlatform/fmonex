@@ -1,5 +1,5 @@
 .header {
-  z-index: 1;
+  z-index: 9999999;
   top: 0;
   color: #e8eef1;
   display: flex;

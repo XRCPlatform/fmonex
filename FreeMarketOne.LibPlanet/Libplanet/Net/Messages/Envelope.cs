@@ -1,4 +1,4 @@
-﻿using FreeMarketOne.Extensions.Helpers;
+using FreeMarketOne.Extensions.Helpers;
 using Libplanet.Crypto;
 using Newtonsoft.Json;
 using System;
@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 
 namespace Libplanet.Net.Messages
 {
+    // FMONECHANGE -  added message wrapper for TOR transport.
     public class Envelope
     {
         private static readonly Dictionary<MessageType, Type> types = new Dictionary<MessageType, Type>
@@ -37,17 +38,17 @@ namespace Libplanet.Net.Messages
             { MessageType.BlockStates, typeof(BlockStates) },
             { MessageType.DifferentVersion, typeof(DifferentVersion) },
             { MessageType.BlockBroadcast, typeof(Blocks) },
-            { MessageType.TxBroadcast, typeof(TxBroadcast) },
+            { MessageType.TxBroadcast, typeof(Tx) },
         };
-        public Envelope(){}
+        public Envelope() { }
 
         public Envelope(BoundPeer fromPeer, AppProtocolVersion version)
         {
             FromPeer = fromPeer;
             PublicKey = Convert.ToBase64String(fromPeer.PublicKey.Format(false));
-            Version = version;            
+            Version = version;
         }
-        
+
         public void Initialize<T>(PrivateKey key, T body)
         {
             MessageType = MapTo(body);
@@ -56,22 +57,24 @@ namespace Libplanet.Net.Messages
                 byte[] bytes = serializable.SerializeToBen();
                 Body = Convert.ToBase64String(bytes.ToArray());
                 Signature = Convert.ToBase64String(key.Sign(bytes.ToArray()));
-            }            
+            }
         }
 
         /// <summary>
         /// Returns a message body that was earlier initialized.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <returns>Message from body</returns>
         public T GetBody<T>()
         {
-            if (Body == null) {
+            if (Body == null)
+            {
                 throw new Exception("Body is only available on Initialized message.");
             }
-            var retval = Activator.CreateInstance(GetMessageType(), new[] 
-            { 
-                Convert.FromBase64String(Body) 
+
+            var retval = Activator.CreateInstance(GetMessageType(), new[]
+            {
+                Convert.FromBase64String(Body)
             });
             return (T)retval;
         }
@@ -162,6 +165,5 @@ namespace Libplanet.Net.Messages
 
             return differentAppProtocolVersionEncountered(remotePeer, remoteVersion, localVersion);
         }
-
     }
 }

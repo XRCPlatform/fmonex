@@ -5,7 +5,11 @@ using Libplanet.Net.Messages;
 
 namespace Libplanet.Net
 {
-
+    /// <summary>
+    /// The exception that is thrown when the version of the
+    /// that <see cref="Swarm{T}" /> received
+    /// is different.
+    /// </summary>
     [Serializable]
     internal sealed class DifferentAppProtocolVersionException : Exception
     {

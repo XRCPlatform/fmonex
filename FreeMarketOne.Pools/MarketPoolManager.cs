@@ -16,12 +16,11 @@ namespace FreeMarketOne.Pools
         public MarketPoolManager(
             IBaseConfiguration configuration,
             string memoryPoolFilePath,
-            DefaultStore storage,
             Swarm<MarketAction> swarmServer,
             PrivateKey privateKey,
             BlockChain<MarketAction> blockChain,
             IDefaultBlockPolicy<MarketAction> blockPolicy)
-            : base(configuration, memoryPoolFilePath, storage, swarmServer, privateKey, blockChain, blockPolicy)
+            : base(configuration, memoryPoolFilePath, swarmServer, privateKey, blockChain, blockPolicy)
         {
         }
     }

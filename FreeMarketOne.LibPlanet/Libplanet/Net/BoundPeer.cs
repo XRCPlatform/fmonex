@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
+//FMONECHANGE added binary serialzation required for TorSocks5Transport
 using System.Runtime.Serialization.Formatters.Binary;
 using Libplanet.Crypto;
 
@@ -71,14 +72,14 @@ namespace Libplanet.Net
         {
             return $"{Address}.{EndPoint}.{PublicIPAddress}";
         }
-
+		//FMONECHANGE added binary serialzation required for TorSocks5Transport
         public static BoundPeer DeserializePeer(byte[] bytes)
         {
             var formatter = new BinaryFormatter();
             using MemoryStream stream = new MemoryStream(bytes);
             return (BoundPeer)formatter.Deserialize(stream);
         }
-
+		//FMONECHANGE added binary serialzation required for TorSocks5Transport
         public static byte[] SerializePeer(BoundPeer peer)
         {
             var formatter = new BinaryFormatter();

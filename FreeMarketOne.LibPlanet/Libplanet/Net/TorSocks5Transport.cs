@@ -1,4 +1,4 @@
-﻿using FreeMarketOne.Tor;
+using FreeMarketOne.Tor;
 using FreeMarketOne.Tor.Exceptions;
 using FreeMarketOne.Tor.Models.Fields.OctetFields;
 using FreeMarketOne.Tor.TorOverTcp.Models.Fields;
@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 
 namespace Libplanet.Net
 {
+    //FMONECHANGE created new transport
     internal class TorSocks5Transport : ITransport
     {
         private readonly PrivateKey _privateKey;
@@ -47,7 +48,8 @@ namespace Libplanet.Net
         private TorProcessManager _torProcessManager;
         private static AsyncLock _circuitLoadingMutex;
         private static AsyncLock _torControlChangeCirquitMutex;
-
+	private RoutingTable _routingTable;
+	
         static TorSocks5Transport()
         {
             try
@@ -67,8 +69,7 @@ namespace Libplanet.Net
             PrivateKey privateKey,
             AppProtocolVersion appProtocolVersion,
             IImmutableSet<PublicKey> trustedAppProtocolVersionSigners,
-            int? tableSize,
-            int? bucketSize,
+            RoutingTable routingTable,
             string host,
             int? listenPort,
             DifferentAppProtocolVersionEncountered differentAppProtocolVersionEncountered,
@@ -87,6 +88,7 @@ namespace Libplanet.Net
             _listenPort = listenPort;
             _differentAppProtocolVersionEncountered = differentAppProtocolVersionEncountered;
             _torSocs5Manager = torSocs5Manager;
+            _routingTable = routingTable;
             ProcessMessageHandler = processMessageHandler;
 
             if (_host != null && _listenPort is int listenPortAsInt)
@@ -101,14 +103,9 @@ namespace Libplanet.Net
             _clientPool = new TorClientPool(_logger, torSocs5Manager);
 
             Protocol = new KademliaProtocol(
+                _routingTable,
                 this,
                 _privateKey.ToAddress(),
-                _appProtocolVersion,
-                _trustedAppProtocolVersionSigners,
-                _differentAppProtocolVersionEncountered,
-                _logger,
-                tableSize,
-                bucketSize,
                 findConcurrency,
                 null,
                 _clientPool,
@@ -116,14 +113,12 @@ namespace Libplanet.Net
 
             PeerStateChangeEvent = peerStateChangeHandler;
             _torProcessManager = torProcessManager;          
-              
+
         }
 
         internal IProtocol Protocol { get; }
 
         public BoundPeer AsPeer => new BoundPeer(_privateKey.PublicKey, _endPoint);
-
-        public IEnumerable<BoundPeer> Peers => Protocol.Peers;
 
         public DateTimeOffset? LastMessageTimestamp { get; private set; }
 
@@ -155,7 +150,7 @@ namespace Libplanet.Net
             _cancellationToken = cancellationToken;
             List<Task> tasks = new List<Task>();
                         
-            tasks.Add(RefreshTableAsync(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(10), _cancellationToken));            
+            tasks.Add(RefreshTableAsync(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(10), _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
             tasks.Add(VerifyTorCirquit(TimeSpan.FromMinutes(1), _cancellationToken));
             await await Task.WhenAny(tasks);
@@ -172,8 +167,8 @@ namespace Libplanet.Net
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _listenPort.Value);
 
             _server = new TotServer(endPoint);
-            _logger.Information($"Listening on {_listenPort}");           
-            
+            _logger.Information($"Listening on {_listenPort}");
+
             try
             {
                 if (!_torControlClient.Running)
@@ -291,10 +286,11 @@ namespace Libplanet.Net
         {
             try
             {
-                if (except == null) {
+                if (except == null)
+                {
                     except = AsPeer;
                 }
-                List<BoundPeer> peers = Protocol.PeersToBroadcast(except.Address).ToList();
+                List<BoundPeer> peers = _routingTable.PeersToBroadcast(except.Address).ToList();
                 _logger.Debug("Broadcasting message: {Message} as {AsPeer}", message, AsPeer);
                 _logger.Debug("Peers to broadcast: {PeersCount}", peers.Count);
 
@@ -316,6 +312,7 @@ namespace Libplanet.Net
                 throw;
             }
         }
+
         public void RequestArrived(object sender, TotRequest request)
         {
             byte[] content = request.Content.Content;
@@ -335,7 +332,7 @@ namespace Libplanet.Net
                         MessageType = envelope.MessageType,
                         Envelope = envelope
                     };
-                    Protocol.ReceiveMessage(notification);
+                    _routingTable.AddPeer(envelope.FromPeer);
                     //response must be delegated to swarm as transport is dull
                     ProcessMessageHandler?.Invoke(this, notification);
 
@@ -385,7 +382,7 @@ namespace Libplanet.Net
                     MessageId = TotMessageId.Random,
                     MessageType = TotMessageType.Request
                 };
-               
+
                 var response = await client.RequestAsync(request, (int)timeout.TotalMilliseconds);
 
                 PeerStateChangeEventArgs args = new PeerStateChangeEventArgs
@@ -419,7 +416,7 @@ namespace Libplanet.Net
                 {
                     _logger.Debug($"Failure starting Tor {e}.");
                 }
-                
+
                 throw cex;
             }
             catch (TorSocks5FailureResponseException socks5Error)
@@ -441,7 +438,7 @@ namespace Libplanet.Net
                     {
                         //swallow;
                     }
-                   
+
                 }
                 else
                 {
@@ -484,7 +481,7 @@ namespace Libplanet.Net
 
         public void ReplyMessage<TResponse>(TotRequest request, TotClient client, TResponse responseMessage)
         {
-            Envelope responseEnvelope = new Envelope(AsPeer,_appProtocolVersion);
+            Envelope responseEnvelope = new Envelope(AsPeer, _appProtocolVersion);
             responseEnvelope.Initialize<TResponse>(_privateKey, responseMessage);
             TotContent response = new TotContent(PackEnvelope(responseEnvelope));
             Stopwatch sw = new Stopwatch();
@@ -535,7 +532,7 @@ namespace Libplanet.Net
                 try
                 {
                     await Task.Delay(period, cancellationToken);
-                    await Protocol.RebuildConnectionAsync(cancellationToken);
+                    await Protocol.RebuildConnectionAsync(2, cancellationToken);
                 }
                 catch (OperationCanceledException e)
                 {
@@ -634,14 +631,13 @@ namespace Libplanet.Net
                 cancellationToken);
         }
 
-        public string Trace() => Protocol is null ? string.Empty : Protocol.Trace();
-    
+        //public string Trace() => Protocol is null ? string.Empty : Protocol.Trace();
 
-        public async Task CheckAllPeersAsync(CancellationToken cancellationToken, TimeSpan? timeout)
-        {
-            var kp = (KademliaProtocol)Protocol;
-            await kp.CheckAllPeersAsync(cancellationToken, timeout);
-        }
+        //public async Task CheckAllPeersAsync(CancellationToken cancellationToken, TimeSpan? timeout)
+        //{
+        //    var kp = (KademliaProtocol)Protocol;
+        //    await kp.CheckAllPeersAsync(cancellationToken, timeout);
+        //}
 
         public void Dispose()
         {
@@ -657,7 +653,7 @@ namespace Libplanet.Net
 
         public Envelope UnPackEnvelope(byte[] bytes)
         {
-            string json = Unzip(bytes);            
+            string json = Unzip(bytes);
             var e = JsonConvert.DeserializeObject<Envelope>(json);
             //if (e.MessageType != MessageType.Ping && e.MessageType != MessageType.Pong) {
             //    _logger.Debug($"JSON received:{json}");

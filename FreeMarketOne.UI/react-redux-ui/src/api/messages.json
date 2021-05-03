@@ -1,0 +1,219 @@
+{
+    "data": [
+        {
+            "id": "e4ae0f5b-1008-448e-9ecf-931603f6c677",
+            "user": "Rick",
+            "status": 0,
+            "lastOnline": "15:27",
+            "messages": [
+                {
+                    "id": "523435d6rety25f898df4e80e2a125e",
+                    "text": "Idactivos has changed the game for hybrid app development.",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":false,
+                    "date": "2014-04-27T20:02:39.082Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:37.944Z"
+                },
+                {
+                    "id": "5454781ca4ab446t3d1d4113abff1",
+                    "text": "I like Ionic better than ice cream!",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":true,
+                    "date": "2014-04-29T02:52:47.706Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:37.944Z"
+                },
+                {
+                    "id": "5335635d625f45ygdfh898df4e80e2a125e",
+                    "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":false,
+                    "date": "2014-11-17T20:19:15.289Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.328Z"
+                },
+                {
+                    "id": "54574781ca4ab445abh3d1d4113abff1",
+                    "text": "Am I dreaming?",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":true,
+                    "date": "2014-11-26T21:18:17.591Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.337Z"
+                },
+                {
+                    "id": "532535d625f8d4ys98df4e80e2a125e",
+                    "text": "Is this magic?",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":true,
+                    "date": "2014-11-26T21:18:38.549Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.338Z"
+                },
+                {
+                    "id": "5456747815dbab43d1d41kgvs13abfef",
+                    "text": "Gee wiz, this is something special.",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":false,
+                    "date": "2014-11-28T06:27:40.001Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.338Z"
+                },
+                {
+                    "id": "5324535d625f898df4e80eas542a125e",
+                    "text": "I think I like Ionic more than I like ice cream!",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":true,
+                    "date": "2014-11-28T06:55:37.350Z",
+                    "read": true,
+                    "readDate": "2015-12-01T06:27:38.338Z"
+                },
+                {
+                    "id": "565835d625f898df4e8s44ts0e2a125e",
+                    "text": "Yea, it's pretty sweet",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":false,
+                    "date": "2014-11-28T06:56:36.472Z",
+                    "read": true,
+                    "readDate": "2015-10-01T06:27:38.338Z"
+                },
+                {
+                    "id": "576894781ca4ab43d1d4a34a113abff1",
+                    "text": "Wow, this is really something huh?",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":true,
+                    "date": "2014-11-28T20:48:06.572Z",
+                    "read": true,
+                    "readDate": "2015-10-01T06:27:38.339Z"
+                },
+                {
+                    "id": "51q35d625f898df4e80nhxz44ae2a125e",
+                    "text": "Create amazing apps - idactivos.com",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":false,
+                    "date": "2015-10-29T06:56:36.472Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.338Z"
+                }
+            ],
+            "unread": 0
+        },
+        {
+            "id": "67e731b1-ba1c-49d1-b02f-435e7fc32726",
+            "user": "Jenny silver queen",
+            "status": 1,
+            "lastOnline": "13:42",
+            "messages": []
+        },
+        {
+            "id": "38d123ce-56a9-4902-aea8-2617253c259b",
+            "user": "Gold Nugget",
+            "status": 1,
+            "lastOnline": "2/26/21",
+            "messages":[]
+        },
+        {
+            "id": "17157bbc-63d7-4a88-ae95-0cf90cfef381",
+            "user": "Funny crypto dude",
+            "status": 1,
+            "lastOnline": "4/1/21",
+            "messages": [
+                {
+                    "id": "523435d6rety25f898df4e80e2a125e",
+                    "text": "@u0421793 what are you looking for exactly? do you have an Ellie where you've tried  doing some stuff?",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":false,
+                    "date": "2014-04-27T20:02:39.082Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:37.944Z"
+                },
+                {
+                    "id": "5454781ca4ab446t3d1d4113abff1",
+                    "text": "I’ve been trying to make a few links on a page in elm and elm-ui but I’ve not found a way to make it work because I haven’t found any examples of elm-ui which incorporate an anchor element",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":true,
+                    "date": "2014-04-29T02:52:47.706Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:37.944Z"
+                },
+                {
+                    "id": "5335635d625f45ygdfh898df4e80e2a125e",
+                    "text": "Anybody replied to @lango https://elmlang.slack.com/archives/C4F9NBLR1/p1541911789377400 About Animation vs Element ?",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":false,
+                    "date": "2014-11-17T20:19:15.289Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.328Z"
+                },
+                {
+                    "id": "54574781ca4ab445abh3d1d4113abff1",
+                    "text": "You can use them together, for sure :smile: You just need to use `Element.htmlAttribute` to render the style attribute.",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":true,
+                    "date": "2014-11-26T21:18:17.591Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.337Z"
+                },
+                {
+                    "id": "532535d625f8d4ys98df4e80e2a125e",
+                    "text": "so ideally, it'd be nice to get the r,g,b,a components from a `Color` so that I could do the string interp (edited)",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":true,
+                    "date": "2014-11-26T21:18:38.549Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.338Z"
+                },
+                {
+                    "id": "5456747815dbab43d1d41kgvs13abfef",
+                    "text": "@Funny crypto dude But that isn't really them 'working together' is it, its more they just happen to be together? For example, `elm-ui` has `background.gradient` but `elm-style-animation` only has `backgroundColor`. It's not clear to me how I could animation `elm-ui`'s `background.gradient` using `elm-animation`?",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":false,
+                    "date": "2014-11-28T06:27:40.001Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.338Z"
+                },
+                {
+                    "id": "5324535d625f898df4e80eas542a125e",
+                    "text": "I think I like Ionic more than I like ice cream!",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":true,
+                    "date": "2014-11-28T06:55:37.350Z",
+                    "read": true,
+                    "readDate": "2015-12-01T06:27:38.338Z"
+                },
+                {
+                    "id": "565835d625f898df4e8s44ts0e2a125e",
+                    "text": "What's the most recent version of elm-ui/stylish-elephants that works on 0.18?",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":false,
+                    "date": "2014-11-28T06:56:36.472Z",
+                    "read": true,
+                    "readDate": "2015-10-01T06:27:38.338Z"
+                },
+                {
+                    "id": "576894781ca4ab43d1d4a34a113abff1",
+                    "text": "Wow, this is really something huh?",
+                    "userId": "534b8fb2aa5e7afc1b23e69c",
+                    "messageSource":true,
+                    "date": "2014-11-28T20:48:06.572Z",
+                    "read": true,
+                    "readDate": "2015-10-01T06:27:38.339Z"
+                },
+                {
+                    "id": "51q35d625f898df4e80nhxz44ae2a125e",
+                    "text": "Ha, I filed an issue about this back in oct.  Used my own workaround!",
+                    "userId": "534b8e5aaa5e7afc1b23e69b",
+                    "messageSource":false,
+                    "date": "2015-10-29T06:56:36.472Z",
+                    "read": true,
+                    "readDate": "2014-12-01T06:27:38.338Z"
+                }
+            ],
+            "unread": 0
+        }
+    ],
+    "status": {
+        "errorCode": 200
+    }
+}

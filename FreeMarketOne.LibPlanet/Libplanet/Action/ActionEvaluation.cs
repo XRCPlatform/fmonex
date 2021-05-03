@@ -88,6 +88,8 @@ namespace Libplanet.Action
         /// The default value is <c>false</c>.</param>
         /// <param name="previousBlockStatesTrie">The trie to contain states at previous block.
         /// </param>
+        /// <param name="blockAction">Pass <c>true</c> if it is
+        /// <see cref="IBlockPolicy{T}.BlockAction"/>.</param>
         /// <returns>Enumerates <see cref="ActionEvaluation"/>s for each one in
         /// <paramref name="actions"/>.  The order is the same to the <paramref name="actions"/>.
         /// Note that each <see cref="IActionContext.Random"/> object
@@ -103,7 +105,8 @@ namespace Libplanet.Action
             byte[] signature,
             IImmutableList<IAction> actions,
             bool rehearsal = false,
-            ITrie previousBlockStatesTrie = null)
+            ITrie previousBlockStatesTrie = null,
+            bool blockAction = false)
         {
             ActionContext CreateActionContext(
                 IAccountStateDelta prevStates,
@@ -116,7 +119,8 @@ namespace Libplanet.Action
                     previousStates: prevStates,
                     randomSeed: randomSeed,
                     rehearsal: rehearsal,
-                    previousBlockStatesTrie: previousBlockStatesTrie
+                    previousBlockStatesTrie: previousBlockStatesTrie,
+                    blockAction: blockAction
                 );
 
             byte[] hashedSignature;
@@ -131,6 +135,7 @@ namespace Libplanet.Action
 
             IAccountStateDelta states = previousStates;
             Exception exc = null;
+            ILogger logger = Log.ForContext<ActionEvaluation>();
             foreach (IAction action in actions)
             {
                 ActionContext context = CreateActionContext(states, seed);
@@ -140,8 +145,7 @@ namespace Libplanet.Action
                     DateTimeOffset actionExecutionStarted = DateTimeOffset.Now;
                     nextStates = action.Execute(context);
                     TimeSpan spent = DateTimeOffset.Now - actionExecutionStarted;
-
-                    Log.Verbose($"{action} execution spent {spent.TotalMilliseconds} ms.");
+                    logger.Verbose($"{action} execution spent {spent.TotalMilliseconds} ms.");
                 }
                 catch (Exception e)
                 {
@@ -167,6 +171,7 @@ namespace Libplanet.Action
                             $"The action {action} (block #{blockIndex} {blockHash}, tx {txid}, " +
                             $"state root hash {stateRootHash}) threw an exception " +
                             "during execution.  See also this exception's InnerException property.";
+                        logger.Error("{Message}\nInnerException: {ExcMessage}", msg, e.Message);
                         exc = new UnexpectedlyTerminatedActionException(
                             blockHash, blockIndex, txid, stateRootHash, action, msg, e
                         );

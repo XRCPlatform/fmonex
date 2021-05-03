@@ -24,7 +24,6 @@ namespace FreeMarketOne.Pools
         private CancellationTokenSource _cancellationToken { get; set; }
 
         private PrivateKey _privateKey { get; set; }
-        private DefaultStore _storage;
         private BlockChain<T> _blockChain;
         private Swarm<T> _swarmServer;
         private Address _address;
@@ -35,7 +34,6 @@ namespace FreeMarketOne.Pools
             Swarm<T> swarmServer,
             BlockChain<T> blockChain,
             Address address,
-            DefaultStore storage,
             PrivateKey privateKey,
             CancellationTokenSource cancellationTokenSource,
             EventHandler eventNewBlock = null)
@@ -46,8 +44,6 @@ namespace FreeMarketOne.Pools
             _blockChain = blockChain;
             _swarmServer = swarmServer;
             _privateKey = privateKey;
-
-            _storage = storage;
             _eventNewBlock = eventNewBlock;
             _address = address;
 
@@ -60,85 +56,85 @@ namespace FreeMarketOne.Pools
         {
             //while (true)
             //{
-                var txs = new HashSet<Transaction<T>>();
+            var txs = new HashSet<Transaction<T>>();
 
-                var taskMiner = Task.Run(async () =>
+            var taskMiner = Task.Run(async () =>
+            {
+                var block = await _blockChain.MineBlock(_address, DateTimeOffset.UtcNow,
+                    cancellationToken: _cancellationToken.Token);
+
+                if (_swarmServer?.Running ?? false)
                 {
-                    var block = await _blockChain.MineBlock(_address, DateTimeOffset.UtcNow, 
-                        cancellationToken: _cancellationToken.Token);
-
-                    if (_swarmServer?.Running ?? false)
-                    {
                         //broadcast even if tip is unchanged
                         _swarmServer.BroadcastBlock(block);
-                    }
-
-                    return block;
-                });
-
-                try
-                {
-                    taskMiner.Wait();
-                    if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
-                    {
-                        var block = taskMiner.Result;
-                        _logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
-                            block.Index,
-                            block.Difficulty));
-                    }
-                }
-                catch (AggregateException ae)
-                {
-                    var invalidTxs = txs;
-                    var retryActions = new HashSet<IImmutableList<T>>();
-                    foreach (var ex in ae.Flatten().InnerExceptions)
-                    {
-                        if (ex is InvalidTxNonceException invalidTxNonceException)
-                        {
-                            var invalidNonceTx = _storage.GetTransaction<T>(invalidTxNonceException.TxId);
-                            
-                            //unpoison
-                            _blockChain.UnstageTransaction(invalidNonceTx);
-                            
-                            //if created by my peer, will build new tx
-                            if (invalidNonceTx.Signer == _address)
-                            {
-                                _logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
-                                    invalidTxNonceException.TxId));
-                                retryActions.Add(invalidNonceTx.Actions);
-                            }
-                        } 
-                        else if (ex is InvalidTxException invalidTxException) 
-                        {
-                            _logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
-                                invalidTxException.TxId));
-                            invalidTxs.Add(_storage.GetTransaction<T>(invalidTxException.TxId));
-                        }
-                        else
-                        {
-                            throw;
-                        }
-
-                        _logger.Error(ex.Message);
-                    }
-   
-                    foreach (var invalidTx in invalidTxs)
-                    {
-                        _blockChain.UnstageTransaction(invalidTx);
-                    }
-
-                    foreach (var retryAction in retryActions)
-                    {
-                        //should we unstage original problem transaction here?
-                        var actions = retryAction.ToArray();
-                        _blockChain.MakeTransaction(_privateKey, actions);
-
-                    }
                 }
 
-                yield return new WaitUntil(() => taskMiner.IsCompleted);
+                return block;
+            });
 
-                _eventNewBlock?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                taskMiner.Wait();
+                if (!taskMiner.IsCanceled && !taskMiner.IsFaulted)
+                {
+                    var block = taskMiner.Result;
+                    _logger.Information(string.Format("Created block index: {0}, difficulty: {1}",
+                        block.Index,
+                        block.Difficulty));
+                }
+            }
+            catch (AggregateException ae)
+            {
+                var invalidTxs = txs;
+                var retryActions = new HashSet<IImmutableList<T>>();
+                foreach (var ex in ae.Flatten().InnerExceptions)
+                {
+                    if (ex is InvalidTxNonceException invalidTxNonceException)
+                    {
+                        var invalidNonceTx = _blockChain.GetTransaction(invalidTxNonceException.TxId);
+
+                        //unpoison
+                        _blockChain.UnstageTransaction(invalidNonceTx);
+
+                        //if created by my peer, will build new tx
+                        if (invalidNonceTx.Signer == _address)
+                        {
+                            _logger.Error(string.Format("Tx[{0}] nonce is invalid. Retry it.",
+                                invalidTxNonceException.TxId));
+                            retryActions.Add(invalidNonceTx.Actions);
+                        }
+                    }
+                    else if (ex is InvalidTxException invalidTxException)
+                    {
+                        _logger.Error(string.Format("Tx[{0}] is invalid. mark to unstage.",
+                            invalidTxException.TxId));
+                        invalidTxs.Add(_blockChain.GetTransaction(invalidTxException.TxId));
+                    }
+                    else
+                    {
+                        throw;
+                    }
+
+                    _logger.Error(ex.Message);
+                }
+
+                foreach (var invalidTx in invalidTxs)
+                {
+                    _blockChain.UnstageTransaction(invalidTx);
+                }
+
+                foreach (var retryAction in retryActions)
+                {
+                    //should we unstage original problem transaction here?
+                    var actions = retryAction.ToArray();
+                    _blockChain.MakeTransaction(_privateKey, actions);
+
+                }
+            }
+
+            yield return new WaitUntil(() => taskMiner.IsCompleted);
+
+            _eventNewBlock?.Invoke(this, EventArgs.Empty);
             //}
         }
 

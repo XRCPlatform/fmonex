@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Libplanet.Action;
 using Libplanet.Blocks;
 using Libplanet.Tx;
@@ -42,6 +43,8 @@ namespace Libplanet.Blockchain.Policies
         /// <param name="doesTransactionFollowPolicy">
         /// A predicate that determines if the transaction follows the block policy.
         /// </param>
+        /// <param name="canonicalChainComparer">The custom rule to determine which is the canonical
+        /// chain.  If omitted, <see cref="TotalDifficultyComparer"/> is used by default.</param>
         public BlockPolicy(
             IAction blockAction = null,
             int blockIntervalMilliseconds = 5000,
@@ -50,7 +53,9 @@ namespace Libplanet.Blockchain.Policies
             int maxTransactionsPerBlock = 100,
             int maxBlockBytes = 100 * 1024,
             int maxGenesisBytes = 1024 * 1024,
-            Func<Transaction<T>, BlockChain<T>, bool> doesTransactionFollowPolicy = null)
+            Func<Transaction<T>, BlockChain<T>, bool> doesTransactionFollowPolicy = null,
+            IComparer<BlockPerception> canonicalChainComparer = null
+        )
             : this(
                 blockAction,
                 TimeSpan.FromMilliseconds(blockIntervalMilliseconds),
@@ -59,7 +64,8 @@ namespace Libplanet.Blockchain.Policies
                 maxTransactionsPerBlock,
                 maxBlockBytes,
                 maxGenesisBytes,
-                doesTransactionFollowPolicy)
+                doesTransactionFollowPolicy,
+                canonicalChainComparer)
         {
         }
 
@@ -85,6 +91,10 @@ namespace Libplanet.Blockchain.Policies
         /// <param name="doesTransactionFollowPolicy">
         /// A predicate that determines if the transaction follows the block policy.
         /// </param>
+        /// <param name="canonicalChainComparer">The custom rule to determine which is the canonical
+        /// chain.  If omitted, <see cref="TotalDifficultyComparer"/> (having
+        /// <see cref="TotalDifficultyComparer.OutdateAfter"/> configured to triple of
+        /// <paramref name="blockInterval"/>) is used by default.</param>
         public BlockPolicy(
             IAction blockAction,
             TimeSpan blockInterval,
@@ -93,7 +103,9 @@ namespace Libplanet.Blockchain.Policies
             int maxTransactionsPerBlock,
             int maxBlockBytes,
             int maxGenesisBytes,
-            Func<Transaction<T>, BlockChain<T>, bool> doesTransactionFollowPolicy = null)
+            Func<Transaction<T>, BlockChain<T>, bool> doesTransactionFollowPolicy = null,
+            IComparer<BlockPerception> canonicalChainComparer = null
+        )
         {
             if (blockInterval < TimeSpan.Zero)
             {
@@ -128,6 +140,8 @@ namespace Libplanet.Blockchain.Policies
             _maxBlockBytes = maxBlockBytes;
             _maxGenesisBytes = maxGenesisBytes;
             _doesTransactionFollowPolicy = doesTransactionFollowPolicy ?? ((_, __) => true);
+            CanonicalChainComparer = canonicalChainComparer
+                ?? new TotalDifficultyComparer(blockInterval + blockInterval + blockInterval);
         }
 
         /// <inheritdoc/>
@@ -146,6 +160,9 @@ namespace Libplanet.Blockchain.Policies
         /// </summary>
         public TimeSpan BlockInterval { get; }
 
+        /// <inheritdoc />
+        public IComparer<BlockPerception> CanonicalChainComparer { get; }
+
         private long MinimumDifficulty { get; }
 
         private int DifficultyBoundDivisor { get; }
@@ -160,8 +177,6 @@ namespace Libplanet.Blockchain.Policies
         }
 
         /// <inheritdoc/>
-        /// <exception cref="InvalidBlockStateRootHashException">It will be thrown when the
-        /// given block has incorrect <see cref="Block{T}.StateRootHash"/>.</exception>
         public virtual InvalidBlockException ValidateNextBlock(
             BlockChain<T> blocks,
             Block<T> nextBlock)
@@ -203,6 +218,7 @@ namespace Libplanet.Blockchain.Policies
             return Math.Max(nextDifficulty, MinimumDifficulty);
         }
 
+        /// <inheritdoc />
         public int GetMaxBlockBytes(long index) => index > 0 ? _maxBlockBytes : _maxGenesisBytes;
     }
 }

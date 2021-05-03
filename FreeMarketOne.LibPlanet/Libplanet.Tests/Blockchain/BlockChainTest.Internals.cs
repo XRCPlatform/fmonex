@@ -16,7 +16,7 @@ namespace Libplanet.Tests.Blockchain
         public void ListStagedTransactions()
         {
             Transaction<DumbAction> MkTx(PrivateKey key, long nonce, DateTimeOffset? ts = null) =>
-                Transaction<DumbAction>.Create(
+                new Transaction<DumbAction>().Create(
                     nonce,
                     key,
                     _blockChain.Genesis.Hash,

@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 
 namespace Libplanet.Net.Messages
 {
+	//FMONECHANGE -  changed message serialization from NetMQMessage to Bencoded message
     public class GetBlockStates : IBenEncodeable
     {
         private static readonly byte[] BlockHeaderKey = { 0x42 };    // 'B'

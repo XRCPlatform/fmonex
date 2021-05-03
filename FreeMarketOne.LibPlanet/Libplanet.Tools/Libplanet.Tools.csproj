@@ -41,21 +41,22 @@
     <AssemblyName>planet</AssemblyName>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(PublishSingleFile)' == 'true' And&#xA;                             '$(RuntimeIdentifier.Substring(0, 6))' == 'linux-' ">
+  <PropertyGroup Condition=" '$(PublishSingleFile)' == 'true' And&#xD;&#xA;                             '$(RuntimeIdentifier.Substring(0, 6))' == 'linux-' ">
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
-
+  <ItemGroup>
+    <None Include="..\LICENSE" Pack="true" PackagePath="LICENSE.txt" />
+    <None Include="README.md" Pack="true" PackagePath="README.md" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Cocona.Lite" Version="1.5.*" />
 
   </ItemGroup>
 
-
   <ItemGroup>
+    <ProjectReference Include="..\Libplanet.Extensions.Cocona\Libplanet.Extensions.Cocona.csproj" />
     <ProjectReference Include="..\Libplanet\Libplanet.csproj" />
-    <!-- FIXME: We should specify the version range when the following NuGet
-    issue is addressed: <https://github.com/NuGet/Home/issues/5556>. -->
   </ItemGroup>
 </Project>

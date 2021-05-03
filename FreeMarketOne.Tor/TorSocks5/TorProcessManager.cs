@@ -232,7 +232,7 @@ namespace FreeMarketOne.Tor
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                string torWinZip = Path.Combine(torDaemonsDir, "tor-win32.zip");
+                string torWinZip = Path.Combine(torDaemonsDir, "tor-win64.zip");
                 IoHelper.BetterExtractZipToDirectoryAsync(torWinZip, torDaemonsDir).GetAwaiter().GetResult();
                 _logger.Information($"Extracted {torWinZip} to {torDaemonsDir}.");
             }

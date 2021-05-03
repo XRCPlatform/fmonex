@@ -12,19 +12,25 @@ using Bencodex;
 using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Assets;
+using Libplanet.Crypto;
 using Libplanet.Store.Trie;
 using Libplanet.Tx;
 
 namespace Libplanet.Blocks
 {
     [Equals]
-    public class Block<T>
+    public class Block<T> : IBlockExcerpt
         where T : IAction, new()
     {
+        /// <summary>
+        /// The most latest protocol version.
+        /// </summary>
+        public const int CurrentProtocolVersion = BlockHeader.CurrentProtocolVersion;
+
         private int _bytesLength;
 
         /// <summary>
-        /// HACK - Empty constructor to use Mine function and Deserialize without Static instance
+        /// FMONE CHANGE - Empty constructor to use Mine function and Deserialize without Static instance
         /// </summary>
         public Block()
         {
@@ -35,6 +41,7 @@ namespace Libplanet.Blocks
         /// Creates a <see cref="Block{T}"/> instance by manually filling all field values.
         /// For a more automated way, see also <see cref="Mine"/> method.
         /// </summary>
+
         /// <param name="index">The height of the block to create.  Goes to the <see cref="Index"/>.
         /// </param>
         /// <param name="difficulty">The mining difficulty that <paramref name="nonce"/> has to
@@ -59,6 +66,8 @@ namespace Libplanet.Blocks
         /// Automatically determined if <c>null</c> is passed (which is default).</param>
         /// <param name="stateRootHash">The <see cref="ITrie.Hash"/> of the states on the block.
         /// </param>
+        /// <param name="protocolVersion">The protocol version. <see cref="CurrentProtocolVersion"/>
+        /// by default.</param>
         /// <seealso cref="Mine"/>
         public Block(
             long index,
@@ -70,8 +79,10 @@ namespace Libplanet.Blocks
             DateTimeOffset timestamp,
             IEnumerable<Transaction<T>> transactions,
             HashDigest<SHA256>? preEvaluationHash = null,
-            HashDigest<SHA256>? stateRootHash = null)
+            HashDigest<SHA256>? stateRootHash = null,
+            int protocolVersion = CurrentProtocolVersion)
         {
+            ProtocolVersion = protocolVersion;
             Index = index;
             Difficulty = difficulty;
             TotalDifficulty = totalDifficulty;
@@ -80,36 +91,13 @@ namespace Libplanet.Blocks
             PreviousHash = previousHash;
             Timestamp = timestamp;
             Transactions = transactions.OrderBy(tx => tx.Id).ToArray();
-            if (Transactions.Any())
-            {
-                byte[][] serializedTxs = Transactions.Select(tx => tx.Serialize(true)).ToArray();
-                int txHashSourceLength = serializedTxs.Select(b => b.Length).Sum() + 2;
-                var txHashSource = new byte[txHashSourceLength];
+            TxHash = CalcualteTxHashes(Transactions);
 
-                // Bencodex lists look like: l...e
-                txHashSource[0] = 0x6c;
-                txHashSource[txHashSourceLength - 1] = 0x65;
-                int offset = 1;
-                foreach (byte[] serializedTx in serializedTxs)
-                {
-                    serializedTx.CopyTo(txHashSource, offset);
-                    offset += serializedTx.Length;
-                }
-
-                TxHash = Hashcash.Hash(txHashSource);
-            }
-            else
-            {
-                TxHash = null;
-            }
-
-            PreEvaluationHash = preEvaluationHash ?? Hashcash.Hash(
-                GetBlockHeader().SerializeForHash()
-            );
+            PreEvaluationHash = preEvaluationHash ?? Hashcash.Hash(Header.SerializeForHash());
             StateRootHash = stateRootHash;
 
             // FIXME: This does not need to be computed every time?
-            Hash = Hashcash.Hash(GetBlockHeader().SerializeForHash());
+            Hash = Hashcash.Hash(Header.SerializeForHash());
 
             // As the order of transactions should be unpredictable until a block is mined,
             // the sorter key should be derived from both a block hash and a txid.
@@ -157,9 +145,12 @@ namespace Libplanet.Blocks
         {
         }
 
+        // FIXME: Should this necessarily be a public constructor?
+        // See also <https://github.com/planetarium/libplanet/issues/1146>.
         public Block(
             Block<T> block,
-            HashDigest<SHA256>? stateRootHash)
+            HashDigest<SHA256>? stateRootHash
+        )
             : this(
                 block.Index,
                 block.Difficulty,
@@ -170,33 +161,87 @@ namespace Libplanet.Blocks
                 block.Timestamp,
                 block.Transactions,
                 block.PreEvaluationHash,
-                stateRootHash)
+                stateRootHash,
+                protocolVersion: block.ProtocolVersion
+            )
         {
         }
 
         private Block(RawBlock rb)
             : this(
+#pragma warning disable SA1118
+                rb.Header.ProtocolVersion,
+                new HashDigest<SHA256>(rb.Header.Hash),
                 rb.Header.Index,
                 rb.Header.Difficulty,
                 rb.Header.TotalDifficulty,
                 new Nonce(rb.Header.Nonce.ToArray()),
                 rb.Header.Miner.Any() ? new Address(rb.Header.Miner) : (Address?)null,
-#pragma warning disable MEN002 // Line is too long
-                rb.Header.PreviousHash.Any() ? new HashDigest<SHA256>(rb.Header.PreviousHash) : (HashDigest<SHA256>?)null,
-#pragma warning restore MEN002 // Line is too long
+                rb.Header.PreviousHash.Any()
+                    ? new HashDigest<SHA256>(rb.Header.PreviousHash)
+                    : (HashDigest<SHA256>?)null,
                 DateTimeOffset.ParseExact(
                     rb.Header.Timestamp,
                     BlockHeader.TimestampFormat,
                     CultureInfo.InvariantCulture).ToUniversalTime(),
+                rb.Header.TxHash.Any()
+                    ? new HashDigest<SHA256>(rb.Header.TxHash)
+                    : (HashDigest<SHA256>?)null,
                 rb.Transactions
-                    .Select(tx => Transaction<T>.Deserialize(tx.ToArray()))
+                    // FMONE CHANGE - In our case isnt tx static - paraller processing issue
+                    .Select(tx => new Transaction<T>().Deserialize(tx.ToArray(), false))
                     .ToList(),
-#pragma warning disable MEN002 // Line is too long
-                rb.Header.PreEvaluationHash.Any() ? new HashDigest<SHA256>(rb.Header.PreEvaluationHash) : (HashDigest<SHA256>?)null,
-                rb.Header.StateRootHash.Any() ? new HashDigest<SHA256>(rb.Header.StateRootHash) : (HashDigest<SHA256>?)null)
-#pragma warning restore MEN002 // Line is too long
+                rb.Header.PreEvaluationHash.Any()
+                    ? new HashDigest<SHA256>(rb.Header.PreEvaluationHash)
+                    : (HashDigest<SHA256>?)null,
+                rb.Header.StateRootHash.Any()
+                    ? new HashDigest<SHA256>(rb.Header.StateRootHash)
+                    : (HashDigest<SHA256>?)null)
+#pragma warning restore SA1118
         {
         }
+
+        private Block(
+            int protocolVersion,
+            HashDigest<SHA256> hash,
+            long index,
+            long difficulty,
+            BigInteger totalDifficulty,
+            Nonce nonce,
+            Address? miner,
+            HashDigest<SHA256>? previousHash,
+            DateTimeOffset timestamp,
+            HashDigest<SHA256>? txHash,
+            IEnumerable<Transaction<T>> transactions,
+            HashDigest<SHA256>? preEvaluationHash,
+            HashDigest<SHA256>? stateRootHash
+        )
+        {
+            ProtocolVersion = protocolVersion;
+            Index = index;
+            Difficulty = difficulty;
+            TotalDifficulty = totalDifficulty;
+            Nonce = nonce;
+            Miner = miner;
+            PreviousHash = previousHash;
+            Timestamp = timestamp;
+            Hash = hash;
+            PreEvaluationHash = preEvaluationHash ??
+                throw new ArgumentNullException(nameof(preEvaluationHash));
+
+            // See also: https://github.com/planetarium/libplanet/pull/1116#discussion_r535836480
+            // FIXME: we should convert `StateRootHash`'s type to `HashDisgest<SHA256>` after
+            // removing `IBlockStateStore`.
+            StateRootHash = stateRootHash;
+            TxHash = txHash;
+            Transactions = transactions.ToImmutableArray();
+        }
+
+        /// <summary>
+        /// The protocol version number.
+        /// </summary>
+        [IgnoreDuringEquals]
+        public int ProtocolVersion { get; }
 
         /// <summary>
         /// <see cref="Hash"/> is derived from a serialized <see cref="Block{T}"/>
@@ -262,6 +307,41 @@ namespace Libplanet.Blocks
             }
         }
 
+        /// <summary>
+        /// The <see cref="BlockHeader"/> of the block.
+        /// </summary>
+        [IgnoreDuringEquals]
+        public BlockHeader Header
+        {
+            get
+            {
+                string timestampAsString = Timestamp.ToString(
+                    BlockHeader.TimestampFormat,
+                    CultureInfo.InvariantCulture
+                );
+                ImmutableArray<byte> previousHashAsArray =
+                    PreviousHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty;
+                ImmutableArray<byte> stateRootHashAsArray =
+                    StateRootHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty;
+
+                // FIXME: When hash is not assigned, should throw an exception.
+                return new BlockHeader(
+                    protocolVersion: ProtocolVersion,
+                    index: Index,
+                    timestamp: timestampAsString,
+                    nonce: Nonce.ToByteArray().ToImmutableArray(),
+                    miner: Miner?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty,
+                    difficulty: Difficulty,
+                    totalDifficulty: TotalDifficulty,
+                    previousHash: previousHashAsArray,
+                    txHash: TxHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty,
+                    hash: Hash.ToByteArray().ToImmutableArray(),
+                    preEvaluationHash: PreEvaluationHash.ToByteArray().ToImmutableArray(),
+                    stateRootHash: stateRootHashAsArray
+                );
+            }
+        }
+
         public static bool operator ==(Block<T> left, Block<T> right) =>
             Operator.Weave(left, right);
 
@@ -283,9 +363,11 @@ namespace Libplanet.Blocks
         /// <param name="timestamp">The <see cref="DateTimeOffset"/> when mining started.</param>
         /// <param name="transactions"><see cref="Transaction{T}"/>s that are going to be included
         /// in the block.</param>
+        /// <param name="protocolVersion">The protocol version.</param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this
         /// operation should be canceled.</param>
+        /// FMONE CHANGE - In our case isnt mining static - paraller processing issue
         /// <returns>A <see cref="Block{T}"/> that mined.</returns>
         public Block<T> Mine(
             long index,
@@ -295,6 +377,7 @@ namespace Libplanet.Blocks
             HashDigest<SHA256>? previousHash,
             DateTimeOffset timestamp,
             IEnumerable<Transaction<T>> transactions,
+            int protocolVersion = CurrentProtocolVersion,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var txs = transactions.OrderBy(tx => tx.Id).ToImmutableArray();
@@ -306,16 +389,13 @@ namespace Libplanet.Blocks
                 miner,
                 previousHash,
                 timestamp,
-                txs);
+                txs,
+                protocolVersion: protocolVersion);
 
             // Poor man' way to optimize stamp...
             // FIXME: We need to rather reorganize the serialization layout.
-            byte[] emptyNonce = MakeBlock(new Nonce(new byte[0]))
-                .GetBlockHeader()
-                .SerializeForHash();
-            byte[] oneByteNonce = MakeBlock(new Nonce(new byte[1]))
-                .GetBlockHeader()
-                .SerializeForHash();
+            byte[] emptyNonce = MakeBlock(new Nonce(new byte[0])).Header.SerializeForHash();
+            byte[] oneByteNonce = MakeBlock(new Nonce(new byte[1])).Header.SerializeForHash();
             int offset = 0;
             while (offset < emptyNonce.Length && emptyNonce[offset].Equals(oneByteNonce[offset]))
             {
@@ -362,6 +442,7 @@ namespace Libplanet.Blocks
         /// <param name="bytes">A <a href="https://bencodex.org/">Bencodex</a>
         /// representation of a <see cref="Block{T}"/>.</param>
         /// <returns>A decoded <see cref="Block{T}"/> object.</returns>
+        /// FMONE CHANGE - It cant be static because of paraller processing
         /// <seealso cref="Serialize()"/>
         [Pure]
         public Block<T> Deserialize(byte[] bytes)
@@ -429,11 +510,10 @@ namespace Libplanet.Blocks
             IAccountStateDelta delta;
             foreach (Transaction<T> tx in Transactions)
             {
-                delta = new AccountStateDeltaImpl(
-                    accountStateGetter,
-                    accountBalanceGetter,
-                    tx.Signer
-                );
+                delta = ProtocolVersion > 0
+                    ? new AccountStateDeltaImpl(accountStateGetter, accountBalanceGetter, tx.Signer)
+                    : new AccountStateDeltaImplV0(
+                        accountStateGetter, accountBalanceGetter, tx.Signer);
                 IEnumerable<ActionEvaluation> evaluations =
                     tx.EvaluateActionsGradually(
                         PreEvaluationHash,
@@ -495,17 +575,20 @@ namespace Libplanet.Blocks
         /// <exception cref="InvalidBlockNonceException">Thrown when
         /// the <see cref="Nonce"/> does not satisfy its
         /// <see cref="Difficulty"/> level.</exception>
-        /// <exception cref="InvalidTxSignatureException">Thrown when its
-        /// <see cref="Transaction{T}.Signature"/> is invalid or not signed by
-        /// the account who corresponds to its
-        /// <see cref="Transaction{T}.PublicKey"/>.</exception>
-        /// <exception cref="InvalidTxPublicKeyException">Thrown when its
-        /// <see cref="Transaction{T}.Signer"/> is not derived from its
-        /// <see cref="Transaction{T}.PublicKey"/>.</exception>
+        /// <exception cref="InvalidBlockTxHashException">Thrown when
+        /// the <see cref="TxHash" /> does not match with its
+        /// <see cref="Transactions"/>.</exception>
         /// <exception cref="InvalidTxUpdatedAddressesException">Thrown when
         /// any <see cref="IAction"/> of <see cref="Transactions"/> tries
         /// to update the states of <see cref="Address"/>es not included
         /// in <see cref="Transaction{T}.UpdatedAddresses"/>.</exception>
+        /// <exception cref="InvalidTxSignatureException">Thrown when its
+        /// <see cref="Transaction{T}.Signature"/> is invalid or not signed by
+        /// the account who corresponds to its <see cref="PublicKey"/>.
+        /// </exception>
+        /// <exception cref="InvalidTxPublicKeyException">Thrown when its
+        /// <see cref="Transaction{T}.Signer"/> is not derived from its
+        /// <see cref="Transaction{T}.PublicKey"/>.</exception>
         public IEnumerable<ActionEvaluation> Evaluate(
             DateTimeOffset currentTime,
             AccountStateGetter accountStateGetter = null,
@@ -558,7 +641,7 @@ namespace Libplanet.Blocks
         public BlockDigest ToBlockDigest()
         {
             return new BlockDigest(
-                header: GetBlockHeader(),
+                header: Header,
                 txIds: Transactions
                     .Select(tx => tx.Id.ToByteArray().ToImmutableArray())
                     .ToImmutableArray());
@@ -569,50 +652,74 @@ namespace Libplanet.Blocks
             return Hash.ToString();
         }
 
-        internal BlockHeader GetBlockHeader()
-        {
-            string timestampAsString = Timestamp.ToString(
-                BlockHeader.TimestampFormat,
-                CultureInfo.InvariantCulture
-            );
-            ImmutableArray<byte> previousHashAsArray =
-                PreviousHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty;
-            ImmutableArray<byte> stateRootHashAsArray =
-                StateRootHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty;
-
-            // FIXME: When hash is not assigned, should throw an exception.
-            return new BlockHeader(
-                index: Index,
-                timestamp: timestampAsString,
-                nonce: Nonce.ToByteArray().ToImmutableArray(),
-                miner: Miner?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty,
-                difficulty: Difficulty,
-                totalDifficulty: TotalDifficulty,
-                previousHash: previousHashAsArray,
-                txHash: TxHash?.ToByteArray().ToImmutableArray() ?? ImmutableArray<byte>.Empty,
-                hash: Hash.ToByteArray().ToImmutableArray(),
-                preEvaluationHash: PreEvaluationHash.ToByteArray().ToImmutableArray(),
-                stateRootHash: stateRootHashAsArray
-            );
-        }
-
         internal void Validate(DateTimeOffset currentTime)
         {
-            GetBlockHeader().Validate(currentTime);
+            Header.Validate(currentTime);
 
             foreach (Transaction<T> tx in Transactions)
             {
                 tx.Validate();
             }
+
+            if (ProtocolVersion > 0)
+            {
+                HashDigest<SHA256> expectedPreEvaluationHash =
+                    Hashcash.Hash(Header.SerializeForHash(includeStateRootHash: false));
+                if (!expectedPreEvaluationHash.Equals(PreEvaluationHash))
+                {
+                    string message =
+                        $"The expected pre evaluation hash of block {Hash} is " +
+                        $"{expectedPreEvaluationHash}, but its pre evaluation hash is " +
+                        $"{PreEvaluationHash}.";
+                    throw new InvalidBlockPreEvaluationHashException(
+                        PreEvaluationHash,
+                        expectedPreEvaluationHash,
+                        message);
+                }
+            }
+
+            HashDigest<SHA256>? calculatedTxHash =
+                CalcualteTxHashes(Transactions.OrderBy(tx => tx.Id));
+            if (!calculatedTxHash.Equals(TxHash))
+            {
+                throw new InvalidBlockTxHashException(
+                    $"Block #{Index} {Hash}'s TxHash doesn't match its content.",
+                    TxHash,
+                    calculatedTxHash
+                );
+            }
         }
 
         internal RawBlock ToRawBlock()
         {
-            // For consistency, order transactions by its id.
             return new RawBlock(
-                header: GetBlockHeader(),
-                transactions: Transactions.OrderBy(tx => tx.Id)
-                    .Select(tx => tx.Serialize(true).ToImmutableArray()).ToImmutableArray());
+                header: Header,
+                transactions: Transactions
+                .Select(tx => tx.Serialize(true).ToImmutableArray()).ToImmutableArray());
+        }
+
+        private HashDigest<SHA256>? CalcualteTxHashes(IEnumerable<Transaction<T>> txs)
+        {
+            if (!txs.Any())
+            {
+                return null;
+            }
+
+            byte[][] serializedTxs = txs.Select(tx => tx.Serialize(true)).ToArray();
+            int txHashSourceLength = serializedTxs.Select(b => b.Length).Sum() + 2;
+            var txHashSource = new byte[txHashSourceLength];
+
+            // Bencodex lists look like: l...e
+            txHashSource[0] = 0x6c;
+            txHashSource[txHashSourceLength - 1] = 0x65;
+            int offset = 1;
+            foreach (byte[] serializedTx in serializedTxs)
+            {
+                serializedTx.CopyTo(txHashSource, offset);
+                offset += serializedTx.Length;
+            }
+
+            return Hashcash.Hash(txHashSource);
         }
 
         private readonly struct BlockSerializationContext

@@ -1,0 +1,19 @@
+﻿[*.cs]
+
+# SA1600: Elements should be documented
+dotnet_diagnostic.SA1600.severity = suggestion
+
+# Default severity for analyzer diagnostics with category 'StyleCop.CSharp.DocumentationRules'
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.DocumentationRules.severity = warning
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = suggestion
+
+# SA1111: Closing parenthesis should be on line of last parameter
+dotnet_diagnostic.SA1111.severity = suggestion
+
+# SA1009: Closing parenthesis should be spaced correctly
+dotnet_diagnostic.SA1009.severity = suggestion
+
+# SA0001: XML comment analysis disabled
+dotnet_diagnostic.SA0001.severity = none

@@ -1,0 +1,294 @@
+@import url("https://fonts.googleapis.com/css?family=Merriweather+Sans");
+html {
+  overflow: hidden;
+}
+body {
+  font-family: "Merriweather Sans", sans-serif;
+  margin: 0px;
+}
+
+.container {
+  background-image: linear-gradient(
+      66deg,
+      transparent 0%,
+      transparent 24%,
+      rgba(195, 195, 195, 0.04) 24%,
+      rgba(195, 195, 195, 0.04) 80%,
+      transparent 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      153deg,
+      transparent 0%,
+      transparent 29%,
+      rgba(195, 195, 195, 0.04) 29%,
+      rgba(195, 195, 195, 0.04) 45%,
+      transparent 45%,
+      transparent 100%
+    ),
+    linear-gradient(
+      199deg,
+      transparent 0%,
+      transparent 32%,
+      rgba(195, 195, 195, 0.04) 32%,
+      rgba(195, 195, 195, 0.04) 59%,
+      transparent 59%,
+      transparent 100%
+    ),
+    linear-gradient(
+      277deg,
+      transparent 0%,
+      transparent 56%,
+      rgba(195, 195, 195, 0.04) 56%,
+      rgba(195, 195, 195, 0.04) 57%,
+      transparent 57%,
+      transparent 100%
+    ),
+    linear-gradient(90deg, rgb(0, 0, 0), rgb(0, 0, 0));
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+}
+
+.footer {
+  bottom: 30px;
+  color: #e8eef1;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  opacity: 0.5;
+}
+.logo {
+  font-family: "Merriweather Sans", sans-serif;
+  opacity: 0.9;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+.logo span {
+  color: #fca611;
+}
+.header {
+  top: 50%;
+  position: relative;
+  margin: auto;
+  text-align: center;
+  color: #e8eef1;
+}
+
+.loading_msg {
+  color: #e8eef1;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  animation: blink linear infinite 3s;
+  opacity: 0.8;
+}
+.loading_msg span {
+  animation: blink linear infinite 2s;
+}
+
+@keyframes blink {
+  78% {
+    color: inherit;
+    text-shadow: inherit;
+  }
+  79% {
+    color: #333;
+  }
+  80% {
+    text-shadow: none;
+  }
+  81% {
+    color: inherit;
+    text-shadow: inherit;
+  }
+  82% {
+    color: #333;
+    text-shadow: none;
+  }
+  83% {
+    color: inherit;
+    text-shadow: inherit;
+  }
+  92% {
+    color: #333;
+    text-shadow: none;
+  }
+  92.5% {
+    color: inherit;
+    text-shadow: inherit;
+  }
+}
+
+.fog {
+  width: 160px;
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+}
+
+li {
+  display: inline-block;
+  width: 160px;
+  height: 25px;
+  border-radius: 100%;
+  background: #fca611;
+  position: absolute;
+  -webkit-filter: blur(6px);
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+li:nth-child(1) {
+  animation: 1.5s first infinite;
+}
+
+@keyframes first {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-150%, -50%) scale(0.7);
+  }
+  75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+li:nth-child(2) {
+  animation: 1.5s second infinite;
+}
+
+@keyframes second {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-100%, -50%) scale(0.85);
+  }
+  75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+li:nth-child(3) {
+  animation: 1.5s third infinite;
+}
+
+@keyframes third {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-50%, -50%);
+  }
+  75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+li:nth-child(4) {
+  animation: 1.5s fourth infinite;
+}
+
+@keyframes fourth {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    transform: translate(0%, -50%) scale(0.85);
+  }
+  75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+li:nth-child(5) {
+  animation: 1.5s fifth infinite;
+}
+
+@keyframes fifth {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    transform: translate(50%, -50%) scale(0.7);
+  }
+  75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Temp code for changing words test -------------->*/
+
+.textChange__container {
+  display: inline-block;
+  height: 1.1em;
+  overflow: hidden;
+  transform: translateX(1%);
+}
+.textChange__sprite {
+  transform: translateY(0px);
+  animation: changeWord 46s steps(12) infinite;
+}
+.loading_msg b {
+  display: block;
+  line-height: 1.1em;
+  animation: blinkWord 3.333333s ease infinite;
+  opacity: 0;
+  transform-origin: top left;
+}
+
+@keyframes blinkWord {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes changeWord {
+  to {
+    transform: translateY(-13.2em);
+  }
+}
+
+/* <----------------------------end temp */

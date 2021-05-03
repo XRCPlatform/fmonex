@@ -8,7 +8,7 @@
 
   !define PRODUCT_NAME "FreeMarketOne"
   !define PRODUCT_WEB_SITE "https://www.freemarket.one"
-  !define PRODUCT_PUBLISHER "Bitcoin Rhodium Developers"
+  !define PRODUCT_PUBLISHER "xRhodium Developers"
   !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
 ;--------------------------------

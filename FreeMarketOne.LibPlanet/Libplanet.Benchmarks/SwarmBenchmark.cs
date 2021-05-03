@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Libplanet.Action;
 using Libplanet.Blockchain;
+using Libplanet.Blockchain.Policies;
 using Libplanet.Blocks;
 using Libplanet.Crypto;
 using Libplanet.Net;
@@ -23,6 +24,7 @@ namespace Libplanet.Benchmarks
         private const int SwarmNumber = 10;
         private const int WaitTimeout = 5 * 1000;
         private readonly NullPolicy<DumbAction> _policy;
+        private readonly IStagePolicy<DumbAction> _stagePolicy;
         private readonly List<Block<DumbAction>> _blocks;
         private readonly AppProtocolVersion _appProtocolVersion;
         private PrivateKey[] _keys;
@@ -33,6 +35,7 @@ namespace Libplanet.Benchmarks
         public SwarmBenchmark()
         {
             _policy = new NullPolicy<DumbAction>();
+            _stagePolicy = new VolatileStagePolicy<DumbAction>();
             _blocks = new List<Block<DumbAction>>
             {
                 TestUtils.MineGenesis<DumbAction>(),
@@ -59,7 +62,7 @@ namespace Libplanet.Benchmarks
                 _keys[i] = _keys[i] ?? new PrivateKey();
                 _fxs[i] = new DefaultStoreFixture(memory: true);
                 _blockChains[i] = new BlockChain<DumbAction>(
-                    _policy, _fxs[i].Store, _fxs[i].StateStore, _blocks[0]);
+                    _policy, _stagePolicy, _fxs[i].Store, _fxs[i].StateStore, _blocks[0]);
                 _swarms[i] = new Swarm<DumbAction>(
                     _blockChains[i],
                     _keys[i],
@@ -122,12 +125,11 @@ namespace Libplanet.Benchmarks
 
         private async Task<Task> StartAsync<T>(
             Swarm<T> swarm,
-            IImmutableSet<Address> trustedStateValidators = null,
             CancellationToken cancellationToken = default
         )
             where T : IAction, new()
         {
-            Task task = swarm.StartAsync(200, 200, trustedStateValidators, cancellationToken);
+            Task task = swarm.StartAsync(200, 200, cancellationToken);
             await swarm.WaitForRunningAsync();
             return task;
         }

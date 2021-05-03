@@ -38,7 +38,7 @@ namespace FreeMarketOne.Tor
 
         private CancellationTokenSource _stop { get; set; }
 
-        private const string _toolsDir = "tools";
+        private const string _torBinariesDir = "TorBinaries";
         
         private static readonly object _torsocksauthlock = new object();
         private static TorSocks5Client client;
@@ -80,7 +80,7 @@ namespace FreeMarketOne.Tor
                     try
                     {
                         var torPath = "";
-                        var fulToolsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
+                        var fulToolsDir = Path.Combine(GetTorBinaryPath(), _torBinariesDir);
 
                         if (IsTorRunning(_configuration.TorEndPoint))
                         {
@@ -95,7 +95,7 @@ namespace FreeMarketOne.Tor
                         }
                         else // If Windows
                         {
-                            torPath = $@"{_toolsDir}\Tor\tor.exe";
+                            torPath = $@"{_torBinariesDir}\Tor\tor.exe";
                         }
 
                         if (!File.Exists(torPath))
@@ -129,13 +129,13 @@ namespace FreeMarketOne.Tor
                         string torArguments = $" -f torrc";
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            _logger.Information($"toolsDir : {_toolsDir}/Tor/");
+                            _logger.Information($"toolsDir : {_torBinariesDir}/Tor/");
                             _logger.Information($"torPath : {torPath}");
                             _logger.Information($"torArguments : {torArguments}");
 
                             _torProcess = Process.Start(new ProcessStartInfo
                             {
-                                WorkingDirectory = $@"{_toolsDir}/Tor/",
+                                WorkingDirectory = $@"{_torBinariesDir}/Tor/",
                                 FileName = torPath,
                                 Arguments = torArguments,
                                 UseShellExecute = false,
@@ -189,7 +189,7 @@ namespace FreeMarketOne.Tor
 
         private void CopyDefaultConfig()
         {
-            string torConfigDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
+            string torConfigDir = Path.Combine(GetTorBinaryPath(), _torBinariesDir);
             string sourceConfig = Path.Combine(torConfigDir, "torrc-default");
             string targetConfig = Path.Combine(torConfigDir, "Tor", "torrc");
 
@@ -198,7 +198,7 @@ namespace FreeMarketOne.Tor
 
         private void GetOnionEndPoint()
         {
-            string torHiddenServiceDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir, "Tor", "hidden_service");
+            string torHiddenServiceDir = Path.Combine(GetTorBinaryPath(), _torBinariesDir, "Tor", "hidden_service");
 
             if (Directory.Exists(torHiddenServiceDir))
             {
@@ -222,9 +222,23 @@ namespace FreeMarketOne.Tor
             }
         }
 
+        internal static string GetTorBinaryPath()
+        {
+            var fullBaseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!fullBaseDirectory.StartsWith('/'))
+                {
+                    fullBaseDirectory.Insert(0, "/");
+                }
+            }
+
+            return fullBaseDirectory;
+        }
+
         private void InstallTor()
         {
-            string torDaemonsDir = Path.Combine(_configuration.FullBaseDirectory, _toolsDir);
+            string torDaemonsDir = Path.Combine(GetTorBinaryPath(), _torBinariesDir);
 
             string dataZip = Path.Combine(torDaemonsDir, "data-folder.zip");
             IoHelper.BetterExtractZipToDirectoryAsync(dataZip, torDaemonsDir).GetAwaiter().GetResult();

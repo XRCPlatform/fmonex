@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using CommandLine;
 using FreeMarketOne.Users;
@@ -9,16 +10,7 @@ namespace FreeMarketOne.ServerCore
     {
         private static FreeMarketOneServer server;
         private static CancellationTokenSource cancellationTokenSource;
-
-        public class Options
-        {
-            [Option('c', "config", Required = true, HelpText="Path to config file")]
-            public string ConfigFile { get; set; }
-
-            [Option('p', "password", Required = false, HelpText="Password for user")]
-            public string Password { get; set; }
-        }
-
+        
         static void Main(string[] args)
         {
             cancellationTokenSource = new CancellationTokenSource();
@@ -29,21 +21,31 @@ namespace FreeMarketOne.ServerCore
         {
             Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleShutdown);
             var cancellationToken = cancellationTokenSource.Token;
-            Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(o =>
+            CommandLineOptions.Parse(args, o =>
                 {
                     Console.WriteLine("FreeMarket One Server");
                     Console.WriteLine("=====================");
                     Console.WriteLine();
-                    var password = o.Password == null ? "" : o.Password;
-                    var userManager = new UserManager(FreeMarketOneServer.Current.MakeConfiguration(o.ConfigFile));
+                    var password = o.Password ?? "";
+                    // Hack to remove: if -c is set, set -d. -d is now preferred
+                    if (o.ConfigFile != null)
+                    {
+                        o.DataDir = Path.GetDirectoryName(Path.GetFullPath(o.ConfigFile));
+                        o.ConfigFile = Path.GetFileName(o.ConfigFile);
+                    }
+
+                    FreeMarketOneServer.Current.DataDir = o.DataDir != null ? 
+                        new DataDir(o.DataDir, o.ConfigFile) : 
+                        new DataDir();
+
+                    var userManager = new UserManager(FreeMarketOneServer.Current.MakeConfiguration());
                     while (password == "" || (userManager.Initialize(password, null) != Users.UserManager.PrivateKeyStates.Valid))
                     {
                         Console.Write("Password: ");
                         password = Console.ReadLine();
                     }
 
-                    FreeMarketOneServer.Current.Initialize(password, null, o.ConfigFile);
+                    FreeMarketOneServer.Current.Initialize(password, null);
                     FreeMarketOneServer.Current.LoadingEvent += new EventHandler<string>(OnLoadingEvent);
                     while (!cancellationToken.IsCancellationRequested)
                         Thread.Sleep(2000);

@@ -70,6 +70,8 @@ namespace FreeMarketOne.ServerCore
         public IBlockChainManager<BaseAction> BaseBlockChainManager;
         public IBlockChainManager<MarketAction> MarketBlockChainManager;
 
+        public DataDir DataDir;
+
         public event EventHandler BaseBlockChainLoadEndedEvent;
         public event EventHandler MarketBlockChainLoadEndedEvent;
 
@@ -85,26 +87,28 @@ namespace FreeMarketOne.ServerCore
         private BackgroundQueue backgroundQueue = new BackgroundQueue();
         public bool IsShuttingDown = false;
 
-        public IBaseConfiguration MakeConfiguration(string configFilePath)
+        public IBaseConfiguration MakeConfiguration()
         {
-            var fullBaseDirectory = InitConfigurationHelper.InitializeFullBaseDirectory();
-            string configFileName = "appsettings.json";
-            if (configFilePath != null)
-            {
-                fullBaseDirectory = Path.GetFullPath(Path.GetDirectoryName(configFilePath));
-                configFileName = Path.GetFileName(configFilePath);
-            }
 
+            // use an existing datadir controlling directory locations
+            // or default to just the app context directory
+            if (DataDir == null)
+            {
+                DataDir = new DataDir();
+            }
+            Console.WriteLine($"Data dir is: {DataDir.DataDirPath}");
+            Console.WriteLine($"Config file name is: {DataDir.ConfigFileName}");
+            
             //Configuration
             var builder = new ConfigurationBuilder()
-                .SetBasePath(fullBaseDirectory)
-                .AddJsonFile(configFileName, true, false);
+                .SetBasePath(DataDir.DataDirPath)
+                .AddJsonFile(DataDir.ConfigFile, true, false);
             var configFile = builder.Build();
 
             var configuration = InitConfigurationHelper.InitializeEnvironment(configFile);
 
             //Config
-            configuration.FullBaseDirectory = fullBaseDirectory;
+            configuration.FullBaseDirectory = DataDir.DataDirPath;
             InitConfigurationHelper.InitializeBaseOnionSeedsEndPoint(configuration, configFile);
             InitConfigurationHelper.InitializeBaseTorEndPoint(configuration, configFile);
             InitConfigurationHelper.InitializeLogFilePath(configuration, configFile);
@@ -127,13 +131,13 @@ namespace FreeMarketOne.ServerCore
         {
             return await Task.Run(() => this.Initialize(password, firstUseData));
         }
-		
+        
         public PrivateKeyStates Initialize(string password = null, UserDataV1 firstUserData = null, string configFilePath = null)
         {
             PrivateKeyStates initResult = PrivateKeyStates.NoPassword;
 
             //Environment
-            Configuration = MakeConfiguration(configFilePath);
+            Configuration = MakeConfiguration();
             blockChainBasePolicy = ((ExtendedConfiguration)Configuration).BlockChainBasePolicy;
             blockChainMarketPolicy = ((ExtendedConfiguration)Configuration).BlockChainMarketPolicy;
             //Initialize Logger

@@ -1,7 +1,11 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
+using FreeMarketOne.ServerCore;
+using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
 
 namespace FreeMarketApp
 {
@@ -14,6 +18,18 @@ namespace FreeMarketApp
             Console.WriteLine("This program comes with ABSOLUTELY NO WARRANTY;");
             Console.WriteLine("This is free software, and you are welcome to redistribute it;");
             Console.WriteLine("------------------------------------");
+            
+            CommandLineOptions.Parse(args, o =>
+            {
+                if (o.ConfigFile != null)
+                {
+                    o.DataDir = Path.GetDirectoryName(Path.GetFullPath(o.ConfigFile));
+                    o.ConfigFile = Path.GetFileName(o.ConfigFile);
+                }
+                FMONE.Current.DataDir = o.DataDir != null ? 
+                    new DataDir(o.DataDir, o.ConfigFile) : 
+                    new DataDir();
+            });
 
             BuildAvaloniaApp()
                .StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);

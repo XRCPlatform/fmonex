@@ -48,8 +48,9 @@ namespace Libplanet.Net
         private TorProcessManager _torProcessManager;
         private static AsyncLock _circuitLoadingMutex;
         private static AsyncLock _torControlChangeCirquitMutex;
-	private RoutingTable _routingTable;
-	
+	    private RoutingTable _routingTable;
+        private static bool IsDebug = false;
+
         static TorSocks5Transport()
         {
             try
@@ -63,8 +64,12 @@ namespace Libplanet.Net
             catch (Exception){};
             _circuitLoadingMutex = new AsyncLock();
             _torControlChangeCirquitMutex = new AsyncLock();
+
+            #if DEBUG
+               IsDebug = true;            
+            #endif
         }
-        
+
         public TorSocks5Transport(
             PrivateKey privateKey,
             AppProtocolVersion appProtocolVersion,
@@ -112,7 +117,7 @@ namespace Libplanet.Net
                 peerStateChangeHandler);
 
             PeerStateChangeEvent = peerStateChangeHandler;
-            _torProcessManager = torProcessManager;          
+            _torProcessManager = torProcessManager;
 
         }
 
@@ -424,7 +429,7 @@ namespace Libplanet.Net
                 //useful info
                 //https://github.com/torproject/torspec/blob/master/control-spec.txt
                 //https://iphelix.medium.com/hacking-the-tor-control-protocol-fb844db6a606
-                if (_torControlClient.Running)
+                if (_torControlClient.Running && IsDebug)
                 {
                     try
                     {

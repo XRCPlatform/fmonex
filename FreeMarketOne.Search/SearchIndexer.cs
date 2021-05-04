@@ -330,7 +330,9 @@ namespace FreeMarketOne.Search
                     {
                         //items that have allready been indexed shall be skipped for efficiency
                         if (!searchResult.Results[y].Signature.Equals(skipSignature)
+                            && (searchResult.Documents.Count == searchResult.Results.Count 
                             && !searchResult.Documents[y].GetField("BlockHash").GetStringValue().Equals(blockHash))
+                           )
                         {
                             Index(searchResult.Results[y], searchResult.Documents[y].GetField("BlockHash").GetStringValue(), false, sellerAggregate, true, OfferDirection.Sold);
                         }

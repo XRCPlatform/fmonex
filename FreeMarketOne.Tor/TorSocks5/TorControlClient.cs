@@ -52,11 +52,31 @@ namespace FreeMarketOne.Tor
             if (!initialised)
             {
                 await InitializeConnectTcpConnectionAsync(ctsToken).ConfigureAwait(false);
-                await AuthenticateAsync(ctsToken).ConfigureAwait(false);
+                await AuthenticateAsync(ctsToken).ConfigureAwait(false);                
                 initialised = true;
             }
         }
 
+        public async Task ReInit(CancellationToken ctsToken = default)
+        {
+            using (await AsyncLock.LockAsync(ctsToken).ConfigureAwait(false))
+            {
+                initialised = false;
+                CirquitRequested = false;
+                try
+                {
+                    DisposeTcpClient();
+                }
+                catch (Exception)
+                {
+                    //swallow if there are errors here disposing it's because we are already disposed.
+                }                
+            }
+            //potential race condition but if move into lock get deadlock
+            await Init(ctsToken);
+        }
+
+        public static bool CirquitRequested { get; private set; }
         public async Task<bool> IsCircuitEstablishedAsync(CancellationToken ctsToken = default)
         {
             using (await AsyncLock.LockAsync(ctsToken).ConfigureAwait(false))
@@ -73,7 +93,7 @@ namespace FreeMarketOne.Tor
                     {
                         return false;
                     }
-                    else throw new TorException($"Wrong response to 'GETINFO status/circuit-established': '{response}'.");
+                    //else throw new TorException($"Wrong response to 'GETINFO status/circuit-established': '{response}'.");
                 }
                 return true;//??? to avoid recycling cirquits on false positives
             }
@@ -87,10 +107,13 @@ namespace FreeMarketOne.Tor
                 {
                     OnCircuitChangeRequested();
 
-                    await InitializeConnectTcpConnectionAsync(ctsToken).ConfigureAwait(false);
-
-                    await AuthenticateAsync(ctsToken).ConfigureAwait(false);
-
+                    if (!initialised)
+                    {
+                        await InitializeConnectTcpConnectionAsync(ctsToken).ConfigureAwait(false);
+                        await AuthenticateAsync(ctsToken).ConfigureAwait(false);
+                        initialised = true;
+                    }
+                    CirquitRequested = true;
                     // Subscribe to SIGNAL events
                     await SendCommandAsync("SETEVENTS SIGNAL", initAuthDispose: false, ctsToken: ctsToken).ConfigureAwait(false);
 
@@ -106,7 +129,7 @@ namespace FreeMarketOne.Tor
                 }
                 finally
                 {
-                    DisposeTcpClient();
+                    //DisposeTcpClient();
 
                     // safety delay, in case the tor client is not quick enough with the actions
                     await Task.Delay(100, ctsToken).ConfigureAwait(false);
@@ -209,16 +232,16 @@ namespace FreeMarketOne.Tor
                     var responseLines = new List<string>(response.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
 
                     // error check a few commands I use
-                    if (command.StartsWith("AUTHENTICATE", StringComparison.OrdinalIgnoreCase)
-                        || command.StartsWith("SETEVENTS", StringComparison.OrdinalIgnoreCase)
-                        || command.StartsWith("SIGNAL", StringComparison.OrdinalIgnoreCase)
-                        || command.StartsWith("GETINFO", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!responseLines.Any(x => x.StartsWith("250 OK", StringComparison.OrdinalIgnoreCase) || x.StartsWith("250-OK", StringComparison.OrdinalIgnoreCase)))
-                            throw new TorException(
-                                $"Unexpected {nameof(response)} from Tor Control Port to sent {nameof(command)} : {command} , {nameof(response)} : {response}.");
+                    //if (command.StartsWith("AUTHENTICATE", StringComparison.OrdinalIgnoreCase)
+                    //    || command.StartsWith("SETEVENTS", StringComparison.OrdinalIgnoreCase)
+                    //    || command.StartsWith("SIGNAL", StringComparison.OrdinalIgnoreCase)
+                    //    || command.StartsWith("GETINFO", StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    //if (!responseLines.Any(x => x.StartsWith("250 OK", StringComparison.OrdinalIgnoreCase) || x.StartsWith("250-OK", StringComparison.OrdinalIgnoreCase)))
+                    //    //    throw new TorException(
+                    //    //        $"Unexpected {nameof(response)} from Tor Control Port to sent {nameof(command)} : {command} , {nameof(response)} : {response}.");
 
-                    }
+                    //}
 
                     // If we are tracking the signal events throw exception if didn't get the expected response
                     if (command.StartsWith("SIGNAL", StringComparison.OrdinalIgnoreCase))

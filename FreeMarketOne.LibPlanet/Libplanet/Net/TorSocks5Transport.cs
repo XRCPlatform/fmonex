@@ -44,10 +44,32 @@ namespace Libplanet.Net
 
         private TorSocks5Manager _torSocs5Manager;
         private TotServer _server;
-        private static TorControlClient torControlClient;
+        private static TorControlClient _torControlClient;
         private TorProcessManager _torProcessManager;
-        private readonly AsyncLock _circuitLoadingMutex;
-        private RoutingTable _routingTable;
+        private static AsyncLock _circuitLoadingMutex;
+        private static AsyncLock _torControlChangeCirquitMutex;
+	    private RoutingTable _routingTable;
+        private static bool IsDebug = false;
+
+        static TorSocks5Transport()
+        {
+            try
+            {
+                if (_torControlClient == null)
+                {
+                    _torControlClient = new TorControlClient("127.0.0.1", 9051, "Let'sUpdateThisLaterProgramatically");
+                }
+            }
+            //no throwing in static constructor please
+            catch (Exception){};
+            _circuitLoadingMutex = new AsyncLock();
+            _torControlChangeCirquitMutex = new AsyncLock();
+
+            #if DEBUG
+               IsDebug = true;            
+            #endif
+        }
+
         public TorSocks5Transport(
             PrivateKey privateKey,
             AppProtocolVersion appProtocolVersion,
@@ -96,18 +118,6 @@ namespace Libplanet.Net
 
             PeerStateChangeEvent = peerStateChangeHandler;
             _torProcessManager = torProcessManager;
-            _circuitLoadingMutex = new AsyncLock();
-            try
-            {
-                if (torControlClient == null)
-                {
-                    torControlClient = new TorControlClient("127.0.0.1", 9051, "Let'sUpdateThisLaterProgramatically");
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Information($"Clould not construct TorControlClient on swarm {_listenPort} error {e}");
-            }
 
         }
 
@@ -144,10 +154,10 @@ namespace Libplanet.Net
             Running = true;
             _cancellationToken = cancellationToken;
             List<Task> tasks = new List<Task>();
-
-            tasks.Add(WaitForCirquit(_cancellationToken));
+                        
             tasks.Add(RefreshTableAsync(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(10), _cancellationToken));
             tasks.Add(RebuildConnectionAsync(TimeSpan.FromMinutes(30), _cancellationToken));
+            tasks.Add(VerifyTorCirquit(TimeSpan.FromMinutes(1), _cancellationToken));
             await await Task.WhenAny(tasks);
         }
 
@@ -164,40 +174,93 @@ namespace Libplanet.Net
             _server = new TotServer(endPoint);
             _logger.Information($"Listening on {_listenPort}");
 
-            await _server.StartAsync();
-            _server.RequestArrived += RequestArrived;
-
             try
             {
-                await torControlClient.Init().ConfigureAwait(false);
-                await WaitForCirquit(cancellationToken);
+                if (!_torControlClient.Running)
+                {
+                    await _torControlClient.Init().ConfigureAwait(false);
+                }
             }
             catch (Exception e)
             {
                 _logger.Information($"Failed initializing TorControlClient on swarm {_listenPort} experienced error {e}");
             }
 
+            await _server.StartAsync();
+            _server.RequestArrived += RequestArrived;
+
             return;
         }
 
-        public async Task WaitForCirquit(CancellationToken cancellationToken = default)
+        private async Task VerifyTorCirquit(TimeSpan period, CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(period, cancellationToken);
+                    await WaitForCirquit(cancellationToken);
+                }
+                catch { }
+            }
+        }
+
+        public async Task WaitForRunningAsync(CancellationToken cancellationToken = default)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                if (_torControlClient.Running)
+                {
+                    if (await WaitForCirquit(cancellationToken))
+                    {
+                        break;
+                    }
+                }
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+            }
+        }
+
+
+        public async Task<bool> WaitForCirquit(CancellationToken cancellationToken = default)
         {
             try
             {
+                if (_torControlClient == null || !_torControlClient.Running)
+                {
+                    return false;
+                }               
+
                 using (await _circuitLoadingMutex.LockAsync(cancellationToken).ConfigureAwait(false))
                 {
+                    Stopwatch total = new Stopwatch();
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    total.Start();
+
                     bool hasCircuit = false;
                     while (!hasCircuit)
                     {
-                        hasCircuit = await torControlClient.IsCircuitEstablishedAsync(cancellationToken);
-
+                        hasCircuit = await _torControlClient.IsCircuitEstablishedAsync(cancellationToken);
+                        //var streaminfo = await torControlClient.SendCommandAsync("GETINFO circuit-status", cancellationToken);
+                        //_logger.Information($"TOR cirquit info {streaminfo} Elapsed:{total.ElapsedMilliseconds}ms");
                         if (!hasCircuit)
                         {
-                            _logger.Information($"TOR cirquit is NOT ESTABLISHED, changing cirquit and waiting to acquire.");
-                            await torControlClient.ChangeCircuitAsync();
+                            _logger.Information($"TOR cirquit is NOT ESTABLISHED. Elapsed:{total.ElapsedMilliseconds}ms");
+                          
+                            if (stopwatch.ElapsedMilliseconds/ 300000 > 1)
+                            {
+                                //this expensive do this only once every 5 minutes                                
+                                //requesting circuit too often will rate limit 32 general pupose circuits allowed
+                                await _torControlClient.ChangeCircuitAsync();
+                                _logger.Information($"TOR cirquit is NOT ESTABLISHED, requested new cirquit. Elapsed:{total.ElapsedMilliseconds}ms");
+                                stopwatch.Reset();
+                            }
                             await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-                        }
+                        }                        
                     }
+                    _logger.Information($"TOR cirquit ESTABLISHED. Elapsed:{total.ElapsedMilliseconds}ms");
+                    
+                    return true;
                 }
             }
             catch (Exception e)
@@ -205,9 +268,9 @@ namespace Libplanet.Net
                 _logger.Information($"WaitForCirquit on swarm {_listenPort} experienced error {e}");
             }
 
-            return;
+            return false;
         }
-
+       
         public async Task StopAsync(TimeSpan waitFor, CancellationToken cancellationToken = default)
         {
             if (Running)
@@ -342,14 +405,16 @@ namespace Libplanet.Net
             catch (ConnectionException cex)
             {
                 _logger.Debug($"Tor connection exception:{cex}");
-                //restart tor /// cex
                 try
                 {
-                    if (_torProcessManager != null)//&& !_torProcessManager.IsTorRunning()
+                    if (_torProcessManager != null)
                     {
                         _logger.Debug($"Tor is down, starting ...");
                         _torProcessManager.ReStart();
                         _logger.Debug($"Tor started.");
+                        _logger.Debug($"Reconecting to TorControll client.");
+                        await _torControlClient.ReInit(new CancellationToken());
+                        _logger.Debug($"TorControll client reconected.");
                     }
                 }
                 catch (Exception e)
@@ -364,14 +429,15 @@ namespace Libplanet.Net
                 //useful info
                 //https://github.com/torproject/torspec/blob/master/control-spec.txt
                 //https://iphelix.medium.com/hacking-the-tor-control-protocol-fb844db6a606
-                if (torControlClient.Running)
+                if (_torControlClient.Running && IsDebug)
                 {
                     try
                     {
                         var ct = new CancellationToken();
-                        var hasCircuit = await torControlClient.IsCircuitEstablishedAsync();
-                        var streaminfo = await torControlClient.SendCommandAsync("GETINFO stream-status", ct);
-                        _logger.Debug($"Connection to peer Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] failed with Error:{socks5Error} Status: hasCircuit:{hasCircuit} StreamInfo:{streaminfo}");
+                        var hasCircuit = await _torControlClient.IsCircuitEstablishedAsync();
+                        var streaminfo = await _torControlClient.SendCommandAsync("GETINFO stream-status", ct);
+                        //var cirquitinfo = await _torControlClient.SendCommandAsync("GETINFO circuit-status", ct);
+                        _logger.Debug($"Connection to peer Peer:[{peer.EndPoint.Host}:{peer.EndPoint.Port}] failed with Error:{socks5Error} Status: hasCircuit:{hasCircuit} \n StreamInfo:{streaminfo}");
                     }
                     catch (Exception)
                     {
@@ -571,17 +637,6 @@ namespace Libplanet.Net
         }
 
         //public string Trace() => Protocol is null ? string.Empty : Protocol.Trace();
-
-        public Task WaitForRunningAsync()
-        {
-            while (true)
-            {
-                if (Running) break;
-                Task.Delay(TimeSpan.FromSeconds(1));
-            }
-            return Task.CompletedTask;
-        }
-
 
         //public async Task CheckAllPeersAsync(CancellationToken cancellationToken, TimeSpan? timeout)
         //{

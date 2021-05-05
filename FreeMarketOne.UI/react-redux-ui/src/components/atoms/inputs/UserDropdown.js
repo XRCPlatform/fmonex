@@ -25,8 +25,9 @@ const UserDropdown = ({ open, handleOpen }) => {
 
   return (
     <div className={open ? "dropdown open" : "dropdown"} ref={selectRef}>
-      <span className="user-login" onClick={handleOpen}>
+      <span className="user-login icon" onClick={handleOpen}>
         <i className="ion-ios-contact-outline"> </i>
+        {!open && <div className="tooltipp tooltip-bott">Account</div>}
       </span>{" "}
       <div className="dropdown-content usr">
         <div className="dropdown-menu-header">
@@ -52,7 +53,7 @@ const UserDropdown = ({ open, handleOpen }) => {
         </div>
         <div className="section">
           <span>
-            <i className="ion-power" />
+            <i className="ion-log-out" />
             Logout
           </span>
         </div>

@@ -2,10 +2,10 @@
     "data": [
         {
             "id": "67e731b1-ba1c-49d1-b02f-435e7fc32726",
-            "title": "",
+            "title": "Home",
             "icon": "ion-ios-home-outline",
             "status": 1,
-            "to":"/",
+            "to": "/",
             "subMenu": []
         },
         {
@@ -13,31 +13,87 @@
             "title": "All markets",
             "icon": "ion-stats-bars",
             "status": 1,
-            "to":"/markets",
-            "subMenu": []
+            "to": "/markets",
+            "subMenu": [
+                {
+                    "title": "Some link",
+                    "icon": "ion-android-star-outline"
+                },
+                {
+                    "title": "Some link",
+                    "icon": "ion-heart-broken"
+                },
+                {
+                    "title": "Some link",
+                    "icon": "ion-ios-color-filter-outline"
+                },
+                {
+                    "title": "Some link",
+                    "icon": "ion-android-alarm-clock"
+                }
+            ]
         },
         {
             "id": "9787e731b1-ba1c-49d1-b02f-435e7fc32726",
             "title": "Categories",
-            "icon": "ion-ios-list-outline",
+            "icon": "ion-grid",
             "status": 1,
-            "to":"/categories",
-            "subMenu": []
+            "to": "/categories",
+            "subMenu": [
+                {
+                    "title": "Gold",
+                    "icon": "ion-ios-color-filter-outline"
+                },
+                {
+                    "title": "Silver",
+                    "icon": "ion-android-alarm-clock"
+                },
+                {
+                    "title": "Platinum",
+                    "icon": "ion-ios-color-filter-outline"
+                },
+                {
+                    "title": "Rhodium",
+                    "icon": "ion-android-alarm-clock"
+                },
+                {
+                    "title": "Palladium",
+                    "icon": "ion-ios-color-filter-outline"
+                },
+                {
+                    "title": "Copper",
+                    "icon": "ion-android-alarm-clock"
+                },
+                {
+                    "title": "Rare Coins",
+                    "icon": "ion-ios-color-filter-outline"
+                },
+                {
+                    "title": "Jewelry",
+                    "icon": "ion-android-alarm-clock"
+                },
+                {
+                    "title": "Cryptocurrency",
+                    "icon": "ion-ios-color-filter-outline"
+                }
+             
+             
+            ]
         },
         {
             "id": "34532731b1-ba1c-49d1-b02f-435e7fc32726",
             "title": "My products",
             "icon": "ion-ios-albums-outline",
             "status": 1,
-            "to":"/products",
+            "to": "/products",
             "subMenu": []
         },
         {
             "id": "8342731b1-ba1c-49d1-b02f-435e7fc32726",
-            "title": "Sales dashboard",
-            "icon": "ion-arrow-graph-up-right",
+            "title": "Dashboard",
+            "icon": "ion-ios-analytics-outline",
             "status": 1,
-            "to":"/dashboard",
+            "to": "/dashboard",
             "subMenu": []
         }
     ]

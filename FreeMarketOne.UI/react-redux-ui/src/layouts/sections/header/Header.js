@@ -1,4 +1,5 @@
-// React, Redux, Router
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -48,8 +49,15 @@ const Header = ({ handleOpenSearch, activeSearch }) => {
           free<span>market</span>one
         </div>
         <div className="header_ctrl">
-          <span className={!activeSearch ? "search-btn" : "search-btn-active"}>
+          <span
+            className={
+              !activeSearch ? "search-btn icon" : "search-btn-active icon"
+            }
+          >
             <i className="ion-ios-search" onClick={handleOpenSearch} />
+            {!activeSearch && (
+              <div className="tooltipp tooltip-bott">Search</div>
+            )}
           </span>
           <DividerVerticalSmall />
           <MsgDropdown
@@ -57,11 +65,8 @@ const Header = ({ handleOpenSearch, activeSearch }) => {
             handleOpen={handleOpenkMsg}
             messages={messages}
           />
-
           <DividerVerticalSmall />
-
           <UserDropdown open={openUser} handleOpen={handleOpenUser} />
-
           <DividerVerticalSmall />
           <Select options={OPTIONS} value={selected} onChange={setSelected} />
         </div>

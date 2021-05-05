@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 /**
 |--------------------------------------------------
 | IMPORTS
@@ -17,9 +18,11 @@ const GET_ALL_MSGS_FLR = "auth/GET_ALL_MSGS_FLR";
 
 const OPEN_CONVERSATION = "OPEN_CONVERSATION";
 
-const REMOVE_CONVERSATION = "REMOVE_CONVERSATION";
+const CLOSE_CONVERSATION = "CLOSE_CONVERSATION";
 
 const SEND_MESSAGE = "SEND_MESSAGE";
+
+const REMOVE_EXCESS = "REMOVE_EXCESS";
 
 /**
  * ACTIONS
@@ -51,9 +54,9 @@ export const openConversation = data => async dispatch => {
   });
 };
 
-export const removeConversation = id => async dispatch => {
+export const closeConversation = id => async dispatch => {
   dispatch({
-    type: REMOVE_CONVERSATION,
+    type: CLOSE_CONVERSATION,
     payload: id
   });
 };
@@ -65,6 +68,12 @@ export const sendMessage = (id, body, handleClearInput) => async dispatch => {
     data: body
   });
   handleClearInput();
+};
+
+export const removeExcess = () => async dispatch => {
+  dispatch({
+    type: REMOVE_EXCESS
+  });
 };
 
 /**
@@ -107,7 +116,7 @@ export default function reducer(state = INIT_STATE, action = {}) {
           : state.conversations
       };
 
-    case REMOVE_CONVERSATION:
+    case CLOSE_CONVERSATION:
       return {
         ...state,
         conversations: state.conversations.filter(
@@ -119,7 +128,6 @@ export default function reducer(state = INIT_STATE, action = {}) {
       return {
         ...state,
         loading: false,
-
         conversations: state.conversations.map(item => {
           if (item.id === action.id) {
             item.messages.push(action.data);
@@ -127,6 +135,14 @@ export default function reducer(state = INIT_STATE, action = {}) {
           }
           return item;
         })
+      };
+
+    case REMOVE_EXCESS:
+      const arr = state.conversations;
+      arr.shift();
+      return {
+        ...state,
+        conversations: arr
       };
 
     default:

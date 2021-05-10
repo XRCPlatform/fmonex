@@ -10,7 +10,7 @@ namespace FreeMarketOne.Pools
         bool Start();
         bool IsPoolManagerRunning();
         void Stop();
-        PoolManagerStates.Errors? AcceptActionItem(IBaseItem actionItem);
+        PoolManagerStates.Errors? AcceptActionItem(IBaseItem actionItem, bool forceIt = false);
         bool SaveActionItemsToFile();
         bool LoadActionItemsFromFile();
         PoolManagerStates.Errors? CheckActionItemInProcessing(IBaseItem actionItem);

@@ -12,6 +12,7 @@ using FreeMarketOne.DataStructure.Chat;
 using FreeMarketOne.Extensions.Helpers;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -72,7 +73,7 @@ namespace FreeMarketApp.Views.Pages
                         var chatData = chatManager.GetChat(_activeChat.MarketItem.Hash);
                         if (chatData.ChatItems != null)
                         {
-                            if ((chatData.ChatItems.Count != _activeChat.ChatItems.Count) ||
+                            if ((chatData.ChatItems.Count != _activeChat?.ChatItems.Count) ||
                                 ((chatData.ChatItems.Count == 1) && chatManager.IsChatValid(chatData.ChatItems)))
                             {
                                 Dispatcher.UIThread.InvokeAsync(() =>
@@ -217,7 +218,7 @@ namespace FreeMarketApp.Views.Pages
                 ((ChatPageViewModel)DataContext).ChatItems.Clear();
                 if ((chatData.ChatItems != null) && chatData.ChatItems.Any() && chatManager.IsChatValid(chatData.ChatItems))
                 {
-                    var decryptedChat = chatManager.DecryptChatItems(chatData.ChatItems);
+                    var decryptedChat = chatManager.DecryptChatItems(Dedupe(chatData.ChatItems));
                     ((ChatPageViewModel)DataContext).ChatItems.AddRange(decryptedChat);
                     btWithoutMessage.IsVisible = false;
                     btSendMessage.IsEnabled = true;
@@ -233,6 +234,20 @@ namespace FreeMarketApp.Views.Pages
                 await Task.Delay(TimeSpans.Ms100);
                 svChat.Offset = new Vector(svChat.Offset.X, svChat.Extent.Height - svChat.Viewport.Height);
             }
+        }
+
+        private List<ChatItem> Dedupe(List<ChatItem> list)
+        {
+            Dictionary<String, ChatItem> filter = new Dictionary<string, ChatItem>();
+            foreach (var item in list)
+            {
+                string key = $"{item.Message}{item.DateCreated}";
+                if (!filter.ContainsKey(key))
+                {
+                    filter.Add(key, item);
+                }
+            }
+            return filter.Values.ToList();
         }
 
         private void ClearForm()

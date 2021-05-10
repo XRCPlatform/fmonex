@@ -22,7 +22,7 @@ cp ${publish_directory}/FreeMarketApp pkg-debian/usr/bin/freemarketone
 
 cat <<EOF > pkg-debian/DEBIAN/control
 Package: freemarketone
-Version: 0.0.1
+Version: 1.1
 Architecture: amd64
 Essential: no
 Section: web
@@ -44,7 +44,7 @@ EOF
 cd pkg-debian/
 find . -type f ! -regex '.*.git.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > DEBIAN/md5sums
 cd ..
-dpkg -b pkg-debian freemarketone-0.1.0_amd64.deb
+dpkg -b pkg-debian freemarketone-1.1_amd64.deb
 
 rm -Rf pkg-debian
 

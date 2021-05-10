@@ -457,6 +457,17 @@ namespace FreeMarketOne.Tor
             _torProcess?.Dispose();
             _torProcess = null;
 
+            //safe kill of tor.exe process
+            Process[] processes = Process.GetProcessesByName("tor");
+            if (processes != null)
+            {
+                foreach (Process process in processes)
+                {
+                    process.Kill();
+                    process.WaitForExit();
+                }
+            }
+
             _logger.Information("Tor stopped.");
         }
 

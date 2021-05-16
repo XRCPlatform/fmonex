@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { openConversation } from "Modules/units/Messages";
 
 // Style
-import "./Input.css";
+import "./UsrMsg.css";
 
 const MsgDropdown = ({ open, handleOpen, messages }) => {
   const dispatch = useDispatch();

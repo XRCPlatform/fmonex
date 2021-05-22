@@ -1,10 +1,18 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 
-import Button from "../../atoms/buttons/ButtonWithEffect";
+// Actions
+import { login } from "Modules/units/Auth";
 
-import "../UsrMsg.css";
+import Button from "../../../../components/atoms/buttons/ButtonWithEffect";
 
-const LoginSignupSection = ({ setLoginTest }) => {
+import "../Style.css";
+
+const LoginSignupSection = ({ setLoad }) => {
+  const dispatch = useDispatch();
+  const history = useHistory();
+
   const [state, setState] = useState({ check: "login" });
 
   const handleChange = e => {
@@ -15,17 +23,22 @@ const LoginSignupSection = ({ setLoginTest }) => {
     });
   };
 
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    dispatch(login(history, setLoad));
+  };
+
   return (
     <>
-      <div className="dropdown-menu-header">
-        {state.check !== "login" ? (
-          <span>Create account</span>
-        ) : (
-          <span>Login to your account</span>
-        )}
-        <i className="ion-log-in" />
-      </div>
       <div className="login">
+        <div className="login_title">
+          {state.check !== "login" ? (
+            <span>Create an account</span>
+          ) : (
+            <span>Login to your account</span>
+          )}
+        </div>
         <div className="switch">
           <div className="input-row">
             <input
@@ -56,15 +69,6 @@ const LoginSignupSection = ({ setLoginTest }) => {
           <span className="switch-selection" />
         </div>
         <div className="login_fields">
-          {state.check !== "login" && (
-            <div className="login_fields__email">
-              <div className="icon">
-                <i className="ion-ios-email-outline" />
-              </div>
-              <input placeholder="Email" type="text" />
-              <div className="validation" />
-            </div>
-          )}
           <div className="login_fields__user">
             <div className="icon">
               <i className="ion-ios-contact-outline" />
@@ -85,14 +89,14 @@ const LoginSignupSection = ({ setLoginTest }) => {
               <div className="icon">
                 <i className="ion-ios-locked-outline" />
               </div>
-              <input placeholder="Repeate password" type="password" />
+              <input placeholder="Repeat password" type="password" />
               <div className="validation" />
             </div>
           )}
           <div className="login_fields__submit">
             <Button
               title={state.check !== "login" ? "Signup" : "Login"}
-              onClick={setLoginTest}
+              onClick={handleSubmit}
             />
           </div>
         </div>

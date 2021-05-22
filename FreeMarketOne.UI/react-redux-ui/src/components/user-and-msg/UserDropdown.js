@@ -1,14 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
+
+// Actions
+import { logOut } from "Modules/units/Auth";
 
 import MenuSection from "./components/MenuSection";
-import LoginSignupSection from "./components/LoginSignupSection";
 
 import "./UsrMsg.css";
 
 const UserDropdown = ({ open, handleOpen }) => {
+  const dispatch = useDispatch();
+  const history = useHistory();
   const selectRef = useRef(null);
-
-  const [loginTest, setLoginTest] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = e => {
@@ -25,8 +29,10 @@ const UserDropdown = ({ open, handleOpen }) => {
     };
   }, [open]);
 
-  const handleSetLoginTest = () => {
-    setLoginTest(!loginTest);
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    dispatch(logOut(history));
   };
 
   return (
@@ -36,11 +42,7 @@ const UserDropdown = ({ open, handleOpen }) => {
         {!open && <div className="tooltipp tooltip-bott">Account</div>}
       </span>{" "}
       <div className="dropdown-content usr">
-        {loginTest ? (
-          <MenuSection setLoginTest={handleSetLoginTest} />
-        ) : (
-          <LoginSignupSection setLoginTest={handleSetLoginTest} />
-        )}
+        <MenuSection setLoginTest={handleSubmit} />
       </div>
     </div>
   );

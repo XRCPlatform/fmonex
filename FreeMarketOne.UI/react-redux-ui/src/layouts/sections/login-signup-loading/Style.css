@@ -1,16 +1,13 @@
 @import url("https://fonts.googleapis.com/css?family=Merriweather+Sans");
- html {
+html {
   overflow: auto;
 }
 body {
   font-family: "Merriweather Sans", sans-serif;
   margin: 0px;
-}   
-
-
+}
 
 .box_c {
-
   background-image: linear-gradient(
       66deg,
       transparent 0%,
@@ -288,177 +285,173 @@ body {
 
 /* <----------------------------end temp */
 
-
 /************************************************** login */
 
 .login::-webkit-input-placeholder {
-    color: #4e546d;
-  }
-  
-  .disclaimer p {
-    color: #5b5e6f;
-    font-size: 10px;
-    text-align: left;
-  }
-  
-  .login {
-    opacity: 1;
-    top: 20% !important;
-    -webkit-transition-timing-function: cubic-bezier(0.68, -0.25, 0.265, 0.85);
-    transition-property: transform, opacity, box-shadow, top, left;
-    transition-duration: 0.5s;
-    transform-origin: 161px 100%;
-    transform: rotateX(0deg);
-    position: relative;
-    width: 240px;
-    min-height: 260px;
-    max-height: auto;
-    height: 340px;
-    position: relative;
-    left: 0;
-    right: 0;
-    margin: auto;
-    top: 0;
-    bottom: 0;
-    padding: 20px 40px 40px 40px;
-    background: transparent;
-  }
-  .login .icon i {
-    color: #afb1be;
+  color: #4e546d;
+}
 
-  }
+.disclaimer p {
+  color: #5b5e6f;
+  font-size: 10px;
+  text-align: left;
+}
 
-  .login .login_title {
-    color: #afb1be;
-   /*  height: 60px; */
-    text-align: center;
-    font-size: 16px;
-  }
+.login {
+  opacity: 1;
+  top: 20% !important;
+  -webkit-transition-timing-function: cubic-bezier(0.68, -0.25, 0.265, 0.85);
+  transition-property: transform, opacity, box-shadow, top, left;
+  transition-duration: 0.5s;
+  transform-origin: 161px 100%;
+  transform: rotateX(0deg);
+  position: relative;
+  width: 240px;
+  min-height: 260px;
+  max-height: auto;
+  height: 340px;
+  position: relative;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  padding: 20px 40px 40px 40px;
+  background: transparent;
+}
 
+.login .icon {
+  color: #afb1be;
+  font-size: 14px;
+}
 
-  .login .validation {
-    position: absolute;
-    z-index: 1;
-    right: 10px;
-    top: 6px;
-    opacity: 0;
-  }
-  .login .disclaimer {
-    position: absolute;
-    bottom: 20px;
-    left: 35px;
-    width: 250px;
- 
-  }
-  
-  .login_fields {
-    height: 208px;
-    position: absolute;
-    left: 0;
-    margin-top: 20px;
-  }
-  .login_fields .icon {
-    position: absolute;
-    z-index: 1;
-    left: 36px;
-    top: 8px;
-    opacity: 0.5;
-  }
-  .login_fields input[type="password"] {
-    color: #afb1be !important;
-  }
-  .login_fields input[type="text"],
-  .login_fields input[type="password"] {
-    color: #afb1be;
-    width: 190px;
-    margin-top: -2px;
-    background: #1c2127;
-    left: 0;
-    padding: 10px 65px;
-    border-top: 1px solid #393f45;
-    border-bottom: 1px solid #393f45;
-    border-right: none;
-    border-left: none;
-    outline: none;
-    box-shadow: none;
-  }
-  .login_fields__user,
-  .login_fields__password,
-  .login_fields__rptpassword {
-    position: relative;
-  }
-  .login_fields__submit {
-    position: relative;
-    top: 20px;
-    bottom: 20px;
-    left: 0;
-    width: 80%;
-    right: 0;
-    margin: auto;
-  }
-  
-  /* switch *********************************************** */
-  .switch {
-    position: relative;
-    margin: 20px auto;
-    height: 26px;
-    width: 120px;
-    background: rgba(0, 0, 0, 0.25);
-  }
-  
-  .switch-label {
-    position: relative;
-    z-index: 2;
-    float: left;
-    width: 58px;
-    line-height: 29px;
-    font-size: 11px;
-    color: #ffd700 !important;
-    text-transform: uppercase;
-    text-align: center;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
-    cursor: pointer;
-  }
-  
-  .switch-label:active {
-    font-weight: bold;
-  }
-  
-  .switch-label-off {
-    padding-left: 2px;
-  }
-  
-  .switch-label-on {
-    padding-right: 2px;
-  }
-  
-  .switch-input {
-    display: none;
-  }
-  
-  .switch-input:checked + .switch-label {
-    -webkit-transition: 0.15s ease-out;
-    -moz-transition: 0.15s ease-out;
-    -o-transition: 0.15s ease-out;
-    transition: 0.15s ease-out;
-  }
-  
-  .switch-input:checked + .switch-label-on ~ .switch-selection {
-    left: 60px;
-  }
-  
-  .switch-selection {
-    display: block;
-    position: absolute;
-    z-index: 1;
-    top: 2px;
-    left: 2px;
-    width: 58px;
-    height: 22px;
-    border: 1px solid #ffd700;
-    -webkit-transition: left 0.15s ease-out;
-    -moz-transition: left 0.15s ease-out;
-    -o-transition: left 0.15s ease-out;
-    transition: left 0.15s ease-out;
-  }
-  
+.login .login_title {
+  color: #afb1be;
+  text-align: center;
+  font-size: 16px;
+}
+
+.login .validation {
+  position: absolute;
+  z-index: 1;
+  right: 10px;
+  top: 6px;
+  opacity: 0;
+}
+.login .disclaimer {
+  position: absolute;
+  bottom: 20px;
+  left: 35px;
+  width: 250px;
+}
+
+.login_fields {
+  height: 208px;
+  position: absolute;
+  left: 0;
+  margin-top: 20px;
+}
+.login_fields .icon {
+  position: absolute;
+  z-index: 1;
+  left: 36px;
+  top: 8px;
+  opacity: 0.5;
+}
+.login_fields input[type="password"] {
+  color: #afb1be !important;
+}
+.login_fields input[type="text"],
+.login_fields input[type="password"] {
+  color: #afb1be;
+  width: 190px;
+  margin-top: -2px;
+  background: #1c2127;
+  left: 0;
+  padding: 10px 65px;
+  border-top: 1px solid #393f45;
+  border-bottom: 1px solid #393f45;
+  border-right: none;
+  border-left: none;
+  outline: none;
+  box-shadow: none;
+}
+.login_fields__user,
+.login_fields__password,
+.login_fields__rptpassword {
+  position: relative;
+}
+.login_fields__submit {
+  position: relative;
+  top: 20px;
+  bottom: 20px;
+  left: 0;
+  width: 80%;
+  right: 0;
+  margin: auto;
+}
+
+/* switch *********************************************** */
+.switch {
+  position: relative;
+  margin: 20px auto;
+  height: 26px;
+  width: 120px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.switch-label {
+  position: relative;
+  z-index: 2;
+  float: left;
+  width: 58px;
+  line-height: 29px;
+  font-size: 11px;
+  color: #ffd700 !important;
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.switch-label:active {
+  font-weight: bold;
+}
+
+.switch-label-off {
+  padding-left: 2px;
+}
+
+.switch-label-on {
+  padding-right: 2px;
+}
+
+.switch-input {
+  display: none;
+}
+
+.switch-input:checked + .switch-label {
+  -webkit-transition: 0.15s ease-out;
+  -moz-transition: 0.15s ease-out;
+  -o-transition: 0.15s ease-out;
+  transition: 0.15s ease-out;
+}
+
+.switch-input:checked + .switch-label-on ~ .switch-selection {
+  left: 60px;
+}
+
+.switch-selection {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  left: 2px;
+  width: 58px;
+  height: 22px;
+  border: 1px solid #ffd700;
+  -webkit-transition: left 0.15s ease-out;
+  -moz-transition: left 0.15s ease-out;
+  -o-transition: left 0.15s ease-out;
+  transition: left 0.15s ease-out;
+}

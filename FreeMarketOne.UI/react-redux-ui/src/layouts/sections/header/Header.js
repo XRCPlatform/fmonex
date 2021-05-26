@@ -9,8 +9,8 @@ import { getAllMessages } from "Modules/units/Messages";
 // Atoms
 import DividerVerticalSmall from "Components/atoms/UI/DividerVerticalSmall";
 import Select from "Components/atoms/inputs/Select";
-import MsgDropdown from "Components/atoms/inputs/MsgDropdown";
-import UserDropdown from "Components/atoms/inputs/UserDropdown";
+import MsgDropdown from "Components/user-and-msg/MsgDropdown";
+import UserDropdown from "Components/user-and-msg/UserDropdown";
 
 import "./Header.css";
 

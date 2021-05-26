@@ -1,11 +1,17 @@
 import React, { useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 
-import Button from "../buttons/ButtonWithEffect";
-import Rating from "../UI/Rating";
+// Actions
+import { logOut } from "Modules/units/Auth";
 
-import "./Input.css";
+import MenuSection from "./components/MenuSection";
+
+import "./UsrMsg.css";
 
 const UserDropdown = ({ open, handleOpen }) => {
+  const dispatch = useDispatch();
+  const history = useHistory();
   const selectRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +29,12 @@ const UserDropdown = ({ open, handleOpen }) => {
     };
   }, [open]);
 
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    dispatch(logOut(history));
+  };
+
   return (
     <div className={open ? "dropdown open" : "dropdown"} ref={selectRef}>
       <span className="user-login icon" onClick={handleOpen}>
@@ -30,34 +42,7 @@ const UserDropdown = ({ open, handleOpen }) => {
         {!open && <div className="tooltipp tooltip-bott">Account</div>}
       </span>{" "}
       <div className="dropdown-content usr">
-        <div className="dropdown-menu-header">
-          <Rating />
-        </div>
-        <div className="section">
-          <span>
-            <i className="ion-android-options" />
-            <span>Settings</span>
-          </span>
-        </div>
-        <div className="section">
-          <span>
-            <i className="ion-bug" />
-            Report bug
-          </span>
-        </div>
-        <div className="section">
-          <span>
-            <i className="ion-easel" />
-            Suggest feature
-          </span>
-        </div>
-        <div className="section">
-          <span>
-            <i className="ion-log-out" />
-            Logout
-          </span>
-        </div>
-        <Button title="Login / Signup" />
+        <MenuSection setLoginTest={handleSubmit} />
       </div>
     </div>
   );

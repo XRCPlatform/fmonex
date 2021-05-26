@@ -52,10 +52,11 @@ input[type="reset"] {
 }
 .btn-animate > span:after {
   position: absolute;
-  content: "LET'S GO!";
+ /*  content: "LET'S GO!"; */
   color: #ffd700 !important;
   top: 0;
-  left: -100%;
+ /*  left: -100%; */
+ left: 0;
   width: 110px;
   height: 30px;
   color: #0f0f0f;
@@ -80,10 +81,12 @@ input[type="reset"] {
   animation: 1s pencil linear forwards;
 }
 .btn-animate:hover > span {
-  left: 100%;
+ /*  left: 100%; */
+ left: 0;
 }
 .btn-animate:hover > span:after {
-  left: -100%;
+  /* left: -100%; */
+  left: 0;
 }
 
 @-webkit-keyframes pencil {

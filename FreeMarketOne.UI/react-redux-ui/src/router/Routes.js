@@ -3,6 +3,9 @@
 import { lazy } from "react";
 
 // Routes (Non splitted)
+import LoginLayout from "Layouts/sections/login-signup-loading";
+
+// Routes (Non splitted)
 import PublicLayout from "Layouts/PublicLayout";
 import PrivateLayout from "Layouts/PrivateLayout";
 
@@ -13,6 +16,7 @@ const Categories = lazy(() => import("Pages/categories/index.js"));
 const Products = lazy(() => import("Pages/products/index.js"));
 const Dashboard = lazy(() => import("Pages/dashboard/index.js"));
 const Admin = lazy(() => import("Pages/admin/index.js"));
+const Login = lazy(() => import("Pages/admin/index.js"));
 
 /**
 |--------------------------------------------------
@@ -21,6 +25,32 @@ const Admin = lazy(() => import("Pages/admin/index.js"));
 */
 
 export const publicRoutes = [
+  {
+    id: "login",
+    title: "Login",
+    description: "Login section",
+    path: "login",
+    exact: true,
+    component: Login,
+    layout: LoginLayout
+  }
+];
+
+/**
+|--------------------------------------------------
+| PRIVATE ROUTES
+|--------------------------------------------------
+*/
+
+export const privateRoutes = [
+  {
+    id: "admin",
+    title: "Dashboard",
+    description: "Dashboard section",
+    path: "admin",
+    component: Admin,
+    layout: PrivateLayout
+  },
   {
     id: "home",
     title: "Homepage",
@@ -66,22 +96,5 @@ export const publicRoutes = [
     exact: true,
     component: Dashboard,
     layout: PublicLayout
-  }
-];
-
-/**
-|--------------------------------------------------
-| PRIVATE ROUTES
-|--------------------------------------------------
-*/
-
-export const privateRoutes = [
-  {
-    id: "admin",
-    title: "Dashboard",
-    description: "Dashboard section",
-    path: "admin",
-    component: Admin,
-    layout: PrivateLayout
   }
 ];

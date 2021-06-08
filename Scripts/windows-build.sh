@@ -13,7 +13,7 @@ download_directory="/tmp"
 project_path="../FreeMarketApp/FreeMarketApp.csproj"
 ico_path="../FreeMarketApp/Assets/freemarket.ico"
 
-version=0.0.1
+version="1.1"
 
 . common-windows.sh
 

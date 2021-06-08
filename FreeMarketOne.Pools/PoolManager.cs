@@ -271,9 +271,9 @@ namespace FreeMarketOne.Pools
             Stop();
         }
 
-        public PoolManagerStates.Errors? AcceptActionItem(IBaseItem actionItem)
+        public PoolManagerStates.Errors? AcceptActionItem(IBaseItem actionItem, bool forceIt = false)
         {
-            if (_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount)
+            if ((_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount) || forceIt)
             {
                 var isValid = CheckActionItemInProcessing(actionItem);
                 bool validSignature = ValidateSignature(actionItem);
@@ -773,7 +773,7 @@ namespace FreeMarketOne.Pools
 
             if (_actionItemsList.Count() > 0)
             {
-                if (_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount)
+                if ((_swarmServer.Peers.Count() >= _configuration.MinimalPeerAmount) || forceIt)
                 {
                     var stagedTxCount = GetAllActionItemStagedCount();
 

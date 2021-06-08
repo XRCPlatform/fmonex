@@ -423,42 +423,6 @@ namespace FreeMarketOne.ServerCore
         {
             //Event that server is loaded
             RaiseAsyncServerLoadedEvent();
-            return;
-            try
-            {
-                //Initialize Market Pool Manager
-                if (MarketBlockChainManager.IsBlockChainManagerRunning())
-                {
-                    LoadingEvent?.Invoke(this, "Loading Market Pool Manager...");
-                    //Add Swarm server to seed manager
-                    OnionSeedsManager.MarketSwarm = MarketBlockChainManager.SwarmServer;
-
-                    MarketPoolManager = new MarketPoolManager(
-                        Configuration,
-                        Configuration.MemoryBasePoolPath,
-                        MarketBlockChainManager.SwarmServer,
-                        MarketBlockChainManager.PrivateKey,
-                        MarketBlockChainManager.BlockChain,
-                        blockChainMarketPolicy);
-
-                    LoadingEvent?.Invoke(this, "Starting Market PoolManager...");
-                    MarketPoolManager.Start();
-                    LoadingEvent?.Invoke(this, "");
-
-                    //Event that server is loaded
-                    RaiseAsyncServerLoadedEvent();
-                }
-                else
-                {
-                    _logger.Error("Market Chain isnt loaded!");
-                    Stop();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.Message);
-                _logger.Error(ex.StackTrace);
-            }
         }
 
         async void RaiseAsyncServerLoadedEvent()
@@ -470,12 +434,9 @@ namespace FreeMarketOne.ServerCore
                 {
                     if (UserManager != null)
                     {
-                        if (UserManager.UsedDataForceToPropagate && (UserManager.UserData != null))
+                        if ((UserManager.UsedDataForceToPropagate) && (UserManager.UserData != null))
                         {
-                            if (BasePoolManager.AcceptActionItem(UserManager.UserData) == null)
-                            {
-                                BasePoolManager.PropagateAllActionItemLocal(true);
-                            }
+                            BasePoolManager.AcceptActionItem(UserManager.UserData, true);
                         }
                         else
                         {

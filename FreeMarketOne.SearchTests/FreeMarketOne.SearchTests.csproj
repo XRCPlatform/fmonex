@@ -23,4 +23,10 @@
     <ProjectReference Include="..\FreeMarketOne.ServerCore\FreeMarketOne.ServerCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="client-secrets.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

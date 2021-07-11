@@ -1,4 +1,5 @@
-﻿using FreeMarketOne.BlockChain;
+﻿using ElectrumXClient;
+using FreeMarketOne.BlockChain;
 using FreeMarketOne.Chats;
 using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
@@ -192,7 +193,7 @@ namespace FreeMarketOne.ServerCore
 
                         //Initialize XRC Daemon
                         LoadingEvent?.Invoke(this, "Loading XRC Daemon...");
-                        XRCDaemonClient client = new XRCDaemonClient(new JsonSerializerSettings(), Configuration, _logger);
+                        ElectrumClient client = new ElectrumClient(Configuration.XRCDaemonUri, Configuration.XRCDaemonPort, Configuration.XRCDaemonUriSsl);
 
                         //Initializing Search Indexer
                         LoadingEvent?.Invoke(this, "Loading Local Search Engine...");

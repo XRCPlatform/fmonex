@@ -36,10 +36,9 @@ namespace FreeMarketOne.ServerCore
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://0.0.0.0:9115/");
             this.SearchEnginePath = "data/testnet_searchindex";
             this.MinimalPeerAmount = 1;
-            this.XRCDaemonUri = "188.127.231.159:16661";
-            this.XRCDaemonUriSsl = false;
-            this.XRCDaemonUser = "fm1_xrc_testnet_user";
-            this.XRCDaemonPassword = "fm1_xrc_testnet_password";
+            this.XRCDaemonUriSsl = true;
+            this.XRCDaemonUri = "telectrum.xrhodium.org";
+            this.XRCDaemonPort = 51002;
             this.PoolMaxStagedTxCountInNetwork = 30;
             this.PoolMaxCountOfLocalItemsPropagation = 5;
             this.PoolPeriodicBroadcastTxInterval = _periodicBroadcastInterval;

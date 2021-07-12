@@ -145,7 +145,7 @@ namespace FreeMarketOne.Search
                 if (summary != null && summary.Total > 0)
                 {
                     seller.XRCTransactions.Add(marketItem.XRCTransactionHash, summary.Total);
-                    decimal total = 0;
+                    double total = 0;
                     foreach (var item in seller.XRCTransactions.Values)
                     {
                         total += item;

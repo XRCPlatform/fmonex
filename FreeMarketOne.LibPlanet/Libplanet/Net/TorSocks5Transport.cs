@@ -65,9 +65,9 @@ namespace Libplanet.Net
             _circuitLoadingMutex = new AsyncLock();
             _torControlChangeCirquitMutex = new AsyncLock();
 
-            #if DEBUG
-               IsDebug = true;            
-            #endif
+            //#if DEBUG
+            //   IsDebug = true;            
+            //#endif
         }
 
         public TorSocks5Transport(

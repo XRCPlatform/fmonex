@@ -3,13 +3,14 @@ using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Linq;
+using ElectrumXClient;
 
 namespace FreeMarketOne.Search
 {
     public class XRCHelper : IXRCHelper
     {
-        IXRCDaemonClient _client;
-        public XRCHelper(IXRCDaemonClient client)
+        IElectrumClient _client;
+        public XRCHelper(IElectrumClient client)
         {
             _client = client;
         }
@@ -18,7 +19,8 @@ namespace FreeMarketOne.Search
         {
             try
             {
-                var xrcTransaction = _client.GetTransaction(hash).ConfigureAwait(false).GetAwaiter().GetResult();
+                var result = _client.GetBlockchainTransactionGet(hash, true).ConfigureAwait(false).GetAwaiter().GetResult();
+                var xrcTransaction = result.Result;
                 if (xrcTransaction == null)
                 {
                     return new XRCTransactionSummary()
@@ -29,8 +31,8 @@ namespace FreeMarketOne.Search
                     };
                 }
 
-                decimal total = 0;
-                foreach (var vout in xrcTransaction.VOut)
+                double total = 0;
+                foreach (var vout in xrcTransaction.VoutValue)
                 {
                     if (vout.ScriptPubKey.Addresses != null)
                     {
@@ -47,8 +49,8 @@ namespace FreeMarketOne.Search
 
                 return new XRCTransactionSummary()
                 {
-                    Confirmations = xrcTransaction.Confirmations.GetValueOrDefault(),
-                    Date = DateTimeOffset.FromUnixTimeSeconds((long)xrcTransaction.BlockTime.GetValueOrDefault()),
+                    Confirmations = xrcTransaction.Confirmations,
+                    Date = DateTimeOffset.FromUnixTimeSeconds(xrcTransaction.Blocktime),
                     Total = total
                 };
             }
@@ -64,5 +66,7 @@ namespace FreeMarketOne.Search
                 Total = 0
             };
         }
+
+
     }
 }

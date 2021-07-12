@@ -39,7 +39,9 @@ namespace FreeMarketOne.ServerCore
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://0.0.0.0:9110/");
             this.SearchEnginePath = "data/searchindex";
             this.MinimalPeerAmount = 4;
-            this.XRCDaemonUri = "https://tpool.bitcoinrh.org/rpc/";
+            this.XRCDaemonUri = "electrumx1.xrhodium.org,electrumx2.xrhodium.org,electrumx3.xrhodium.org,electrumx4.xrhodium.org";
+            this.XRCDaemonPort = 51002;
+            this.XRCDaemonUriSsl = true;
             this.PoolMaxStagedTxCountInNetwork = 30;
             this.PoolMaxCountOfLocalItemsPropagation = 5;
             this.PoolPeriodicBroadcastTxInterval = _periodicBroadcastInterval;

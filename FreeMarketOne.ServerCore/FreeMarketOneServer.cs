@@ -5,7 +5,6 @@ using FreeMarketOne.DataStructure;
 using FreeMarketOne.DataStructure.Objects.BaseItems;
 using FreeMarketOne.DataStructure.ProtocolVersions;
 using FreeMarketOne.Extensions.Helpers;
-using FreeMarketOne.GenesisBlock;
 using FreeMarketOne.Markets;
 using FreeMarketOne.P2P;
 using FreeMarketOne.Pools;
@@ -19,7 +18,6 @@ using Libplanet.Extensions;
 using Libplanet.Net;
 using Libplanet.Net.Messages;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using System;
@@ -334,9 +332,9 @@ namespace FreeMarketOne.ServerCore
             if (e.Peer.EndPoint != null)
             {
                 var endPoint = e.Peer.EndPoint;
-                if (endPoint.Port == 9114 && (e.Change.Equals(PeerStateChange.Joined) || e.Change.Equals(PeerStateChange.TwoWayDialogConfirmed)))
+                if (endPoint.Port == Configuration.ListenerMarketEndPoint && (e.Change.Equals(PeerStateChange.Joined) || e.Change.Equals(PeerStateChange.TwoWayDialogConfirmed)))
                 {
-                    var sibling = new BoundPeer(e.Peer.PublicKey, new DnsEndPoint(e.Peer.EndPoint.Host, 9113));
+                    var sibling = new BoundPeer(e.Peer.PublicKey, new DnsEndPoint(e.Peer.EndPoint.Host, Configuration.ListenerBaseEndPoint));
                     var peers = new List<Peer>
                     {
                         sibling
@@ -357,9 +355,9 @@ namespace FreeMarketOne.ServerCore
                         
                     }
                 }
-                if (endPoint.Port == 9113 && (e.Change.Equals(PeerStateChange.Joined) ||e.Change.Equals(PeerStateChange.TwoWayDialogConfirmed)))
+                if (endPoint.Port == Configuration.ListenerBaseEndPoint && (e.Change.Equals(PeerStateChange.Joined) ||e.Change.Equals(PeerStateChange.TwoWayDialogConfirmed)))
                 {
-                    var sibling = new BoundPeer(e.Peer.PublicKey, new DnsEndPoint(e.Peer.EndPoint.Host, 9114));
+                    var sibling = new BoundPeer(e.Peer.PublicKey, new DnsEndPoint(e.Peer.EndPoint.Host, Configuration.ListenerMarketEndPoint));
                     var peers = new List<Peer>
                     {
                         sibling

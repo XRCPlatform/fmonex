@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Lucene.Net.Search;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -64,12 +63,12 @@ namespace FreeMarketOne.ServerCore
         {
             dynamic appSettings = new ExpandoObject();
             appSettings.FreeMarketOneConfiguration = new ExpandoObject();
-            appSettings.FreeMarketOneConfiguration.ServerEnvironment = "Test";
+            appSettings.FreeMarketOneConfiguration.ServerEnvironment = "Main";
             appSettings.FreeMarketOneConfiguration.ListenersUseTor = true;
             appSettings.FreeMarketOneConfiguration.MinimalPeerAmount = 1;
             appSettings.FreeMarketOneConfiguration.OnionSeeds = new List<string>();
             ((List<string>)appSettings.FreeMarketOneConfiguration.OnionSeeds).Append(
-                "dleu464lfj6xqjyp.onion:80:dleu464lfj6xqjyp.onion:9113:9114:04dd48b8ce0cf21d1c37e7e460ac0cfcb88ddc7c08b2f25e93c13399f9920e8ec406728238fdcb34693a104d59d35cfd317e9e20bc98ac1aacb0086b565fc9f676"
+                "zx2lvuufqqdurahsgc7jf3qaugc7yme7t4ypjmji2lx75zmnddluotad.onion:80:zx2lvuufqqdurahsgc7jf3qaugc7yme7t4ypjmji2lx75zmnddluotad.onion:9111:9112:04d70636420fb40caa0974afa63b29506a727cce777f89bf7f22d368edf4be49e2fcfc307a98b093a79ca095069edb42cce1ce830ef8dcc5a3b40f75c5c687d518"
             );
             return JsonConvert.SerializeObject(appSettings);
         }

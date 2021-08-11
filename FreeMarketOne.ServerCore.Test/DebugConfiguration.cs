@@ -19,7 +19,7 @@ namespace FreeMarketOne.ServerCore.Test
             this.Environment = (int)EnvironmentTypes.Test;
             this.TorEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9050/");
             this.LogFilePath = "log/debug_log.txt";
-            this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds_testnet_v2.txt";
+            this.OnionSeedsEndPoint = "https://www.fmone.org/onionseeds_testnet_v2.txt";
             this.MemoryBasePoolPath = "data/debug_memory_basetx.data";
             this.MemoryMarketPoolPath = "data/debug_memory_markettx.data";
             this.BlockChainBasePath = "data/debug_blockchain_base";

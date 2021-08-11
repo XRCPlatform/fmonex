@@ -226,7 +226,7 @@ namespace FreeMarketApp.Views
         {
             Process process = new Process();
             process.StartInfo.UseShellExecute = true;
-            process.StartInfo.FileName = "https://www.freemarket.one/";
+            process.StartInfo.FileName = "https://www.fmone.org/";
             process.Start();
         }
 
@@ -234,7 +234,7 @@ namespace FreeMarketApp.Views
         {
             Process process = new Process();
             process.StartInfo.UseShellExecute = true;
-            process.StartInfo.FileName = "https://xrhodium.org/";
+            process.StartInfo.FileName = "https://www.xrhodium.org/";
             process.Start();
         }
 

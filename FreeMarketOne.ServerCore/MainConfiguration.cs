@@ -19,7 +19,7 @@ namespace FreeMarketOne.ServerCore
             this.Environment = (int)EnvironmentTypes.Main;
             this.TorEndPoint = EndPointHelper.ParseIPEndPoint("http://127.0.0.1:9050/");
             this.LogFilePath = "log/log.txt";
-            this.OnionSeedsEndPoint = "https://www.freemarket.one/onionseeds.txt";
+            this.OnionSeedsEndPoint = "https://www.fmone.org/onionseeds.txt";
             this.MemoryBasePoolPath = "data/memory_basetx.data";
             this.MemoryMarketPoolPath = "data/memory_markettx.data";
             this.BlockChainBasePath = "data/blockchain_base";
@@ -34,7 +34,7 @@ namespace FreeMarketOne.ServerCore
             this.ChangellyApiKey = "5fe8cbe95ade4e73bdb62db0897e3615";
             this.ChangellySecret = "2b8c94c3c7befcc751c932117a63b63e12c2f2c176ebf6553b5e375da2a8b656";
             this.ChangellyApiBaseUrl = "https://api.changelly.com";
-            this.TelemetryServerUri = "https://telemetry.freemarket.one/";
+            this.TelemetryServerUri = "https://telemetry.fmone.org/";
             this.ChatPath = "data/chat";
             this.ListenerChatEndPoint = EndPointHelper.ParseIPEndPoint("tcp://0.0.0.0:9110/");
             this.SearchEnginePath = "data/searchindex";

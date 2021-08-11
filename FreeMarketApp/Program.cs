@@ -14,7 +14,7 @@ namespace FreeMarketApp
         public static void Main(string[] args)
         {
             Console.WriteLine("Free Market One - World precious metals marketplace;");
-            Console.WriteLine("Copyright (c) 2020 www.freemarket.one;");
+            Console.WriteLine("Copyright (c) 2020 www.fmone.org;");
             Console.WriteLine("This program comes with ABSOLUTELY NO WARRANTY;");
             Console.WriteLine("This is free software, and you are welcome to redistribute it;");
             Console.WriteLine("------------------------------------");

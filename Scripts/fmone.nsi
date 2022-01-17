@@ -6,7 +6,7 @@
 ;--------------------------------
 ;Variables
 
-  !define PRODUCT_NAME "FreeMarketOne"
+  !define PRODUCT_NAME "FreeMarketOneX"
   !define PRODUCT_WEB_SITE "https://www.fmone.org"
   !define PRODUCT_PUBLISHER "xRhodium Developers"
   !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -16,7 +16,7 @@
 
 
   Name "${PRODUCT_NAME}"
-  OutFile "freemarketone-setup.exe"
+  OutFile "FreeMarketOneX-setup.exe"
   InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
   InstallDirRegKey HKCU "Software\${PRODUCT_NAME}" ""
   RequestExecutionLevel admin

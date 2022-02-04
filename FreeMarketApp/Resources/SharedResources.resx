@@ -238,7 +238,7 @@
     <value>Passwords aren't identical.</value>
   </data>
   <data name="Dialog_FirstRun_ShortDescription" xml:space="preserve">
-    <value>Description is too short. Minimum is 50 chars.</value>
+    <value>Description is too short. Minimum is 30 chars.</value>
   </data>
   <data name="Dialog_FirstRun_ShortPassword" xml:space="preserve">
     <value>Password is too short. Minimum is 16 chars.</value>

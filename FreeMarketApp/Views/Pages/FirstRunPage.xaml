@@ -33,7 +33,7 @@
 					<TextBlock Classes="H1" Text="Description" FontSize="16" FontWeight="Bold"/>
 					<TextBlock Text="*" Classes="H1Red" FontSize="16" FontWeight="Bold"/>
 				</StackPanel>
-                <TextBox Classes="TextBoxBackground" Name="TBDescription" MaxLength="260" Margin="20 5 20 0" FontSize="16" MinHeight="70" Watermark="Add public description (50-260 characters)" AcceptsReturn="True" Padding="10" TextWrapping="Wrap" />
+                <TextBox Classes="TextBoxBackground" Name="TBDescription" MaxLength="260" Margin="20 5 20 0" FontSize="16" MinHeight="70" Watermark="Add public description (30-260 characters)" AcceptsReturn="True" Padding="10" TextWrapping="Wrap" />
 
 				<!-- Passwords -->
 				<Grid>

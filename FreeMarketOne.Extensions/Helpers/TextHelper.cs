@@ -6,7 +6,7 @@ namespace FreeMarketOne.Extensions.Helpers
     {
         public const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
         public const string CHARS_DANGEROUS = "'|\\";
-        public const string WORDS_FILTER = "gun,woman,weapon,wife,female,pistol,handgun,fire,shot,shoot,narcotic,drug,dope,marijuana,hemp,narcotic,lsd,pills,cannabis,opium,cocaine,mdma,extasy,ketamine,weed,poppers,heroin,mushrooms";
+        public const string WORDS_FILTER = "gun ,woman ,weapon ,wife ,female ,pistol ,handgun ,fire ,shot ,shoot ,narcotic ,drug ,dope ,marijuana ,hemp ,narcotic ,lsd ,pills ,cannabis ,opium ,cocaine ,mdma ,extasy ,ketamine ,weed ,poppers ,heroin ,mushrooms ";
 
         public bool IsNumberValid(string text)
         {

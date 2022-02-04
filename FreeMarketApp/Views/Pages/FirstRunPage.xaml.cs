@@ -83,7 +83,7 @@ namespace FreeMarketApp.Views.Pages
                 }
             }
 
-            if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 50))
+            if (string.IsNullOrEmpty(tbDescription.Text) || (tbDescription.Text.Length < 30))
             {
                 errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_ShortDescription"));
                 errorCount++;
@@ -98,7 +98,10 @@ namespace FreeMarketApp.Views.Pages
 
                 if (!textHelper.IsWithoutBannedWords(tbDescription.Text))
                 {
-                    errorMessages.AppendLine(SharedResources.ResourceManager.GetString("Dialog_FirstRun_BannedWordsDescription"));
+                    errorMessages.AppendLine(
+                        string.Format("{0}: {1}",
+                        SharedResources.ResourceManager.GetString("Dialog_FirstRun_BannedWordsDescription"), 
+                        TextHelper.WORDS_FILTER.Replace(" ,", ", ")));
                     errorCount++;
                 }
             }
@@ -139,11 +142,11 @@ namespace FreeMarketApp.Views.Pages
             if (errorCount == 0)
             {
                 FMONE.Current.UserManager.SaveNewPrivKey(
-                    tbSeed.Text, 
+                    tbSeed.Text,
                     tbPassword.Text,
                     FMONE.Current.Configuration.FullBaseDirectory,
                     FMONE.Current.Configuration.BlockChainSecretPath);
-                
+
                 var firstUserData = FMONE.Current.UserManager.SignUserData(tbUserName.Text, tbDescription.Text);
 
                 FMONE.Current.UserManager.SaveUserData(

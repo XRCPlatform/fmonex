@@ -9,13 +9,23 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ContentWithTargetPath Include="bin\Release\netcoreapp3.1\appsettings.json"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  <ItemGroup Condition="'$(Configuration)' == 'DEBUG'">
+    <ContentWithTargetPath Include="Libs\Debug\appsettings.json"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <TargetPath>appsettings.json</TargetPath>
     </ContentWithTargetPath>
 
-    <ContentWithTargetPath Include="bin\Release\netcoreapp3.1\tools\**\*.*"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <TargetPath>tools\%(FileName)%(Extension)</TargetPath>
+    <ContentWithTargetPath Include="Libs\TorBinaries\*"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>TorBinaries\%(FileName)%(Extension)</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(Configuration)' != 'DEBUG'">
+    <ContentWithTargetPath Include="Libs\Release\appsettings.json"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>appsettings.json</TargetPath>
+    </ContentWithTargetPath>
+
+    <ContentWithTargetPath Include="Libs\TorBinaries\*"> <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>TorBinaries\%(FileName)%(Extension)</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
 

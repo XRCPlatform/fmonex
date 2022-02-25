@@ -619,6 +619,15 @@ namespace FreeMarketApp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data about market item are incomplete. Try it later..
+        /// </summary>
+        internal static string Dialog_Information_UnknownData {
+            get {
+                return ResourceManager.GetString("Dialog_Information_UnknownData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Password contains invalid chars..
         /// </summary>
         internal static string Dialog_LoginPage_InvalidCharsPassword {

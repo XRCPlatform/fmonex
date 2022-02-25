@@ -381,8 +381,10 @@ namespace FreeMarketApp.Views.Pages
             }
         }
 
-        public void LoadProduct(string signature)
+        public MarketProcessingStateEnum LoadProduct(string signature)
         {
+            var result = MarketProcessingStateEnum.Ok;
+
             var offer = FMONE.Current.MarketManager.GetOfferBySignature(
                 signature,
                 FMONE.Current.MarketPoolManager,
@@ -420,7 +422,7 @@ namespace FreeMarketApp.Views.Pages
                 PagesHelper.HideOrSetValueToTextBlock(Instance, "TBWeightInGrams", "TBWeightInGramsLabel", offer.WeightInGrams.ToString());
 
                 btBuyButton.IsEnabled = true;
-                if (!String.IsNullOrEmpty(_offer.BuyerSignature) || _offer.State == (int)ProductStateEnum.Sold)
+                if (!string.IsNullOrEmpty(_offer.BuyerSignature) || _offer.State == (int)ProductStateEnum.Sold)
                 {
                     btBuyButton.IsEnabled = false;
                 }
@@ -447,7 +449,12 @@ namespace FreeMarketApp.Views.Pages
                 }
                 else
                 {
-                    //if seller info could not be located, it's due to corrupted keys
+                    PagesHelper.Log(Instance._logger, 
+                        string.Format("User Data aren't in chain {0}", _offer.Signature),
+                        Serilog.Events.LogEventLevel.Warning);
+
+                    result = MarketProcessingStateEnum.UnknownUser;
+
                     btBuyButton.IsEnabled = false;
                 }
 
@@ -471,7 +478,17 @@ namespace FreeMarketApp.Views.Pages
                         }
                     }
                 }
+            } 
+            else
+            {
+                PagesHelper.Log(Instance._logger,
+                    string.Format("Missing market item {0}", signature),
+                    Serilog.Events.LogEventLevel.Warning);
+
+                result = MarketProcessingStateEnum.Missing;
             }
+
+            return result;
         }
         private void ClearForm()
         {

@@ -13,7 +13,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
+using FreeMarketApp.Views.Controls;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
+using FreeMarketApp.Resources;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -86,14 +88,24 @@ namespace FreeMarketApp.Views.Pages
             cbPageSize.SelectedItem = cbPageSize.Items.OfType<ComboBoxItem>().Single(t => t.Content.Equals(pageSize.ToString()));
         }
 
-        public void ButtonProduct_Click(object sender, RoutedEventArgs args)
+        public async void ButtonProduct_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
             var signature = ((Button) sender).Tag.ToString();
 
             var productPage = ProductPage.Instance;
-            productPage.LoadProduct(signature);
-            PagesHelper.Switch(mainWindow, productPage);
+            var loadingState = productPage.LoadProduct(signature);
+            if (loadingState == MarketManager.MarketProcessingStateEnum.Ok)
+            {
+                PagesHelper.Switch(mainWindow, productPage);
+            }
+            else
+            {
+                await MessageBox.Show(mainWindow,
+                    string.Format(SharedResources.ResourceManager.GetString("Dialog_Information_UnknownData")),
+                    SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                    MessageBox.MessageBoxButtons.Ok);
+            }
         }
 
         public void ButtonCategory_Click(object sender, RoutedEventArgs args)

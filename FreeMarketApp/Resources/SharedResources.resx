@@ -396,4 +396,7 @@
   <data name="Dialog_ThereWasCriticalError" xml:space="preserve">
     <value>There was critical application error. Please restart the application to continue.</value>
   </data>
+  <data name="Dialog_Information_UnknownData" xml:space="preserve">
+    <value>Data about market item are incomplete. Try it later.</value>
+  </data>
 </root>

@@ -2,6 +2,7 @@
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FreeMarketApp.Helpers;
+using FreeMarketApp.Resources;
 using FreeMarketApp.ViewModels;
 using FreeMarketOne.Search;
 using Lucene.Net.Search;
@@ -9,7 +10,9 @@ using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using FreeMarketApp.Views.Controls;
 using FMONE = FreeMarketOne.ServerCore.FreeMarketOneServer;
+using FreeMarketOne.Markets;
 
 namespace FreeMarketApp.Views.Pages
 {
@@ -110,14 +113,25 @@ namespace FreeMarketApp.Views.Pages
             PagesHelper.Switch(mainWindow, MainPage.Instance);
         }
 
-        public void ButtonProduct_Click(object sender, RoutedEventArgs args)
+        public async void ButtonProduct_Click(object sender, RoutedEventArgs args)
         {
             var mainWindow = PagesHelper.GetParentWindow(this);
             var signature = ((Button)sender).Tag.ToString();
 
             var productPage = ProductPage.Instance;
-            productPage.LoadProduct(signature);
-            PagesHelper.Switch(mainWindow, productPage);
+            
+            var loadingState = productPage.LoadProduct(signature);
+            if (loadingState == MarketManager.MarketProcessingStateEnum.Ok)
+            {
+                PagesHelper.Switch(mainWindow, productPage);
+            } 
+            else
+            {
+                await MessageBox.Show(mainWindow,
+                    string.Format(SharedResources.ResourceManager.GetString("Dialog_Information_UnknownData")),
+                    SharedResources.ResourceManager.GetString("Dialog_Information_Title"),
+                    MessageBox.MessageBoxButtons.Ok);
+            }
         }
 
         public void OnPageSize_Change(object sender, SelectionChangedEventArgs e)
@@ -254,6 +268,5 @@ namespace FreeMarketApp.Views.Pages
                 DataContext = new SearchResultsPageViewModel(result, _appliedFilters);
             }
         }
-
     }
 }

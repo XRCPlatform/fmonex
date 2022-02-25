@@ -16,6 +16,13 @@ namespace FreeMarketOne.Markets
 {
     public class MarketManager : IMarketManager
     {
+        public enum MarketProcessingStateEnum
+        {
+            Ok = 0,
+            UnknownUser = 1,
+            Missing = 2,
+        }
+
         public enum MarketCategoryEnum
         {
             All = 0,

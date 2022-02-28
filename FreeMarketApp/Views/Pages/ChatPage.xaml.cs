@@ -73,7 +73,7 @@ namespace FreeMarketApp.Views.Pages
                         var chatData = chatManager.GetChat(_activeChat.MarketItem.Hash);
                         if (chatData.ChatItems != null)
                         {
-                            if ((chatData.ChatItems.Count != _activeChat?.ChatItems.Count) ||
+                            if ((chatData.ChatItems.Count != _activeChat?.ChatItems?.Count) ||
                                 ((chatData.ChatItems.Count == 1) && chatManager.IsChatValid(chatData.ChatItems)))
                             {
                                 Dispatcher.UIThread.InvokeAsync(() =>

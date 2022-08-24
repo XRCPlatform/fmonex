@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace Libplanet.Extensions
 {
@@ -7,7 +8,9 @@ namespace Libplanet.Extensions
         public string GetSHA256(string input)
         {
             var bytes = Encoding.UTF8.GetBytes(input);
-            var hashDigest = Hashcash.Hash(bytes);
+
+            using SHA256 hashAlgo = SHA256.Create();
+            var hashDigest = new HashDigest<SHA256>(hashAlgo.ComputeHash(bytes));
 
             return hashDigest.ToString();
         }

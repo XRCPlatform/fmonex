@@ -1,3 +1,6 @@
-[submodule "netmq"]
-	path = netmq
-	url = https://github.com/XRCPlatform/netmq
+[submodule "Libplanet"]
+	path = Libplanet
+	url = https://github.com/XRCPlatform/libplanet
+[submodule "NetMQ"]
+	path = NetMQ
+	url = https://github.com/XRCPlatform/netmq.git

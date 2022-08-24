@@ -27,7 +27,6 @@ namespace Libplanet.Extensions
         }
 
         [Pure]
-        [IgnoreDuringEquals]
         public new UserPublicKey PublicKey
         {
             get

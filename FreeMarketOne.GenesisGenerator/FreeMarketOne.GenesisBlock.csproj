@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
-    <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
   </ItemGroup>
 
 </Project>

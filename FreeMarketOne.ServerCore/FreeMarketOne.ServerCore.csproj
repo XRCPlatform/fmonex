@@ -38,7 +38,6 @@
     <ProjectReference Include="..\FreeMarketOne.BlockChain\FreeMarketOne.BlockChain.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Chats\FreeMarketOne.Chats.csproj" />
     <ProjectReference Include="..\FreeMarketOne.GenesisGenerator\FreeMarketOne.GenesisBlock.csproj" />
-    <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Markets\FreeMarketOne.Markets.csproj" />
     <ProjectReference Include="..\FreeMarketOne.P2P\FreeMarketOne.P2P.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Pools\FreeMarketOne.Pools.csproj" />

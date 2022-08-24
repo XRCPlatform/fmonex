@@ -7,7 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.DataStructure\FreeMarketOne.DataStructure.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Pools\FreeMarketOne.Pools.csproj" />
-    <ProjectReference Include="..\Libplanet.Extensions\Libplanet.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -14,10 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FreeMarketOne.Configuration\FreeMarketOne.Configuration.csproj" />
     <ProjectReference Include="..\FreeMarketOne.Extensions\FreeMarketOne.Extensions.csproj" />
-    <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet.Net\Libplanet.Net.csproj" />
-    <ProjectReference Include="..\FreeMarketOne.LibPlanet\Libplanet\Libplanet.csproj" />
-    <ProjectReference Include="..\Libplanet.Extensions\Libplanet.Extensions.csproj" />
-    <ProjectReference Include="..\netmq\src\NetMQ\NetMQ.csproj" />
+    <ProjectReference Include="..\Libplanet\Libplanet.Net\Libplanet.Net.csproj" />
   </ItemGroup>
 
 </Project>
